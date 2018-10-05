@@ -1051,14 +1051,16 @@ function processLogData(data) {
                 tempMain[grpId] += 1;
             }
         });
-        json.submitDeckReq.deck.sideboardCards.forEach( function (grpId) {
-            if (tempSide[grpId] == undefined) {
-                tempSide[grpId] = 1
-            }
-            else {
-                tempSide[grpId] += 1;
-            }
-        });
+        if (json.submitDeckReq.deck.sideboardCards !== undefined) {
+            json.submitDeckReq.deck.sideboardCards.forEach( function (grpId) {
+                if (tempSide[grpId] == undefined) {
+                    tempSide[grpId] = 1
+                }
+                else {
+                    tempSide[grpId] += 1;
+                }
+            });
+        }
 
         // Update on overlay
         var str = JSON.stringify(currentDeck);
@@ -1072,10 +1074,12 @@ function processLogData(data) {
         });
 
         currentDeck.sideboard = [];
-        Object.keys(tempSide).forEach(function(key) {
-            var c = {"id": key, "quantity": tempSide[key]};
-            currentDeck.sideboard.push(c);
-        });
+        if (json.submitDeckReq.deck.sideboardCards !== undefined) {
+            Object.keys(tempSide).forEach(function(key) {
+                var c = {"id": key, "quantity": tempSide[key]};
+                currentDeck.sideboard.push(c);
+            });
+        }
 
         //console.log(JSON.stringify(currentDeck));
         //console.log(currentDeck);
