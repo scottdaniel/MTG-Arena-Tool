@@ -2260,107 +2260,30 @@ function exportCollection() {
 
 //
 function printStats() {
-    $('.moving_ux').animate({'left': '-100%'}, 250, 'easeInOutCubic'); 
+	$('.moving_ux').animate({ 'left': '-100%' }, 250, 'easeInOutCubic');
 	$("#ux_1").html('');
-	stats = get_collection_stats();
+	const stats = get_collection_stats();
 
-	var top = $('<div class="decklist_top"><div class="button back"></div><div class="deck_name">Collection Statistics</div></div>');
+	const top = $('<div class="decklist_top"><div class="button back"></div><div class="deck_name">Collection Statistics</div></div>');
 	change_background("http://www.artofmtg.com/wp-content/uploads/2018/04/Urzas-Tome-Dominaria-MtG-Art.jpg");
-	
-	flex = $('<div class="flex_item"></div>');
-	mainstats = $('<div class="main_stats"></div>');
 
-	var label = $('<label>Sets Completion</label>');
-	label.appendTo(mainstats);
+	const flex = $('<div class="flex_item"></div>');
+	const mainstats = $('<div class="main_stats"></div>');
+
+	$('<label>Sets Completion</label>').appendTo(mainstats);
 
 	// each set stats
 	for (let set in setsList) {
-		var setdiv = $('<div class="stats_set_completion"></div>');
-		$('<div class="stats_set_icon" style="background-image: url(../images/sets/'+setsList[set].code+'.png)"><span>'+set+' <i>('+stats[set].ownedCards+'/'+stats[set].totalCards+', '+Math.round(stats[set].ownedCards/stats[set].totalCards*100)+'%)</i></span></div>').appendTo(setdiv);
-		$('<div class="stats_set_bar" style="width: '+stats[set].ownedCards/stats[set].totalCards*100+'%"></div>').appendTo(setdiv);
-		setdiv.appendTo(mainstats);
-
-		setdiv.click(function() {
-			var substats = $(".sub_stats");
-			substats.html('');
-			$('<label>'+set+' Completion</label>').appendTo(substats);
-			var setdiv = $('<div class="stats_set_completion"></div>');
-			$('<div class="stats_rarity_icon" style="background-image: url(../images/wc_common.png)"><span>Commons <i>('+stats[set].ownedCommon+'/'+stats[set].totalCommon+', '+Math.round(stats[set].ownedCommon/stats[set].totalCommon*100)+'%)</i></span></div>').appendTo(setdiv);
-			$('<div class="stats_set_bar" style="width: '+stats[set].ownedCommon/stats[set].totalCommon*100+'%"></div>').appendTo(setdiv);
-			setdiv.appendTo(substats);
-			var setdiv = $('<div class="stats_set_completion"></div>');
-			$('<div class="stats_rarity_icon" style="background-image: url(../images/wc_uncommon.png)"><span>Uncommons <i>('+stats[set].ownedUncommon+'/'+stats[set].totalUncommon+', '+Math.round(stats[set].ownedUncommon/stats[set].totalUncommon*100)+'%)</i></span></div>').appendTo(setdiv);
-			$('<div class="stats_set_bar" style="width: '+stats[set].ownedUncommon/stats[set].totalUncommon*100+'%"></div>').appendTo(setdiv);
-			setdiv.appendTo(substats);
-			var setdiv = $('<div class="stats_set_completion"></div>');
-			$('<div class="stats_rarity_icon" style="background-image: url(../images/wc_rare.png)"><span>Rares <i>('+stats[set].ownedRare+'/'+stats[set].totalRare+', '+Math.round(stats[set].ownedRare/stats[set].totalRare*100)+'%)</i></span></div>').appendTo(setdiv);
-			$('<div class="stats_set_bar" style="width: '+stats[set].ownedRare/stats[set].totalRare*100+'%"></div>').appendTo(setdiv);
-			setdiv.appendTo(substats);
-			if (stats[set].totalMythic == 0)	stats[set].totalMythic = 1;
-			var setdiv = $('<div class="stats_set_completion"></div>');
-			$('<div class="stats_rarity_icon" style="background-image: url(../images/wc_mythic.png)"><span>Mythics <i>('+stats[set].ownedMythic+'/'+stats[set].totalMythic+', '+Math.round(stats[set].ownedMythic/stats[set].totalMythic*100)+'%)</i></span></div>').appendTo(setdiv);
-			$('<div class="stats_set_bar" style="width: '+stats[set].ownedMythic/stats[set].totalMythic*100+'%"></div>').appendTo(setdiv);
-			setdiv.appendTo(substats);
-		});
+		renderSetStats(stats[set], setsList[set].code, set).appendTo(mainstats);
 	}
 
 	// Complete collection sats
-	var setdiv = $('<div class="stats_set_completion"></div>');
-	$('<div class="stats_set_icon" style="background-image: url(../images/sets/pw.png)"><span>Complete collection <i>('+stats.ownedCards+'/'+stats.totalCards+', '+Math.round(stats.ownedCards/stats.totalCards*100)+'%)</i></span></div>').appendTo(setdiv);
-	$('<div class="stats_set_bar" style="width: '+stats.ownedCards/stats.totalCards*100+'%"></div>').appendTo(setdiv);
-	setdiv.appendTo(mainstats);
-
-	setdiv.click(function() {
-		var substats = $(".sub_stats");
-		substats.html('');
-		$('<label>Complete collection completion</label>').appendTo(substats);
-		var setdiv = $('<div class="stats_set_completion"></div>');
-		$('<div class="stats_rarity_icon" style="background-image: url(../images/wc_common.png)"><span>Commons <i>('+stats.ownedCommon+'/'+stats.totalCommon+', '+Math.round(stats.ownedCommon/stats.totalCommon*100)+'%)</i></span></div>').appendTo(setdiv);
-		$('<div class="stats_set_bar" style="width: '+stats.ownedCommon/stats.totalCommon*100+'%"></div>').appendTo(setdiv);
-		setdiv.appendTo(substats);
-		var setdiv = $('<div class="stats_set_completion"></div>');
-		$('<div class="stats_rarity_icon" style="background-image: url(../images/wc_uncommon.png)"><span>Uncommons <i>('+stats.ownedUncommon+'/'+stats.totalUncommon+', '+Math.round(stats.ownedUncommon/stats.totalUncommon*100)+'%)</i></span></div>').appendTo(setdiv);
-		$('<div class="stats_set_bar" style="width: '+stats.ownedUncommon/stats.totalUncommon*100+'%"></div>').appendTo(setdiv);
-		setdiv.appendTo(substats);
-		var setdiv = $('<div class="stats_set_completion"></div>');
-		$('<div class="stats_rarity_icon" style="background-image: url(../images/wc_rare.png)"><span>Rares <i>('+stats.ownedRare+'/'+stats.totalRare+', '+Math.round(stats.ownedRare/stats.totalRare*100)+'%)</i></span></div>').appendTo(setdiv);
-		$('<div class="stats_set_bar" style="width: '+stats.ownedRare/stats.totalRare*100+'%"></div>').appendTo(setdiv);
-		setdiv.appendTo(substats);
-		var setdiv = $('<div class="stats_set_completion"></div>');
-		$('<div class="stats_rarity_icon" style="background-image: url(../images/wc_mythic.png)"><span>Mythics <i>('+stats.ownedMythic+'/'+stats.totalMythic+', '+Math.round(stats.ownedMythic/stats.totalMythic*100)+'%)</i></span></div>').appendTo(setdiv);
-		$('<div class="stats_set_bar" style="width: '+stats.ownedMythic/stats.totalMythic*100+'%"></div>').appendTo(setdiv);
-		setdiv.appendTo(substats);
-	});
+	renderSetStats(stats.complete, "pw", "Complete collection").appendTo(mainstats);
 
 	// Singleton collection sats
-	var setdiv = $('<div class="stats_set_completion"></div>');
-	$('<div class="stats_set_icon" style="background-image: url(../images/sets/pw.png)"><span>Singles <i>('+stats.ownedSingles+'/'+stats.totalSingles+', '+Math.round(stats.ownedSingles/stats.totalSingles*100)+'%)</i></span></div>').appendTo(setdiv);
-	$('<div class="stats_set_bar" style="width: '+stats.ownedSingles/stats.totalSingles*100+'%"></div>').appendTo(setdiv);
-	setdiv.appendTo(mainstats);
+	renderSetStats(stats.singles, "pw", "Singles").appendTo(mainstats);
 
-	setdiv.click(function() {
-		var substats = $(".sub_stats");
-		substats.html('');
-		$('<label>Singles completion</label>').appendTo(substats);
-		var setdiv = $('<div class="stats_set_completion"></div>');
-		$('<div class="stats_rarity_icon" style="background-image: url(../images/wc_common.png)"><span>Commons <i>('+stats.ownedSinglesCommon+'/'+stats.totalSinglesCommon+', '+Math.round(stats.ownedSinglesCommon/stats.totalSinglesCommon*100)+'%)</i></span></div>').appendTo(setdiv);
-		$('<div class="stats_set_bar" style="width: '+stats.ownedSinglesCommon/stats.totalSinglesCommon*100+'%"></div>').appendTo(setdiv);
-		setdiv.appendTo(substats);
-		var setdiv = $('<div class="stats_set_completion"></div>');
-		$('<div class="stats_rarity_icon" style="background-image: url(../images/wc_uncommon.png)"><span>Uncommons <i>('+stats.ownedSinglesUncommon+'/'+stats.totalSinglesUncommon+', '+Math.round(stats.ownedSinglesUncommon/stats.totalSinglesUncommon*100)+'%)</i></span></div>').appendTo(setdiv);
-		$('<div class="stats_set_bar" style="width: '+stats.ownedSinglesUncommon/stats.totalSinglesUncommon*100+'%"></div>').appendTo(setdiv);
-		setdiv.appendTo(substats);
-		var setdiv = $('<div class="stats_set_completion"></div>');
-		$('<div class="stats_rarity_icon" style="background-image: url(../images/wc_rare.png)"><span>Rares <i>('+stats.ownedSinglesRare+'/'+stats.totalSinglesRare+', '+Math.round(stats.ownedSinglesRare/stats.totalSinglesRare*100)+'%)</i></span></div>').appendTo(setdiv);
-		$('<div class="stats_set_bar" style="width: '+stats.ownedSinglesRare/stats.totalSinglesRare*100+'%"></div>').appendTo(setdiv);
-		setdiv.appendTo(substats);
-		var setdiv = $('<div class="stats_set_completion"></div>');
-		$('<div class="stats_rarity_icon" style="background-image: url(../images/wc_mythic.png)"><span>Mythics <i>('+stats.ownedSinglesMythic+'/'+stats.totalSinglesMythic+', '+Math.round(stats.ownedSinglesMythic/stats.totalSinglesMythic*100)+'%)</i></span></div>').appendTo(setdiv);
-		$('<div class="stats_set_bar" style="width: '+stats.ownedSinglesMythic/stats.totalSinglesMythic*100+'%"></div>').appendTo(setdiv);
-		setdiv.appendTo(substats);
-	});
-
-	substats = $('<div class="main_stats sub_stats"></div>');
+	const substats = $('<div class="main_stats sub_stats"></div>');
 
 	flex.append(mainstats);
 	flex.append(substats);
@@ -2370,8 +2293,38 @@ function printStats() {
 	//
 	$(".back").click(function () {
 		change_background("default");
-	    $('.moving_ux').animate({'left': '0px'}, 250, 'easeInOutCubic'); 
+		$('.moving_ux').animate({ 'left': '0px' }, 250, 'easeInOutCubic');
 	});
+}
+
+//
+function renderSetStats(setStats, setIconCode, setName) {
+	const setDiv = renderCompletionDiv(setStats.all, 'sets/' + setIconCode + '.png', setName);
+
+	setDiv.click(function () {
+		const substats = $(".sub_stats");
+		substats.html('');
+		$('<label>' + setName + ' completion</label>').appendTo(substats);
+		["common", "uncommon", "rare", "mythic"].forEach(rarity => {
+			const countStats = setStats[rarity];
+			if (countStats.total > 0) {
+				const capitalizedRarity = rarity[0].toUpperCase() + rarity.slice(1) + 's';
+				renderCompletionDiv(countStats, 'wc_' + rarity + '.png', capitalizedRarity).appendTo(substats);
+			}
+		});
+	});
+
+	return setDiv;
+}
+
+//
+function renderCompletionDiv(countStats, image, title) {
+	const completionDiv = $('<div class="stats_set_completion"></div>');
+	$('<div class="stats_set_icon" style="background-image: url(../images/' + image + ')"><span>' + title + ' <i>(' + countStats.owned + '/' + countStats.total + ', ' + Math.round(countStats.percentage) + '%)</i></span></div>')
+		.appendTo(completionDiv);
+	$('<div class="stats_set_bar" style="width: ' + countStats.percentage + '%"></div>')
+		.appendTo(completionDiv);
+	return completionDiv;
 }
 
 function sortCollection(alg) {
