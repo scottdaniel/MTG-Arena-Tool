@@ -254,6 +254,8 @@ function getReadableEvent(arg) {
 			return "Quick Singleton"; break;
 		case "Welcome_Weekend_Singleton":
 			return "Welcome Weekend Singleton"; break;
+		case "CompCons_Metagame_Challenge_":
+			return "Metagame Challenge"; break;
 		
 		case "Quick_constructed_april_":
 			return "Quick Constructed"; break;

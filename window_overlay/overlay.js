@@ -206,68 +206,71 @@ ipc.on('set_deck', function (event, arg) {
 	$(".overlay_decklist").html('');
 	$(".overlay_deckcolors").html('');
 
-	if (deckMode == 3) {
-		$(".overlay_deckname").html("Played by "+arg.name.slice(0, -6));
-	}
-	else {
-		$(".overlay_deckname").html(arg.name);
-	}
+	if (arg != null) {
 
-	arg.colors = get_deck_colors(arg);
-	arg.colors.forEach(function(color) {
-		$(".overlay_deckcolors").append('<div class="mana_s20 mana_'+mana[color]+'"></div>');
-	});
-
-	arg.mainDeck.sort(compare_cards); 
-	var deckListDiv = $(".overlay_decklist");
-	var prevIndex = 0;
-
-	if (deckMode == 0 || deckMode == 2) {
-		deckListDiv.append('<div class="chance_title">'+arg.cardsLeft+' cards left</div>');
-	}
-	else {
-		var deckSize = 0
-		arg.mainDeck.forEach(function(card) {
-			deckSize += card.quantity;
-		});
-
-		deckListDiv.append('<div class="chance_title">'+deckSize+' cards</div>');
-	}
-
-	arg.mainDeck.forEach(function(card) {
-		var grpId = card.id;
-		if (deckMode == 2) {
-			addCardTile(grpId, 'a', card.chance+"%", deckListDiv);
+		if (deckMode == 3) {
+			$(".overlay_deckname").html("Played by "+arg.name.slice(0, -6));
 		}
 		else {
-			addCardTile(grpId, 'a', card.quantity, deckListDiv);
+			$(".overlay_deckname").html(arg.name);
 		}
-		prevIndex = grpId;
-	});
-	if (showSideboard) {
-		deckListDiv.append('<div class="card_tile_separator">Sideboard</div>');
-		
-		arg.sideboard.forEach(function(card) {
+
+		arg.colors = get_deck_colors(arg);
+		arg.colors.forEach(function(color) {
+			$(".overlay_deckcolors").append('<div class="mana_s20 mana_'+mana[color]+'"></div>');
+		});
+
+		arg.mainDeck.sort(compare_cards); 
+		var deckListDiv = $(".overlay_decklist");
+		var prevIndex = 0;
+
+		if (deckMode == 0 || deckMode == 2) {
+			deckListDiv.append('<div class="chance_title">'+arg.cardsLeft+' cards left</div>');
+		}
+		else {
+			var deckSize = 0
+			arg.mainDeck.forEach(function(card) {
+				deckSize += card.quantity;
+			});
+
+			deckListDiv.append('<div class="chance_title">'+deckSize+' cards</div>');
+		}
+
+		arg.mainDeck.forEach(function(card) {
 			var grpId = card.id;
 			if (deckMode == 2) {
-				addCardTile(grpId, 'a', "0%", deckListDiv);
+				addCardTile(grpId, 'a', card.chance+"%", deckListDiv);
 			}
 			else {
 				addCardTile(grpId, 'a', card.quantity, deckListDiv);
 			}
 			prevIndex = grpId;
 		});
-	}
+		if (showSideboard) {
+			deckListDiv.append('<div class="card_tile_separator">Sideboard</div>');
+			
+			arg.sideboard.forEach(function(card) {
+				var grpId = card.id;
+				if (deckMode == 2) {
+					addCardTile(grpId, 'a', "0%", deckListDiv);
+				}
+				else {
+					addCardTile(grpId, 'a', card.quantity, deckListDiv);
+				}
+				prevIndex = grpId;
+			});
+		}
 
-	if (deckMode == 2) {
-		deckListDiv.append('<div class="chance_title"></div>');// Add some space
-		deckListDiv.append('<div class="chance_title">Creature: '+arg.chanceCre+'%</div>');
-		deckListDiv.append('<div class="chance_title">Instant: '+arg.chanceIns+'%</div>');
-		deckListDiv.append('<div class="chance_title">Sorcery: '+arg.chanceSor+'%</div>');
-		deckListDiv.append('<div class="chance_title">Artifact: '+arg.chanceArt+'%</div>');
-		deckListDiv.append('<div class="chance_title">Enchantment: '+arg.chanceEnc+'%</div>');
-		deckListDiv.append('<div class="chance_title">Planeswalker: '+arg.chancePla+'%</div>');
-		deckListDiv.append('<div class="chance_title">Land: '+arg.chanceLan+'%</div>');
+		if (deckMode == 2) {
+			deckListDiv.append('<div class="chance_title"></div>');// Add some space
+			deckListDiv.append('<div class="chance_title">Creature: '+arg.chanceCre+'%</div>');
+			deckListDiv.append('<div class="chance_title">Instant: '+arg.chanceIns+'%</div>');
+			deckListDiv.append('<div class="chance_title">Sorcery: '+arg.chanceSor+'%</div>');
+			deckListDiv.append('<div class="chance_title">Artifact: '+arg.chanceArt+'%</div>');
+			deckListDiv.append('<div class="chance_title">Enchantment: '+arg.chanceEnc+'%</div>');
+			deckListDiv.append('<div class="chance_title">Planeswalker: '+arg.chancePla+'%</div>');
+			deckListDiv.append('<div class="chance_title">Land: '+arg.chanceLan+'%</div>');
+		}
 	}
 });
 

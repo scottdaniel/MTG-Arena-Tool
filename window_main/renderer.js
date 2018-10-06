@@ -29,6 +29,7 @@ var loadHistory = 0;
 var defaultBackground = "";
 var currentOpenDeck = null;
 var lastSettingsSection = 1;
+var serverStatus = undefined;
 
 var rankOffset = 0;
 var rankTitle = "";
@@ -151,6 +152,11 @@ ipc.on('set_deck_changes', function (event, arg) {
 ipc.on('set_cards', function (event, _cards, _cardsnew) {
 	cards = _cards;
 	cardsNew = _cardsnew;
+});
+
+//
+ipc.on('set_status', function (event, arg) {
+	serverStatus = arg;
 });
 
 //

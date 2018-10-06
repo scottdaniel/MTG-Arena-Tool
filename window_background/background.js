@@ -936,11 +936,11 @@ function processLogData(data) {
                 }
             }
         }
-        if (json.packNumber == 0 && json.pickNumber == 0) {
-            createDraft();
-            ipc.send("set_draft_cards", json.draftPack, json.pickedCards, json.packNumber+1, json.pickNumber);
-            currentDraftPack = json.draftPack.slice(0);
+        if (json.packNumber == 0 && json.pickNumber <= 1) {
             httpGetPicks(draftSet);
+            setDraftCards(json);
+            createDraft();
+            currentDraftPack = json.draftPack.slice(0);
         }
         return;
     }
@@ -1084,6 +1084,18 @@ function processLogData(data) {
         //console.log(JSON.stringify(currentDeck));
         //console.log(currentDeck);
         return;
+    }
+}
+
+
+function setDraftCards(json) {
+    if (httpAsync.length == 0) {
+        ipc.send("set_draft_cards", json.draftPack, json.pickedCards, json.packNumber+1, json.pickNumber);
+    }
+    else {
+        setTimeout(function() {
+            setDraftCards(json);
+        }, 1000);
     }
 }
 
@@ -1661,6 +1673,7 @@ function finishLoading() {
 var httpAsync = [];
 httpBasic();
 httpGetDatabase();
+htttpGetStatus();
 
 function httpBasic() {
     var httpAsyncNew = httpAsync.slice(0);
@@ -1668,7 +1681,7 @@ function httpBasic() {
     async.forEachOfSeries(httpAsyncNew, function (value, index, callback) {
         var _headers = value;
 
-        if (store.get("settings").send_data == false && _headers.method != 'delete_data' && _headers.method != 'get_database' && debugLog == false) {
+        if (store.get("settings").send_data == false && _headers.method != 'delete_data' && _headers.method != 'get_database' && _headers.method != 'get_status' && debugLog == false) {
             callback({message: "Settings dont allow sending data! > "+_headers.method});
             removeFromHttp(_headers.reqId);
         }
@@ -1687,15 +1700,18 @@ function httpBasic() {
         if (_headers.method == 'get_picks') {
             var options = { protocol: 'https:', port: 443, hostname: serverAddress, path: '/get_picks.php', method: 'POST', headers: _headers };
         }
-        if (_headers.method == 'get_database') {
+        else if (_headers.method == 'get_database') {
             var options = { protocol: 'https:', port: 443, hostname: serverAddress, path: '/database/db.json', method: 'GET'};
+        }
+        else if (_headers.method == 'get_status') {
+            var options = { protocol: 'https:', port: 443, hostname: 'magicthegatheringarena.statuspage.io', path: '/index.json', method: 'GET'};
         }
         else {
             var options = { protocol: 'https:', port: 443, hostname: serverAddress, path: '/apiv4.php', method: 'POST', headers: _headers };
         }
 
         if (debugNet) {
-            console.log("SEND >> "+index+", "+_headers.method, _headers);
+            console.log("SEND >> "+index+", "+_headers.method, _headers, options);
             ipc_send("ipc_log", "SEND >> "+index+", "+_headers.method+", "+_headers.reqId+", "+_headers.token);
         }
 
@@ -1712,6 +1728,14 @@ function httpBasic() {
                 }
                 try {
                     var parsedResult = JSON.parse(results);
+                    if (_headers.method == 'get_status') {
+                        delete parsedResult.page; delete parsedResult.incidents;
+                        parsedResult.components.forEach(function(ob) {
+                            delete ob.id; delete ob.page_id; delete ob.group_id; delete ob.showcase; delete ob.description; delete ob.position; delete ob.created_at;
+                        });
+                        console.log("STATUS", parsedResult);
+                        ipc_send("set_status", parsedResult);
+                    }
                     if (parsedResult.ok) {
                         if (_headers.method == 'auth') {
                             tokenAuth = parsedResult.token;
@@ -1824,6 +1848,11 @@ function httpGetDatabase() {
     var _id = makeId(6);
     ipc_send("popup", {"text": "Downloading metadata", "time": 0});
     httpAsync.push({'reqId': _id, 'method': 'get_database', 'uid': playerId});
+}
+
+function htttpGetStatus() {
+    var _id = makeId(6);
+    httpAsync.push({'reqId': _id, 'method': 'get_status', 'uid': playerId});
 }
 
 //

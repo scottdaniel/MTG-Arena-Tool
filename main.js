@@ -48,6 +48,10 @@ app.on('ready', () => {
                 overlay.webContents.send("set_settings", arg);
                 break;
 
+            case 'set_status':
+                mainWindow.webContents.send("set_status", arg);
+                break;
+
             case 'set_db':
                 mainWindow.webContents.send("set_db", arg);
                 overlay.webContents.send("set_db", arg);
