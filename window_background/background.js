@@ -73,6 +73,7 @@ var matchWincon = "";
 var duringMatch = false;
 var matchBeginTime = 0;
 
+var arenaVersion = '';
 var playerName = null;
 var playerRank = null;
 var playerTier = null;
@@ -88,6 +89,7 @@ var oppSeat = null;
 var oppWin = 0;
 var annotationsRead = [];
 
+var prevTurn = -1;
 var turnPhase = "";
 var turnStep  = "";
 var turnNumber = 0;
@@ -279,7 +281,7 @@ function loadPlayerConfig(playerId) {
     history.matches = entireConfig['matches_index'];
     
     for (let i=0; i<history.matches.length; i++) {
-        ipc_send("popup", "Reading history: "+i+" / "+history.matches.length);
+        ipc_send("popup", {"text": "Reading history: "+i+" / "+history.matches.length, "time": 0});
         var id = history.matches[i];
         if (id != null) {
             var item = entireConfig[id];
@@ -292,7 +294,7 @@ function loadPlayerConfig(playerId) {
     
     drafts.matches = store.get('draft_index');
     for (let i=0; i<drafts.matches.length; i++) {
-        ipc_send("popup", "Reading drafts: "+i+" / "+history.matches.length);
+        ipc_send("popup", {"text": "Reading drafts: "+i+" / "+history.matches.length, "time": 0});
         var id = drafts.matches[i];
 
         if (id != null) {
@@ -405,7 +407,6 @@ else {
 console.log(logUri);
 
 var file;
-
 var logLoopMode = 0;
 setTimeout(logLoop, 500);
 
@@ -461,9 +462,11 @@ function readLog() {
 
 function processLog(err, bytecount, buff) {
     let rawString = buff.toString('utf-8', 0, bytecount);
-    var splitString = rawString.split('[UnityCrossThread');
+    //var splitString = rawString.split('[UnityCrossThread');
+    var splitString = rawString.split(/(\[UnityCrossThread|\[Client GRE\])+/);
+
     console.log('Reading:', bytecount, 'bytes, ',splitString.length, ' chunks');
-    ipc_send("ipc_log", 'Reading: '+bytecount+' bytes, '+splitString.length+' chunks');
+    //ipc_send("ipc_log", 'Reading: '+bytecount+' bytes, '+splitString.length+' chunks');
 
     if (firstPass) {
         splitString.push("%END%");
@@ -474,7 +477,7 @@ function processLog(err, bytecount, buff) {
         //ipc_send("ipc_log", "Async: ("+index+")");
         if (value == "%END%") {
             finishLoading();
-            ipc_send("popup", "100%");
+            ipc_send("popup", {"text": "100%", "time": 3000});
         }
         else if (value == "%CLOSE%") {
             fs.close(file);
@@ -482,7 +485,7 @@ function processLog(err, bytecount, buff) {
         else {
             processLogData(value);
             if (firstPass) {
-                ipc_send("popup", "Processing log: "+Math.round(100/splitString.length*index)+"%");
+                ipc_send("popup", {"text": "Processing log: "+Math.round(100/splitString.length*index)+"%", "time": 0});
             }
             
             if (debugLog) {
@@ -680,8 +683,11 @@ function processLogData(data) {
             delete json.Id;
 
             select_deck(json);
-            json.CourseDeck.colors = get_deck_colors(json.CourseDeck);
-            httpSubmitCourse(json._id, json);
+            if (json.CourseDeck != null) {
+                json.CourseDeck.colors = get_deck_colors(json.CourseDeck);
+                console.log(json.CourseDeck, json.CourseDeck.colors)
+                httpSubmitCourse(json._id, json);
+            }
         }
         return;
     }
@@ -689,7 +695,13 @@ function processLogData(data) {
     // Get player Id
     strCheck = '"PlayerId":"';
     if (data.indexOf(strCheck) > -1) {
-		playerId = dataChop(data, strCheck, '"');
+        playerId = dataChop(data, strCheck, '"');
+    }
+
+    // Get Client Version
+    strCheck = '"clientVersion":"';
+    if (data.indexOf(strCheck) > -1) {
+        arenaVersion = dataChop(data, strCheck, '"');
     }
 
     // Get User name
@@ -699,6 +711,25 @@ function processLogData(data) {
         ipc_send("set_username", playerName);
         return;
     }
+
+    /*
+    // Use this to get precon decklists
+    strCheck = '<== Deck.GetPreconDecks(';
+    json = checkJsonWithStart(data, strCheck, '', ')');
+    if (json != false) {
+        var str = "";
+        var newline = '\n';
+        json.forEach(function(_deck) {
+            str += "**"_deck.name.replace("?=?Loc/Decks/Precon/", "")+newline;
+            _deck.mainDeck.forEach(function(_card) {
+                str += _card.quantity+" "+cardsDb.get(_card.id).name+newline;
+            });
+            str += newline+newline;
+        });
+        console.log(str);
+        return;
+    }
+    */
 
     strCheck = '==> Authenticate(';
 	if (data.indexOf(strCheck) > -1) {
@@ -930,7 +961,9 @@ function processLogData(data) {
             var logTime = dataChop(data, strCheck, ' (');
             matchBeginTime = parseWotcTime(logTime);
         }
-        createMatch(json);
+        if (json.eventId != "NPE") {
+            createMatch(json);
+        }
         return;
     }
 
@@ -949,20 +982,19 @@ function processLogData(data) {
     if (json != false) {
         console.log("Draft status");
         if (json.eventName != undefined) {
-            if (json.eventName.indexOf("M19") !== -1)   draftSet = "Magic 2019";
-            if (json.eventName.indexOf("DOM") !== -1)   draftSet = "Dominaria";
-            if (json.eventName.indexOf("HOU") !== -1)   draftSet = "Hour of Devastation";
-            if (json.eventName.indexOf("AKH") !== -1)   draftSet = "Amonketh";
-            if (json.eventName.indexOf("XLN") !== -1)   draftSet = "Ixalan";
-            if (json.eventName.indexOf("RIX") !== -1)   draftSet = "Rivals of Ixalan";
-            if (json.eventName.indexOf("KLD") !== -1)   draftSet = "Kaladesh";
-            if (json.eventName.indexOf("AER") !== -1)   draftSet = "Aether Revolt";
+            // TEST THIS
+            for (var set in setsList) {
+                var setCode = setsList[set]["code"];
+                if (json.eventName.indexOf(setCode) !== -1) {
+                    draftSet = set;
+                }
+            }
         }
-        if (json.packNumber == 0 && json.pickNumber == 0) {
-            createDraft();
-            ipc.send("set_draft_cards", json.draftPack, json.pickedCards, json.packNumber+1, json.pickNumber);
-            currentDraftPack = json.draftPack.slice(0);
+        if (json.packNumber == 0 && json.pickNumber <= 1) {
             httpGetPicks(draftSet);
+            setDraftCards(json);
+            createDraft();
+            currentDraftPack = json.draftPack.slice(0);
         }
         return;
     }
@@ -1015,10 +1047,11 @@ function processLogData(data) {
 
         if (json.gameRoomConfig != undefined) {
             currentMatchId = json.gameRoomConfig.matchId;
+            eventId = json.gameRoomConfig.eventId;
             duringMatch = true;
         }
 
-        if (json.stateType == "MatchGameRoomStateType_MatchCompleted") {
+        if (json.stateType == "MatchGameRoomStateType_MatchCompleted" && eventId != "NPE") {
             playerWin = 0;
             oppWin = 0;
         	json.finalMatchResult.resultList.forEach(function(res) {
@@ -1072,14 +1105,16 @@ function processLogData(data) {
                 tempMain[grpId] += 1;
             }
         });
-        json.submitDeckReq.deck.sideboardCards.forEach( function (grpId) {
-            if (tempSide[grpId] == undefined) {
-                tempSide[grpId] = 1
-            }
-            else {
-                tempSide[grpId] += 1;
-            }
-        });
+        if (json.submitDeckReq.deck.sideboardCards !== undefined) {
+            json.submitDeckReq.deck.sideboardCards.forEach( function (grpId) {
+                if (tempSide[grpId] == undefined) {
+                    tempSide[grpId] = 1
+                }
+                else {
+                    tempSide[grpId] += 1;
+                }
+            });
+        }
 
         // Update on overlay
         var str = JSON.stringify(currentDeck);
@@ -1093,14 +1128,28 @@ function processLogData(data) {
         });
 
         currentDeck.sideboard = [];
-        Object.keys(tempSide).forEach(function(key) {
-            var c = {"id": key, "quantity": tempSide[key]};
-            currentDeck.sideboard.push(c);
-        });
+        if (json.submitDeckReq.deck.sideboardCards !== undefined) {
+            Object.keys(tempSide).forEach(function(key) {
+                var c = {"id": key, "quantity": tempSide[key]};
+                currentDeck.sideboard.push(c);
+            });
+        }
 
         //console.log(JSON.stringify(currentDeck));
         //console.log(currentDeck);
         return;
+    }
+}
+
+
+function setDraftCards(json) {
+    if (httpAsync.length == 0) {
+        ipc.send("set_draft_cards", json.draftPack, json.pickedCards, json.packNumber+1, json.pickNumber);
+    }
+    else {
+        setTimeout(function() {
+            setDraftCards(json);
+        }, 1000);
     }
 }
 
@@ -1111,6 +1160,29 @@ function gre_to_client(data) {
             gameObjs = {};
         }
         //console.log("Message: "+msg.msgId, msg);
+        if (msg.type == "GREMessageType_DeclareAttackersReq") {
+            msg.declareAttackersReq.attackers.forEach(function(obj) {
+                var att = obj.attackerInstanceId;
+                var str = gameObjs[att].name+" attacked ";
+                if (obj.selectedDamageRecipient !== undefined) {
+                    var rec = obj.selectedDamageRecipient;
+                    if (rec.type == "DamageRecType_Player") {
+                        ipc_send("ipc_log", str+getNameBySeat(rec.playerSystemSeatId));
+                    }
+                    //else if (rec.type == "") {
+                    //}
+                }
+                if (obj.legalDamageRecipients !== undefined) {
+                    var rec = obj.legalDamageRecipients.forEach(function(rec) {
+                        if (rec.type == "DamageRecType_Player") {
+                            ipc_send("ipc_log", str+getNameBySeat(rec.playerSystemSeatId));
+                        }
+                        //else if (rec.type == "") {
+                        //}
+                    });
+                }
+            });
+        }
         if (msg.type == "GREMessageType_GameStateMessage") {
             if (msg.gameStateMessage.type == "GameStateType_Full") {
                 if (msg.gameStateMessage.zones != undefined) {
@@ -1122,6 +1194,7 @@ function gre_to_client(data) {
             else if (msg.gameStateMessage.type == "GameStateType_Diff") {
 
                 if (msg.gameStateMessage.turnInfo != undefined) {
+                    prevTurn = turnNumber;
                     turnPhase = msg.gameStateMessage.turnInfo.phase;
                     turnStep  = msg.gameStateMessage.turnInfo.step;
                     turnNumber = msg.gameStateMessage.turnInfo.turnNumber;
@@ -1130,6 +1203,15 @@ function gre_to_client(data) {
                     turnDecision = msg.gameStateMessage.turnInfo.decisionPlayer;
                     turnStorm = msg.gameStateMessage.turnInfo.stormCount;
 
+                    if (prevTurn !== turnNumber) {
+                        ipc_send("ipc_log", ">");
+                        if (playerSeat == turnActive) {
+                            ipc_send("ipc_log", playerName+"'s turn begin. (#"+turnNumber+")");
+                        }
+                        else {
+                            ipc_send("ipc_log", oppName+"'s turn begin. (#"+turnNumber+")");
+                        }
+                    }
                     if (!firstPass) {
                         ipc.send("set_turn", playerSeat, turnPhase, turnStep, turnNumber, turnActive, turnPriority, turnDecision);
                     }
@@ -1173,16 +1255,30 @@ function gre_to_client(data) {
 
                         if (affected != undefined) {
                             affected.forEach(function(aff) {
-                                /*
+                                
                                 if (obj.type.includes("AnnotationType_EnteredZoneThisTurn")) {
                                     if (gameObjs[aff] !== undefined) {
-                                        ipc_send("ipc_log", "("+gameObjs[aff].instanceId+") AnnotationType_EnteredZoneThisTurn - "+gameObjs[aff].name+" / zone: "+affector+" - "+zones[affector].type);
+                                        //ipc_send("ipc_log", "("+gameObjs[aff].instanceId+") AnnotationType_EnteredZoneThisTurn - ("+aff+") "+gameObjs[aff].name+" / zone: "+affector+" - "+zones[affector].type);
                                         gameObjs[aff].zoneId = affector;
                                         gameObjs[aff].zoneName = zones[affector].type;
                                     }
                                 }
-                                */
-
+                                if (obj.type.includes("AnnotationType_ResolutionStart")) {
+                                    var grpid = undefined;
+                                    obj.details.forEach(function(detail) {
+                                        if (detail.key == "grpid") {
+                                            grpid = detail.valueInt32[0]
+                                        }
+                                    });
+                                    if (grpid != undefined) {
+                                        card = cardsDb.get(grpid);
+                                        var aff = obj.affectorId;
+                                        var pn = oppName;
+                                        if (gameObjs[aff] != undefined) {
+                                            console.log(getNameBySeat(gameObjs[aff].controllerSeatId)+" cast "+card.name, gameObjs[aff]);
+                                        }
+                                    }
+                                }
                                 if (obj.type.includes("AnnotationType_ZoneTransfer")) {
                                     var _orig = undefined;
                                     var _new = undefined;
@@ -1200,11 +1296,11 @@ function gre_to_client(data) {
                                     }
                                     else if (gameObjs[aff] !== undefined) {
                                         //ipc_send("ipc_log", "("+gameObjs[aff].instanceId+") AnnotationType_ZoneTransfer - "+gameObjs[aff].name+" / zone: "+_dest+" - "+zones[_dest].type);
+                                        ipc_send("ipc_log", gameObjs[aff].name+" moved to "+zones[_dest].type);
                                         gameObjs[aff].zoneId = _dest;
                                         gameObjs[aff].zoneName = zones[_dest].type;
                                     }
                                 }
-
                                 if (obj.type.includes("AnnotationType_ObjectIdChanged")) {
                                     var _orig = undefined;
                                     var _new = undefined;
@@ -1225,6 +1321,27 @@ function gre_to_client(data) {
                                         gameObjs[_new] = JSON.parse(JSON.stringify(gameObjs[_orig]));
                                         gameObjs[_orig] = undefined;
                                     }
+                                }
+                                if (obj.type.includes("AnnotationType_DamageDealt")) {
+                                    var aff = obj.affectorId;
+                                    var affected = obj.affectedIds;
+                                    var damage = 0;
+                                    obj.details.forEach(function(detail) {
+                                        if (detail.key == "damage") {
+                                            damage = detail.valueInt32[0];
+                                        }
+                                    });
+
+                                    affected.forEach(function(affd) {
+                                        if (gameObjs[aff] !== undefined) {
+                                            if (affd == playerSeat || affd == oppSeat) {
+                                                ipc_send("ipc_log", gameObjs[aff].name+" dealt "+damage+" damage to "+getNameBySeat(affd));
+                                            }
+                                            else {
+                                                ipc_send("ipc_log", gameObjs[aff].name+" dealt "+damage+" damage to "+gameObjs[affd]);
+                                            }
+                                        }
+                                    });
                                 }
                             });
                         }
@@ -1254,8 +1371,7 @@ function gre_to_client(data) {
                         }
                         obj.zoneName = zones[obj.zoneId].type;
                         gameObjs[obj.instanceId] = obj;
-
-                        //ipc_send("ipc_log", "Message: "+msg.msgId+" > ("+obj.instanceId+") "++" created at "+zones[obj.zoneId].type);
+                        //ipc_send("ipc_log", "Message: "+msg.msgId+" > ("+obj.instanceId+") created at "+zones[obj.zoneId].type);
                     });
                 }
                 
@@ -1269,11 +1385,20 @@ function gre_to_client(data) {
         }
         //
     });
-    
+
     var str = JSON.stringify(currentDeck);
     currentDeckUpdated = JSON.parse(str);
     forceDeckUpdate();
     update_deck(false);
+}
+
+function getNameBySeat(seat) {
+    if (seat == playerSeat) {
+        return playerName.slice(0, -6);
+    }
+    else {
+        return oppName.slice(0, -6);
+    }
 }
 
 function createMatch(arg) {
@@ -1540,7 +1665,7 @@ function saveMatch() {
     history[currentMatchId].type = "match";
     httpSetMatch(match);
     requestHistorySend(0);
-    ipc_send("popup", "Match saved!");
+    ipc_send("popup", {"text": "Match saved!", "time": 3000});
 }
 
 function saveDraft() {
@@ -1572,7 +1697,7 @@ function saveDraft() {
     history[draftId].type = "draft";
     httpSetMatch(draft);
     requestHistorySend(0);
-    ipc_send("popup", "Draft saved!");
+    ipc_send("popup", {"text": "Draft saved!", "time": 3000});
 }
 
 function finishLoading() {
@@ -1601,6 +1726,8 @@ function finishLoading() {
 
 var httpAsync = [];
 httpBasic();
+httpGetDatabase();
+htttpGetStatus();
 
 function httpBasic() {
     var httpAsyncNew = httpAsync.slice(0);
@@ -1608,7 +1735,7 @@ function httpBasic() {
     async.forEachOfSeries(httpAsyncNew, function (value, index, callback) {
         var _headers = value;
 
-        if (store.get("settings").send_data == false && _headers.method != 'delete_data' && _headers.method != 'get_database' && debugLog == false) {
+        if (store.get("settings").send_data == false && _headers.method != 'delete_data' && _headers.method != 'get_database' && _headers.method != 'get_status' && debugLog == false) {
             callback({message: "Settings dont allow sending data! > "+_headers.method});
             removeFromHttp(_headers.reqId);
         }
@@ -1627,15 +1754,18 @@ function httpBasic() {
         if (_headers.method == 'get_picks') {
             var options = { protocol: 'https:', port: 443, hostname: serverAddress, path: '/get_picks.php', method: 'POST', headers: _headers };
         }
-        if (_headers.method == 'get_database') {
+        else if (_headers.method == 'get_database') {
             var options = { protocol: 'https:', port: 443, hostname: serverAddress, path: '/database/db.json', method: 'GET'};
+        }
+        else if (_headers.method == 'get_status') {
+            var options = { protocol: 'https:', port: 443, hostname: 'magicthegatheringarena.statuspage.io', path: '/index.json', method: 'GET'};
         }
         else {
             var options = { protocol: 'https:', port: 443, hostname: serverAddress, path: '/apiv4.php', method: 'POST', headers: _headers };
         }
 
         if (debugNet) {
-            console.log("SEND >> "+index+", "+_headers.method, _headers);
+            console.log("SEND >> "+index+", "+_headers.method, _headers, options);
             ipc_send("ipc_log", "SEND >> "+index+", "+_headers.method+", "+_headers.reqId+", "+_headers.token);
         }
 
@@ -1652,6 +1782,14 @@ function httpBasic() {
                 }
                 try {
                     var parsedResult = JSON.parse(results);
+                    if (_headers.method == 'get_status') {
+                        delete parsedResult.page; delete parsedResult.incidents;
+                        parsedResult.components.forEach(function(ob) {
+                            delete ob.id; delete ob.page_id; delete ob.group_id; delete ob.showcase; delete ob.description; delete ob.position; delete ob.created_at;
+                        });
+                        console.log("STATUS", parsedResult);
+                        ipc_send("set_status", parsedResult);
+                    }
                     if (parsedResult.ok) {
                         if (_headers.method == 'auth') {
                             tokenAuth = parsedResult.token;
@@ -1664,7 +1802,9 @@ function httpBasic() {
                         }
                         if (_headers.method == 'get_database') {
                             cardsDb.set(parsedResult);
+                            setTimeout(logLoop, 1);
                             delete parsedResult.ok;
+                            setsList = parsedResult.sets;
                             ipc_send("set_db", parsedResult);
                         }
                     }
@@ -1714,7 +1854,7 @@ function removeFromHttp(req) {
 
 function httpAuth() {
     var _id = makeId(6);
-	httpAsync.push({'reqId': _id, 'method': 'auth', 'uid': playerId});
+	httpAsync.push({'reqId': _id, 'method': 'auth', 'uid': playerId, 'version': arenaVersion});
 }
 
 function httpSubmitCourse(_courseId, _course) {
@@ -1760,39 +1900,13 @@ function httpGetPicks(set) {
 
 function httpGetDatabase() {
     var _id = makeId(6);
+    ipc_send("popup", {"text": "Downloading metadata", "time": 0});
     httpAsync.push({'reqId': _id, 'method': 'get_database', 'uid': playerId});
 }
 
-httpGetDatabase();
-
-//
-function get_deck_colors(deck) {
-    deck.colors = [];
-    deck.mainDeck.forEach(function(card) {
-        var grpid = card.id;
-        if (card.quantity > 0) {
-            var card_name = cardsDb.get(grpid).name;
-            var card_cost = cardsDb.get(grpid).cost;
-            card_cost.forEach(function(c) {
-                if (!deck.colors.includes(c.color) && c.color != 0 && c.color < 7) {
-                    deck.colors.push(c.color);
-                }
-            });
-        }
-    });
-    /*
-    deck.sideboard.forEach(function(card) {
-        var grpid = card.id;
-        var card_name = cardsDb.get(grpid).name;
-        var card_cost = cardsDb.get(grpid).cost;
-        card_cost.forEach(function(c) {
-            if (!deck.colors.includes(c.color) && c.color != 0 && c.color < 7) {
-                deck.colors.push(c.color);
-            }
-        });
-    });
-    */
-    return deck.colors;
+function htttpGetStatus() {
+    var _id = makeId(6);
+    httpAsync.push({'reqId': _id, 'method': 'get_status', 'uid': playerId});
 }
 
 //

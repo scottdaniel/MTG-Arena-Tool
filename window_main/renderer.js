@@ -29,6 +29,7 @@ var loadHistory = 0;
 var defaultBackground = "";
 var currentOpenDeck = null;
 var lastSettingsSection = 1;
+var serverStatus = undefined;
 
 var rankOffset = 0;
 var rankTitle = "";
@@ -64,6 +65,8 @@ process.on('uncaughtException', (err) => {
 
 //
 ipc.on('set_db', function (event, arg) {
+	setsList = arg.sets;
+	delete arg.sets;
 	cardsDb.set(arg);
 });
 
@@ -71,7 +74,8 @@ ipc.on('set_db', function (event, arg) {
 ipc.on('set_username', function (event, arg) {
 	userName = arg;
 	if (sidebarActive != -1) {
-		$('.top_username').html(userName);
+		$('.top_username').html(userName.slice(0, -6));
+		$('.top_username_id').html(userName.slice(-6));
 	}
 });
 
@@ -148,6 +152,71 @@ ipc.on('set_deck_changes', function (event, arg) {
 ipc.on('set_cards', function (event, _cards, _cardsnew) {
 	cards = _cards;
 	cardsNew = _cardsnew;
+});
+
+//
+ipc.on('set_status', function (event, arg) {
+	var mainStatus = 0;
+	var sp = $('<span>'+arg.status.description+'</span>');
+	sp.css('text-align', 'center');
+	sp.css('margin-bottom', '4px');
+	$('.top_status_pop').append(sp);
+	arg.components.forEach(function(comp) {
+		var div = $('<div class="status_item"></div>');
+		var st = $('<div class="top_status"></div>');
+		div.append('<span>'+comp.name+':</span>');
+		var sp = $('<span></span>');
+		if (comp.status == 'operational') {
+			st.addClass('status_green');
+			sp.html('Operational');
+		}
+		else if (comp.status == 'degraded_performance') {
+			st.addClass('status_yellow');
+			if (mainStatus > 1) mainStatus = 1;
+			sp.html('Degraded performance');
+		}
+		else if (comp.status == 'major_outage') {
+			st.addClass('status_red');
+			if (mainStatus > 2) mainStatus = 2;
+			sp.html('Major outage');
+		}
+		else if (comp.status == 'partial_outage') {
+			st.addClass('status_yellow');
+			if (mainStatus > 1) mainStatus = 1;
+			sp.html('Partial outage');
+		}
+		else if (comp.status == 'under_maintenance') {
+			st.addClass('status_yellow');
+			if (mainStatus > 1) mainStatus = 1;
+			sp.html('Under maintenance');
+		}
+		else {
+			st.addClass('status_yellow');
+			if (mainStatus > 1) mainStatus = 1;
+			sp.html(comp.status);
+		}
+		sp.css('margin-left', 'auto');
+		sp.appendTo(div);
+		st.appendTo(div);
+		div.appendTo($('.top_status_pop'));
+	});
+
+	if (mainStatus == 0) {
+		$('.top_status').addClass('status_green');
+	}
+	if (mainStatus == 1) {
+		$('.top_status').addClass('status_yellow');
+	}
+	if (mainStatus == 2) {
+		$('.top_status').addClass('status_red');
+	}
+
+	$('.top_status').on('mouseenter', function(e) {
+		$('.top_status_pop').css("opacity", 1);
+	});
+	$('.top_status').on('mouseleave', function(e) {
+		$('.top_status_pop').css("opacity", 0);
+	});
 });
 
 //
@@ -247,7 +316,9 @@ ipc.on('init_login', function (event, arg) {
 
 //
 ipc.on('initialize', function (event, arg) {
-	$('.top_username').html(userName);
+	$('.top_username').html(userName.slice(0, -6));
+	$('.top_username_id').html(userName.slice(-6));
+
 	$(".top_rank").css("background-position", (rankOffset*-48)+"px 0px").attr("title", rankTitle);
 	sidebarActive = 0;
 	setDecks(null);
@@ -282,21 +353,26 @@ $(".list_deck").on('mouseenter mouseleave', function(e) {
 
 
 //
-ipc.on('popup', function (event, arg) {
-	pop(arg);
+ipc.on('popup', function (event, arg, time) {
+	pop(arg, time);
 });
 
 var popTimeout = null;
-function pop(str) {
+function pop(str, timeout) {
     $('.popup').css("opacity", 1);
     $('.popup').html(str);
     if (popTimeout != null) {
 	    clearTimeout(popTimeout);
     }
-    popTimeout = setTimeout(function() {
-    	$('.popup').css("opacity", 0);
+    if (timeout < 1) {
     	popTimeout = null;
-    }, 3000);
+    }
+    else {
+	    popTimeout = setTimeout(function() {
+	    	$('.popup').css("opacity", 0);
+	    	popTimeout = null;
+	    }, timeout);
+    }
 }
 
 //
@@ -454,7 +530,7 @@ function setHistory(loadMore) {
 		
 		var wrap_r = document.createElement("div");
 		wrap_r.classList.add("wrapper_column");
-		wrap_r.classList.add("sidebar_column");
+		wrap_r.classList.add("sidebar_column_l");
 
 		var div = document.createElement("div");
 		div.classList.add("ranks_history");
@@ -514,10 +590,11 @@ function setHistory(loadMore) {
 	for (var loadEnd = loadHistory + loadMore; loadHistory < loadEnd; loadHistory++) {
 		var match_id = matchesHistory.matches[loadHistory];
 		var match = matchesHistory[match_id];
-		console.log("Load match: ", match_id, match);
 
 		if (match == undefined) continue;
-		console.log("Match: ", loadHistory, match.type, match)
+		if (match.opponent.userid.indexOf("Familiar") !== -1) continue;
+		console.log("Load match: ", match_id, match);
+		console.log("Match: ", loadHistory, match.type, match);
 
 		var div = document.createElement("div");
 		div.classList.add(match.id);
@@ -564,7 +641,8 @@ function setHistory(loadMore) {
 			var tile = document.createElement("div");
 			tile.classList.add(match.id+"t");
 			tile.classList.add("deck_tile");
-			tile.style.backgroundImage = "url(https://img.scryfall.com/cards/art_crop/en/"+get_set_scryfall(cardsDb.get(tileGrpid).set)+"/"+cardsDb.get(tileGrpid).cid+".jpg)";
+
+			tile.style.backgroundImage = "url(https://img.scryfall.com/cards"+cardsDb.get(tileGrpid).images["art_crop"]+")";
 			fltl.appendChild(tile);
 
 			var d = document.createElement("div");
@@ -574,14 +652,17 @@ function setHistory(loadMore) {
 
 			match.playerDeck.colors.forEach(function(color) {
 				var m = document.createElement("div");
-				m.classList.add("mana_20");
+				m.classList.add("mana_s20");
 				m.classList.add("mana_"+mana[color]);
 				flb.appendChild(m);
 			});
 
 			var d = document.createElement("div");
 			d.classList.add("list_match_title");
-			d.innerHTML = "vs "+match.opponent.name;
+			if (match.opponent.name == null) {
+				match.opponent.name = "-";
+			}
+			d.innerHTML = "vs "+match.opponent.name.slice(0, -6);
 			fct.appendChild(d);
 
 			var or = document.createElement("div");
@@ -598,7 +679,7 @@ function setHistory(loadMore) {
 			var cc = get_deck_colors(match.oppDeck);
 			cc.forEach(function(color) {
 				var m = document.createElement("div");
-				m.classList.add("mana_20");
+				m.classList.add("mana_s20");
 				m.classList.add("mana_"+mana[color]);
 				fcb.appendChild(m);
 			});
@@ -623,7 +704,8 @@ function setHistory(loadMore) {
 			var tile = document.createElement("div");
 			tile.classList.add(match.id+"t");
 			tile.classList.add("deck_tile");
-			tile.style.backgroundImage = "url(https://img.scryfall.com/cards/art_crop/en/"+get_set_scryfall(cardsDb.get(tileGrpid).set)+"/"+cardsDb.get(tileGrpid).cid+".jpg)";
+
+			tile.style.backgroundImage = "url(https://img.scryfall.com/cards"+cardsDb.get(tileGrpid).images["art_crop"]+")";
 			fltl.appendChild(tile);
 
 			var d = document.createElement("div");
@@ -770,11 +852,7 @@ function setDecks(arg) {
 			tile.classList.add(deck.id+'t');
 			tile.classList.add('deck_tile');
 
-			let dfc = '';
-			if (cardsDb.get(tileGrpid).dfc == 'DFC_Back')	dfc = 'a';
-			if (cardsDb.get(tileGrpid).dfc == 'DFC_Front')	dfc = 'b';
-			if (cardsDb.get(tileGrpid).dfc == 'SplitHalf')	dfc = 'a';
-			tile.style.backgroundImage = "url(https://img.scryfall.com/cards/art_crop/en/"+get_set_scryfall(cardsDb.get(tileGrpid).set)+"/"+cardsDb.get(tileGrpid).cid+dfc+".jpg)";
+			tile.style.backgroundImage = "url(https://img.scryfall.com/cards"+cardsDb.get(tileGrpid).images["art_crop"]+")";
 
 			var div = document.createElement("div");
 			div.classList.add(deck.id);
@@ -845,7 +923,7 @@ function setDecks(arg) {
 
 			deck.colors.forEach(function(color) {
 				var d = document.createElement("div");
-				d.classList.add('mana_20');
+				d.classList.add('mana_s20');
 				d.classList.add('mana_'+mana[color]);
 				flb.appendChild(d);
 			});
@@ -1011,11 +1089,7 @@ function setExplore(arg, loadMore) {
 		tile.classList.add(index+"t");
 		tile.classList.add("deck_tile");
 
-		let dfc = '';
-		if (cardsDb.get(tileGrpid).dfc == 'DFC_Back')	dfc = 'a';
-		if (cardsDb.get(tileGrpid).dfc == 'DFC_Front')	dfc = 'b';
-		if (cardsDb.get(tileGrpid).dfc == 'SplitHalf')	dfc = 'a';
-		tile.style.backgroundImage = "url(https://img.scryfall.com/cards/art_crop/en/"+get_set_scryfall(cardsDb.get(tileGrpid).set)+"/"+cardsDb.get(tileGrpid).cid+dfc+".jpg)";
+		tile.style.backgroundImage = "url(https://img.scryfall.com/cards"+cardsDb.get(tileGrpid).images["art_crop"]+")";
 
 		var div = document.createElement("div");
 		div.classList.add(index);
@@ -1054,7 +1128,7 @@ function setExplore(arg, loadMore) {
 		
 		_deck.deck_colors.forEach(function(color) {
 			var d = document.createElement("div");
-			d.classList.add("mana_20");
+			d.classList.add("mana_s20");
 			d.classList.add("mana_"+mana[color]);
 			flb.appendChild(d);
 		});
@@ -1128,19 +1202,13 @@ function open_deck(i, type) {
 	flr = $('<div class="flex_item" style="align-self: center;"></div>');
 
 	_deck.colors.forEach(function(color) {
-		var m = $('<div class="mana_20 mana_'+mana[color]+'"></div>');
+		var m = $('<div class="mana_s20 mana_'+mana[color]+'"></div>');
 		flr.append(m);
 	});
 	top.append(flr);
 
-
 	var tileGrpid = _deck.deckTileId;
-	let dfc = '';
-	if (cardsDb.get(tileGrpid).dfc == 'DFC_Back')	dfc = 'a';
-	if (cardsDb.get(tileGrpid).dfc == 'DFC_Front')	dfc = 'b';
-	if (cardsDb.get(tileGrpid).dfc == 'SplitHalf')	dfc = 'a';
-
-	change_background("https://img.scryfall.com/cards/art_crop/en/"+get_set_scryfall(cardsDb.get(tileGrpid).set)+"/"+cardsDb.get(tileGrpid).cid+dfc+".jpg");
+	change_background("https://img.scryfall.com/cards"+cardsDb.get(tileGrpid).images["art_crop"]);
 	var fld = $('<div class="flex_item"></div>');
 
 	var dl = $('<div class="decklist"></div>');
@@ -1172,7 +1240,7 @@ function open_deck(i, type) {
 	curvediv.appendTo(stats);
 	var curvediv = $('<div class="mana_curve_numbers"></div>');
 	for (let i=0; i<curve.length; i++) {
-		curvediv.append($('<div class="mana_curve_column_number"><div style="margin: 0 auto !important" class="mana_16 mana_g'+i+'"></div></div>'))
+		curvediv.append($('<div class="mana_curve_column_number"><div style="margin: 0 auto !important" class="mana_s16 mana_'+i+'"></div></div>'))
 	}
 	curvediv.appendTo(stats);
 
@@ -1343,6 +1411,36 @@ function drawDeck(div, deck) {
 
 //
 function drawDeckVisual(_div, _stats, deck) {
+	// attempt at sorting visually.. 
+	var newMainDeck = [];
+
+	for (var cmc = 0; cmc < 21; cmc++) {
+		for (var qq = 4; qq > -1; qq--) {
+			deck.mainDeck.forEach(function(c) {
+				var grpId = c.id;
+				var card = cardsDb.get(grpId);
+				if (card.type.indexOf("Land") == -1) {
+					if (card.cmc == cmc) {
+						var quantity = c.quantity;
+
+						if (quantity == qq) {
+							newMainDeck.push(c);
+						}
+					}
+				}
+				else if (cmc == 20) {
+					var quantity = c.quantity;
+					if (qq == 0 && quantity > 4) {
+						newMainDeck.push(c);
+					}
+					if (quantity == qq) {
+						newMainDeck.push(c);
+					}
+				}
+			});
+		}
+	}
+
 	_stats.hide();
 	_div.css("display", "flex");
 	_div.css("width", "auto");
@@ -1370,7 +1468,7 @@ function drawDeckVisual(_div, _stats, deck) {
 
 	var tileNow;
 	var _n = 0;
-	deck.mainDeck.forEach(function(c) {
+	newMainDeck.forEach(function(c) {
 		var grpId = c.id;
 		var card = cardsDb.get(grpId);
 
@@ -1388,7 +1486,8 @@ function drawDeckVisual(_div, _stats, deck) {
 
 			        let d = $('<div style="width: '+sz+'px !important;" class="deck_visual_card"></div>');
 			        let img = $('<img style="width: '+sz+'px !important;" class="deck_visual_card_img"></img>');
-					img.attr("src", "https://img.scryfall.com/cards/"+cardQuality+"/en/"+get_set_scryfall(card.set)+"/"+card.cid+dfc+".jpg");
+
+			        img.attr("src", "https://img.scryfall.com/cards"+card.images[cardQuality]);
 					img.appendTo(d);
 					d.appendTo(tileNow);
 
@@ -1430,7 +1529,8 @@ function drawDeckVisual(_div, _stats, deck) {
 					        var d = $('<div style="margin-left: 60px; width: '+sz+'px !important;" class="deck_visual_card_side"></div>');
 						}
 				        let img = $('<img style="width: '+sz+'px !important;" class="deck_visual_card_img"></img>');
-						img.attr("src", "https://img.scryfall.com/cards/"+cardQuality+"/en/"+get_set_scryfall(card.set)+"/"+card.cid+dfc+".jpg");
+				        img.attr("src", "https://img.scryfall.com/cards"+card.images[cardQuality]);
+						//img.attr("src", "https://img.scryfall.com/cards/"+cardQuality+"/en/"+get_set_scryfall(card.set)+"/"+card.cid+dfc+".jpg");
 						img.appendTo(d);
 						d.appendTo(tileNow);
 
@@ -1635,7 +1735,8 @@ function open_draft(id, tileGrpid, set) {
 	var top = $('<div class="decklist_top"><div class="button back"></div><div class="deck_name">'+set+' Draft</div></div>');
 	flr = $('<div class="flex_item" style="align-self: center;"></div>');
 	top.append(flr);
-	change_background("https://img.scryfall.com/cards/art_crop/en/"+get_set_scryfall(cardsDb.get(tileGrpid).set)+"/"+cardsDb.get(tileGrpid).cid+".jpg");
+
+	change_background("https://img.scryfall.com/cards"+cardsDb.get(grpId).images["art_crop"]);
 
 	var cont = $('<div class="flex_item" style="flex-direction: column;"></div>');
     cont.append('<div class="draft_nav_container"><div class="draft_nav_prev"></div><div class="draft_nav_next"></div></div>');
@@ -1653,21 +1754,16 @@ function open_draft(id, tileGrpid, set) {
 
 	
 	pack.forEach(function(grpId) {
-		let dfc = '';
-		if (cardsDb.get(grpId).dfc == 'DFC_Back')	dfc = 'a';
-		if (cardsDb.get(grpId).dfc == 'DFC_Front')	dfc = 'b';
-		if (cardsDb.get(grpId).dfc == 'SplitHalf')	dfc = 'a';
         var d = $('<div style="width: '+cardSize+'px !important;" class="draft_card"></div>');
         var img = $('<img style="width: '+cardSize+'px !important;" class="draft_card_img"></img>');
         if (grpId == pick && draftPosition % 2 == 0) {
         	img.addClass('draft_card_picked');
         }
         var card = cardsDb.get(grpId);
-		img.attr("src", "https://img.scryfall.com/cards/"+cardQuality+"/en/"+get_set_scryfall(card.set)+"/"+card.cid+dfc+".jpg");
+        img.attr("src", "https://img.scryfall.com/cards"+card.images[cardQuality]);
+
 		img.appendTo(d);
-
 		addCardHover(img, card);
-
 		d.appendTo(pd);
 	});
 
@@ -1722,7 +1818,7 @@ function open_match(id) {
 
 	if (match.playerDeck.colors != undefined) {		
 		match.playerDeck.colors.forEach(function(color) {
-			var m = $('<div class="mana_20 mana_'+mana[color]+'"></div>');
+			var m = $('<div class="mana_s20 mana_'+mana[color]+'"></div>');
 			flr.append(m);
 		});
 	}
@@ -1749,7 +1845,7 @@ function open_match(id) {
 	var tier = match.player.tier;
 	r.css("background-position", (get_rank_index(rank, tier)*-48)+"px 0px").attr("title", rank+" "+tier);
 
-	var name = $('<div class="list_match_player_left">'+match.player.name+' ('+match.player.win+')</div>');
+	var name = $('<div class="list_match_player_left">'+match.player.name.slice(0, -6)+' ('+match.player.win+')</div>');
 	name.appendTo(fltrt);
 
 	if (match.player.win > match.opponent.win) {
@@ -1777,7 +1873,7 @@ function open_match(id) {
 	var tier = match.opponent.tier;
 	r.css("background-position", (get_rank_index(rank, tier)*-48)+"px 0px").attr("title", rank+" "+tier);
 
-	var name = $('<div class="list_match_player_right">'+match.opponent.name+' ('+match.opponent.win+')</div>');
+	var name = $('<div class="list_match_player_right">'+match.opponent.name.slice(0, -6)+' ('+match.opponent.win+')</div>');
 	name.appendTo(fltrt);
 
 	if (match.player.win < match.opponent.win) {
@@ -1806,7 +1902,7 @@ function open_match(id) {
 	});
 	$(".exportDeckStandard").click(function () {
 	    var list = get_deck_export_txt(deck);
-	    ipc_send('export_txt', {str: list, name: match.opponent.name+"'s deck"});
+	    ipc_send('export_txt', {str: list, name: match.opponent.name.slice(0, -6)+"'s deck"});
 	});
 
 	$(".back").click(function () {
@@ -2241,107 +2337,30 @@ function exportCollection() {
 
 //
 function printStats() {
-    $('.moving_ux').animate({'left': '-100%'}, 250, 'easeInOutCubic'); 
+	$('.moving_ux').animate({ 'left': '-100%' }, 250, 'easeInOutCubic');
 	$("#ux_1").html('');
-	stats = get_collection_stats();
+	const stats = get_collection_stats();
 
-	var top = $('<div class="decklist_top"><div class="button back"></div><div class="deck_name">Collection Statistics</div></div>');
+	const top = $('<div class="decklist_top"><div class="button back"></div><div class="deck_name">Collection Statistics</div></div>');
 	change_background("http://www.artofmtg.com/wp-content/uploads/2018/04/Urzas-Tome-Dominaria-MtG-Art.jpg");
-	
-	flex = $('<div class="flex_item"></div>');
-	mainstats = $('<div class="main_stats"></div>');
 
-	var label = $('<label>Sets Completion</label>');
-	label.appendTo(mainstats);
+	const flex = $('<div class="flex_item"></div>');
+	const mainstats = $('<div class="main_stats"></div>');
+
+	$('<label>Sets Completion</label>').appendTo(mainstats);
 
 	// each set stats
 	for (let set in setsList) {
-		var setdiv = $('<div class="stats_set_completion"></div>');
-		$('<div class="stats_set_icon" style="background-image: url(../images/sets/'+setsList[set].code+'.png)"><span>'+set+' <i>('+stats[set].ownedCards+'/'+stats[set].totalCards+', '+Math.round(stats[set].ownedCards/stats[set].totalCards*100)+'%)</i></span></div>').appendTo(setdiv);
-		$('<div class="stats_set_bar" style="width: '+stats[set].ownedCards/stats[set].totalCards*100+'%"></div>').appendTo(setdiv);
-		setdiv.appendTo(mainstats);
-
-		setdiv.click(function() {
-			var substats = $(".sub_stats");
-			substats.html('');
-			$('<label>'+set+' Completion</label>').appendTo(substats);
-			var setdiv = $('<div class="stats_set_completion"></div>');
-			$('<div class="stats_rarity_icon" style="background-image: url(../images/wc_common.png)"><span>Commons <i>('+stats[set].ownedCommon+'/'+stats[set].totalCommon+', '+Math.round(stats[set].ownedCommon/stats[set].totalCommon*100)+'%)</i></span></div>').appendTo(setdiv);
-			$('<div class="stats_set_bar" style="width: '+stats[set].ownedCommon/stats[set].totalCommon*100+'%"></div>').appendTo(setdiv);
-			setdiv.appendTo(substats);
-			var setdiv = $('<div class="stats_set_completion"></div>');
-			$('<div class="stats_rarity_icon" style="background-image: url(../images/wc_uncommon.png)"><span>Uncommons <i>('+stats[set].ownedUncommon+'/'+stats[set].totalUncommon+', '+Math.round(stats[set].ownedUncommon/stats[set].totalUncommon*100)+'%)</i></span></div>').appendTo(setdiv);
-			$('<div class="stats_set_bar" style="width: '+stats[set].ownedUncommon/stats[set].totalUncommon*100+'%"></div>').appendTo(setdiv);
-			setdiv.appendTo(substats);
-			var setdiv = $('<div class="stats_set_completion"></div>');
-			$('<div class="stats_rarity_icon" style="background-image: url(../images/wc_rare.png)"><span>Rares <i>('+stats[set].ownedRare+'/'+stats[set].totalRare+', '+Math.round(stats[set].ownedRare/stats[set].totalRare*100)+'%)</i></span></div>').appendTo(setdiv);
-			$('<div class="stats_set_bar" style="width: '+stats[set].ownedRare/stats[set].totalRare*100+'%"></div>').appendTo(setdiv);
-			setdiv.appendTo(substats);
-			if (stats[set].totalMythic == 0)	stats[set].totalMythic = 1;
-			var setdiv = $('<div class="stats_set_completion"></div>');
-			$('<div class="stats_rarity_icon" style="background-image: url(../images/wc_mythic.png)"><span>Mythics <i>('+stats[set].ownedMythic+'/'+stats[set].totalMythic+', '+Math.round(stats[set].ownedMythic/stats[set].totalMythic*100)+'%)</i></span></div>').appendTo(setdiv);
-			$('<div class="stats_set_bar" style="width: '+stats[set].ownedMythic/stats[set].totalMythic*100+'%"></div>').appendTo(setdiv);
-			setdiv.appendTo(substats);
-		});
+		renderSetStats(stats[set], setsList[set].code, set).appendTo(mainstats);
 	}
 
 	// Complete collection sats
-	var setdiv = $('<div class="stats_set_completion"></div>');
-	$('<div class="stats_set_icon" style="background-image: url(../images/sets/pw.png)"><span>Complete collection <i>('+stats.ownedCards+'/'+stats.totalCards+', '+Math.round(stats.ownedCards/stats.totalCards*100)+'%)</i></span></div>').appendTo(setdiv);
-	$('<div class="stats_set_bar" style="width: '+stats.ownedCards/stats.totalCards*100+'%"></div>').appendTo(setdiv);
-	setdiv.appendTo(mainstats);
-
-	setdiv.click(function() {
-		var substats = $(".sub_stats");
-		substats.html('');
-		$('<label>Complete collection completion</label>').appendTo(substats);
-		var setdiv = $('<div class="stats_set_completion"></div>');
-		$('<div class="stats_rarity_icon" style="background-image: url(../images/wc_common.png)"><span>Commons <i>('+stats.ownedCommon+'/'+stats.totalCommon+', '+Math.round(stats.ownedCommon/stats.totalCommon*100)+'%)</i></span></div>').appendTo(setdiv);
-		$('<div class="stats_set_bar" style="width: '+stats.ownedCommon/stats.totalCommon*100+'%"></div>').appendTo(setdiv);
-		setdiv.appendTo(substats);
-		var setdiv = $('<div class="stats_set_completion"></div>');
-		$('<div class="stats_rarity_icon" style="background-image: url(../images/wc_uncommon.png)"><span>Uncommons <i>('+stats.ownedUncommon+'/'+stats.totalUncommon+', '+Math.round(stats.ownedUncommon/stats.totalUncommon*100)+'%)</i></span></div>').appendTo(setdiv);
-		$('<div class="stats_set_bar" style="width: '+stats.ownedUncommon/stats.totalUncommon*100+'%"></div>').appendTo(setdiv);
-		setdiv.appendTo(substats);
-		var setdiv = $('<div class="stats_set_completion"></div>');
-		$('<div class="stats_rarity_icon" style="background-image: url(../images/wc_rare.png)"><span>Rares <i>('+stats.ownedRare+'/'+stats.totalRare+', '+Math.round(stats.ownedRare/stats.totalRare*100)+'%)</i></span></div>').appendTo(setdiv);
-		$('<div class="stats_set_bar" style="width: '+stats.ownedRare/stats.totalRare*100+'%"></div>').appendTo(setdiv);
-		setdiv.appendTo(substats);
-		var setdiv = $('<div class="stats_set_completion"></div>');
-		$('<div class="stats_rarity_icon" style="background-image: url(../images/wc_mythic.png)"><span>Mythics <i>('+stats.ownedMythic+'/'+stats.totalMythic+', '+Math.round(stats.ownedMythic/stats.totalMythic*100)+'%)</i></span></div>').appendTo(setdiv);
-		$('<div class="stats_set_bar" style="width: '+stats.ownedMythic/stats.totalMythic*100+'%"></div>').appendTo(setdiv);
-		setdiv.appendTo(substats);
-	});
+	renderSetStats(stats.complete, "pw", "Complete collection").appendTo(mainstats);
 
 	// Singleton collection sats
-	var setdiv = $('<div class="stats_set_completion"></div>');
-	$('<div class="stats_set_icon" style="background-image: url(../images/sets/pw.png)"><span>Singles <i>('+stats.ownedSingles+'/'+stats.totalSingles+', '+Math.round(stats.ownedSingles/stats.totalSingles*100)+'%)</i></span></div>').appendTo(setdiv);
-	$('<div class="stats_set_bar" style="width: '+stats.ownedSingles/stats.totalSingles*100+'%"></div>').appendTo(setdiv);
-	setdiv.appendTo(mainstats);
+	renderSetStats(stats.singles, "pw", "Singles").appendTo(mainstats);
 
-	setdiv.click(function() {
-		var substats = $(".sub_stats");
-		substats.html('');
-		$('<label>Singles completion</label>').appendTo(substats);
-		var setdiv = $('<div class="stats_set_completion"></div>');
-		$('<div class="stats_rarity_icon" style="background-image: url(../images/wc_common.png)"><span>Commons <i>('+stats.ownedSinglesCommon+'/'+stats.totalSinglesCommon+', '+Math.round(stats.ownedSinglesCommon/stats.totalSinglesCommon*100)+'%)</i></span></div>').appendTo(setdiv);
-		$('<div class="stats_set_bar" style="width: '+stats.ownedSinglesCommon/stats.totalSinglesCommon*100+'%"></div>').appendTo(setdiv);
-		setdiv.appendTo(substats);
-		var setdiv = $('<div class="stats_set_completion"></div>');
-		$('<div class="stats_rarity_icon" style="background-image: url(../images/wc_uncommon.png)"><span>Uncommons <i>('+stats.ownedSinglesUncommon+'/'+stats.totalSinglesUncommon+', '+Math.round(stats.ownedSinglesUncommon/stats.totalSinglesUncommon*100)+'%)</i></span></div>').appendTo(setdiv);
-		$('<div class="stats_set_bar" style="width: '+stats.ownedSinglesUncommon/stats.totalSinglesUncommon*100+'%"></div>').appendTo(setdiv);
-		setdiv.appendTo(substats);
-		var setdiv = $('<div class="stats_set_completion"></div>');
-		$('<div class="stats_rarity_icon" style="background-image: url(../images/wc_rare.png)"><span>Rares <i>('+stats.ownedSinglesRare+'/'+stats.totalSinglesRare+', '+Math.round(stats.ownedSinglesRare/stats.totalSinglesRare*100)+'%)</i></span></div>').appendTo(setdiv);
-		$('<div class="stats_set_bar" style="width: '+stats.ownedSinglesRare/stats.totalSinglesRare*100+'%"></div>').appendTo(setdiv);
-		setdiv.appendTo(substats);
-		var setdiv = $('<div class="stats_set_completion"></div>');
-		$('<div class="stats_rarity_icon" style="background-image: url(../images/wc_mythic.png)"><span>Mythics <i>('+stats.ownedSinglesMythic+'/'+stats.totalSinglesMythic+', '+Math.round(stats.ownedSinglesMythic/stats.totalSinglesMythic*100)+'%)</i></span></div>').appendTo(setdiv);
-		$('<div class="stats_set_bar" style="width: '+stats.ownedSinglesMythic/stats.totalSinglesMythic*100+'%"></div>').appendTo(setdiv);
-		setdiv.appendTo(substats);
-	});
-
-	substats = $('<div class="main_stats sub_stats"></div>');
+	const substats = $('<div class="main_stats sub_stats"></div>');
 
 	flex.append(mainstats);
 	flex.append(substats);
@@ -2351,8 +2370,38 @@ function printStats() {
 	//
 	$(".back").click(function () {
 		change_background("default");
-	    $('.moving_ux').animate({'left': '0px'}, 250, 'easeInOutCubic'); 
+		$('.moving_ux').animate({ 'left': '0px' }, 250, 'easeInOutCubic');
 	});
+}
+
+//
+function renderSetStats(setStats, setIconCode, setName) {
+	const setDiv = renderCompletionDiv(setStats.all, 'sets/' + setIconCode + '.png', setName);
+
+	setDiv.click(function () {
+		const substats = $(".sub_stats");
+		substats.html('');
+		$('<label>' + setName + ' completion</label>').appendTo(substats);
+		["common", "uncommon", "rare", "mythic"].forEach(rarity => {
+			const countStats = setStats[rarity];
+			if (countStats.total > 0) {
+				const capitalizedRarity = rarity[0].toUpperCase() + rarity.slice(1) + 's';
+				renderCompletionDiv(countStats, 'wc_' + rarity + '.png', capitalizedRarity).appendTo(substats);
+			}
+		});
+	});
+
+	return setDiv;
+}
+
+//
+function renderCompletionDiv(countStats, image, title) {
+	const completionDiv = $('<div class="stats_set_completion"></div>');
+	$('<div class="stats_set_icon" style="background-image: url(../images/' + image + ')"><span>' + title + ' <i>(' + countStats.owned + '/' + countStats.total + ', ' + Math.round(countStats.percentage) + '%)</i></span></div>')
+		.appendTo(completionDiv);
+	$('<div class="stats_set_bar" style="width: ' + countStats.percentage + '%"></div>')
+		.appendTo(completionDiv);
+	return completionDiv;
 }
 
 function sortCollection(alg) {
@@ -2499,6 +2548,40 @@ function printCards() {
 			let s = [];
 			let generic = false;
 			cost.forEach(function(m) {
+				if (m.indexOf('w') !== -1) {
+					if (filterExclude.checked && !filteredMana.includes(1)) {
+						doDraw = false;
+					}
+					s[1] = 1;
+				}
+				if (m.indexOf('u') !== -1) {
+					if (filterExclude.checked && !filteredMana.includes(2)) {
+						doDraw = false;
+					}
+					s[2] = 1;
+				}
+				if (m.indexOf('b') !== -1) {
+					if (filterExclude.checked && !filteredMana.includes(3)) {
+						doDraw = false;
+					}
+					s[3] = 1;
+				}
+				if (m.indexOf('r') !== -1) {
+					if (filterExclude.checked && !filteredMana.includes(4)) {
+						doDraw = false;
+					}
+					s[4] = 1;
+				}
+				if (m.indexOf('g') !== -1) {
+					if (filterExclude.checked && !filteredMana.includes(5)) {
+						doDraw = false;
+					}
+					s[5] = 1;
+				}
+				if (parseInt(m) > 0) {
+					generic = true;
+				}
+				/*
 				if (m.color < 6 && m.color > 0) {
 					s[m.color] = 1;
 					if (filterExclude.checked && !filteredMana.includes(m.color)) {
@@ -2508,6 +2591,7 @@ function printCards() {
 				if (m.color > 6) {
 					generic = true;
 				}
+				*/
 			});
 			let ms = s.reduce((a, b) => a + b, 0);
 			if ((generic && ms == 0) && filterExclude.checked) {
@@ -2561,7 +2645,7 @@ function printCards() {
 	        }
 
 	        var img = $('<img style="width: '+cardSize+'px !important;" class="inventory_card_img"></img>');
-			img.attr("src", "https://img.scryfall.com/cards/"+cardQuality+"/en/"+get_set_scryfall(card.set)+"/"+card.cid+dfc+".jpg");
+	        img.attr("src", "https://img.scryfall.com/cards"+card.images[cardQuality]);
 			img.appendTo(d);
 
 			addCardHover(img, card);
@@ -2632,13 +2716,14 @@ function add_checkbox(div, label, iid, def) {
 
 //
 function open_settings(openSection) {
+	lastSettingsSection = openSection;
     change_background("default");
 	$("#ux_0").off();
 	$("#history_column").off();
 	$("#ux_0").html('');
 	$("#ux_0").addClass('flex_item');
 
-	var wrap_l = $('<div class="wrapper_column sidebar_column"></div>');
+	var wrap_l = $('<div class="wrapper_column sidebar_column_r"></div>');
 	$('<div class="settings_nav sn1" style="margin-top: 28px;" >Behaviour</div>').appendTo(wrap_l);
 	$('<div class="settings_nav sn2">Overlay</div>').appendTo(wrap_l);
 	$('<div class="settings_nav sn3">Visual</div>').appendTo(wrap_l);
@@ -2716,6 +2801,7 @@ function open_settings(openSection) {
 
 	var d = $('<div style="width: '+cardSize+'px; !important" class="inventory_card_settings"></div>');
 	var img = $('<img style="width: '+cardSize+'px; !important" class="inventory_card_settings_img"></img>');
+	
 	img.attr("src", "https://img.scryfall.com/cards/"+cardQuality+"/en/m19/"+Math.round(Math.random()*314)+".jpg");
 	img.appendTo(d);
 
@@ -2790,8 +2876,8 @@ function open_settings(openSection) {
 	$("#ux_0").append(wrap_l);
 	$("#ux_0").append(wrap_r);
 
-	$(".ss"+lastSettingsSection).show();
-	$(".sn"+lastSettingsSection).addClass("nav_selected");
+	$(".ss"+openSection).show();
+	$(".sn"+openSection).addClass("nav_selected");
 
 	$(".settings_nav").click(function () {
 		if (!$(this).hasClass("nav_selected")) {

@@ -2,6 +2,46 @@ span i {
     margin-left: 4px;
 }
 
+.top_status {
+    width: 24px;
+    height: 24px;
+    align-self: center;
+}
+
+.status_item {
+    display: flex;
+    color: #fae5d2;
+}
+
+.top_status_pop {
+    pointer-events: none;
+    display: grid;
+    padding: 12px;
+    color: #fae5d2;
+    width: 240px;
+    opacity: 0;
+    background-color: rgba(0, 0, 0, 0.75);
+    border-radius: 4px;
+    height: 120px;
+    position: absolute;
+    top: 48px;
+    margin-left: -120px;
+    -webkit-transition: all .5s ease-in-out;
+    box-shadow: 0 8px 16px 0px rgba(0, 0, 0, 0.2);
+}
+
+.status_green {
+    background-image: url(../images/status_green.png);
+}
+
+.status_yellow {
+    background-image: url(../images/status_yellow.png);
+}
+
+.status_red {
+    background-image: url(../images/status_red.png);
+}
+
 .top_logo_about {
     cursor: pointer;
     align-self: center;
@@ -102,12 +142,21 @@ span i {
 .top_username {
     color: #FAE5D2;
     font-size: 20px;
-    margin-right: 32px;
     margin-left: 16px;
     align-self: center;
     font-family: Beleren;
     cursor: default;
 }
+
+.top_username_id {
+    color: rgba(250, 229, 210, 0.35);
+    font-size: 20px;
+    margin-right: 32px;
+    align-self: center;
+    font-family: Beleren;
+    cursor: default;
+}
+
 
 .top_rank {
     -webkit-app-region: no-drag;
@@ -768,7 +817,7 @@ a:hover {
     cursor: pointer;
     display: flex;
     line-height: 24px;
-    width: 500px;
+    width: max-content;
     font-size: 15px;
     position: relative;
     margin-left: 36px;
@@ -1187,11 +1236,19 @@ a:hover {
     overflow-y: auto;
 }
 
-.sidebar_column {
+.sidebar_column_r {
     width: 30% !important;
     max-width: 220px;
     border-width: 2px;
     border-style: none solid none none;
+    border-image: linear-gradient(to bottom, rgba(250, 229, 210, 0) 10px, rgba(250, 229, 210, 0.5) 10px, rgba(250, 229, 210, 0)) 1 100%;
+}
+
+.sidebar_column_l {
+    width: 30% !important;
+    max-width: 220px;
+    border-width: 2px;
+    border-style: none none none solid;
     border-image: linear-gradient(to bottom, rgba(250, 229, 210, 0) 10px, rgba(250, 229, 210, 0.5) 10px, rgba(250, 229, 210, 0)) 1 100%;
 }
 
