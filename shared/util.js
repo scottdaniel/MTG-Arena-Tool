@@ -367,74 +367,70 @@ function get_set_code(set) {
 }
 
 //
-function get_collection_stats() {
-	var stats = {
-		ownedCommon: 0,
-		ownedUncommon: 0,
-		ownedRare: 0,
-		ownedMythic: 0,
-		totalCommon: 0,
-		totalUncommon: 0,
-		totalRare: 0,
-		totalMythic: 0,
-		totalCards: 0,
-		ownedCards: 0,
+class CountStats {
+	constructor(owned = 0, total = 0) {
+		this.owned = owned;
+		this.total = total;
+	}
 
-		ownedSinglesCommon: 0,
-		ownedSinglesUncommon: 0,
-		ownedSinglesRare: 0,
-		ownedSinglesMythic: 0,
-		totalSinglesCommon: 0,
-		totalSinglesUncommon: 0,
-		totalSinglesRare: 0,
-		totalSinglesMythic: 0,
-		totalSingles: 0,
-		ownedSingles: 0
+	get percentage() {
+		if (this.total) {
+			return this.owned / this.total * 100;
+		} else {
+			return 100;
+		}
+	}
+}
+
+//
+class SetStats {
+	constructor(set) {
+		this.set = set;
+		this.common = new CountStats();
+		this.uncommon = new CountStats();
+		this.rare = new CountStats();
+		this.mythic = new CountStats();
+	}
+
+	get all() {
+		return [new CountStats(), this.common, this.uncommon, this.rare, this.mythic].reduce((acc, c) => {
+			acc.owned += c.owned;
+			acc.total += c.total;
+			return acc;
+		});
+	}
+}
+
+//
+function get_collection_stats() {
+	const stats = {
+		complete: new SetStats("complete"),
+		singles: new SetStats("singles")
 	};
 
 	for (var set in setsList) {
-		stats[set] = {
-			totalCards: 0,
-			ownedCards: 0,
-			ownedCommon: 0,
-			ownedUncommon: 0,
-			ownedRare: 0,
-			ownedMythic: 0,
-			totalCommon: 0,
-			totalUncommon: 0,
-			totalRare: 0,
-			totalMythic: 0
-		};
+		stats[set] = new SetStats(set);
 	}
 
-    Object.keys(cardsDb.cards).forEach(function(grpId) {
-    	card = cardsDb.get(grpId);
-    	if (card.rarity !== "token" && card.rarity !== "land" && card.set !== "Oath of the Gatewatch" && card.dfc != "DFC_Front" && card.dfc != "SplitCard") {
+	Object.keys(cardsDb.cards).forEach(function (grpId) {
+		const card = cardsDb.get(grpId);
+		if (card.rarity !== "token" && card.rarity !== "land" && card.set !== "Oath of the Gatewatch" && card.dfc != "DFC_Front" && card.dfc != "SplitCard") {
 			// add to totals
-			//console.log(card, card.set);
-			stats[card.set].totalCards += 4;
-			stats.totalCards += 4;
-			stats.totalSingles += 1;
-			if (card.rarity == 'common')	{ stats.totalCommon 	+= 4; stats.totalSinglesCommon 	 += 1; stats[card.set].totalCommon 	+= 4; }
-			if (card.rarity == 'uncommon')	{ stats.totalUncommon 	+= 4; stats.totalSinglesUncommon += 1; stats[card.set].totalUncommon += 4; }
-			if (card.rarity == 'rare')		{ stats.totalRare 		+= 4; stats.totalSinglesRare 	 += 1; stats[card.set].totalRare 	+= 4; }
-			if (card.rarity == 'mythic')	{ stats.totalMythic	 	+= 4; stats.totalSinglesMythic   += 1; stats[card.set].totalMythic 	+= 4; }
+			stats[card.set][card.rarity].total += 4;
+			stats.complete[card.rarity].total += 4;
+			stats.singles[card.rarity].total += 1;
 
-    		// add cards we own
+			// add cards we own
 			if (cards[grpId] !== undefined) {
-				var add = cards[grpId];
-				stats[card.set].ownedCards += add;
-				stats.ownedCards += add;
-				stats.ownedSingles += 1;
-				if (card.rarity == 'common')	{ stats.ownedCommon 	+= add; stats.ownedSinglesCommon 	+= 1; stats[card.set].ownedCommon 	+= add; }
-				if (card.rarity == 'uncommon')	{ stats.ownedUncommon 	+= add; stats.ownedSinglesUncommon 	+= 1; stats[card.set].ownedUncommon 	+= add; }
-				if (card.rarity == 'rare')		{ stats.ownedRare 		+= add; stats.ownedSinglesRare 		+= 1; stats[card.set].ownedRare 		+= add; }
-				if (card.rarity == 'mythic')	{ stats.ownedMythic 	+= add; stats.ownedSinglesMythic 	+= 1; stats[card.set].ownedMythic 	+= add; }
+				var owned = cards[grpId];
+				stats[card.set][card.rarity].owned += owned;
+				stats.complete[card.rarity].owned += owned;
+				stats.singles[card.rarity].owned += 1;
 			}
-    	}
-    });
+		}
+	});
 
-    return stats;
+	return stats;
 }
 
 //
