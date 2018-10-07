@@ -156,12 +156,7 @@ ipc.on('set_cards', function (event, _cards, _cardsnew) {
 
 //
 ipc.on('set_status', function (event, arg) {
-	if (arg.status.description == 'All Systems Operational') {
-		$('.top_status').addClass('status_green');
-	}
-	else {
-		$('.top_status').addClass('status_red');
-	}
+	var mainStatus = 0;
 	var sp = $('<span>'+arg.status.description+'</span>');
 	sp.css('text-align', 'center');
 	sp.css('margin-bottom', '4px');
@@ -177,22 +172,27 @@ ipc.on('set_status', function (event, arg) {
 		}
 		else if (comp.status == 'degraded_performance') {
 			st.addClass('status_yellow');
+			if (mainStatus > 1) mainStatus = 1;
 			sp.html('Degraded performance');
 		}
 		else if (comp.status == 'major_outage') {
 			st.addClass('status_red');
+			if (mainStatus > 2) mainStatus = 2;
 			sp.html('Major outage');
 		}
 		else if (comp.status == 'partial_outage') {
 			st.addClass('status_yellow');
+			if (mainStatus > 1) mainStatus = 1;
 			sp.html('Partial outage');
 		}
 		else if (comp.status == 'under_maintenance') {
 			st.addClass('status_yellow');
+			if (mainStatus > 1) mainStatus = 1;
 			sp.html('Under maintenance');
 		}
 		else {
 			st.addClass('status_yellow');
+			if (mainStatus > 1) mainStatus = 1;
 			sp.html(comp.status);
 		}
 		sp.css('margin-left', 'auto');
@@ -200,6 +200,16 @@ ipc.on('set_status', function (event, arg) {
 		st.appendTo(div);
 		div.appendTo($('.top_status_pop'));
 	});
+
+	if (mainStatus == 0) {
+		$('.top_status').addClass('status_green');
+	}
+	if (mainStatus == 1) {
+		$('.top_status').addClass('status_yellow');
+	}
+	if (mainStatus == 2) {
+		$('.top_status').addClass('status_red');
+	}
 
 	$('.top_status').on('mouseenter', function(e) {
 		$('.top_status_pop').css("opacity", 1);

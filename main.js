@@ -14,7 +14,7 @@ const {autoUpdater} = require("electron-updater");
 require('electron-debug')({showDevTools: false});
 console.log(process.platform);
 
-const debugBack = true;
+const debugBack = false;
 
 var mainWindow;
 var background;
