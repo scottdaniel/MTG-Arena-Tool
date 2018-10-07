@@ -156,7 +156,57 @@ ipc.on('set_cards', function (event, _cards, _cardsnew) {
 
 //
 ipc.on('set_status', function (event, arg) {
-	serverStatus = arg;
+	if (arg.status.description == 'All Systems Operational') {
+		$('.top_status').addClass('status_green');
+	}
+	else {
+		$('.top_status').addClass('status_red');
+	}
+	var sp = $('<span>'+arg.status.description+'</span>');
+	sp.css('text-align', 'center');
+	sp.css('margin-bottom', '4px');
+	$('.top_status_pop').append(sp);
+	arg.components.forEach(function(comp) {
+		var div = $('<div class="status_item"></div>');
+		var st = $('<div class="top_status"></div>');
+		div.append('<span>'+comp.name+':</span>');
+		var sp = $('<span></span>');
+		if (comp.status == 'operational') {
+			st.addClass('status_green');
+			sp.html('Operational');
+		}
+		else if (comp.status == 'degraded_performance') {
+			st.addClass('status_yellow');
+			sp.html('Degraded performance');
+		}
+		else if (comp.status == 'major_outage') {
+			st.addClass('status_red');
+			sp.html('Major outage');
+		}
+		else if (comp.status == 'partial_outage') {
+			st.addClass('status_yellow');
+			sp.html('Partial outage');
+		}
+		else if (comp.status == 'under_maintenance') {
+			st.addClass('status_yellow');
+			sp.html('Under maintenance');
+		}
+		else {
+			st.addClass('status_yellow');
+			sp.html(comp.status);
+		}
+		sp.css('margin-left', 'auto');
+		sp.appendTo(div);
+		st.appendTo(div);
+		div.appendTo($('.top_status_pop'));
+	});
+
+	$('.top_status').on('mouseenter', function(e) {
+		$('.top_status_pop').css("opacity", 1);
+	});
+	$('.top_status').on('mouseleave', function(e) {
+		$('.top_status_pop').css("opacity", 0);
+	});
 });
 
 //

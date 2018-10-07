@@ -2,6 +2,45 @@ span i {
     margin-left: 4px;
 }
 
+.top_status {
+    width: 24px;
+    height: 24px;
+    align-self: center;
+}
+
+.status_item {
+    display: flex;
+    color: #fae5d2;
+}
+
+.top_status_pop {
+    display: grid;
+    padding: 12px;
+    color: #fae5d2;
+    width: 240px;
+    opacity: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    border-radius: 4px;
+    height: 120px;
+    position: absolute;
+    top: 48px;
+    margin-left: -120px;
+    -webkit-transition: all .5s ease-in-out;
+    box-shadow: 0 8px 16px 0px rgba(0, 0, 0, 0.2);
+}
+
+.status_green {
+    background-image: url(../images/status_green.png);
+}
+
+.status_yellow {
+    background-image: url(../images/status_yellow.png);
+}
+
+.status_red {
+    background-image: url(../images/status_red.png);
+}
+
 .top_logo_about {
     cursor: pointer;
     align-self: center;
