@@ -14,12 +14,13 @@ span i {
 }
 
 .top_status_pop {
+    pointer-events: none;
     display: grid;
     padding: 12px;
     color: #fae5d2;
     width: 240px;
     opacity: 0;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(0, 0, 0, 0.75);
     border-radius: 4px;
     height: 120px;
     position: absolute;
@@ -798,7 +799,7 @@ span i {
     cursor: pointer;
     display: flex;
     line-height: 24px;
-    width: 500px;
+    width: max-content;
     font-size: 15px;
     position: relative;
     margin-left: 36px;
