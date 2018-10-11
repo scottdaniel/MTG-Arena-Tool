@@ -48,6 +48,18 @@ app.on('ready', () => {
                 overlay.webContents.send("set_settings", arg);
                 break;
 
+            case 'auth':
+                mainWindow.webContents.send("auth", arg);
+                break;
+
+            case 'login':
+                background.webContents.send("login", arg);
+                break;
+
+            case 'offline':
+                mainWindow.webContents.send("offline", arg);
+                break;
+
             case 'set_status':
                 mainWindow.webContents.send("set_status", arg);
                 break;

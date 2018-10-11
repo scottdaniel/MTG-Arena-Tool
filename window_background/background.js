@@ -74,6 +74,8 @@ var duringMatch = false;
 var matchBeginTime = 0;
 
 var arenaVersion = '';
+var playerPassword = '';
+var username = ';'
 var playerName = null;
 var playerRank = null;
 var playerTier = null;
@@ -142,6 +144,22 @@ ipc.on('set_renderer_state', function (event, arg) {
 	    ipc_send("show_background", 1);
 	    finishLoading();
 	}
+});
+
+//
+ipc.on('login', function (event, arg) {
+    playerPassword = arg.password;
+    if (arg.username == '' && arg.password == '') {
+        ipc_send("auth", {ok: true, user:-1});
+        loadPlayerConfig(playerId);
+        username = '';
+        logLoopMode = 1;
+        prevLogSize = 0;
+    }
+    else {
+        username = arg.username;
+        httpAuth(arg.username, arg.password);
+    }
 });
 
 //
@@ -249,11 +267,18 @@ ipc.on('set_economy', function (event, arg) {
 });
 
 ipc.on('request_explore', function (event, arg) {
-    if (arg == "all" || arg == "All" ) {
-        arg = "";
+    if (username == '') {
+        ipc_send("offline", 1);
     }
-    arg = arg.replace("_m_", "_m19_");// dirty hack :(
-    httpGetTopDecks(arg);
+    else {
+        if (arg == "all" || arg == "All" ) {
+            httpGetTopDecks("");
+        }
+        else {
+            arg = arg.replace("_m_", "_m19_");// dirty hack :(
+            httpGetTopDecks(arg);
+        }
+    }
 });
 
 ipc.on('request_course', function (event, arg) {
@@ -427,7 +452,7 @@ function logLoop() {
 
 function readLog() {
 	//console.log("readLog()");
-    //ipc_send("ipc_log", "readLog()");
+    //ipc_send("ipc_log", "readLog("+logLoopMode+")");
     if (!firstPass)  {
         ipc_send("log_read", 1);
     }
@@ -507,9 +532,10 @@ function processLog(err, bytecount, buff) {
 }
 
 function processLogUser(err, bytecount, buff) {
+    // Process the log only to find player name and id
     let rawString = buff.toString('utf-8', 0, bytecount);
     var splitString = rawString.split('[UnityCrossThread');
-    console.log('Reading:', bytecount, 'bytes, ',splitString.length, ' chunks');
+    console.log('Reading user:', bytecount, 'bytes, ',splitString.length, ' chunks');
     ipc_send("ipc_log", 'Reading: '+bytecount+' bytes, '+splitString.length+' chunks');
 
     if (firstPass) {
@@ -537,6 +563,14 @@ function processLogUser(err, bytecount, buff) {
             if (value.indexOf(strCheck) > -1) {
                 playerName = dataChop(value, strCheck, '"');
                 ipc_send("init_login", playerName);
+                ipc_send("ipc_log", 'Arena screen name: '+playerName);
+            }
+
+            // Get Client Version
+            strCheck = '"ClientVersion":"';
+            if (value.indexOf(strCheck) > -1) {
+                arenaVersion = dataChop(value, strCheck, '"');
+                ipc_send("ipc_log", 'Arena version: '+arenaVersion);
             }
 
             if (firstPass) {
@@ -699,7 +733,7 @@ function processLogData(data) {
     }
 
     // Get Client Version
-    strCheck = '"clientVersion":"';
+    strCheck = '"ClientVersion":"';
     if (data.indexOf(strCheck) > -1) {
         arenaVersion = dataChop(data, strCheck, '"');
     }
@@ -733,8 +767,8 @@ function processLogData(data) {
 
     strCheck = '==> Authenticate(';
 	if (data.indexOf(strCheck) > -1) {
-		httpAuth();
-		loadPlayerConfig(playerId);
+		//httpAuth();
+		//loadPlayerConfig(playerId);
         return;
     }
 
@@ -1167,7 +1201,7 @@ function gre_to_client(data) {
                 if (obj.selectedDamageRecipient !== undefined) {
                     var rec = obj.selectedDamageRecipient;
                     if (rec.type == "DamageRecType_Player") {
-                        ipc_send("ipc_log", str+getNameBySeat(rec.playerSystemSeatId));
+                        //ipc_send("ipc_log", str+getNameBySeat(rec.playerSystemSeatId));
                     }
                     //else if (rec.type == "") {
                     //}
@@ -1175,7 +1209,7 @@ function gre_to_client(data) {
                 if (obj.legalDamageRecipients !== undefined) {
                     var rec = obj.legalDamageRecipients.forEach(function(rec) {
                         if (rec.type == "DamageRecType_Player") {
-                            ipc_send("ipc_log", str+getNameBySeat(rec.playerSystemSeatId));
+                            //ipc_send("ipc_log", str+getNameBySeat(rec.playerSystemSeatId));
                         }
                         //else if (rec.type == "") {
                         //}
@@ -1204,12 +1238,12 @@ function gre_to_client(data) {
                     turnStorm = msg.gameStateMessage.turnInfo.stormCount;
 
                     if (prevTurn !== turnNumber) {
-                        ipc_send("ipc_log", ">");
+                        //ipc_send("ipc_log", ">");
                         if (playerSeat == turnActive) {
-                            ipc_send("ipc_log", playerName+"'s turn begin. (#"+turnNumber+")");
+                            //ipc_send("ipc_log", playerName+"'s turn begin. (#"+turnNumber+")");
                         }
                         else {
-                            ipc_send("ipc_log", oppName+"'s turn begin. (#"+turnNumber+")");
+                            //ipc_send("ipc_log", oppName+"'s turn begin. (#"+turnNumber+")");
                         }
                     }
                     if (!firstPass) {
@@ -1296,7 +1330,7 @@ function gre_to_client(data) {
                                     }
                                     else if (gameObjs[aff] !== undefined) {
                                         //ipc_send("ipc_log", "("+gameObjs[aff].instanceId+") AnnotationType_ZoneTransfer - "+gameObjs[aff].name+" / zone: "+_dest+" - "+zones[_dest].type);
-                                        ipc_send("ipc_log", gameObjs[aff].name+" moved to "+zones[_dest].type);
+                                        //ipc_send("ipc_log", gameObjs[aff].name+" moved to "+zones[_dest].type);
                                         gameObjs[aff].zoneId = _dest;
                                         gameObjs[aff].zoneName = zones[_dest].type;
                                     }
@@ -1335,10 +1369,10 @@ function gre_to_client(data) {
                                     affected.forEach(function(affd) {
                                         if (gameObjs[aff] !== undefined) {
                                             if (affd == playerSeat || affd == oppSeat) {
-                                                ipc_send("ipc_log", gameObjs[aff].name+" dealt "+damage+" damage to "+getNameBySeat(affd));
+                                                //ipc_send("ipc_log", gameObjs[aff].name+" dealt "+damage+" damage to "+getNameBySeat(affd));
                                             }
                                             else {
-                                                ipc_send("ipc_log", gameObjs[aff].name+" dealt "+damage+" damage to "+gameObjs[affd]);
+                                                //ipc_send("ipc_log", gameObjs[aff].name+" dealt "+damage+" damage to "+gameObjs[affd]);
                                             }
                                         }
                                     });
@@ -1742,7 +1776,7 @@ function httpBasic() {
         if (_headers.method != 'auth') {
             if (tokenAuth == undefined) {
                 callback({message: "Undefined token"});
-                removeFromHttp(_headers.reqId);             
+                removeFromHttp(_headers.reqId);
                 _headers.token = "";
             }
             else {
@@ -1761,7 +1795,7 @@ function httpBasic() {
             var options = { protocol: 'https:', port: 443, hostname: 'magicthegatheringarena.statuspage.io', path: '/index.json', method: 'GET'};
         }
         else {
-            var options = { protocol: 'https:', port: 443, hostname: serverAddress, path: '/apiv4.php', method: 'POST', headers: _headers };
+            var options = { protocol: 'https:', port: 443, hostname: serverAddress, path: '/api.php', method: 'POST', headers: _headers };
         }
 
         if (debugNet) {
@@ -1793,6 +1827,10 @@ function httpBasic() {
                     if (parsedResult.ok) {
                         if (_headers.method == 'auth') {
                             tokenAuth = parsedResult.token;
+                            ipc_send("auth", parsedResult);
+                            loadPlayerConfig(playerId);
+                            logLoopMode = 1;
+                            prevLogSize = 0;
                         }
                         if (_headers.method == 'get_top_decks') {
                             ipc_send("set_explore", parsedResult.result);
@@ -1807,6 +1845,9 @@ function httpBasic() {
                             setsList = parsedResult.sets;
                             ipc_send("set_db", parsedResult);
                         }
+                    }
+                    if (_headers.method == 'auth') {
+                        ipc_send("auth", parsedResult);
                     }
                     if (_headers.method == 'get_picks') {
 						ipc_send("set_draft_picks", parsedResult);
@@ -1852,9 +1893,9 @@ function removeFromHttp(req) {
     });
 }
 
-function httpAuth() {
+function httpAuth(user, pass) {
     var _id = makeId(6);
-	httpAsync.push({'reqId': _id, 'method': 'auth', 'uid': playerId, 'version': arenaVersion});
+	httpAsync.push({'reqId': _id, 'method': 'auth', 'username': user, 'password': pass, 'playerid': playerId, 'playername': playerName, 'mtgaversion': arenaVersion, 'version': window.electron.remote.app.getVersion()});
 }
 
 function httpSubmitCourse(_courseId, _course) {

@@ -79,6 +79,17 @@ span i {
     background-size: contain;
 }
 
+.unlink {
+    -webkit-app-region: no-drag;
+    display: none;
+    background: url(../images/unlink.png) no-repeat center;
+    width: 24px;
+    height: 24px;
+    align-self: center;
+    position: relative;
+    margin-right: 16px;
+}
+
 .notification {
     -webkit-app-region: no-drag;
     display: none;
@@ -399,6 +410,14 @@ span i {
 
 a:hover {
     text-decoration: underline;
+}
+
+.message_unlink {
+    background-image: url("../images/unlink_big.png"); 
+    margin-bottom: 32px;
+    align-self: center;
+    width: 128px;
+    height: 128px;
 }
 
 .message_center {
