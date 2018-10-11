@@ -42,6 +42,7 @@ const chartjs = require('chart.js');
 const Database = require('../shared/database.js');
 const cardsDb = new Database();
 
+const sha1 = require('js-sha1');
 const fs = require("fs");
 
 var mana = {0: "", 1: "white", 2: "blue", 3: "black", 4: "red", 5: "green", 6: "colorless", 7: "", 8: "x"}
@@ -62,6 +63,17 @@ window.onerror = (err) => {
 process.on('uncaughtException', (err) => {
     ipc_send("ipc_log", "Exception: "+err);
 })
+
+//
+ipc.on('auth', function (event, arg) {
+	if (arg.ok) {
+		$('.message_center').css('display', 'block');
+		$('.authenticate').hide();
+	}
+	else {
+		pop(arg.error, -1);
+	}
+});
 
 //
 ipc.on('set_db', function (event, arg) {
@@ -338,6 +350,15 @@ ipc.on('no_log', function (event, arg) {
 });
 
 //
+ipc.on('offline', function (event, arg) {
+	document.body.style.cursor = "auto";
+	$('#ux_0').html('<div class="message_center" style="display: flex; position: fixed;"><div class="message_unlink"></div><div class="message_big red">Oops, you are offline!</div><div class="message_sub_16 white">You can <a class="signup_link">sign up</a> to access online features.</div></div>');
+	$(".signup_link").click(function() {
+		shell.openExternal('https://mtgatool.com/signup/');
+	});
+});
+
+//
 ipc.on('log_read', function (event, arg) {
 	if ($('.top_nav').hasClass('hidden')) {
 		$('.top_nav').removeClass('hidden');
@@ -445,6 +466,17 @@ function isArenaRunning() {
 $(document).ready(function() {
 	$(".signup_link").click(function() {
 		shell.openExternal('https://mtgatool.com/signup/');
+	});
+
+	$(".offline_link").click(function() {
+		ipc_send("login", {username: '', password: ''});
+	    $('.unlink').show();
+	});
+
+	$(".login_link").click(function() {
+		var user = document.getElementById("signin_user").value;
+		var pass = sha1(document.getElementById("signin_pass").value);
+		ipc_send("login", {username: user, password: pass});
 	});
 
 	//
@@ -592,6 +624,7 @@ function setHistory(loadMore) {
 		var match = matchesHistory[match_id];
 
 		if (match == undefined) continue;
+		if (match.opponent == undefined) continue;
 		if (match.opponent.userid.indexOf("Familiar") !== -1) continue;
 		console.log("Load match: ", match_id, match);
 		console.log("Match: ", loadHistory, match.type, match);
