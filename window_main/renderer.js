@@ -1261,7 +1261,7 @@ function open_deck(i, type) {
 	    stops: '#E7CA8E '+wp+'%, #AABEDF 0 '+up+'%, #A18E87 0 '+bp+'%, #DD8263 0 '+rp+'%, #B7C89E 0 '+gp+'%, #E3E3E3 0 '+cp+'%', // required
 	    size: 400 // Default: Math.max(innerWidth, innerHeight)
 	});
-	var piechart = $('<div class="pie_container"><span>Mana Simbols</span><svg class="pie">'+gradient.svg+'</svg></div>');
+	var piechart = $('<div class="pie_container"><span>Mana Symbols</span><svg class="pie">'+gradient.svg+'</svg></div>');
 	piechart.appendTo(cont);
 
 	// Lands colors
