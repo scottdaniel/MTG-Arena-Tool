@@ -56,6 +56,14 @@ app.on('ready', () => {
                 background.webContents.send("login", arg);
                 break;
 
+            case 'set_remember':
+                mainWindow.webContents.send("set_remember", arg);
+                break;
+
+            case 'remember':
+                background.webContents.send("remember", arg);
+                break;
+
             case 'offline':
                 mainWindow.webContents.send("offline", arg);
                 break;

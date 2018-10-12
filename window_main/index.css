@@ -1026,6 +1026,11 @@ a:hover {
     -webkit-transition: all .15s ease-in-out;
 }
 
+.check_container_centered {
+    margin: 16px auto !important;
+    width: fit-content !important;
+}
+
 .check_container_but {
     margin-top: 20px;
     margin-left: 16px;

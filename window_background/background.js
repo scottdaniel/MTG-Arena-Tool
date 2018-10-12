@@ -5,6 +5,11 @@ const path  = require('path');
 const Store = require('../store.js');
 const async = require("async");
 
+const rememberCfg = {
+    email: '',
+    token: ''
+}
+
 const defaultCfg = {
     windowBounds: { width: 800, height: 600, x: 0, y: 0 },
     overlayBounds: { width: 300, height: 600, x: 0, y: 0 },
@@ -38,6 +43,11 @@ const defaultCfg = {
     gold_history:[],
     wildcards_history:[]
 }
+
+var rstore = new Store({
+    configName: "remember",
+    defaults: rememberCfg
+});
 
 var store = new Store({
 	configName: 'default',
@@ -75,7 +85,7 @@ var matchBeginTime = 0;
 
 var arenaVersion = '';
 var playerPassword = '';
-var username = ';'
+var playerUsername = '';
 var playerName = null;
 var playerRank = null;
 var playerTier = null;
@@ -134,11 +144,28 @@ ipc_send = function (method, arg) {
     ipc.send('ipc_switch', method, arg);
 };
 
+
+var rememberMe = false;
+
+//
+ipc.on('remember', function (event, arg) {
+    rememberMe = arg;
+    if (!arg) {
+        rstore.set("email", "");
+        rstore.set("token", "");
+    }
+});
+
 //
 ipc.on('set_renderer_state', function (event, arg) {
 	renderer_state = arg;
 	var settings = store.get("settings");
 	updateSettings(settings, true);
+
+    if (rstore.get("token") !== "" && rstore.get("email") !== "") {
+        rememberMe = true;
+        ipc_send("set_remember", rstore.get("email"));
+    }
 
 	if (debugLog) {
 	    ipc_send("show_background", 1);
@@ -148,19 +175,27 @@ ipc.on('set_renderer_state', function (event, arg) {
 
 //
 ipc.on('login', function (event, arg) {
-    playerPassword = arg.password;
-    if (arg.username == '' && arg.password == '') {
+    if (arg.password == "********") {
+        ipc_send("auth", {ok: true, user:arg.username});
+        loadPlayerConfig(playerId);
+        playerUsername = arg.username;
+        logLoopMode = 1;
+        prevLogSize = 0;
+    }
+    else if (arg.username == '' && arg.password == '') {
         ipc_send("auth", {ok: true, user:-1});
         loadPlayerConfig(playerId);
-        username = '';
+        playerUsername = '';
         logLoopMode = 1;
         prevLogSize = 0;
     }
     else {
-        username = arg.username;
+        playerUsername = arg.username;
         httpAuth(arg.username, arg.password);
     }
 });
+
+
 
 //
 ipc.on('windowBounds', function (event, obj) {
@@ -267,7 +302,7 @@ ipc.on('set_economy', function (event, arg) {
 });
 
 ipc.on('request_explore', function (event, arg) {
-    if (username == '') {
+    if (playerUsername == '') {
         ipc_send("offline", 1);
     }
     else {
@@ -293,6 +328,17 @@ ipc.on('set_deck_mode', function (event, state) {
 ipc.on('get_deck_changes', function (event, arg) {
     get_deck_changes(arg);
 });
+
+function rememberLogin(bool) {
+    if (bool) {
+        rstore.set("email", playerUsername);
+        rstore.set("token", tokenAuth);
+    }
+    else {
+        rstore.set("email", "");
+        rstore.set("token", "");
+    }
+}
 
 function loadPlayerConfig(playerId) {
 	ipc_send("ipc_log", "Load player ID: "+playerId);
@@ -1827,6 +1873,12 @@ function httpBasic() {
                     if (parsedResult.ok) {
                         if (_headers.method == 'auth') {
                             tokenAuth = parsedResult.token;
+
+                            if (rememberMe) {
+                                rstore.set("token", tokenAuth);
+                                rstore.set("email", _headers.username);
+                            }
+
                             ipc_send("auth", parsedResult);
                             loadPlayerConfig(playerId);
                             logLoopMode = 1;
@@ -2022,3 +2074,4 @@ function debugEnd(str) {
     console.log(timeEnd - timeStart, str);
     timeStart = new Date();
 }
+

@@ -327,6 +327,23 @@ ipc.on('init_login', function (event, arg) {
 });
 
 //
+ipc.on('set_remember', function (event, arg) {
+	if (arg != "") {
+        document.getElementById("rememberme").checked = true;
+		document.getElementById("signin_user").value = arg;
+		document.getElementById("signin_pass").value = "********";
+	}
+	else {
+        document.getElementById("rememberme").checked = false;
+	}
+});
+
+//
+function rememberMe() {
+	ipc_send("remember", document.getElementById("rememberme").checked);
+}
+
+//
 ipc.on('initialize', function (event, arg) {
 	$('.top_username').html(userName.slice(0, -6));
 	$('.top_username_id').html(userName.slice(-6));
@@ -464,6 +481,8 @@ function isArenaRunning() {
 }
 
 $(document).ready(function() {
+	//document.getElementById("rememberme").checked = false;
+
 	$(".signup_link").click(function() {
 		shell.openExternal('https://mtgatool.com/signup/');
 	});
@@ -475,7 +494,10 @@ $(document).ready(function() {
 
 	$(".login_link").click(function() {
 		var user = document.getElementById("signin_user").value;
-		var pass = sha1(document.getElementById("signin_pass").value);
+		var pass = document.getElementById("signin_pass").value;
+		if (pass != "********") {
+			pass = sha1(pass);
+		}
 		ipc_send("login", {username: user, password: pass});
 	});
 
@@ -1241,7 +1263,9 @@ function open_deck(i, type) {
 	top.append(flr);
 
 	var tileGrpid = _deck.deckTileId;
-	change_background("https://img.scryfall.com/cards"+cardsDb.get(tileGrpid).images["art_crop"]);
+	if (cardsDb.get(tileGrpid)) {
+		change_background("https://img.scryfall.com/cards"+cardsDb.get(tileGrpid).images["art_crop"]);
+	}
 	var fld = $('<div class="flex_item"></div>');
 
 	var dl = $('<div class="decklist"></div>');
@@ -1769,7 +1793,9 @@ function open_draft(id, tileGrpid, set) {
 	flr = $('<div class="flex_item" style="align-self: center;"></div>');
 	top.append(flr);
 
-	change_background("https://img.scryfall.com/cards"+cardsDb.get(grpId).images["art_crop"]);
+	if (cardsDb.get(tileGrpid)) {
+		change_background("https://img.scryfall.com/cards"+cardsDb.get(grpId).images["art_crop"]);
+	}
 
 	var cont = $('<div class="flex_item" style="flex-direction: column;"></div>');
     cont.append('<div class="draft_nav_container"><div class="draft_nav_prev"></div><div class="draft_nav_next"></div></div>');
@@ -1859,7 +1885,9 @@ function open_match(id) {
 
 
 	var tileGrpid = match.playerDeck.deckTileId;
-	change_background("https://img.scryfall.com/cards/art_crop/en/"+get_set_scryfall(cardsDb.get(tileGrpid).set)+"/"+cardsDb.get(tileGrpid).cid+".jpg");
+	if (cardsDb.get(tileGrpid)) {
+		change_background("https://img.scryfall.com/cards/art_crop/en/"+get_set_scryfall(cardsDb.get(tileGrpid).set)+"/"+cardsDb.get(tileGrpid).cid+".jpg");
+	}
 	var fld = $('<div class="flex_item"></div>');
 
 	// this is a mess

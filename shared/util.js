@@ -891,3 +891,11 @@ function makeId(length) {
 
     return ret;
 }
+
+//
+function debugDeck(deck) {
+	deck.forEach( function (card) {
+	    var c = cardsDb.get(card.id);
+	    ipc_send("ipc_log", card.quantity+"x "+c.name +" ("+card.id+")");
+	});
+}
