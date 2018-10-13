@@ -6,8 +6,10 @@ This is probably caused by an error reading the user configuration, probably due
 Locate your log and config files;
 - Close MTG Arena and MTG Arena Tool.
 - Go to `%APPDATA%\..\LocalLow\Wizards Of The Coast\MTGA\`
-- Proceed deleting `output.log`.
+- Rename `output.log`, do not delete it!
 - Run MTG Arena, once open, run MTG Arena Tool again.
+
+If this works, send the the old log file file to [mtgatool@gmail.com](mailto:mtgatool@gmail.com) to analyze the error.
 
 If that does not work;
 - Proceed to `%APPDATA%\mtg-arena-tool`
