@@ -67,7 +67,7 @@ process.on('uncaughtException', (err) => {
 //
 ipc.on('auth', function (event, arg) {
 	if (arg.ok) {
-		$('.message_center').css('display', 'block');
+		$('.message_center').css('display', 'flex');
 		$('.authenticate').hide();
 	}
 	else {
@@ -233,8 +233,10 @@ ipc.on('set_status', function (event, arg) {
 
 //
 ipc.on('set_explore', function (event, arg) {
-	arg.sort(compare_explore);
-	setExplore(arg, 0);
+	if (sidebarActive == 2) {
+		arg.sort(compare_explore);
+		setExplore(arg, 0);
+	}
 });
 
 //

@@ -177,6 +177,7 @@ ipc.on('set_renderer_state', function (event, arg) {
 ipc.on('login', function (event, arg) {
     if (arg.password == "********") {
         ipc_send("auth", {ok: true, user:arg.username});
+        tokenAuth = rstore.get("token");
         loadPlayerConfig(playerId);
         playerUsername = arg.username;
         logLoopMode = 1;
