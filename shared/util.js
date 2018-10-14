@@ -65,6 +65,10 @@ function addCardTile(grpId, indent, quantity, element) {
 
 		if (renderer == 0) {
 			if (card.type.indexOf("Basic Land") == -1) {
+				if (grpId == 67306 && quantity > 4) {
+					quantity = 4;
+				}
+
 				if (cards[grpId] == undefined) {
 					cont.append('<div class="card_tile_not_owned" title="'+quantity+' missing"></div>');
 				}
@@ -311,6 +315,24 @@ function compare_cards(a, b) {
 
 	return 0;
 }
+
+//
+function compare_chances(a, b) {
+	// Yeah this is lazy.. I know
+	a = a.chance;
+	b = b.chance;
+
+	if (a > b) {
+		return -1;
+	}
+	if (a < b) {
+		return 1;
+	}
+
+	return 0;
+}
+
+
 //
 function compare_draft_cards(a, b) {
 	// Yeah this is lazy.. I know
@@ -604,6 +626,10 @@ function get_deck_missing(deck) {
 		var add = 0;
 		var rarity = cardsDb.get(grpid).rarity;
 
+		if (grpid == 67306 && quantity > 4) {
+			quantity = 4;
+		}
+
 		if (cards[grpid] == undefined) {
 			add = quantity;
 		}
@@ -622,6 +648,10 @@ function get_deck_missing(deck) {
 		var quantity = card.quantity;
 		var add = 0;
 		var rarity = cardsDb.get(grpid).rarity;
+
+		if (grpid == 67306 && quantity > 4) {
+			quantity = 4;
+		}
 
 		if (cards[grpid] == undefined) {
 			add = quantity;

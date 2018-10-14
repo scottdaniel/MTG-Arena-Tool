@@ -366,9 +366,9 @@ function loadPlayerConfig(playerId) {
     
     drafts.matches = store.get('draft_index');
     for (let i=0; i<drafts.matches.length; i++) {
-        ipc_send("popup", {"text": "Reading drafts: "+i+" / "+history.matches.length, "time": 0});
+        ipc_send("popup", {"text": "Reading drafts: "+i+" / "+drafts.matches.length, "time": 0});
         var id = drafts.matches[i];
-
+        
         if (id != null) {
             var item = entireConfig[id];
             if (item != undefined) {
@@ -1041,6 +1041,7 @@ function processLogData(data) {
         if (data.indexOf(strCheck) > -1) {
             var logTime = dataChop(data, strCheck, ' (');
             matchBeginTime = parseWotcTime(logTime);
+            ipc_send("ipc_log", "MATCH CREATED: "+logTime);
         }
         if (json.eventId != "NPE") {
             createMatch(json);
@@ -1256,7 +1257,7 @@ function gre_to_client(data) {
                 if (obj.legalDamageRecipients !== undefined) {
                     var rec = obj.legalDamageRecipients.forEach(function(rec) {
                         if (rec.type == "DamageRecType_Player") {
-                            //ipc_send("ipc_log", str+getNameBySeat(rec.playerSystemSeatId));
+                           //ipc_send("ipc_log", str+getNameBySeat(rec.playerSystemSeatId));
                         }
                         //else if (rec.type == "") {
                         //}
@@ -1508,6 +1509,7 @@ function createMatch(arg) {
     playerWin = 0;
     oppWin = 0;
 
+    ipc_send("ipc_log", "vs "+oppName);
     ipc_send("set_timer", matchBeginTime);
     ipc_send("set_opponent", oppName);
     ipc_send("set_opponent_rank", get_rank_index(oppRank, oppTier), oppRank+" "+oppTier);

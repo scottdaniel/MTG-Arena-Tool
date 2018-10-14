@@ -220,7 +220,13 @@ ipc.on('set_deck', function (event, arg) {
 			$(".overlay_deckcolors").append('<div class="mana_s20 mana_'+mana[color]+'"></div>');
 		});
 
-		arg.mainDeck.sort(compare_cards); 
+		if (deckMode == 2) {
+			arg.mainDeck.sort(compare_chances);
+		}
+		else {
+			arg.mainDeck.sort(compare_cards);
+		}
+
 		var deckListDiv = $(".overlay_decklist");
 		var prevIndex = 0;
 

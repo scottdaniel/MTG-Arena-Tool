@@ -953,10 +953,14 @@ function setDecks(arg) {
 				var grpId = card.id;
 				var type = cardsDb.get(grpId).type;
 				if (cardsDb.get(grpId).type.indexOf("Basic Land") == -1) {
+					var quantity = card.quantity;
+					if (grpId == 67306 && quantity > 4) {
+						quantity = 4;
+					}
 					if (cards[grpId] == undefined) {
 						missingCards = true
 					}
-					else if (card.quantity > cards[grpId]) {
+					else if (quantity > cards[grpId]) {
 						missingCards = true;
 					}
 				}
@@ -965,10 +969,14 @@ function setDecks(arg) {
 				var grpId = card.id;
 				var type = cardsDb.get(grpId).type;
 				if (cardsDb.get(grpId).type.indexOf("Basic Land") == -1) {
+					var quantity = card.quantity;
+					if (grpId == 67306 && quantity > 4) {
+						quantity = 4;
+					}
 					if (cards[grpId] == undefined) {
 						missingCards = true
 					}
-					else if (card.quantity > cards[grpId]) {
+					else if (quantity > cards[grpId]) {
 						missingCards = true;
 					}
 				}
@@ -1481,7 +1489,7 @@ function drawDeckVisual(_div, _stats, deck) {
 			deck.mainDeck.forEach(function(c) {
 				var grpId = c.id;
 				var card = cardsDb.get(grpId);
-				if (card.type.indexOf("Land") == -1) {
+				if (card.type.indexOf("Land") == -1 && grpId != 67306) {
 					if (card.cmc == cmc) {
 						var quantity = c.quantity;
 
