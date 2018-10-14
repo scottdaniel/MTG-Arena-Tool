@@ -30,6 +30,7 @@ var defaultBackground = "";
 var currentOpenDeck = null;
 var lastSettingsSection = 1;
 var serverStatus = undefined;
+var loggedIn = false;
 
 var rankOffset = 0;
 var rankTitle = "";
@@ -69,6 +70,7 @@ ipc.on('auth', function (event, arg) {
 	if (arg.ok) {
 		$('.message_center').css('display', 'flex');
 		$('.authenticate').hide();
+		loggedIn = true;
 	}
 	else {
 		pop(arg.error, -1);
@@ -361,11 +363,12 @@ ipc.on('initialize', function (event, arg) {
 
 //
 ipc.on('no_log', function (event, arg) {
-	console.log(arg)
-	$('.top_nav').addClass('hidden');
-	$('.overflow_ux').addClass('hidden');
-	$('.message_center').css('display', 'flex');
-	$('.message_center').html('<div class="message_big red">No Log Found</div><div class="message_sub_16 white">check if it exists at '+arg+'</div><div class="message_sub_16 white">if it does, try closing MTG Arena and deleting it.</div>');
+	if (loggedIn) {
+		$('.top_nav').addClass('hidden');
+		$('.overflow_ux').addClass('hidden');
+		$('.message_center').css('display', 'flex');
+		$('.message_center').html('<div class="message_big red">No Log Found</div><div class="message_sub_16 white">check if it exists at '+arg+'</div><div class="message_sub_16 white">if it does, try closing MTG Arena and deleting it.</div>');
+	}
 });
 
 //
