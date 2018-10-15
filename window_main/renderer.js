@@ -1971,11 +1971,11 @@ function open_match(id) {
 	$("#ux_1").append(fld);
 	
 	$(".exportDeck").click(function () {
-	    var list = get_deck_export(deck);
+	    var list = get_deck_export(match.oppDeck);
 	    ipc_send('set_clipboard', list);
 	});
 	$(".exportDeckStandard").click(function () {
-	    var list = get_deck_export_txt(deck);
+	    var list = get_deck_export_txt(match.oppDeck);
 	    ipc_send('export_txt', {str: list, name: match.opponent.name.slice(0, -6)+"'s deck"});
 	});
 
