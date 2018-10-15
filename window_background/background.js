@@ -368,7 +368,8 @@ function loadPlayerConfig(playerId) {
     for (let i=0; i<drafts.matches.length; i++) {
         ipc_send("popup", {"text": "Reading drafts: "+i+" / "+drafts.matches.length, "time": 0});
         var id = drafts.matches[i];
-        
+        console.log("Read draft: ", entireConfig[id]);
+
         if (id != null) {
             var item = entireConfig[id];
             if (item != undefined) {
@@ -378,6 +379,8 @@ function loadPlayerConfig(playerId) {
             }
 	    }
     }    
+
+    console.log("Done reading history");
 
     deck_changes_index = entireConfig["deck_changes_index"];
     deck_changes = entireConfig["deck_changes"];

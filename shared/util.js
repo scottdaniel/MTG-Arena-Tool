@@ -251,6 +251,8 @@ function getReadableEvent(arg) {
 			return "Quick Draft DOM"; break;
 		case "QuickDraft_M_":
 			return "Quick Draft M19"; break;
+		case "QuickDraft_GRN_":
+			return "Quick Draft GRN"; break;
 
 		case "QuickExploration_":
 			return "Quick Exploration"; break;
@@ -266,6 +268,31 @@ function getReadableEvent(arg) {
 		default:
 			return arg; break;
 	}
+}
+
+//
+function removeDuplicates(decklist) {
+	var newList = [];
+	decklist.forEach(function(card) {
+		var cname = cardsDb.get(card.id).name;
+		var added = false;
+		newList.forEach(function(c) {
+			var cn = cardsDb.get(c.id).name;
+			if (cn == cname) {
+				c.quantity += card.quantity;
+				if (c.chance != undefined) {
+					c.chance += card.chance;
+				}
+				added = true;
+			}
+		});
+
+		if (!added) {
+			newList.push(card);
+		}
+	});
+
+	return newList;
 }
 
 //
