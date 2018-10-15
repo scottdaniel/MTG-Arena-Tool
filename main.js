@@ -15,6 +15,7 @@ require('electron-debug')({showDevTools: false});
 console.log(process.platform);
 
 const debugBack = false;
+const debugIPC = false;
 
 var mainWindow;
 var background;
@@ -34,7 +35,14 @@ app.on('ready', () => {
     autoUpdater.checkForUpdatesAndNotify();
 
     ipc.on('ipc_switch', function (event, method, arg) {
-        //console.log("IPC ", method);
+        if (debugIPC && method != "log_read") {
+            if (debugIPC == 2 && method != "set_status" && method != "set_db" && method != "set_cards" && method != "set_decks" && method != "background_set_history_data") {
+                console.log("IPC ", method+": "+JSON.stringify(arg));
+            }
+            else {
+                console.log("IPC ", method);
+            }
+        }
         switch (method) {
             case 'ipc_log':
                 console.log("IPC LOG: ", arg);

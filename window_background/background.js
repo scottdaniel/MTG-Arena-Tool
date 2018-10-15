@@ -180,15 +180,11 @@ ipc.on('login', function (event, arg) {
         tokenAuth = rstore.get("token");
         loadPlayerConfig(playerId);
         playerUsername = arg.username;
-        logLoopMode = 1;
-        prevLogSize = 0;
     }
     else if (arg.username == '' && arg.password == '') {
         ipc_send("auth", {ok: true, user:-1});
         loadPlayerConfig(playerId);
         playerUsername = '';
-        logLoopMode = 1;
-        prevLogSize = 0;
     }
     else {
         playerUsername = arg.username;
@@ -342,6 +338,9 @@ function rememberLogin(bool) {
 }
 
 function loadPlayerConfig(playerId) {
+    logLoopMode = 1;
+    prevLogSize = 0;
+    resetLogLoop(500);
 	ipc_send("ipc_log", "Load player ID: "+playerId);
     store = new Store({
         configName: playerId,
@@ -379,8 +378,6 @@ function loadPlayerConfig(playerId) {
             }
 	    }
     }    
-
-    console.log("Done reading history");
 
     deck_changes_index = entireConfig["deck_changes_index"];
     deck_changes = entireConfig["deck_changes"];
@@ -482,9 +479,19 @@ else {
 console.log(logUri);
 
 var file;
+var logLoopTimer = null;
 var logLoopMode = 0;
-setTimeout(logLoop, 500);
+resetLogLoop(500);
 
+//
+function resetLogLoop(time) {
+    if (logLoopTimer != null) {
+        window.clearTimeout(logLoopTimer);
+    }
+    logLoopTimer = setTimeout(logLoop, time);
+}
+
+//
 function logLoop() {
     //console.log("logLoop() start");
     //ipc_send("ipc_log", "logLoop() start");
@@ -493,13 +500,14 @@ function logLoop() {
         if (err) {
             ipc_send("no_log", logUri);
             console.log("No log file found");
-            setTimeout(logLoop, 100);
+            resetLogLoop(500);
         } else {
             readLog();
         }
     });
 }
 
+//
 function readLog() {
 	//console.log("readLog()");
     //ipc_send("ipc_log", "readLog("+logLoopMode+")");
@@ -526,12 +534,12 @@ function readLog() {
             //console.log("fs.close(file) readLog")
             //ipc_send("ipc_log", "fs.close(file) readLog");
             fs.close(file);
-            setTimeout(logLoop, 500);
+            resetLogLoop(500);
         }
     }
     else {
         fs.close(file);
-        setTimeout(logLoop, 500);
+        resetLogLoop(500);
     }
 }
 
@@ -572,7 +580,7 @@ function processLog(err, bytecount, buff) {
 
     }, function (err) {
         console.log("Async end");
-        setTimeout(logLoop, 1000);
+        resetLogLoop(500);
         if (err) {
             console.log("processLog err: "+err.message);
         }
@@ -586,7 +594,7 @@ function processLogUser(err, bytecount, buff) {
     let rawString = buff.toString('utf-8', 0, bytecount);
     var splitString = rawString.split('[UnityCrossThread');
     console.log('Reading user:', bytecount, 'bytes, ',splitString.length, ' chunks');
-    ipc_send("ipc_log", 'Reading: '+bytecount+' bytes, '+splitString.length+' chunks');
+    //ipc_send("ipc_log", 'Reading: '+bytecount+' bytes, '+splitString.length+' chunks');
 
     if (firstPass) {
         splitString.push("%END%");
@@ -814,13 +822,6 @@ function processLogData(data) {
         return;
     }
     */
-
-    strCheck = '==> Authenticate(';
-	if (data.indexOf(strCheck) > -1) {
-		//httpAuth();
-		//loadPlayerConfig(playerId);
-        return;
-    }
 
     // Get Ranks
     strCheck = '<== Event.GetCombinedRankInfo(';
@@ -1887,8 +1888,6 @@ function httpBasic() {
 
                             ipc_send("auth", parsedResult);
                             loadPlayerConfig(playerId);
-                            logLoopMode = 1;
-                            prevLogSize = 0;
                         }
                         if (_headers.method == 'get_top_decks') {
                             ipc_send("set_explore", parsedResult.result);
@@ -1898,7 +1897,7 @@ function httpBasic() {
                         }
                         if (_headers.method == 'get_database') {
                             cardsDb.set(parsedResult);
-                            setTimeout(logLoop, 1);
+                            resetLogLoop(1);
                             delete parsedResult.ok;
                             setsList = parsedResult.sets;
                             ipc_send("set_db", parsedResult);
