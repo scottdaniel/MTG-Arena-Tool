@@ -177,6 +177,7 @@ ipc.on('set_renderer_state', function (event, arg) {
 ipc.on('login', function (event, arg) {
     if (arg.password == "********") {
         tokenAuth = rstore.get("token");
+        playerUsername = arg.username;
         httpAuth(arg.username, arg.password);
     }
     else if (arg.username == '' && arg.password == '') {
@@ -191,6 +192,11 @@ ipc.on('login', function (event, arg) {
     }
 });
 
+
+//
+ipc.on('request_draft_link', function (event, obj) {
+    httpDraftShareLink(obj.id, obj.expire);
+});
 
 
 //
@@ -366,7 +372,6 @@ function loadPlayerConfig(playerId) {
     for (let i=0; i<drafts.matches.length; i++) {
         ipc_send("popup", {"text": "Reading drafts: "+i+" / "+drafts.matches.length, "time": 0});
         var id = drafts.matches[i];
-        console.log("Read draft: ", entireConfig[id]);
 
         if (id != null) {
             var item = entireConfig[id];
@@ -1894,6 +1899,9 @@ function httpBasic() {
                         if (_headers.method == 'get_course') {
                             ipc_send("open_course_deck", parsedResult.result);
                         }
+                        if (_headers.method == 'share_draft') {
+                            ipc_send("set_draft_link", parsedResult.url);
+                        }
                         if (_headers.method == 'get_database') {
                             cardsDb.set(parsedResult);
                             resetLogLoop(1);
@@ -1901,6 +1909,9 @@ function httpBasic() {
                             setsList = parsedResult.sets;
                             ipc_send("set_db", parsedResult);
                         }
+                    }
+                    else if (parsedResult.ok == false) {
+                        // errors here 
                     }
                     if (_headers.method == 'auth') {
                         ipc_send("auth", parsedResult);
@@ -2005,6 +2016,13 @@ function htttpGetStatus() {
     var _id = makeId(6);
     httpAsync.push({'reqId': _id, 'method': 'get_status', 'uid': playerId});
 }
+
+function httpDraftShareLink(did, exp) {
+    var _id = makeId(6);
+    httpAsync.push({'reqId': _id, 'method': 'share_draft', 'uid': playerId, 'id': did, 'expire': exp});
+}
+
+
 
 //
 function parseWotcTime(str) {

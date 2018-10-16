@@ -21,7 +21,7 @@ class Database {
     get(grpId) {
     	let ret = this.cards[grpId];
     	if (ret == undefined) {
-    		console.log("Unable to find card with id "+grpId);
+    		//console.error("card not found: "+grpId);
     		return false;
     	}
         return ret;

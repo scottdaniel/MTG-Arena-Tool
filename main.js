@@ -49,6 +49,10 @@ app.on('ready', () => {
                 break;
 
             // to renderer
+            case 'set_draft_link':
+                mainWindow.webContents.send("set_draft_link", arg);
+                break;
+
             case 'set_settings':
                 //console.log("set settings: ", arg);
                 saveSettings(arg);
@@ -158,6 +162,10 @@ app.on('ready', () => {
                 break;
 
             // to background
+            case 'request_draft_link':
+                background.webContents.send("request_draft_link", arg);
+                break;
+
             case 'get_deck_changes':
                 background.webContents.send("get_deck_changes", arg);
                 break;

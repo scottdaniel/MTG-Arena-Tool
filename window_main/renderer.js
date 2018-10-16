@@ -651,10 +651,12 @@ function setHistory(loadMore) {
 		var match = matchesHistory[match_id];
 
 		if (match == undefined) continue;
-		if (match.opponent == undefined) continue;
-		if (match.opponent.userid.indexOf("Familiar") !== -1) continue;
-		console.log("Load match: ", match_id, match);
-		console.log("Match: ", loadHistory, match.type, match);
+		if (match.type == "match") {
+			if (match.opponent == undefined) continue;
+			if (match.opponent.userid.indexOf("Familiar") !== -1) continue;
+		}
+		//console.log("Load match: ", match_id, match);
+		//console.log("Match: ", loadHistory, match.type, match);
 
 		var div = document.createElement("div");
 		div.classList.add(match.id);
@@ -758,7 +760,6 @@ function setHistory(loadMore) {
 			}
 		}
 		else {
-			//console.log("DRAFT: ", match)
 			var tileGrpid = setsList[match.set].tile;
 
 			var tile = document.createElement("div");
@@ -813,9 +814,11 @@ function setHistory(loadMore) {
 	loadHistory = loadEnd;
 }
 
+var currentId = null;
 //
 function addShare(_match) {
 	$('.'+_match.id+'dr').on('click', function(e) {
+		currentId = _match.id;
 		e.stopPropagation();
 		$('.share_dialog_wrapper').css('opacity', 1);
 		$('.share_dialog_wrapper').css('pointer-events', 'all');
@@ -849,19 +852,53 @@ function addShare(_match) {
 		cont.append('<div class="share_title">Link For sharing:</div>');
 		var icd = $('<div class="share_input_container"></div>');
 		var but = $('<div class="button_simple">Copy</div>');
-		var sin = $('<input id="share_input" onClick="this.setSelectionRange(0, this.value.length)" autofocus autocomplete="off" value="https://mtgatool.com/draft/'+_match.id+'" />');
+		var sin = $('<input id="share_input" onClick="this.setSelectionRange(0, this.value.length)" autofocus autocomplete="off" value="" />');
 
 		sin.appendTo(icd);
 		but.appendTo(icd);
 		icd.appendTo(cont);
-		cont.append('<div class="share_subtitle"><i>This link will never expire</i></div>');
+
+		cont.append('<div class="share_subtitle"><i>Expires in: </i></div>');
 		cont.appendTo(dialog);
 
+		var select = $('<select id="expire_select">'+sortingAlgorithm+'</select>');
+		var sortby = ['One day', 'One week', 'One month', 'Never'];
+		for (var i=0; i < sortby.length; i++) {
+			select.append('<option value="'+sortby[i]+'">'+sortby[i]+'</option>');
+		}
+		select.appendTo(cont);
+		selectAdd(select, draftShareLink);
+
 		but.click(function () {
-		    ipc_send('set_clipboard', "https://mtgatool.com/draft/"+_match.id);
+		    ipc_send('set_clipboard', document.getElementById("share_input").value);
 		});
 	});
 }
+
+//
+function draftShareLink() {
+	var shareExpire = document.getElementById("expire_select").value;
+	var expire = 0;
+	switch (shareExpire) {
+		case 'One day': 	expire = 0; break;
+		case 'One week': 	expire = 1; break;
+		case 'One month': 	expire = 2; break;
+		case 'Never': 		expire = -1; break;
+		default: 			expire = 0; break;
+
+	}
+	obj = {
+		expire: expire,
+		id: currentId
+	}
+	ipc_send('request_draft_link', obj);
+}
+
+//
+ipc.on('set_draft_link', function (event, arg) {
+	document.getElementById("share_input").value = arg;
+});
+
 
 //
 function addHover(_match, tileGrpid) {
@@ -1807,7 +1844,7 @@ function open_draft(id, tileGrpid, set) {
 	top.append(flr);
 
 	if (cardsDb.get(tileGrpid)) {
-		change_background("https://img.scryfall.com/cards"+cardsDb.get(grpId).images["art_crop"]);
+		change_background("https://img.scryfall.com/cards"+cardsDb.get(tileGrpid).images["art_crop"]);
 	}
 
 	var cont = $('<div class="flex_item" style="flex-direction: column;"></div>');
