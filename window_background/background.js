@@ -176,10 +176,8 @@ ipc.on('set_renderer_state', function (event, arg) {
 //
 ipc.on('login', function (event, arg) {
     if (arg.password == "********") {
-        ipc_send("auth", {ok: true, user:arg.username});
         tokenAuth = rstore.get("token");
-        loadPlayerConfig(playerId);
-        playerUsername = arg.username;
+        httpAuth(arg.username, arg.password);
     }
     else if (arg.username == '' && arg.password == '') {
         ipc_send("auth", {ok: true, user:-1});
@@ -188,6 +186,7 @@ ipc.on('login', function (event, arg) {
     }
     else {
         playerUsername = arg.username;
+        tokenAuth = '';
         httpAuth(arg.username, arg.password);
     }
 });
@@ -1826,15 +1825,13 @@ function httpBasic() {
             callback({message: "Settings dont allow sending data! > "+_headers.method});
             removeFromHttp(_headers.reqId);
         }
-        if (_headers.method != 'auth') {
-            if (tokenAuth == undefined) {
-                callback({message: "Undefined token"});
-                removeFromHttp(_headers.reqId);
-                _headers.token = "";
-            }
-            else {
-                _headers.token = tokenAuth;
-            }
+        if (tokenAuth == undefined) {
+            callback({message: "Undefined token"});
+            removeFromHttp(_headers.reqId);
+            _headers.token = "";
+        }
+        else {
+            _headers.token = tokenAuth;
         }
         
         var http = require('https');
@@ -1880,6 +1877,8 @@ function httpBasic() {
                     if (parsedResult.ok) {
                         if (_headers.method == 'auth') {
                             tokenAuth = parsedResult.token;
+
+                            ipc_send("auth", parsedResult.arenaids);
 
                             if (rememberMe) {
                                 rstore.set("token", tokenAuth);
