@@ -32,6 +32,7 @@ const defaultCfg = {
         overlay_deck: true,
         overlay_clock: true,
         overlay_ontop: true,
+        export_format: "$Name,$Count,$Rarity,$SetName,$Collector",
         back_color: "rgba(0,0,0,0.3)",
         back_url: ''
     },
@@ -408,6 +409,10 @@ function updateSettings(_settings, relay) {
     if (_settings.overlay_ontop == undefined) _settings.overlay_ontop = true;
 
     ipc_send("overlay_set_ontop", _settings.overlay_ontop);
+
+    if (_settings.export_format == undefined) {
+        _settings.export_format = "$Name,$Count,$Rarity,$SetName,$Collector";
+    }
 
     if (_settings.show_overlay == false) {
     	ipc_send("overlay_close", 1);

@@ -320,6 +320,27 @@ app.on('ready', () => {
                     }
                 });
 
+            case 'export_csvtxt':
+                dialog.showSaveDialog({
+                    filters: [{
+                        name: 'csv',
+                        extensions: ['csv']
+                    },{
+                        name: 'txt',
+                        extensions: ['txt']
+                    }],
+                    defaultPath: '~/'+arg.name+'.csv'
+                }, function(file_path) {
+                    if (file_path) {
+                        fs.writeFile(file_path, arg.str, function(err) {
+                            if (err) {
+                                dialog.showErrorBox('Error', err);
+                                return;
+                            }
+                        });
+                    }
+                });
+
                 break;
 
             default:

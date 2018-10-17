@@ -536,18 +536,28 @@ function collectionSortCmc(a, b) {
 
 //
 function get_collection_export() {
-	var str = "";
-
+	var list = "";
     Object.keys(cards).forEach(function(key) {
+    	var add = settings.export_format+"";
+    	var card = cardsDb.get(key);
+    	if (card) {
+	    	let name = card.name;
+	    	name = replaceAll(name, '///', '//');
+	    	add = add.replace('$Name', name);
 
-    	let quantity = cards[key];
-    	let name = cardsDb.get(key).name;
-    	name = replaceAll(name, '///', '//');
+	    	add = add.replace('$Count', cards[key]);
 
-		str += quantity+" "+name+"\r\n";
+	    	add = add.replace('$SetName', card.set);
+	    	add = add.replace('$SetCode', setsList[card.set].code);
+	    	add = add.replace('$Collector', card.cid);
+	    	add = add.replace('$Rarity', card.rarity);
+	    	add = add.replace('$Type', card.type);
+	    	add = add.replace('$Cmc', card.cmc);
+			list += add+"\r\n";
+    	}
     });
 
-    return str;
+    return list;
 }
 
 //

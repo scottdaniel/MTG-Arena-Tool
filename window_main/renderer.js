@@ -2260,7 +2260,7 @@ function open_cards() {
 	select.appendTo(flex);
 	selectAdd(select, sortCollection);
 
-	var exp   = $('<div class="button_simple button_thin" onClick="exportCollection()">Copy to Clipboard</div>');
+	var exp   = $('<div class="button_simple button_thin" onClick="exportCollection()">Export Collection</div>');
 	exp.appendTo(flex);
 	var reset = $('<div class="button_simple button_thin" onClick="resetFilters()">Reset</div>');
 	reset.appendTo(flex);
@@ -2442,8 +2442,8 @@ function resetFilters() {
 
 //
 function exportCollection() {
-	var str = get_collection_export();
-	ipc_send('set_clipboard', str);
+	var list = get_collection_export();
+	ipc_send('export_csvtxt', {str: list, name: "collection"});
 }
 
 //
@@ -2854,7 +2854,17 @@ function open_settings(openSection) {
 	add_checkbox(section, 'Close to tray', 'settings_closetotray', settings.close_to_tray);
 	add_checkbox(section, 'Sound when priority changes', 'settings_soundpriority', settings.sound_priority);
 
-	//
+
+    var label = $('<label class="but_container_label">Export Format:</label>');
+    label.appendTo(section);
+    var icd = $('<div class="input_container"></div>');
+    var export_input = $('<input type="search" id="settings_export_format" autocomplete="off" value="'+settings.export_format+'" />');
+    export_input.appendTo(icd);
+    icd.appendTo(label);
+
+    section.append('<label style="color: rgba(250, 229, 210, 0.75); font-size: 14px; margin-left: 16px;"><i>Possible variables: $Name, $Count, $SetName, $SetCode, $Collector, $Rarity, $Type, $Cmc</i></label>');
+    
+
 	section = $('<div class="settings_section ss2"></div>');
 	section.appendTo(div);
 	section.append('<div class="settings_title">Overlay</div>');
@@ -3036,6 +3046,12 @@ function open_settings(openSection) {
         }
     });
 
+    export_input.on('keyup', function (e) {
+        if (e.keyCode == 13) {
+            updateSettings();
+        }
+    });
+
 	$(".sliderA").off();
 
 	$(".sliderA").on('click mousemove', function() {
@@ -3150,6 +3166,8 @@ function updateSettings() {
 	var overlayClock = document.getElementById("settings_overlay_clock").checked;
 	var overlaySideboard = document.getElementById("settings_overlay_sideboard").checked;
 
+    var exportFormat = document.getElementById("settings_export_format").value;
+
 	settings = {
 		sound_priority: soundPriority,
 		show_overlay: showOverlay,
@@ -3170,6 +3188,7 @@ function updateSettings() {
         anon_explore: anonExplore,
         back_color: backColor,
         back_url: backUrl,
+        export_format: exportFormat
 	};
 	cardSize = 100+(cardSizePos*10);
 	ipc_send('save_settings', settings);
