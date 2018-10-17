@@ -613,7 +613,9 @@ function processLogUser(err, bytecount, buff) {
     async.forEachOfSeries(splitString, function (value, index, callback) {
         //ipc_send("ipc_log", "Async: ("+index+")");
         if (value == "%END%") {
-            ipc_send("popup", "100%");
+            if (playerName == null) {
+                ipc_send("popup", {"text": "output_log contains no data", "time": 0});
+            }
         }
         else if (value == "%CLOSE%") {
             fs.close(file);
@@ -641,7 +643,7 @@ function processLogUser(err, bytecount, buff) {
             }
 
             if (firstPass) {
-                ipc_send("popup", "Processing log: "+Math.round(100/splitString.length*index)+"%");
+                ipc_send("popup", {"text": "Reading: "+Math.round(100/splitString.length*index)+"%", "time": 0});
             }      
         }
         callback();
