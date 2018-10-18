@@ -615,6 +615,7 @@ function processLogUser(err, bytecount, buff) {
         if (value == "%END%") {
             if (playerName == null) {
                 ipc_send("popup", {"text": "output_log contains no data", "time": 0});
+                resetLogLoop(500);
             }
         }
         else if (value == "%CLOSE%") {
@@ -643,7 +644,7 @@ function processLogUser(err, bytecount, buff) {
             }
 
             if (firstPass) {
-                ipc_send("popup", {"text": "Reading: "+Math.round(100/splitString.length*index)+"%", "time": 0});
+                ipc_send("popup", {"text": "Reading: "+Math.round(100/splitString.length*index)+"%", "time": 1000});
             }      
         }
         callback();

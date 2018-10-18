@@ -749,13 +749,15 @@ function setHistory(loadMore) {
 			if (match.player.win > match.opponent.win) {
 				var d = document.createElement("div");
 				d.classList.add("list_match_result_win");
-				d.innerHTML = "Win";
+				//d.innerHTML = "Win";
+				d.innerHTML = match.player.win +":"+match.opponent.win;
 				flr.appendChild(d);
 			}
 			else {
 				var d = document.createElement("div");
 				d.classList.add("list_match_result_loss");
-				d.innerHTML = "Loss";
+				//d.innerHTML = "Loss";
+				d.innerHTML = match.player.win +":"+match.opponent.win;
 				flr.appendChild(d);
 			}
 		}

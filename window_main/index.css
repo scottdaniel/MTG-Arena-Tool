@@ -350,7 +350,7 @@ span i {
     color: rgba(250, 229, 210, 0.5);
 }
 .list_match_result_win {
-    font-family: Mplantin-italic;
+    font-family: Mplantin;
     font-size: 20px;
     line-height: 64px;
     margin-right: 32px;
@@ -359,10 +359,18 @@ span i {
 
 .list_match_result_loss {
     line-height: 64px;
-    font-family: Mplantin-italic;
+    font-family: Mplantin;
     font-size: 20px;
     margin-right: 32px;
     color: rgba(221, 130, 99, 1);
+}
+
+.list_match_result_score {
+    font-family: Mplantin-italic;
+    font-size: 20px;
+    line-height: 64px;
+    margin-right: 32px;
+    color: rgba(250, 229, 210, 0.71);
 }
 
 .list_match_player_left {
