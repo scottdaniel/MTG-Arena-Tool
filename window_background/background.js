@@ -38,6 +38,7 @@ const defaultCfg = {
     },
     deck_changes:{},
     deck_changes_index:[],
+    courses_index:[],
     matches_index:[],
     draft_index:[],
     gems_history:[],
@@ -117,7 +118,7 @@ var hoverCard = undefined;
 var history = {};
 var drafts = {};
 var topDecks = {};
-var coursesToSubmit = {};
+//var coursesToSubmit = {};
 var decks = [];
 
 var updateAvailable = false;
@@ -790,6 +791,7 @@ function processLogData(data) {
             if (json.CourseDeck != null) {
                 json.CourseDeck.colors = get_deck_colors(json.CourseDeck);
                 console.log(json.CourseDeck, json.CourseDeck.colors)
+                saveCourse(json);
                 httpSubmitCourse(json._id, json);
             }
         }
@@ -1711,6 +1713,20 @@ function getOppDeck() {
     }); 
     
     return oppDeck;
+}
+
+function saveCourse(json) {
+    json.id = json._id;
+    json.date = new Date();;
+    delete json._id;
+    var courses_index = store.get('courses_index');
+
+    if (!courses_index.includes(json.id)) {
+        courses_index.push(json.id);
+    }
+
+    store.set('courses_index', courses_index);
+    store.set(json.id, json);
 }
 
 function saveMatch() {
