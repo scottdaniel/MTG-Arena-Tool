@@ -26,6 +26,7 @@ var cardSize = 140;
 var cardQuality = "normal";
 var inputTimer = undefined;
 var loadHistory = 0;
+var loadEvents = 0;
 var defaultBackground = "";
 var currentOpenDeck = null;
 var lastSettingsSection = 1;
@@ -52,10 +53,11 @@ ipc_send = function (method, arg) {
     ipc.send('ipc_switch', method, arg);
 };
 
-document.addEventListener('DOMContentLoaded', windowReady);
-function windowReady(){
-	ipc_send('renderer_state', 1);
-}
+//document.addEventListener('DOMContentLoaded', windowReady);
+
+//function windowReady(){
+//	ipc_send('renderer_state', 1);
+//}
 
 window.onerror = (err) => {
     ipc_send("ipc_log", "Error: "+err);
@@ -80,7 +82,9 @@ ipc.on('auth', function (event, arg) {
 //
 ipc.on('set_db', function (event, arg) {
 	setsList = arg.sets;
+	eventsList = arg.events;
 	delete arg.sets;
+	delete arg.events;
 	cardsDb.set(arg);
 });
 
@@ -143,6 +147,20 @@ ipc.on('set_history_data', function (event, arg) {
 	if (arg != null) {
 		matchesHistory = JSON.parse(arg);
 	}
+});
+
+//
+ipc.on('set_events', function (event, arg) {
+	if (arg != null) {
+	    try {
+	        eventsHistory = JSON.parse(arg);
+	    } catch(e) {
+	        console.log("Error parsing JSON:", str);
+	        return false;
+	    }
+	}
+
+	setEvents(0);
 });
 
 //
@@ -235,7 +253,7 @@ ipc.on('set_status', function (event, arg) {
 
 //
 ipc.on('set_explore', function (event, arg) {
-	if (sidebarActive == 2) {
+	if (sidebarActive == 3) {
 		arg.sort(compare_explore);
 		setExplore(arg, 0);
 	}
@@ -424,10 +442,10 @@ function installUpdate() {
 }
 
 function force_open_settings() {
-	sidebarActive = 5;
+	sidebarActive = 6;
 	$(".top_nav_item").each(function(index) {
 		$(this).removeClass("item_selected");
-		if ($(this).hasClass("it5")) {
+		if ($(this).hasClass("it6")) {
 			$(this).addClass("item_selected");
 		}
 	});
@@ -439,7 +457,7 @@ function force_open_about() {
 	sidebarActive = 9;
 	$(".top_nav_item").each(function(index) {
 		$(this).removeClass("item_selected");
-		if ($(this).hasClass("it6")) {
+		if ($(this).hasClass("it7")) {
 			$(this).addClass("item_selected");
 		}
 	});
@@ -546,20 +564,25 @@ $(document).ready(function() {
 			}
 			if ($(this).hasClass("it2")) {
 				sidebarActive = 2;
+				$("#ux_0").html('');
+				ipc_send('request_events', 1);
+			}
+			if ($(this).hasClass("it3")) {
+				sidebarActive = 3;
 				$("#ux_0").html('<div class="loading_bar ux_loading"><div class="loading_color loading_w"></div><div class="loading_color loading_u"></div><div class="loading_color loading_b"></div><div class="loading_color loading_r"></div><div class="loading_color loading_g"></div></div>');
 				document.body.style.cursor = "progress";
 				ipc_send('renderer_request_explore', filterEvent);
 			}
-			if ($(this).hasClass("it3")) {
-				sidebarActive = 3;
-				open_economy_ipc();
-			}
 			if ($(this).hasClass("it4")) {
 				sidebarActive = 4;
-				open_cards();
+				open_economy_ipc();
 			}
 			if ($(this).hasClass("it5")) {
 				sidebarActive = 5;
+				open_cards();
+			}
+			if ($(this).hasClass("it6")) {
+				sidebarActive = 6;
 				open_settings(lastSettingsSection);
 			}
 		}
@@ -572,6 +595,137 @@ $(document).ready(function() {
 //
 function open_economy_ipc() {
 	ipc_send('renderer_get_economy', 1);
+}
+
+
+//
+function setEvents(loadMore) {
+	var mainDiv = document.getElementById("ux_0");
+	if (loadMore > 0) {
+	}
+	else {
+		loadMore = 25;
+		eventsHistory.courses.sort(compare_courses); 
+
+		mainDiv.classList.remove("flex_item");
+		mainDiv.innerHTML = '';
+
+		var d = document.createElement("div");
+		d.classList.add("list_fill");
+		mainDiv.appendChild(d);
+
+		loadEvents = 0;
+	}
+
+	console.log("Load more: ", loadEvents, loadMore, loadEvents+loadMore);
+	for (var loadEnd = loadEvents + loadMore; loadEvents < loadEnd; loadEvents++) {
+		var course_id = eventsHistory.courses[loadEvents];
+		var course = eventsHistory[course_id];
+
+		if (course == undefined) continue;
+
+		var div = document.createElement("div");
+		div.classList.add(course.id);
+		div.classList.add("list_match");
+
+		var fltl = document.createElement("div");
+		fltl.classList.add("flex_item");
+
+		var fll = document.createElement("div");
+		fll.classList.add("flex_item");
+		fll.style.flexDirection = "column";
+
+		var flt = document.createElement("div");
+		flt.classList.add("flex_top");
+		fll.appendChild(flt);
+
+		var flb = document.createElement("div");
+		flb.classList.add("flex_bottom");
+		fll.appendChild(flb);
+
+		var flc = document.createElement("div");
+		flc.classList.add("flex_item");
+		flc.style.flexDirection = "column";
+		flc.style.flexGrow = 2;
+
+		var fct = document.createElement("div");
+		fct.classList.add("flex_top");
+		flc.appendChild(fct);
+
+		var fcb = document.createElement("div");
+		fcb.classList.add("flex_bottom");
+		fcb.style.marginRight = "14px";
+		flc.appendChild(fcb);
+
+		var flr = document.createElement("div");
+		flr.classList.add("flex_item");
+
+		var tileGrpid = course.CourseDeck.deckTileId;
+		if (!cardsDb.get(tileGrpid)) {
+			tileGrpid = 67003;
+		}
+
+		var tile = document.createElement("div");
+		tile.classList.add(course.id+"t");
+		tile.classList.add("deck_tile");
+
+		tile.style.backgroundImage = "url(https://img.scryfall.com/cards"+cardsDb.get(tileGrpid).images["art_crop"]+")";
+		fltl.appendChild(tile);
+
+		var d = document.createElement("div");
+		d.classList.add("list_deck_name");
+		d.innerHTML = getReadableEvent(course.InternalEventName);
+		flt.appendChild(d);
+
+		var d = document.createElement("div");
+		if (course.CurrentEventState == "DoneWithMatches") {
+			d.innerHTML = "Completed";
+			d.classList.add("list_event_phase");
+		}
+		else {
+			d.innerHTML = "In progress";
+			d.classList.add("list_event_phase_red");
+		}
+		fct.appendChild(d);
+
+		var d = document.createElement("div");
+		d.classList.add("list_match_time");
+		d.innerHTML = timeSince(new Date(course.date))+' ago.';
+		fcb.appendChild(d);
+
+		var wlGate = course.ModuleInstanceData.WinLossGate;
+
+		if (wlGate.MaxWins == wlGate.CurrentWins) {
+			var d = document.createElement("div");
+			d.classList.add("list_match_result_win");
+			d.innerHTML = wlGate.CurrentWins +":"+wlGate.CurrentLosses;
+			flr.appendChild(d);
+		}
+		else {
+			var d = document.createElement("div");
+			d.classList.add("list_match_result_loss");
+			d.innerHTML = wlGate.CurrentWins +":"+wlGate.CurrentLosses;
+			flr.appendChild(d);
+		}
+
+		div.appendChild(fltl);
+		div.appendChild(fll);
+		div.appendChild(flc);
+		div.appendChild(flr);
+
+		mainDiv.appendChild(div);
+			
+		addHover(course, tileGrpid);
+	}
+
+	$(this).off();
+	$("#ux_0").on('scroll', function() {
+		if($(this).scrollTop() + $(this).innerHeight() >= $(this)[0].scrollHeight) {
+			setEvents(20);
+		}
+	})
+
+	loadEvents = loadEnd;
 }
 
 //
@@ -918,9 +1072,12 @@ function addHover(_match, tileGrpid) {
 		if (_match.type == "match") {
 			open_match(_match.id);
 		}
-		else {
+		else if (_match.type == "draft") {
 			draftPosition = 1;
 			open_draft(_match.id, tileGrpid, _match.set);
+		}
+		else {
+			//open_match(_match.id);
 		}
 	    $('.moving_ux').animate({'left': '-100%'}, 250, 'easeInOutCubic'); 
 	});
@@ -1080,7 +1237,7 @@ function setDecks(arg) {
 
 //
 function updateExplore() {
-	filterEvent = document.getElementById("query_select").value;
+	filterEvent = getEventId(document.getElementById("query_select").value);
 	ipc_send('request_explore', filterEvent.toLowerCase());
 }
 
@@ -1129,7 +1286,7 @@ function setExplore(arg, loadMore) {
 					i--;
 				}
 				else {
-					let evId = _deck.event.replace(/[0-9]/g, ''); 
+					let evId = getReadableEvent(_deck.event)//.replace(/[0-9]/g, ''); 
 					if (!eventFilters.includes(evId)) {
 						eventFilters.push(evId);
 					}
@@ -1142,8 +1299,8 @@ function setExplore(arg, loadMore) {
 			return 0;
 		})
 		for (var i=0; i < eventFilters.length; i++) {
-			if (eventFilters[i] !== filterEvent) {
-				select.append('<option value="'+eventFilters[i]+'">'+getReadableEvent(eventFilters[i])+'</option>');
+			if (eventFilters[i] !== getReadableEvent(filterEvent)) {
+				select.append('<option value="'+eventFilters[i]+'">'+eventFilters[i]+'</option>');
 			}
 		}
 		select.appendTo(input);
@@ -3326,6 +3483,28 @@ function compare_matches(a, b) {
 
 	a = matchesHistory[a];
 	b = matchesHistory[b];
+
+	if (a == undefined)
+		return -1;
+	if (b == undefined)
+		return 1;
+
+	a = Date.parse(a.date);
+	b = Date.parse(b.date);
+	if (a < b)	return 1;
+	if (a > b)	return -1;
+	return 0;
+}
+
+//
+function compare_courses(a, b) {
+	if (a == undefined)
+		return -1;
+	if (b == undefined)
+		return 1;
+
+	a = eventsHistory[a];
+	b = eventsHistory[b];
 
 	if (a == undefined)
 		return -1;

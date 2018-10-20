@@ -64,7 +64,7 @@ const serverAddress = 'mtgatool.com';
 
 const debugLog = false;
 const debugNet = false;
-const debugLogSpeed = 0.1;
+var debugLogSpeed = 0.1;
 var timeStart = 0;
 var timeEnd = 0;
 const fs = require("fs");
@@ -117,6 +117,7 @@ var gameObjs = {};
 var hoverCard = undefined;
 var history = {};
 var drafts = {};
+var events = {};
 var topDecks = {};
 //var coursesToSubmit = {};
 var decks = [];
@@ -160,6 +161,7 @@ ipc.on('remember', function (event, arg) {
 
 //
 ipc.on('set_renderer_state', function (event, arg) {
+    ipc_send("ipc_log", "Renderer state: "+arg);
 	renderer_state = arg;
 	var settings = store.get("settings");
 	updateSettings(settings, true);
@@ -167,12 +169,7 @@ ipc.on('set_renderer_state', function (event, arg) {
     if (rstore.get("token") !== "" && rstore.get("email") !== "") {
         rememberMe = true;
         ipc_send("set_remember", rstore.get("email"));
-    }
-
-	if (debugLog) {
-	    ipc_send("show_background", 1);
-	    finishLoading();
-	}
+    }    
 });
 
 //
@@ -227,6 +224,11 @@ ipc.on('update_install', function (event, settings) {
     if (updateState == 3) {
         autoUpdater.quitAndInstall();
     }
+});
+
+//
+ipc.on('request_events', function (event, arg) {
+    ipc_send("set_events", JSON.stringify(events));
 });
 
 //
@@ -305,6 +307,7 @@ ipc.on('set_economy', function (event, arg) {
     ipc_send("set_economy", economy);
 });
 
+
 ipc.on('request_explore', function (event, arg) {
     if (playerUsername == '') {
         ipc_send("offline", 1);
@@ -382,7 +385,21 @@ function loadPlayerConfig(playerId) {
                 history[id] = item;
                 history[id].type = "draft";
             }
-	    }
+        }
+    }
+
+    events.courses = store.get('courses_index');
+    for (let i=0; i<events.courses.length; i++) {
+        ipc_send("popup", {"text": "Reading events: "+i+" / "+events.courses.length, "time": 0});
+        var id = events.courses[i];
+
+        if (id != null) {
+            var item = entireConfig[id];
+            if (item != undefined) {
+                events[id] = item;
+                events[id].type = "Event";
+            }
+        }
     }    
 
     deck_changes_index = entireConfig["deck_changes_index"];
@@ -491,7 +508,7 @@ console.log(logUri);
 var file;
 var logLoopTimer = null;
 var logLoopMode = 0;
-resetLogLoop(500);
+resetLogLoop(100);
 
 //
 function resetLogLoop(time) {
@@ -520,7 +537,7 @@ function logLoop() {
 //
 function readLog() {
 	//console.log("readLog()");
-    //ipc_send("ipc_log", "readLog("+logLoopMode+")");
+    //ipc_send("ipc_log", "readLog logloopmode: "+logLoopMode+", renderer state:"+renderer_state+", logSize: "+logSize+", prevLogSize: "+prevLogSize);
     if (!firstPass)  {
         ipc_send("log_read", 1);
     }
@@ -532,7 +549,11 @@ function readLog() {
         var logSize = stats.size;
         var logDiff = logSize - prevLogSize;
 
-        if (logSize > prevLogSize+1) {
+        if (logSize == undefined) {
+            fs.close(file);
+            resetLogLoop(500);
+        }
+        else if (logSize > prevLogSize+1) {
             if (logLoopMode == 0) {
                 fs.read(file, new Buffer(logDiff), 0, logDiff, prevLogSize, processLogUser);
             }
@@ -541,8 +562,6 @@ function readLog() {
             }
         }
         else {
-            //console.log("fs.close(file) readLog")
-            //ipc_send("ipc_log", "fs.close(file) readLog");
             fs.close(file);
             resetLogLoop(500);
         }
@@ -791,8 +810,8 @@ function processLogData(data) {
             if (json.CourseDeck != null) {
                 json.CourseDeck.colors = get_deck_colors(json.CourseDeck);
                 console.log(json.CourseDeck, json.CourseDeck.colors)
-                saveCourse(json);
                 httpSubmitCourse(json._id, json);
+                saveCourse(json);
             }
         }
         return;
@@ -1071,8 +1090,9 @@ function processLogData(data) {
     strCheck = '<== Event.Draft(';
     json = checkJsonWithStart(data, strCheck, '', ')');
     if (json != false) {
-        console.log("Draft start")
+        console.log("Draft start");
         draftId = json.Id;
+        //debugLogSpeed = 200;
         return;
     }
 
@@ -1090,7 +1110,8 @@ function processLogData(data) {
                 }
             }
         }
-        if (json.packNumber == 0 && json.pickNumber <= 1) {
+        console.log("Draft:", json);
+        if (json.packNumber == 0 && json.pickNumber <= 0) {
             httpGetPicks(draftSet);
             setDraftCards(json);
             createDraft();
@@ -1724,6 +1745,14 @@ function saveCourse(json) {
     if (!courses_index.includes(json.id)) {
         courses_index.push(json.id);
     }
+    else {
+        json.date = store.get(json.id).date;
+    }
+
+    // add locally
+    if (!events.courses.includes(json.id)) {
+        events.courses.push(json.id);
+    }
 
     store.set('courses_index', courses_index);
     store.set(json.id, json);
@@ -1850,7 +1879,7 @@ function httpBasic() {
     async.forEachOfSeries(httpAsyncNew, function (value, index, callback) {
         var _headers = value;
 
-        if (store.get("settings").send_data == false && _headers.method != 'delete_data' && _headers.method != 'get_database' && _headers.method != 'get_status' && debugLog == false) {
+        if (store.get("settings").send_data == false && _headers.method != 'get_picks' && _headers.method != 'delete_data' && _headers.method != 'get_database' && _headers.method != 'get_status' && debugLog == false) {
             callback({message: "Settings dont allow sending data! > "+_headers.method});
             removeFromHttp(_headers.reqId);
         }
@@ -1890,7 +1919,7 @@ function httpBasic() {
             res.on('end', function () {
                 if (debugNet) {
     				ipc_send("ipc_log", "RECV << "+index+", "+_headers.method+", "+_headers.reqId+", "+_headers.token);
-                    ipc_send("ipc_log", "RECV << "+index+", "+_headers.method+", "+results);
+                    ipc_send("ipc_log", "RECV << "+index+", "+_headers.method+", "+results.slice(0, 100));
                     console.log("RECV << "+index, _headers.method, results);
                 }
                 try {
@@ -1928,13 +1957,17 @@ function httpBasic() {
                         }
                         if (_headers.method == 'get_database') {
                             cardsDb.set(parsedResult);
-                            resetLogLoop(1);
+                           //resetLogLoop(100);
                             delete parsedResult.ok;
                             setsList = parsedResult.sets;
+                            eventsList = parsedResult.events;
                             ipc_send("set_db", parsedResult);
                         }
                     }
-                    else if (parsedResult.ok == false) {
+                    else if (parsedResult.ok == false && parsedResult.error != undefined) {
+                        if (_headers.method == 'share_draft') {
+                            ipc_send("popup", {"text": parsedResult.error, "time": 3000});
+                        }
                         // errors here 
                     }
                     if (_headers.method == 'auth') {

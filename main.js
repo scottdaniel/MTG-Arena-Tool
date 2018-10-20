@@ -28,10 +28,30 @@ var updateProgress = 0;
 var updateSpeed = 0;
 const ipc = electron.ipcMain;
 
+var mainLoaded = false;
+var backLoaded = false;
+
 app.on('ready', () => {
     mainWindow  = createMainWindow();
     overlay     = createOverlay();
     background  = createBackgroundWindow();
+
+    mainWindow.webContents.once('dom-ready', () => {
+        mainLoaded = true;
+        if (backLoaded == true) {
+            showWindow();
+            background.webContents.send("set_renderer_state", 1);
+        }
+    });
+
+    background.webContents.once('dom-ready', () => {
+        backLoaded = true;
+        if (mainLoaded == true) {
+            showWindow();
+            background.webContents.send("set_renderer_state", 1);
+        }
+    });
+
     autoUpdater.checkForUpdatesAndNotify();
 
     ipc.on('ipc_switch', function (event, method, arg) {
@@ -72,16 +92,16 @@ app.on('ready', () => {
                 mainWindow.webContents.send("set_remember", arg);
                 break;
 
-            case 'remember':
-                background.webContents.send("remember", arg);
-                break;
-
             case 'offline':
                 mainWindow.webContents.send("offline", arg);
                 break;
 
             case 'set_status':
                 mainWindow.webContents.send("set_status", arg);
+                break;
+
+            case 'set_events':
+                mainWindow.webContents.send("set_events", arg);
                 break;
 
             case 'set_db':
@@ -162,6 +182,10 @@ app.on('ready', () => {
                 break;
 
             // to background
+            case 'remember':
+                background.webContents.send("remember", arg);
+                break;
+
             case 'request_draft_link':
                 background.webContents.send("request_draft_link", arg);
                 break;
@@ -172,6 +196,10 @@ app.on('ready', () => {
 
             case 'request_explore':
                 background.webContents.send("request_explore", arg);
+                break;
+
+            case 'request_events':
+                background.webContents.send("request_events", arg);
                 break;
 
             case 'renderer_get_economy':

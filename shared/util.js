@@ -217,57 +217,25 @@ function addCardSeparator(i, element) {
 
 //
 function getReadableEvent(arg) {
-	switch (arg) {
-		case "CompCons_M_":
-			return "Competitive Constructed M19"; break;
-		case "Constructed_BestOf":
-			return "Constructed Best of 3"; break;
-		case "Brewers_M_":
-			return "Brewers Delight"; break;
-		case "Pauper_":
-			return "Pauper"; break;
-		case "TwiceTheLife_":
-			return "Twice the Life"; break;
-		case "QuickDraftExploration_M_":
-			return "Quick Draft Exploration M19"; break;
-		case "Momir_":
-			return "Momir Mardness"; break;
-
-		case "Sealed_GRN_":
-			return "Guilds of Ravnica Sealed"; break;
-
-		case "CompDraft_DOM_":
-			return "Competitive Draft DOM"; break;
-		case "CompDraft_M_":
-			return "Competitive Draft M19"; break;
-		case "CompDraft_GRN_":
-			return "Competitive Draft GRN"; break;
-
-		case "QuickDraft_RIX_":
-			return "Quick Draft RIX"; break;
-		case "QuickDraft_AKH_":
-			return "Quick Draft AKH"; break;
-		case "QuickDraft_DOM_":
-			return "Quick Draft DOM"; break;
-		case "QuickDraft_M_":
-			return "Quick Draft M19"; break;
-		case "QuickDraft_GRN_":
-			return "Quick Draft GRN"; break;
-
-		case "QuickExploration_":
-			return "Quick Exploration"; break;
-		case "Quick_Singleton_":
-			return "Quick Singleton"; break;
-		case "Welcome_Weekend_Singleton":
-			return "Welcome Weekend Singleton"; break;
-		case "CompCons_Metagame_Challenge_":
-			return "Metagame Challenge"; break;
-		
-		case "Quick_constructed_april_":
-			return "Quick Constructed"; break;
-		default:
-			return arg; break;
+	if (eventsList[arg] != undefined) {
+		return eventsList[arg];
 	}
+
+	return arg;
+}
+
+//
+function getEventId(arg) {
+	var ret = arg;
+	Object.keys(eventsList).forEach(function (key) {
+		console.log(arg, key, eventsList[key]);
+		if (eventsList[key] == arg) {
+			console.log("match!");
+			ret = key;
+		}
+	});
+
+	return ret;
 }
 
 //
@@ -397,7 +365,8 @@ function compare_draft_cards(a, b) {
 
 
 //
-var setsList = null;
+var setsList = {};
+var eventsList = {};
 
 //
 function get_set_scryfall(set) {
