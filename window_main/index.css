@@ -414,6 +414,14 @@ span i {
     color: #FAE5D2;
 }
 
+.list_event_expand {
+    width: calc(100% - 32px);
+    height: 0px;
+    overflow: hidden;
+    margin-left: 16px;
+    -webkit-transition: all .2s ease-in;
+}
+
 .green {
     color: rgba(183, 200, 158, 1) !important;
 }

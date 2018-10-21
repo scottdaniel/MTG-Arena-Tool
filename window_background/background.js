@@ -62,9 +62,9 @@ const cardsDb = new Database();
 
 const serverAddress = 'mtgatool.com';
 
-const debugLog = true;
+const debugLog = false;
 const debugNet = false;
-var debugLogSpeed = 10.1;
+var debugLogSpeed = 0.1;
 var timeStart = 0;
 var timeEnd = 0;
 const fs = require("fs");
@@ -526,7 +526,7 @@ function logLoop() {
         file = fd;
         if (err) {
             ipc_send("no_log", logUri);
-            console.log("No log file found");
+            ipc_send("popup", {"text": "No log file found.", "time": 0});
             resetLogLoop(500);
         } else {
             readLog();
@@ -1740,6 +1740,7 @@ function saveCourse(json) {
     json.id = json._id;
     json.date = new Date();;
     delete json._id;
+    
     var courses_index = store.get('courses_index');
 
     if (!courses_index.includes(json.id)) {

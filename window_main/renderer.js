@@ -715,14 +715,19 @@ function setEvents(loadMore) {
 			flr.appendChild(d);
 		}
 
+		var divExp = document.createElement("div");
+		divExp.classList.add(course.id+"exp");
+		divExp.classList.add("list_event_expand");
+
 		div.appendChild(fltl);
 		div.appendChild(fll);
 		div.appendChild(flc);
 		div.appendChild(flr);
 
 		mainDiv.appendChild(div);
-			
-		addHover(course, tileGrpid);
+		mainDiv.appendChild(divExp);
+		
+		addHover(course, divExp);
 	}
 
 	$(this).off();
@@ -733,6 +738,151 @@ function setEvents(loadMore) {
 	})
 
 	loadEvents = loadEnd;
+}
+
+//
+function expandEvent(_course, expandDiv) {
+	if (expandDiv.hasAttribute("style")) {
+		expandDiv.removeAttribute("style");
+		setTimeout(function() {
+			expandDiv.innerHTML = "";
+		}, 200);
+		return;
+	}
+
+	var matchesList = _course.ModuleInstanceData.WinLossGate.ProcessedMatchIds;
+	expandDiv.innerHTML = "";
+	console.log(matchesList);
+	var newHeight = 0;
+	if (matchesList != undefined) {
+		matchesList.forEach(function(_mid) {
+			var match = matchesHistory[_mid];
+
+			console.log(_mid);
+			console.log(match);
+			if (match != undefined) {
+				if (match.type == "match") {
+
+					//	if (match.opponent == undefined) continue;
+					//	if (match.opponent.userid.indexOf("Familiar") !== -1) continue;
+					match.playerDeck.mainDeck.sort(compare_cards);
+					match.oppDeck.mainDeck.sort(compare_cards);
+
+					var div = document.createElement("div");
+					div.classList.add(match.id);
+					div.classList.add("list_match");
+
+					var fltl = document.createElement("div");
+					fltl.classList.add("flex_item");
+
+					var fll = document.createElement("div");
+					fll.classList.add("flex_item");
+					fll.style.flexDirection = "column";
+
+					var flt = document.createElement("div");
+					flt.classList.add("flex_top");
+					fll.appendChild(flt);
+
+					var flb = document.createElement("div");
+					flb.classList.add("flex_bottom");
+					fll.appendChild(flb);
+
+					var flc = document.createElement("div");
+					flc.classList.add("flex_item");
+					flc.style.flexDirection = "column";
+					flc.style.flexGrow = 2;
+
+					var fct = document.createElement("div");
+					fct.classList.add("flex_top");
+					flc.appendChild(fct);
+
+					var fcb = document.createElement("div");
+					fcb.classList.add("flex_bottom");
+					fcb.style.marginRight = "14px";
+					flc.appendChild(fcb);
+
+					var flr = document.createElement("div");
+					flr.classList.add("flex_item");
+
+					var tileGrpid = match.playerDeck.deckTileId;
+					if (!cardsDb.get(tileGrpid)) {
+						tileGrpid = 67003;
+					}
+
+					var tile = document.createElement("div");
+					tile.classList.add(match.id+"t");
+					tile.classList.add("deck_tile");
+
+					tile.style.backgroundImage = "url(https://img.scryfall.com/cards"+cardsDb.get(tileGrpid).images["art_crop"]+")";
+					fltl.appendChild(tile);
+
+					var d = document.createElement("div");
+					d.classList.add("list_deck_name");
+					d.innerHTML = match.playerDeck.name;
+					flt.appendChild(d);
+
+					match.playerDeck.colors.forEach(function(color) {
+						var m = document.createElement("div");
+						m.classList.add("mana_s20");
+						m.classList.add("mana_"+mana[color]);
+						flb.appendChild(m);
+					});
+
+					var d = document.createElement("div");
+					d.classList.add("list_match_title");
+					if (match.opponent.name == null) {
+						match.opponent.name = "-";
+					}
+					d.innerHTML = "vs "+match.opponent.name.slice(0, -6);
+					fct.appendChild(d);
+
+					var or = document.createElement("div");
+					or.classList.add("ranks_16");
+					or.style.backgroundPosition = (get_rank_index_16(match.opponent.rank)*-16)+"px 0px";
+					or.title = match.opponent.rank+" "+match.opponent.tier;
+					fct.appendChild(or);
+
+					var d = document.createElement("div");
+					d.classList.add("list_match_time");
+					d.innerHTML = timeSince(new Date(match.date))+' ago.';
+					fcb.appendChild(d);
+
+					var cc = get_deck_colors(match.oppDeck);
+					cc.forEach(function(color) {
+						var m = document.createElement("div");
+						m.classList.add("mana_s20");
+						m.classList.add("mana_"+mana[color]);
+						fcb.appendChild(m);
+					});
+
+					if (match.player.win > match.opponent.win) {
+						var d = document.createElement("div");
+						d.classList.add("list_match_result_win");
+						//d.innerHTML = "Win";
+						d.innerHTML = match.player.win +":"+match.opponent.win;
+						flr.appendChild(d);
+					}
+					else {
+						var d = document.createElement("div");
+						d.classList.add("list_match_result_loss");
+						//d.innerHTML = "Loss";
+						d.innerHTML = match.player.win +":"+match.opponent.win;
+						flr.appendChild(d);
+					}
+
+					div.appendChild(fltl);
+					div.appendChild(fll);
+					div.appendChild(flc);
+					div.appendChild(flr);
+
+					expandDiv.appendChild(div);
+					newHeight += 64;
+					addHover(match, expandDiv);
+				}
+			}
+		});
+	}
+	expandDiv.style.height = newHeight+"px";
 }
 
 //
@@ -1078,15 +1228,16 @@ function addHover(_match, tileGrpid) {
 	$('.'+_match.id).on('click', function(e) {
 		if (_match.type == "match") {
 			open_match(_match.id);
+		    $('.moving_ux').animate({'left': '-100%'}, 250, 'easeInOutCubic'); 
 		}
 		else if (_match.type == "draft") {
 			draftPosition = 1;
 			open_draft(_match.id, tileGrpid, _match.set);
+		    $('.moving_ux').animate({'left': '-100%'}, 250, 'easeInOutCubic'); 
 		}
-		else {
-			//open_match(_match.id);
+		else if (_match.type == "Event") {
+			expandEvent(_match, tileGrpid);
 		}
-	    $('.moving_ux').animate({'left': '-100%'}, 250, 'easeInOutCubic'); 
 	});
 }
 
