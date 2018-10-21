@@ -20,6 +20,7 @@ var showSideboard = false;
 
 const Database = require('../shared/database.js');
 const cardsDb = new Database();
+var cards = {};
 
 var mana = {0: "", 1: "white", 2: "blue", 3: "black", 4: "red", 5: "green", 6: "colorless", 7: "", 8: "x"};
 
@@ -195,6 +196,12 @@ ipc.on('set_opponent_rank', function (event, rank, title) {
 	$(".top_rank").css("background-position", (rank*-48)+"px 0px").attr("title", title);
 });
 
+//
+ipc.on('set_cards', function (event, _cards) {
+	cards = _cards;
+});
+
+
 var picksRank = null;
 ipc.on('set_draft_picks', function (event, arg) {
 	picksRank = arg;
@@ -343,7 +350,21 @@ function setDraft() {
 					rank = Math.round(picksRank[grpId].average/13*9);
 				}
 			}
-			addCardTile(grpId, 'a', rank+1, $(".overlay_decklist"));
+
+			var od = $(".overlay_decklist");
+			var cont = $('<div class="overlay_card_quantity"></div>');
+
+	        for (let i=0; i<4; i++) {
+	        	if (i < cards[grpId]) {
+			        $('<div style="width: 24px; " class="inventory_card_quantity_green"></div>').appendTo(cont);
+	        	}
+	        	else {
+			        $('<div style="width: 24px; " class="inventory_card_quantity_gray"></div>').appendTo(cont);
+	        	}
+	        }
+
+	        cont.appendTo(od);
+			addCardTile(grpId, 'a', rank+1, od);
 		});
 	}
 }

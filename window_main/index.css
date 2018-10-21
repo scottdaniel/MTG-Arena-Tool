@@ -759,6 +759,12 @@ a:hover {
     margin: -2px 0 -2px -2px;
 }
 
+.overlay_card_quantity {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
 .inventory_card_quantity_blue {
     width: 35px;
     height: 24px;

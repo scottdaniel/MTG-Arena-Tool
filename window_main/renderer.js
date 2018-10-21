@@ -677,6 +677,13 @@ function setEvents(loadMore) {
 		d.innerHTML = getReadableEvent(course.InternalEventName);
 		flt.appendChild(d);
 
+		course.CourseDeck.colors.forEach(function(color) {
+			var m = document.createElement("div");
+			m.classList.add("mana_s20");
+			m.classList.add("mana_"+mana[color]);
+			flb.appendChild(m);
+		});
+
 		var d = document.createElement("div");
 		if (course.CurrentEventState == "DoneWithMatches") {
 			d.innerHTML = "Completed";

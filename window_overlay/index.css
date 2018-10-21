@@ -149,3 +149,37 @@
 .clock_prev:hover, .clock_next:hover, .draft_prev:hover, .draft_next:hover, .deck_prev:hover, .deck_next:hover {
     opacity: 1;
 }
+
+.overlay_card_quantity {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.inventory_card_quantity_blue {
+    width: 18px;
+    height: 18px;
+    display: inline-block;
+    background: center no-repeat url('../images/quantity_blue.png');
+}
+
+.inventory_card_quantity_green {
+    width: 18px;
+    height: 18px;
+    display: inline-block;
+    background: center no-repeat url('../images/quantity_green.png');
+}
+
+.inventory_card_quantity_gray {
+    width: 18px;
+    height: 18px;
+    display: inline-block;
+    background: center no-repeat url('../images/quantity_gray.png');
+}
+
+.inventory_card_quantity_orange {
+    width: 18px;
+    height: 18px;
+    display: inline-block;
+    background: center no-repeat url('../images/quantity_orange.png');
+}

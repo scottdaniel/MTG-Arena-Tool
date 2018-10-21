@@ -62,9 +62,9 @@ const cardsDb = new Database();
 
 const serverAddress = 'mtgatool.com';
 
-const debugLog = false;
+const debugLog = true;
 const debugNet = false;
-var debugLogSpeed = 0.1;
+var debugLogSpeed = 10.1;
 var timeStart = 0;
 var timeEnd = 0;
 const fs = require("fs");
@@ -1092,7 +1092,6 @@ function processLogData(data) {
     if (json != false) {
         console.log("Draft start");
         draftId = json.Id;
-        //debugLogSpeed = 200;
         return;
     }
 
@@ -1142,6 +1141,7 @@ function processLogData(data) {
         value.pack = currentDraftPack;
         var key = "pack_"+json.params.packNumber+"pick_"+json.params.pickNumber;
         currentDraft[key] = value;
+        debugLogSpeed = 1000;
         return;
     }
 

@@ -163,6 +163,7 @@ app.on('ready', () => {
 
             case 'set_cards':
                 mainWindow.webContents.send("set_cards", arg.cards, arg.new);
+                overlay.webContents.send("set_cards", arg.cards);
                 break;
 
             case 'init_login':
