@@ -2,7 +2,7 @@
 
 const electron = require('electron');
 
-const {dialog, app, Menu, Tray, net, clipboard} = require('electron');
+const {dialog, app, globalShortcut, Menu, Tray, net, clipboard} = require('electron');
 const path  = require('path');
 const Store = require('./store.js');
 const async = require("async");
@@ -35,6 +35,15 @@ app.on('ready', () => {
     mainWindow  = createMainWindow();
     overlay     = createOverlay();
     background  = createBackgroundWindow();
+
+    globalShortcut.register('Alt+Shift+D', () => {
+        if (background.isVisible()) {
+            background.hide();
+        }
+        else {
+            background.show();
+        }
+    })
 
     mainWindow.webContents.once('dom-ready', () => {
         mainLoaded = true;
