@@ -1755,6 +1755,8 @@ function saveCourse(json) {
         events.courses.push(json.id);
     }
 
+    events[json.id] = json;
+    history[currentMatchId].type = "Event";
     store.set('courses_index', courses_index);
     store.set(json.id, json);
 }
