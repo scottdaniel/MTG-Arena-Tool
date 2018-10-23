@@ -51,6 +51,8 @@ npm install
 npm start
 ```
 
+Once running from source you can open developer tools with F12 and toggle background process window visible using Shift+Alt+D.
+
 ### Download
 Currently, our releases are hosted [here at GitHub](https://github.com/Manuel-777/MTG-Arena-Tool/releases). You will find all stable and pre-production releases right here.
 

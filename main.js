@@ -212,6 +212,11 @@ app.on('ready', () => {
                 background.webContents.send("request_events", arg);
                 break;
 
+            case 'request_economy':
+                background.webContents.send("request_economy", arg);
+                break;
+
+            // ** FOR REMOVAL ** 
             case 'renderer_get_economy':
                 background.webContents.send("set_economy", 1);
                 break;

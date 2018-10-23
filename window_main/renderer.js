@@ -4,7 +4,10 @@ var shell = electron.shell;
 window.ipc = electron.ipcRenderer;
 var decks = null;
 var changes = null;
-var matchesHistory = null;
+var matchesHistory = [];
+var economyHistory = [];
+var eventsHistory = [];
+
 var explore = null;
 var cards = {};
 var cardsNew = {};
@@ -36,9 +39,12 @@ var loggedIn = false;
 var rankOffset = 0;
 var rankTitle = "";
 var userName = ""
+
+// ** FOR REMOVAL **
 var goldHistory = null;
 var gemsHistory = null;
 var wildcardHistory = null;
+//
 
 const chartjs = require('chart.js');
 const Database = require('../shared/database.js');
@@ -161,6 +167,20 @@ ipc.on('set_events', function (event, arg) {
 	}
 
 	setEvents(0);
+});
+
+
+ipc.on('set_economy', function (event, arg) {
+	if (arg != null) {
+	    try {
+	        economyHistory = JSON.parse(arg);
+	    } catch(e) {
+	        console.log("Error parsing JSON:", str);
+	        return false;
+	    }
+	}
+
+	setEconomy(0);
 });
 
 //
@@ -330,7 +350,8 @@ ipc.on('force_open_about', function (event, arg) {
 	force_open_about();
 });
 
-//
+// ** FOR REMOVAL **
+/*
 ipc.on('set_economy', function (event, arg) {
 	goldHistory = arg.gold;
 	gemsHistory = arg.gems;
@@ -340,6 +361,7 @@ ipc.on('set_economy', function (event, arg) {
 		open_economy();
 	}
 });
+*/
 
 //
 ipc.on('init_login', function (event, arg) {
@@ -575,7 +597,8 @@ $(document).ready(function() {
 			}
 			if ($(this).hasClass("it4")) {
 				sidebarActive = 4;
-				open_economy_ipc();
+				ipc_send('request_economy', 1);
+				//open_economy_ipc();
 			}
 			if ($(this).hasClass("it5")) {
 				sidebarActive = 5;
@@ -592,11 +615,244 @@ $(document).ready(function() {
 	});
 });
 
-//
+// ** FOR REMOVAL **
 function open_economy_ipc() {
 	ipc_send('renderer_get_economy', 1);
 }
 
+//
+function setEconomy(loadMore) {
+	var mainDiv = document.getElementById("ux_0");
+	if (loadMore > 0) {
+	}
+	else {
+		loadMore = 25;
+		economyHistory.changes.sort(compare_economy); 
+
+		mainDiv.classList.remove("flex_item");
+		mainDiv.innerHTML = '';
+
+		var d = document.createElement("div");
+		d.classList.add("list_fill");
+		mainDiv.appendChild(d);
+
+		loadEconomy = 0;
+	}
+
+	console.log("Load more: ", loadEconomy, loadMore, loadEconomy+loadMore);
+	for (var loadEnd = loadEconomy + loadMore; loadEconomy < loadEnd; loadEconomy++) {
+		var economy_id = economyHistory.changes[loadEconomy];
+		var change = economyHistory[economy_id];
+
+		if (change == undefined) continue;
+
+		var div = document.createElement("div");
+		div.classList.add(economy_id);
+		div.classList.add("list_economy");
+
+		var fll = document.createElement("div");
+		fll.classList.add("flex_item");
+		fll.style.flexDirection = "column";
+
+		var flt = document.createElement("div");
+		flt.classList.add("flex_top");
+		flt.classList.add("economy_sub");
+		flt.style.lineHeight = "32px";
+		flt.innerHTML = change.context;
+
+		var flb = document.createElement("div");
+		flb.classList.add("flex_bottom");
+
+		var flr = document.createElement("div");
+		flr.classList.add("flex_item");
+		flr.style.marginRight = "24px";
+
+		checkGemsPaid = false;
+		checkGoldPaid = false;
+		checkCardsAdded = false;
+		checkBoosterAdded = false;
+		checkGemsEarnt = false;
+		checkGoldEarnt = false;
+
+		if (change.context == "Booster Open") {
+			change.delta.boosterDelta.forEach(function(booster) {
+				var set = get_colation_set(booster.collationId);
+
+				var bos = document.createElement("div");
+				bos.classList.add("set_logo");
+				bos.style.backgroundImage = 'url(../images/sets/'+setsList[set].code+'.png)';
+				bos.title = set;
+
+				var bon = document.createElement("div");
+				bon.style.lineHeight = "32px";
+				bon.classList.add("economy_sub");
+
+				bon.innerHTML = "x"+Math.abs(booster.count);
+
+				flb.appendChild(bos);
+				flb.appendChild(bon);
+			});
+
+			checkCardsAdded = true;
+			// Draw set logo below title
+			// Draw small cards images on the right
+		}
+		else if (change.context == "Store") {
+			checkGemsPaid = true;
+			checkGoldPaid = true;
+			checkBoosterAdded = true;
+			checkCardsAdded = true;
+			// Draw gold or gems + ammount spent below title
+			// Draw obtained goods on the right
+		}
+		else if (change.context == "Redeem Wilcard") {
+			var imgUri = "";
+			if (change.delta.wcCommonDelta != undefined)	imgUri = "wc_common";
+			if (change.delta.wcUncommonDelta != undefined)	imgUri = "wc_uncommon";
+			if (change.delta.wcRareDelta != undefined)		imgUri = "wc_rare";
+			if (change.delta.wcMythicDelta != undefined)	imgUri = "wc_mythic";
+			if (imgUri != "") {
+				var bos = document.createElement("div");
+				bos.classList.add("economy_wc");
+				bos.style.backgroundImage = 'url(../images/'+imgUri+'.png)';
+
+				flb.appendChild(bos);
+			}
+
+			checkCardsAdded = true;
+			// Draw wildcard spent below title
+			// Draw card redeemed on the right
+		}
+		else {
+			checkGemsEarnt = true;
+			checkGoldEarnt = true;
+			checkBoosterAdded = true;
+			checkCardsAdded = true;
+		}
+
+		if (checkGemsPaid && change.delta.gemsDelta != undefined) {
+			var bos = document.createElement("div");
+			bos.classList.add("economy_gems");
+			bos.title = "Gems";
+
+			var bon = document.createElement("div");
+			bon.style.lineHeight = "32px";
+			bon.classList.add("economy_sub");
+			bon.innerHTML = Math.abs(change.delta.gemsDelta);
+
+			flb.appendChild(bos);
+			flb.appendChild(bon);
+		}
+
+		if (checkGoldPaid && change.delta.goldDelta != undefined) {
+			var bos = document.createElement("div");
+			bos.classList.add("economy_gold");
+			bos.title = "Gold";
+
+			var bon = document.createElement("div");
+			bon.style.lineHeight = "32px";
+			bon.classList.add("economy_sub");
+			bon.innerHTML = Math.abs(change.delta.goldDelta);
+
+			flb.appendChild(bos);
+			flb.appendChild(bon);
+		}
+
+		if (checkGemsEarnt && change.delta.gemsDelta != undefined) {
+			var bos = document.createElement("div");
+			bos.classList.add("economy_gems_med");
+			bos.title = "Gems";
+
+			var bon = document.createElement("div");
+			bon.style.lineHeight = "64px";
+			bon.classList.add("economy_sub");
+			bon.innerHTML = Math.abs(change.delta.gemsDelta);
+
+			flr.appendChild(bos);
+			flr.appendChild(bon);
+		}
+
+		if (checkGoldEarnt && change.delta.goldDelta != undefined) {
+			var bos = document.createElement("div");
+			bos.classList.add("economy_gold_med");
+			bos.title = "Gold";
+
+			var bon = document.createElement("div");
+			bon.style.lineHeight = "64px";
+			bon.classList.add("economy_sub");
+			bon.innerHTML = Math.abs(change.delta.goldDelta);
+
+			flr.appendChild(bos);
+			flr.appendChild(bon);
+		}
+
+		if (checkBoosterAdded && change.delta.boosterDelta != undefined) {
+			change.delta.boosterDelta.forEach(function(booster) {
+				var set = get_colation_set(booster.collationId);
+
+				var bos = document.createElement("div");
+				bos.classList.add("set_logo_med");
+				bos.style.backgroundImage = 'url(../images/sets/'+setsList[set].code+'.png)';
+				bos.title = set;
+
+				var bon = document.createElement("div");
+				bon.style.lineHeight = "64px";
+				bon.classList.add("economy_sub");
+				bon.innerHTML = "x"+Math.abs(booster.count);
+
+				flr.appendChild(bos);
+				flr.appendChild(bon);
+			});
+		}
+
+		if (checkCardsAdded && change.delta.cardsAdded != undefined) {
+			change.delta.cardsAdded.forEach(function(grpId) {
+				var card = cardsDb.get(grpId);
+
+				var d = document.createElement("div");
+				d.classList.add("inventory_card");
+				d.style.width = "39px";
+
+				var img = document.createElement("img");
+				img.classList.add("inventory_card_img");
+				img.style.width = "39px";
+				img.src = "https://img.scryfall.com/cards"+card.images[cardQuality];
+
+				d.appendChild(img);
+				flr.appendChild(d);
+
+				var imgDom = $(img);
+				addCardHover(imgDom, card);
+
+				imgDom.on('click', function(e) {
+					if (cardsDb.get(grpId).dfc == 'SplitHalf')	{
+						card = cardsDb.get(card.dfcId);
+					}
+					let newname = card.name.split(' ').join('-');
+
+					shell.openExternal('https://scryfall.com/card/'+get_set_scryfall(card.set)+'/'+card.cid+'/'+card.name);
+				});				
+			});
+		}
+
+		fll.appendChild(flt);
+		fll.appendChild(flb);
+		div.appendChild(fll);
+		div.appendChild(flr);
+
+		mainDiv.appendChild(div);
+
+	}
+
+	$(this).off();
+	$("#ux_0").on('scroll', function() {
+		if($(this).scrollTop() + $(this).innerHeight() >= $(this)[0].scrollHeight) {
+			setEconomy(20);
+		}
+	})
+
+	loadEconomy = loadEnd;
+}
 
 //
 function setEvents(loadMore) {
@@ -2234,7 +2490,7 @@ function open_draft(id, tileGrpid, set) {
 	});
 }
 
-//
+// ** FOR REMOVAL ** 
 function open_match(id) {
 	$("#ux_1").html('');
 	var match = matchesHistory[id];
@@ -3675,6 +3931,30 @@ function compare_courses(a, b) {
 	if (a > b)	return -1;
 	return 0;
 }
+
+//
+function compare_economy(a, b) {
+	if (a == undefined)
+		return -1;
+	if (b == undefined)
+		return 1;
+
+	a = economyHistory[a];
+	b = economyHistory[b];
+
+	if (a == undefined)
+		return -1;
+	if (b == undefined)
+		return 1;
+
+	a = Date.parse(a.date);
+	b = Date.parse(b.date);
+	if (a < b)	return 1;
+	if (a > b)	return -1;
+	return 0;
+}
+
+
 
 function compare_explore(a, b) {
 	var awlrate = a.wins-a.losses;

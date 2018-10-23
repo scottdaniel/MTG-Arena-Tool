@@ -36,6 +36,8 @@ const defaultCfg = {
         back_color: "rgba(0,0,0,0.3)",
         back_url: ''
     },
+    economy_index:[],
+    economy:[],
     deck_changes:{},
     deck_changes_index:[],
     courses_index:[],
@@ -133,6 +135,7 @@ var draftId = undefined;
 var overlayDeckMode = 0;
 var lastDeckUpdate = new Date();
 
+var economy = {};
 var goldHistory = [];
 var gemsHistory = [];
 var wilcardsHistory = [];
@@ -292,7 +295,7 @@ function calculateRankWins() {
 	history.rankwinrates = rankwinrates;
 }
 
-//
+// ** FOR REMOVAL ** 
 ipc.on('set_economy', function (event, arg) {
     goldHistory = store.get("gold_history");
     gemsHistory = store.get("gems_history");
@@ -302,9 +305,8 @@ ipc.on('set_economy', function (event, arg) {
     gemsHistory = fix_history(gemsHistory);
     wilcardsHistory = fix_history(wilcardsHistory);
 
-    var economy = {gold: goldHistory, gems: gemsHistory, wildcards: wilcardsHistory, open: true};    
-
-    ipc_send("set_economy", economy);
+    //var economy = {gold: goldHistory, gems: gemsHistory, wildcards: wilcardsHistory, open: true};    
+    //ipc_send("set_economy", economy);
 });
 
 
@@ -317,10 +319,14 @@ ipc.on('request_explore', function (event, arg) {
             httpGetTopDecks("");
         }
         else {
-            arg = arg.replace("_m_", "_m19_");// dirty hack :(
+            //arg = arg.replace("_m_", "_m19_");// dirty hack :(
             httpGetTopDecks(arg);
         }
     }
+});
+
+ipc.on('request_economy', function (event, arg) {
+    ipc_send("set_economy", JSON.stringify(economy));
 });
 
 ipc.on('request_course', function (event, arg) {
@@ -400,15 +406,31 @@ function loadPlayerConfig(playerId) {
                 events[id].type = "Event";
             }
         }
-    }    
+    }
+
+    economy.changes = store.get('economy_index');
+    for (let i=0; i<economy.changes.length; i++) {
+        ipc_send("popup", {"text": "Reading economy: "+i+" / "+economy.changes.length, "time": 0});
+        var id = economy.changes[i];
+
+        if (id != null) {
+            var item = entireConfig[id];
+            if (item != undefined) {
+                economy[id] = item;
+            }
+        }
+    }
 
     deck_changes_index = entireConfig["deck_changes_index"];
     deck_changes = entireConfig["deck_changes"];
+
+    // ** FOR REMOVAL **
     goldHistory = entireConfig["gold_history"];
     gemsHistory = entireConfig["gems_history"];
     wilcardsHistory = entireConfig["wildcards_history"];
-    var economy = {gold: goldHistory, gems: gemsHistory, wildcards: wilcardsHistory, open: false};    
-    ipc_send("set_economy", economy);
+    //var economy = {gold: goldHistory, gems: gemsHistory, wildcards: wilcardsHistory, open: false};
+    //ipc_send("set_economy", economy);
+    //
 
     var settings = store.get("settings");
     updateSettings(settings, true);
@@ -444,7 +466,7 @@ function updateSettings(_settings, relay) {
     }
 }
 
-//
+// ** FOR REMOVAL ** 
 function fix_history(_history) {
     var mode = 0;
     if (mode == 0) {
@@ -954,6 +976,37 @@ function processLogData(data) {
             }
         });
 
+        return;
+    }
+
+    // Get inventory changes
+    strCheck = 'Incoming Inventory.Updated';
+    json = checkJson(data, strCheck, '');
+    if (json != false) {
+        strCheck = 'Logger]';
+        if (data.indexOf(strCheck) > -1) {
+            var str = dataChop(data, strCheck, 'M')+'M';
+            var logTime = parseWotcTime(str);
+        }
+        json.date = logTime;
+        
+        if (json.delta.boosterDelta.length == 0)        delete json.delta.boosterDelta;
+        if (json.delta.cardsAdded.length == 0)          delete json.delta.cardsAdded;
+        if (json.delta.decksAdded.length == 0)          delete json.delta.decksAdded;
+        if (json.delta.vanityItemsAdded.length == 0)    delete json.delta.vanityItemsAdded;
+        if (json.delta.vanityItemsRemoved.length == 0)  delete json.delta.vanityItemsRemoved;
+
+        if (json.delta.gemsDelta == 0)           delete json.delta.gemsDelta;
+        if (json.delta.draftTokensDelta == 0)    delete json.delta.draftTokensDelta;
+        if (json.delta.goldDelta == 0)           delete json.delta.goldDelta;
+        if (json.delta.sealedTokensDelta == 0)   delete json.delta.sealedTokensDelta;
+        if (json.delta.vaultProgressDelta == 0)  delete json.delta.vaultProgressDelta;
+        if (json.delta.wcCommonDelta == 0)       delete json.delta.wcCommonDelta;
+        if (json.delta.wcMythicDelta == 0)       delete json.delta.wcMythicDelta;
+        if (json.delta.wcRareDelta == 0)         delete json.delta.wcRareDelta;
+        if (json.delta.wcUncommonDelta == 0)     delete json.delta.wcUncommonDelta;
+
+        saveEconomy(json);
         return;
     }
 
@@ -1736,6 +1789,41 @@ function getOppDeck() {
     return oppDeck;
 }
 
+function saveEconomy(json) {
+    var ctx = json.context;
+    json.id = sha1(json.date.getTime()+ctx);
+    
+    if (ctx.indexOf("Quest.Completed") !== -1) {
+        json.context = "Quest Completed";
+    }
+    if (ctx.indexOf("Booster.Open") !== -1) {
+        json.context = "Booster Open";
+    }
+    if (ctx.indexOf("PlayerReward") !== -1) {
+        json.context = "Player Rewards";
+    }
+    if (ctx.indexOf("WildCard.Redeem") !== -1) {
+        json.context = "Redeem Wilcard";
+    }
+    if (ctx.indexOf("Store.Fulfillment") !== -1) {
+        json.context = "Store";
+    }
+    if (ctx.indexOf("Event.Prize") !== -1) {
+        json.context = "Event Prize";
+    }
+
+    var economy_index = store.get('economy_index');
+
+    if (!economy_index.includes(json.id)) {
+        economy_index.push(json.id);
+    }
+    
+    economy[json.id] = json;
+    economy.changes = economy_index;
+    store.set('economy_index', economy_index);
+    store.set(json.id, json);
+}
+
 function saveCourse(json) {
     json.id = json._id;
     json.date = new Date();;
@@ -1755,8 +1843,8 @@ function saveCourse(json) {
         events.courses.push(json.id);
     }
 
+    json.type = "Event";
     events[json.id] = json;
-    history[currentMatchId].type = "Event";
     store.set('courses_index', courses_index);
     store.set(json.id, json);
 }

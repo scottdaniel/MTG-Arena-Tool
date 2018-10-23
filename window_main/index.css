@@ -414,6 +414,33 @@ span i {
     color: #FAE5D2;
 }
 
+.list_economy {
+    cursor: pointer;
+    padding-left: 16px;
+    height: 64px;
+    display: flex;
+    justify-content: space-between;
+    background-color: rgba(0, 0, 0, 0);
+    -webkit-transition: background-color .2s ease-in;
+}
+
+.list_economy:hover {
+    background-color: rgba(0, 0, 0, 0.25);
+}
+
+.list_economy_title {
+    width: auto;
+    margin-right: 8px;
+    margin-left: auto;
+    line-height: 32px;
+    vertical-align: middle;
+    text-align: right;
+    font-family: Mplantin-italic;
+    font-size: 16px;
+    color: rgba(250, 229, 210, 1);
+}
+
+
 .list_event_expand {
     width: calc(100% - 32px);
     height: 0px;
@@ -949,6 +976,24 @@ a:hover {
     width: calc(100% - 32px);
 }
 
+.set_logo {
+    background-repeat: no-repeat;
+    width: 28px;
+    margin: auto 4px;
+    height: 28px;
+    cursor: pointer;
+    background-size: contain;
+}
+
+.set_logo_med {
+    background-repeat: no-repeat;
+    width: 36px;
+    margin: auto 4px;
+    height: 36px;
+    cursor: pointer;
+    background-size: contain;
+}
+
 .set_filter {
     opacity: 1;
     background-repeat: no-repeat;
@@ -968,6 +1013,53 @@ a:hover {
     opacity: 0.3;
 }
 
+.economy_sub {
+    margin-left: 2px;
+    color: #FAE5D2;
+}
+
+.economy_wc {
+    width: 24px;
+    height: 24px;
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+.economy_gems {
+    background-repeat: no-repeat;
+    margin: auto 4px;
+    width: 28px;
+    height: 28px;
+    background-image: url(../images/gem.png);
+    background-size: contain;
+}
+
+.economy_gems_med {
+    background-repeat: no-repeat;
+    margin: auto 4px;
+    width: 32px;
+    height: 32px;
+    background-image: url(../images/gem.png);
+    background-size: contain;
+}
+
+.economy_gold {
+    background-repeat: no-repeat;
+    margin: auto 4px;
+    width: 28px;
+    height: 28px;
+    background-image: url(../images/gold.png);
+    background-size: contain;
+}
+
+.economy_gold_med {
+    background-repeat: no-repeat;
+    margin: auto 4px;
+    width: 32px;
+    height: 32px;
+    background-image: url(../images/gold.png);
+    background-size: contain;
+}
 
 .mana_filter {
     opacity: 1;

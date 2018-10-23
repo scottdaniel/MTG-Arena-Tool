@@ -228,7 +228,6 @@ function getReadableEvent(arg) {
 function getEventId(arg) {
 	var ret = arg;
 	Object.keys(eventsList).forEach(function (key) {
-		console.log(arg, key, eventsList[key]);
 		if (eventsList[key] == arg) {
 			console.log("match!");
 			ret = key;
@@ -374,6 +373,18 @@ function get_set_scryfall(set) {
 	let s = setsList[set].scryfall;
 	if (s == undefined)	s = set;
 	return s;
+}
+
+//
+function get_colation_set(collationid) {
+	var ret = "";
+    Object.keys(setsList).forEach(function(setName) {
+    	if (setsList[setName].collation == collationid) {
+    		ret = setName;
+    	}
+    });
+
+	return ret;
 }
 
 //
