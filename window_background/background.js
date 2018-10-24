@@ -1817,6 +1817,8 @@ function saveEconomy(json) {
     if (!economy_index.includes(json.id)) {
         economy_index.push(json.id);
     }
+
+    httpSetEconomy(json);
     
     economy[json.id] = json;
     economy.changes = economy_index;
@@ -1994,7 +1996,7 @@ function httpBasic() {
             var options = { protocol: 'https:', port: 443, hostname: 'magicthegatheringarena.statuspage.io', path: '/index.json', method: 'GET'};
         }
         else {
-            var options = { protocol: 'https:', port: 443, hostname: serverAddress, path: '/api.php', method: 'POST', headers: _headers };
+            var options = { protocol: 'https:', port: 443, hostname: serverAddress, path: '/api_test.php', method: 'POST', headers: _headers };
         }
 
         if (debugNet) {
@@ -2142,6 +2144,12 @@ function httpSetMatch(match) {
     var _id = makeId(6);
     match = JSON.stringify(match);
     httpAsync.push({'reqId': _id, 'method': 'set_match', 'uid': playerId, 'match': match});
+}
+
+function httpSetEconomy(change) {
+    var _id = makeId(6);
+    change = JSON.stringify(change);
+    httpAsync.push({'reqId': _id, 'method': 'set_economy', 'uid': playerId, 'change': change});
 }
 
 function httpDeleteData(courseId) {
