@@ -1013,6 +1013,38 @@ a:hover {
     opacity: 0.3;
 }
 
+.economy_day_stats {
+    font-family: 'Mplantin';
+    font-size: 16px;
+    margin: auto 16px auto auto;
+}
+
+.economy_up {
+    background-repeat: no-repeat;
+    margin: auto 4px;
+    width: 24px;
+    height: 24px;
+    background-image: url(../images/up_green.png);
+    background-size: contain;
+}
+
+.economy_down {
+    background-repeat: no-repeat;
+    margin: auto 4px;
+    width: 24px;
+    height: 24px;
+    background-image: url(../images/down_red.png);
+    background-size: contain;
+}
+
+.economy_title {
+    padding-left: 16px;
+    line-height: 64px;
+    font-family: 'Beleren';
+    font-size: 18px;
+    background-color: rgba(145, 121, 97, 0.2);
+}
+
 .economy_sub {
     margin-left: 2px;
     color: #FAE5D2;
@@ -1037,8 +1069,8 @@ a:hover {
 .economy_gems_med {
     background-repeat: no-repeat;
     margin: auto 4px;
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
     background-image: url(../images/gem.png);
     background-size: contain;
 }
@@ -1055,8 +1087,8 @@ a:hover {
 .economy_gold_med {
     background-repeat: no-repeat;
     margin: auto 4px;
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
     background-image: url(../images/gold.png);
     background-size: contain;
 }

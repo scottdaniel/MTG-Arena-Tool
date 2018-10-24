@@ -620,6 +620,18 @@ function open_economy_ipc() {
 	ipc_send('renderer_get_economy', 1);
 }
 
+var daysago = 0;
+var dayList = [];
+
+class economyDay {
+	constructor(goldEarned = 0, gemsEarned = 0, goldSpent = 0, gemsSpent = 0) {
+		this.goldEarned = goldEarned;
+		this.gemsEarned = gemsEarned;
+		this.goldSpent = goldSpent;
+		this.gemsSpent = gemsSpent;
+	}
+}
+
 //
 function setEconomy(loadMore) {
 	var mainDiv = document.getElementById("ux_0");
@@ -627,16 +639,44 @@ function setEconomy(loadMore) {
 	}
 	else {
 		loadMore = 25;
+		daysago = 0;
+		dayList = [];
+		dayList[0] = new economyDay();
 		economyHistory.changes.sort(compare_economy); 
+		
+		for (var n = 0; n < economyHistory.changes.length; n++) {
+			var economy_id = economyHistory.changes[n];
+			var change = economyHistory[economy_id];
+			if (change == undefined) continue;
 
+			if (change.delta.gemsDelta != undefined) {
+				if (change.delta.gemsDelta > 0)
+					dayList[daysago].gemsEarned += change.delta.gemsDelta;
+				else 
+					dayList[daysago].gemsSpent  += Math.abs(change.delta.gemsDelta);
+			}
+			if (change.delta.goldDelta != undefined) {
+				if (change.delta.goldDelta > 0)
+					dayList[daysago].goldEarned += change.delta.goldDelta;
+				else 
+					dayList[daysago].goldSpent  += Math.abs(change.delta.goldDelta);
+			}
+			
+			if (daysago != daysPast(change.date)) {
+				daysago = daysPast(change.date);
+				dayList[daysago] = new economyDay();
+			}
+		}
+		
 		mainDiv.classList.remove("flex_item");
-		mainDiv.innerHTML = '';
+		mainDiv.innerHTML = "";
 
 		var d = document.createElement("div");
 		d.classList.add("list_fill");
 		mainDiv.appendChild(d);
 
 		loadEconomy = 0;
+		daysago = -1;
 	}
 
 	console.log("Load more: ", loadEconomy, loadMore, loadEconomy+loadMore);
@@ -645,6 +685,70 @@ function setEconomy(loadMore) {
 		var change = economyHistory[economy_id];
 
 		if (change == undefined) continue;
+
+		if (daysago != daysPast(change.date)) {
+			daysago = daysPast(change.date);
+			let dd = new Date(change.date);
+			let div = document.createElement("div");
+			div.classList.add("economy_title");
+			div.classList.add("flex_item");
+
+			let fll = document.createElement("div");
+			fll.classList.add("economy_sub");
+			div.classList.add("flex_item");
+			fll.style.lineHeight = "64px";
+			if (daysago == 0) 	fll.innerHTML =  "Today";
+			if (daysago == 1) 	fll.innerHTML =  "Yesterday";
+			if (daysago > 1) 	fll.innerHTML =  daysago+" Days ago. ("+dd.toDateString()+")";
+
+			let flr = document.createElement("div");
+			flr.classList.add("economy_day_stats");
+			flr.classList.add("flex_item");
+
+			let icgo = document.createElement("div");
+			icgo.classList.add("economy_gold_med");
+			icgo.title = "Gold";
+
+			let icge = document.createElement("div");
+			icge.classList.add("economy_gems_med");
+			icge.style.marginLeft = "24px";
+			icge.title = "Gems";
+
+			let up = document.createElement("div");
+			up.classList.add("economy_up");
+
+			let down = document.createElement("div");
+			down.classList.add("economy_down");
+
+			let tx = document.createElement("div");
+			tx.style.lineHeight = "64px";
+			tx.classList.add("economy_sub");
+
+			flr.appendChild(icgo);
+			flr.appendChild(up);
+			tx.innerHTML = dayList[daysago].goldEarned;
+			flr.appendChild(tx);
+			
+			flr.appendChild(down);
+			let ntx = tx.cloneNode(true);
+			ntx.innerHTML = dayList[daysago].goldSpent;
+			flr.appendChild(ntx);
+			
+			flr.appendChild(icge);
+			flr.appendChild(up.cloneNode(true));
+			ntx = tx.cloneNode(true);
+			ntx.innerHTML = dayList[daysago].gemsEarned;
+			flr.appendChild(ntx);
+			
+			flr.appendChild(down.cloneNode(true));
+			ntx = tx.cloneNode(true);
+			ntx.innerHTML = dayList[daysago].gemsSpent;
+			flr.appendChild(ntx);
+			
+			div.appendChild(fll);
+			div.appendChild(flr);
+			mainDiv.appendChild(div);
+		}
 
 		var div = document.createElement("div");
 		div.classList.add(economy_id);
@@ -671,6 +775,7 @@ function setEconomy(loadMore) {
 		checkGoldPaid = false;
 		checkCardsAdded = false;
 		checkBoosterAdded = false;
+		checkWildcardsAdded = false;
 		checkGemsEarnt = false;
 		checkGoldEarnt = false;
 
@@ -693,6 +798,7 @@ function setEconomy(loadMore) {
 				flb.appendChild(bon);
 			});
 
+			checkWildcardsAdded = true;
 			checkCardsAdded = true;
 			// Draw set logo below title
 			// Draw small cards images on the right
@@ -728,6 +834,7 @@ function setEconomy(loadMore) {
 			checkGoldEarnt = true;
 			checkBoosterAdded = true;
 			checkCardsAdded = true;
+			checkWildcardsAdded = true;
 		}
 
 		if (checkGemsPaid && change.delta.gemsDelta != undefined) {
@@ -803,6 +910,64 @@ function setEconomy(loadMore) {
 				flr.appendChild(bos);
 				flr.appendChild(bon);
 			});
+		}
+
+		if (checkWildcardsAdded) {
+			if (change.delta.wcCommonDelta != undefined) {
+				var bos = document.createElement("div");
+				bos.classList.add("economy_wc");
+				bos.title = 'Common Wildcard';
+				bos.style.margin = 'auto 4px';
+				bos.style.backgroundImage = 'url(../images/wc_common.png)';
+				var bon = document.createElement("div");
+				bon.style.lineHeight = "64px";
+				bon.classList.add("economy_sub");
+				bon.innerHTML = "x"+Math.abs(change.delta.wcCommonDelta);
+				flr.appendChild(bos);
+				flr.appendChild(bon);
+			}
+
+			if (change.delta.wcUncommonDelta != undefined) {
+				var bos = document.createElement("div");
+				bos.classList.add("economy_wc");
+				bos.title = 'Uncommon Wildcard';
+				bos.style.margin = 'auto 4px';
+				bos.style.backgroundImage = 'url(../images/wc_uncommon.png)';
+				var bon = document.createElement("div");
+				bon.style.lineHeight = "64px";
+				bon.classList.add("economy_sub");
+				bon.innerHTML = "x"+Math.abs(change.delta.wcUncommonDelta);
+				flr.appendChild(bos);
+				flr.appendChild(bon);
+			}
+
+			if (change.delta.wcRareDelta != undefined) {
+				var bos = document.createElement("div");
+				bos.classList.add("economy_wc");
+				bos.title = 'Rare Wildcard';
+				bos.title = 'Common Wildcard';
+				bos.style.margin = 'auto 4px';
+				bos.style.backgroundImage = 'url(../images/wc_rare.png)';
+				var bon = document.createElement("div");
+				bon.style.lineHeight = "64px";
+				bon.classList.add("economy_sub");
+				bon.innerHTML = "x"+Math.abs(change.delta.wcRareDelta);
+				flr.appendChild(bos);
+				flr.appendChild(bon);
+			}
+			if (change.delta.wcMythicDelta != undefined) {
+				var bos = document.createElement("div");
+				bos.classList.add("economy_wc");
+				bos.title = 'Mythic Wildcard';
+				bos.style.margin = 'auto 4px';
+				bos.style.backgroundImage = 'url(../images/wc_mythic.png)';
+				var bon = document.createElement("div");
+				bon.style.lineHeight = "64px";
+				bon.classList.add("economy_sub");
+				bon.innerHTML = "x"+Math.abs(change.delta.wcMythicDelta);
+				flr.appendChild(bos);
+				flr.appendChild(bon);
+			}
 		}
 
 		if (checkCardsAdded && change.delta.cardsAdded != undefined) {
