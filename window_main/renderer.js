@@ -1407,6 +1407,7 @@ function setHistory(loadMore) {
 			if (match.opponent == undefined) continue;
 			if (match.opponent.userid.indexOf("Familiar") !== -1) continue;
 		}
+		if (match.type == "Event")	continue;
 		//console.log("Load match: ", match_id, match);
 		//console.log("Match: ", loadHistory, match.type, match);
 
@@ -1513,7 +1514,7 @@ function setHistory(loadMore) {
 				flr.appendChild(d);
 			}
 		}
-		else {
+		else if (match.type == "draft") {
 			var tileGrpid = setsList[match.set].tile;
 
 			var tile = document.createElement("div");
@@ -4056,17 +4057,19 @@ function sort_history() {
 
 		if (mid != null && match != undefined) {
 			if (match.type != "draft") {
-				if (match.playerDeck.mainDeck == undefined) {
-					match.playerDeck = JSON.parse('{"deckTileId":67003,"description":null,"format":"Standard","colors":[],"id":"00000000-0000-0000-0000-000000000000","isValid":false,"lastUpdated":"2018-05-31T00:06:29.7456958","lockedForEdit":false,"lockedForUse":false,"mainDeck":[],"name":"Undefined","resourceId":"00000000-0000-0000-0000-000000000000","sideboard":[]}');
+				try {
+					if (match.playerDeck.mainDeck == undefined) {
+						match.playerDeck = JSON.parse('{"deckTileId":67003,"description":null,"format":"Standard","colors":[],"id":"00000000-0000-0000-0000-000000000000","isValid":false,"lastUpdated":"2018-05-31T00:06:29.7456958","lockedForEdit":false,"lockedForUse":false,"mainDeck":[],"name":"Undefined","resourceId":"00000000-0000-0000-0000-000000000000","sideboard":[]}');
+					}
+					else {
+						match.playerDeck.colors = get_deck_colors(match.playerDeck);
+					}
+					match.playerDeck.mainDeck.sort(compare_cards);
+					match.oppDeck.colors = get_deck_colors(match.oppDeck);
+					match.oppDeck.mainDeck.sort(compare_cards);
+				} catch (e) {
+					console.log(match);
 				}
-				else {
-					match.playerDeck.colors = get_deck_colors(match.playerDeck);
-				}
-
-				match.playerDeck.mainDeck.sort(compare_cards);
-
-				match.oppDeck.colors = get_deck_colors(match.oppDeck);
-				match.oppDeck.mainDeck.sort(compare_cards);
 			}
 		}
 	});
