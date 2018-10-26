@@ -688,7 +688,7 @@ function setEconomy(loadMore) {
 		div.appendChild(ntx);
 
 		ntx = tx.cloneNode(true);
-		ntx.innerHTML = "Vault: "+economyHistory.vault;
+		ntx.innerHTML = "Vault: "+economyHistory.vault+"%";
 		ntx.style.marginLeft = "32px";
 		div.appendChild(ntx);
 

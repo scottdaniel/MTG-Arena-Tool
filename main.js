@@ -221,11 +221,6 @@ app.on('ready', () => {
                 background.webContents.send("request_economy", arg);
                 break;
 
-            // ** FOR REMOVAL ** 
-            case 'renderer_get_economy':
-                background.webContents.send("set_economy", 1);
-                break;
-
             case 'renderer_state':
                 showWindow();
                 background.webContents.send("set_renderer_state", arg);
@@ -263,6 +258,9 @@ app.on('ready', () => {
                 break;
 
             // to overlay
+            case 'action_log':
+                overlay.webContents.send("action_log", arg);
+                break;
 
             case 'set_deck':
                 overlay.webContents.send("set_deck", arg);

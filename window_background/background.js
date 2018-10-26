@@ -502,8 +502,12 @@ function get_deck_changes(deckId) {
     ipc_send("set_deck_changes", JSON.stringify(changes));
 }
 
+
 // Read the log
 var prevLogSize = 0;
+var logSize = 0;
+var logDiff = 0;
+
 if (process.platform === 'win32') {
     var logUri = process.env.APPDATA;
     logUri = logUri.replace('Roaming','LocalLow\\Wizards Of The Coast\\MTGA\\output_log.txt');
@@ -546,7 +550,7 @@ function logLoop() {
 //
 function readLog() {
 	//console.log("readLog()");
-    //ipc_send("ipc_log", "readLog logloopmode: "+logLoopMode+", renderer state:"+renderer_state+", logSize: "+logSize+", prevLogSize: "+prevLogSize);
+    
     if (!firstPass)  {
         ipc_send("log_read", 1);
     }
@@ -555,27 +559,36 @@ function readLog() {
     }
     if (renderer_state == 1) {
         var stats = fs.fstatSync(file);
-        var logSize = stats.size;
-        var logDiff = logSize - prevLogSize;
+        logSize = stats.size;
+        logDiff = logSize - prevLogSize;
 
+        //ipc_send("ipc_log", "readLog logloopmode: "+logLoopMode+", renderer state:"+renderer_state+", logSize: "+logSize+", prevLogSize: "+prevLogSize);
         if (logSize == undefined) {
             fs.close(file);
             resetLogLoop(500);
         }
-        else if (logSize > prevLogSize+1) {
-            if (logLoopMode == 0) {
-                fs.read(file, new Buffer(logDiff), 0, logDiff, prevLogSize, processLogUser);
+        else {
+            if (logSize < prevLogSize) {
+                prevLogSize = 0;
+                logDiff = logSize;
+            }
+
+            if (logSize > prevLogSize+1) {
+                if (logLoopMode == 0) {
+                    fs.read(file, new Buffer(logDiff), 0, logDiff, prevLogSize, processLogUser);
+                }
+                else {
+                    fs.read(file, new Buffer(logDiff), 0, logDiff, prevLogSize, processLog);
+                }
             }
             else {
-                fs.read(file, new Buffer(logDiff), 0, logDiff, prevLogSize, processLog);
+                fs.close(file);
+                resetLogLoop(500);
             }
-        }
-        else {
-            fs.close(file);
-            resetLogLoop(500);
         }
     }
     else {
+        //ipc_send("ipc_log", "readLog logloopmode: "+logLoopMode+", renderer state:"+renderer_state+", logSize: "+logSize+", prevLogSize: "+prevLogSize);
         fs.close(file);
         resetLogLoop(500);
     }
@@ -586,7 +599,7 @@ function processLog(err, bytecount, buff) {
     //var splitString = rawString.split('[UnityCrossThread');
     var splitString = rawString.split(/(\[UnityCrossThread|\[Client GRE\])+/);
 
-    console.log('Reading:', bytecount, 'bytes, ',splitString.length, ' chunks');
+    //console.log('Reading:', bytecount, 'bytes, ',splitString.length, ' chunks');
     //ipc_send("ipc_log", 'Reading: '+bytecount+' bytes, '+splitString.length+' chunks');
 
     if (firstPass) {
@@ -617,7 +630,7 @@ function processLog(err, bytecount, buff) {
         callback();
 
     }, function (err) {
-        console.log("Async end");
+        //console.log("Async end");
         resetLogLoop(500);
         if (err) {
             console.log("processLog err: "+err.message);
@@ -631,7 +644,7 @@ function processLogUser(err, bytecount, buff) {
     // Process the log only to find player name and id
     let rawString = buff.toString('utf-8', 0, bytecount);
     var splitString = rawString.split('[UnityCrossThread');
-    console.log('Reading user:', bytecount, 'bytes, ',splitString.length, ' chunks');
+    //console.log('Reading user:', bytecount, 'bytes, ',splitString.length, ' chunks');
     //ipc_send("ipc_log", 'Reading: '+bytecount+' bytes, '+splitString.length+' chunks');
 
     if (firstPass) {
@@ -776,6 +789,7 @@ function findFirstJSON(str) {
 function processLogData(data) {
     data = data.replace(/[\r\n]/g, "");
     var strCheck, json;
+    //console.log(data);
 
     // Log info
     if (data.indexOf('==> Log.Info(') > -1) {
@@ -1271,6 +1285,72 @@ function setDraftCards(json) {
     }
 }
 
+function actionLog(seat, time, str) {
+    console.log("ACTION LOG", seat, time.getTime(), str);
+    ipc_send("action_log", {seat: seat, time:time, str: str});
+}
+
+var attackersDetected = [];
+var zoneTransfers = [];
+
+function tryZoneTransfers() {
+    zoneTransfers.forEach(function(obj) {
+        var _orig, _new, _src, _dest, _cat = undefined;
+        var cname = "";
+        var removeFromListAnyway = false;
+        var removeFromList = true;
+
+        obj.details.forEach(function(detail) {
+            if (detail.key == "zone_src") {
+                _src = detail.valueInt32[0];
+            }
+            if (detail.key == "zone_dest") {
+                _dest = detail.valueInt32[0];
+            }
+            if (detail.key == "category") {
+                _cat = detail.valueString[0];
+            }
+        });
+
+        try {
+            cname = gameObjs[obj.aff].name;
+        } catch (e) {
+            removeFromList = false;
+        }
+
+        try {
+            //console.log("AnnotationType_ZoneTransfer", obj, obj.aff, gameObjs, _src, _dest, _cat);
+            if (_cat == "CastSpell") {
+                actionLog(obj.affector, obj.time, getNameBySeat(obj.affector)+" casted "+cname);
+            }
+            else if (_cat == "Resolve") {
+                actionLog(obj.affector, obj.time, getNameBySeat(obj.affector)+" resolved "+cname);
+            }
+            else if (_cat == "PlayLand") {
+                actionLog(obj.affector, obj.time, getNameBySeat(obj.affector)+" played "+cname);
+            }
+            else if (_cat == "Draw") {
+                actionLog(obj.affector, obj.time, getNameBySeat(obj.affector)+" drew a card");
+                removeFromListAnyway = true;
+            }
+            else {
+                actionLog(obj.affector, obj.time, cname+" moved to "+zones[_dest].type);
+            }
+            gameObjs[obj.aff].zoneId = _dest;
+            gameObjs[obj.aff].zoneName = zones[_dest].type;
+        }
+        catch (e) {
+            removeFromList = false;
+        }
+
+        if (removeFromList || removeFromListAnyway) {
+            obj.remove = true;
+        }
+    })
+    if (zoneTransfers.length > 0) {
+        zoneTransfers = zoneTransfers.filter(obj => obj.remove == false);
+    }
+}
 
 function gre_to_client(data) {
     data.forEach(function(msg) {
@@ -1281,24 +1361,26 @@ function gre_to_client(data) {
         if (msg.type == "GREMessageType_DeclareAttackersReq") {
             msg.declareAttackersReq.attackers.forEach(function(obj) {
                 var att = obj.attackerInstanceId;
-                var str = gameObjs[att].name+" attacked ";
-                if (obj.selectedDamageRecipient !== undefined) {
-                    var rec = obj.selectedDamageRecipient;
-                    if (rec.type == "DamageRecType_Player") {
-                        //ipc_send("ipc_log", str+getNameBySeat(rec.playerSystemSeatId));
-                    }
-                    //else if (rec.type == "") {
-                    //}
-                }
-                if (obj.legalDamageRecipients !== undefined) {
-                    var rec = obj.legalDamageRecipients.forEach(function(rec) {
+                if (!attackersDetected.includes(att)) {
+                    var str = gameObjs[att].name+" attacked ";
+                    if (obj.selectedDamageRecipient !== undefined) {
+                        var rec = obj.selectedDamageRecipient;
                         if (rec.type == "DamageRecType_Player") {
-                           //ipc_send("ipc_log", str+getNameBySeat(rec.playerSystemSeatId));
+                            actionLog(gameObjs[att].controllerSeatId, new Date(), str+getNameBySeat(rec.playerSystemSeatId));
+                            //ipc_send("", str+getNameBySeat(rec.playerSystemSeatId));
                         }
-                        //else if (rec.type == "") {
-                        //}
-                    });
+                    }
+                    if (obj.legalDamageRecipients !== undefined) {
+                        var rec = obj.legalDamageRecipients.forEach(function(rec) {
+                            if (rec.type == "DamageRecType_Player") {
+                                actionLog(gameObjs[att].controllerSeatId, new Date(), str+getNameBySeat(rec.playerSystemSeatId));
+                               //ipc_send("ipc_log", str+getNameBySeat(rec.playerSystemSeatId));
+                            }
+                        });
+                    }
+                    attackersDetected.push(att);
                 }
+
             });
         }
         if (msg.type == "GREMessageType_GameStateMessage") {
@@ -1321,14 +1403,10 @@ function gre_to_client(data) {
                     turnDecision = msg.gameStateMessage.turnInfo.decisionPlayer;
                     turnStorm = msg.gameStateMessage.turnInfo.stormCount;
 
-                    if (prevTurn !== turnNumber) {
-                        //ipc_send("ipc_log", ">");
-                        if (playerSeat == turnActive) {
-                            //ipc_send("ipc_log", playerName+"'s turn begin. (#"+turnNumber+")");
-                        }
-                        else {
-                            //ipc_send("ipc_log", oppName+"'s turn begin. (#"+turnNumber+")");
-                        }
+                    if (prevTurn !== turnNumber && turnNumber != undefined) {
+                        attackersDetected = [];
+                        actionLog(-1, new Date(),  getNameBySeat(turnActive)+"'s turn begin. (#"+turnNumber+")");
+                        //ipc_send("ipc_log", playerName+"'s turn begin. (#"+turnNumber+")");
                     }
                     if (!firstPass) {
                         ipc.send("set_turn", playerSeat, turnPhase, turnStep, turnNumber, turnActive, turnPriority, turnDecision);
@@ -1374,9 +1452,31 @@ function gre_to_client(data) {
                         if (affected != undefined) {
                             affected.forEach(function(aff) {
                                 
+                                if (obj.type.includes("AnnotationType_ObjectIdChanged")) {
+                                    var _orig = undefined;
+                                    var _new = undefined;
+                                    obj.details.forEach(function(detail) {
+                                        if (detail.key == "orig_id") {
+                                            _orig = detail.valueInt32[0];
+                                        }
+                                        if (detail.key == "new_id") {
+                                            _new = detail.valueInt32[0];
+                                        }
+                                    });
+
+                                    if (_orig == undefined || _new == undefined) {
+                                        console.log("undefined value: ", obj)
+                                    }
+                                    else if (gameObjs[_orig] != undefined) {
+                                        //console.log("AnnotationType_ObjectIdChanged", aff, _orig, _new, gameObjs[_orig], gameObjs);
+                                        gameObjs[_new] = JSON.parse(JSON.stringify(gameObjs[_orig]));
+                                        gameObjs[_orig] = undefined;
+                                    }
+                                }
+
                                 if (obj.type.includes("AnnotationType_EnteredZoneThisTurn")) {
                                     if (gameObjs[aff] !== undefined) {
-                                        //ipc_send("ipc_log", "("+gameObjs[aff].instanceId+") AnnotationType_EnteredZoneThisTurn - ("+aff+") "+gameObjs[aff].name+" / zone: "+affector+" - "+zones[affector].type);
+                                        //console.log("AnnotationType_EnteredZoneThisTurn", aff, affector, gameObjs[aff], zones[affector], gameObjs);
                                         gameObjs[aff].zoneId = affector;
                                         gameObjs[aff].zoneName = zones[affector].type;
                                     }
@@ -1395,58 +1495,39 @@ function gre_to_client(data) {
                                         if (gameObjs[aff] != undefined) {
                                             if (gameObjs[aff].type == "GameObjectType_Ability") {
                                                 src = gameObjs[aff].objectSourceGrpId;
+                                                actionLog(gameObjs[aff].controllerSeatId, new Date(), cardsDb.get(src).name+"'s ability");
                                                 //ipc_send("ipc_log", cardsDb.get(src).name+"'s ability");
                                                 //console.log(cardsDb.get(src).name+"'s ability", gameObjs[aff]);
                                             }
                                             else {
-                                                //ipc_send("ipc_log", gameObjs[aff].controllerSeatId)+" cast "+card.name);
+                                                //actionLog(gameObjs[aff].controllerSeatId, new Date(), getNameBySeat(gameObjs[aff].controllerSeatId)+" cast "+card.name);
+                                                //ipc_send("ipc_log", gameObjs[aff].controllerSeatId+" cast "+card.name);
                                                 //console.log(getNameBySeat(gameObjs[aff].controllerSeatId)+" cast "+card.name, gameObjs[aff]);
                                             }
                                         }
                                     }
                                 }
                                 if (obj.type.includes("AnnotationType_ZoneTransfer")) {
-                                    var _orig = undefined;
-                                    var _new = undefined;
-                                    obj.details.forEach(function(detail) {
-                                        if (detail.key == "zone_src") {
-                                            _src = detail.valueInt32[0];
+                                    if (affector == undefined || affector > 4) {
+                                        try {
+                                            affector = gameObjs[affector].controllerSeatId;
+                                        } catch (e) {
+                                            try {
+                                                affector = gameObjs[obj.affectorId].controllerSeatId;
+                                            } catch (e) {
+                                                try {
+                                                    affector = gameObjs[aff].controllerSeatId;
+                                                } catch (e) {
+                                                    affector = oppSeat;
+                                                }
+                                            }
                                         }
-                                        if (detail.key == "zone_dest") {
-                                            _dest = detail.valueInt32[0];
-                                        }
-                                    });
-
-                                    if (_src == undefined || _dest == undefined) {
-                                        console.log("undefined value: ", obj)
                                     }
-                                    else if (gameObjs[aff] !== undefined) {
-                                        //ipc_send("ipc_log", "("+gameObjs[aff].instanceId+") AnnotationType_ZoneTransfer - "+gameObjs[aff].name+" / zone: "+_dest+" - "+zones[_dest].type);
-                                        //ipc_send("ipc_log", gameObjs[aff].name+" moved to "+zones[_dest].type);
-                                        gameObjs[aff].zoneId = _dest;
-                                        gameObjs[aff].zoneName = zones[_dest].type;
-                                    }
-                                }
-                                if (obj.type.includes("AnnotationType_ObjectIdChanged")) {
-                                    var _orig = undefined;
-                                    var _new = undefined;
-                                    obj.details.forEach(function(detail) {
-                                        if (detail.key == "orig_id") {
-                                            _orig = detail.valueInt32[0];
-                                        }
-                                        if (detail.key == "new_id") {
-                                            _new = detail.valueInt32[0];
-                                        }
-                                    });
-
-                                    if (_orig == undefined || _new == undefined) {
-                                        console.log("undefined value: ", obj)
-                                    }
-                                    else if (gameObjs[_orig] != undefined) {
-                                        //ipc_send("ipc_log", "("+gameObjs[aff].instanceId+") AnnotationType_ObjectIdChanged - "+gameObjs[aff].name+" / newid: "+_new);
-                                        gameObjs[_new] = JSON.parse(JSON.stringify(gameObjs[_orig]));
-                                        gameObjs[_orig] = undefined;
-                                    }
+                                    obj.remove = false;
+                                    obj.affector = affector;
+                                    obj.aff = aff;
+                                    obj.time = new Date();
+                                    zoneTransfers.push(obj);
                                 }
                                 if (obj.type.includes("AnnotationType_DamageDealt")) {
                                     var aff = obj.affectorId;
@@ -1461,9 +1542,11 @@ function gre_to_client(data) {
                                     affected.forEach(function(affd) {
                                         if (gameObjs[aff] !== undefined) {
                                             if (affd == playerSeat || affd == oppSeat) {
+                                                actionLog(gameObjs[aff].controllerSeatId, new Date(), gameObjs[aff].name+" dealt "+damage+" damage to "+getNameBySeat(affd));
                                                 //ipc_send("ipc_log", gameObjs[aff].name+" dealt "+damage+" damage to "+getNameBySeat(affd));
                                             }
                                             else {
+                                                actionLog(gameObjs[aff].controllerSeatId, new Date(), gameObjs[aff].name+" dealt "+damage+" damage to "+gameObjs[affd].name);
                                                 //ipc_send("ipc_log", gameObjs[aff].name+" dealt "+damage+" damage to "+gameObjs[affd]);
                                             }
                                         }
@@ -1511,6 +1594,7 @@ function gre_to_client(data) {
         }
         //
     });
+    tryZoneTransfers();
 
     var str = JSON.stringify(currentDeck);
     currentDeckUpdated = JSON.parse(str);

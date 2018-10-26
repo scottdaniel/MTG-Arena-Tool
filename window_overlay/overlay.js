@@ -113,6 +113,10 @@ $( window ).resize(function() {
 });
 
 
+ipc.on('action_log', function (event, arg) {
+	console.log(arg.seat, arg.str);
+});
+
 ipc.on('set_settings', function (event, settings) {
 	// Alpha does some weird things..
 	/*
