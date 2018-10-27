@@ -1274,14 +1274,7 @@ function processLogData(data) {
 
 
 function setDraftCards(json) {
-    if (httpAsync.length == 0) {
-        ipc.send("set_draft_cards", json.draftPack, json.pickedCards, json.packNumber+1, json.pickNumber);
-    }
-    else {
-        setTimeout(function() {
-            setDraftCards(json);
-        }, 1000);
-    }
+    ipc.send("set_draft_cards", json.draftPack, json.pickedCards, json.packNumber+1, json.pickNumber);
 }
 
 function actionLogGenerateLink(grpId) {
