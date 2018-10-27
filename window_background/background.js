@@ -1306,6 +1306,17 @@ function tryZoneTransfers() {
         var removeFromListAnyway = false;
         var removeFromList = true;
 
+        var owner = -1;
+        try {
+            owner = gameObjs[obj.affectorId].controllerSeatId;
+        } catch (e) {
+            try {
+                owner = gameObjs[obj.aff].controllerSeatId;
+            } catch (e) {
+                owner = oppSeat;
+            }
+        }
+
         obj.details.forEach(function(detail) {
             if (detail.key == "zone_src") {
                 _src = detail.valueInt32[0];
@@ -1328,20 +1339,39 @@ function tryZoneTransfers() {
         try {
             //console.log("AnnotationType_ZoneTransfer", obj, obj.aff, gameObjs, _src, _dest, _cat);
             if (_cat == "CastSpell") {
-                actionLog(obj.affector, obj.time, getNameBySeat(obj.affector)+" casted "+actionLogGenerateLink(grpid));
+                actionLog(owner, obj.time, getNameBySeat(owner)+" casted "+actionLogGenerateLink(grpid));
             }
             else if (_cat == "Resolve") {
-                actionLog(obj.affector, obj.time, getNameBySeat(obj.affector)+" resolved "+actionLogGenerateLink(grpid));
+                actionLog(owner, obj.time, getNameBySeat(owner)+" resolved "+actionLogGenerateLink(grpid));
             }
             else if (_cat == "PlayLand") {
-                actionLog(obj.affector, obj.time, getNameBySeat(obj.affector)+" played "+actionLogGenerateLink(grpid));
+                actionLog(owner, obj.time, getNameBySeat(owner)+" played "+actionLogGenerateLink(grpid));
+            }
+            else if (_cat == "Countered") {
+                var affectorGrpid = gameObjs[obj.affectorId].grpId;
+                if (affectorGrpid == undefined) {
+                    removeFromList = false;
+                }
+                else {
+                    actionLog(owner, obj.time, actionLogGenerateLink(affectorGrpid)+" countered "+actionLogGenerateLink(grpid));
+                }
+            }
+            else if (_cat == "Destroy") {
+                var affectorGrpid = gameObjs[obj.affectorId].grpId;
+                if (affectorGrpid == undefined) {
+                    removeFromList = false;
+                }
+                else {
+                    actionLog(owner, obj.time, actionLogGenerateLink(affectorGrpid)+" destroyed "+actionLogGenerateLink(grpid));
+                }
             }
             else if (_cat == "Draw") {
-                actionLog(obj.affector, obj.time, getNameBySeat(obj.affector)+" drew a card");
+                console.log(">>> ", obj);
+                actionLog(owner, obj.time, getNameBySeat(owner)+" drew a card");
                 removeFromListAnyway = true;
             }
             else if (cname != "") {
-                actionLog(obj.affector, obj.time, actionLogGenerateLink(grpid)+" moved to "+zones[_dest].type);
+                actionLog(owner, obj.time, actionLogGenerateLink(grpid)+" moved to "+zones[_dest].type);
             }
             gameObjs[obj.aff].zoneId = _dest;
             gameObjs[obj.aff].zoneName = zones[_dest].type;
@@ -1515,23 +1545,7 @@ function gre_to_client(data) {
                                     }
                                 }
                                 if (obj.type.includes("AnnotationType_ZoneTransfer")) {
-                                    if (affector == undefined || affector > 4) {
-                                        try {
-                                            affector = gameObjs[affector].controllerSeatId;
-                                        } catch (e) {
-                                            try {
-                                                affector = gameObjs[obj.affectorId].controllerSeatId;
-                                            } catch (e) {
-                                                try {
-                                                    affector = gameObjs[aff].controllerSeatId;
-                                                } catch (e) {
-                                                    affector = oppSeat;
-                                                }
-                                            }
-                                        }
-                                    }
                                     obj.remove = false;
-                                    obj.affector = affector;
                                     obj.aff = aff;
                                     obj.time = new Date();
                                     zoneTransfers.push(obj);
