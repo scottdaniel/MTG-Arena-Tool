@@ -2004,7 +2004,7 @@ function setExplore(arg, loadMore) {
 
 		var d = document.createElement("div");
 		d.classList.add("list_deck_name_it");
-		let ee = _deck.event.replace(/[0-9]/g, ''); 
+		let ee = _deck.event;
 		d.innerHTML = getReadableEvent(ee)+" - "+timeSince(_deck.date*1000)+" ago";
 		flr.appendChild(d);
 
