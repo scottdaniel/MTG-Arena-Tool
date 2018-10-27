@@ -116,16 +116,17 @@ $( window ).resize(function() {
 	$(".overlay_decklist").css("height", "100%").css("height", "-="+_height+"px");
 
 	var bounds = remote.getCurrentWindow().webContents.getOwnerBrowserWindow().getBounds()
-	var w = bounds.width ;
-	if (w < 256) {
-		var sc = w / 256;
-		webFrame.setZoomFactor(sc);
-	}
+	var w = Math.min(bounds.width, 256);
+	var sc = w / 256;
+	webFrame.setZoomFactor(sc);
 });
 
 
 ipc.on('action_log', function (event, arg) {
 	actionLog.push(arg);
+	if (arg.seat == -99) {
+		actionLog = [];
+	}
 	actionLog.sort(compare_logs);
 	//console.log(arg.seat, arg.str);
 });

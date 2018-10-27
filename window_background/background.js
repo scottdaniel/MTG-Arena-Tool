@@ -1365,7 +1365,6 @@ function tryZoneTransfers() {
                 }
             }
             else if (_cat == "Draw") {
-                console.log(">>> ", obj);
                 actionLog(owner, obj.time, getNameBySeat(owner)+" drew a card");
                 removeFromListAnyway = true;
             }
@@ -1634,6 +1633,7 @@ function getNameBySeat(seat) {
 
 function createMatch(arg) {
     var obj = store.get('overlayBounds');
+    actionLog(-99, new Date(), "");
 
     annotationsRead = [];
     zones = {};
@@ -2056,7 +2056,7 @@ function httpBasic() {
             var options = { protocol: 'https:', port: 443, hostname: 'magicthegatheringarena.statuspage.io', path: '/index.json', method: 'GET'};
         }
         else {
-            var options = { protocol: 'https:', port: 443, hostname: serverAddress, path: '/api_test.php', method: 'POST', headers: _headers };
+            var options = { protocol: 'https:', port: 443, hostname: serverAddress, path: '/api.php', method: 'POST', headers: _headers };
         }
 
         if (debugNet) {

@@ -197,6 +197,8 @@
 
 
 .actionlog {
+    white-space: nowrap;
+    overflow: hidden;
     background-color: rgb(255, 248, 242);
     height: 24px;
     line-height: 24px;
@@ -218,7 +220,6 @@
 }
 
 .actionlog_text {
-    overflow: hidden;
     margin-left: 16px;
 }
 
