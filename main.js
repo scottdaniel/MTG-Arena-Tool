@@ -2,7 +2,7 @@
 
 const electron = require('electron');
 
-const {dialog, app, globalShortcut, Menu, Tray, net, clipboard} = require('electron');
+const {dialog, app, globalShortcut, Menu, Tray, net, clipboard, webFrame} = require('electron');
 const path  = require('path');
 const Store = require('./store.js');
 const async = require("async");
@@ -609,6 +609,7 @@ function createOverlay() {
     over.on('closed', onOverlayClosed);
 
 	over.on('resize', () => {
+
 		saveOverlayPos();
 	});
     /*

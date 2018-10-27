@@ -1,6 +1,10 @@
-var electron = require('electron');
+var electron  = require('electron');
+const {webFrame, remote} = require('electron');
+
 window.ipc = electron.ipcRenderer;
 var renderer = 1;
+
+
 var matchBeginTime = Date.now();
 var clockMode = 0;
 var draftMode = 1;
@@ -110,6 +114,13 @@ $( window ).resize(function() {
 		_height += 64;
 	}
 	$(".overlay_decklist").css("height", "100%").css("height", "-="+_height+"px");
+
+	var bounds = remote.getCurrentWindow().webContents.getOwnerBrowserWindow().getBounds()
+	var w = bounds.width ;
+	if (w < 256) {
+		var sc = w / 256;
+		webFrame.setZoomFactor(sc);
+	}
 });
 
 
@@ -231,9 +242,9 @@ ipc.on('set_deck', function (event, arg) {
 
 			actionLog.forEach(function(log) {
 				var d = new Date(log.time);
-				var hh = d.getHours();
-				var mm = d.getMinutes(); 
-				var ss = d.getSeconds();
+				var hh = ("0"+d.getHours()).slice(-2);
+				var mm = ("0"+d.getMinutes()).slice(-2);
+				var ss = ("0"+d.getSeconds()).slice(-2);
 
 				var box = $('<div class="actionlog log_p'+log.seat+'"></div>');
 				var time = $('<div class="actionlog_time">'+hh+':'+mm+':'+ss+'</div>');
@@ -261,11 +272,13 @@ ipc.on('set_deck', function (event, arg) {
 			return;
 		}
 
-		if (deckMode == 3) {
-			$(".overlay_deckname").html("Played by "+arg.name.slice(0, -6));
-		}
-		else {
-			$(".overlay_deckname").html(arg.name);
+		if (arg.name != null) {
+			if (deckMode == 3) {
+				$(".overlay_deckname").html("Played by "+arg.name.slice(0, -6));
+			}
+			else {
+				$(".overlay_deckname").html(arg.name);
+			}
 		}
 
 		arg.colors = get_deck_colors(arg);

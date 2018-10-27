@@ -240,26 +240,30 @@ function getEventId(arg) {
 //
 function removeDuplicates(decklist) {
 	var newList = [];
-	decklist.forEach(function(card) {
-		var cname = cardsDb.get(card.id).name;
-		var added = false;
-		newList.forEach(function(c) {
-			var cn = cardsDb.get(c.id).name;
-			if (cn == cname) {
-				c.quantity += card.quantity;
-				if (c.chance != undefined) {
-					c.chance += card.chance;
+	try {
+		decklist.forEach(function(card) {
+			var cname = cardsDb.get(card.id).name;
+			var added = false;
+			newList.forEach(function(c) {
+				var cn = cardsDb.get(c.id).name;
+				if (cn == cname) {
+					c.quantity += card.quantity;
+					if (c.chance != undefined) {
+						c.chance += card.chance;
+					}
+					added = true;
 				}
-				added = true;
+			});
+
+			if (!added) {
+				newList.push(card);
 			}
 		});
-
-		if (!added) {
-			newList.push(card);
-		}
-	});
-
-	return newList;
+		return newList;
+	}
+	catch (e) {
+		return [];
+	}
 }
 
 //
@@ -543,25 +547,30 @@ function get_collection_export() {
 //
 function get_deck_colors(deck) {
 	deck.colors = [];
-	deck.mainDeck.forEach(function(card) {
-		var grpid = card.id;
-		if (card.quantity > 0) {
-			var cdb = cardsDb.get(grpid);
-			if (cdb) {
-				var card_name = cdb.name;
-				var card_cost = cdb.cost;
-				card_cost.forEach(function(c) {
-					if (c.indexOf('w') !== -1 && !deck.colors.includes(1))	deck.colors.push(1);
-					if (c.indexOf('u') !== -1 && !deck.colors.includes(2))	deck.colors.push(2);
-					if (c.indexOf('b') !== -1 && !deck.colors.includes(3))	deck.colors.push(3);
-					if (c.indexOf('r') !== -1 && !deck.colors.includes(4))	deck.colors.push(4);
-					if (c.indexOf('g') !== -1 && !deck.colors.includes(5))	deck.colors.push(5);
-				});
+	try {
+		deck.mainDeck.forEach(function(card) {
+			var grpid = card.id;
+			if (card.quantity > 0) {
+				var cdb = cardsDb.get(grpid);
+				if (cdb) {
+					var card_name = cdb.name;
+					var card_cost = cdb.cost;
+					card_cost.forEach(function(c) {
+						if (c.indexOf('w') !== -1 && !deck.colors.includes(1))	deck.colors.push(1);
+						if (c.indexOf('u') !== -1 && !deck.colors.includes(2))	deck.colors.push(2);
+						if (c.indexOf('b') !== -1 && !deck.colors.includes(3))	deck.colors.push(3);
+						if (c.indexOf('r') !== -1 && !deck.colors.includes(4))	deck.colors.push(4);
+						if (c.indexOf('g') !== -1 && !deck.colors.includes(5))	deck.colors.push(5);
+					});
+				}
 			}
-		}
-	});
+		});
 
-	return deck.colors;
+		return deck.colors;
+	}
+	catch (e) {
+		return [];
+	}
 }
 
 //
