@@ -1286,7 +1286,7 @@ function setDraftCards(json) {
 }
 
 function actionLog(seat, time, str) {
-    console.log("ACTION LOG", seat, time.getTime(), str);
+    //console.log("ACTION LOG", seat, time.getTime(), str);
     ipc_send("action_log", {seat: seat, time:time, str: str});
 }
 
@@ -2110,9 +2110,13 @@ function httpBasic() {
                 }
                 /*
                 if (_headers.token != "") {
-                    callback();
                 }
                 */
+                try {
+                    callback();
+                }
+                catch (e) {}
+
                 removeFromHttp(_headers.reqId);
                 if (debugNet) {
                     var str = ""; httpAsync.forEach( function(h) { str += h.reqId+", "; });
