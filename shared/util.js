@@ -4,7 +4,7 @@ const enums = {"CounterType":{"1":"+1\/+1","2":"-1\/-1","3":"Poison","4":"Wind",
 function addCardTile(grpId, indent, quantity, element) {
 	if (quantity !== 0) {
 		var cont = $('<div class="card_tile_container"></div>');
-		if ((quantity+" ").indexOf("%") != -1) {
+		if (!isNumber(quantity)) {
 			var ww = 64;
 			var ll = 48;
 			cont.append('<div class="card_tile_odds"><span>'+quantity+'</span></div>');
@@ -213,6 +213,11 @@ function addCardSeparator(i, element) {
 
 	var cont = $('<div class="card_tile_separator">'+str+'</div>');
 	element.append(cont);
+}
+
+//
+function isNumber(n) {
+  return !isNaN(parseFloat(n)) && isFinite(n);
 }
 
 //

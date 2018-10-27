@@ -1122,7 +1122,6 @@ function processLogData(data) {
         }
         console.log("Draft:", json);
         if (json.packNumber == 0 && json.pickNumber <= 0) {
-            httpGetPicks(draftSet);
             setDraftCards(json);
             createDraft();
             currentDraftPack = json.draftPack.slice(0);
@@ -2127,9 +2126,6 @@ function httpBasic() {
                     if (_headers.method == 'auth') {
                         ipc_send("auth", parsedResult);
                     }
-                    if (_headers.method == 'get_picks') {
-						ipc_send("set_draft_picks", parsedResult);
-                    }
                 } catch (e) {
                     console.error(e.message);
                 }
@@ -2228,11 +2224,6 @@ function httpSendError(error) {
 function httpDeleteData(courseId) {
     var _id = makeId(6);
     httpAsync.push({'reqId': _id, 'method': 'delete_data', 'uid': playerId});
-}
-
-function httpGetPicks(set) {
-    var _id = makeId(6);
-    httpAsync.push({'reqId': _id, 'method': 'get_picks', 'uid': playerId, 'query': set});
 }
 
 function httpGetDatabase() {
