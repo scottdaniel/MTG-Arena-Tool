@@ -1285,9 +1285,14 @@ function setDraftCards(json) {
     }
 }
 
-function actionLog(seat, time, str) {
+function actionLogGenerateLink(grpId) {
+    var card = cardsDb.get(grpId);
+    return '<a class="card_link" href="'+grpId+'">'+card.name+'</a>';
+}
+
+function actionLog(seat, time, str, grpId = 0) {
     //console.log("ACTION LOG", seat, time.getTime(), str);
-    ipc_send("action_log", {seat: seat, time:time, str: str});
+    ipc_send("action_log", {seat: seat, time:time, str: str, grpId: grpId});
 }
 
 var attackersDetected = [];
@@ -1297,6 +1302,7 @@ function tryZoneTransfers() {
     zoneTransfers.forEach(function(obj) {
         var _orig, _new, _src, _dest, _cat = undefined;
         var cname = "";
+        var grpid = 0;
         var removeFromListAnyway = false;
         var removeFromList = true;
 
@@ -1314,6 +1320,7 @@ function tryZoneTransfers() {
 
         try {
             cname = gameObjs[obj.aff].name;
+            grpid = gameObjs[obj.aff].grpId;
         } catch (e) {
             removeFromList = false;
         }
@@ -1321,20 +1328,20 @@ function tryZoneTransfers() {
         try {
             //console.log("AnnotationType_ZoneTransfer", obj, obj.aff, gameObjs, _src, _dest, _cat);
             if (_cat == "CastSpell") {
-                actionLog(obj.affector, obj.time, getNameBySeat(obj.affector)+" casted "+cname);
+                actionLog(obj.affector, obj.time, getNameBySeat(obj.affector)+" casted "+actionLogGenerateLink(grpid));
             }
             else if (_cat == "Resolve") {
-                actionLog(obj.affector, obj.time, getNameBySeat(obj.affector)+" resolved "+cname);
+                actionLog(obj.affector, obj.time, getNameBySeat(obj.affector)+" resolved "+actionLogGenerateLink(grpid));
             }
             else if (_cat == "PlayLand") {
-                actionLog(obj.affector, obj.time, getNameBySeat(obj.affector)+" played "+cname);
+                actionLog(obj.affector, obj.time, getNameBySeat(obj.affector)+" played "+actionLogGenerateLink(grpid));
             }
             else if (_cat == "Draw") {
                 actionLog(obj.affector, obj.time, getNameBySeat(obj.affector)+" drew a card");
                 removeFromListAnyway = true;
             }
-            else {
-                actionLog(obj.affector, obj.time, cname+" moved to "+zones[_dest].type);
+            else if (cname != "") {
+                actionLog(obj.affector, obj.time, actionLogGenerateLink(grpid)+" moved to "+zones[_dest].type);
             }
             gameObjs[obj.aff].zoneId = _dest;
             gameObjs[obj.aff].zoneName = zones[_dest].type;
@@ -1362,7 +1369,7 @@ function gre_to_client(data) {
             msg.declareAttackersReq.attackers.forEach(function(obj) {
                 var att = obj.attackerInstanceId;
                 if (!attackersDetected.includes(att)) {
-                    var str = gameObjs[att].name+" attacked ";
+                    var str = actionLogGenerateLink(gameObjs[att].grpId)+" attacked ";
                     if (obj.selectedDamageRecipient !== undefined) {
                         var rec = obj.selectedDamageRecipient;
                         if (rec.type == "DamageRecType_Player") {
@@ -1494,8 +1501,8 @@ function gre_to_client(data) {
                                         var pn = oppName;
                                         if (gameObjs[aff] != undefined) {
                                             if (gameObjs[aff].type == "GameObjectType_Ability") {
-                                                src = gameObjs[aff].objectSourceGrpId;
-                                                actionLog(gameObjs[aff].controllerSeatId, new Date(), cardsDb.get(src).name+"'s ability");
+                                                var src = gameObjs[aff].objectSourceGrpId;
+                                                actionLog(gameObjs[aff].controllerSeatId, new Date(), actionLogGenerateLink(src)+"'s ability");
                                                 //ipc_send("ipc_log", cardsDb.get(src).name+"'s ability");
                                                 //console.log(cardsDb.get(src).name+"'s ability", gameObjs[aff]);
                                             }
@@ -1542,11 +1549,12 @@ function gre_to_client(data) {
                                     affected.forEach(function(affd) {
                                         if (gameObjs[aff] !== undefined) {
                                             if (affd == playerSeat || affd == oppSeat) {
-                                                actionLog(gameObjs[aff].controllerSeatId, new Date(), gameObjs[aff].name+" dealt "+damage+" damage to "+getNameBySeat(affd));
+
+                                                actionLog(gameObjs[aff].controllerSeatId, new Date(), actionLogGenerateLink(gameObjs[aff].grpId)+" dealt "+damage+" damage to "+getNameBySeat(affd));
                                                 //ipc_send("ipc_log", gameObjs[aff].name+" dealt "+damage+" damage to "+getNameBySeat(affd));
                                             }
                                             else {
-                                                actionLog(gameObjs[aff].controllerSeatId, new Date(), gameObjs[aff].name+" dealt "+damage+" damage to "+gameObjs[affd].name);
+                                                actionLog(gameObjs[aff].controllerSeatId, new Date(), actionLogGenerateLink(gameObjs[aff].grpId)+" dealt "+damage+" damage to "+actionLogGenerateLink(gameObjs[affd].grpId));
                                                 //ipc_send("ipc_log", gameObjs[aff].name+" dealt "+damage+" damage to "+gameObjs[affd]);
                                             }
                                         }
@@ -1700,6 +1708,9 @@ function update_deck(force) {
         if (overlayDeckMode == 3) {
             var currentOppDeck = getOppDeck();
             ipc_send("set_deck", currentOppDeck);
+        }
+        if (overlayDeckMode == 4) {
+            ipc_send("set_deck", currentDeckUpdated);
         }
         lastDeckUpdate = nd;
     }

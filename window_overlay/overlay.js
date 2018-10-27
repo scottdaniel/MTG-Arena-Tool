@@ -16,7 +16,7 @@ var turnDecision = 0;
 var soundPriority = false;
 
 var showSideboard = false;
-
+var actionLog = [];
 
 const Database = require('../shared/database.js');
 const cardsDb = new Database();
@@ -114,7 +114,9 @@ $( window ).resize(function() {
 
 
 ipc.on('action_log', function (event, arg) {
-	console.log(arg.seat, arg.str);
+	actionLog.push(arg);
+	actionLog.sort(compare_logs);
+	//console.log(arg.seat, arg.str);
 });
 
 ipc.on('set_settings', function (event, settings) {
@@ -214,10 +216,50 @@ ipc.on('set_draft_picks', function (event, arg) {
 
 //
 ipc.on('set_deck', function (event, arg) {
+	var doscroll = false;
+	if ($(".overlay_decklist")[0].scrollHeight - $(".overlay_decklist").height() == $(".overlay_decklist").scrollTop()) {
+		doscroll = true;
+	}
+
 	$(".overlay_decklist").html('');
 	$(".overlay_deckcolors").html('');
 
 	if (arg != null) {
+		if (deckMode == 4) {
+			$(".overlay_deckname").html("Action Log");
+			var deckListDiv = $(".overlay_decklist");
+
+			actionLog.forEach(function(log) {
+				var d = new Date(log.time);
+				var hh = d.getHours();
+				var mm = d.getMinutes(); 
+				var ss = d.getSeconds();
+
+				var box = $('<div class="actionlog log_p'+log.seat+'"></div>');
+				var time = $('<div class="actionlog_time">'+hh+':'+mm+':'+ss+'</div>');
+				var str = $('<div class="actionlog_text">'+log.str+'</div>');
+
+				box.append(time);
+				box.append(str);
+				deckListDiv.append(box);
+			});
+
+			if (doscroll) {
+				deckListDiv.scrollTop(deckListDiv[0].scrollHeight);
+			}
+
+			$(".card_link").each(function(index) {
+				$(this).click(function() {
+				    return false;
+				});
+				var grpId = $( this ).attr("href");
+				console.log(">> ", $( this ).attr("href"));
+				addCardHover($( this ), cardsDb.get(grpId));
+			});
+			
+
+			return;
+		}
 
 		if (deckMode == 3) {
 			$(".overlay_deckname").html("Played by "+arg.name.slice(0, -6));
@@ -373,6 +415,12 @@ function setDraft() {
 	}
 }
 
+function compare_logs(a, b) {
+	if (a.time < b.time)	return -1;
+	if (a.time > b.time)	return 1;
+	return 0;
+}
+
 function compare_draft_picks(a, b) {
 	var arank = 15;
 	var brank = 15;
@@ -444,14 +492,14 @@ $(document).ready(function() {
 	$(".deck_prev").click(function () {
 	    deckMode -= 1;
 	    if (deckMode < 0) {
-	    	deckMode = 3;
+	    	deckMode = 4;
 	    }
 	    ipc_send('overlay_set_deck_mode', deckMode);
 	});
 	//
 	$(".deck_next").click(function () {
 	    deckMode += 1;
-	    if (deckMode > 3) {
+	    if (deckMode > 4) {
 	    	deckMode = 0;
 	    }
 	    ipc_send('overlay_set_deck_mode', deckMode);

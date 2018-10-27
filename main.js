@@ -560,7 +560,6 @@ function createBackgroundWindow() {
 
 function createMainWindow() {
     const win = new electron.BrowserWindow({
-        /*transparent: true,*/
         backgroundColor: '#000',
         frame: false,
         show: false,

@@ -4,6 +4,12 @@
     overflow: overlay;
 }
 
+.overlay_decklist a {
+    color: inherit;
+    text-decoration: none;
+}
+
+
 .overlay_deckname {
     -webkit-app-region:drag;
     padding: 12px 0 0 0;
@@ -23,6 +29,11 @@
     padding: 4px;
     height: 16px;
     background: url(../images/separator_spr.png) center no-repeat;
+}
+
+.main_hover {
+    margin-left: auto !important;
+    margin-right: auto !important;
 }
 
 .overlay_hover {
@@ -182,4 +193,43 @@
     height: 18px;
     display: inline-block;
     background: center no-repeat url('../images/quantity_orange.png');
+}
+
+
+.actionlog {
+    background-color: rgb(255, 248, 242);
+    height: 24px;
+    line-height: 24px;
+    width: 100%;
+    display: flex;
+    font-size: 14px;
+}
+
+.log_p1 {
+    color: #ca3300;
+}
+
+.log_p2 {
+    color: rgb(6, 114, 193);
+}
+
+.actionlog_time {
+    color: rgba(0, 0, 0, 0.8);
+}
+
+.actionlog_text {
+    overflow: hidden;
+    margin-left: 16px;
+}
+
+
+
+.card_link {
+    text-decoration: none;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.card_link {
+    text-decoration: underline;
 }
