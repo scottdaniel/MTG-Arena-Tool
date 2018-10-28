@@ -1941,6 +1941,9 @@ function saveEconomy(json) {
     if (ctx.indexOf("Event.PayEntry") !== -1) {
         json.context = "Pay Event Entry";
     }
+    if (ctx.indexOf("Event.GrantCardPool") !== -1) {
+        json.context = "Event Card Pool";
+    }
 
     var economy_index = store.get('economy_index');
 

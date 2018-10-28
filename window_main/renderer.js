@@ -786,8 +786,8 @@ function setEconomy(loadMore) {
 		flb.classList.add("flex_bottom");
 
 		var flr = document.createElement("div");
-		flr.classList.add("flex_item");
-		flr.style.marginRight = "24px";
+		flr.classList.add("tiny_scroll");
+		flr.classList.add("list_economy_awarded");
 
 		checkGemsPaid = false;
 		checkGoldPaid = false;
@@ -993,6 +993,7 @@ function setEconomy(loadMore) {
 		}
 
 		if (checkCardsAdded && change.delta.cardsAdded != undefined) {
+			change.delta.cardsAdded.sort(collectionSortRarity);
 			change.delta.cardsAdded.forEach(function(grpId) {
 				var card = cardsDb.get(grpId);
 
@@ -1028,6 +1029,12 @@ function setEconomy(loadMore) {
 		div.appendChild(flr);
 
 		mainDiv.appendChild(div);
+
+	    $('.list_economy_awarded').on("mousewheel", function(e) {
+	    	var delta = (parseInt(e.originalEvent.deltaY)/40);
+	        this.scrollLeft += delta;
+	        e.preventDefault();
+	    });
 
 	}
 

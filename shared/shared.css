@@ -70,6 +70,27 @@ label {
     background: #B59579; 
 }
 
+
+.tiny_scroll::-webkit-scrollbar {
+    height: 2px;
+}
+
+.tiny_scroll::-webkit-scrollbar-track {
+    background: #33281E;
+    border-radius: 2px;
+    margin-left: 2px;
+}
+
+.tiny_scroll::-webkit-scrollbar-thumb {
+    background: #c3a485;
+    border-radius: 2px;
+}
+
+.tiny_scroll::-webkit-scrollbar-thumb:hover {
+    background: #ffe9d3; 
+}
+
+
 .loading_bar {
     background-color: #B7C89E;
     overflow: hidden;

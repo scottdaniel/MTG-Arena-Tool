@@ -493,12 +493,24 @@ function collectionSortSet(a, b) {
 	return 0;
 }
 
+function getRaritySortValue(rarity) {
+	rarity = rarity.toLowerCase();
+	switch (rarity) {
+		case 'land':		return 1; break;
+		case 'common':		return 2; break;
+		case 'uncommon':	return 3; break;
+		case 'rare':		return 4; break;
+		case 'mythic':		return 5; break;
+		default: 			return 0; break;
+	}
+
+}
 //
 function collectionSortRarity(a, b) {
 	a = cardsDb.get(a);
 	b = cardsDb.get(b);
-	if (a.rarity < b.rarity)	return -1;
-	if (a.rarity > b.rarity)	return 1;
+	if (getRaritySortValue(a.rarity) < getRaritySortValue(b.rarity))	return -1;
+	if (getRaritySortValue(a.rarity) > getRaritySortValue(b.rarity))	return 1;
 
 	if (a.set < b.set)	return -1;
 	if (a.set > b.set)	return 1;

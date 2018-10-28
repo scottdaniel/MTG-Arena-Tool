@@ -447,6 +447,13 @@ span i {
     color: rgba(250, 229, 210, 1);
 }
 
+.list_economy_awarded {
+    margin: 0 24px;
+    align-items: center;
+    overflow: -webkit-paged-x;
+    display: flex;
+    max-width: calc(100% - 200px);
+}
 
 .list_event_expand {
     width: calc(100% - 32px);
@@ -1058,7 +1065,7 @@ a:hover {
 }
 
 .economy_wc {
-    width: 24px;
+    min-width: 24px;
     height: 24px;
     background-size: contain;
     background-repeat: no-repeat;
