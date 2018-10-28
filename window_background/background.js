@@ -452,6 +452,9 @@ function loadPlayerConfig(playerId) {
     deck_changes_index = entireConfig["deck_changes_index"];
     deck_changes = entireConfig["deck_changes"];
 
+    var obj = store.get('overlayBounds');
+    ipc_send("overlay_set_bounds", obj);
+
     var settings = store.get("settings");
     updateSettings(settings, true);
     requestHistorySend(0);
@@ -1623,8 +1626,8 @@ function getNameBySeat(seat) {
 }
 
 function createMatch(arg) {
-    var obj = store.get('overlayBounds');
     actionLog(-99, new Date(), "");
+    var obj = store.get('overlayBounds');
 
     annotationsRead = [];
     zones = {};
@@ -1656,6 +1659,7 @@ function createMatch(arg) {
 }
 
 function createDraft() {
+    actionLog(-99, new Date(), "");
     var obj = store.get('overlayBounds');
     annotationsRead = [];
     zones = {};
@@ -1992,13 +1996,12 @@ function finishLoading() {
 	firstPass = false;
 
     if (duringMatch) {
-        var obj = store.get('overlayBounds');
-
         ipc_send("renderer_hide", 1);
         ipc_send("overlay_show", 1);
-        ipc_send("overlay_set_bounds", obj);
         update_deck(false);
     }
+    var obj = store.get('overlayBounds');
+    ipc_send("overlay_set_bounds", obj);
 
     requestHistorySend(0);
 	ipc_send("initialize", 1);
