@@ -1119,7 +1119,6 @@ function processLogData(data) {
     strCheck = '<== Draft.DraftStatus(';
     json = checkJsonWithStart(data, strCheck, '', ')');
     if (json != false) {
-        console.log("Draft status");
         if (json.eventName != undefined) {
             // TEST THIS
             for (var set in setsList) {
@@ -1129,12 +1128,13 @@ function processLogData(data) {
                 }
             }
         }
-        console.log("Draft:", json);
-        if (json.packNumber == 0 && json.pickNumber <= 0) {
-            setDraftCards(json);
+
+        if (currentDraft == undefined || (json.packNumber == 0 && json.pickNumber <= 0)) {
             createDraft();
-            currentDraftPack = json.draftPack.slice(0);
         }
+
+        setDraftCards(json);
+        currentDraftPack = json.draftPack.slice(0);
         return;
     }
 
@@ -1144,7 +1144,12 @@ function processLogData(data) {
     if (json != false) {
         // store pack in recording
         if (json.draftPack != undefined) {
-            ipc.send("set_draft_cards", json.draftPack, json.pickedCards, json.packNumber+1, json.pickNumber);
+
+            if (currentDraft == undefined) {
+                createDraft();
+            }
+
+            setDraftCards(json);
             currentDraftPack = json.draftPack.slice(0);
         }
         return;
@@ -1160,7 +1165,7 @@ function processLogData(data) {
         value.pack = currentDraftPack;
         var key = "pack_"+json.params.packNumber+"pick_"+json.params.pickNumber;
         currentDraft[key] = value;
-        debugLogSpeed = 1000;
+        debugLogSpeed = 500;
         return;
     }
 
