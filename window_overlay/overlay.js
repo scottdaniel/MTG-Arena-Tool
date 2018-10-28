@@ -256,7 +256,6 @@ ipc.on('set_deck', function (event, arg) {
 				    return false;
 				});
 				var grpId = $( this ).attr("href");
-				console.log(">> ", $( this ).attr("href"));
 				addCardHover($( this ), cardsDb.get(grpId));
 			});
 			

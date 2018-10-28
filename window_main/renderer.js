@@ -697,7 +697,7 @@ function setEconomy(loadMore) {
 		daysago = -1;
 	}
 
-	console.log("Load more: ", loadEconomy, loadMore, loadEconomy+loadMore);
+	//console.log("Load more: ", loadEconomy, loadMore, loadEconomy+loadMore);
 	for (var loadEnd = loadEconomy + loadMore; loadEconomy < loadEnd; loadEconomy++) {
 		var economy_id = economyHistory.changes[loadEconomy];
 		var change = economyHistory[economy_id];
@@ -1060,7 +1060,7 @@ function setEvents(loadMore) {
 		loadEvents = 0;
 	}
 
-	console.log("Load more: ", loadEvents, loadMore, loadEvents+loadMore);
+	//console.log("Load more: ", loadEvents, loadMore, loadEvents+loadMore);
 	for (var loadEnd = loadEvents + loadMore; loadEvents < loadEnd; loadEvents++) {
 		var course_id = eventsHistory.courses[loadEvents];
 		var course = eventsHistory[course_id];
@@ -1195,14 +1195,14 @@ function expandEvent(_course, expandDiv) {
 
 	var matchesList = _course.ModuleInstanceData.WinLossGate.ProcessedMatchIds;
 	expandDiv.innerHTML = "";
-	console.log(matchesList);
+	//console.log(matchesList);
 	var newHeight = 0;
 	if (matchesList != undefined) {
 		matchesList.forEach(function(_mid) {
 			var match = matchesHistory[_mid];
 
-			console.log(_mid);
-			console.log(match);
+			//console.log(_mid);
+			//console.log(match);
 			if (match != undefined) {
 				if (match.type == "match") {
 
@@ -1399,7 +1399,7 @@ function setHistory(loadMore) {
 
 	mainDiv = document.getElementById("history_column");
 	
-	console.log("Load more: ", loadHistory, loadMore, loadHistory+loadMore);
+	//console.log("Load more: ", loadHistory, loadMore, loadHistory+loadMore);
 	for (var loadEnd = loadHistory + loadMore; loadHistory < loadEnd; loadHistory++) {
 		var match_id = matchesHistory.matches[loadHistory];
 		var match = matchesHistory[match_id];

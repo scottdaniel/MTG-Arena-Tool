@@ -70,6 +70,11 @@ var timeEnd = 0;
 const fs = require("fs");
 window.ipc = electron.ipcRenderer;
 
+const actionLogDir = path.join((electron.app || electron.remote.app).getPath('userData'), 'actionlogs');
+if (!fs.existsSync(actionLogDir)){
+    fs.mkdirSync(actionLogDir);
+}
+
 var firstPass = true;
 var tokenAuth = undefined;
 
@@ -111,6 +116,8 @@ var turnActive = 0;
 var turnPriority = 0;
 var turnDecision = 0;
 var turnStorm = 0;
+var playerLife = 20;
+var opponentLife = 20;
 
 var zones = {};
 var gameObjs = {};
@@ -645,6 +652,7 @@ function processLogUser(err, bytecount, buff) {
     // Process the log only to find player name and id
     let rawString = buff.toString('utf-8', 0, bytecount);
     var splitString = rawString.split('[UnityCrossThread');
+
     //console.log('Reading user:', bytecount, 'bytes, ',splitString.length, ' chunks');
     //ipc_send("ipc_log", 'Reading: '+bytecount+' bytes, '+splitString.length+' chunks');
 
@@ -1283,9 +1291,24 @@ function actionLogGenerateLink(grpId) {
     return '<a class="card_link" href="'+grpId+'">'+card.name+'</a>';
 }
 
+var currentActionLog = "";
+
 function actionLog(seat, time, str, grpId = 0) {
-    //console.log("ACTION LOG", seat, time.getTime(), str);
+    if (seat == -99) {
+        currentActionLog = "";
+    }
+    else {
+        var hh = ("0"+time.getHours()).slice(-2);
+        var mm = ("0"+time.getMinutes()).slice(-2);
+        var ss = ("0"+time.getSeconds()).slice(-2);
+        currentActionLog += hh+':'+mm+':'+ss+' '+stripTags(str)+'\r\n';
+
+        try { fs.writeFileSync(path.join(actionLogDir, currentMatchId+'.txt'), currentActionLog, 'utf-8'); }
+        catch(e) {}
+    }
+
     ipc_send("action_log", {seat: seat, time:time, str: str, grpId: grpId});
+
 }
 
 var attackersDetected = [];
@@ -1450,6 +1473,8 @@ function gre_to_client(data) {
                         oppWin = 0;
                         results.forEach(function(res) {
                             if (res.scope == "MatchScope_Game") {
+                                actionLog(res.winningTeamId, new Date(), '');
+                                actionLog(-1, new Date(), getNameBySeat(res.winningTeamId)+' Wins!');
                                 if (res.winningTeamId == playerSeat) {
                                     playerWin += 1;
                                 }
@@ -1514,7 +1539,7 @@ function gre_to_client(data) {
                                     var grpid = undefined;
                                     obj.details.forEach(function(detail) {
                                         if (detail.key == "grpid") {
-                                            grpid = detail.valueInt32[0]
+                                            grpid = detail.valueInt32[0];
                                         }
                                     });
                                     if (grpid != undefined) {
@@ -1524,7 +1549,15 @@ function gre_to_client(data) {
                                         if (gameObjs[aff] != undefined) {
                                             if (gameObjs[aff].type == "GameObjectType_Ability") {
                                                 var src = gameObjs[aff].objectSourceGrpId;
-                                                actionLog(gameObjs[aff].controllerSeatId, new Date(), actionLogGenerateLink(src)+"'s ability");
+                                                var abId = gameObjs[aff].grpId;
+                                                var ab = cardsDb.getAbility(abId);
+                                                var cname = "";
+                                                try {
+                                                    ab = replaceAll(ab, "CARDNAME", cardsDb.get(src).name);
+                                                }
+                                                catch (e) {}
+                                        
+                                                actionLog(gameObjs[aff].controllerSeatId, new Date(), actionLogGenerateLink(src)+'\'s <a class="card_ability" title="'+ab+'">ability</a>');
                                                 //ipc_send("ipc_log", cardsDb.get(src).name+"'s ability");
                                                 //console.log(cardsDb.get(src).name+"'s ability", gameObjs[aff]);
                                             }
@@ -1536,6 +1569,22 @@ function gre_to_client(data) {
                                         }
                                     }
                                 }
+                                /*
+                                // Not optimal, this triggers too many times
+                                if (obj.type.includes("AnnotationType_ModifiedLife")) {
+                                    obj.details.forEach(function(detail) {
+                                        if (detail.key == "life") {
+                                            var change = detail.valueInt32[0];
+                                            if (change < 0) {
+                                                actionLog(aff, new Date(), getNameBySeat(aff)+' lost '+Math.abs(change)+' life');
+                                            }
+                                            else {
+                                                actionLog(aff, new Date(), getNameBySeat(aff)+' gained '+Math.abs(change)+' life');
+                                            }
+                                        }
+                                    });
+                                }
+                                */
                                 if (obj.type.includes("AnnotationType_ZoneTransfer")) {
                                     obj.remove = false;
                                     obj.aff = aff;
@@ -1555,7 +1604,6 @@ function gre_to_client(data) {
                                     affected.forEach(function(affd) {
                                         if (gameObjs[aff] !== undefined) {
                                             if (affd == playerSeat || affd == oppSeat) {
-
                                                 actionLog(gameObjs[aff].controllerSeatId, new Date(), actionLogGenerateLink(gameObjs[aff].grpId)+" dealt "+damage+" damage to "+getNameBySeat(affd));
                                                 //ipc_send("ipc_log", gameObjs[aff].name+" dealt "+damage+" damage to "+getNameBySeat(affd));
                                             }
@@ -1603,7 +1651,32 @@ function gre_to_client(data) {
                         gameObjs[obj] = undefined;
                     });
                 }
-                
+
+
+                if (msg.gameStateMessage.players != undefined) {
+                    msg.gameStateMessage.players.forEach(function(obj) {
+                        var sign = '';
+                        if (playerSeat == obj.controllerSeatId) {
+                            var diff = obj.lifeTotal - playerLife;
+                            if (diff > 0) sign = '+'
+
+                            if (diff != 0) {
+                                actionLog(obj.controllerSeatId, new Date(), getNameBySeat(obj.controllerSeatId)+'\'s life changed to '+obj.lifeTotal+' ('+sign+diff+")");
+                            }
+                            
+                            playerLife = obj.lifeTotal;
+                        }
+                        else {
+                            var diff = obj.lifeTotal - opponentLife;
+                            if (diff > 0) sign = '+';
+                            if (diff != 0) {
+                                actionLog(obj.controllerSeatId, new Date(), getNameBySeat(obj.controllerSeatId)+'\'s life changed to '+obj.lifeTotal+' ('+sign+diff+")");
+                            }
+
+                            opponentLife = obj.lifeTotal;
+                        }
+                    });
+                }
             }
         }
         //
@@ -1642,7 +1715,8 @@ function createMatch(arg) {
         ipc_send("overlay_show", 1);
         ipc_send("overlay_set_bounds", obj);
     }
-
+    playerLife = 20;
+    opponentLife = 20;
     oppName = arg.opponentScreenName;
     oppRank = arg.opponentRankingClass;
     oppTier = arg.opponentRankingTier;
@@ -2107,7 +2181,7 @@ function httpBasic() {
                         }
                         
                         if (_headers.method == 'get_database') {
-                           //resetLogLoop(100);
+                            //resetLogLoop(100);
                             delete parsedResult.ok;
                             setsList = parsedResult.sets;
                             eventsList = parsedResult.events;
