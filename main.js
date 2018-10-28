@@ -238,6 +238,9 @@ app.on('ready', () => {
                 break;
 
             case 'renderer_update_install':
+                if (updateState == 3) {
+                    autoUpdater.quitAndInstall();
+                }
                 background.webContents.send("update_install", 1);
                 break;
 

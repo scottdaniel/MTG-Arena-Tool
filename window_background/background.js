@@ -264,13 +264,6 @@ ipc.on('delete_data', function (event, arg) {
 });
 
 //
-ipc.on('update_install', function (event, settings) {
-    if (updateState == 3) {
-        autoUpdater.quitAndInstall();
-    }
-});
-
-//
 ipc.on('request_events', function (event, arg) {
     ipc_send("set_events", JSON.stringify(events));
 });
