@@ -2325,25 +2325,31 @@ function httpDraftShareLink(did, exp) {
 
 //
 function parseWotcTime(str) {
-    let datePart = str.split(" ")[0];
-    let timePart = str.split(" ")[1];
-    let midnight = str.split(" ")[2];
+    try {
+        let datePart = str.split(" ")[0];
+        let timePart = str.split(" ")[1];
+        let midnight = str.split(" ")[2];
 
-    datePart = datePart.split("/");
-    timePart = timePart.split(":");
+        datePart = datePart.split("/");
+        timePart = timePart.split(":");
 
-    timePart.forEach(function(s, index) {timePart[index] = parseInt(s)});
-    datePart.forEach(function(s, index) {datePart[index] = parseInt(s)});
+        timePart.forEach(function(s, index) {timePart[index] = parseInt(s)});
+        datePart.forEach(function(s, index) {datePart[index] = parseInt(s)});
 
-    if (midnight == "PM" && timePart[0] != 12) {
-        timePart[0] += 12;
+        if (midnight == "PM" && timePart[0] != 12) {
+            timePart[0] += 12;
+        }
+        if (midnight == "AM" && timePart[0] == 12) {
+            timePart[0] = 0;
+        }
+
+        var date = new Date(datePart[2], datePart[0]-1, datePart[1], timePart[0], timePart[1], timePart[2]);
+        return date;
     }
-    if (midnight == "AM" && timePart[0] == 12) {
-        timePart[0] = 0;
+    catch (e) {
+        return new Date();
     }
 
-    var date = new Date(datePart[2], datePart[0]-1, datePart[1], timePart[0], timePart[1], timePart[2]);
-    return date;
 }
 
 //
