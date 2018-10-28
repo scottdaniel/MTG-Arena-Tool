@@ -41,8 +41,6 @@ var rankTitle = "";
 var userName = ""
 
 const chartjs = require('chart.js');
-const Database = require('../shared/database.js');
-const cardsDb = new Database();
 
 const sha1 = require('js-sha1');
 const fs = require("fs");

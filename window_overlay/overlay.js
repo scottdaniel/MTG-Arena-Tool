@@ -22,8 +22,6 @@ var soundPriority = false;
 var showSideboard = false;
 var actionLog = [];
 
-const Database = require('../shared/database.js');
-const cardsDb = new Database();
 var cards = {};
 
 var mana = {0: "", 1: "white", 2: "blue", 3: "black", 4: "red", 5: "green", 6: "colorless", 7: "", 8: "x"};

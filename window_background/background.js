@@ -59,13 +59,11 @@ var store = new Store({
 });
 
 const sha1 = require('js-sha1');
-const Database = require('../shared/database.js');
-const cardsDb = new Database();
 
 const serverAddress = 'mtgatool.com';
 
 const debugLog = false;
-const debugNet = false;
+const debugNet = true;
 var debugLogSpeed = 0.1;
 var timeStart = 0;
 var timeEnd = 0;
@@ -2101,14 +2099,16 @@ function httpBasic() {
                         if (_headers.method == 'share_draft') {
                             ipc_send("set_draft_link", parsedResult.url);
                         }
+                        
                         if (_headers.method == 'get_database') {
-                            cardsDb.set(parsedResult);
                            //resetLogLoop(100);
                             delete parsedResult.ok;
                             setsList = parsedResult.sets;
                             eventsList = parsedResult.events;
                             ipc_send("set_db", parsedResult);
+                            cardsDb.set(parsedResult);
                         }
+                        
                     }
                     else if (parsedResult.ok == false && parsedResult.error != undefined) {
                         if (_headers.method == 'share_draft') {
