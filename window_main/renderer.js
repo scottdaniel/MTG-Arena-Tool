@@ -818,16 +818,22 @@ function setEconomy(loadMore) {
 
 			checkWildcardsAdded = true;
 			checkCardsAdded = true;
-			// Draw set logo below title
-			// Draw small cards images on the right
 		}
 		else if (change.context == "Store") {
 			checkGemsPaid = true;
 			checkGoldPaid = true;
 			checkBoosterAdded = true;
 			checkCardsAdded = true;
-			// Draw gold or gems + ammount spent below title
-			// Draw obtained goods on the right
+		}
+		else if (change.context == "Pay Event Entry") {
+			checkGemsPaid = true;
+			checkGoldPaid = true;
+
+			var bos = document.createElement("div");
+			bos.classList.add("economy_ticket_med");
+			bos.title = "Event Entry";
+
+			flr.appendChild(bos);
 		}
 		else if (change.context == "Redeem Wilcard") {
 			var imgUri = "";
@@ -843,9 +849,7 @@ function setEconomy(loadMore) {
 				flb.appendChild(bos);
 			}
 
-			checkCardsAdded = true;
-			// Draw wildcard spent below title
-			// Draw card redeemed on the right
+			checkCardsAdded = true;1
 		}
 		else {
 			checkGemsEarnt = true;

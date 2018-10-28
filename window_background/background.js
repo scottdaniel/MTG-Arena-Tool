@@ -1866,6 +1866,9 @@ function saveEconomy(json) {
     if (ctx.indexOf("Event.Prize") !== -1) {
         json.context = "Event Prize";
     }
+    if (ctx.indexOf("Event.PayEntry") !== -1) {
+        json.context = "Pay Event Entry";
+    }
 
     var economy_index = store.get('economy_index');
 
