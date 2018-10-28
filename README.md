@@ -6,8 +6,10 @@ An MTG Arena deck tracker and collection manager.
 ## Current features
 - In-game overlay
 	- Cards left in library
+	- Actions log
 	- Odds of drawing next
 	- Full deck with sideboard
+	- Draft helper
 	- Elapsed time / current time clock
 - History of games played
 	- Cards your opponents played
@@ -38,7 +40,6 @@ An MTG Arena deck tracker and collection manager.
 
 ## Roadmap
 `These are some features I would like to include, not ordered in any way`
-- Log of events (Player X casts Y spell, This targeted that, etc), save the log too
 - Metagame / Archetypes on decks explorer `this requires more data to be able to play with`
 - Deck editor/modifier, for adding things like specific basic lands and then importing them to MTG Arena.
 
