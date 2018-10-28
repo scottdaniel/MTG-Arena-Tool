@@ -1113,7 +1113,6 @@ function processLogData(data) {
     json = checkJsonWithStart(data, strCheck, '', ')');
     if (json != false) {
         if (json.eventName != undefined) {
-            // TEST THIS
             for (var set in setsList) {
                 var setCode = setsList[set]["code"];
                 if (json.eventName.indexOf(setCode) !== -1) {
@@ -1125,7 +1124,6 @@ function processLogData(data) {
         if (currentDraft == undefined || (json.packNumber == 0 && json.pickNumber <= 0)) {
             createDraft();
         }
-
         setDraftCards(json);
         currentDraftPack = json.draftPack.slice(0);
         return;
@@ -1136,12 +1134,19 @@ function processLogData(data) {
     json = checkJsonWithStart(data, strCheck, '', ')');
     if (json != false) {
         // store pack in recording
-        if (json.draftPack != undefined) {
+        if (json.eventName != undefined) {
+            for (var set in setsList) {
+                var setCode = setsList[set]["code"];
+                if (json.eventName.indexOf(setCode) !== -1) {
+                    draftSet = set;
+                }
+            }
+        }
 
+        if (json.draftPack != undefined) {
             if (currentDraft == undefined) {
                 createDraft();
             }
-
             setDraftCards(json);
             currentDraftPack = json.draftPack.slice(0);
         }

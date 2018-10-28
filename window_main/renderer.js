@@ -1524,7 +1524,12 @@ function setHistory(loadMore) {
 			}
 		}
 		else if (match.type == "draft") {
-			var tileGrpid = setsList[match.set].tile;
+			try {
+				var tileGrpid = setsList[match.set].tile;
+			}
+			catch (e) {
+				var tileGrpid = 67003;
+			}
 
 			var tile = document.createElement("div");
 			tile.classList.add(match.id+"t");
@@ -3322,6 +3327,10 @@ function printCards() {
 	var totalCards = 0;
 	if (filterUnown) {
 		var list = cardsDb.getAll();
+		delete list.abilities;
+		delete list.events;
+		delete list.sets;
+		delete list.ok;
 	}
 	else {
 		var list = cards;
