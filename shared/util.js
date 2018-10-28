@@ -121,7 +121,6 @@ function selectAdd(div, callback) {
 	        $styledSelect.text($(this).text()).removeClass('active');
 	        $this.val($(this).attr('rel'));
 	        $list.hide();
-	        console.log($this.val());
 	        callback($this.val());
 	    });
 	  
@@ -237,7 +236,6 @@ function getEventId(arg) {
 	var ret = arg;
 	Object.keys(eventsList).forEach(function (key) {
 		if (eventsList[key] == arg) {
-			console.log("match!");
 			ret = key;
 		}
 	});

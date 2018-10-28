@@ -1848,10 +1848,10 @@ function setExplore(arg, loadMore) {
 
 	var mainDiv = document.getElementById("ux_0");
 	mainDiv.classList.remove("flex_item");
-
 	if (loadMore > 0) {
 	}
 	else {
+		loadExplore = 0;
 		loadMore = 25;
 
 		mainDiv.innerHTML = '';
@@ -1914,17 +1914,16 @@ function setExplore(arg, loadMore) {
 		var d = document.createElement("div");
 		d.classList.add("list_fill");
 		mainDiv.appendChild(d);
-
-		loadExplore = 0;
 	}
 
-
 	//explore.forEach(function(_deck, index) {
+	var actuallyLoaded = 0;
 	for (var loadEnd = loadExplore + loadMore; loadExplore < loadEnd; loadExplore++) {
 		let _deck = explore[loadExplore];
 		if (_deck == undefined) {
 			continue;
 		}
+
 		let index = loadExplore;
 
 		var dateNow = new Date();
@@ -1933,6 +1932,8 @@ function setExplore(arg, loadMore) {
 		if (Math.floor(ss / 86400) > 10) {
 			continue;
 		}
+
+		actuallyLoaded++;
 
 		if (_deck.deck_colors == undefined) {
 			_deck.deck_colors = [];
@@ -2031,7 +2032,10 @@ function setExplore(arg, loadMore) {
 		});
 
 	}
-	//$("#ux_0").append('<div class="list_fill"></div>');
+
+	if (loadMore == 0 && actuallyLoaded < 20) {
+		setExplore(null, 50);
+	}
 
 	$(this).off();
 	$("#ux_0").on('scroll', function() {
@@ -2039,8 +2043,6 @@ function setExplore(arg, loadMore) {
 			setExplore(null, 20);
 		}
 	})
-
-	loadExplore += 20;
 }
 
 //
