@@ -2396,7 +2396,7 @@ function drawDeckVisual(_div, _stats, deck) {
 		if (deck.sideboard.length == 0) {
 			tileNow.css("display", "none");
 		}
-		
+
 		var _n = 0;
 		deck.sideboard.forEach(function(c) {
 			var grpId = c.id;
@@ -3756,8 +3756,15 @@ function open_settings(openSection) {
 		about.append('<div class="button_simple" onClick="installUpdate()">Install</div>');
 	}
 
-	about.append('<div class="flex_item" style="width: 160px; margin: 64px auto 0px auto;"><div class="twitter_link"></div><div class="git_link"></div></div>');
+	about.append('<div class="flex_item" style="margin: 64px auto 0px auto;"><div class="discord_link"></div><div class="twitter_link"></div><div class="git_link"></div></div>');
 	about.appendTo(section);
+
+	div.appendTo(wrap_r);
+	$("#ux_0").append(wrap_l);
+	$("#ux_0").append(wrap_r);
+
+	$(".ss"+openSection).show();
+	$(".sn"+openSection).addClass("nav_selected");
 
 	$(".top_logo_about").click(function() {
 		shell.openExternal('https://mtgatool.com');
@@ -3767,6 +3774,10 @@ function open_settings(openSection) {
 		shell.openExternal('https://twitter.com/MEtchegaray7');
 	});
 
+	$(".discord_link").click(function() {
+		shell.openExternal('https://discord.gg/K9bPkJy');
+	});
+
 	$(".git_link").click(function() {
 		shell.openExternal('https://github.com/Manuel-777/MTG-Arena-Tool');
 	});
@@ -3774,13 +3785,6 @@ function open_settings(openSection) {
 	$(".release_notes_link").click(function() {
 		shell.openExternal('https://mtgatool.com/release-notes/');
 	});
-
-	div.appendTo(wrap_r);
-	$("#ux_0").append(wrap_l);
-	$("#ux_0").append(wrap_r);
-
-	$(".ss"+openSection).show();
-	$(".sn"+openSection).addClass("nav_selected");
 
 	$(".settings_nav").click(function () {
 		if (!$(this).hasClass("nav_selected")) {

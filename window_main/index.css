@@ -62,17 +62,27 @@ span i {
 .twitter_link {
     cursor: pointer;
     align-self: center;
-    margin: 0 auto;
+    margin: auto 32px;
     width: 32px;
     height: 32px;
     background: url(../images/twitter_logo.png) no-repeat center;
     background-size: contain;
 }
 
+.discord_link {
+    cursor: pointer;
+    align-self: center;
+    margin: auto 32px;
+    width: 32px;
+    height: 32px;
+    background: url(../images/discord_logo.png) no-repeat center;
+    background-size: contain;
+}
+
 .git_link {
     cursor: pointer;
     align-self: center;
-    margin: 0 auto;
+    margin: auto 32px;
     width: 32px;
     height: 32px;
     background: url(../images/github_logo.png) no-repeat center;
