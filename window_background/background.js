@@ -786,6 +786,36 @@ function findFirstJSON(str) {
     unnecessarily long text to mark a point in the code that is fairly important because I cant remember the line number \^.^/
 
 */
+function client_to_gre(json) {
+  const messages = require('./messages_pb');
+
+  const msgType = json.clientToMatchServiceMessageType.split('_')[1],
+    binaryMsg = new Buffer(json.payload, 'base64');
+
+  try {
+    let msgDeserialiser;
+    if (msgType === 'ClientToGREMessage' || msgType === 'ClientToGREUIMessage') {
+      msgDeserialiser = messages.ClientToGREMessage;
+    } else if (msgType === 'ClientToMatchDoorConnectRequest') {
+      msgDeserialiser = messages.ClientToMatchDoorConnectRequest;
+    } else if (msgType === 'AuthenticateRequest') {
+      msgDeserialiser = messages.AuthenticateRequest;
+    } else if (msgType === 'CreateMatchGameRoomRequest') {
+      msgDeserialiser = messages.CreateMatchGameRoomRequest;
+    } else if (msgType === 'EchoRequest') {
+      msgDeserialiser = messages.EchoRequest;
+    } else {
+      console.warn(`${msgType} - unknown message type`);
+      return;
+    }
+    const msg = msgDeserialiser.deserializeBinary(binaryMsg);
+    console.log(json.payload);
+    console.log(msg.toObject());
+    console.log("");
+  } catch (e) {
+    console.log(e.message);
+  }
+}
 
 
 function processLogData(data) {
@@ -821,6 +851,17 @@ function processLogData(data) {
     if (json != false) {
         gre_to_client(json.greToClientEvent.greToClientMessages);
         return;
+    }
+
+    // Gre to Client Event
+    strCheck = 'ClientToMatchServiceMessageType';
+    if (data.indexOf(strCheck) > -1) {
+      let rawJson = data.substr(data.indexOf('{')).trim();
+      //got packets like this one during tests:
+      //{  "requestId": 3,  "clientToMatchServiceMessageType": "ClientToMatchServiceMessageType_ClientToGREMessage",  "payload": "CBSCAQQKAkgB"}Camera depthTextureMode was None, changing to DepthAuto responded to: ChooseStartingPlayerRequestThe referenced script on this Behaviour (Game Object 'OrderIndicator') is missing! (Filename:  Line: 1789)The referenced script on this Behaviour (Game Object 'SurveilGraveyard') is missing! (Filename:  Line: 1789)The referenced script on this Behaviour (Game Object 'DefaultScrollbar') is missing! (Filename:  Line: 1789)The referenced script on this Behaviour (Game Object 'SurveilGraveyard') is missing! (Filename:  Line: 1789)The referenced script on this Behaviour (Game Object 'BrowserHeader') is missing! (Filename:  Line: 1789)The referenced script on this Behaviour (Game Object 'OrderIndicator') is missing! (Filename:  Line: 1789)The referenced script on this Behaviour (Game Object 'OrderIndicator') is missing! (Filename:  Line: 1789)The referenced script on this
+      if (rawJson.slice(-1) !== '}') rawJson = rawJson.replace(/}[^}]*/, '}');
+      client_to_gre(JSON.parse(rawJson));
+      return;
     }
 
     // Get courses
