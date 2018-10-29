@@ -2393,6 +2393,10 @@ function drawDeckVisual(_div, _stats, deck) {
 		tileNow.css("width", (sz+6)*5+"px");
 		tileNow.appendTo(div);
 
+		if (deck.sideboard.length == 0) {
+			tileNow.css("display", "none");
+		}
+		
 		var _n = 0;
 		deck.sideboard.forEach(function(c) {
 			var grpId = c.id;
