@@ -452,19 +452,21 @@ function get_collection_stats() {
 	}
 
 	Object.keys(cardsDb.cards).forEach(function (grpId) {
-		const card = cardsDb.get(grpId);
-		if (card.rarity !== "token" && card.rarity !== "land" && card.set !== "Oath of the Gatewatch" && card.dfc != "DFC_Front" && card.dfc != "SplitCard") {
-			// add to totals
-			stats[card.set][card.rarity].total += 4;
-			stats.complete[card.rarity].total += 4;
-			stats.singles[card.rarity].total += 1;
+		if (grpId != "ok" && grpId != "abilities" && grpId != "events" && grpId != "sets") {
+			const card = cardsDb.get(grpId);
+			if (card.rarity !== "token" && card.rarity !== "land" && card.set !== "Oath of the Gatewatch" && card.dfc != "DFC_Front" && card.dfc != "SplitCard") {
+				// add to totals
+				stats[card.set][card.rarity].total += 4;
+				stats.complete[card.rarity].total += 4;
+				stats.singles[card.rarity].total += 1;
 
-			// add cards we own
-			if (cards[grpId] !== undefined) {
-				var owned = cards[grpId];
-				stats[card.set][card.rarity].owned += owned;
-				stats.complete[card.rarity].owned += owned;
-				stats.singles[card.rarity].owned += 1;
+				// add cards we own
+				if (cards[grpId] !== undefined) {
+					var owned = cards[grpId];
+					stats[card.set][card.rarity].owned += owned;
+					stats.complete[card.rarity].owned += owned;
+					stats.singles[card.rarity].owned += 1;
+				}
 			}
 		}
 	});

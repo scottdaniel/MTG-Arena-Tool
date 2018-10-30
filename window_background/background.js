@@ -1867,24 +1867,24 @@ function forceDeckUpdate() {
         currentDeckUpdated.mainDeck.forEach(function(card) {
             var c = cardsDb.get(card.id);
             if (c) {
-                if (c.type.includes("Creature", 0))      typeCre += card.quantity;
-                if (c.type.includes("Planeswalker", 0))  typePla += card.quantity;
-                if (c.type.includes("Instant", 0))       typeIns += card.quantity;
-                if (c.type.includes("Sorcery", 0))       typeSor += card.quantity;
-                if (c.type.includes("Artifact", 0))      typeArt += card.quantity;
-                if (c.type.includes("Enchantment", 0))   typeEnc += card.quantity;
-                if (c.type.includes("Land", 0))          typeLan += card.quantity;
+                if (c.type.includes("Land", 0))                 typeLan += card.quantity;
+                else if (c.type.includes("Creature", 0))        typeCre += card.quantity;
+                else if (c.type.includes("Artifact", 0))        typeArt += card.quantity;
+                else if (c.type.includes("Enchantment", 0))     typeEnc += card.quantity;
+                else if (c.type.includes("Instant", 0))         typeIns += card.quantity;
+                else if (c.type.includes("Sorcery", 0))         typeSor += card.quantity;
+                else if (c.type.includes("Planeswalker", 0))    typePla += card.quantity;
             }
-            card.chance = Math.round(hypergeometric(1, decksize, 1, card.quantity)*100);
+            card.chance = Math.round(hypergeometric(1, cardsleft, 1, card.quantity)*100);
         });
 
-        currentDeckUpdated.chanceCre = Math.round(hypergeometric(1, decksize, 1, typeCre) * 1000)/10;
-        currentDeckUpdated.chanceIns = Math.round(hypergeometric(1, decksize, 1, typeIns) * 1000)/10;
-        currentDeckUpdated.chanceSor = Math.round(hypergeometric(1, decksize, 1, typeSor) * 1000)/10;
-        currentDeckUpdated.chancePla = Math.round(hypergeometric(1, decksize, 1, typePla) * 1000)/10;
-        currentDeckUpdated.chanceArt = Math.round(hypergeometric(1, decksize, 1, typeArt) * 1000)/10;
-        currentDeckUpdated.chanceEnc = Math.round(hypergeometric(1, decksize, 1, typeEnc) * 1000)/10;
-        currentDeckUpdated.chanceLan = Math.round(hypergeometric(1, decksize, 1, typeLan) * 1000)/10;
+        currentDeckUpdated.chanceCre = Math.round(hypergeometric(1, cardsleft, 1, typeCre) * 1000)/10;
+        currentDeckUpdated.chanceIns = Math.round(hypergeometric(1, cardsleft, 1, typeIns) * 1000)/10;
+        currentDeckUpdated.chanceSor = Math.round(hypergeometric(1, cardsleft, 1, typeSor) * 1000)/10;
+        currentDeckUpdated.chancePla = Math.round(hypergeometric(1, cardsleft, 1, typePla) * 1000)/10;
+        currentDeckUpdated.chanceArt = Math.round(hypergeometric(1, cardsleft, 1, typeArt) * 1000)/10;
+        currentDeckUpdated.chanceEnc = Math.round(hypergeometric(1, cardsleft, 1, typeEnc) * 1000)/10;
+        currentDeckUpdated.chanceLan = Math.round(hypergeometric(1, cardsleft, 1, typeLan) * 1000)/10;
         currentDeckUpdated.deckSize  = decksize;
         currentDeckUpdated.cardsLeft = cardsleft;
     }
@@ -2188,11 +2188,13 @@ function httpBasic() {
                         
                         if (_headers.method == 'get_database') {
                             //resetLogLoop(100);
+                            /*
                             delete parsedResult.ok;
                             setsList = parsedResult.sets;
                             eventsList = parsedResult.events;
                             ipc_send("set_db", parsedResult);
                             cardsDb.set(parsedResult);
+                            */
                         }
                         
                     }
