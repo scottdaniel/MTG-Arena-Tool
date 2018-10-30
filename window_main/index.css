@@ -649,19 +649,28 @@ a:hover {
 
 .decklist_top {
     /* opacity: 0.8; */
-    width: calc(100% - 48px);
+    /* width: calc(100% - 48px); */
     height: 32px;
     display: flex;
     margin-top: 24px;
-    padding: 8px 16px 8px 16px;
+    padding: 8px 24px;
     justify-content: space-between;
 }
 
 .deck_name {
     align-self: center;
+    width: 33%;
+    text-align: center;
     color: #FAE5D2;
     font-size: 22px;
     text-shadow: 0px 4px 16px rgb(0, 0, 0);
+}
+
+.deck_top_colors {
+    width: 33%;
+    justify-content: flex-end;
+    align-self: center;
+    display: flex;
 }
 
 .mana_curve {

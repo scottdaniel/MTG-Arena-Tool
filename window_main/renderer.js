@@ -40,10 +40,12 @@ var rankOffset = 0;
 var rankTitle = "";
 var userName = ""
 
-const chartjs = require('chart.js');
+//const chartjs = require('chart.js');
+const sha1 	= require('js-sha1');
+const fs 	= require("fs");
+const path  = require('path');
 
-const sha1 = require('js-sha1');
-const fs = require("fs");
+const actionLogDir = path.join((electron.app || electron.remote.app).getPath('userData'), 'actionlogs');
 
 var mana = {0: "", 1: "white", 2: "blue", 3: "black", 4: "red", 5: "green", 6: "colorless", 7: "", 8: "x"}
 
@@ -2079,7 +2081,7 @@ function open_deck(i, type) {
 	$("#ux_1").html('');
 
 	var top = $('<div class="decklist_top"><div class="button back"></div><div class="deck_name">'+_deck.name+'</div></div>');
-	flr = $('<div class="flex_item" style="align-self: center;"></div>');
+	flr = $('<div class="deck_top_colors" style="align-self: center;"></div>');
 
 	_deck.colors.forEach(function(color) {
 		var m = $('<div class="mana_s20 mana_'+mana[color]+'"></div>');
@@ -2619,7 +2621,7 @@ function open_draft(id, tileGrpid, set) {
 	var pick = draft[key].pick;
 
 	var top = $('<div class="decklist_top"><div class="button back"></div><div class="deck_name">'+set+' Draft</div></div>');
-	flr = $('<div class="flex_item" style="align-self: center;"></div>');
+	flr = $('<div class="deck_top_colors"></div>');
 	top.append(flr);
 
 	if (cardsDb.get(tileGrpid)) {
@@ -2701,7 +2703,7 @@ function open_match(id) {
 	var match = matchesHistory[id];
 
 	var top = $('<div class="decklist_top"><div class="button back"></div><div class="deck_name">'+match.playerDeck.name+'</div></div>');
-	flr = $('<div class="flex_item" style="align-self: center;"></div>');
+	flr = $('<div class="deck_top_colors"></div>');
 
 	if (match.playerDeck.colors != undefined) {		
 		match.playerDeck.colors.forEach(function(color) {
@@ -2711,6 +2713,10 @@ function open_match(id) {
 	}
 	top.append(flr);
 
+	var flc = $('<div class="flex_item" style="justify-content: space-evenly;"></div>');
+	if (fs.existsSync(path.join(actionLogDir, id+'.txt'))) {
+		$('<div class="button_simple openLog">Action log</div>').appendTo(flc);
+	}
 
 	var tileGrpid = match.playerDeck.deckTileId;
 	if (cardsDb.get(tileGrpid)) {
@@ -2783,8 +2789,13 @@ function open_match(id) {
 	dl.appendTo(fld);
 	odl.appendTo(fld);
 	$("#ux_1").append(top);
+	$("#ux_1").append(flc);
 	$("#ux_1").append(fld);
 	
+	$(".openLog").click(function() {
+		shell.openItem(path.join(actionLogDir, id+'.txt'));
+	});
+
 	$(".exportDeck").click(function () {
 	    var list = get_deck_export(match.oppDeck);
 	    ipc_send('set_clipboard', list);
@@ -2798,6 +2809,7 @@ function open_match(id) {
 		change_background("default");
 	    $('.moving_ux').animate({'left': '0px'}, 250, 'easeInOutCubic'); 
 	});
+
 }
 
 //
@@ -3230,7 +3242,7 @@ function printStats() {
 	$("#ux_1").html('');
 	const stats = get_collection_stats();
 
-	const top = $('<div class="decklist_top"><div class="button back"></div><div class="deck_name">Collection Statistics</div></div>');
+	const top = $('<div class="decklist_top"><div class="button back"></div><div class="deck_name">Collection Statistics</div><div class="deck_top_colors"></div></div>');
 	change_background("http://www.artofmtg.com/wp-content/uploads/2018/04/Urzas-Tome-Dominaria-MtG-Art.jpg");
 
 	const flex = $('<div class="flex_item"></div>');
@@ -3889,13 +3901,11 @@ function change_background(arg) {
     else {
         $.ajax({
             url: arg,
-            type:'HEAD',
-            error: function()
-            {
+            type: 'HEAD',
+            error: function() {
                 $('.main_wrapper').css("background-image", "");
             },
-            success: function()
-            {
+            success: function() {
                 $('.main_wrapper').css("background-image", "url("+arg+")");
             }
         });
