@@ -2753,6 +2753,9 @@ function open_match(id) {
 
 	drawDeck(dl, match.playerDeck);
 
+	$('<div class="button_simple centered exportDeckPlayer">Export to Arena</div>').appendTo(dl);
+	$('<div class="button_simple centered exportDeckStandardPlayer">Export to .txt</div>').appendTo(dl);
+
 	var flt = $('<div class="flex_item" style="flex-direction: row-reverse;"></div>')
 	var fltl = $('<div class="flex_item"></div>')
 	var r = $('<div class="rank"></div>'); r.appendTo(fltl);
@@ -2783,8 +2786,8 @@ function open_match(id) {
 	match.oppDeck.sideboard.sort(compare_cards);
 	drawDeck(odl, match.oppDeck);
 
-	$('<div class="button_simple exportDeck">Export to Arena</div>').appendTo(odl);
-	$('<div class="button_simple exportDeckStandard">Export to .txt</div>').appendTo(odl);
+	$('<div class="button_simple centered exportDeck">Export to Arena</div>').appendTo(odl);
+	$('<div class="button_simple centered exportDeckStandard">Export to .txt</div>').appendTo(odl);
 
 	dl.appendTo(fld);
 	odl.appendTo(fld);
@@ -2794,6 +2797,15 @@ function open_match(id) {
 	
 	$(".openLog").click(function() {
 		shell.openItem(path.join(actionLogDir, id+'.txt'));
+	});
+
+	$(".exportDeckPlayer").click(function () {
+	    var list = get_deck_export(match.playerDeck);
+	    ipc_send('set_clipboard', list);
+	});
+	$(".exportDeckStandardPlayer").click(function () {
+	    var list = get_deck_export_txt(match.playerDeck);
+	    ipc_send('export_txt', {str: list, name: match.playerDeck.name});
 	});
 
 	$(".exportDeck").click(function () {
