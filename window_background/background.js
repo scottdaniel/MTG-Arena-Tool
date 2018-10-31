@@ -2127,7 +2127,7 @@ function httpBasic() {
             var options = { protocol: 'https:', port: 443, hostname: serverAddress, path: '/get_picks.php', method: 'POST', headers: _headers };
         }
         else if (_headers.method == 'get_database') {
-            var options = { protocol: 'https:', port: 443, hostname: serverAddress, path: '/database/db.json', method: 'GET'};
+            var options = { protocol: 'https:', port: 443, hostname: serverAddress, path: '/database/database.json', method: 'GET'};
         }
         else if (_headers.method == 'get_status') {
             var options = { protocol: 'https:', port: 443, hostname: 'magicthegatheringarena.statuspage.io', path: '/index.json', method: 'GET'};
@@ -2188,13 +2188,11 @@ function httpBasic() {
                         
                         if (_headers.method == 'get_database') {
                             //resetLogLoop(100);
-                            /*
                             delete parsedResult.ok;
                             setsList = parsedResult.sets;
                             eventsList = parsedResult.events;
                             ipc_send("set_db", parsedResult);
                             cardsDb.set(parsedResult);
-                            */
                         }
                         
                     }
