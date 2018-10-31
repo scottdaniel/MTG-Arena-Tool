@@ -540,7 +540,7 @@ function logLoop() {
         file = fd;
         if (err) {
             ipc_send("no_log", logUri);
-            ipc_send("popup", {"text": "No log file found.", "time": 0});
+            ipc_send("popup", {"text": "No log file found.", "time": 1000});
             resetLogLoop(500);
         } else {
             readLog();

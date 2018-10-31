@@ -606,15 +606,15 @@ function createOverlay() {
         height: 600,
         show: false,
         title: "MTG Arena Tool",
-        icon:'images/icon.png'
+        icon:'iconoverlay.png'
     });
     over.loadURL(`file://${__dirname}/window_overlay/index.html`);
     over.on('closed', onOverlayClosed);
 
 	over.on('resize', () => {
-
 		saveOverlayPos();
 	});
+
     /*
     setTimeout( function() {
         overlay.webContents.send("set_deck", currentDeck);

@@ -529,6 +529,10 @@ $(document).ready(function() {
 	    $('.unlink').show();
 	});
 
+	$(".forget_link").click(function() {
+		shell.openExternal('https://mtgatool.com/resetpassword/');
+	});
+
 	$(".login_link").click(function() {
 		var user = document.getElementById("signin_user").value;
 		var pass = document.getElementById("signin_pass").value;
