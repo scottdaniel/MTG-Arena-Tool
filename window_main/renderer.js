@@ -1125,7 +1125,10 @@ function setEvents(loadMore) {
 		tile.classList.add(course.id+"t");
 		tile.classList.add("deck_tile");
 
-		tile.style.backgroundImage = "url(https://img.scryfall.com/cards"+cardsDb.get(tileGrpid).images["art_crop"]+")";
+		try {
+			tile.style.backgroundImage = "url(https://img.scryfall.com/cards"+cardsDb.get(tileGrpid).images["art_crop"]+")";
+		}
+		catch (e) {}
 		fltl.appendChild(tile);
 
 		var d = document.createElement("div");
@@ -1269,7 +1272,10 @@ function expandEvent(_course, expandDiv) {
 					tile.classList.add(match.id+"t");
 					tile.classList.add("deck_tile");
 
-					tile.style.backgroundImage = "url(https://img.scryfall.com/cards"+cardsDb.get(tileGrpid).images["art_crop"]+")";
+					try {
+						tile.style.backgroundImage = "url(https://img.scryfall.com/cards"+cardsDb.get(tileGrpid).images["art_crop"]+")";
+					}
+					catch (e) {}
 					fltl.appendChild(tile);
 
 					var d = document.createElement("div");
@@ -1472,7 +1478,10 @@ function setHistory(loadMore) {
 			tile.classList.add(match.id+"t");
 			tile.classList.add("deck_tile");
 
-			tile.style.backgroundImage = "url(https://img.scryfall.com/cards"+cardsDb.get(tileGrpid).images["art_crop"]+")";
+			try {
+				tile.style.backgroundImage = "url(https://img.scryfall.com/cards"+cardsDb.get(tileGrpid).images["art_crop"]+")";
+			}
+			catch (e) {}
 			fltl.appendChild(tile);
 
 			var d = document.createElement("div");
@@ -1541,7 +1550,10 @@ function setHistory(loadMore) {
 			tile.classList.add(match.id+"t");
 			tile.classList.add("deck_tile");
 
-			tile.style.backgroundImage = "url(https://img.scryfall.com/cards"+cardsDb.get(tileGrpid).images["art_crop"]+")";
+			try {
+				tile.style.backgroundImage = "url(https://img.scryfall.com/cards"+cardsDb.get(tileGrpid).images["art_crop"]+")";
+			}
+			catch (e) {}
 			fltl.appendChild(tile);
 
 			var d = document.createElement("div");
@@ -1728,7 +1740,10 @@ function setDecks(arg) {
 			tile.classList.add(deck.id+'t');
 			tile.classList.add('deck_tile');
 
-			tile.style.backgroundImage = "url(https://img.scryfall.com/cards"+cardsDb.get(tileGrpid).images["art_crop"]+")";
+			try {
+				tile.style.backgroundImage = "url(https://img.scryfall.com/cards"+cardsDb.get(tileGrpid).images["art_crop"]+")";
+			}
+			catch (e) {}
 
 			var div = document.createElement("div");
 			div.classList.add(deck.id);
@@ -1974,7 +1989,10 @@ function setExplore(arg, loadMore) {
 		tile.classList.add(index+"t");
 		tile.classList.add("deck_tile");
 
-		tile.style.backgroundImage = "url(https://img.scryfall.com/cards"+cardsDb.get(tileGrpid).images["art_crop"]+")";
+		try {
+			tile.style.backgroundImage = "url(https://img.scryfall.com/cards"+cardsDb.get(tileGrpid).images["art_crop"]+")";
+		}
+		catch (e) {}
 
 		var div = document.createElement("div");
 		div.classList.add(index);
