@@ -841,7 +841,13 @@ function get_deck_export(deck) {
 		var card_set = cardsDb.get(grpid).set;
 		var card_cn = cardsDb.get(grpid).cid;
 		
-		str += card.quantity+" "+card_name+" ("+get_set_code(card_set)+") "+card_cn+"\r\n";
+		try {
+			card_set = setsList[card_set].arenacode;
+			str += card.quantity+" "+card_name+" ("+card_set+") "+card_cn+"\r\n";
+		}
+		catch (e) {
+			str += card.quantity+" "+card_name+" ("+get_set_code(card_set)+") "+card_cn+"\r\n";
+		}
 	});
 
 	str += "\r\n";
@@ -852,7 +858,13 @@ function get_deck_export(deck) {
 		var card_set = cardsDb.get(grpid).set;
 		var card_cn = cardsDb.get(grpid).cid;
 		
-		str += card.quantity+" "+card_name+" ("+get_set_code(card_set)+") "+card_cn+"\r\n";
+		try {
+			card_set = setsList[card_set].arenacode;
+			str += card.quantity+" "+card_name+" ("+card_set+") "+card_cn+"\r\n";
+		}
+		catch (e) {
+			str += card.quantity+" "+card_name+" ("+get_set_code(card_set)+") "+card_cn+"\r\n";
+		}
 	});
 
 	return str;
