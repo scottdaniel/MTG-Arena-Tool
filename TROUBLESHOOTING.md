@@ -23,6 +23,6 @@ If the last step worked, send the the .json file to [mtgatool@gmail.com](mailto:
 
 Run the app using the  `-debug` command, that should prompt three developer consoles, one for each process (main, overlay and background).
 Check if any of them has errors. If you see anything here (or anywhere else, really) you can submit to:
-- (Discord)[https://discord.gg/K9bPkJy]
-- (Github issues)[https://github.com/Manuel-777/MTG-Arena-Tool/issues]
+- [Discord](https://discord.gg/K9bPkJy)
+- [Github issues](https://github.com/Manuel-777/MTG-Arena-Tool/issues)
 - [mtgatool@gmail.com](mailto:mtgatool@gmail.com)
