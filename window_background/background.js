@@ -156,6 +156,8 @@ var wilcardsHistory = [];
 var deck_changes_index = [];
 var deck_changes = {};
 
+
+// Begin of IPC messages recievers
 ipc_send = function (method, arg) {
     if (method == "ipc_log") {
         //console.log("IPC LOG", arg);
@@ -208,35 +210,6 @@ ipc.on('login', function (event, arg) {
     }
 });
 
-window.onerror = (msg, url, line, col, err) => {
-    var error = {
-        msg: err.msg,
-        stack: err.stack,
-        line: line,
-        col: col
-    }
-    error.id = sha1(error.msg + playerId);
-    httpSendError(error);
-}
-
-process.on('uncaughtException', function(err){
-    var error = {
-        msg: err,
-        stack: "uncaughtException",
-        line: 0,
-        col: 0
-    }
-    console.log("ERROR: ", error);
-    error.id = sha1(error.msg + playerId);
-    httpSendError(error);
-})
-
-//
-ipc.on('error', function (event, err) {
-    err.id = sha1(err.msg + playerId);
-    httpSendError(err);
-});
-
 //
 ipc.on('request_draft_link', function (event, obj) {
     httpDraftShareLink(obj.id, obj.expire);
@@ -273,6 +246,35 @@ ipc.on('request_history', function (event, state) {
     requestHistorySend(state);
 });
 
+window.onerror = (msg, url, line, col, err) => {
+    var error = {
+        msg: err.msg,
+        stack: err.stack,
+        line: line,
+        col: col
+    }
+    error.id = sha1(error.msg + playerId);
+    httpSendError(error);
+}
+
+process.on('uncaughtException', function(err){
+    var error = {
+        msg: err,
+        stack: "uncaughtException",
+        line: 0,
+        col: 0
+    }
+    console.log("ERROR: ", error);
+    error.id = sha1(error.msg + playerId);
+    httpSendError(error);
+})
+
+//
+ipc.on('error', function (event, err) {
+    err.id = sha1(err.msg + playerId);
+    httpSendError(err);
+});
+
 //
 function requestHistorySend(state) {
 	if (history.matches != undefined) {
@@ -286,7 +288,7 @@ function requestHistorySend(state) {
     }
 }
 
-//
+// Calculates winrates for history tabs (set to last 10 dys as default)
 function calculateRankWins() {
 	var rankwinrates = {beginner: {w:0, l:0, t:0, r:"Beginner"}, bronze: {w:0, l:0, t:0, r:"Bronze"}, silver: {w:0, l:0, t:0, r:"Silver"}, gold: {w:0, l:0, t:0, r:"Gold"}, diamond: {w:0, l:0, t:0, r:"Diamond"}, master: {w:0, l:0, t:0, r:"Master"}};
 	for (var i = 0; i < history.matches.length; i++) {
@@ -381,6 +383,7 @@ function rememberLogin(bool) {
     }
 }
 
+// Loads this player's configuration file
 function loadPlayerConfig(playerId) {
     logLoopMode = 1;
     prevLogSize = 0;
@@ -456,11 +459,13 @@ function loadPlayerConfig(playerId) {
     ipc_send("overlay_set_bounds", obj);
 
     var settings = store.get("settings");
+    // Update the overlay settings too
     updateSettings(settings, true);
     requestHistorySend(0);
 }
 
 
+// Updates the settings variables , sends to overlay if 'relay' is set
 function updateSettings(_settings, relay) {
 	//console.log(_settings);
     const exeName = path.basename(process.execPath);
@@ -505,9 +510,13 @@ function get_deck_changes(deckId) {
 
 
 // Read the log
+// Set variables to default first
 var prevLogSize = 0;
 var logSize = 0;
 var logDiff = 0;
+var file;
+var logLoopTimer = null;
+var logLoopMode = 0;
 
 if (process.platform === 'win32') {
     var logUri = process.env.APPDATA;
@@ -519,12 +528,9 @@ else {
 }
 console.log(logUri);
 
-var file;
-var logLoopTimer = null;
-var logLoopMode = 0;
 resetLogLoop(100);
 
-//
+// Resets the log loop timeout to trigger in 'time' ms
 function resetLogLoop(time) {
     if (logLoopTimer != null) {
         window.clearTimeout(logLoopTimer);
@@ -532,7 +538,7 @@ function resetLogLoop(time) {
     logLoopTimer = setTimeout(logLoop, time);
 }
 
-//
+// Basic logic for reading the log file
 function logLoop() {
     //console.log("logLoop() start");
     //ipc_send("ipc_log", "logLoop() start");
@@ -548,7 +554,7 @@ function logLoop() {
     });
 }
 
-//
+// Begin reading the log 
 function readLog() {
 	//console.log("readLog()");
     
@@ -558,26 +564,34 @@ function readLog() {
     if (debugLog) {
         firstPass = false;
     }
+
+    // If the renderer process is running, we can start reading
     if (renderer_state == 1) {
         var stats = fs.fstatSync(file);
         logSize = stats.size;
         logDiff = logSize - prevLogSize;
 
         //ipc_send("ipc_log", "readLog logloopmode: "+logLoopMode+", renderer state:"+renderer_state+", logSize: "+logSize+", prevLogSize: "+prevLogSize);
+
+        // Something went wrong obtaining the file size, try again later
         if (logSize == undefined) {
             fs.close(file);
             resetLogLoop(500);
         }
         else {
+            // If the log was cleared, we default and start reading from position zero
             if (logSize < prevLogSize) {
                 prevLogSize = 0;
                 logDiff = logSize;
             }
 
+            // If the log has changed since we last checked (or if this is the first time we read it)
             if (logSize > prevLogSize+1) {
+                // We are looping only to get user data (processLogUser)
                 if (logLoopMode == 0) {
                     fs.read(file, new Buffer(logDiff), 0, logDiff, prevLogSize, processLogUser);
                 }
+                // We are looking to read the whole log (processLog)
                 else {
                     fs.read(file, new Buffer(logDiff), 0, logDiff, prevLogSize, processLog);
                 }
@@ -588,6 +602,7 @@ function readLog() {
             }
         }
     }
+    // The renderer process is not ready, postpose reading the log
     else {
         //ipc_send("ipc_log", "readLog logloopmode: "+logLoopMode+", renderer state:"+renderer_state+", logSize: "+logSize+", prevLogSize: "+prevLogSize);
         fs.close(file);
@@ -595,28 +610,39 @@ function readLog() {
     }
 }
 
+// We are reading the whole log
 function processLog(err, bytecount, buff) {
+    // rawstring contains the ENTIRE log as a single text
     let rawString = buff.toString('utf-8', 0, bytecount);
     //var splitString = rawString.split('[UnityCrossThread');
+
+    // We split it into smaller chunks to read it 
     var splitString = rawString.split(/(\[UnityCrossThread|\[Client GRE\])+/);
 
     //console.log('Reading:', bytecount, 'bytes, ',splitString.length, ' chunks');
     //ipc_send("ipc_log", 'Reading: '+bytecount+' bytes, '+splitString.length+' chunks');
 
+    // If this is happening while the app is loading, tell the async series to finish loading at the end
     if (firstPass) {
         splitString.push("%END%");
     }
+
+    // Also tell the async series to close the file
     splitString.push("%CLOSE%");
 
     async.forEachOfSeries(splitString, function (value, index, callback) {
         //ipc_send("ipc_log", "Async: ("+index+")");
+
+        // If this is the last chunk, end reading and exit loading screen
         if (value == "%END%") {
             finishLoading();
             ipc_send("popup", {"text": "100%", "time": 3000});
         }
+        // Close the file (release priority)
         else if (value == "%CLOSE%") {
             fs.close(file);
         }
+        // Process the chunks
         else {
             processLogData(value);
             if (firstPass) {
@@ -628,6 +654,7 @@ function processLog(err, bytecount, buff) {
                 while (new Date() - _time < debugLogSpeed) {}
             }            
         }
+
         callback();
 
     }, function (err) {
@@ -638,9 +665,12 @@ function processLog(err, bytecount, buff) {
         }
     });
 
+    // Increase position read
     prevLogSize+=bytecount;
 }
 
+// Process only the user data for initial loading (prior to log in)
+// Same logic as processLog() but without the processLogData() function
 function processLogUser(err, bytecount, buff) {
     // Process the log only to find player name and id
     let rawString = buff.toString('utf-8', 0, bytecount);
@@ -702,6 +732,8 @@ function processLogUser(err, bytecount, buff) {
     prevLogSize+=bytecount;
 }
 
+// Check if the string contains a JSON object, return it parsed as JS object
+// If its not found, return false
 function checkJson(str, check, chop) {
     if (str.indexOf(check) > -1) {
         try {
@@ -715,8 +747,9 @@ function checkJson(str, check, chop) {
     return false;
 }
 
+
+// Cuts the string "data" between first ocurrences of the two selected words "startStr" and "endStr";
 function dataChop(data, startStr, endStr) {
-    // Cuts the string between first ocurrences of the two selected words "start" and "end";
     var start = data.indexOf(startStr)+startStr.length;
     var end = data.length;
     data = data.substring(start, end);
@@ -730,9 +763,10 @@ function dataChop(data, startStr, endStr) {
     return data;
 }
 
+
+// Cuts "str" if "check" exists, between "chop" and after "start", then returns the first JSON found.
+// If "chop" is empty it will find the whole string, aka, from "check" and after "start" to end.
 function checkJsonWithStart(str, check, chop, start) {
-    // Cuts the string between "check" and "chop" and after "start", then returns the first JSON found.
-    // If "chop" is empty it will find the whole string, aka, from "check" and after "start" to end.
     if (str.indexOf(check) > -1) {
         try {
             str = dataChop(str, check, chop);
@@ -747,6 +781,7 @@ function checkJsonWithStart(str, check, chop, start) {
     return false;
 }
 
+// cuts "str" if "check" exists, between "chop" and after "start", then returns the JSON as a string
 function checkJsonWithStartNoParse(str, check, chop, start) {
     if (str.indexOf(check) > -1) {
 		str = dataChop(str, check, chop);
@@ -757,6 +792,8 @@ function checkJsonWithStartNoParse(str, check, chop, start) {
     return false;
 }
 
+
+// Finds the first JSON object inside "str", then returns it as a string
 function findFirstJSON(str) {
     //str.replace("Logger]", "");
     var _br = 0;
@@ -787,11 +824,33 @@ function findFirstJSON(str) {
 
 */
 
-
+// Main function for processing log chunks
 function processLogData(data) {
     data = data.replace(/[\r\n]/g, "");
     var strCheck, json;
     //console.log(data);
+
+    /*
+
+    Using a combination of the previous functions we can extract almost any data from the chunks extracted from the log
+    In almost every case we are returned with a parsed JSON object, from there it depends on the data how we read it
+    For example, to read all decks we need to locate '<== Deck.GetDeckLists(9)' inside the log;
+
+[UnityCrossThreadLogger]11/1/2018 6:50:07 PM
+<== Deck.GetDeckLists(9)
+[
+  {
+
+
+    From here we know '<== Deck.GetDeckLists(' wont change, the date and the (9) after are variables, so we do;
+
+        strCheck = '<== Deck.GetDeckLists(';
+        json = checkJsonWithStart(data, strCheck, '', ')');
+
+    We check if strCheck exists within this chunk, if it does we locate it and find a JSON object starting after ')'
+    See below to how we handle the parsed json data
+
+    */
 
     // Log info
     if (data.indexOf('==> Log.Info(') > -1) {
@@ -816,6 +875,7 @@ function processLogData(data) {
     }
 
     // Gre to Client Event
+    // Gre to Client contains most data about in-progress games.
     strCheck = 'GreToClientEvent';
     json = checkJson(data, strCheck, '');
     if (json != false) {
@@ -1294,8 +1354,10 @@ function actionLogGenerateLink(grpId) {
     return '<a class="card_link" href="'+grpId+'">'+card.name+'</a>';
 }
 
+
 var currentActionLog = "";
 
+// Send action log data to overlay
 function actionLog(seat, time, str, grpId = 0) {
     if (seat == -99) {
         currentActionLog = "";
@@ -1317,6 +1379,10 @@ function actionLog(seat, time, str, grpId = 0) {
 var attackersDetected = [];
 var zoneTransfers = [];
 
+
+// Process zone transfers
+// Sometimes GreToClient sends data about transfers when they havent been reported elsewhere
+// Here we check if the object ID the transfer refers to exists in the main objects array and process it if it does
 function tryZoneTransfers() {
     zoneTransfers.forEach(function(obj) {
         var _orig, _new, _src, _dest, _cat = undefined;
@@ -1348,6 +1414,7 @@ function tryZoneTransfers() {
             }
         });
 
+        // If the transfer is already in the gameObjs array..
         try {
             cname = gameObjs[obj.aff].name;
             grpid = gameObjs[obj.aff].grpId;
@@ -1355,6 +1422,7 @@ function tryZoneTransfers() {
             removeFromList = false;
         }
 
+        // Try processing it
         try {
             //console.log("AnnotationType_ZoneTransfer", obj, obj.aff, gameObjs, _src, _dest, _cat);
             if (_cat == "CastSpell") {
@@ -1407,12 +1475,19 @@ function tryZoneTransfers() {
     }
 }
 
+
 function gre_to_client(data) {
     data.forEach(function(msg) {
+        //console.log("Message: "+msg.msgId, msg);
+        // Sometimes Gre messages have many bulked messages at once
+        // Process each individually
+
+        // Nothing here..
         if (msg.type == "GREMessageType_SubmitDeckReq") {
             gameObjs = {};
         }
-        //console.log("Message: "+msg.msgId, msg);
+
+        // Declare attackers message
         if (msg.type == "GREMessageType_DeclareAttackersReq") {
             msg.declareAttackersReq.attackers.forEach(function(obj) {
                 var att = obj.attackerInstanceId;
@@ -1438,8 +1513,18 @@ function gre_to_client(data) {
 
             });
         }
+
+        // An update about the game state, can either be;
+        // - A change (diff)
+        // - The entire board state (full)
+        // - binary (we dont check that one)
         if (msg.type == "GREMessageType_GameStateMessage") {
             if (msg.gameStateMessage.type == "GameStateType_Full") {
+                // For the full board state we only update the zones
+                // We DO NOT update gameObjs array here, this is because sometimes cards become invisible for us
+                // and updating the entire gameobjs array to what the server says we should be looking at will remove those from our view
+                // This includes also cards and actions we STILL havent processed!
+
                 if (msg.gameStateMessage.zones != undefined) {
                     msg.gameStateMessage.zones.forEach(function(zone) {
                         zones[zone.zoneId] = zone;
@@ -1447,6 +1532,13 @@ function gre_to_client(data) {
                 }
             }
             else if (msg.gameStateMessage.type == "GameStateType_Diff") {
+                // Most game updates happen here
+                // Sometimes, especially with annotations, stuff gets sent to us repeatedly
+                // Like if we recieve an object moved from zone A to B , we may recieve the same message many times
+                // So we should be careful reading stuff as it may:
+                // - not be unique
+                // - reference changes we still havent recieved
+                // - reference objects that may be deleted
 
                 if (msg.gameStateMessage.turnInfo != undefined) {
                     prevTurn = turnNumber;
@@ -1508,7 +1600,7 @@ function gre_to_client(data) {
 
                         if (affected != undefined) {
                             affected.forEach(function(aff) {
-                                
+                                // An object ID changed, create new object and move it
                                 if (obj.type.includes("AnnotationType_ObjectIdChanged")) {
                                     var _orig = undefined;
                                     var _new = undefined;
@@ -1531,6 +1623,7 @@ function gre_to_client(data) {
                                     }
                                 }
 
+                                // An object changed zone, here we only update the gameobjs array
                                 if (obj.type.includes("AnnotationType_EnteredZoneThisTurn")) {
                                     if (gameObjs[aff] !== undefined) {
                                         //console.log("AnnotationType_EnteredZoneThisTurn", aff, affector, gameObjs[aff], zones[affector], gameObjs);
@@ -1538,6 +1631,7 @@ function gre_to_client(data) {
                                         gameObjs[aff].zoneName = zones[affector].type;
                                     }
                                 }
+
                                 if (obj.type.includes("AnnotationType_ResolutionStart")) {
                                     var grpid = undefined;
                                     obj.details.forEach(function(detail) {
@@ -1550,6 +1644,7 @@ function gre_to_client(data) {
                                         var aff = obj.affectorId;
                                         var pn = oppName;
                                         if (gameObjs[aff] != undefined) {
+                                            // We ooly check for abilities here, since cards and spells are better processed with "AnnotationType_ZoneTransfer"
                                             if (gameObjs[aff].type == "GameObjectType_Ability") {
                                                 var src = gameObjs[aff].objectSourceGrpId;
                                                 var abId = gameObjs[aff].grpId;
@@ -1572,7 +1667,9 @@ function gre_to_client(data) {
                                         }
                                     }
                                 }
+
                                 /*
+                                // Life total changed, see below (msg.gameStateMessage.players) 
                                 // Not optimal, this triggers too many times
                                 if (obj.type.includes("AnnotationType_ModifiedLife")) {
                                     obj.details.forEach(function(detail) {
@@ -1588,12 +1685,17 @@ function gre_to_client(data) {
                                     });
                                 }
                                 */
+
+                                // Something moved between zones
+                                // This requires some "async" work, as data referenced by annotations sometimes has future data
+                                // That is , data we have already recieved and still havent processed (particularly, game objects)
                                 if (obj.type.includes("AnnotationType_ZoneTransfer")) {
                                     obj.remove = false;
                                     obj.aff = aff;
                                     obj.time = new Date();
                                     zoneTransfers.push(obj);
                                 }
+
                                 if (obj.type.includes("AnnotationType_DamageDealt")) {
                                     var aff = obj.affectorId;
                                     var affected = obj.affectedIds;
@@ -1622,6 +1724,10 @@ function gre_to_client(data) {
                     });
                 }
 
+                // Update the zones
+                // Each zone has every object ID that lives inside that zone
+                // Sometimes object IDs we dont have any data from are here
+                // So, for example, a card in the opp library HAS an ID in its zone, but we just dont have any data about it
                 if (msg.gameStateMessage.zones != undefined) {
                     //ipc_send("ipc_log", "Zones updated");
                     msg.gameStateMessage.zones.forEach(function(zone) {
@@ -1637,6 +1743,7 @@ function gre_to_client(data) {
                     });
                 }
 
+                // Update the game objects
                 if (msg.gameStateMessage.gameObjects != undefined) {
                     msg.gameStateMessage.gameObjects.forEach(function(obj) {
                         name = cardsDb.get(obj.grpId).name;
@@ -1649,13 +1756,16 @@ function gre_to_client(data) {
                     });
                 }
                 
+                // An object has been deleted
+                // Removing this caused some objects to end up duplicated , unfortunately
                 if (msg.gameStateMessage.diffDeletedInstanceIds != undefined) {
                     msg.gameStateMessage.diffDeletedInstanceIds.forEach(function(obj) {
                         gameObjs[obj] = undefined;
                     });
                 }
 
-
+                // Players data update
+                // We only read life totals at the moment, but we also get timers and such
                 if (msg.gameStateMessage.players != undefined) {
                     msg.gameStateMessage.players.forEach(function(obj) {
                         var sign = '';
@@ -1692,6 +1802,7 @@ function gre_to_client(data) {
     update_deck(false);
 }
 
+// Get player name by seat in the game
 function getNameBySeat(seat) {
     if (seat == playerSeat) {
         return playerName.slice(0, -6);
@@ -1701,6 +1812,7 @@ function getNameBySeat(seat) {
     }
 }
 
+//
 function createMatch(arg) {
     actionLog(-99, new Date(), "");
     var obj = store.get('overlayBounds');
@@ -1735,6 +1847,7 @@ function createMatch(arg) {
     ipc_send("set_opponent_rank", get_rank_index(oppRank, oppTier), oppRank+" "+oppTier);
 }
 
+//
 function createDraft() {
     actionLog(-99, new Date(), "");
     var obj = store.get('overlayBounds');
@@ -1766,6 +1879,7 @@ function createDraft() {
     ipc_send("set_opponent_rank", get_rank_index(oppRank, oppTier), oppRank+" "+oppTier);
 }
 
+//
 function select_deck(arg) {
     currentDeck = arg.CourseDeck;
     var str = JSON.stringify(currentDeck);
@@ -1773,11 +1887,13 @@ function select_deck(arg) {
     ipc_send("set_deck", currentDeck);
 }
 
+//
 function clear_deck() {
     var deck = {mainDeck: [], sideboard : [], name: ""};
     ipc_send("set_deck", deck);
 }
 
+//
 function update_deck(force) {
     var nd = new Date()
     if (nd - lastDeckUpdate > 1000 || debugLog == true || force) {
@@ -1813,6 +1929,7 @@ function get_rank_index(_rank, _tier) {
     return ii;
 }
 
+//
 function forceDeckUpdate() {
     var decksize = 0;
     var cardsleft = 0;
@@ -1890,6 +2007,7 @@ function forceDeckUpdate() {
     }
 }
 
+//
 function getOppDeck() {
 	//var oppDeck = {mainDeck: [], sideboard : []};
 	var doAdd = true;
@@ -1921,6 +2039,7 @@ function getOppDeck() {
     return oppDeck;
 }
 
+//
 function saveEconomy(json) {
     var ctx = json.context;
     json.id = sha1(json.date.getTime()+ctx);
@@ -1964,6 +2083,7 @@ function saveEconomy(json) {
     store.set(json.id, json);
 }
 
+//
 function saveCourse(json) {
     json.id = json._id;
     json.date = new Date();;
@@ -1989,6 +2109,7 @@ function saveCourse(json) {
     store.set(json.id, json);
 }
 
+//
 function saveMatch() {
 	if (currentMatchTime == 0) {
 		return;
@@ -2043,6 +2164,7 @@ function saveMatch() {
     ipc_send("popup", {"text": "Match saved!", "time": 3000});
 }
 
+//
 function saveDraft() {
     var draft = currentDraft;
     draft.id = draftId;
@@ -2075,6 +2197,7 @@ function saveDraft() {
     ipc_send("popup", {"text": "Draft saved!", "time": 3000});
 }
 
+//
 function finishLoading() {
 	firstPass = false;
 
@@ -2097,12 +2220,13 @@ function finishLoading() {
     }
 }
 
-
+// HTTP stuff starts here
 var httpAsync = [];
 httpBasic();
 httpGetDatabase();
 htttpGetStatus();
 
+// 
 function httpBasic() {
     var httpAsyncNew = httpAsync.slice(0);
     //var str = ""; httpAsync.forEach( function(h) {str += h.reqId+", "; }); console.log("httpAsync: ", str);
@@ -2322,6 +2446,7 @@ function httpDraftShareLink(did, exp) {
 }
 
 
+// Utility functions that belong only to background
 
 //
 function parseWotcTime(str) {
