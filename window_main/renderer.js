@@ -2712,6 +2712,8 @@ function open_draft(id, tileGrpid, set) {
         img.attr("src", "https://img.scryfall.com/cards"+card.images[cardQuality]);
 
 		img.appendTo(d);
+        var r = $('<div style="" class="draft_card_rating">'+draftRanks[card.rank]+'</div>');
+		r.appendTo(d);
 		addCardHover(img, card);
 		d.appendTo(pd);
 	});

@@ -7,6 +7,21 @@ const enums = {"CounterType":{"1":"+1\/+1","2":"-1\/-1","3":"Poison","4":"Wind",
 var setsList = cardsDb.get("sets");
 var eventsList = cardsDb.get("events");
 
+var draftRanks = [];
+draftRanks[12] = "A+";
+draftRanks[11] = "A";
+draftRanks[10] = "A-";
+draftRanks[9] = "B+";
+draftRanks[8] = "B";
+draftRanks[7] = "B-";
+draftRanks[6] = "C+";
+draftRanks[5] = "C";
+draftRanks[4] = "C-";
+draftRanks[3] = "D+";
+draftRanks[2] = "D";
+draftRanks[1] = "D-";
+draftRanks[0] = "F";
+
 //
 function addCardTile(grpId, indent, quantity, element) {
 	if (quantity !== 0) {
