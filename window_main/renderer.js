@@ -3726,6 +3726,13 @@ function open_settings(openSection) {
 	var sliderInput = $('<input type="range" min="0" max="20" value="'+cardSizePos+'" class="slider sliderA" id="myRange">');
 	sliderInput.appendTo(slider);
 
+	var sliderOpacity = $('<div class="slidecontainer_settings"></div>');
+	sliderOpacity.appendTo(section);
+	var sliderOpacityLabel = $('<label style="width: 400px; !important" class="card_size_container">Opacity: '+(overlayAlpha*10)+'%</label>');
+	sliderOpacityLabel.appendTo(sliderOpacity);
+	var sliderOpacityInput = $('<input type="range" min="0" max="10" value="'+overlayAlpha+'" class="slider sliderB" id="opacityRange">');
+	sliderOpacityInput.appendTo(sliderOpacity);
+
 	var d = $('<div style="width: '+cardSize+'px; !important" class="inventory_card_settings"></div>');
 	var img = $('<img style="width: '+cardSize+'px; !important" class="inventory_card_settings_img"></img>');
 	

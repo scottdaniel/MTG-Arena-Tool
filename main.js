@@ -597,7 +597,7 @@ function createMainWindow() {
 
 function createOverlay() {
     const over = new electron.BrowserWindow({
-        /*transparent: true,*/
+        transparent: true,
         frame: false,
         alwaysOnTop: true,
         x: 0,

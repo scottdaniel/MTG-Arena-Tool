@@ -18,6 +18,7 @@ var turnActive = 0;
 var turnPriority = 0;
 var turnDecision = 0;
 var soundPriority = false;
+var overlayAlpha = 1;
 
 var showSideboard = false;
 var actionLog = [];
@@ -137,6 +138,8 @@ ipc.on('set_settings', function (event, settings) {
 	$('.overlay_wrapper:before').css("opacity", 0.4*alpha);
 	$('.overlay_wrapper').css("opacity", alpha);
 	*/
+	overlayAlpha = settings.overlay_alpha;
+	$('.overlay_wrapper').css("opacity", overlayAlpha);
 	showSideboard = settings.overlay_sideboard;
 	soundPriority = settings.sound_priority;
 	$('.top').css('display', '');
@@ -530,5 +533,17 @@ $(document).ready(function() {
 	//
 	$(".settings").click(function () {
 		ipc_send('force_open_settings', 1);
+	});
+
+	$(".overlay_wrapper").hover(function() {
+		$(this).css("opacity", 1);
+		if(!$(this).hasClass("overlay_bg_image")) {
+			$(this).addClass("overlay_bg_image");
+		}
+	}, function() {
+		if(overlayAlpha !== 1) {
+			$(this).css("opacity", overlayAlpha);
+			$(this).removeClass("overlay_bg_image");
+		}
 	});
 });
