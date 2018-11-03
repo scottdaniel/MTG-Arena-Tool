@@ -3248,6 +3248,8 @@ function printCards() {
     	let cmc = card.cmc;
     	let set  = card.set;
 
+    	if (card.images == undefined) 	continue;
+
     	// Filter name
     	var arr;
     	arr = filterName.split(" ");
@@ -3400,6 +3402,7 @@ function printCards() {
     	}
 
 		let dfc = '';
+
 		if (card.dfc == 'DFC_Back')	 dfc = 'a';
 		if (card.dfc == 'DFC_Front') dfc = 'b';
 		if (card.dfc == 'SplitHalf') dfc = 'a';
@@ -3590,7 +3593,8 @@ function open_settings(openSection) {
 	var d = $('<div style="width: '+cardSize+'px; !important" class="inventory_card_settings"></div>');
 	var img = $('<img style="width: '+cardSize+'px; !important" class="inventory_card_settings_img"></img>');
 	
-	img.attr("src", "https://img.scryfall.com/cards/"+cardQuality+"/en/m19/"+Math.round(Math.random()*314)+".jpg");
+	card = cardsDb.get(67518);
+	img.attr("src", "https://img.scryfall.com/cards"+card.images[cardQuality]);
 	img.appendTo(d);
 
 	d.appendTo(slider);
