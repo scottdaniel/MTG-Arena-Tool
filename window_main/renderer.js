@@ -3728,9 +3728,9 @@ function open_settings(openSection) {
 
 	var sliderOpacity = $('<div class="slidecontainer_settings"></div>');
 	sliderOpacity.appendTo(section);
-	var sliderOpacityLabel = $('<label style="width: 400px; !important" class="card_size_container">Opacity: '+(overlayAlpha*10)+'%</label>');
+	var sliderOpacityLabel = $('<label style="width: 400px; !important" class="card_size_container">Overlay transparency: '+transparencyFromAlpha(overlayAlpha)+'%</label>');
 	sliderOpacityLabel.appendTo(sliderOpacity);
-	var sliderOpacityInput = $('<input type="range" min="0" max="10" value="'+overlayAlpha+'" class="slider sliderB" id="opacityRange">');
+	var sliderOpacityInput = $('<input type="range" min="0" max="100" value="'+transparencyFromAlpha(overlayAlpha)+'" class="slider sliderB" id="opacityRange">');
 	sliderOpacityInput.appendTo(sliderOpacity);
 
 	var d = $('<div style="width: '+cardSize+'px; !important" class="inventory_card_settings"></div>');
@@ -3895,15 +3895,23 @@ function open_settings(openSection) {
 	$(".sliderB").off();
 
 	$(".sliderB").on('click mousemove', function() {
-		overlayAlpha = parseInt(this.value)/10;
-		alphasliderlabel.html('Overlay transparency: '+overlayAlpha);
+		overlayAlpha = alphaFromTransparency(parseInt(this.value));
+		sliderOpacityLabel.html('Overlay transparency: '+transparencyFromAlpha(overlayAlpha)+'%');
 	});
 
 	$(".sliderB").on('click mouseup', function() {
-		overlayAlpha = parseInt(this.value)/10;
+		overlayAlpha = alphaFromTransparency(parseInt(this.value));
 		updateSettings();
 	});
 
+}
+
+function alphaFromTransparency(transparency) {
+	return 1 - (transparency / 100);
+}
+
+function transparencyFromAlpha(alpha) {
+	return Math.round((1 - alpha) * 100);
 }
 
 //
