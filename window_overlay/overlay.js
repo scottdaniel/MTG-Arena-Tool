@@ -298,7 +298,7 @@ ipc.on('set_deck', function (event, arg) {
 		var deckListDiv = $(".overlay_decklist");
 		var prevIndex = 0;
 
-		if (deckMode == 0 || deckMode == 2) {
+		if (arg.cardsLeft && (deckMode == 0 || deckMode == 2)) {
 			deckListDiv.append('<div class="chance_title">'+arg.cardsLeft+' cards left</div>');
 		}
 		else {
