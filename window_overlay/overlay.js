@@ -139,12 +139,14 @@ ipc.on('set_settings', function (event, settings) {
 	$('.overlay_wrapper').css("opacity", alpha);
 	*/
 	overlayAlpha = settings.overlay_alpha;
-	$('.overlay_wrapper').css("opacity", overlayAlpha);
-	if(overlayAlpha === 1 && !$(this).hasClass("overlay_bg_image")) {
-		$('.overlay_wrapper').addClass("overlay_bg_image");
+	$('.overlay_wrapper').css('opacity', overlayAlpha);
+	if(overlayAlpha === 1) {
+		if(!$(this).hasClass('overlay_bg_image')) $('.overlay_wrapper').addClass('overlay_bg_image');
+		$(document.body).css('background-color', 'rgba(0,0,0,1)');
 	}
-	else if(overlayAlpha < 1) {
-		$('.overlay_wrapper').removeClass("overlay_bg_image");
+	else {
+		$('.overlay_wrapper').removeClass('overlay_bg_image');
+		$(document.body).css('background-color', 'rgba(0,0,0,0)');
 	}
 	showSideboard = settings.overlay_sideboard;
 	soundPriority = settings.sound_priority;
