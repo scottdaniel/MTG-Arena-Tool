@@ -180,7 +180,7 @@ ipc.on('remember', function (event, arg) {
 
 function loadSettings() {
     var settings = store.get("settings");
-	updateSettings(settings, true);
+    updateSettings(settings, true);
 }
 
 ipc.on('reload_overlay', function (event, arg) {
