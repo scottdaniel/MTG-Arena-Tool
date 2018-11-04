@@ -28,6 +28,7 @@ var background;
 var overlay;
 var tray = null;
 var closeToTray = true;
+var alphaEnabled = false;
 var updateState = 0;
 var updateAvailable = 0;
 var updateProgress = 0;
@@ -421,6 +422,12 @@ function saveSettings(settings) {
         openAtLogin: settings.startup
     });
     closeToTray = settings.close_to_tray;
+
+    var oldAlphaEnabled = alphaEnabled;
+    alphaEnabled = settings.overlay_alpha < 1;
+    if(oldAlphaEnabled != alphaEnabled) {
+        recreateOverlay();
+    }
 }
 
 
@@ -603,7 +610,7 @@ function createMainWindow() {
 
 function createOverlay() {
     const over = new electron.BrowserWindow({
-        transparent: true,
+        transparent: alphaEnabled,
         frame: false,
         alwaysOnTop: true,
         x: 0,
@@ -628,6 +635,16 @@ function createOverlay() {
     }, 1000);
     */
     return over;
+}
+
+function recreateOverlay() {
+    if(overlay) {
+        overlay.destroy();
+        overlay = createOverlay();
+        overlay.webContents.once('dom-ready', () => {
+            background.webContents.send("reload_overlay");
+        });
+    }
 }
 
 var shouldQuit = app.makeSingleInstance(function(commandLine, workingDirectory) {

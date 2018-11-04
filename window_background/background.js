@@ -178,12 +178,22 @@ ipc.on('remember', function (event, arg) {
     }
 });
 
+function loadSettings() {
+    var settings = store.get("settings");
+	updateSettings(settings, true);
+}
+
+ipc.on('reload_overlay', function (event, arg) {
+    loadSettings();
+    var obj = store.get('overlayBounds');
+    ipc_send("overlay_set_bounds", obj);
+});
+
 //
 ipc.on('set_renderer_state', function (event, arg) {
     ipc_send("ipc_log", "Renderer state: "+arg);
 	renderer_state = arg;
-	var settings = store.get("settings");
-	updateSettings(settings, true);
+	loadSettings();
 
     if (rstore.get("token") !== "" && rstore.get("email") !== "") {
         rememberMe = true;
@@ -458,9 +468,7 @@ function loadPlayerConfig(playerId) {
     var obj = store.get('overlayBounds');
     ipc_send("overlay_set_bounds", obj);
 
-    var settings = store.get("settings");
-    // Update the overlay settings too
-    updateSettings(settings, true);
+    loadSettings();
     requestHistorySend(0);
 }
 
