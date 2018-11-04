@@ -25,7 +25,7 @@ draftRanks[0] = "F";
 //
 function addCardTile(grpId, indent, quantity, element) {
 	if (quantity !== 0) {
-		var cont = $('<div class="card_tile_container"></div>');
+		var cont = $('<div class="card_tile_container click-on"></div>');
 		if (!isNumber(quantity)) {
 			var ww = 64;
 			var ll = 48;

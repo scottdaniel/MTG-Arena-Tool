@@ -54,6 +54,7 @@ ipc_send = function (method, arg) {
     ipc.send('ipc_switch', method, arg);
 };
 
+
 //document.addEventListener('DOMContentLoaded', windowReady);
 
 //function windowReady(){
@@ -3555,14 +3556,14 @@ function open_settings(openSection) {
 
 	var sliderOpacity = $('<div class="slidecontainer_settings"></div>');
 	sliderOpacity.appendTo(section);
-	var sliderOpacityLabel = $('<label style="width: 400px; !important" class="card_size_container">Elements Transparency: '+transparencyFromAlpha(overlayAlpha)+'%</label>');
+	var sliderOpacityLabel = $('<label style="width: 400px; !important" class="card_size_container">Elements transparency: '+transparencyFromAlpha(overlayAlpha)+'%</label>');
 	sliderOpacityLabel.appendTo(sliderOpacity);
 	var sliderOpacityInput = $('<input type="range" min="0" max="100" step="5" value="'+transparencyFromAlpha(overlayAlpha)+'" class="slider sliderB" id="opacityRange">');
 	sliderOpacityInput.appendTo(sliderOpacity);
 
 	var sliderOpacityBack = $('<div class="slidecontainer_settings"></div>');
 	sliderOpacityBack.appendTo(section);
-	var sliderOpacityBackLabel = $('<label style="width: 400px; !important" class="card_size_container">Background Transparency: '+transparencyFromAlpha(overlayAlphaBack)+'%</label>');
+	var sliderOpacityBackLabel = $('<label style="width: 400px; !important" class="card_size_container">Background transparency: '+transparencyFromAlpha(overlayAlphaBack)+'%</label>');
 	sliderOpacityBackLabel.appendTo(sliderOpacityBack);
 	var sliderOpacityBackInput = $('<input type="range" min="0" max="100" step="5" value="'+transparencyFromAlpha(overlayAlphaBack)+'" class="slider sliderC" id="opacityBackRange">');
 	sliderOpacityBackInput.appendTo(sliderOpacityBack);

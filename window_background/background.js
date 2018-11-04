@@ -1405,7 +1405,7 @@ function setDraftCards(json) {
 
 function actionLogGenerateLink(grpId) {
     var card = cardsDb.get(grpId);
-    return '<a class="card_link" href="'+grpId+'">'+card.name+'</a>';
+    return '<a class="card_link click-on" href="'+grpId+'">'+card.name+'</a>';
 }
 
 
@@ -1709,7 +1709,7 @@ function gre_to_client(data) {
                                                 }
                                                 catch (e) {}
                                         
-                                                actionLog(gameObjs[aff].controllerSeatId, new Date(), actionLogGenerateLink(src)+'\'s <a class="card_ability" title="'+ab+'">ability</a>');
+                                                actionLog(gameObjs[aff].controllerSeatId, new Date(), actionLogGenerateLink(src)+'\'s <a class="card_ability click-on" title="'+ab+'">ability</a>');
                                                 //ipc_send("ipc_log", cardsDb.get(src).name+"'s ability");
                                                 //console.log(cardsDb.get(src).name+"'s ability", gameObjs[aff]);
                                             }
