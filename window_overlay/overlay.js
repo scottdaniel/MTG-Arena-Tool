@@ -140,6 +140,12 @@ ipc.on('set_settings', function (event, settings) {
 	*/
 	overlayAlpha = settings.overlay_alpha;
 	$('.overlay_wrapper').css("opacity", overlayAlpha);
+	if(overlayAlpha === 1 && !$(this).hasClass("overlay_bg_image")) {
+		$('.overlay_wrapper').addClass("overlay_bg_image");
+	}
+	else if(overlayAlpha < 1) {
+		$('.overlay_wrapper').removeClass("overlay_bg_image");
+	}
 	showSideboard = settings.overlay_sideboard;
 	soundPriority = settings.sound_priority;
 	$('.top').css('display', '');
