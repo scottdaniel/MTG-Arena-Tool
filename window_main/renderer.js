@@ -529,6 +529,10 @@ $(document).ready(function() {
 	    $('.unlink').show();
 	});
 
+	$(".forget_link").click(function() {
+		shell.openExternal('https://mtgatool.com/resetpassword/');
+	});
+
 	$(".login_link").click(function() {
 		var user = document.getElementById("signin_user").value;
 		var pass = document.getElementById("signin_pass").value;
@@ -795,6 +799,7 @@ function setEconomy(loadMore) {
 		checkGoldPaid = false;
 		checkCardsAdded = false;
 		checkBoosterAdded = false;
+		checkAetherized = false;
 		checkWildcardsAdded = false;
 		checkGemsEarnt = false;
 		checkGoldEarnt = false;
@@ -820,12 +825,14 @@ function setEconomy(loadMore) {
 
 			checkWildcardsAdded = true;
 			checkCardsAdded = true;
+			checkAetherized = true;
 		}
 		else if (change.context == "Store") {
 			checkGemsPaid = true;
 			checkGoldPaid = true;
 			checkBoosterAdded = true;
 			checkCardsAdded = true;
+			checkAetherized = true;
 		}
 		else if (change.context == "Pay Event Entry") {
 			checkGemsPaid = true;
@@ -851,13 +858,15 @@ function setEconomy(loadMore) {
 				flb.appendChild(bos);
 			}
 
-			checkCardsAdded = true;1
+			checkCardsAdded = true;
+			checkAetherized = true;
 		}
 		else {
 			checkGemsEarnt = true;
 			checkGoldEarnt = true;
 			checkBoosterAdded = true;
 			checkCardsAdded = true;
+			checkAetherized = true;
 			checkWildcardsAdded = true;
 		}
 
@@ -994,6 +1003,38 @@ function setEconomy(loadMore) {
 			}
 		}
 
+		if (checkAetherized && change.aetherizedCards != undefined) {
+			change.aetherizedCards.forEach(function(obj) {
+				var grpId = obj.grpId;
+				var card = cardsDb.get(grpId);
+
+				var d = document.createElement("div");
+				d.classList.add("inventory_card");
+				d.style.width = "39px";
+
+				var img = document.createElement("img");
+				img.classList.add("inventory_card_img");
+				img.classList.add("inventory_card_aetherized");
+				img.style.width = "39px";
+				img.src = "https://img.scryfall.com/cards"+card.images[cardQuality];
+
+				d.appendChild(img);
+				flr.appendChild(d);
+
+				var imgDom = $(img);
+				addCardHover(imgDom, card);
+
+				imgDom.on('click', function(e) {
+					if (cardsDb.get(grpId).dfc == 'SplitHalf')	{
+						card = cardsDb.get(card.dfcId);
+					}
+					let newname = card.name.split(' ').join('-');
+
+					shell.openExternal('https://scryfall.com/card/'+get_set_scryfall(card.set)+'/'+card.cid+'/'+card.name);
+				});
+			});
+		}
+
 		if (checkCardsAdded && change.delta.cardsAdded != undefined) {
 			change.delta.cardsAdded.sort(collectionSortRarity);
 			change.delta.cardsAdded.forEach(function(grpId) {
@@ -1121,7 +1162,10 @@ function setEvents(loadMore) {
 		tile.classList.add(course.id+"t");
 		tile.classList.add("deck_tile");
 
-		tile.style.backgroundImage = "url(https://img.scryfall.com/cards"+cardsDb.get(tileGrpid).images["art_crop"]+")";
+		try {
+			tile.style.backgroundImage = "url(https://img.scryfall.com/cards"+cardsDb.get(tileGrpid).images["art_crop"]+")";
+		}
+		catch (e) {}
 		fltl.appendChild(tile);
 
 		var d = document.createElement("div");
@@ -1265,7 +1309,10 @@ function expandEvent(_course, expandDiv) {
 					tile.classList.add(match.id+"t");
 					tile.classList.add("deck_tile");
 
-					tile.style.backgroundImage = "url(https://img.scryfall.com/cards"+cardsDb.get(tileGrpid).images["art_crop"]+")";
+					try {
+						tile.style.backgroundImage = "url(https://img.scryfall.com/cards"+cardsDb.get(tileGrpid).images["art_crop"]+")";
+					}
+					catch (e) {}
 					fltl.appendChild(tile);
 
 					var d = document.createElement("div");
@@ -1468,7 +1515,10 @@ function setHistory(loadMore) {
 			tile.classList.add(match.id+"t");
 			tile.classList.add("deck_tile");
 
-			tile.style.backgroundImage = "url(https://img.scryfall.com/cards"+cardsDb.get(tileGrpid).images["art_crop"]+")";
+			try {
+				tile.style.backgroundImage = "url(https://img.scryfall.com/cards"+cardsDb.get(tileGrpid).images["art_crop"]+")";
+			}
+			catch (e) {}
 			fltl.appendChild(tile);
 
 			var d = document.createElement("div");
@@ -1537,7 +1587,10 @@ function setHistory(loadMore) {
 			tile.classList.add(match.id+"t");
 			tile.classList.add("deck_tile");
 
-			tile.style.backgroundImage = "url(https://img.scryfall.com/cards"+cardsDb.get(tileGrpid).images["art_crop"]+")";
+			try {
+				tile.style.backgroundImage = "url(https://img.scryfall.com/cards"+cardsDb.get(tileGrpid).images["art_crop"]+")";
+			}
+			catch (e) {}
 			fltl.appendChild(tile);
 
 			var d = document.createElement("div");
@@ -1724,7 +1777,10 @@ function setDecks(arg) {
 			tile.classList.add(deck.id+'t');
 			tile.classList.add('deck_tile');
 
-			tile.style.backgroundImage = "url(https://img.scryfall.com/cards"+cardsDb.get(tileGrpid).images["art_crop"]+")";
+			try {
+				tile.style.backgroundImage = "url(https://img.scryfall.com/cards"+cardsDb.get(tileGrpid).images["art_crop"]+")";
+			}
+			catch (e) {}
 
 			var div = document.createElement("div");
 			div.classList.add(deck.id);
@@ -1970,7 +2026,10 @@ function setExplore(arg, loadMore) {
 		tile.classList.add(index+"t");
 		tile.classList.add("deck_tile");
 
-		tile.style.backgroundImage = "url(https://img.scryfall.com/cards"+cardsDb.get(tileGrpid).images["art_crop"]+")";
+		try {
+			tile.style.backgroundImage = "url(https://img.scryfall.com/cards"+cardsDb.get(tileGrpid).images["art_crop"]+")";
+		}
+		catch (e) {}
 
 		var div = document.createElement("div");
 		div.classList.add(index);
@@ -2653,6 +2712,8 @@ function open_draft(id, tileGrpid, set) {
         img.attr("src", "https://img.scryfall.com/cards"+card.images[cardQuality]);
 
 		img.appendTo(d);
+        var r = $('<div style="" class="draft_card_rating">'+draftRanks[card.rank]+'</div>');
+		r.appendTo(d);
 		addCardHover(img, card);
 		d.appendTo(pd);
 	});
@@ -2822,204 +2883,6 @@ function open_match(id) {
 	    $('.moving_ux').animate({'left': '0px'}, 250, 'easeInOutCubic'); 
 	});
 
-}
-
-//
-function open_economy() {
-	$("#ux_0").html('');
-	$("#ux_1").html('');
-	var div = $('<div class="economy"></div>');
-	$('<div class="chart_container"><canvas id="goldChart"></canvas></div>').appendTo(div);
-	$('<div class="chart_container"><canvas id="wildcardsChart"></canvas></div>').appendTo(div);
-	$('<div class="chart_container"><canvas id="gemsChart"></canvas></div>').appendTo(div);
-
-	$("#ux_0").append(div);
-	$("#ux_0").removeClass("flex_item");
-
-	// Set gold chart
-	var labels = [];
-	var data = [];
-
-	goldHistory.forEach(function(item) {
-		var date = new Date(item.date);
-		labels.push(date);
-		data.push(item.value);
-	});
-
-	Chart.defaults.global.defaultFontColor="rgb(250, 229, 210)";
-
- 	var ctx = document.getElementById("goldChart").getContext('2d');
-	var myChart = new Chart(ctx, {
-	    type: 'bar',
-	    data: {
-	        labels: labels,
-	        datasets: [{
-	            label: 'Gold',
-				data: data,
-				type: 'line',
-				fill: true,
-	            backgroundColor: [
-	                'rgba(221, 130, 99, 0.5)',
-	            ],
-	            borderColor: [
-	                'rgba(221, 130, 99, 0.5)',
-	            ]
-	        }]
-	    },
-	    options: {
-	    	responsive: true,
-			elements: {
-				line: {
-					tension: 0.000001
-				}
-			},
-			scales: {
-				xAxes: [{
-					type: 'time',
-					distribution: 'series',
-					display: true,
-	                time: {
-	                    unit: 'day'
-	                },
-					ticks: {
-						source: 'labels'
-					}
-				}],
-				yAxes: [{
-					display: true
-				}]
-			}
-	    }
-	});
-
-	// Set wildcards chart
-	wcCommon = [];
-	wcUncommon = [];
-	wcRare = [];
-	wcMythic = [];
-	labels = [];
-	wildcardHistory.forEach(function(item) {
-		var date = new Date(item.date);
-		labels.push(date);
-		wcCommon.push(item.value.wcCommon);
-		wcUncommon.push(item.value.wcUncommon);
-		wcRare.push(item.value.wcRare);
-		wcMythic.push(item.value.wcMythic);
-	});
-
-	var ctx = document.getElementById("wildcardsChart").getContext('2d');
-	var myChart = new Chart(ctx, {
-	    type: 'bar',
-	    data: {
-	        labels: labels,
-	        datasets: [{
-	            label: 'Common',
-				data: wcCommon,
-				type: 'line',
-	            borderColor: [
-	                'rgba(255, 255, 255, 0.5)',
-	            ]
-	        },{
-	            label: 'Uncommon',
-				data: wcUncommon,
-				type: 'line',
-	            borderColor: [
-	                'rgba(166, 206, 255, 0.5)',
-	            ]
-	        },{
-	            label: 'Rare',
-				data: wcRare,
-				type: 'line',
-				fill: true,
-	            borderColor: [
-	                'rgba(255, 186, 0, 0.5)',
-	            ]
-	        },{
-	            label: 'Mythic Rare',
-				data: wcMythic,
-				type: 'line',
-				fill: true,
-	            borderColor: [
-	                'rgba(255, 27, 0, 0.5)',
-	            ]
-	        }]
-	    },
-	    options: {
-	    	responsive: true,
-			elements: {
-				line: {
-					tension: 0.000001
-				}
-			},
-			scales: {
-				xAxes: [{
-					type: 'time',
-					distribution: 'series',
-	                time: {
-	                    unit: 'day'
-	                },
-					ticks: {
-						source: 'labels'
-					}
-				}],
-				yAxes: [{
-					display: true
-				}]
-			}
-	    }
-	});
-
-	// Set gems chart
-	labels = [];
-	data = [];
-	gemsHistory.forEach(function(item) {
-		var date = new Date(item.date);
-		labels.push(date);
-		data.push(item.value);
-	});
-
-	var ctx = document.getElementById("gemsChart").getContext('2d');
-	var myChart = new Chart(ctx, {
-	    type: 'bar',
-	    data: {
-	        labels: labels,
-	        datasets: [{
-	            label: 'gems',
-				data: data,
-				type: 'line',
-				fill: true,
-	            backgroundColor: [
-	                'rgba(183, 200, 158, 0.5)',
-	            ],
-	            borderColor: [
-	                'rgba(183, 200, 158, 0.5)',
-	            ]
-	        }]
-	    },
-	    options: {
-	    	responsive: true,
-			elements: {
-				line: {
-					tension: 0.000001
-				}
-			},
-			scales: {
-				xAxes: [{
-					type: 'time',
-					distribution: 'series',
-	                time: {
-	                    unit: 'day'
-	                },
-					ticks: {
-						source: 'labels'
-					}
-				}],
-				yAxes: [{
-					display: true
-				}]
-			}
-	    }
-	});
 }
 
 //
@@ -3387,6 +3250,8 @@ function printCards() {
     	let cmc = card.cmc;
     	let set  = card.set;
 
+    	if (card.images == undefined) 	continue;
+
     	// Filter name
     	var arr;
     	arr = filterName.split(" ");
@@ -3539,6 +3404,7 @@ function printCards() {
     	}
 
 		let dfc = '';
+
 		if (card.dfc == 'DFC_Back')	 dfc = 'a';
 		if (card.dfc == 'DFC_Front') dfc = 'b';
 		if (card.dfc == 'SplitHalf') dfc = 'a';
@@ -3736,7 +3602,8 @@ function open_settings(openSection) {
 	var d = $('<div style="width: '+cardSize+'px; !important" class="inventory_card_settings"></div>');
 	var img = $('<img style="width: '+cardSize+'px; !important" class="inventory_card_settings_img"></img>');
 	
-	img.attr("src", "https://img.scryfall.com/cards/"+cardQuality+"/en/m19/"+Math.round(Math.random()*314)+".jpg");
+	card = cardsDb.get(67518);
+	img.attr("src", "https://img.scryfall.com/cards"+card.images[cardQuality]);
 	img.appendTo(d);
 
 	d.appendTo(slider);

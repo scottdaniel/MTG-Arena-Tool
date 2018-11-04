@@ -377,21 +377,6 @@ ipc.on("set_turn", function (event, _we, _phase, _step, _number, _active, _prior
 	}
 });
 
-var draftRanks = [];
-draftRanks[12] = "A+";
-draftRanks[11] = "A";
-draftRanks[10] = "A-";
-draftRanks[9] = "B+";
-draftRanks[8] = "B";
-draftRanks[7] = "B-";
-draftRanks[6] = "C+";
-draftRanks[5] = "C";
-draftRanks[4] = "C-";
-draftRanks[3] = "D+";
-draftRanks[2] = "D";
-draftRanks[1] = "D-";
-draftRanks[0] = "F";
-
 function setDraft() {
 	$(".overlay_decklist").html('');
 	$(".overlay_deckcolors").html('');
