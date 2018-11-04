@@ -24,6 +24,7 @@ var filteredSets = [];
 var filteredMana = [];
 var draftPosition = 1;
 var overlayAlpha = 1;
+var overlayAlphaBack = 1;
 var cardSizePos = 4;
 var cardSize = 140;
 var cardQuality = "normal";
@@ -302,6 +303,7 @@ ipc.on('set_settings', function (event, arg) {
 	settings = arg;
 	cardSizePos = settings.cards_size;
 	overlayAlpha = settings.overlay_alpha;
+	overlayAlphaBack = settings.overlay_alpha_back;
     if (settings.cards_quality != undefined) {
         cardQuality = settings.cards_quality;
     }
@@ -3551,6 +3553,20 @@ function open_settings(openSection) {
 	add_checkbox(section, 'Show clock', 'settings_overlay_clock', settings.overlay_clock);
 	add_checkbox(section, 'Show sideboard', 'settings_overlay_sideboard', settings.overlay_sideboard);
 
+	var sliderOpacity = $('<div class="slidecontainer_settings"></div>');
+	sliderOpacity.appendTo(section);
+	var sliderOpacityLabel = $('<label style="width: 400px; !important" class="card_size_container">Elements Transparency: '+transparencyFromAlpha(overlayAlpha)+'%</label>');
+	sliderOpacityLabel.appendTo(sliderOpacity);
+	var sliderOpacityInput = $('<input type="range" min="0" max="100" step="5" value="'+transparencyFromAlpha(overlayAlpha)+'" class="slider sliderB" id="opacityRange">');
+	sliderOpacityInput.appendTo(sliderOpacity);
+
+	var sliderOpacityBack = $('<div class="slidecontainer_settings"></div>');
+	sliderOpacityBack.appendTo(section);
+	var sliderOpacityBackLabel = $('<label style="width: 400px; !important" class="card_size_container">Background Transparency: '+transparencyFromAlpha(overlayAlphaBack)+'%</label>');
+	sliderOpacityBackLabel.appendTo(sliderOpacityBack);
+	var sliderOpacityBackInput = $('<input type="range" min="0" max="100" step="5" value="'+transparencyFromAlpha(overlayAlphaBack)+'" class="slider sliderC" id="opacityBackRange">');
+	sliderOpacityBackInput.appendTo(sliderOpacityBack);
+
 	//
 	section = $('<div class="settings_section ss3"></div>');
 	section.appendTo(div);
@@ -3591,13 +3607,6 @@ function open_settings(openSection) {
 	sliderlabel.appendTo(slider);
 	var sliderInput = $('<input type="range" min="0" max="20" value="'+cardSizePos+'" class="slider sliderA" id="myRange">');
 	sliderInput.appendTo(slider);
-
-	var sliderOpacity = $('<div class="slidecontainer_settings"></div>');
-	sliderOpacity.appendTo(section);
-	var sliderOpacityLabel = $('<label style="width: 400px; !important" class="card_size_container">Overlay transparency: '+transparencyFromAlpha(overlayAlpha)+'%</label>');
-	sliderOpacityLabel.appendTo(sliderOpacity);
-	var sliderOpacityInput = $('<input type="range" min="0" max="100" step="5" value="'+transparencyFromAlpha(overlayAlpha)+'" class="slider sliderB" id="opacityRange">');
-	sliderOpacityInput.appendTo(sliderOpacity);
 
 	var d = $('<div style="width: '+cardSize+'px; !important" class="inventory_card_settings"></div>');
 	var img = $('<img style="width: '+cardSize+'px; !important" class="inventory_card_settings_img"></img>');
@@ -3763,11 +3772,21 @@ function open_settings(openSection) {
 
 	$(".sliderB").on('click mousemove', function() {
 		overlayAlpha = alphaFromTransparency(parseInt(this.value));
-		sliderOpacityLabel.html('Overlay transparency: '+transparencyFromAlpha(overlayAlpha)+'%');
+		sliderOpacityLabel.html('Elements transparency: '+transparencyFromAlpha(overlayAlpha)+'%');
 	});
 
 	$(".sliderB").on('click mouseup', function() {
 		overlayAlpha = alphaFromTransparency(parseInt(this.value));
+		updateSettings();
+	});
+
+	$(".sliderC").on('click mousemove', function() {
+		overlayAlphaBack = alphaFromTransparency(parseInt(this.value));
+		sliderOpacityBackLabel.html('Background transparency: '+transparencyFromAlpha(overlayAlphaBack)+'%');
+	});
+
+	$(".sliderC").on('click mouseup', function() {
+		overlayAlphaBack = alphaFromTransparency(parseInt(this.value));
 		updateSettings();
 	});
 
@@ -3869,6 +3888,7 @@ function updateSettings() {
 		cards_size: cardSizePos,
 		cards_quality: cardQuality,
 		overlay_alpha: overlayAlpha,
+		overlay_alpha_back: overlayAlphaBack,
 		overlay_top: overlayTop,
 		overlay_title: overlayTitle,
 		overlay_deck: overlayDeck,

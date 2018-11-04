@@ -139,15 +139,17 @@ ipc.on('set_settings', function (event, settings) {
 	$('.overlay_wrapper').css("opacity", alpha);
 	*/
 	overlayAlpha = settings.overlay_alpha;
-	$('.overlay_wrapper').css('opacity', overlayAlpha);
-	if(overlayAlpha === 1) {
-		if(!$(this).hasClass('overlay_bg_image')) $('.overlay_wrapper').addClass('overlay_bg_image');
+	overlayAlphaBack = settings.overlay_alpha_back;
+
+	$('.overlay_container').css('opacity', overlayAlpha);
+	$('.overlay_wrapper').css('opacity', overlayAlphaBack);
+	if(overlayAlphaBack === 1) {
 		$(document.body).css('background-color', 'rgba(0,0,0,1)');
 	}
 	else {
-		$('.overlay_wrapper').removeClass('overlay_bg_image');
 		$(document.body).css('background-color', 'rgba(0,0,0,0)');
 	}
+
 	showSideboard = settings.overlay_sideboard;
 	soundPriority = settings.sound_priority;
 	$('.top').css('display', '');
@@ -528,15 +530,11 @@ $(document).ready(function() {
 		ipc_send('force_open_settings', 1);
 	});
 
-	$(".overlay_wrapper").hover(function() {
-		$(this).css("opacity", 1);
-		if(!$(this).hasClass("overlay_bg_image")) {
-			$(this).addClass("overlay_bg_image");
-		}
+	$(".overlay_container").hover(function() {
+		$(".overlay_container").css("opacity", 1);
 	}, function() {
-		if(overlayAlpha !== 1) {
-			$(this).css("opacity", overlayAlpha);
-			$(this).removeClass("overlay_bg_image");
+		if (overlayAlpha !== 1) {
+			$(".overlay_container").css("opacity", overlayAlpha);
 		}
 	});
 });

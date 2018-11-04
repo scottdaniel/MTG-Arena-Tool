@@ -424,7 +424,7 @@ function saveSettings(settings) {
     closeToTray = settings.close_to_tray;
 
     var oldAlphaEnabled = alphaEnabled;
-    alphaEnabled = settings.overlay_alpha < 1;
+    alphaEnabled = settings.overlay_alpha_back < 1;
     if(oldAlphaEnabled != alphaEnabled) {
         recreateOverlay();
     }

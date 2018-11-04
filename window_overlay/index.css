@@ -1,3 +1,7 @@
+.overlay_container {
+    -webkit-transition: all .2s ease-in;
+}
+
 .overlay_decklist {
     padding-left: 2px;
     height: calc(100% - 210px);
