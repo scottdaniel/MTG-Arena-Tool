@@ -3730,7 +3730,7 @@ function open_settings(openSection) {
 	sliderOpacity.appendTo(section);
 	var sliderOpacityLabel = $('<label style="width: 400px; !important" class="card_size_container">Overlay transparency: '+transparencyFromAlpha(overlayAlpha)+'%</label>');
 	sliderOpacityLabel.appendTo(sliderOpacity);
-	var sliderOpacityInput = $('<input type="range" min="0" max="100" value="'+transparencyFromAlpha(overlayAlpha)+'" class="slider sliderB" id="opacityRange">');
+	var sliderOpacityInput = $('<input type="range" min="0" max="100" step="5" value="'+transparencyFromAlpha(overlayAlpha)+'" class="slider sliderB" id="opacityRange">');
 	sliderOpacityInput.appendTo(sliderOpacity);
 
 	var d = $('<div style="width: '+cardSize+'px; !important" class="inventory_card_settings"></div>');
