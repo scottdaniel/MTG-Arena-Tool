@@ -1,3 +1,12 @@
+body {pointer-events: none}
+
+.click-on      {pointer-events: all}
+.click-through {pointer-events: none}
+
+.overlay_container {
+    -webkit-transition: all .2s ease-in;
+}
+
 .overlay_decklist {
     padding-left: 2px;
     height: calc(100% - 210px);
@@ -197,38 +206,38 @@
 
 
 .actionlog {
+    text-shadow: 2px 2px 2px rgb(0, 0, 0);
     white-space: nowrap;
     overflow: hidden;
-    background-color: rgb(255, 248, 242);
     height: 24px;
     line-height: 24px;
     width: 100%;
     display: flex;
     font-size: 14px;
-}
+    background: linear-gradient(to right, rgba(0,0,0,0.3), rgba(0,0,0,0));
+}   
 
 .log_p1 {
-    color: #ca3300;
+    color: rgba(255, 200, 200, 1);
 }
 
 .log_p2 {
-    color: rgb(6, 114, 193);
+    color: rgba(200, 200, 255, 1);
 }
 
 .log_p-1 {
+    color: rgba(255, 255, 255, 0.9);
     font-weight: bold;
 }
 
 .actionlog_time {
-    margin-left: 4px;
-    color: rgba(0, 0, 0, 0.8);
+    margin-left: 8px;
+    color: rgba(255, 255, 255, 0.8);
 }
 
 .actionlog_text {
     margin-left: 8px;
 }
-
-
 
 .card_ability {
     text-decoration: underline !important;

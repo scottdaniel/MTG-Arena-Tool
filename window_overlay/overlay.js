@@ -18,6 +18,7 @@ var turnActive = 0;
 var turnPriority = 0;
 var turnDecision = 0;
 var soundPriority = false;
+var overlayAlpha = 1;
 
 var showSideboard = false;
 var actionLog = [];
@@ -30,6 +31,11 @@ const Howler = require('howler');
 var sound = new Howl({
 	src: ['../sounds/blip.mp3']
 });
+
+const TransparencyMouseFix = require('electron-transparency-mouse-fix');
+const fix = new TransparencyMouseFix({
+  fixPointerEvents: 'auto'
+})
 
 ipc_send = function (method, arg) {
     ipc.send('ipc_switch', method, arg);
@@ -137,6 +143,24 @@ ipc.on('set_settings', function (event, settings) {
 	$('.overlay_wrapper:before').css("opacity", 0.4*alpha);
 	$('.overlay_wrapper').css("opacity", alpha);
 	*/
+	overlayAlpha = settings.overlay_alpha;
+	overlayAlphaBack = settings.overlay_alpha_back;
+
+	$('.overlay_container').css('opacity', overlayAlpha);
+	$('.overlay_wrapper').css('opacity', overlayAlphaBack);
+	if(overlayAlphaBack === 1) {
+		$(".click-through").each(function() {
+			$(this).css("pointer-events", "all");
+		});
+		$(document.body).css('background-color', 'rgba(0,0,0,1)');
+	}
+	else {
+		$(".click-through").each(function() {
+			$(this).css("pointer-events", "inherit");
+		});
+		$(document.body).css('background-color', 'rgba(0,0,0,0)');
+	}
+
 	showSideboard = settings.overlay_sideboard;
 	soundPriority = settings.sound_priority;
 	$('.top').css('display', '');
@@ -289,7 +313,7 @@ ipc.on('set_deck', function (event, arg) {
 		var deckListDiv = $(".overlay_decklist");
 		var prevIndex = 0;
 
-		if (deckMode == 0 || deckMode == 2) {
+		if (arg.cardsLeft && (deckMode == 0 || deckMode == 2)) {
 			deckListDiv.append('<div class="chance_title">'+arg.cardsLeft+' cards left</div>');
 		}
 		else {
@@ -304,7 +328,7 @@ ipc.on('set_deck', function (event, arg) {
 		arg.mainDeck.forEach(function(card) {
 			var grpId = card.id;
 			if (deckMode == 2) {
-				addCardTile(grpId, 'a', card.chance+"%", deckListDiv);
+				addCardTile(grpId, 'a', (card.chance != undefined ? card.chance : '0')+"%", deckListDiv);
 			}
 			else {
 				addCardTile(grpId, 'a', card.quantity, deckListDiv);
@@ -328,13 +352,13 @@ ipc.on('set_deck', function (event, arg) {
 
 		if (deckMode == 2) {
 			deckListDiv.append('<div class="chance_title"></div>');// Add some space
-			deckListDiv.append('<div class="chance_title">Creature: '+arg.chanceCre+'%</div>');
-			deckListDiv.append('<div class="chance_title">Instant: '+arg.chanceIns+'%</div>');
-			deckListDiv.append('<div class="chance_title">Sorcery: '+arg.chanceSor+'%</div>');
-			deckListDiv.append('<div class="chance_title">Artifact: '+arg.chanceArt+'%</div>');
-			deckListDiv.append('<div class="chance_title">Enchantment: '+arg.chanceEnc+'%</div>');
-			deckListDiv.append('<div class="chance_title">Planeswalker: '+arg.chancePla+'%</div>');
-			deckListDiv.append('<div class="chance_title">Land: '+arg.chanceLan+'%</div>');
+			deckListDiv.append('<div class="chance_title">Creature: '	+	(arg.chanceCre != undefined ? arg.chanceCre : '0')+'%</div>');
+			deckListDiv.append('<div class="chance_title">Instant: '	+	(arg.chanceIns != undefined ? arg.chanceIns : '0')+'%</div>');
+			deckListDiv.append('<div class="chance_title">Sorcery: '	+	(arg.chanceSor != undefined ? arg.chanceSor : '0')+'%</div>');
+			deckListDiv.append('<div class="chance_title">Artifact: '	+	(arg.chanceArt != undefined ? arg.chanceArt : '0')+'%</div>');
+			deckListDiv.append('<div class="chance_title">Enchantment: '	+	(arg.chanceEnc != undefined ? arg.chanceEnc : '0')+'%</div>');
+			deckListDiv.append('<div class="chance_title">Planeswalker: '	+	(arg.chancePla != undefined ? arg.chancePla : '0')+'%</div>');
+			deckListDiv.append('<div class="chance_title">Land: '		+	(arg.chanceLan != undefined ? arg.chanceLan : '0')+'%</div>');
 		}
 	}
 });
@@ -516,4 +540,14 @@ $(document).ready(function() {
 	$(".settings").click(function () {
 		ipc_send('force_open_settings', 1);
 	});
+
+	$(".overlay_container").hover(function() {
+		$(".overlay_container").css("opacity", 1);
+	}, function() {
+		if (overlayAlpha !== 1) {
+			$(".overlay_container").css("opacity", overlayAlpha);
+		}
+	});
+
+
 });

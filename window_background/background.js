@@ -27,6 +27,7 @@ const defaultCfg = {
         close_on_match: true,
         cards_size: 2,
         overlay_alpha: 1,
+        overlay_alpha_back: 1,
         overlay_top: true,
         overlay_title: true,
         overlay_deck: true,
@@ -178,12 +179,22 @@ ipc.on('remember', function (event, arg) {
     }
 });
 
+function loadSettings() {
+    var settings = store.get("settings");
+    updateSettings(settings, true);
+}
+
+ipc.on('reload_overlay', function (event, arg) {
+    loadSettings();
+    var obj = store.get('overlayBounds');
+    ipc_send("overlay_set_bounds", obj);
+});
+
 //
 ipc.on('set_renderer_state', function (event, arg) {
     ipc_send("ipc_log", "Renderer state: "+arg);
 	renderer_state = arg;
-	var settings = store.get("settings");
-	updateSettings(settings, true);
+	loadSettings();
 
     if (rstore.get("token") !== "" && rstore.get("email") !== "") {
         rememberMe = true;
@@ -458,9 +469,7 @@ function loadPlayerConfig(playerId) {
     var obj = store.get('overlayBounds');
     ipc_send("overlay_set_bounds", obj);
 
-    var settings = store.get("settings");
-    // Update the overlay settings too
-    updateSettings(settings, true);
+    loadSettings();
     requestHistorySend(0);
 }
 
@@ -1396,7 +1405,7 @@ function setDraftCards(json) {
 
 function actionLogGenerateLink(grpId) {
     var card = cardsDb.get(grpId);
-    return '<a class="card_link" href="'+grpId+'">'+card.name+'</a>';
+    return '<a class="card_link click-on" href="'+grpId+'">'+card.name+'</a>';
 }
 
 
@@ -1700,7 +1709,7 @@ function gre_to_client(data) {
                                                 }
                                                 catch (e) {}
                                         
-                                                actionLog(gameObjs[aff].controllerSeatId, new Date(), actionLogGenerateLink(src)+'\'s <a class="card_ability" title="'+ab+'">ability</a>');
+                                                actionLog(gameObjs[aff].controllerSeatId, new Date(), actionLogGenerateLink(src)+'\'s <a class="card_ability click-on" title="'+ab+'">ability</a>');
                                                 //ipc_send("ipc_log", cardsDb.get(src).name+"'s ability");
                                                 //console.log(cardsDb.get(src).name+"'s ability", gameObjs[aff]);
                                             }

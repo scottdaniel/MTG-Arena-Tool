@@ -199,8 +199,11 @@ label {
     opacity: 0;
 }
 
-.main_wrapper, .overlay_wrapper {
+.main_bg_image, .overlay_bg_image {
     background: url(../images/Ghitu-Lavarunner-Dominaria-MtG-Art.jpg);
+}
+
+.main_wrapper, .overlay_wrapper {
     position: absolute;
     overflow: hidden;
     background-color: rgba(0, 0, 0, 0.25);
@@ -211,7 +214,7 @@ label {
     z-index: 5;
     height: calc(100% - 4px);
     width: calc(100% - 4px);
-    transition: background 0.5s ease-in;
+    transition: all 0.25s ease-in;
 }
 
 .wrapper {
@@ -229,11 +232,19 @@ label {
 }
 */
 
+.absolute {
+    left: 0;
+    top: 0;
+    z-index: 10;
+    position: absolute;
+}
+
 .outer_wrapper {
     padding: 2px;
     overflow: hidden;
     height: calc(100% - 4px);
     width: calc(100% - 4px);
+    -webkit-backface-visibility: hidden;
 }
 
 

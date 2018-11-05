@@ -20,10 +20,13 @@
         <script src="overlay.js"></script>
     </head>
     <body>
-        <div class="outer_wrapper">
-        <div class="overlay_wrapper" >
-
-            <div class="top" style="justify-content: flex-end;">
+        <div class="outer_wrapper click-through">
+            <div class="overlay_wrapper overlay_bg_image" >
+            </div>
+        </div>
+        <div class="outer_wrapper click-through absolute overlay_container">
+        
+            <div class="top click-on" style="justify-content: flex-end;">
                 <div class="button minimize"></div>
                 <div class="button settings"></div>
                 <div class="button close"></div>
@@ -34,18 +37,18 @@
             <div class="overlay_separator"></div>
             <div class="overlay_decklist"></div>
 
-            <div class="overlay_deck_container">
+            <div class="overlay_deck_container click-on">
                 <div class="deck_prev"></div>
                 <div class="deck_next"></div>
             </div>
 
-            <div class="overlay_draft_container">
+            <div class="overlay_draft_container click-on">
                 <div class="draft_prev"></div>
                 <div class="draft_title"></div>
                 <div class="draft_next"></div>
             </div>
 
-            <div class="overlay_clock_container">
+            <div class="overlay_clock_container click-on">
                 <div class="clock_prev"></div>
                 <div class="clock_turn"></div>
                 <div class="clock_elapsed"></div>
@@ -55,7 +58,6 @@
             <div class="overlay_hover_container">
                 <img class="main_hover"></img>
             </div>
-        </div>
         </div>
     </body>
 </html>
