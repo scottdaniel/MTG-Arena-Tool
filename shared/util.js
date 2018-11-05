@@ -659,6 +659,17 @@ function add_deck_colors(colors, deck) {
 }
 
 //
+function compare_colors(color_a, color_b) {
+	for (var i = color_a.length; i--;) {
+		if (color_a[i] !== color_b[i]) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
+//
 function get_ids_colors(list) {
 	var colors = [];
 	list.forEach(function(grpid) {

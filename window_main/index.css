@@ -485,6 +485,18 @@ span i {
     color: #FAE5D2 !important;
 }
 
+.back_green {
+    background-color: rgba(183, 200, 158, 1) !important;
+}
+
+.back_red {
+    background-color: rgba(221, 130, 99, 1) !important;
+}
+
+.back-white {
+    background-color: #FAE5D2 !important;
+}
+
 .about {
     width: 100%;
     height: 100%;
@@ -695,6 +707,12 @@ a:hover {
     width: 100%;
 }
 
+.mana_curve_costs {
+    display: flex;
+    align-items: flex-start;
+    width: 100%;
+
+}
 
 .mana_curve_column_number {
     color: #FAE5D2;
