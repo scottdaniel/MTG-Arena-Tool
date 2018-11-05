@@ -579,6 +579,8 @@ function get_collection_export() {
     return list;
 }
 
+
+
 //
 function get_deck_colors(deck) {
 	deck.colors = [];
@@ -600,7 +602,7 @@ function get_deck_colors(deck) {
 				}
 			}
 		});
-
+		deck.colors.sort(function(a, b){return a - b});
 		return deck.colors;
 	}
 	catch (e) {
