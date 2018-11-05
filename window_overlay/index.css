@@ -206,6 +206,7 @@ body {pointer-events: none}
 
 
 .actionlog {
+    text-shadow: 2px 2px 2px rgb(0, 0, 0);
     white-space: nowrap;
     overflow: hidden;
     height: 24px;

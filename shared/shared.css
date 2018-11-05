@@ -244,6 +244,7 @@ label {
     overflow: hidden;
     height: calc(100% - 4px);
     width: calc(100% - 4px);
+    -webkit-backface-visibility: hidden;
 }
 
 
