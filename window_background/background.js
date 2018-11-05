@@ -1546,25 +1546,26 @@ function gre_to_client(data) {
             msg.declareAttackersReq.attackers.forEach(function(obj) {
                 var att = obj.attackerInstanceId;
                 if (!attackersDetected.includes(att)) {
-                    var str = actionLogGenerateLink(gameObjs[att].grpId)+" attacked ";
-                    if (obj.selectedDamageRecipient !== undefined) {
-                        var rec = obj.selectedDamageRecipient;
-                        if (rec.type == "DamageRecType_Player") {
-                            actionLog(gameObjs[att].controllerSeatId, new Date(), str+getNameBySeat(rec.playerSystemSeatId));
-                            //ipc_send("", str+getNameBySeat(rec.playerSystemSeatId));
-                        }
-                    }
-                    if (obj.legalDamageRecipients !== undefined) {
-                        var rec = obj.legalDamageRecipients.forEach(function(rec) {
+                    if (gameObjs[att] != undefined) {
+                        var str = actionLogGenerateLink(gameObjs[att].grpId)+" attacked ";
+                        if (obj.selectedDamageRecipient !== undefined) {
+                            var rec = obj.selectedDamageRecipient;
                             if (rec.type == "DamageRecType_Player") {
                                 actionLog(gameObjs[att].controllerSeatId, new Date(), str+getNameBySeat(rec.playerSystemSeatId));
-                               //ipc_send("ipc_log", str+getNameBySeat(rec.playerSystemSeatId));
+                                //ipc_send("", str+getNameBySeat(rec.playerSystemSeatId));
                             }
-                        });
+                        }
+                        if (obj.legalDamageRecipients !== undefined) {
+                            var rec = obj.legalDamageRecipients.forEach(function(rec) {
+                                if (rec.type == "DamageRecType_Player") {
+                                    actionLog(gameObjs[att].controllerSeatId, new Date(), str+getNameBySeat(rec.playerSystemSeatId));
+                                   //ipc_send("ipc_log", str+getNameBySeat(rec.playerSystemSeatId));
+                                }
+                            });
+                        }
+                        attackersDetected.push(att);
                     }
-                    attackersDetected.push(att);
                 }
-
             });
         }
 
@@ -1861,9 +1862,11 @@ function getNameBySeat(seat) {
     if (seat == playerSeat) {
         return playerName.slice(0, -6);
     }
-    else {
+    else if (oppName != undefined) {
         return oppName.slice(0, -6);
     }
+
+    return "???";
 }
 
 //
