@@ -12,13 +12,6 @@ const {autoUpdater} = require("electron-updater");
 
 // Adds debug features like hotkeys for triggering dev tools and reload
 console.log(process.platform);
-if (process.argv[0] == "-debug") {
-    console.log("** DEBUG MODE **");
-    require('electron-debug')({showDevTools: true});
-}
-else {
-    require('electron-debug')({showDevTools: false});
-}
 
 const debugBack = false;
 const debugIPC = false;
@@ -44,13 +37,10 @@ app.on('ready', () => {
     background  = createBackgroundWindow();
 
     globalShortcut.register('Alt+Shift+D', () => {
-        if (background.isVisible()) {
-            background.hide();
-        }
-        else {
-            background.show();
-        }
-    })
+        background.toggleDevTools();
+        overlay.toggleDevTools();
+        mainWindow.toggleDevTools();
+    })    
 
     mainWindow.webContents.once('dom-ready', () => {
         mainLoaded = true;

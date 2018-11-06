@@ -558,7 +558,12 @@ function logLoop() {
             ipc_send("popup", {"text": "No log file found.", "time": 1000});
             resetLogLoop(500);
         } else {
-            readLog();
+            try {
+                readLog();
+            }
+            catch (e) {
+                resetLogLoop(500);
+            }
         }
     });
 }
@@ -2333,7 +2338,7 @@ function httpBasic() {
                 if (debugNet) {
     				ipc_send("ipc_log", "RECV << "+index+", "+_headers.method+", "+_headers.reqId+", "+_headers.token);
                     ipc_send("ipc_log", "RECV << "+index+", "+_headers.method+", "+results.slice(0, 100));
-                    console.log("RECV << "+index, _headers.method, results);
+                    console.log("RECV << "+index, _headers.method, results.slice(0, 500));
                 }
                 try {
                     var parsedResult = JSON.parse(results);
@@ -2342,7 +2347,6 @@ function httpBasic() {
                         parsedResult.components.forEach(function(ob) {
                             delete ob.id; delete ob.page_id; delete ob.group_id; delete ob.showcase; delete ob.description; delete ob.position; delete ob.created_at;
                         });
-                        console.log("STATUS", parsedResult);
                         ipc_send("set_status", parsedResult);
                     }
                     if (parsedResult.ok) {
