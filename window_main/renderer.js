@@ -36,6 +36,7 @@ var currentOpenDeck = null;
 var lastSettingsSection = 1;
 var serverStatus = undefined;
 var loggedIn = false;
+var canLogin = false;
 
 var rankOffset = 0;
 var rankTitle = "";
@@ -99,6 +100,7 @@ ipc.on('set_db', function (event, arg) {
 	eventsList = arg.events;
 	delete arg.sets;
 	delete arg.events;
+	canLogin = true;
 	cardsDb.set(arg);
 });
 
@@ -537,12 +539,14 @@ $(document).ready(function() {
 	});
 
 	$(".login_link").click(function() {
-		var user = document.getElementById("signin_user").value;
-		var pass = document.getElementById("signin_pass").value;
-		if (pass != "********") {
-			pass = sha1(pass);
+		if (canLogin) {
+			var user = document.getElementById("signin_user").value;
+			var pass = document.getElementById("signin_pass").value;
+			if (pass != "********") {
+				pass = sha1(pass);
+			}
+			ipc_send("login", {username: user, password: pass});
 		}
-		ipc_send("login", {username: user, password: pass});
 	});
 
 	//
@@ -2268,19 +2272,23 @@ function open_deck(i, type) {
 			}
 
 			for (let i=0; i<wr.colors.length; i++) {
-				curvediv.append($('<div class="mana_curve_column back_green" style="height: '+(wr.colors[i].wins/curveMax*100)+'%"></div>'))
-				curvediv.append($('<div class="mana_curve_column back_red" style="height: '+(wr.colors[i].losses/curveMax*100)+'%"></div>'))
+				if (wr.colors[i].wins + wr.colors[i].losses > 2) {
+					curvediv.append($('<div class="mana_curve_column back_green" style="height: '+(wr.colors[i].wins/curveMax*100)+'%"></div>'))
+					curvediv.append($('<div class="mana_curve_column back_red" style="height: '+(wr.colors[i].losses/curveMax*100)+'%"></div>'))
+				}
 			}
 
 			curvediv.appendTo(stats);
 			var curvediv = $('<div class="mana_curve_costs"></div>');
 			for (let i=0; i<wr.colors.length; i++) {
-				var cn = $('<div class="mana_curve_column_number"></div>');
-				var colors = wr.colors[i].colors;
-				colors.forEach(function(color) {
-					cn.append($('<div style="margin: 0 auto !important" class="mana_s16 mana_'+mana[color]+'"></div>'));
-				})
-				curvediv.append(cn);
+				if (wr.colors[i].wins + wr.colors[i].losses > 2) {
+					var cn = $('<div class="mana_curve_column_number"></div>');
+					var colors = wr.colors[i].colors;
+					colors.forEach(function(color) {
+						cn.append($('<div style="margin: 0 auto !important" class="mana_s16 mana_'+mana[color]+'"></div>'));
+					})
+					curvediv.append(cn);
+				}
 			}
 			curvediv.appendTo(stats);
 		}
@@ -3947,6 +3955,7 @@ function getDeckWinrate(deckid, lastEdit) {
 	if (matchesHistory == undefined) {
 		return 0;
 	}
+
 	matchesHistory.matches.forEach(function(matchid, index) {
 		match = matchesHistory[matchid];
 		if (matchid != null && match != undefined) {
@@ -3955,6 +3964,7 @@ function getDeckWinrate(deckid, lastEdit) {
 					var oppDeckColors = get_deck_colors(match.oppDeck);
 					if (oppDeckColors.length > 0) {
 						var added = -1;
+
 						colorsWinrates.forEach(function(wr, index) {
 							if (compare_colors(wr.colors, oppDeckColors)) {
 								added = index;
@@ -4001,9 +4011,20 @@ function getDeckWinrate(deckid, lastEdit) {
 	var winrateLastEdit = Math.round((1/(winsLastEdit+lossLastEdit)*winsLastEdit) * 100) / 100;
 	if (winsLastEdit == 0)	winrateLastEdit = 0;
 
-	colorsWinrates.sort(compare_color_winrates);
+	//colorsWinrates.sort(compare_color_winrates);
+	colorsWinrates.sort(compare_winrates);
 
 	return {total: winrate, lastEdit: winrateLastEdit, colors: colorsWinrates};
+}
+
+function compare_winrates(a, b) {
+	var _a = a.wins/a.losses;
+	var _b = b.wins/b.losses;
+
+	if (_a < _b)	return 1;
+	if (_a > _b)	return -1;
+
+	return compare_color_winrates(a, b);
 }
 
 function compare_color_winrates(a, b) {

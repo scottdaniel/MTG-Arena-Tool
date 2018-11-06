@@ -592,6 +592,13 @@ function get_deck_colors(deck) {
 				if (cdb) {
 					var card_name = cdb.name;
 					var card_cost = cdb.cost;
+					if (cdb.type.indexOf("Land") !== -1 && cdb.frame.length < 3) {
+						if (cdb.frame.includes(1) && !deck.colors.includes(1))	deck.colors.push(1);
+						if (cdb.frame.includes(2) && !deck.colors.includes(2))	deck.colors.push(2);
+						if (cdb.frame.includes(3) && !deck.colors.includes(3))	deck.colors.push(3);
+						if (cdb.frame.includes(4) && !deck.colors.includes(4))	deck.colors.push(4);
+						if (cdb.frame.includes(5) && !deck.colors.includes(5))	deck.colors.push(5);
+					}
 					card_cost.forEach(function(c) {
 						if (c.indexOf('w') !== -1 && !deck.colors.includes(1))	deck.colors.push(1);
 						if (c.indexOf('u') !== -1 && !deck.colors.includes(2))	deck.colors.push(2);
@@ -662,6 +669,9 @@ function add_deck_colors(colors, deck) {
 
 //
 function compare_colors(color_a, color_b) {
+	if (color_a.length != color_b.length)
+		return false;
+
 	for (var i = color_a.length; i--;) {
 		if (color_a[i] !== color_b[i]) {
 			return false;

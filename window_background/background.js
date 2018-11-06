@@ -292,9 +292,11 @@ function requestHistorySend(state) {
 		calculateRankWins(history);
 	}
     if (state == 1) {
+        // Send the data and open history tab
         ipc_send("background_set_history", JSON.stringify(history));
     }
     else {
+        /// Send only the data
         ipc_send("background_set_history_data", JSON.stringify(history));
     }
 }
@@ -2388,6 +2390,7 @@ function httpBasic() {
                             eventsList = parsedResult.events;
                             ipc_send("set_db", parsedResult);
                             cardsDb.set(parsedResult);
+                            ipc_send("popup", {"text": "Metadata: Ok", "time": 1000});
                         }
                         
                     }
