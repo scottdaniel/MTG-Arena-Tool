@@ -724,6 +724,36 @@ a:hover {
   align-self: flex-end;
 }
 
+.types_container {
+    margin: auto;
+    max-width: 630px;
+    margin-top: 32px;
+    padding-left: 16px;
+    padding-right: 16px;
+    width: calc(100% - 32px);
+    display: flex;
+    justify-content: space-between;
+}
+
+.type_icon_cont {
+    display: flex;
+    flex-direction: column;
+}
+
+.type_icon {
+    width: 32px;
+    height: 32px;
+    margin-bottom: 8px;
+}
+
+.type_art { background-image: url(../images/type_artifact.png); }
+.type_cre { background-image: url(../images/type_creature.png); }
+.type_enc { background-image: url(../images/type_enchantment.png); }
+.type_ins { background-image: url(../images/type_instant.png); }
+.type_lan { background-image: url(../images/type_land.png); }
+.type_pla { background-image: url(../images/type_planeswalker.png); }
+.type_sor { background-image: url(../images/type_sorcery.png); }
+
 .pie_container {
     width: 100%;
     display: flex;
@@ -742,7 +772,9 @@ a:hover {
     height: 160px;
 }
 
-.pie_container span, .wildcards_cost span {
+.pie_container span, .wildcards_cost span , .types_container span {
+    text-align: center;
+    display: block;
     margin-bottom: 12px;
     font-family: 'Mplantin';
     font-size: 16px;

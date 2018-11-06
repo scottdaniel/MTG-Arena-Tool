@@ -11,6 +11,7 @@ const fs    = require("fs");
 const {autoUpdater} = require("electron-updater");
 
 // Adds debug features like hotkeys for triggering dev tools and reload
+require('electron-debug')({showDevTools: false});
 console.log(process.platform);
 
 const debugBack = false;

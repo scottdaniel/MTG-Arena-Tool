@@ -801,6 +801,26 @@ function get_deck_curve(deck) {
 }
 
 //
+function get_deck_types_ammount(deck) {
+	var types = {art:0, cre: 0, enc: 0, ins: 0, lan: 0, pla: 0, sor: 0};
+
+	deck.mainDeck.forEach(function(card) {
+        var c = cardsDb.get(card.id);
+        if (c) {
+            if (c.type.includes("Land", 0))                 types.lan += card.quantity;
+            else if (c.type.includes("Creature", 0))        types.cre += card.quantity;
+            else if (c.type.includes("Artifact", 0))        types.art += card.quantity;
+            else if (c.type.includes("Enchantment", 0))     types.enc += card.quantity;
+            else if (c.type.includes("Instant", 0))         types.ins += card.quantity;
+            else if (c.type.includes("Sorcery", 0))         types.sor += card.quantity;
+            else if (c.type.includes("Planeswalker", 0))    types.pla += card.quantity;
+        }
+	});
+
+	return types;
+}
+
+//
 function get_deck_colors_ammount(deck) {
 	var colors = {total:0, w: 0, u: 0, b: 0, r: 0, g: 0, c: 0};
 

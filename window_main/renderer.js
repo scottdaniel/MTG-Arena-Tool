@@ -2179,6 +2179,17 @@ function open_deck(i, type) {
 	$('<div class="button_simple exportDeck">Export to Arena</div>').appendTo(stats);
 	$('<div class="button_simple exportDeckStandard">Export to .txt</div>').appendTo(stats);
 
+	var types = get_deck_types_ammount(_deck);
+	var typesdiv = $('<div class="types_container"></div>');
+	$('<div class="type_icon_cont"><div title="Creatures" 		class="type_icon type_cre"></div><span>'+types.cre+'</span></div>').appendTo(typesdiv);
+	$('<div class="type_icon_cont"><div title="Lands" 			class="type_icon type_lan"></div><span>'+types.lan+'</span></div>').appendTo(typesdiv);
+	$('<div class="type_icon_cont"><div title="Instants" 		class="type_icon type_ins"></div><span>'+types.ins+'</span></div>').appendTo(typesdiv);
+	$('<div class="type_icon_cont"><div title="Sorceries" 		class="type_icon type_sor"></div><span>'+types.sor+'</span></div>').appendTo(typesdiv);
+	$('<div class="type_icon_cont"><div title="Enchantments" 	class="type_icon type_enc"></div><span>'+types.enc+'</span></div>').appendTo(typesdiv);
+	$('<div class="type_icon_cont"><div title="Artifacts" 		class="type_icon type_art"></div><span>'+types.art+'</span></div>').appendTo(typesdiv);
+	$('<div class="type_icon_cont"><div title="Planeswalkers" 	class="type_icon type_pla"></div><span>'+types.pla+'</span></div>').appendTo(typesdiv);
+	typesdiv.appendTo(stats);
+
 	var curvediv = $('<div class="mana_curve"></div>');
 	var curve = get_deck_curve(_deck);
 
@@ -2203,7 +2214,6 @@ function open_deck(i, type) {
 	curvediv.appendTo(stats);
 
 	//var missing = get_deck_missing(_deck);
-
 	var cont = $('<div class="pie_container_outer"></div>');
 
 	// Deck colors
@@ -2243,6 +2253,7 @@ function open_deck(i, type) {
 	if (type == 0) {
 		var wr = getDeckWinrate(_deck.id, _deck.lastUpdated);
 		if (wr != 0) {
+			//$('<span>w/l vs Color combinations</span>').appendTo(stats);
 			var curvediv = $('<div class="mana_curve"></div>');
 			var curve = get_deck_curve(_deck);
 
@@ -2395,6 +2406,17 @@ function drawDeckVisual(_div, _stats, deck) {
 			});
 		}
 	}
+
+	var types = get_deck_types_ammount(deck);
+	var typesdiv = $('<div class="types_container"></div>');
+	$('<div class="type_icon_cont"><div title="Creatures" 		class="type_icon type_cre"></div><span>'+types.cre+'</span></div>').appendTo(typesdiv);
+	$('<div class="type_icon_cont"><div title="Lands" 			class="type_icon type_lan"></div><span>'+types.lan+'</span></div>').appendTo(typesdiv);
+	$('<div class="type_icon_cont"><div title="Instants" 		class="type_icon type_ins"></div><span>'+types.ins+'</span></div>').appendTo(typesdiv);
+	$('<div class="type_icon_cont"><div title="Sorceries" 		class="type_icon type_sor"></div><span>'+types.sor+'</span></div>').appendTo(typesdiv);
+	$('<div class="type_icon_cont"><div title="Enchantments" 	class="type_icon type_enc"></div><span>'+types.enc+'</span></div>').appendTo(typesdiv);
+	$('<div class="type_icon_cont"><div title="Artifacts" 		class="type_icon type_art"></div><span>'+types.art+'</span></div>').appendTo(typesdiv);
+	$('<div class="type_icon_cont"><div title="Planeswalkers" 	class="type_icon type_pla"></div><span>'+types.pla+'</span></div>').appendTo(typesdiv);
+	typesdiv.prependTo(_div.parent());
 
 	_stats.hide();
 	_div.css("display", "flex");
