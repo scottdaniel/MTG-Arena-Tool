@@ -1157,7 +1157,10 @@ function setEvents(loadMore) {
 		flr.classList.add("flex_item");
 
 		var tileGrpid = course.CourseDeck.deckTileId;
-		if (!cardsDb.get(tileGrpid)) {
+		try {
+			var tileCard = cardsDb.get(tileGrpid).set;
+		}
+		catch (e) {
 			tileGrpid = 67003;
 		}
 
@@ -1304,7 +1307,10 @@ function expandEvent(_course, expandDiv) {
 					flr.classList.add("flex_item");
 
 					var tileGrpid = match.playerDeck.deckTileId;
-					if (!cardsDb.get(tileGrpid)) {
+					try {
+						var tileCard = cardsDb.get(tileGrpid).set;
+					}
+					catch (e) {
 						tileGrpid = 67003;
 					}
 
@@ -1510,7 +1516,10 @@ function setHistory(loadMore) {
 
 		if (match.type == "match") {
 			var tileGrpid = match.playerDeck.deckTileId;
-			if (!cardsDb.get(tileGrpid)) {
+			try {
+				var tileCard = cardsDb.get(tileGrpid).set;
+			}
+			catch (e) {
 				tileGrpid = 67003;
 			}
 
@@ -2021,7 +2030,10 @@ function setExplore(arg, loadMore) {
 		}
 
 		var tileGrpid = _deck.deck_tile;
-		if (cardsDb.get(tileGrpid).set == undefined) {
+		try {
+			var tileCard = cardsDb.get(tileGrpid).set;
+		}
+		catch (e) {
 			tileGrpid = 67003;
 		}
 
