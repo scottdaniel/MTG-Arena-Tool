@@ -2233,35 +2233,40 @@ function saveMatch() {
 
 //
 function saveDraft() {
-    var draft = currentDraft;
-    draft.id = draftId;
-    draft.date = new Date();
-    draft.set = draftSet; 
-    draft.owner = playerName; 
+    if (draftId != undefined) {
+        var draft = currentDraft;
+        draft.id = draftId;
+        draft.date = new Date();
+        draft.set = draftSet; 
+        draft.owner = playerName; 
 
-    console.log("Save draft:", draft);
-    
-	var draft_index = store.get('draft_index');
-	// add to config
-    if (!draft_index.includes(draftId)) {
-        draft_index.push(draftId);
+        console.log("Save draft:", draft);
+        
+    	var draft_index = store.get('draft_index');
+    	// add to config
+        if (!draft_index.includes(draftId)) {
+            draft_index.push(draftId);
+        }
+        else {
+            draft.date = store.get(draftId).date;
+        }
+
+        // add locally
+        if (!history.matches.includes(draftId)) {
+            history.matches.push(draftId);
+        }
+     
+        store.set('draft_index', draft_index);
+        store.set(draftId, draft);
+        history[draftId] = draft;
+        history[draftId].type = "draft";
+        httpSetMatch(draft);
+        requestHistorySend(0);
+        ipc_send("popup", {"text": "Draft saved!", "time": 3000});        
     }
     else {
-        draft.date = store.get(draftId).date;
+        console.log("Couldnt save draft with undefined ID:", draft);
     }
-
-    // add locally
-    if (!history.matches.includes(draftId)) {
-        history.matches.push(draftId);
-    }
- 
-    store.set('draft_index', draft_index);
-    store.set(draftId, draft);
-    history[draftId] = draft;
-    history[draftId].type = "draft";
-    httpSetMatch(draft);
-    requestHistorySend(0);
-    ipc_send("popup", {"text": "Draft saved!", "time": 3000});
 }
 
 //
