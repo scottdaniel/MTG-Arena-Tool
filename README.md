@@ -13,6 +13,7 @@ An MTG Arena deck tracker and collection manager.
 	- Elapsed time / current time clock
 - History of games played
 	- Cards your opponents played
+	- View games action logs
 	- Export decklists
 - Collection browser
 	- Filter cards by set
@@ -26,7 +27,7 @@ An MTG Arena deck tracker and collection manager.
 	- Wildcards needed
 	- Show cards missing
 	- mana curve
-	- Winrate vs colors
+	- Winrate vs color combinations
 	- Visual view
 	- Deck export (to mtga, to .txt)
 - Draft tracker
@@ -52,8 +53,7 @@ npm install
 npm start
 ```
 
-Once running from source you can open developer tools with F12 and toggle background process window visible using `Shift+Alt+D`.
-If you would like to debug a build, run with `-debug`
+You can toggle developer tools for debugging using `Shift+Alt+D`, or using `F12` if you run from source.
 
 ### Download
 Currently, our releases are hosted [here at GitHub](https://github.com/Manuel-777/MTG-Arena-Tool/releases). You will find all stable and pre-production releases right here.
