@@ -1864,14 +1864,17 @@ function gre_to_client(data) {
 
 // Get player name by seat in the game
 function getNameBySeat(seat) {
-    if (seat == playerSeat) {
-        return playerName.slice(0, -6);
+    try {
+        if (seat == playerSeat) {
+            return playerName.slice(0, -6);
+        }
+        else {
+            return oppName.slice(0, -6);
+        }
     }
-    else if (oppName != undefined) {
-        return oppName.slice(0, -6);
+    catch (e) {
+        return "???";
     }
-
-    return "???";
 }
 
 //
