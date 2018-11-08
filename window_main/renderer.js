@@ -2169,7 +2169,7 @@ function open_deck(i, type) {
 
 	var tileGrpid = _deck.deckTileId;
 	if (cardsDb.get(tileGrpid)) {
-		change_background("https://img.scryfall.com/cards"+cardsDb.get(tileGrpid).images["art_crop"]);
+		change_background("", tileGrpid);
 	}
 	var fld = $('<div class="flex_item"></div>');
 
@@ -2726,7 +2726,7 @@ function open_draft(id, tileGrpid, set) {
 	top.append(flr);
 
 	if (cardsDb.get(tileGrpid)) {
-		change_background("https://img.scryfall.com/cards"+cardsDb.get(tileGrpid).images["art_crop"]);
+		change_background("", tileGrpid);
 	}
 
 	var cont = $('<div class="flex_item" style="flex-direction: column;"></div>');
@@ -2823,7 +2823,7 @@ function open_match(id) {
 
 	var tileGrpid = match.playerDeck.deckTileId;
 	if (cardsDb.get(tileGrpid)) {
-		change_background("https://img.scryfall.com/cards/art_crop/en/"+get_set_scryfall(cardsDb.get(tileGrpid).set)+"/"+cardsDb.get(tileGrpid).cid+".jpg");
+		change_background("", tileGrpid);
 	}
 	var fld = $('<div class="flex_item"></div>');
 
@@ -3160,7 +3160,7 @@ function printStats() {
 	const stats = get_collection_stats();
 
 	const top = $('<div class="decklist_top"><div class="button back"></div><div class="deck_name">Collection Statistics</div><div class="deck_top_colors"></div></div>');
-	change_background("http://www.artofmtg.com/wp-content/uploads/2018/04/Urzas-Tome-Dominaria-MtG-Art.jpg");
+	change_background("", 67574);
 
 	const flex = $('<div class="flex_item"></div>');
 	const mainstats = $('<div class="main_stats"></div>');
@@ -3679,7 +3679,6 @@ function open_settings(openSection) {
 	about.append('<div class="message_sub_15 white">By Manuel Etchegaray, 2018</div>');
 	about.append('<div class="message_sub_15 white">Version '+window.electron.remote.app.getVersion()+'</div>');
 
-
 	if (updateState.state == 0) {
 		about.append('<div class="message_updates white">Checking for updates..</div>');
 	}
@@ -3841,13 +3840,24 @@ function transparencyFromAlpha(alpha) {
 }
 
 //
-function change_background(arg) {
+function change_background(arg, grpId = 0) {
+	var artistLine = "";
+	var _card = cardsDb.get(grpId);
+
+	console.log(arg, grpId, _card);
     if (arg == "default") {
-        arg = defaultBackground;
+        $('.top_artist').html("Githu Lavarunner by Jesper Ejsing");
+        if (defaultBackground == "") {
+	        $('.main_wrapper').css("background-image", "url(../images/Ghitu-Lavarunner-Dominaria-MtG-Art.jpg)");
+        }
+        else {
+	        $('.main_wrapper').css("background-image", "url("+defaultBackground+")");
+        }
     }
-    if (arg == "") {
-        $('.main_wrapper').css("background-image", "");
-    }
+    else if (_card != false) {
+    	console.log(_card.images["art_crop"]);
+	   	$('.main_wrapper').css("background-image", "url(https://img.scryfall.com/cards"+_card.images["art_crop"]+")");
+	}
     else if (fs.existsSync(arg)) {
         $('.main_wrapper').css("background-image", "url("+arg+")");
     }
@@ -3862,6 +3872,14 @@ function change_background(arg) {
                 $('.main_wrapper').css("background-image", "url("+arg+")");
             }
         });
+    }
+
+    if (_card) {
+    	try {
+    		artistLine = _card.name+" by "+_card.artist;
+	    	$('.top_artist').html(artistLine);
+    	}
+    	catch (e) {}
     }
 }
 

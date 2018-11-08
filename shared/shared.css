@@ -285,6 +285,12 @@ label {
     opacity: 0.33;
 }
 
+.top_artist {
+    line-height: 32px;
+    font-style: italic;
+    color: rgba(250, 229, 210, 0.4);
+}
+
 
 .button {
     -webkit-app-region: no-drag;
