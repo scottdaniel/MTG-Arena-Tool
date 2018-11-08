@@ -549,6 +549,8 @@ $(document).ready(function() {
 		}
 	});
 
+
+
 	//
 	$(".close").click(function () {
 	    ipc_send('renderer_window_close', 1);
@@ -3703,6 +3705,9 @@ function open_settings(openSection) {
 	}
 
 	about.append('<div class="flex_item" style="margin: 64px auto 0px auto;"><div class="discord_link"></div><div class="twitter_link"></div><div class="git_link"></div></div>');
+
+	about.append('<div class="message_sub_15 white" style="margin: 24px 0 12px 0;">Support my work!</div><div class="donate_link"><img src="https://www.paypalobjects.com/webstatic/en_US/i/buttons/PP_logo_h_100x26.png" alt="PayPal" /></div>')
+
 	about.appendTo(section);
 
 	div.appendTo(wrap_r);
@@ -3730,6 +3735,10 @@ function open_settings(openSection) {
 
 	$(".release_notes_link").click(function() {
 		shell.openExternal('https://mtgatool.com/release-notes/');
+	});
+
+	$(".donate_link").click(function() {
+		shell.openExternal('https://www.paypal.me/ManuelEtchegaray/10');
 	});
 
 	$(".settings_nav").click(function () {
@@ -3844,7 +3853,7 @@ function change_background(arg, grpId = 0) {
 	var artistLine = "";
 	var _card = cardsDb.get(grpId);
 
-	console.log(arg, grpId, _card);
+	//console.log(arg, grpId, _card);
     if (arg == "default") {
         $('.top_artist').html("Githu Lavarunner by Jesper Ejsing");
         if (defaultBackground == "") {

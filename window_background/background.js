@@ -732,10 +732,11 @@ function processLogUser(err, bytecount, buff) {
                 arenaVersion = dataChop(value, strCheck, '"');
                 ipc_send("ipc_log", 'Arena version: '+arenaVersion);
             }
-
+            /*
             if (firstPass) {
                 ipc_send("popup", {"text": "Reading: "+Math.round(100/splitString.length*index)+"%", "time": 1000});
-            }      
+            }
+            */
         }
         callback();
 

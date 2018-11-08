@@ -59,6 +59,16 @@ span i {
     text-decoration: underline;
 }
 
+.donate_link {
+    background-color: white;
+    padding: 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100px;
+    height: 26px;
+    margin: 0 auto;
+}
+
 .twitter_link {
     cursor: pointer;
     align-self: center;
