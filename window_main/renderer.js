@@ -102,6 +102,8 @@ ipc.on('set_db', function (event, arg) {
 	delete arg.events;
 	canLogin = true;
 	cardsDb.set(arg);
+
+	$(".button_simple_disabled").addClass("button_simple");
 });
 
 //
