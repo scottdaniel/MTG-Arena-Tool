@@ -1888,7 +1888,8 @@ function setDecks(arg) {
 			if (wr != 0) {
 				var d = document.createElement("div");
 				d.classList.add('list_deck_winrate');
-				d.innerHTML = 'Winrate: '+(wr.total*100).toFixed(2)+'%';
+				//d.innerHTML = 'Winrate: '+(wr.total*100).toFixed(2)+'%';
+				d.innerHTML = 'Wins: '+wr.wins+' Losses: '+wr.losses+' ('+(wr.total*100).toFixed(2)+'%)';
 				flr.appendChild(d);
 
 				var d = document.createElement("div");
@@ -4043,7 +4044,7 @@ function getDeckWinrate(deckid, lastEdit) {
 	//colorsWinrates.sort(compare_color_winrates);
 	colorsWinrates.sort(compare_winrates);
 
-	return {total: winrate, lastEdit: winrateLastEdit, colors: colorsWinrates};
+	return {total: winrate, wins: wins, losses: loss, lastEdit: winrateLastEdit, colors: colorsWinrates};
 }
 
 function compare_winrates(a, b) {

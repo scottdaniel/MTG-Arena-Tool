@@ -94,6 +94,7 @@ body {pointer-events: none}
 }
 
 .overlay_deck_container {
+    pointer-events: none;
     position: absolute;
     flex-direction: column;
     display: flex;
