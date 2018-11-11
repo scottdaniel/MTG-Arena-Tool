@@ -1971,7 +1971,7 @@ function clear_deck() {
 //
 function update_deck(force) {
     var nd = new Date()
-    if (nd - lastDeckUpdate > 1000 || debugLog == true || force) {
+    if (nd - lastDeckUpdate > 1000 || debugLog || !firstPass || force) {
         if (overlayDeckMode == 0) {
             ipc_send("set_deck", currentDeckUpdated);
         }
@@ -2015,7 +2015,7 @@ function forceDeckUpdate() {
     var typeArt = 0;
     var typeEnc = 0;
     var typeLan = 0;
-    if ((debugLog == true || firstPass == false) && currentDeckUpdated.mainDeck != undefined) {
+    if ((debugLog || !firstPass) && currentDeckUpdated.mainDeck != undefined) {
         /*
         // DEBUG
         currentDeckUpdated.mainDeck = [];
@@ -2055,7 +2055,7 @@ function forceDeckUpdate() {
         }
     });
 
-    if ((debugLog == true || firstPass == false) && currentDeckUpdated.mainDeck != undefined) {
+    if ((debugLog || !firstPass) && currentDeckUpdated.mainDeck != undefined) {
         currentDeckUpdated.mainDeck.forEach(function(card) {
             var c = cardsDb.get(card.id);
             if (c) {

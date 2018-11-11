@@ -29,15 +29,22 @@ var updateProgress = 0;
 var updateSpeed = 0;
 const ipc = electron.ipcMain;
 
+var screenElectron = null;
 var mainLoaded = false;
 var backLoaded = false;
 
 app.on('ready', () => {
+    screenElectron = electron.screen;
+
     mainWindow  = createMainWindow();
     overlay     = createOverlay();
     background  = createBackgroundWindow();
 
     globalShortcut.register('Alt+Shift+D', () => {
+        if (background.isVisible())
+            background.show();
+        else
+            background.hide();
         background.toggleDevTools();
         overlay.toggleDevTools();
         mainWindow.toggleDevTools();
@@ -142,6 +149,11 @@ app.on('ready', () => {
                 break;
 
             case 'renderer_set_bounds':
+                var sc = screenElectron.getPrimaryDisplay();
+                if (arg.x > sc.size.width-arg.width)    arg.x = sc.size.width-arg.width;
+                if (arg.y > sc.size.height-arg.height)  arg.y = sc.size.height-arg.height;
+                if (arg.x < 0)                          arg.x = 0;
+                if (arg.y < 0)                          arg.y = 0;
                 mainWindow.setBounds(arg);
                 break;
 
@@ -329,6 +341,11 @@ app.on('ready', () => {
                 break;
 
             case 'overlay_set_bounds':
+                var sc = screenElectron.getPrimaryDisplay();
+                if (arg.x > sc.size.width-arg.width)    arg.x = sc.size.width-arg.width;
+                if (arg.y > sc.size.height-arg.height)  arg.y = sc.size.height-arg.height;
+                if (arg.x < 0)                          arg.x = 0;
+                if (arg.y < 0)                          arg.y = 0;
                 overlay.setBounds(arg);
                 break;
 
@@ -554,9 +571,9 @@ function createBackgroundWindow() {
         x: 0,
         y: 0,
         show: debugBack,
-        width: 100,
-        height: 100,
-        title: "MTG Arena Tool",
+        width: 640,
+        height: 480,
+        title: "Background",
         icon:'icon.png'
     });
     win.loadURL(`file://${__dirname}/window_background/index.html`);

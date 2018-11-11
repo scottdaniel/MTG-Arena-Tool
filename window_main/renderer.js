@@ -1889,7 +1889,7 @@ function setDecks(arg) {
 				var d = document.createElement("div");
 				d.classList.add('list_deck_winrate');
 				//d.innerHTML = 'Winrate: '+(wr.total*100).toFixed(2)+'%';
-				d.innerHTML = 'Wins: '+wr.wins+' Losses: '+wr.losses+' ('+(wr.total*100).toFixed(2)+'%)';
+				d.innerHTML = 'Wins: '+wr.wins+' / Losses: '+wr.losses+' ('+(wr.total*100).toFixed(2)+'%)';
 				flr.appendChild(d);
 
 				var d = document.createElement("div");
@@ -3794,9 +3794,7 @@ function open_settings(openSection) {
     });
 
     export_input.on('keyup', function (e) {
-        if (e.keyCode == 13) {
-            updateSettings();
-        }
+        updateSettings();
     });
 
 	$(".sliderA").off();
