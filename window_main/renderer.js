@@ -3930,6 +3930,7 @@ function updateSettings() {
     var backColor = $(".color_picker").spectrum("get").toRgbString();
     var backUrl = document.getElementById("query_image").value;
     defaultBackground = backUrl;
+    if (backUrl == "")	backUrl = "default";
     change_background(backUrl);
 
 	var overlayOnTop = document.getElementById("settings_overlay_ontop").checked;
