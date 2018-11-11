@@ -3454,7 +3454,10 @@ function printCards() {
 
 		if (card.dfc == 'DFC_Back')	 dfc = 'a';
 		if (card.dfc == 'DFC_Front') dfc = 'b';
-		if (card.dfc == 'SplitHalf') dfc = 'a';
+		if (card.dfc == 'SplitHalf') {
+			dfc = 'a';
+			if (card.dfcId != 0)	dfc = 'b';
+		}
 		if (dfc == 'b') {
 			doDraw = false;
 		}
@@ -3930,8 +3933,10 @@ function updateSettings() {
     var backColor = $(".color_picker").spectrum("get").toRgbString();
     var backUrl = document.getElementById("query_image").value;
     defaultBackground = backUrl;
-    if (backUrl == "")	backUrl = "default";
-    change_background(backUrl);
+    if (backUrl == "")
+	    change_background("default");
+	else
+	    change_background(backUrl);
 
 	var overlayOnTop = document.getElementById("settings_overlay_ontop").checked;
 	var closeToTray = document.getElementById("settings_closetotray").checked;
