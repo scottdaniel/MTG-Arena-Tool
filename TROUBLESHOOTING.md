@@ -21,7 +21,9 @@ If the last step worked, send the the .json file to [mtgatool@gmail.com](mailto:
 
 ### If you have any other unexpected behaviour
 
-Run the app using the  `-debug` command, that should prompt three developer consoles, one for each process (main, overlay and background).
+First of all, uninstalling and installing again will probably not change anything, as most errors are either configuration errors or log provessing errors. Neither of them are solved by uninstalling. So, just to save you some time, make sure you have the latest version only.
+
+Run the app then use `Alt+Shift+D` to open three developer consoles, one for each process (main, overlay and background).
 Check if any of them has errors. If you see anything here (or anywhere else, really) you can submit to:
 - [Discord](https://discord.gg/K9bPkJy)
 - [Github issues](https://github.com/Manuel-777/MTG-Arena-Tool/issues)
