@@ -88,6 +88,11 @@ app.on('ready', () => {
                 break;
 
             // to renderer
+            case 'too_slow':
+                mainWindow.webContents.send("too_slow", arg);
+                console.log("Something went wrong loading", arg);
+                break;
+
             case 'set_draft_link':
                 mainWindow.webContents.send("set_draft_link", arg);
                 break;

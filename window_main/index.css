@@ -59,6 +59,11 @@ span i {
     text-decoration: underline;
 }
 
+.trouble_link {
+    cursor: pointer;
+    text-decoration: underline;
+}
+
 .donate_link {
     background-color: white;
     padding: 12px;

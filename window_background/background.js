@@ -265,6 +265,7 @@ window.onerror = (msg, url, line, col, err) => {
         col: col
     }
     error.id = sha1(error.msg + playerId);
+    resetLogLoop(250);
     httpSendError(error);
 }
 
@@ -277,12 +278,14 @@ process.on('uncaughtException', function(err){
     }
     console.log("ERROR: ", error);
     error.id = sha1(error.msg + playerId);
+    resetLogLoop(250);
     httpSendError(error);
 })
 
 //
 ipc.on('error', function (event, err) {
     err.id = sha1(err.msg + playerId);
+    resetLogLoop(250);
     httpSendError(err);
 });
 
@@ -412,6 +415,7 @@ function loadPlayerConfig(playerId) {
     history.matches = entireConfig['matches_index'];
     
     for (let i=0; i<history.matches.length; i++) {
+        last_load = new Date();
         ipc_send("popup", {"text": "Reading history: "+i+" / "+history.matches.length, "time": 0});
         var id = history.matches[i];
         if (id != null) {
@@ -425,6 +429,7 @@ function loadPlayerConfig(playerId) {
     
     drafts.matches = store.get('draft_index');
     for (let i=0; i<drafts.matches.length; i++) {
+        last_load = new Date();
         ipc_send("popup", {"text": "Reading drafts: "+i+" / "+drafts.matches.length, "time": 0});
         var id = drafts.matches[i];
 
@@ -440,6 +445,7 @@ function loadPlayerConfig(playerId) {
 
     events.courses = store.get('courses_index');
     for (let i=0; i<events.courses.length; i++) {
+        last_load = new Date();
         ipc_send("popup", {"text": "Reading events: "+i+" / "+events.courses.length, "time": 0});
         var id = events.courses[i];
 
@@ -454,6 +460,7 @@ function loadPlayerConfig(playerId) {
 
     economy.changes = store.get('economy_index');
     for (let i=0; i<economy.changes.length; i++) {
+        last_load = new Date();
         ipc_send("popup", {"text": "Reading economy: "+i+" / "+economy.changes.length, "time": 0});
         var id = economy.changes[i];
 
@@ -549,10 +556,21 @@ function resetLogLoop(time) {
     logLoopTimer = setTimeout(logLoop, time);
 }
 
+last_load = new Date();
+
 // Basic logic for reading the log file
 function logLoop() {
     //console.log("logLoop() start");
     //ipc_send("ipc_log", "logLoop() start");
+    if (firstPass) {
+        var now = new Date();
+        var timeDiff = (now - last_load)/1000;
+        ipc_send("ipc_log", timeDiff);
+        if (timeDiff > 5) {
+            ipc_send("too_slow", "");
+        }
+    }
+    
     fs.open(logUri, 'r', function(err, fd) {
         file = fd;
         if (err) {
@@ -630,6 +648,7 @@ function readLog() {
 function processLog(err, bytecount, buff) {
     // rawstring contains the ENTIRE log as a single text
     let rawString = buff.toString('utf-8', 0, bytecount);
+    // Increase position read
     //var splitString = rawString.split('[UnityCrossThread');
 
     // We split it into smaller chunks to read it 
@@ -637,6 +656,8 @@ function processLog(err, bytecount, buff) {
 
     //console.log('Reading:', bytecount, 'bytes, ',splitString.length, ' chunks');
     //ipc_send("ipc_log", 'Reading: '+bytecount+' bytes, '+splitString.length+' chunks');
+
+    prevLogSize+=bytecount;
 
     // If this is happening while the app is loading, tell the async series to finish loading at the end
     if (firstPass) {
@@ -662,6 +683,7 @@ function processLog(err, bytecount, buff) {
         else {
             processLogData(value);
             if (firstPass) {
+                last_load = new Date();
                 ipc_send("popup", {"text": "Processing log: "+Math.round(100/splitString.length*index)+"%", "time": 0});
             }
             
@@ -680,9 +702,6 @@ function processLog(err, bytecount, buff) {
             console.log("processLog err: "+err.message);
         }
     });
-
-    // Increase position read
-    prevLogSize+=bytecount;
 }
 
 // Process only the user data for initial loading (prior to log in)
@@ -694,6 +713,7 @@ function processLogUser(err, bytecount, buff) {
 
     //console.log('Reading user:', bytecount, 'bytes, ',splitString.length, ' chunks');
     //ipc_send("ipc_log", 'Reading: '+bytecount+' bytes, '+splitString.length+' chunks');
+    prevLogSize+=bytecount;
 
     if (firstPass) {
         splitString.push("%END%");
@@ -704,7 +724,7 @@ function processLogUser(err, bytecount, buff) {
         //ipc_send("ipc_log", "Async: ("+index+")");
         if (value == "%END%") {
             if (playerName == null) {
-                ipc_send("popup", {"text": "output_log contains no data", "time": 0});
+                ipc_send("popup", {"text": "output_log contains no player data", "time": 0});
                 resetLogLoop(500);
             }
         }
@@ -746,7 +766,6 @@ function processLogUser(err, bytecount, buff) {
         }
     });
 
-    prevLogSize+=bytecount;
 }
 
 // Check if the string contains a JSON object, return it parsed as JS object

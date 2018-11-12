@@ -95,6 +95,19 @@ ipc.on('auth', function (event, arg) {
 });
 
 //
+ipc.on('too_slow', function (event, arg) {
+	pop('Loading is taking too long, please read our <a class="trouble_link">troubleshooting guide</a>.', 0);
+
+	$('.popup').css("left", "calc(50% - 280px)");
+	$('.popup').css("width", "560px");
+	$('.popup').css("pointer-events", "all");
+
+	$(".trouble_link").click(function() {
+		shell.openExternal('https://github.com/Manuel-777/MTG-Arena-Tool/blob/master/TROUBLESHOOTING.md');
+	});
+});
+
+//
 ipc.on('set_db', function (event, arg) {
 	setsList = arg.sets;
 	eventsList = arg.events;
