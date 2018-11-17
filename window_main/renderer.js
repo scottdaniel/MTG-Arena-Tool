@@ -83,6 +83,11 @@ process.on('warning', (warning) => {
 });;
 
 //
+ipc.on('clear_pwd', function (event, arg) {
+	document.getElementById("signin_pass").value = "";
+});
+
+//
 ipc.on('auth', function (event, arg) {
 	if (arg.ok) {
 		$('.message_center').css('display', 'flex');
@@ -1225,17 +1230,25 @@ function setEvents(loadMore) {
 
 		var wlGate = course.ModuleInstanceData.WinLossGate;
 
-		if (wlGate.MaxWins == wlGate.CurrentWins) {
+		if (wlGate == undefined) {
 			var d = document.createElement("div");
 			d.classList.add("list_match_result_win");
-			d.innerHTML = wlGate.CurrentWins +":"+wlGate.CurrentLosses;
+			d.innerHTML = "0:0";
 			flr.appendChild(d);
 		}
 		else {
-			var d = document.createElement("div");
-			d.classList.add("list_match_result_loss");
-			d.innerHTML = wlGate.CurrentWins +":"+wlGate.CurrentLosses;
-			flr.appendChild(d);
+			if (wlGate.MaxWins == wlGate.CurrentWins) {
+				var d = document.createElement("div");
+				d.classList.add("list_match_result_win");
+				d.innerHTML = wlGate.CurrentWins +":"+wlGate.CurrentLosses;
+				flr.appendChild(d);
+			}
+			else {
+				var d = document.createElement("div");
+				d.classList.add("list_match_result_loss");
+				d.innerHTML = wlGate.CurrentWins +":"+wlGate.CurrentLosses;
+				flr.appendChild(d);
+			}
 		}
 
 		var divExp = document.createElement("div");
@@ -1944,7 +1957,7 @@ function setDecks(arg) {
 //
 function updateExplore() {
 	filterEvent = getEventId(document.getElementById("query_select").value);
-	ipc_send('request_explore', filterEvent.toLowerCase());
+	ipc_send('request_explore', filterEvent);
 }
 
 //
@@ -2043,15 +2056,15 @@ function setExplore(arg, loadMore) {
 
 		actuallyLoaded++;
 
-		if (_deck.deck_colors == undefined) {
-			_deck.deck_colors = [];
+		if (_deck.colors == undefined) {
+			_deck.colors = [];
 		}
 		if (_deck.wins == undefined) {
 			_deck.wins = 0;
 			_deck.losses = 0;
 		}
 
-		var tileGrpid = _deck.deck_tile;
+		var tileGrpid = _deck.tile;
 		try {
 			var tileCard = cardsDb.get(tileGrpid).set;
 		}
@@ -2095,15 +2108,15 @@ function setExplore(arg, loadMore) {
 
 		var d = document.createElement("div");
 		d.classList.add("list_deck_name");
-		d.innerHTML = _deck.deck_name;
+		d.innerHTML = _deck.deckname;
 		flt.appendChild(d);
 
 		var d = document.createElement("div");
 		d.classList.add("list_deck_name_it");
-		d.innerHTML = "by "+_deck.player_name;
+		d.innerHTML = "by "+_deck.player;
 		flt.appendChild(d);
 		
-		_deck.deck_colors.forEach(function(color) {
+		_deck.colors.forEach(function(color) {
 			var d = document.createElement("div");
 			d.classList.add("mana_s20");
 			d.classList.add("mana_"+mana[color]);
@@ -2118,7 +2131,7 @@ function setExplore(arg, loadMore) {
 		var d = document.createElement("div");
 		d.classList.add("list_deck_name_it");
 		let ee = _deck.event;
-		d.innerHTML = getReadableEvent(ee)+" - "+timeSince(_deck.date*1000)+" ago";
+		d.innerHTML = getReadableEvent(ee)+" - "+timeSince(new Date(_deck.date))+" ago";
 		flr.appendChild(d);
 
 		div.appendChild(fll);
@@ -2142,7 +2155,7 @@ function setExplore(arg, loadMore) {
 		});
 
 		$('.'+index).on('click', function(e) {
-			open_course_request(_deck.id);
+			open_course_request(_deck._id);
 		});
 
 	}

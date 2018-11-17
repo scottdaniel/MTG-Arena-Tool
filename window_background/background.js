@@ -4,6 +4,7 @@ const {app, net, clipboard} = require('electron');
 const path  = require('path');
 const Store = require('../store.js');
 const async = require("async");
+const qs    = require('qs');
 
 const rememberCfg = {
     email: '',
@@ -198,6 +199,7 @@ ipc.on('set_renderer_state', function (event, arg) {
 
     if (rstore.get("token") !== "" && rstore.get("email") !== "") {
         rememberMe = true;
+        tokenAuth = rstore.get("token");
         ipc_send("set_remember", rstore.get("email"));
     }    
 });
@@ -570,7 +572,6 @@ function logLoop() {
             ipc_send("too_slow", "");
         }
     }
-    
     fs.open(logUri, 'r', function(err, fd) {
         file = fd;
         if (err) {
@@ -604,7 +605,7 @@ function readLog() {
         var stats = fs.fstatSync(file);
         logSize = stats.size;
         logDiff = logSize - prevLogSize;
-
+        if (logDiff > 268435440)  logDiff = 268435440;
         //ipc_send("ipc_log", "readLog logloopmode: "+logLoopMode+", renderer state:"+renderer_state+", logSize: "+logSize+", prevLogSize: "+prevLogSize);
 
         // Something went wrong obtaining the file size, try again later
@@ -968,6 +969,13 @@ function processLogData(data) {
     strCheck = '<== Event.GetPlayerCourse(';
     json = checkJsonWithStart(data, strCheck, '', ')');
     if (json != false) {
+        strCheck = 'Logger]';
+        if (data.indexOf(strCheck) > -1) {
+            var str = dataChop(data, strCheck, 'M')+'M';
+            var logTime = parseWotcTime(str);
+            json.date = logTime;
+        }
+
         if (json.Id != "00000000-0000-0000-0000-000000000000") {
             json._id = json.Id;
             delete json.Id;
@@ -976,7 +984,7 @@ function processLogData(data) {
             if (json.CourseDeck != null) {
                 json.CourseDeck.colors = get_deck_colors(json.CourseDeck);
                 console.log(json.CourseDeck, json.CourseDeck.colors)
-                httpSubmitCourse(json._id, json);
+                httpSubmitCourse(json);
                 saveCourse(json);
             }
         }
@@ -1240,7 +1248,22 @@ function processLogData(data) {
         return;
     }
 
+    // Direct Challenge
+    strCheck = '==> DirectGame.Challenge(';
+    json = checkJsonWithStart(data, strCheck, '', '):');
+    if (json != false) {
+        var deck = json.params.deck;
+        
+        deck = replaceAll(deck, '"Id"', '"id"');
+        deck = replaceAll(deck, '"Quantity"', '"quantity"');
+        deck = JSON.parse(deck);
+        select_deck(deck);
+
+        return;
+    }
+
     // Draft status / draft start
+    /*
     strCheck = '<== Event.Draft(';
     json = checkJsonWithStart(data, strCheck, '', ')');
     if (json != false) {
@@ -1248,6 +1271,7 @@ function processLogData(data) {
         draftId = json.Id;
         return;
     }
+    */
 
     //   
     strCheck = '<== Draft.DraftStatus(';
@@ -1304,7 +1328,7 @@ function processLogData(data) {
         value.pack = currentDraftPack;
         var key = "pack_"+json.params.packNumber+"pick_"+json.params.pickNumber;
         currentDraft[key] = value;
-        debugLogSpeed = 500;
+        debugLogSpeed = 200;
         return;
     }
 
@@ -1319,6 +1343,8 @@ function processLogData(data) {
         }
         //ipc_send("renderer_show", 1);
 
+        draftId = json.Id;
+        console.log("Complete draft", json);
         saveDraft();
         return;
     }
@@ -1837,8 +1863,14 @@ function gre_to_client(data) {
                         if (name) {
                             obj.name = name;
                         }
-                        obj.zoneName = zones[obj.zoneId].type;
-                        gameObjs[obj.instanceId] = obj;
+
+                        // This should be a delayed check
+                        try {
+                            obj.zoneName = zones[obj.zoneId].type;
+                            gameObjs[obj.instanceId] = obj;
+                        }
+                        catch (e) {}
+
                         //ipc_send("ipc_log", "Message: "+msg.msgId+" > ("+obj.instanceId+") created at "+zones[obj.zoneId].type);
                     });
                 }
@@ -1975,9 +2007,15 @@ function createDraft() {
 
 //
 function select_deck(arg) {
-    currentDeck = arg.CourseDeck;
+    if (arg.CourseDeck !== undefined) {
+        currentDeck = arg.CourseDeck;
+    }
+    else {
+        currentDeck = arg;
+    }
     var str = JSON.stringify(currentDeck);
     currentDeckUpdated = JSON.parse(str);
+    console.log(currentDeck, arg);
     ipc_send("set_deck", currentDeck);
 }
 
@@ -2287,7 +2325,7 @@ function saveDraft() {
         store.set(draftId, draft);
         history[draftId] = draft;
         history[draftId].type = "draft";
-        httpSetMatch(draft);
+        httpSetDraft(draft);
         requestHistorySend(0);
         ipc_send("popup", {"text": "Draft saved!", "time": 3000});        
     }
@@ -2332,13 +2370,13 @@ function httpBasic() {
     async.forEachOfSeries(httpAsyncNew, function (value, index, callback) {
         var _headers = value;
 
-        if (store.get("settings").send_data == false && _headers.method != 'get_picks' && _headers.method != 'delete_data' && _headers.method != 'get_database' && _headers.method != 'get_status' && debugLog == false) {
+        if (store.get("settings").send_data == false && _headers.method != 'auth' && _headers.method != 'delete_data' && _headers.method != 'get_database' && _headers.method != 'get_status' && debugLog == false) {
             callback({message: "Settings dont allow sending data! > "+_headers.method});
             removeFromHttp(_headers.reqId);
         }
-        if (tokenAuth == undefined) {
-            callback({message: "Undefined token"});
-            removeFromHttp(_headers.reqId);
+        else if (tokenAuth == undefined) {
+            //callback({message: "Undefined token"});
+            //removeFromHttp(_headers.reqId);
             _headers.token = "";
         }
         else {
@@ -2346,23 +2384,28 @@ function httpBasic() {
         }
         
         var http = require('https');
-        if (_headers.method == 'get_picks') {
-            var options = { protocol: 'https:', port: 443, hostname: serverAddress, path: '/get_picks.php', method: 'POST', headers: _headers };
-        }
-        else if (_headers.method == 'get_database') {
-            var options = { protocol: 'https:', port: 443, hostname: serverAddress, path: '/database/database.json', method: 'GET'};
+        if (_headers.method == 'get_database') {
+            var options = { protocol: 'https:', port: 443, hostname: serverAddress, path: '/mongo/database/database.json', method: 'GET'};
         }
         else if (_headers.method == 'get_status') {
+            http = require('https');
             var options = { protocol: 'https:', port: 443, hostname: 'magicthegatheringarena.statuspage.io', path: '/index.json', method: 'GET'};
         }
+        else if (_headers.method_path !== undefined) {
+            var options = { protocol: 'https:', port: 443, hostname: serverAddress, path: _headers.method_path, method: 'POST'};
+        }
         else {
-            var options = { protocol: 'https:', port: 443, hostname: serverAddress, path: '/api.php', method: 'POST', headers: _headers };
+            var options = { protocol: 'https:', port: 443, hostname: serverAddress, path: '/mongo/api.php', method: 'POST'};
         }
 
         if (debugNet) {
             console.log("SEND >> "+index+", "+_headers.method, _headers, options);
             ipc_send("ipc_log", "SEND >> "+index+", "+_headers.method+", "+_headers.reqId+", "+_headers.token);
         }
+
+        console.log("POST", _headers);
+        var post_data = qs.stringify(_headers);
+        options.headers = { 'Content-Type': 'application/x-www-form-urlencoded', 'Content-Length': post_data.length};
 
         var results = ''; 
         var req = http.request(options, function(res) {
@@ -2388,11 +2431,11 @@ function httpBasic() {
                         if (_headers.method == 'auth') {
                             tokenAuth = parsedResult.token;
 
-                            ipc_send("auth", parsedResult.arenaids);
+                            //ipc_send("auth", parsedResult.arenaids);
 
                             if (rememberMe) {
                                 rstore.set("token", tokenAuth);
-                                rstore.set("email", _headers.username);
+                                rstore.set("email", playerUsername);
                             }
 
                             ipc_send("auth", parsedResult);
@@ -2423,6 +2466,15 @@ function httpBasic() {
                         if (_headers.method == 'share_draft') {
                             ipc_send("popup", {"text": parsedResult.error, "time": 3000});
                         }
+                        if (_headers.method == 'auth') {
+                            if (parsedResult.error == "Invalid credentials.") {
+                                tokenAuth = undefined;
+                                rstore.set("email", "");
+                                rstore.set("token", "");
+                                ipc_send("clear_pwd", 1);
+                                ipc_send("set_remember", false);
+                            }
+                        }
                         // errors here 
                     }
                     if (_headers.method == 'auth') {
@@ -2439,6 +2491,7 @@ function httpBasic() {
                     callback();
                 }
                 catch (e) {}
+                
 
                 removeFromHttp(_headers.reqId);
                 if (debugNet) {
@@ -2447,13 +2500,13 @@ function httpBasic() {
                 }
             }); 
         });
-
         req.on('error', function(e) {
             callback(e);
             removeFromHttp(_headers.reqId);
             ipc_send("ipc_log", e.message);
         });
-
+        req.write(post_data);
+        console.log(req);
         req.end();
 
     }, function (err) {
@@ -2477,71 +2530,79 @@ function removeFromHttp(req) {
 
 function httpAuth(user, pass) {
     var _id = makeId(6);
-	httpAsync.push({'reqId': _id, 'method': 'auth', 'username': user, 'password': pass, 'playerid': playerId, 'playername': playerName, 'mtgaversion': arenaVersion, 'version': window.electron.remote.app.getVersion()});
+    playerUsername = user;
+	httpAsync.push({'reqId': _id, 'method': 'auth', 'method_path': '/login.php', 'email': user, 'password': pass, 'playerid': playerId, 'playername': playerName, 'mtgaversion': arenaVersion, 'version': window.electron.remote.app.getVersion()});
 }
 
-function httpSubmitCourse(_courseId, _course) {
+function httpSubmitCourse(course) {
     var _id = makeId(6);
     if (store.get("settings").anon_explore == true) {
-        _course.PlayerId = "000000000000000";
-        _course.PlayerName = "Anonymous";
+        course.PlayerId = "000000000000000";
+        course.PlayerName = "Anonymous";
     }
-    _course = JSON.stringify(_course);
-    httpAsync.push({'reqId': _id, 'method': 'submit_course', 'uid': playerId, 'course': _course, 'courseid': _courseId});
+    course = JSON.stringify(course);
+    httpAsync.push({'reqId': _id, 'method': 'submit_course', 'method_path': '/send_course.php', 'course': course});
 }
 
 function httpSetPlayer(name, rank, tier) {
-    var _id = makeId(6);
-	httpAsync.push({'reqId': _id, 'method': 'set_player', 'uid': playerId, 'name': name, 'rank': rank, 'tier': tier});
+    // useless I think
+    //var _id = makeId(6);
+	//httpAsync.push({'reqId': _id, 'method': 'set_player', 'name': name, 'rank': rank, 'tier': tier});
 }
 
 function httpGetTopDecks(query) {
     var _id = makeId(6);
-	httpAsync.push({'reqId': _id, 'method': 'get_top_decks', 'uid': playerId, 'query': query});
+	httpAsync.push({'reqId': _id, 'method': 'get_top_decks', 'method_path': '/get_courses_list.php', 'query': query});
 }
 
 function httpGetCourse(courseId) {
     var _id = makeId(6);
-    httpAsync.push({'reqId': _id, 'method': 'get_course', 'uid': playerId, 'courseid': courseId});
+    httpAsync.push({'reqId': _id, 'method': 'get_course', 'method_path': '/get_course.php', 'courseid': courseId});
 }
 
 function httpSetMatch(match) {
     var _id = makeId(6);
     match = JSON.stringify(match);
-    httpAsync.push({'reqId': _id, 'method': 'set_match', 'uid': playerId, 'match': match});
+    httpAsync.push({'reqId': _id, 'method': 'set_match', 'method_path': '/send_match.php', 'match': match});
+}
+
+function httpSetDraft(draft) {
+    var _id = makeId(6);
+    draft = JSON.stringify(draft);
+    httpAsync.push({'reqId': _id, 'method': 'set_draft', 'method_path': '/send_draft.php', 'draft': draft});
 }
 
 function httpSetEconomy(change) {
     var _id = makeId(6);
     change = JSON.stringify(change);
-    httpAsync.push({'reqId': _id, 'method': 'set_economy', 'uid': playerId, 'change': change});
+    httpAsync.push({'reqId': _id, 'method': 'set_economy', 'method_path': '/send_economy.php', 'change': change});
 }
 
 function httpSendError(error) {
     var _id = makeId(6);
     error = JSON.stringify(error);
-    httpAsync.push({'reqId': _id, 'method': 'send_error', 'uid': playerId, 'error': error});
+    httpAsync.push({'reqId': _id, 'method': 'send_error', 'method_path': '/send_error.php', 'error': error});
 }
 
 function httpDeleteData(courseId) {
     var _id = makeId(6);
-    httpAsync.push({'reqId': _id, 'method': 'delete_data', 'uid': playerId});
+    httpAsync.push({'reqId': _id, 'method': 'delete_data', 'method_path': '/delete_data.php'});
 }
 
 function httpGetDatabase() {
     var _id = makeId(6);
     ipc_send("popup", {"text": "Downloading metadata", "time": 0});
-    httpAsync.push({'reqId': _id, 'method': 'get_database', 'uid': playerId});
+    httpAsync.push({'reqId': _id, 'method': 'get_database'});
 }
 
 function htttpGetStatus() {
     var _id = makeId(6);
-    httpAsync.push({'reqId': _id, 'method': 'get_status', 'uid': playerId});
+    httpAsync.push({'reqId': _id, 'method': 'get_status'});
 }
 
 function httpDraftShareLink(did, exp) {
     var _id = makeId(6);
-    httpAsync.push({'reqId': _id, 'method': 'share_draft', 'uid': playerId, 'id': did, 'expire': exp});
+    httpAsync.push({'reqId': _id, 'method': 'share_draft', 'method_path': '/get_share_draft.php', 'id': did, 'expire': exp});
 }
 
 
