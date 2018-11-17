@@ -83,6 +83,11 @@ process.on('warning', (warning) => {
 });;
 
 //
+ipc.on('clear_pwd', function (event, arg) {
+	document.getElementById("signin_pass").value = "";
+});
+
+//
 ipc.on('auth', function (event, arg) {
 	if (arg.ok) {
 		$('.message_center').css('display', 'flex');
@@ -1225,17 +1230,25 @@ function setEvents(loadMore) {
 
 		var wlGate = course.ModuleInstanceData.WinLossGate;
 
-		if (wlGate.MaxWins == wlGate.CurrentWins) {
+		if (wlGate == undefined) {
 			var d = document.createElement("div");
 			d.classList.add("list_match_result_win");
-			d.innerHTML = wlGate.CurrentWins +":"+wlGate.CurrentLosses;
+			d.innerHTML = "0:0";
 			flr.appendChild(d);
 		}
 		else {
-			var d = document.createElement("div");
-			d.classList.add("list_match_result_loss");
-			d.innerHTML = wlGate.CurrentWins +":"+wlGate.CurrentLosses;
-			flr.appendChild(d);
+			if (wlGate.MaxWins == wlGate.CurrentWins) {
+				var d = document.createElement("div");
+				d.classList.add("list_match_result_win");
+				d.innerHTML = wlGate.CurrentWins +":"+wlGate.CurrentLosses;
+				flr.appendChild(d);
+			}
+			else {
+				var d = document.createElement("div");
+				d.classList.add("list_match_result_loss");
+				d.innerHTML = wlGate.CurrentWins +":"+wlGate.CurrentLosses;
+				flr.appendChild(d);
+			}
 		}
 
 		var divExp = document.createElement("div");

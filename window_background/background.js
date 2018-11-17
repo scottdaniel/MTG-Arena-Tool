@@ -620,7 +620,6 @@ function readLog() {
                 logDiff = logSize;
             }
 
-            console.log("log diff: ", logDiff, "log size: ", logSize);
             // If the log has changed since we last checked (or if this is the first time we read it)
             if (logSize > prevLogSize+1) {
                 // We are looping only to get user data (processLogUser)
@@ -1264,6 +1263,7 @@ function processLogData(data) {
     }
 
     // Draft status / draft start
+    /*
     strCheck = '<== Event.Draft(';
     json = checkJsonWithStart(data, strCheck, '', ')');
     if (json != false) {
@@ -1271,6 +1271,7 @@ function processLogData(data) {
         draftId = json.Id;
         return;
     }
+    */
 
     //   
     strCheck = '<== Draft.DraftStatus(';
@@ -1327,7 +1328,7 @@ function processLogData(data) {
         value.pack = currentDraftPack;
         var key = "pack_"+json.params.packNumber+"pick_"+json.params.pickNumber;
         currentDraft[key] = value;
-        debugLogSpeed = 500;
+        debugLogSpeed = 200;
         return;
     }
 
@@ -1342,6 +1343,8 @@ function processLogData(data) {
         }
         //ipc_send("renderer_show", 1);
 
+        draftId = json.Id;
+        console.log("Complete draft", json);
         saveDraft();
         return;
     }
@@ -1860,8 +1863,14 @@ function gre_to_client(data) {
                         if (name) {
                             obj.name = name;
                         }
-                        obj.zoneName = zones[obj.zoneId].type;
-                        gameObjs[obj.instanceId] = obj;
+
+                        // This should be a delayed check
+                        try {
+                            obj.zoneName = zones[obj.zoneId].type;
+                            gameObjs[obj.instanceId] = obj;
+                        }
+                        catch (e) {}
+
                         //ipc_send("ipc_log", "Message: "+msg.msgId+" > ("+obj.instanceId+") created at "+zones[obj.zoneId].type);
                     });
                 }
@@ -2457,6 +2466,15 @@ function httpBasic() {
                         if (_headers.method == 'share_draft') {
                             ipc_send("popup", {"text": parsedResult.error, "time": 3000});
                         }
+                        if (_headers.method == 'auth') {
+                            if (parsedResult.error == "Invalid credentials.") {
+                                tokenAuth = undefined;
+                                rstore.set("email", "");
+                                rstore.set("token", "");
+                                ipc_send("clear_pwd", 1);
+                                ipc_send("set_remember", false);
+                            }
+                        }
                         // errors here 
                     }
                     if (_headers.method == 'auth') {
@@ -2563,12 +2581,12 @@ function httpSetEconomy(change) {
 function httpSendError(error) {
     var _id = makeId(6);
     error = JSON.stringify(error);
-    //httpAsync.push({'reqId': _id, 'method': 'send_error', 'method_path': '/mongo/send_error.php', 'error': error});
+    httpAsync.push({'reqId': _id, 'method': 'send_error', 'method_path': '/mongo/send_error.php', 'error': error});
 }
 
 function httpDeleteData(courseId) {
     var _id = makeId(6);
-    //httpAsync.push({'reqId': _id, 'method': 'delete_data', 'method_path': '/mongo/delete_data.php');
+    httpAsync.push({'reqId': _id, 'method': 'delete_data', 'method_path': '/mongo/delete_data.php'});
 }
 
 function httpGetDatabase() {
@@ -2584,7 +2602,7 @@ function htttpGetStatus() {
 
 function httpDraftShareLink(did, exp) {
     var _id = makeId(6);
-    //httpAsync.push({'reqId': _id, 'method': 'share_draft', 'method_path': '/mongo/get_share.php', 'uid': playerId, 'id': did, 'expire': exp});
+    httpAsync.push({'reqId': _id, 'method': 'share_draft', 'method_path': '/mongo/get_share_draft.php', 'id': did, 'expire': exp});
 }
 
 

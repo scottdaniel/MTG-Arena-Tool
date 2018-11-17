@@ -104,6 +104,10 @@ app.on('ready', () => {
                 overlay.webContents.send("set_settings", arg);
                 break;
 
+            case 'clear_pwd':
+                mainWindow.webContents.send("clear_pwd", arg);
+                break;
+
             case 'auth':
                 mainWindow.webContents.send("auth", arg);
                 break;
