@@ -2531,7 +2531,7 @@ function removeFromHttp(req) {
 function httpAuth(user, pass) {
     var _id = makeId(6);
     playerUsername = user;
-	httpAsync.push({'reqId': _id, 'method': 'auth', 'method_path': '/mongo/login.php', 'email': user, 'password': pass, 'playerid': playerId, 'playername': playerName, 'mtgaversion': arenaVersion, 'version': window.electron.remote.app.getVersion()});
+	httpAsync.push({'reqId': _id, 'method': 'auth', 'method_path': '/login.php', 'email': user, 'password': pass, 'playerid': playerId, 'playername': playerName, 'mtgaversion': arenaVersion, 'version': window.electron.remote.app.getVersion()});
 }
 
 function httpSubmitCourse(course) {
@@ -2541,7 +2541,7 @@ function httpSubmitCourse(course) {
         course.PlayerName = "Anonymous";
     }
     course = JSON.stringify(course);
-    httpAsync.push({'reqId': _id, 'method': 'submit_course', 'method_path': '/mongo/send_course.php', 'course': course});
+    httpAsync.push({'reqId': _id, 'method': 'submit_course', 'method_path': '/send_course.php', 'course': course});
 }
 
 function httpSetPlayer(name, rank, tier) {
@@ -2552,41 +2552,41 @@ function httpSetPlayer(name, rank, tier) {
 
 function httpGetTopDecks(query) {
     var _id = makeId(6);
-	httpAsync.push({'reqId': _id, 'method': 'get_top_decks', 'method_path': '/mongo/get_courses_list.php', 'query': query});
+	httpAsync.push({'reqId': _id, 'method': 'get_top_decks', 'method_path': '/get_courses_list.php', 'query': query});
 }
 
 function httpGetCourse(courseId) {
     var _id = makeId(6);
-    httpAsync.push({'reqId': _id, 'method': 'get_course', 'method_path': '/mongo/get_course.php', 'courseid': courseId});
+    httpAsync.push({'reqId': _id, 'method': 'get_course', 'method_path': '/get_course.php', 'courseid': courseId});
 }
 
 function httpSetMatch(match) {
     var _id = makeId(6);
     match = JSON.stringify(match);
-    httpAsync.push({'reqId': _id, 'method': 'set_match', 'method_path': '/mongo/send_match.php', 'match': match});
+    httpAsync.push({'reqId': _id, 'method': 'set_match', 'method_path': '/send_match.php', 'match': match});
 }
 
 function httpSetDraft(draft) {
     var _id = makeId(6);
     draft = JSON.stringify(draft);
-    httpAsync.push({'reqId': _id, 'method': 'set_draft', 'method_path': '/mongo/send_draft.php', 'draft': draft});
+    httpAsync.push({'reqId': _id, 'method': 'set_draft', 'method_path': '/send_draft.php', 'draft': draft});
 }
 
 function httpSetEconomy(change) {
     var _id = makeId(6);
     change = JSON.stringify(change);
-    httpAsync.push({'reqId': _id, 'method': 'set_economy', 'method_path': '/mongo/send_economy.php', 'change': change});
+    httpAsync.push({'reqId': _id, 'method': 'set_economy', 'method_path': '/send_economy.php', 'change': change});
 }
 
 function httpSendError(error) {
     var _id = makeId(6);
     error = JSON.stringify(error);
-    httpAsync.push({'reqId': _id, 'method': 'send_error', 'method_path': '/mongo/send_error.php', 'error': error});
+    httpAsync.push({'reqId': _id, 'method': 'send_error', 'method_path': '/send_error.php', 'error': error});
 }
 
 function httpDeleteData(courseId) {
     var _id = makeId(6);
-    httpAsync.push({'reqId': _id, 'method': 'delete_data', 'method_path': '/mongo/delete_data.php'});
+    httpAsync.push({'reqId': _id, 'method': 'delete_data', 'method_path': '/delete_data.php'});
 }
 
 function httpGetDatabase() {
@@ -2602,7 +2602,7 @@ function htttpGetStatus() {
 
 function httpDraftShareLink(did, exp) {
     var _id = makeId(6);
-    httpAsync.push({'reqId': _id, 'method': 'share_draft', 'method_path': '/mongo/get_share_draft.php', 'id': did, 'expire': exp});
+    httpAsync.push({'reqId': _id, 'method': 'share_draft', 'method_path': '/get_share_draft.php', 'id': did, 'expire': exp});
 }
 
 
