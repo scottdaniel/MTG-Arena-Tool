@@ -199,6 +199,7 @@ ipc.on('set_renderer_state', function (event, arg) {
 
     if (rstore.get("token") !== "" && rstore.get("email") !== "") {
         rememberMe = true;
+        tokenAuth = rstore.get("token");
         ipc_send("set_remember", rstore.get("email"));
     }    
 });
@@ -604,7 +605,7 @@ function readLog() {
         var stats = fs.fstatSync(file);
         logSize = stats.size;
         logDiff = logSize - prevLogSize;
-
+        if (logDiff > 268435440)  logDiff = 268435440;
         //ipc_send("ipc_log", "readLog logloopmode: "+logLoopMode+", renderer state:"+renderer_state+", logSize: "+logSize+", prevLogSize: "+prevLogSize);
 
         // Something went wrong obtaining the file size, try again later
@@ -619,6 +620,7 @@ function readLog() {
                 logDiff = logSize;
             }
 
+            console.log("log diff: ", logDiff, "log size: ", logSize);
             // If the log has changed since we last checked (or if this is the first time we read it)
             if (logSize > prevLogSize+1) {
                 // We are looping only to get user data (processLogUser)
@@ -968,6 +970,13 @@ function processLogData(data) {
     strCheck = '<== Event.GetPlayerCourse(';
     json = checkJsonWithStart(data, strCheck, '', ')');
     if (json != false) {
+        strCheck = 'Logger]';
+        if (data.indexOf(strCheck) > -1) {
+            var str = dataChop(data, strCheck, 'M')+'M';
+            var logTime = parseWotcTime(str);
+            json.date = logTime;
+        }
+
         if (json.Id != "00000000-0000-0000-0000-000000000000") {
             json._id = json.Id;
             delete json.Id;
@@ -2352,7 +2361,7 @@ function httpBasic() {
     async.forEachOfSeries(httpAsyncNew, function (value, index, callback) {
         var _headers = value;
 
-        if (store.get("settings").send_data == false && _headers.method != 'get_picks' && _headers.method != 'delete_data' && _headers.method != 'get_database' && _headers.method != 'get_status' && debugLog == false) {
+        if (store.get("settings").send_data == false && _headers.method != 'auth' && _headers.method != 'delete_data' && _headers.method != 'get_database' && _headers.method != 'get_status' && debugLog == false) {
             callback({message: "Settings dont allow sending data! > "+_headers.method});
             removeFromHttp(_headers.reqId);
         }
@@ -2385,6 +2394,7 @@ function httpBasic() {
             ipc_send("ipc_log", "SEND >> "+index+", "+_headers.method+", "+_headers.reqId+", "+_headers.token);
         }
 
+        console.log("POST", _headers);
         var post_data = qs.stringify(_headers);
         options.headers = { 'Content-Type': 'application/x-www-form-urlencoded', 'Content-Length': post_data.length};
 
@@ -2415,7 +2425,6 @@ function httpBasic() {
                             //ipc_send("auth", parsedResult.arenaids);
 
                             if (rememberMe) {
-                                console.log(tokenAuth, parsedResult);
                                 rstore.set("token", tokenAuth);
                                 rstore.set("email", playerUsername);
                             }
@@ -2473,13 +2482,13 @@ function httpBasic() {
                 }
             }); 
         });
-        console.log(req);
         req.on('error', function(e) {
             callback(e);
             removeFromHttp(_headers.reqId);
             ipc_send("ipc_log", e.message);
         });
         req.write(post_data);
+        console.log(req);
         req.end();
 
     }, function (err) {
@@ -2514,7 +2523,7 @@ function httpSubmitCourse(course) {
         course.PlayerName = "Anonymous";
     }
     course = JSON.stringify(course);
-    //httpAsync.push({'reqId': _id, 'method': 'submit_course', 'method_path': '/mongo/send_course.php', 'course': course});
+    httpAsync.push({'reqId': _id, 'method': 'submit_course', 'method_path': '/mongo/send_course.php', 'course': course});
 }
 
 function httpSetPlayer(name, rank, tier) {
@@ -2525,12 +2534,12 @@ function httpSetPlayer(name, rank, tier) {
 
 function httpGetTopDecks(query) {
     var _id = makeId(6);
-	//httpAsync.push({'reqId': _id, 'method': 'get_top_decks', 'method_path': '/mongo/get_top_decks.php', 'query': query});
+	httpAsync.push({'reqId': _id, 'method': 'get_top_decks', 'method_path': '/mongo/get_courses_list.php', 'query': query});
 }
 
 function httpGetCourse(courseId) {
     var _id = makeId(6);
-    //httpAsync.push({'reqId': _id, 'method': 'get_course', 'method_path': '/mongo/get_course.php', 'courseid': courseId});
+    httpAsync.push({'reqId': _id, 'method': 'get_course', 'method_path': '/mongo/get_course.php', 'courseid': courseId});
 }
 
 function httpSetMatch(match) {
@@ -2548,7 +2557,7 @@ function httpSetDraft(draft) {
 function httpSetEconomy(change) {
     var _id = makeId(6);
     change = JSON.stringify(change);
-    //httpAsync.push({'reqId': _id, 'method': 'set_economy', 'method_path': '/mongo/send_economy.php', 'change': change});
+    httpAsync.push({'reqId': _id, 'method': 'set_economy', 'method_path': '/mongo/send_economy.php', 'change': change});
 }
 
 function httpSendError(error) {

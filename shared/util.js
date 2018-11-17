@@ -1006,7 +1006,7 @@ function timeSince(_date) {
     return interval + " days";
   interval = Math.floor(seconds / 3600);
   if (interval == 1)
-    return interval + " hous";
+    return interval + " hour";
   if (interval > 0)
     return interval + " hours";
   interval = Math.floor(seconds / 60);
