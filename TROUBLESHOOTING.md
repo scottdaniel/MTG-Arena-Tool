@@ -19,6 +19,11 @@ If that does not work;
 
 If the last step worked, send the the .json file to [mtgatool@gmail.com](mailto:mtgatool@gmail.com) and I will inspect what is wrong with it.
 
+### If you recieve a "No log file found" error
+
+Close MTG Arena and MTG Arena tool, then start MTG Arena. Once MTG Arena is loaded run MTG Arena Tool again.
+
+
 ### If you have any other unexpected behaviour
 
 First of all, uninstalling and installing again will probably not change anything, as most errors are either configuration errors or log provessing errors. Neither of them are solved by uninstalling. So, just to save you some time, make sure you have the latest version only.
