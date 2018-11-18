@@ -28,3 +28,7 @@ They come from the [Magic Community Set Reviews](https://www.mtgcommunityreview.
 
 Currently progress is stored locally, that means you can only see the history of games you played in the PC you played them in. Sync features are in the works!
 
+### OBS does not capture the app window
+
+Check this out; [youtube.com/watch?v=bjmX7NdJX8w](https://www.youtube.com/watch?v=bjmX7NdJX8w)
+You just have to change compatibility mode and you're good to go. Remember to set 'Persistent mode' on settings too!

@@ -670,6 +670,11 @@ function processLog(err, bytecount, buff) {
 
     async.forEachOfSeries(splitString, function (value, index, callback) {
         //ipc_send("ipc_log", "Async: ("+index+")");
+        /*
+        if (value.indexOf("") > -1) {
+            console.log(value);
+        }
+        */
 
         // If this is the last chunk, end reading and exit loading screen
         if (value == "%END%") {
@@ -953,17 +958,69 @@ function processLogData(data) {
     }
 
     // Gre to Client Event
-    
-    strCheck = 'ClientToMatchServiceMessageType';
-    if (data.indexOf(strCheck) > -1) {
-        let rawJson = data.substr(data.indexOf('{')).trim();
-        //got packets like this one during tests:
-        //{  "requestId": 3,  "clientToMatchServiceMessageType": "ClientToMatchServiceMessageType_ClientToGREMessage",  "payload": "CBSCAQQKAkgB"}Camera depthTextureMode was None, changing to DepthAuto responded to: ChooseStartingPlayerRequestThe referenced script on this Behaviour (Game Object 'OrderIndicator') is missing! (Filename:  Line: 1789)The referenced script on this Behaviour (Game Object 'SurveilGraveyard') is missing! (Filename:  Line: 1789)The referenced script on this Behaviour (Game Object 'DefaultScrollbar') is missing! (Filename:  Line: 1789)The referenced script on this Behaviour (Game Object 'SurveilGraveyard') is missing! (Filename:  Line: 1789)The referenced script on this Behaviour (Game Object 'BrowserHeader') is missing! (Filename:  Line: 1789)The referenced script on this Behaviour (Game Object 'OrderIndicator') is missing! (Filename:  Line: 1789)The referenced script on this Behaviour (Game Object 'OrderIndicator') is missing! (Filename:  Line: 1789)The referenced script on this
-        if (rawJson.slice(-1) !== '}') rawJson = rawJson.replace(/}[^}]*/, '}');
+    // Obsolete now packets are decoded by the logger
+    //strCheck = 'ClientToMatchServiceMessageType';
+    //if (data.indexOf(strCheck) > -1) {
+    //    let rawJson = data.substr(data.indexOf('{')).trim();
+    //    if (rawJson.slice(-1) !== '}') rawJson = rawJson.replace(/}[^}]*/, '}');
         //client_to_gre(JSON.parse(rawJson));
+    //    return;
+    //}
+    
+    strCheck = 'ClientToMatchServiceMessageType_ClientToGREMessage';
+    json = checkJson(data, strCheck, '');
+    if (json != false) {
+        if (json.payload.type !== undefined) {
+            // Get sideboard changes
+            if (json.payload.type == "ClientMessageType_SubmitDeckResp") {
+
+                var tempMain = {};
+                var tempSide = {};
+                json.payload.submitDeckResp.deck.deckCards.forEach( function (grpId) {
+                    if (tempMain[grpId] == undefined) {
+                        tempMain[grpId] = 1
+                    }
+                    else {
+                        tempMain[grpId] += 1;
+                    }
+                });
+                if (json.payload.submitDeckResp.deck.sideboardCards !== undefined) {
+                    json.payload.submitDeckResp.deck.sideboardCards.forEach( function (grpId) {
+                        if (tempSide[grpId] == undefined) {
+                            tempSide[grpId] = 1
+                        }
+                        else {
+                            tempSide[grpId] += 1;
+                        }
+                    });
+                }
+
+                // Update on overlay
+                var str = JSON.stringify(currentDeck);
+                currentDeckUpdated = JSON.parse(str);
+                ipc_send("set_deck", currentDeck);
+
+                currentDeck.mainDeck = [];
+                Object.keys(tempMain).forEach(function(key) {
+                    var c = {"id": key, "quantity": tempMain[key]};
+                    currentDeck.mainDeck.push(c);
+                });
+
+                currentDeck.sideboard = [];
+                if (json.payload.submitDeckResp.deck.sideboardCards !== undefined) {
+                    Object.keys(tempSide).forEach(function(key) {
+                        var c = {"id": key, "quantity": tempSide[key]};
+                        currentDeck.sideboard.push(c);
+                    });
+                }
+
+                select_deck(currentDeck);
+                //console.log(JSON.stringify(currentDeck));
+                //console.log(currentDeck);
+            }
+        }
         return;
     }
-
 
     // Get courses
     strCheck = '<== Event.GetPlayerCourse(';
@@ -1398,55 +1455,6 @@ function processLogData(data) {
                 }
             });
         }
-        return;
-    }
-
-    // Get sideboard changes
-    strCheck = 'Received unhandled GREMessageType: GREMessageType_SubmitDeckReq';
-    json = checkJson(data, strCheck, '');
-    if (json != false) {
-        var tempMain = {};
-        var tempSide = {};
-        json.submitDeckReq.deck.deckCards.forEach( function (grpId) {
-            if (tempMain[grpId] == undefined) {
-                tempMain[grpId] = 1
-            }
-            else {
-                tempMain[grpId] += 1;
-            }
-        });
-        if (json.submitDeckReq.deck.sideboardCards !== undefined) {
-            json.submitDeckReq.deck.sideboardCards.forEach( function (grpId) {
-                if (tempSide[grpId] == undefined) {
-                    tempSide[grpId] = 1
-                }
-                else {
-                    tempSide[grpId] += 1;
-                }
-            });
-        }
-
-        // Update on overlay
-        var str = JSON.stringify(currentDeck);
-        currentDeckUpdated = JSON.parse(str);
-        ipc_send("set_deck", currentDeck);
-
-        currentDeck.mainDeck = [];
-        Object.keys(tempMain).forEach(function(key) {
-            var c = {"id": key, "quantity": tempMain[key]};
-            currentDeck.mainDeck.push(c);
-        });
-
-        currentDeck.sideboard = [];
-        if (json.submitDeckReq.deck.sideboardCards !== undefined) {
-            Object.keys(tempSide).forEach(function(key) {
-                var c = {"id": key, "quantity": tempSide[key]};
-                currentDeck.sideboard.push(c);
-            });
-        }
-
-        //console.log(JSON.stringify(currentDeck));
-        //console.log(currentDeck);
         return;
     }
 }
@@ -2160,7 +2168,7 @@ function getOppDeck() {
                     });
                     if (doAdd) {
                         if (cardsDb.get(gameObjs[key].grpId) != false) {
-    						oppDeck.mainDeck.push( {id: gameObjs[key].grpId, quantity: 1} );
+    						oppDeck.mainDeck.push( {id: gameObjs[key].grpId, quantity: 9999} );
                         }
                     }
                 }
