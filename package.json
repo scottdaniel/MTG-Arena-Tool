@@ -27,7 +27,8 @@
 		"electron-updater": "^3.0.3",
 		"google-protobuf": "^3.6.1",
 		"howler": "^2.0.15",
-		"js-sha1": "^0.6.0"
+		"js-sha1": "^0.6.0",
+		"qs": "^6.5.2"
 	},
 	"devDependencies": {
 		"electron": "^2.0.13",
