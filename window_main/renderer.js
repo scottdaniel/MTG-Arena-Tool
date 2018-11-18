@@ -1007,7 +1007,6 @@ function setEconomy(loadMore) {
 				var bos = document.createElement("div");
 				bos.classList.add("economy_wc");
 				bos.title = 'Rare Wildcard';
-				bos.title = 'Common Wildcard';
 				bos.style.margin = 'auto 4px';
 				bos.style.backgroundImage = 'url(../images/wc_rare.png)';
 				var bon = document.createElement("div");
@@ -1424,7 +1423,7 @@ function expandEvent(_course, expandDiv) {
 			}
 		});
 	}
-	expandDiv.style.height = newHeight+"px";
+	expandDiv.style.height = newHeight+16+"px";
 }
 
 //

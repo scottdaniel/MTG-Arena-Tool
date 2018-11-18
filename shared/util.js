@@ -32,6 +32,7 @@ function addCardTile(grpId, indent, quantity, element) {
 			cont.append('<div class="card_tile_odds"><span>'+quantity+'</span></div>');
 		}
 		if (quantity == 9999) {
+			quantity = 1;
 			var ww = 56;
 			var ll = 40;
 			cont.append('<div style="color: rgba(255, 255, 255, 0); min-width: 0px; width: 0px;" class="card_tile_quantity"><span>'+quantity+'</span></div>');
