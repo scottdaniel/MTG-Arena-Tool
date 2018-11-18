@@ -15,8 +15,7 @@
 	"scripts": {
 		"start": "electron .",
 		"postinstall": "install-app-deps",
-		"pack": "build --dir",
-		"dist": "build"
+		"dist": "build --ia32 --x64 -w"
 	},
 	"dependencies": {
 		"async": "^2.6.1",

@@ -2385,7 +2385,7 @@ function httpBasic() {
         
         var http = require('https');
         if (_headers.method == 'get_database') {
-            var options = { protocol: 'https:', port: 443, hostname: serverAddress, path: '/mongo/database/database.json', method: 'GET'};
+            var options = { protocol: 'https:', port: 443, hostname: serverAddress, path: '/database/database.json', method: 'GET'};
         }
         else if (_headers.method == 'get_status') {
             http = require('https');
@@ -2395,7 +2395,7 @@ function httpBasic() {
             var options = { protocol: 'https:', port: 443, hostname: serverAddress, path: _headers.method_path, method: 'POST'};
         }
         else {
-            var options = { protocol: 'https:', port: 443, hostname: serverAddress, path: '/mongo/api.php', method: 'POST'};
+            var options = { protocol: 'https:', port: 443, hostname: serverAddress, path: '/api.php', method: 'POST'};
         }
 
         if (debugNet) {
