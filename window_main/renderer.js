@@ -37,6 +37,7 @@ var lastSettingsSection = 1;
 var serverStatus = undefined;
 var loggedIn = false;
 var canLogin = false;
+var offlineMode = false;
 
 var rankOffset = 0;
 var rankTitle = "";
@@ -551,6 +552,7 @@ $(document).ready(function() {
 
 	$(".offline_link").click(function() {
 		ipc_send("login", {username: '', password: ''});
+		offlineMode = true;
 	    $('.unlink').show();
 	});
 
@@ -3593,6 +3595,14 @@ function open_settings(openSection) {
 	$('<div class="settings_nav sn3">Visual</div>').appendTo(wrap_l);
 	$('<div class="settings_nav sn4">Privacy</div>').appendTo(wrap_l);
 	$('<div class="settings_nav sn5">About</div>').appendTo(wrap_l);
+
+	if (offlineMode) {
+		$('<div class="settings_nav sn6">Login</div>').appendTo(wrap_l);
+	}
+	else {
+		$('<div class="settings_nav sn6">Logout</div>').appendTo(wrap_l);
+	}
+
 	var wrap_r = $('<div class="wrapper_column"></div>');
 	var div = $('<div class="settings_page"></div>');
 	var section;
@@ -3742,10 +3752,22 @@ function open_settings(openSection) {
 	}
 
 	about.append('<div class="flex_item" style="margin: 64px auto 0px auto;"><div class="discord_link"></div><div class="twitter_link"></div><div class="git_link"></div></div>');
-
 	about.append('<div class="message_sub_15 white" style="margin: 24px 0 12px 0;">Support my work!</div><div class="donate_link"><img src="https://www.paypalobjects.com/webstatic/en_US/i/buttons/PP_logo_h_100x26.png" alt="PayPal" /></div>')
-
 	about.appendTo(section);
+
+	//
+	section = $('<div class="settings_section ss6" style="height: 100%;"></div>');
+	var login = $('<div class="about"></div>');
+	section.appendTo(div);
+	if (offlineMode) {
+		var button = $('<div class="button_simple centered login_link_about">Login</div>');
+	}
+	else {
+		var button = $('<div class="button_simple centered login_link_about">Logout</div>');
+	}
+	button.appendTo(login);
+	login.appendTo(section);
+
 
 	div.appendTo(wrap_r);
 	$("#ux_0").append(wrap_l);
@@ -3777,6 +3799,13 @@ function open_settings(openSection) {
 	$(".donate_link").click(function() {
 		shell.openExternal('https://www.paypal.me/ManuelEtchegaray/10');
 	});
+
+	$(".login_link_about").click(function() {
+		const remote = require('electron').remote;
+		remote.app.relaunch();
+		remote.app.exit(0);
+	});
+
 
 	$(".settings_nav").click(function () {
 		if (!$(this).hasClass("nav_selected")) {
@@ -3813,6 +3842,11 @@ function open_settings(openSection) {
 				sidebarActive = 9;
 				lastSettingsSection = 5;
 				$(".ss5").show();
+			}
+			if ($(this).hasClass("sn6")) {
+				sidebarActive = 8;
+				lastSettingsSection = 6;
+				$(".ss6").show();
 			}
 		}
 	});
