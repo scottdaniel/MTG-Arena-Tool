@@ -2742,12 +2742,18 @@ function setChangesTimeline() {
 function open_draft(id, tileGrpid, set) {
 	console.log("OPEN DRAFT", draftPosition)
 	$("#ux_1").html('');
-	if (draftPosition < 1)	draftPosition = 1; 
-	if (draftPosition > 84)	draftPosition = 84; 
 	var draft = matchesHistory[id];
 
-	var pa = Math.floor( (draftPosition-1)/2 / 14);
-	var pi = Math.floor( ((draftPosition-1)/2) % 14);
+	if (draftPosition < 1)	draftPosition = 1; 
+	if (draftPosition > (packSize*6))	draftPosition = (packSize*6); 
+
+	var packSize = 14;
+	if (draft.set == "Guilds of Ravnica") {
+		packSize = 15;
+	}
+
+	var pa = Math.floor( (draftPosition-1)/2 / packSize);
+	var pi = Math.floor( ((draftPosition-1)/2) % packSize);
 	var key = 'pack_'+pa+'pick_'+pi;
 
 	var pack = draft[key].pack;
@@ -2768,7 +2774,7 @@ function open_draft(id, tileGrpid, set) {
 
 	var slider = $('<div class="slidecontainer"></div>');
 	slider.appendTo(cont);
-	var sliderInput = $('<input type="range" min="1" max="84" value="'+draftPosition+'" class="slider" id="myRange">');
+	var sliderInput = $('<input type="range" min="1" max="'+packSize*6+'" value="'+draftPosition+'" class="slider" id="myRange">');
 	sliderInput.appendTo(slider);
 
 
@@ -2804,8 +2810,8 @@ function open_draft(id, tileGrpid, set) {
 
 	$(".slider").on('click mousemove', function() {
 		console.log("SLIDER MOVE", draftPosition)
-		var pa = Math.floor( (qSel.value-1)/2 / 14) ;
-		var pi = Math.floor( ((qSel.value-1)/2) % 14) ;
+		var pa = Math.floor( (qSel.value-1)/2 / packSize) ;
+		var pi = Math.floor( ((qSel.value-1)/2) % packSize) ;
 		$('.draft_title').html('Pack '+(pa+1)+', Pick '+(pi+1));
 	});
 
