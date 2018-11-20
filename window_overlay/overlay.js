@@ -319,7 +319,8 @@ ipc.on('set_deck', function (event, arg) {
 		else {
 			var deckSize = 0
 			arg.mainDeck.forEach(function(card) {
-				deckSize += card.quantity;
+				if (deckMode == 3) deckSize++;
+				else	deckSize += card.quantity;
 			});
 
 			deckListDiv.append('<div class="chance_title">'+deckSize+' cards</div>');
