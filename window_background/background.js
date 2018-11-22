@@ -295,7 +295,6 @@ window.onerror = (msg, url, line, col, err) => {
         col: col
     }
     error.id = sha1(error.msg + playerId);
-    resetLogLoop(250);
     httpSendError(error);
 }
 
@@ -308,14 +307,12 @@ process.on('uncaughtException', function(err){
     }
     console.log("ERROR: ", error);
     error.id = sha1(error.msg + playerId);
-    resetLogLoop(250);
     httpSendError(error);
 })
 
 //
 ipc.on('error', function (event, err) {
     err.id = sha1(err.msg + playerId);
-    resetLogLoop(250);
     httpSendError(err);
 });
 
@@ -433,7 +430,6 @@ function rememberLogin(bool) {
 function loadPlayerConfig(playerId) {
     logLoopMode = 1;
     prevLogSize = 0;
-    resetLogLoop(500);
 	ipc_send("ipc_log", "Load player ID: "+playerId);
     store = new Store({
         configName: playerId,
@@ -560,26 +556,15 @@ function get_deck_changes(deckId) {
 // Read the log
 // Set variables to default first
 const mtgaLog = require('./mtga-log');
-var prevLogSize = 0;
-var logSize = 0;
-var logDiff = 0;
-var logLoopTimer = null;
-var logLoopMode = 0;
+let prevLogSize = 0;
+let logSize = 0;
+let logDiff = 0;
+let logLoopMode = 0;
+let last_load = new Date();
 
 const logUri = mtgaLog.path();
 console.log(logUri);
-
-resetLogLoop(100);
-
-// Resets the log loop timeout to trigger in 'time' ms
-function resetLogLoop(time) {
-    if (logLoopTimer != null) {
-        window.clearTimeout(logLoopTimer);
-    }
-    logLoopTimer = setTimeout(logLoop, time);
-}
-
-last_load = new Date();
+window.setInterval(logLoop, 250);
 
 // Basic logic for reading the log file
 async function logLoop() {
@@ -597,14 +582,8 @@ async function logLoop() {
     if (! await mtgaLog.exists()) {
         ipc_send("no_log", logUri);
         ipc_send("popup", {"text": "No log file found.", "time": 1000});
-        resetLogLoop(500);
     } else {
-        try {
-            await readLog();
-        }
-        catch (e) {
-            resetLogLoop(500);
-        }
+        await readLog();
     }
 }
 
@@ -628,10 +607,7 @@ async function readLog() {
         //ipc_send("ipc_log", "readLog logloopmode: "+logLoopMode+", renderer state:"+renderer_state+", logSize: "+logSize+", prevLogSize: "+prevLogSize);
 
         // Something went wrong obtaining the file size, try again later
-        if (logSize == undefined) {
-            resetLogLoop(500);
-        }
-        else {
+        if (logSize != undefined) {
             // If the log was cleared, we default and start reading from position zero
             if (logSize < prevLogSize) {
                 prevLogSize = 0;
@@ -652,15 +628,11 @@ async function readLog() {
                     prevLogSize += logDiff;
                 }
             }
-            else {
-                resetLogLoop(500);
-            }
         }
     }
     // The renderer process is not ready, postpose reading the log
     else {
         //ipc_send("ipc_log", "readLog logloopmode: "+logLoopMode+", renderer state:"+renderer_state+", logSize: "+logSize+", prevLogSize: "+prevLogSize);
-        resetLogLoop(500);
     }
 }
 
@@ -699,8 +671,6 @@ function processLog(rawString) {
         if (err) {
             console.log("processLog err: "+err.message);
         }
-    } finally {
-        resetLogLoop(500);
     }
 }
 
@@ -741,7 +711,6 @@ function processLogUser(rawString) {
 
     if (firstPass && playerName == null) {
         ipc_send("popup", {"text": "output_log contains no player data", "time": 0});
-        resetLogLoop(500);
     }
 }
 
@@ -2431,7 +2400,6 @@ function httpBasic() {
                         }
                         
                         if (_headers.method == 'get_database') {
-                            //resetLogLoop(100);
                             delete parsedResult.ok;
                             setsList = parsedResult.sets;
                             eventsList = parsedResult.events;
