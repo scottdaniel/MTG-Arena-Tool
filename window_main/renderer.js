@@ -709,7 +709,7 @@ function setEconomy(loadMore) {
 		//
 		var selectdiv = document.createElement("div");
 		selectdiv.style.margin = "auto 64px auto 0px";
-		
+
 		var select = $('<select id="query_select"></select>');
 		for (var i=0; i < selectItems.length; i++) {
 			if (selectItems[i] !== filterEconomy) {
@@ -2350,7 +2350,9 @@ function open_deck(i, type) {
 			var curvediv = $('<div class="mana_curve_costs"></div>');
 			for (let i=0; i<wr.colors.length; i++) {
 				if (wr.colors[i].wins + wr.colors[i].losses > 2) {
-					var cn = $('<div class="mana_curve_column_number"></div>');
+					var cn = $('<div class="mana_curve_column_number">'+wr.colors[i].wins+'/'+wr.colors[i].losses+'</div>');
+					cn.append($('<div style="margin: 0 auto !important" class=""></div>'));
+
 					var colors = wr.colors[i].colors;
 					colors.forEach(function(color) {
 						cn.append($('<div style="margin: 0 auto !important" class="mana_s16 mana_'+mana[color]+'"></div>'));
