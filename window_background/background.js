@@ -674,42 +674,41 @@ function processLog(rawString) {
         splitString.push("%END%");
     }
 
-    async.forEachOfSeries(splitString, function (value, index, callback) {
-        //ipc_send("ipc_log", "Async: ("+index+")");
-        /*
-        if (value.indexOf("") > -1) {
-            console.log(value);
-        }
-        */
-
-        // If this is the last chunk, end reading and exit loading screen
-        if (value == "%END%") {
-            finishLoading();
-            ipc_send("popup", {"text": "100%", "time": 3000});
-        }
-        // Process the chunks
-        else {
-            processLogData(value);
-            if (firstPass) {
-                last_load = new Date();
-                ipc_send("popup", {"text": "Processing log: "+Math.round(100/splitString.length*index)+"%", "time": 0});
+    try {
+        splitString.forEach((value, index) => {
+            //ipc_send("ipc_log", "Async: ("+index+")");
+            /*
+            if (value.indexOf("") > -1) {
+                console.log(value);
             }
-            
-            if (debugLog) {
-                _time = new Date();
-                while (new Date() - _time < debugLogSpeed) {}
-            }            
-        }
+            */
 
-        callback();
-
-    }, function (err) {
-        //console.log("Async end");
-        resetLogLoop(500);
+            // If this is the last chunk, end reading and exit loading screen
+            if (value == "%END%") {
+                finishLoading();
+                ipc_send("popup", {"text": "100%", "time": 3000});
+            }
+            // Process the chunks
+            else {
+                processLogData(value);
+                if (firstPass) {
+                    last_load = new Date();
+                    ipc_send("popup", {"text": "Processing log: "+Math.round(100/splitString.length*index)+"%", "time": 0});
+                }
+                
+                if (debugLog) {
+                    _time = new Date();
+                    while (new Date() - _time < debugLogSpeed) {}
+                }            
+            }
+        });
+    } catch (err) {
         if (err) {
             console.log("processLog err: "+err.message);
         }
-    });
+    } finally {
+        resetLogLoop(500);
+    }
 }
 
 // Process only the user data for initial loading (prior to log in)
@@ -721,7 +720,7 @@ function processLogUser(rawString) {
         splitString.push("%END%");
     }
 
-    async.forEachOfSeries(splitString, function (value, index, callback) {
+    splitString.forEach(value => {
         //ipc_send("ipc_log", "Async: ("+index+")");
         if (value == "%END%") {
             if (playerName == null) {
@@ -756,14 +755,7 @@ function processLogUser(rawString) {
             }
             */
         }
-        callback();
-
-    }, function (err) {
-        if (err) {
-            console.log("processLog err: "+err.message);
-        }
     });
-
 }
 
 // Check if the string contains a JSON object, return it parsed as JS object
