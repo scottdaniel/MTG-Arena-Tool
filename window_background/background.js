@@ -582,56 +582,55 @@ async function logLoop() {
     if (! await mtgaLog.exists()) {
         ipc_send("no_log", logUri);
         ipc_send("popup", {"text": "No log file found.", "time": 1000});
-    } else {
-        
-
-        //console.log("readLog()");
-        
-        if (!firstPass)  {
-            ipc_send("log_read", 1);
-        }
-        if (debugLog) {
-            firstPass = false;
-        }
-
-        // If the renderer process is running, we can start reading
-        if (renderer_state == 1) {
-            var stats = await mtgaLog.stat();
-            logSize = stats.size;
-            logDiff = logSize - prevLogSize;
-            if (logDiff > 268435440)  logDiff = 268435440;
-            //ipc_send("ipc_log", "readLog logloopmode: "+logLoopMode+", renderer state:"+renderer_state+", logSize: "+logSize+", prevLogSize: "+prevLogSize);
-
-            // Something went wrong obtaining the file size, try again later
-            if (logSize != undefined) {
-                // If the log was cleared, we default and start reading from position zero
-                if (logSize < prevLogSize) {
-                    prevLogSize = 0;
-                    logDiff = logSize;
-                }
-
-                // If the log has changed since we last checked (or if this is the first time we read it)
-                if (logSize > prevLogSize+1) {
-                    // We are looping only to get user data (processLogUser)
-                    if (logLoopMode == 0) {
-                        processLogUser(await mtgaLog.readSegment(prevLogSize, logDiff));
-                        prevLogSize += logDiff;
-
-                    }
-                    // We are looking to read the whole log (processLog)
-                    else {
-                        processLog(await mtgaLog.readSegment(prevLogSize, logDiff));
-                        prevLogSize += logDiff;
-                    }
-                }
-            }
-        }
-        // The renderer process is not ready, postpose reading the log
-        else {
-            //ipc_send("ipc_log", "readLog logloopmode: "+logLoopMode+", renderer state:"+renderer_state+", logSize: "+logSize+", prevLogSize: "+prevLogSize);
-        }
-
+        return;
     }
+
+    if (!firstPass)  {
+        ipc_send("log_read", 1);
+    }
+
+    if (debugLog) {
+        firstPass = false;
+    }
+
+    if (renderer_state != 1) {
+        // The renderer process is not ready, postpose reading the log
+        //ipc_send("ipc_log", "readLog logloopmode: "+logLoopMode+", renderer state:"+renderer_state+", logSize: "+logSize+", prevLogSize: "+prevLogSize);
+        return;
+    }
+
+    var stats = await mtgaLog.stat();
+    logSize = stats.size;
+    logDiff = logSize - prevLogSize;
+    if (logDiff > 268435440)  logDiff = 268435440;
+    //ipc_send("ipc_log", "readLog logloopmode: "+logLoopMode+", renderer state:"+renderer_state+", logSize: "+logSize+", prevLogSize: "+prevLogSize);
+
+    if (logSize == undefined) {
+        // Something went wrong obtaining the file size, try again later
+        return;
+    }
+
+    if (logSize === prevLogSize) {
+        // The log has not changed since we last checked
+        return;
+    }
+
+    if (logSize < prevLogSize) {
+        // If the log was cleared, we default and start reading from position zero
+        prevLogSize = 0;
+        logDiff = logSize;
+    }
+
+    const logSegment = await mtgaLog.readSegment(prevLogSize, logDiff);
+    if (logLoopMode == 0) {
+        // We are looping only to get user data (processLogUser)
+        processLogUser(logSegment);
+    } else {
+        // We are looking to read the whole log (processLog)
+        processLog(logSegment);
+    }
+
+    prevLogSize += logDiff;
 }
 
 // We are reading the whole log
