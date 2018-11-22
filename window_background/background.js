@@ -250,6 +250,34 @@ ipc.on('delete_data', function (event, arg) {
 });
 
 //
+ipc.on('delete_course', function (event, arg) {
+    var i = events.courses.indexOf(arg);
+    if (i > -1) {
+        events.courses.splice(i, 1);
+        store.set('courses_index', events.courses);
+        store.delete(arg);
+    }
+    //console.log("Delete ", arg);
+});
+
+//
+ipc.on('delete_match', function (event, arg) {
+    var i = history.matches.indexOf(arg);
+    if (i > -1) {
+        history.matches.splice(i, 1);
+        store.set('matches_index', history.matches);
+        store.delete(arg);
+    }
+    var i = drafts.matches.indexOf(arg);
+    if (i > -1) {
+        drafts.matches.splice(i, 1);
+        store.set('draft_index', drafts.matches);
+        store.delete(arg);
+    }
+    //console.log("Delete ", arg);
+});
+
+//
 ipc.on('request_events', function (event, arg) {
     ipc_send("set_events", JSON.stringify(events));
 });

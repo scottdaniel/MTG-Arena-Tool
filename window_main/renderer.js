@@ -1292,14 +1292,23 @@ function setEvents(loadMore) {
 		divExp.classList.add(course.id+"exp");
 		divExp.classList.add("list_event_expand");
 
+
+		var fldel = document.createElement("div");
+		fldel.classList.add("flex_item");
+		fldel.classList.add(course.id+"_del");
+		fldel.classList.add("delete_item");
+		fldel.style.marginRight = "10px";
+
 		div.appendChild(fltl);
 		div.appendChild(fll);
 		div.appendChild(flc);
 		div.appendChild(flr);
+		div.appendChild(fldel);
 
 		mainDiv.appendChild(div);
 		mainDiv.appendChild(divExp);
 		
+		deleteCourse(course);
 		addHover(course, divExp);
 	}
 
@@ -1310,7 +1319,26 @@ function setEvents(loadMore) {
 		}
 	})
 
+	$('.delete_item').hover(function() {
+			// in
+			$(this).css('width', '32px');
+		}, function() {
+			// out
+			$(this).css('width', '4px');
+		}
+	);
+
 	loadEvents = loadEnd;
+}
+
+//
+function deleteCourse(_course) {
+	$('.'+_course.id+'_del').on('click', function(e) {
+		currentId = _course.id;
+		e.stopPropagation();
+		ipc_send('delete_course', currentId);
+		$('.'+currentId).css('height', "0px");
+	});
 }
 
 //
@@ -1583,6 +1611,7 @@ function setHistory(loadMore) {
 		flc.appendChild(fcb);
 
 		var flr = document.createElement("div");
+		flr.classList.add("rightmost");
 		flr.classList.add("flex_item");
 
 		if (match.type == "match") {
@@ -1632,7 +1661,7 @@ function setHistory(loadMore) {
 
 			var d = document.createElement("div");
 			d.classList.add("list_match_time");
-			d.innerHTML = timeSince(new Date(match.date))+' ago.';
+			d.innerHTML = timeSince(new Date(match.date))+' ago - '+toMMSS(match.duration);
 			fcb.appendChild(d);
 
 			var cc = get_deck_colors(match.oppDeck);
@@ -1698,16 +1727,24 @@ function setHistory(loadMore) {
 
 		}
 
+		var fldel = document.createElement("div");
+		fldel.classList.add("flex_item");
+		fldel.classList.add(match.id+"_del");
+		fldel.classList.add("delete_item");
+
+
 		div.appendChild(fltl);
 		div.appendChild(fll);
 		div.appendChild(flc);
 		div.appendChild(flr);
+		div.appendChild(fldel);
 
 		mainDiv.appendChild(div);
 
 		if (match.type == "draft") {
 			addShare(match);
 		}
+		deleteMatch(match);
 		addHover(match, tileGrpid);
 	}
 
@@ -1718,7 +1755,26 @@ function setHistory(loadMore) {
 		}
 	})
 
+	$('.delete_item').hover(function() {
+			// in
+			$(this).css('width', '32px');
+		}, function() {
+			// out
+			$(this).css('width', '4px');
+		}
+	);
+
 	loadHistory = loadEnd;
+}
+
+//
+function deleteMatch(_match) {
+	$('.'+_match.id+'_del').on('click', function(e) {
+		currentId = _match.id;
+		e.stopPropagation();
+		ipc_send('delete_match', currentId);
+		$('.'+currentId).css('height', "0px");
+	});
 }
 
 var currentId = null;

@@ -216,6 +216,14 @@ app.on('ready', () => {
                 break;
 
             // to background
+            case 'delete_course':
+                background.webContents.send("delete_course", arg);
+                break;
+
+            case 'delete_match':
+                background.webContents.send("delete_match", arg);
+                break;
+
             case 'remember':
                 background.webContents.send("remember", arg);
                 break;

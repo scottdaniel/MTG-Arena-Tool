@@ -337,13 +337,14 @@ span i {
 }
 
 .list_match {
+    overflow: hidden;
     cursor: pointer;
     padding-left: 16px;
     height: 64px;
     display: flex;
     justify-content: space-between;
     background-color: rgba(0, 0, 0, 0);
-    -webkit-transition: background-color .2s ease-in;
+    -webkit-transition: all .2s ease-in;
 }
 
 .list_match:hover {
@@ -425,7 +426,7 @@ span i {
     font-family: Mplantin;
     font-size: 20px;
     line-height: 64px;
-    margin-right: 32px;
+    margin-right: 8px;
     color: rgba(183, 200, 158, 1);
 }
 
@@ -433,7 +434,7 @@ span i {
     line-height: 64px;
     font-family: Mplantin;
     font-size: 20px;
-    margin-right: 32px;
+    margin-right: 8px;
     color: rgba(221, 130, 99, 1);
 }
 
@@ -1971,4 +1972,12 @@ a:hover {
     max-width: 400px;
     height: 300px;
     margin: 0 auto;
+}
+
+.delete_item {
+    width: 4px; 
+    margin-left: 8px;
+    overflow: hidden;
+    background: #DD8263 url(../images/delete.png) no-repeat left;
+    -webkit-transition: all .25s cubic-bezier(0.2, 0.5, 0.35, 1);
 }
