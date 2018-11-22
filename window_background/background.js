@@ -669,11 +669,6 @@ function processLog(rawString) {
     // We split it into smaller chunks to read it 
     var splitString = rawString.split(/(\[UnityCrossThread|\[Client GRE\])+/);
 
-    // If this is happening while the app is loading, tell the async series to finish loading at the end
-    if (firstPass) {
-        splitString.push("%END%");
-    }
-
     try {
         splitString.forEach((value, index) => {
             //ipc_send("ipc_log", "Async: ("+index+")");
@@ -683,25 +678,23 @@ function processLog(rawString) {
             }
             */
 
-            // If this is the last chunk, end reading and exit loading screen
-            if (value == "%END%") {
-                finishLoading();
-                ipc_send("popup", {"text": "100%", "time": 3000});
+            processLogData(value);
+            if (firstPass) {
+                last_load = new Date();
+                ipc_send("popup", {"text": "Processing log: "+Math.round(100/splitString.length*index)+"%", "time": 0});
             }
-            // Process the chunks
-            else {
-                processLogData(value);
-                if (firstPass) {
-                    last_load = new Date();
-                    ipc_send("popup", {"text": "Processing log: "+Math.round(100/splitString.length*index)+"%", "time": 0});
-                }
-                
-                if (debugLog) {
-                    _time = new Date();
-                    while (new Date() - _time < debugLogSpeed) {}
-                }            
-            }
+            
+            if (debugLog) {
+                _time = new Date();
+                while (new Date() - _time < debugLogSpeed) {}
+            }            
         });
+
+        if (firstPass) {
+            finishLoading();
+            ipc_send("popup", {"text": "100%", "time": 3000});
+        }
+    
     } catch (err) {
         if (err) {
             console.log("processLog err: "+err.message);
@@ -716,46 +709,40 @@ function processLog(rawString) {
 function processLogUser(rawString) {
     var splitString = rawString.split('[UnityCrossThread');
 
-    if (firstPass) {
-        splitString.push("%END%");
-    }
-
     splitString.forEach(value => {
         //ipc_send("ipc_log", "Async: ("+index+")");
-        if (value == "%END%") {
-            if (playerName == null) {
-                ipc_send("popup", {"text": "output_log contains no player data", "time": 0});
-                resetLogLoop(500);
-            }
-        }
-        else {
-            // Get player Id
-            strCheck = '"PlayerId":"';
-            if (value.indexOf(strCheck) > -1) {
-                playerId = dataChop(value, strCheck, '"');
-            }
 
-            // Get User name
-            strCheck = '"PlayerScreenName":"';
-            if (value.indexOf(strCheck) > -1) {
-                playerName = dataChop(value, strCheck, '"');
-                ipc_send("init_login", playerName);
-                ipc_send("ipc_log", 'Arena screen name: '+playerName);
-            }
-
-            // Get Client Version
-            strCheck = '"ClientVersion":"';
-            if (value.indexOf(strCheck) > -1) {
-                arenaVersion = dataChop(value, strCheck, '"');
-                ipc_send("ipc_log", 'Arena version: '+arenaVersion);
-            }
-            /*
-            if (firstPass) {
-                ipc_send("popup", {"text": "Reading: "+Math.round(100/splitString.length*index)+"%", "time": 1000});
-            }
-            */
+        // Get player Id
+        strCheck = '"PlayerId":"';
+        if (value.indexOf(strCheck) > -1) {
+            playerId = dataChop(value, strCheck, '"');
         }
+
+        // Get User name
+        strCheck = '"PlayerScreenName":"';
+        if (value.indexOf(strCheck) > -1) {
+            playerName = dataChop(value, strCheck, '"');
+            ipc_send("init_login", playerName);
+            ipc_send("ipc_log", 'Arena screen name: '+playerName);
+        }
+
+        // Get Client Version
+        strCheck = '"ClientVersion":"';
+        if (value.indexOf(strCheck) > -1) {
+            arenaVersion = dataChop(value, strCheck, '"');
+            ipc_send("ipc_log", 'Arena version: '+arenaVersion);
+        }
+        /*
+        if (firstPass) {
+            ipc_send("popup", {"text": "Reading: "+Math.round(100/splitString.length*index)+"%", "time": 1000});
+        }
+        */
     });
+
+    if (firstPass && playerName == null) {
+        ipc_send("popup", {"text": "output_log contains no player data", "time": 0});
+        resetLogLoop(500);
+    }
 }
 
 // Check if the string contains a JSON object, return it parsed as JS object
