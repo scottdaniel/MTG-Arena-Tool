@@ -531,21 +531,14 @@ function get_deck_changes(deckId) {
 
 // Read the log
 // Set variables to default first
+const mtgaLog = require('./mtga-log');
 var prevLogSize = 0;
 var logSize = 0;
 var logDiff = 0;
-var file;
 var logLoopTimer = null;
 var logLoopMode = 0;
 
-if (process.platform === 'win32') {
-    var logUri = process.env.APPDATA;
-    logUri = logUri.replace('Roaming','LocalLow\\Wizards Of The Coast\\MTGA\\output_log.txt');
-}
-else {
-    // Path for Wine, could change depending on installation method
-    var logUri = process.env.HOME+'/.wine/drive_c/user/'+process.env.USER+'/AppData/LocalLow/Wizards of the Coast/MTGA/output_log.txt';
-}
+const logUri = mtgaLog.path();
 console.log(logUri);
 
 resetLogLoop(100);
@@ -561,7 +554,7 @@ function resetLogLoop(time) {
 last_load = new Date();
 
 // Basic logic for reading the log file
-function logLoop() {
+async function logLoop() {
     //console.log("logLoop() start");
     //ipc_send("ipc_log", "logLoop() start");
     if (firstPass) {
@@ -572,25 +565,23 @@ function logLoop() {
             ipc_send("too_slow", "");
         }
     }
-    fs.open(logUri, 'r', function(err, fd) {
-        file = fd;
-        if (err) {
-            ipc_send("no_log", logUri);
-            ipc_send("popup", {"text": "No log file found.", "time": 1000});
-            resetLogLoop(500);
-        } else {
-            try {
-                readLog();
-            }
-            catch (e) {
-                resetLogLoop(500);
-            }
+
+    if (! await mtgaLog.exists()) {
+        ipc_send("no_log", logUri);
+        ipc_send("popup", {"text": "No log file found.", "time": 1000});
+        resetLogLoop(500);
+    } else {
+        try {
+            await readLog();
         }
-    });
+        catch (e) {
+            resetLogLoop(500);
+        }
+    }
 }
 
 // Begin reading the log 
-function readLog() {
+async function readLog() {
 	//console.log("readLog()");
     
     if (!firstPass)  {
@@ -602,7 +593,7 @@ function readLog() {
 
     // If the renderer process is running, we can start reading
     if (renderer_state == 1) {
-        var stats = fs.fstatSync(file);
+        var stats = await mtgaLog.stat();
         logSize = stats.size;
         logDiff = logSize - prevLogSize;
         if (logDiff > 268435440)  logDiff = 268435440;
@@ -610,7 +601,6 @@ function readLog() {
 
         // Something went wrong obtaining the file size, try again later
         if (logSize == undefined) {
-            fs.close(file);
             resetLogLoop(500);
         }
         else {
@@ -624,15 +614,17 @@ function readLog() {
             if (logSize > prevLogSize+1) {
                 // We are looping only to get user data (processLogUser)
                 if (logLoopMode == 0) {
-                    fs.read(file, new Buffer(logDiff), 0, logDiff, prevLogSize, processLogUser);
+                    processLogUser(await mtgaLog.readSegment(prevLogSize, logDiff));
+                    prevLogSize += logDiff;
+
                 }
                 // We are looking to read the whole log (processLog)
                 else {
-                    fs.read(file, new Buffer(logDiff), 0, logDiff, prevLogSize, processLog);
+                    processLog(await mtgaLog.readSegment(prevLogSize, logDiff));
+                    prevLogSize += logDiff;
                 }
             }
             else {
-                fs.close(file);
                 resetLogLoop(500);
             }
         }
@@ -640,33 +632,19 @@ function readLog() {
     // The renderer process is not ready, postpose reading the log
     else {
         //ipc_send("ipc_log", "readLog logloopmode: "+logLoopMode+", renderer state:"+renderer_state+", logSize: "+logSize+", prevLogSize: "+prevLogSize);
-        fs.close(file);
         resetLogLoop(500);
     }
 }
 
 // We are reading the whole log
-function processLog(err, bytecount, buff) {
-    // rawstring contains the ENTIRE log as a single text
-    let rawString = buff.toString('utf-8', 0, bytecount);
-    // Increase position read
-    //var splitString = rawString.split('[UnityCrossThread');
-
+function processLog(rawString) {
     // We split it into smaller chunks to read it 
     var splitString = rawString.split(/(\[UnityCrossThread|\[Client GRE\])+/);
-
-    //console.log('Reading:', bytecount, 'bytes, ',splitString.length, ' chunks');
-    //ipc_send("ipc_log", 'Reading: '+bytecount+' bytes, '+splitString.length+' chunks');
-
-    prevLogSize+=bytecount;
 
     // If this is happening while the app is loading, tell the async series to finish loading at the end
     if (firstPass) {
         splitString.push("%END%");
     }
-
-    // Also tell the async series to close the file
-    splitString.push("%CLOSE%");
 
     async.forEachOfSeries(splitString, function (value, index, callback) {
         //ipc_send("ipc_log", "Async: ("+index+")");
@@ -680,10 +658,6 @@ function processLog(err, bytecount, buff) {
         if (value == "%END%") {
             finishLoading();
             ipc_send("popup", {"text": "100%", "time": 3000});
-        }
-        // Close the file (release priority)
-        else if (value == "%CLOSE%") {
-            fs.close(file);
         }
         // Process the chunks
         else {
@@ -712,19 +686,12 @@ function processLog(err, bytecount, buff) {
 
 // Process only the user data for initial loading (prior to log in)
 // Same logic as processLog() but without the processLogData() function
-function processLogUser(err, bytecount, buff) {
-    // Process the log only to find player name and id
-    let rawString = buff.toString('utf-8', 0, bytecount);
+function processLogUser(rawString) {
     var splitString = rawString.split('[UnityCrossThread');
-
-    //console.log('Reading user:', bytecount, 'bytes, ',splitString.length, ' chunks');
-    //ipc_send("ipc_log", 'Reading: '+bytecount+' bytes, '+splitString.length+' chunks');
-    prevLogSize+=bytecount;
 
     if (firstPass) {
         splitString.push("%END%");
     }
-    splitString.push("%CLOSE%");
 
     async.forEachOfSeries(splitString, function (value, index, callback) {
         //ipc_send("ipc_log", "Async: ("+index+")");
@@ -733,9 +700,6 @@ function processLogUser(err, bytecount, buff) {
                 ipc_send("popup", {"text": "output_log contains no player data", "time": 0});
                 resetLogLoop(500);
             }
-        }
-        else if (value == "%CLOSE%") {
-            fs.close(file);
         }
         else {
             // Get player Id
