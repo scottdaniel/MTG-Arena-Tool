@@ -557,8 +557,6 @@ function get_deck_changes(deckId) {
 // Set variables to default first
 const mtgaLog = require('./mtga-log');
 let prevLogSize = 0;
-let logSize = 0;
-let logDiff = 0;
 let logLoopMode = 0;
 let last_load = new Date();
 
@@ -599,29 +597,24 @@ async function logLoop() {
         return;
     }
 
-    var stats = await mtgaLog.stat();
-    logSize = stats.size;
-    logDiff = logSize - prevLogSize;
-    if (logDiff > 268435440)  logDiff = 268435440;
-    //ipc_send("ipc_log", "readLog logloopmode: "+logLoopMode+", renderer state:"+renderer_state+", logSize: "+logSize+", prevLogSize: "+prevLogSize);
-
-    if (logSize == undefined) {
+    const { size } = await mtgaLog.stat();
+    
+    if (size == undefined) {
         // Something went wrong obtaining the file size, try again later
         return;
     }
 
-    if (logSize === prevLogSize) {
+    const delta = size - prevLogSize;
+
+    if (delta === 0) {
         // The log has not changed since we last checked
         return;
     }
 
-    if (logSize < prevLogSize) {
-        // If the log was cleared, we default and start reading from position zero
-        prevLogSize = 0;
-        logDiff = logSize;
-    }
+    const logSegment = delta > 0
+        ? await mtgaLog.readSegment(prevLogSize, delta)
+        : await mtgaLog.readSegment(0, size);
 
-    const logSegment = await mtgaLog.readSegment(prevLogSize, logDiff);
     if (logLoopMode == 0) {
         // We are looping only to get user data (processLogUser)
         processLogUser(logSegment);
@@ -630,7 +623,7 @@ async function logLoop() {
         processLog(logSegment);
     }
 
-    prevLogSize += logDiff;
+    prevLogSize = size;
 }
 
 // We are reading the whole log
