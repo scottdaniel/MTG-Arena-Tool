@@ -520,11 +520,11 @@ function collectionSortSet(a, b) {
 function getRaritySortValue(rarity) {
 	rarity = rarity.toLowerCase();
 	switch (rarity) {
-		case 'land':		return 1; break;
-		case 'common':		return 2; break;
+		case 'land':		return 5; break;
+		case 'common':		return 4; break;
 		case 'uncommon':	return 3; break;
-		case 'rare':		return 4; break;
-		case 'mythic':		return 5; break;
+		case 'rare':		return 2; break;
+		case 'mythic':		return 1; break;
 		default: 			return 0; break;
 	}
 

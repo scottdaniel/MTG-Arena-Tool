@@ -20,6 +20,7 @@ var collectionPage = 0;
 var eventFilters = null;
 var sortingAlgorithm = 'Set';
 var filterEvent = 'All';
+var filterEconomy = 'All';
 var filteredSets = [];
 var filteredMana = [];
 var draftPosition = 1;
@@ -665,9 +666,15 @@ function setEconomy(loadMore) {
 		dayList[0] = new economyDay();
 		economyHistory.changes.sort(compare_economy); 
 
+		var selectItems = ["All"];
 		for (var n = 0; n < economyHistory.changes.length; n++) {
 			var economy_id = economyHistory.changes[n];
 			var change = economyHistory[economy_id];
+
+			if (!selectItems.includes(change.context)) {
+				selectItems.push(change.context);
+			}
+			
 			if (change == undefined) continue;
 
 			if (change.delta.gemsDelta != undefined) {
@@ -698,6 +705,23 @@ function setEconomy(loadMore) {
 		let div = document.createElement("div");
 		div.classList.add("list_economy_top");
 		div.classList.add("flex_item");
+
+		//
+		var selectdiv = document.createElement("div");
+		selectdiv.style.margin = "auto 64px auto 0px";
+		
+		var select = $('<select id="query_select"></select>');
+		for (var i=0; i < selectItems.length; i++) {
+			if (selectItems[i] !== filterEconomy) {
+				select.append('<option value="'+selectItems[i]+'">'+selectItems[i]+'</option>');
+			}
+		}
+		select.appendTo(selectdiv);
+		div.appendChild(selectdiv);
+		selectAdd(select, updateEconomy);
+		select.next('div.select-styled').text(filterEconomy);
+
+		//
 
 		let icgo = document.createElement("div");
 		icgo.classList.add("economy_gold_med");
@@ -740,6 +764,10 @@ function setEconomy(loadMore) {
 		var change = economyHistory[economy_id];
 
 		if (change == undefined) continue;
+		if (filterEconomy !== 'All' && change.context !== filterEconomy) {
+			loadEnd++;
+			continue;
+		}
 
 		if (daysago != daysPast(change.date)) {
 			daysago = daysPast(change.date);
@@ -752,6 +780,7 @@ function setEconomy(loadMore) {
 			fll.classList.add("economy_sub");
 			div.classList.add("flex_item");
 			fll.style.lineHeight = "64px";
+
 			if (daysago == 0) 	fll.innerHTML =  "Today";
 			if (daysago == 1) 	fll.innerHTML =  "Yesterday";
 			if (daysago > 1) 	fll.innerHTML =  daysago+" Days ago. ("+dd.toDateString()+")";
@@ -1120,6 +1149,13 @@ function setEconomy(loadMore) {
 
 	loadEconomy = loadEnd;
 }
+
+//
+function updateEconomy() {
+	filterEconomy = getEventId(document.getElementById("query_select").value);
+	setEconomy(0);
+}
+
 
 //
 function setEvents(loadMore) {
