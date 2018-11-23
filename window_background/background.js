@@ -567,6 +567,7 @@ window.setInterval(attemptLogLoop, 250);
 async function attemptLogLoop() {
     try {
         await logLoop();
+        last_load = new Date();
     } catch (err) {
         console.error(err);
     }
@@ -649,7 +650,6 @@ function processLog(rawString) {
 
         processLogData(value);
         if (firstPass) {
-            last_load = new Date();
             ipc_send("popup", {"text": "Processing log: "+Math.round(100/splitString.length*index)+"%", "time": 0});
         }
         
@@ -1035,7 +1035,8 @@ function processLogData(data) {
     strCheck = '<== Deck.GetDeckLists(';
     json = checkJsonWithStart(data, strCheck, '', ')');
     if (json != false) {
-        decks = json.plimplom / 0;
+        A = B;
+        decks = json;
         requestHistorySend(0);
         ipc_send("set_decks", JSON.stringify(json));
         return;
