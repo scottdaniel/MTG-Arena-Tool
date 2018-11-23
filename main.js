@@ -88,6 +88,10 @@ app.on('ready', () => {
                 break;
 
             // to renderer
+            case 'log_ok':
+                mainWindow.webContents.send("log_ok", arg);
+                break;
+
             case 'too_slow':
                 mainWindow.webContents.send("too_slow", arg);
                 console.log("Something went wrong loading", arg);
@@ -216,6 +220,10 @@ app.on('ready', () => {
                 break;
 
             // to background
+            case 'set_log':
+                background.webContents.send("set_log", arg);
+                break;
+
             case 'delete_course':
                 background.webContents.send("delete_course", arg);
                 break;

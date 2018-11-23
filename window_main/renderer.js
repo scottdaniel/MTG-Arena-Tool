@@ -422,6 +422,7 @@ ipc.on('initialize', function (event, arg) {
 });
 
 //
+var logDialogOpen = false;
 ipc.on('no_log', function (event, arg) {
 	if (loggedIn) {
 		$('.top_nav').addClass('hidden');
@@ -429,6 +430,67 @@ ipc.on('no_log', function (event, arg) {
 		$('.message_center').css('display', 'flex');
 		$('.message_center').html('<div class="message_big red">No Log Found</div><div class="message_sub_16 white">check if it exists at '+arg+'</div><div class="message_sub_16 white">if it does, try closing MTG Arena and deleting it.</div>');
 	}
+	else if (!logDialogOpen) {
+		logDialogOpen = true;
+		$('.dialog_wrapper').css('opacity', 1);
+		$('.dialog_wrapper').css('pointer-events', 'all');
+		$('.dialog_wrapper').show();
+		$('.dialog').css('width', '600px');
+		$('.dialog').css('height', '200px');
+		$('.dialog').css('top', 'calc(50% - 100px)');
+
+		$('.dialog_wrapper').on('click', function(e) {
+			logDialogOpen = false;
+			console.log('.dialog_wrapper on click')
+			//e.stopPropagation();
+			$('.dialog_wrapper').css('opacity', 0);
+			$('.dialog_wrapper').css('pointer-events', 'none');
+			setTimeout(function() {
+				$('.dialog_wrapper').hide();
+				$('.dialog').css('width', '500px');
+				$('.dialog').css('height', '160px');
+				$('.dialog').css('top', 'calc(50% - 80px)');
+			}, 250);
+		});
+
+		$('.dialog').on('click', function(e) {
+			e.stopPropagation();
+			console.log('.dialog on click')
+		});
+
+		var dialog = $('.dialog');
+		dialog.html('');
+		
+		var cont = $('<div class="dialog_container"></div>');
+
+		cont.append('<div class="share_title">Enter output_log.txt location:</div>');
+		var icd = $('<div class="share_input_container"></div>');
+		var sin = $('<input style="border-radius: 3px; height: 28px;font-size: 14px;" id="log_input" onClick="this.setSelectionRange(0, this.value.length)" autofocus autocomplete="off" value="'+arg+'" />');
+		var but = $('<div class="button_simple">Save</div>');
+		
+		sin.appendTo(icd);
+		icd.appendTo(cont);
+		
+		cont.appendTo(dialog);
+		but.appendTo(dialog);
+
+		but.click(function () {
+		    ipc_send('set_log', document.getElementById("log_input").value);
+		});
+	}
+});
+
+
+ipc.on('log_ok', function (event, arg) {
+	logDialogOpen = false;
+	$('.dialog_wrapper').css('opacity', 0);
+	$('.dialog_wrapper').css('pointer-events', 'none');
+	setTimeout(function() {
+		$('.dialog_wrapper').hide();
+		$('.dialog').css('width', '500px');
+		$('.dialog').css('height', '160px');
+		$('.dialog').css('top', 'calc(50% - 80px)');
+	}, 250);
 });
 
 //
@@ -1783,34 +1845,34 @@ function addShare(_match) {
 	$('.'+_match.id+'dr').on('click', function(e) {
 		currentId = _match.id;
 		e.stopPropagation();
-		$('.share_dialog_wrapper').css('opacity', 1);
-		$('.share_dialog_wrapper').css('pointer-events', 'all');
-		$('.share_dialog_wrapper').show();
-		$('.share_dialog').css('width', '500px');
-		$('.share_dialog').css('height', '200px');
-		$('.share_dialog').css('top', 'calc(50% - 100px)');
+		$('.dialog_wrapper').css('opacity', 1);
+		$('.dialog_wrapper').css('pointer-events', 'all');
+		$('.dialog_wrapper').show();
+		$('.dialog').css('width', '500px');
+		$('.dialog').css('height', '200px');
+		$('.dialog').css('top', 'calc(50% - 100px)');
 
-		$('.share_dialog_wrapper').on('click', function(e) {
-			console.log('.share_dialog_wrapper on click')
+		$('.dialog_wrapper').on('click', function(e) {
+			console.log('.dialog_wrapper on click')
 			//e.stopPropagation();
-			$('.share_dialog_wrapper').css('opacity', 0);
-			$('.share_dialog_wrapper').css('pointer-events', 'none');
+			$('.dialog_wrapper').css('opacity', 0);
+			$('.dialog_wrapper').css('pointer-events', 'none');
 			setTimeout(function() {
-				$('.share_dialog_wrapper').hide();
-				$('.share_dialog').css('width', '400px');
-				$('.share_dialog').css('height', '160px');
-				$('.share_dialog').css('top', 'calc(50% - 80px)');
+				$('.dialog_wrapper').hide();
+				$('.dialog').css('width', '400px');
+				$('.dialog').css('height', '160px');
+				$('.dialog').css('top', 'calc(50% - 80px)');
 			}, 250);
 		});
 
-		$('.share_dialog').on('click', function(e) {
+		$('.dialog').on('click', function(e) {
 			e.stopPropagation();
-			console.log('.share_dialog on click')
+			console.log('.dialog on click')
 		});
 
-		var dialog = $('.share_dialog');
+		var dialog = $('.dialog');
 		dialog.html('');
-		var cont = $('<div class="share_dialog_container"></div>');
+		var cont = $('<div class="dialog_container"></div>');
 
 		cont.append('<div class="share_title">Link For sharing:</div>');
 		var icd = $('<div class="share_input_container"></div>');
