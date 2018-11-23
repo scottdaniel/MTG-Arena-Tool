@@ -562,7 +562,15 @@ let last_load = new Date();
 
 const logUri = mtgaLog.path();
 console.log(logUri);
-window.setInterval(logLoop, 250);
+window.setInterval(attemptLogLoop, 250);
+
+async function attemptLogLoop() {
+    try {
+        await logLoop();
+    } catch (err) {
+        console.log(err);
+    }
+}
 
 // Basic logic for reading the log file
 async function logLoop() {
