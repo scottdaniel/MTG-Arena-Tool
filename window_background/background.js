@@ -631,36 +631,29 @@ function processLog(rawString) {
     // We split it into smaller chunks to read it 
     var splitString = rawString.split(/(\[UnityCrossThread|\[Client GRE\])+/);
 
-    try {
-        splitString.forEach((value, index) => {
-            //ipc_send("ipc_log", "Async: ("+index+")");
-            /*
-            if (value.indexOf("") > -1) {
-                console.log(value);
-            }
-            */
+    splitString.forEach((value, index) => {
+        //ipc_send("ipc_log", "Async: ("+index+")");
+        /*
+        if (value.indexOf("") > -1) {
+            console.log(value);
+        }
+        */
 
-            processLogData(value);
-            if (firstPass) {
-                last_load = new Date();
-                ipc_send("popup", {"text": "Processing log: "+Math.round(100/splitString.length*index)+"%", "time": 0});
-            }
-            
-            if (debugLog) {
-                _time = new Date();
-                while (new Date() - _time < debugLogSpeed) {}
-            }            
-        });
-
+        processLogData(value);
         if (firstPass) {
-            finishLoading();
-            ipc_send("popup", {"text": "100%", "time": 3000});
+            last_load = new Date();
+            ipc_send("popup", {"text": "Processing log: "+Math.round(100/splitString.length*index)+"%", "time": 0});
         }
-    
-    } catch (err) {
-        if (err) {
-            console.log("processLog err: "+err.message);
-        }
+        
+        if (debugLog) {
+            _time = new Date();
+            while (new Date() - _time < debugLogSpeed) {}
+        }            
+    });
+
+    if (firstPass) {
+        finishLoading();
+        ipc_send("popup", {"text": "100%", "time": 3000});
     }
 }
 
