@@ -568,7 +568,7 @@ async function attemptLogLoop() {
     try {
         await logLoop();
     } catch (err) {
-        console.log(err);
+        console.error(err);
     }
 }
 
@@ -576,15 +576,6 @@ async function attemptLogLoop() {
 async function logLoop() {
     //console.log("logLoop() start");
     //ipc_send("ipc_log", "logLoop() start");
-    if (firstPass) {
-        var now = new Date();
-        var timeDiff = (now - last_load)/1000;
-        ipc_send("ipc_log", timeDiff);
-        if (timeDiff > 5) {
-            ipc_send("too_slow", "");
-        }
-    }
-
     if (! await mtgaLog.exists()) {
         ipc_send("no_log", logUri);
         ipc_send("popup", {"text": "No log file found.", "time": 1000});
@@ -622,6 +613,15 @@ async function logLoop() {
     const logSegment = delta > 0
         ? await mtgaLog.readSegment(prevLogSize, delta)
         : await mtgaLog.readSegment(0, size);
+
+    if (firstPass) {
+        var now = new Date();
+        var timeDiff = (now - last_load)/1000;
+        ipc_send("ipc_log", timeDiff);
+        if (timeDiff > 5) {
+            ipc_send("too_slow", "");
+        }
+    }
 
     if (logLoopMode == 0) {
         // We are looping only to get user data (processLogUser)
@@ -1035,7 +1035,7 @@ function processLogData(data) {
     strCheck = '<== Deck.GetDeckLists(';
     json = checkJsonWithStart(data, strCheck, '', ')');
     if (json != false) {
-        decks = json;
+        decks = json.plimplom / 0;
         requestHistorySend(0);
         ipc_send("set_decks", JSON.stringify(json));
         return;
