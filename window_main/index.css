@@ -1635,9 +1635,7 @@ a:hover {
     text-align: center;
 }
 
-
-
-.share_dialog_wrapper {
+.dialog_wrapper {
     pointer-events: none;
     z-index: 50;
     display: hidden;
@@ -1649,7 +1647,7 @@ a:hover {
     -webkit-transition: all .15s cubic-bezier(1, 0.35, 0.35, 1);
 }
 
-.share_dialog {
+.dialog {
     z-index: 40;
     display: flex;
     position: relative;
@@ -1665,7 +1663,7 @@ a:hover {
     -webkit-transition: all .15s cubic-bezier(1, 0.35, 0.35, 1);
 }
 
-.share_dialog_container {
+.dialog_container {
     margin: 16px;
 }
 
