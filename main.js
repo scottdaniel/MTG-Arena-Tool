@@ -41,7 +41,7 @@ app.on('ready', () => {
     background  = createBackgroundWindow();
 
     globalShortcut.register('Alt+Shift+D', () => {
-        if (background.isVisible())
+        if (!background.isVisible())
             background.show();
         else
             background.hide();
