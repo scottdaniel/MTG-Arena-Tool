@@ -295,7 +295,6 @@ window.onerror = (msg, url, line, col, err) => {
         col: col
     }
     error.id = sha1(error.msg + playerId);
-    resetLogLoop(250);
     httpSendError(error);
 }
 
@@ -308,14 +307,12 @@ process.on('uncaughtException', function(err){
     }
     console.log("ERROR: ", error);
     error.id = sha1(error.msg + playerId);
-    resetLogLoop(250);
     httpSendError(error);
 })
 
 //
 ipc.on('error', function (event, err) {
     err.id = sha1(err.msg + playerId);
-    resetLogLoop(250);
     httpSendError(err);
 });
 
@@ -433,7 +430,6 @@ function rememberLogin(bool) {
 function loadPlayerConfig(playerId) {
     logLoopMode = 1;
     prevLogSize = 0;
-    resetLogLoop(500);
 	ipc_send("ipc_log", "Load player ID: "+playerId);
     store = new Store({
         configName: playerId,
@@ -445,7 +441,6 @@ function loadPlayerConfig(playerId) {
     history.matches = entireConfig['matches_index'];
     
     for (let i=0; i<history.matches.length; i++) {
-        last_load = new Date();
         ipc_send("popup", {"text": "Reading history: "+i+" / "+history.matches.length, "time": 0});
         var id = history.matches[i];
         if (id != null) {
@@ -459,7 +454,6 @@ function loadPlayerConfig(playerId) {
     
     drafts.matches = store.get('draft_index');
     for (let i=0; i<drafts.matches.length; i++) {
-        last_load = new Date();
         ipc_send("popup", {"text": "Reading drafts: "+i+" / "+drafts.matches.length, "time": 0});
         var id = drafts.matches[i];
 
@@ -475,7 +469,6 @@ function loadPlayerConfig(playerId) {
 
     events.courses = store.get('courses_index');
     for (let i=0; i<events.courses.length; i++) {
-        last_load = new Date();
         ipc_send("popup", {"text": "Reading events: "+i+" / "+events.courses.length, "time": 0});
         var id = events.courses[i];
 
@@ -490,7 +483,6 @@ function loadPlayerConfig(playerId) {
 
     economy.changes = store.get('economy_index');
     for (let i=0; i<economy.changes.length; i++) {
-        last_load = new Date();
         ipc_send("popup", {"text": "Reading economy: "+i+" / "+economy.changes.length, "time": 0});
         var id = economy.changes[i];
 
@@ -556,112 +548,83 @@ function get_deck_changes(deckId) {
     ipc_send("set_deck_changes", JSON.stringify(changes));
 }
 
+// Set a new log URI
+ipc.on('set_log', function (event, arg) {
+    logUri = arg;
+});
+
 
 // Read the log
 // Set variables to default first
 const mtgaLog = require('./mtga-log');
-var prevLogSize = 0;
-var logSize = 0;
-var logDiff = 0;
-var logLoopTimer = null;
-var logLoopMode = 0;
+let logLoopProgress = -1;
+let logLoopProgressChanged = new Date();
+let prevLogSize = 0;
+let logLoopMode = 0;
 
-const logUri = mtgaLog.path();
+let logUri = mtgaLog.defaultLogUri();
 console.log(logUri);
+window.setInterval(attemptLogLoop, 250);
 
-resetLogLoop(100);
-
-// Resets the log loop timeout to trigger in 'time' ms
-function resetLogLoop(time) {
-    if (logLoopTimer != null) {
-        window.clearTimeout(logLoopTimer);
+async function attemptLogLoop() {
+    try {
+        await logLoop();
+    } catch (err) {
+        console.error(err);
     }
-    logLoopTimer = setTimeout(logLoop, time);
 }
-
-last_load = new Date();
 
 // Basic logic for reading the log file
 async function logLoop() {
     //console.log("logLoop() start");
     //ipc_send("ipc_log", "logLoop() start");
-    if (firstPass) {
-        var now = new Date();
-        var timeDiff = (now - last_load)/1000;
-        ipc_send("ipc_log", timeDiff);
-        if (timeDiff > 5) {
-            ipc_send("too_slow", "");
-        }
-    }
-
-    if (! await mtgaLog.exists()) {
+    if (! await mtgaLog.exists(logUri)) {
         ipc_send("no_log", logUri);
         ipc_send("popup", {"text": "No log file found.", "time": 1000});
-        resetLogLoop(500);
-    } else {
-        try {
-            await readLog();
-        }
-        catch (e) {
-            resetLogLoop(500);
-        }
+        return;
     }
-}
 
-// Begin reading the log 
-async function readLog() {
-	//console.log("readLog()");
-    
     if (!firstPass)  {
         ipc_send("log_read", 1);
     }
+
     if (debugLog) {
         firstPass = false;
     }
 
-    // If the renderer process is running, we can start reading
-    if (renderer_state == 1) {
-        var stats = await mtgaLog.stat();
-        logSize = stats.size;
-        logDiff = logSize - prevLogSize;
-        if (logDiff > 268435440)  logDiff = 268435440;
+    if (renderer_state != 1) {
+        // The renderer process is not ready, postpose reading the log
         //ipc_send("ipc_log", "readLog logloopmode: "+logLoopMode+", renderer state:"+renderer_state+", logSize: "+logSize+", prevLogSize: "+prevLogSize);
+        return;
+    }
 
+    const { size } = await mtgaLog.stat(logUri);
+    
+    if (size == undefined) {
         // Something went wrong obtaining the file size, try again later
-        if (logSize == undefined) {
-            resetLogLoop(500);
-        }
-        else {
-            // If the log was cleared, we default and start reading from position zero
-            if (logSize < prevLogSize) {
-                prevLogSize = 0;
-                logDiff = logSize;
-            }
-
-            // If the log has changed since we last checked (or if this is the first time we read it)
-            if (logSize > prevLogSize+1) {
-                // We are looping only to get user data (processLogUser)
-                if (logLoopMode == 0) {
-                    processLogUser(await mtgaLog.readSegment(prevLogSize, logDiff));
-                    prevLogSize += logDiff;
-
-                }
-                // We are looking to read the whole log (processLog)
-                else {
-                    processLog(await mtgaLog.readSegment(prevLogSize, logDiff));
-                    prevLogSize += logDiff;
-                }
-            }
-            else {
-                resetLogLoop(500);
-            }
-        }
+        return;
     }
-    // The renderer process is not ready, postpose reading the log
-    else {
-        //ipc_send("ipc_log", "readLog logloopmode: "+logLoopMode+", renderer state:"+renderer_state+", logSize: "+logSize+", prevLogSize: "+prevLogSize);
-        resetLogLoop(500);
+
+    const delta = size - prevLogSize;
+
+    if (delta === 0) {
+        // The log has not changed since we last checked
+        return;
     }
+
+    const logSegment = delta > 0
+        ? await mtgaLog.readSegment(logUri, prevLogSize, delta)
+        : await mtgaLog.readSegment(logUri, 0, size);
+
+    if (logLoopMode == 0) {
+        // We are looping only to get user data (processLogUser)
+        processLogUser(logSegment);
+    } else {
+        // We are looking to read the whole log (processLog)
+        processLog(logSegment);
+    }
+
+    prevLogSize = size;
 }
 
 // We are reading the whole log
@@ -669,12 +632,7 @@ function processLog(rawString) {
     // We split it into smaller chunks to read it 
     var splitString = rawString.split(/(\[UnityCrossThread|\[Client GRE\])+/);
 
-    // If this is happening while the app is loading, tell the async series to finish loading at the end
-    if (firstPass) {
-        splitString.push("%END%");
-    }
-
-    async.forEachOfSeries(splitString, function (value, index, callback) {
+    splitString.forEach((value, index) => {
         //ipc_send("ipc_log", "Async: ("+index+")");
         /*
         if (value.indexOf("") > -1) {
@@ -682,34 +640,31 @@ function processLog(rawString) {
         }
         */
 
-        // If this is the last chunk, end reading and exit loading screen
-        if (value == "%END%") {
-            finishLoading();
-            ipc_send("popup", {"text": "100%", "time": 3000});
-        }
-        // Process the chunks
-        else {
+        const progress = Math.round(100 / splitString.length * index);
+        try {
             processLogData(value);
-            if (firstPass) {
-                last_load = new Date();
-                ipc_send("popup", {"text": "Processing log: "+Math.round(100/splitString.length*index)+"%", "time": 0});
+        } catch (err) {
+            if (firstPass && logLoopProgress === progress && new Date() - logLoopProgressChanged > 5000) {
+                ipc_send("too_slow", "");
             }
-            
-            if (debugLog) {
-                _time = new Date();
-                while (new Date() - _time < debugLogSpeed) {}
-            }            
+            throw err;
         }
-
-        callback();
-
-    }, function (err) {
-        //console.log("Async end");
-        resetLogLoop(500);
-        if (err) {
-            console.log("processLog err: "+err.message);
+        if (firstPass && logLoopProgress < progress) {
+            logLoopProgress = progress;
+            logLoopProgressChanged = new Date();
+            ipc_send("popup", {"text": "Processing log: "+progress+"%", "time": 0});
         }
+        
+        if (debugLog) {
+            _time = new Date();
+            while (new Date() - _time < debugLogSpeed) {}
+        }            
     });
+
+    if (firstPass) {
+        finishLoading();
+        ipc_send("popup", {"text": "100%", "time": 3000});
+    }
 }
 
 // Process only the user data for initial loading (prior to log in)
@@ -717,53 +672,39 @@ function processLog(rawString) {
 function processLogUser(rawString) {
     var splitString = rawString.split('[UnityCrossThread');
 
-    if (firstPass) {
-        splitString.push("%END%");
-    }
-
-    async.forEachOfSeries(splitString, function (value, index, callback) {
+    splitString.forEach(value => {
         //ipc_send("ipc_log", "Async: ("+index+")");
-        if (value == "%END%") {
-            if (playerName == null) {
-                ipc_send("popup", {"text": "output_log contains no player data", "time": 0});
-                resetLogLoop(500);
-            }
-        }
-        else {
-            // Get player Id
-            strCheck = '"PlayerId":"';
-            if (value.indexOf(strCheck) > -1) {
-                playerId = dataChop(value, strCheck, '"');
-            }
 
-            // Get User name
-            strCheck = '"PlayerScreenName":"';
-            if (value.indexOf(strCheck) > -1) {
-                playerName = dataChop(value, strCheck, '"');
-                ipc_send("init_login", playerName);
-                ipc_send("ipc_log", 'Arena screen name: '+playerName);
-            }
-
-            // Get Client Version
-            strCheck = '"ClientVersion":"';
-            if (value.indexOf(strCheck) > -1) {
-                arenaVersion = dataChop(value, strCheck, '"');
-                ipc_send("ipc_log", 'Arena version: '+arenaVersion);
-            }
-            /*
-            if (firstPass) {
-                ipc_send("popup", {"text": "Reading: "+Math.round(100/splitString.length*index)+"%", "time": 1000});
-            }
-            */
+        // Get player Id
+        strCheck = '"PlayerId":"';
+        if (value.indexOf(strCheck) > -1) {
+            playerId = dataChop(value, strCheck, '"');
         }
-        callback();
 
-    }, function (err) {
-        if (err) {
-            console.log("processLog err: "+err.message);
+        // Get User name
+        strCheck = '"PlayerScreenName":"';
+        if (value.indexOf(strCheck) > -1) {
+            playerName = dataChop(value, strCheck, '"');
+            ipc_send("init_login", playerName);
+            ipc_send("ipc_log", 'Arena screen name: '+playerName);
         }
+
+        // Get Client Version
+        strCheck = '"ClientVersion":"';
+        if (value.indexOf(strCheck) > -1) {
+            arenaVersion = dataChop(value, strCheck, '"');
+            ipc_send("ipc_log", 'Arena version: '+arenaVersion);
+        }
+        /*
+        if (firstPass) {
+            ipc_send("popup", {"text": "Reading: "+Math.round(100/splitString.length*index)+"%", "time": 1000});
+        }
+        */
     });
 
+    if (firstPass && playerName == null) {
+        ipc_send("popup", {"text": "output_log contains no player data", "time": 0});
+    }
 }
 
 // Check if the string contains a JSON object, return it parsed as JS object
@@ -2452,7 +2393,6 @@ function httpBasic() {
                         }
                         
                         if (_headers.method == 'get_database') {
-                            //resetLogLoop(100);
                             delete parsedResult.ok;
                             setsList = parsedResult.sets;
                             eventsList = parsedResult.events;

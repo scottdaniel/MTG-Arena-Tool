@@ -8,7 +8,7 @@ const fsPromises = {
   read: promisify(fs.read)
 };
 
-function path() {
+function defaultLogUri() {
   if (process.platform !== "win32") {
     return (
       process.env.HOME +
@@ -23,23 +23,21 @@ function path() {
   );
 }
 
-const PATH = path();
-
-async function exists() {
+async function exists(path) {
   try {
-    await fsPromises.access(PATH, fs.constants.R_OK);
+    await fsPromises.access(path, fs.constants.R_OK);
     return true;
   } catch (err) {
     return false;
   }
 }
 
-async function stat() {
-  return await fsPromises.stat(PATH);
+async function stat(path) {
+  return await fsPromises.stat(path);
 }
 
-async function readSegment(start, length) {
-  const fd = await fsPromises.open(PATH, "r");
+async function readSegment(path, start, length) {
+  const fd = await fsPromises.open(path, "r");
   try {
     const buffer = new Buffer(length);
     const { bytesRead } = await fsPromises.read(fd, buffer, 0, length, start);
@@ -49,4 +47,4 @@ async function readSegment(start, length) {
   }
 }
 
-module.exports = { path, exists, stat, readSegment };
+module.exports = { defaultLogUri, exists, stat, readSegment };
