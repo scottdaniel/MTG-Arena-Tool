@@ -554,6 +554,7 @@ function get_deck_changes(deckId) {
 // Set variables to default first
 const mtgaLog = require('./mtga-log');
 let logLoopStarted = null;
+let logLoadTooSlow = false;
 let prevLogSize = 0;
 let logLoopMode = 0;
 
@@ -620,7 +621,14 @@ async function logLoop() {
         processLogUser(logSegment);
     } else {
         // We are looking to read the whole log (processLog)
-        processLog(logSegment);
+        try {
+            processLog(logSegment);
+        } catch (err) {
+            if (new Date() - logLoopStarted > 5000) {
+                logLoadTooSlow = true;
+            }
+            throw err;
+        }
     }
 
     prevLogSize = size;
@@ -641,7 +649,7 @@ function processLog(rawString) {
 
         processLogData(value);
         if (firstPass) {
-            if (new Date() - logLoopStarted > 5000) {
+            if (logLoadTooSlow) {
                 ipc_send("too_slow", "");
             } else {
                 ipc_send("popup", {"text": "Processing log: "+Math.round(100/splitString.length*index)+"%", "time": 0});
