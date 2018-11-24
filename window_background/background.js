@@ -409,6 +409,10 @@ ipc.on('request_course', function (event, arg) {
     httpGetCourse(arg);
 });
 
+ipc.on('request_tou_list', function (event, arg) {
+    httpTournamentList();
+});
+
 ipc.on('set_deck_mode', function (event, state) {
     overlayDeckMode = state;
     update_deck(true);
@@ -2450,6 +2454,9 @@ function httpBasic() {
                         if (_headers.method == 'share_draft') {
                             ipc_send("set_draft_link", parsedResult.url);
                         }
+                        if (_headers.method == 'tou_list') {
+                            ipc_send("set_tou_list", parsedResult.result);
+                        }
                         
                         if (_headers.method == 'get_database') {
                             //resetLogLoop(100);
@@ -2603,6 +2610,11 @@ function htttpGetStatus() {
 function httpDraftShareLink(did, exp) {
     var _id = makeId(6);
     httpAsync.push({'reqId': _id, 'method': 'share_draft', 'method_path': '/get_share_draft.php', 'id': did, 'expire': exp});
+}
+
+function httpTournamentList() {
+    var _id = makeId(6);
+    httpAsync.push({'reqId': _id, 'method': 'tou_list', 'method_path': '/tournament_list.php'});
 }
 
 

@@ -2,6 +2,8 @@ var electron = require('electron');
 var desktopCapturer = electron.desktopCapturer;
 var shell = electron.shell;
 window.ipc = electron.ipcRenderer;
+
+var tournaments = [];
 var decks = null;
 var changes = null;
 var matchesHistory = [];
@@ -13,7 +15,7 @@ var cards = {};
 var cardsNew = {};
 var settings = null;
 var updateState =  {state: -1, available: false, progress: 0, speed: 0};
-var sidebarActive = -1;
+var sidebarActive = -99;
 var arenaRunning = false;
 var renderer = 0;
 var collectionPage = 0;
@@ -129,7 +131,7 @@ ipc.on('set_db', function (event, arg) {
 //
 ipc.on('set_username', function (event, arg) {
 	userName = arg;
-	if (sidebarActive != -1) {
+	if (sidebarActive != -99) {
 		$('.top_username').html(userName.slice(0, -6));
 		$('.top_username_id').html(userName.slice(-6));
 	}
@@ -139,7 +141,7 @@ ipc.on('set_username', function (event, arg) {
 ipc.on('set_rank', function (event, offset, rank) {
 	rankOffset = offset;
 	rankTitle = rank;
-	if (sidebarActive != -1) {
+	if (sidebarActive != -99) {
 		$(".top_rank").css("background-position", (rankOffset*-48)+"px 0px").attr("title", rankTitle);
 	}
 });
@@ -304,6 +306,16 @@ ipc.on('set_status', function (event, arg) {
 });
 
 //
+ipc.on('set_tou_list', function (event, arg) {
+	if (arg != null) {
+		tournaments = arg;
+	}
+	if (sidebarActive == -1) {
+		setHome();
+	}
+});
+
+//
 ipc.on('set_explore', function (event, arg) {
 	if (sidebarActive == 3) {
 		arg.sort(compare_explore);
@@ -413,8 +425,8 @@ ipc.on('initialize', function (event, arg) {
 	$('.top_username_id').html(userName.slice(-6));
 
 	$(".top_rank").css("background-position", (rankOffset*-48)+"px 0px").attr("title", rankTitle);
-	sidebarActive = 0;
-	setDecks(null);
+	sidebarActive = -1;
+	ipc_send('request_tou_list', true);
 	$('.top_nav').removeClass('hidden');
 	$('.overflow_ux').removeClass('hidden');
 	$('.message_center').css('display', 'none');
@@ -634,8 +646,6 @@ $(document).ready(function() {
 		}
 	});
 
-
-
 	//
 	$(".close").click(function () {
 	    ipc_send('renderer_window_close', 1);
@@ -665,6 +675,10 @@ $(document).ready(function() {
 
 			$(this).addClass("item_selected");
 
+			if ($(this).hasClass("ith")) {
+				sidebarActive = -1;
+				ipc_send('request_tou_list', true);
+			}
 			if ($(this).hasClass("it0")) {
 				sidebarActive = 0;
 				setDecks(null);
@@ -1951,6 +1965,64 @@ function addHover(_match, tileGrpid) {
 			expandEvent(_match, tileGrpid);
 		}
 	});
+}
+
+//
+function setHome(arg) {
+	if (arg != null) {
+		tournaments = arg;
+	}
+
+	var mainDiv = document.getElementById("ux_0");
+	mainDiv.classList.remove("flex_item");
+	mainDiv.innerHTML = '';
+
+	var d = document.createElement("div");
+	d.classList.add("list_fill");
+	mainDiv.appendChild(d);
+
+	cont = document.createElement("div");
+	cont.classList.add("tournament_list_cont");
+
+	tournaments.forEach(function(tou) {
+		console.log(tou);
+
+		var div = document.createElement("div");
+		div.classList.add("tou_container");
+
+		var now = timestamp();
+		timeDiff = now - tou.serverTime;
+		now = tou.serverTime - timeDiff;
+		
+
+		var state = "-";
+		var stateb = "-";
+		if (tou.state == -1) {
+			state = "Sign ups begin in";
+		}
+		if (tou.state == 0) {
+			state = "Sign ups in progress.";
+		}
+		if (tou.state == 1) {
+			state = "Round "+tou.currentRound+" in progress.";
+		}
+		if (tou.state == 4) {
+			state = "Tournament finish.";
+		}
+
+		var st = document.createElement("div");
+		st.classList.add("tou_state");
+		st.innerHTML = state;
+
+		var stb = document.createElement("div");
+		stb.classList.add("tou_state");
+		stb.innerHTML = state;
+
+		div.appendChild(st);
+		cont.appendChild(div);
+	});
+
+	mainDiv.appendChild(cont);
 }
 
 //

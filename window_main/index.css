@@ -265,6 +265,15 @@ span i {
     overflow: hidden;
 }
 
+.ith_icon {
+    width: 32px;
+    height: 32px;
+    opacity: 0.5;
+    margin: 16px auto;
+    background-repeat: no-repeat;
+    background-image: url(../images/cup.png);
+}
+
 .top_nav_item:hover {
     background-position-y: 4px;
     opacity: 1;
@@ -1978,4 +1987,21 @@ a:hover {
     overflow: hidden;
     background: #DD8263 url(../images/delete.png) no-repeat left;
     -webkit-transition: all .25s cubic-bezier(0.2, 0.5, 0.35, 1);
+}
+
+.tournament_list_cont {
+    width: 50%;
+    margin: 16px;
+    overflow: auto;
+}
+
+.tou_container {
+    display: flex;
+    height: 32px;
+}
+
+.tou_state {
+    color: rgba(250, 229, 210, 0.8);
+    font-size: 14px;
+    line-height: 32px;
 }

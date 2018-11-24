@@ -219,6 +219,10 @@ app.on('ready', () => {
                 mainWindow.webContents.send("open_course_deck", arg);
                 break;
 
+            case 'set_tou_list':
+                mainWindow.webContents.send("set_tou_list", arg);
+                break;
+
             // to background
             case 'set_log':
                 background.webContents.send("set_log", arg);
@@ -254,6 +258,10 @@ app.on('ready', () => {
 
             case 'request_economy':
                 background.webContents.send("request_economy", arg);
+                break;
+
+            case 'request_tou_list':
+                background.webContents.send("request_tou_list", arg);
                 break;
 
             case 'renderer_state':
