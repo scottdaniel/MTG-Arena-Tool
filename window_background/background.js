@@ -548,6 +548,11 @@ function get_deck_changes(deckId) {
     ipc_send("set_deck_changes", JSON.stringify(changes));
 }
 
+// Set a new log URI
+ipc.on('set_log', function (event, arg) {
+    logUri = arg;
+});
+
 
 // Read the log
 // Set variables to default first
@@ -557,7 +562,7 @@ let logLoopProgressChanged = new Date();
 let prevLogSize = 0;
 let logLoopMode = 0;
 
-const logUri = mtgaLog.defaultLogUri();
+let logUri = mtgaLog.defaultLogUri();
 console.log(logUri);
 window.setInterval(attemptLogLoop, 250);
 
@@ -1032,7 +1037,6 @@ function processLogData(data) {
     strCheck = '<== Deck.GetDeckLists(';
     json = checkJsonWithStart(data, strCheck, '', ')');
     if (json != false) {
-        A = B;
         decks = json;
         requestHistorySend(0);
         ipc_send("set_decks", JSON.stringify(json));

@@ -440,12 +440,12 @@ ipc.on('no_log', function (event, arg) {
 		$('.dialog').css('top', 'calc(50% - 100px)');
 
 		$('.dialog_wrapper').on('click', function(e) {
-			logDialogOpen = false;
 			console.log('.dialog_wrapper on click')
 			//e.stopPropagation();
 			$('.dialog_wrapper').css('opacity', 0);
 			$('.dialog_wrapper').css('pointer-events', 'none');
 			setTimeout(function() {
+				logDialogOpen = false;
 				$('.dialog_wrapper').hide();
 				$('.dialog').css('width', '500px');
 				$('.dialog').css('height', '160px');
@@ -476,6 +476,15 @@ ipc.on('no_log', function (event, arg) {
 
 		but.click(function () {
 		    ipc_send('set_log', document.getElementById("log_input").value);
+			$('.dialog_wrapper').css('opacity', 0);
+			$('.dialog_wrapper').css('pointer-events', 'none');
+			setTimeout(function() {
+			    logDialogOpen = false;
+				$('.dialog_wrapper').hide();
+				$('.dialog').css('width', '500px');
+				$('.dialog').css('height', '160px');
+				$('.dialog').css('top', 'calc(50% - 80px)');
+			}, 250);
 		});
 	}
 });
