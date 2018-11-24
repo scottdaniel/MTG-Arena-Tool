@@ -557,7 +557,7 @@ let logLoopProgressChanged = new Date();
 let prevLogSize = 0;
 let logLoopMode = 0;
 
-const logUri = mtgaLog.path();
+const logUri = mtgaLog.defaultLogUri();
 console.log(logUri);
 window.setInterval(attemptLogLoop, 250);
 
@@ -573,7 +573,7 @@ async function attemptLogLoop() {
 async function logLoop() {
     //console.log("logLoop() start");
     //ipc_send("ipc_log", "logLoop() start");
-    if (! await mtgaLog.exists()) {
+    if (! await mtgaLog.exists(logUri)) {
         ipc_send("no_log", logUri);
         ipc_send("popup", {"text": "No log file found.", "time": 1000});
         return;
@@ -593,7 +593,7 @@ async function logLoop() {
         return;
     }
 
-    const { size } = await mtgaLog.stat();
+    const { size } = await mtgaLog.stat(logUri);
     
     if (size == undefined) {
         // Something went wrong obtaining the file size, try again later
@@ -608,8 +608,8 @@ async function logLoop() {
     }
 
     const logSegment = delta > 0
-        ? await mtgaLog.readSegment(prevLogSize, delta)
-        : await mtgaLog.readSegment(0, size);
+        ? await mtgaLog.readSegment(logUri, prevLogSize, delta)
+        : await mtgaLog.readSegment(logUri, 0, size);
 
     if (logLoopMode == 0) {
         // We are looping only to get user data (processLogUser)
