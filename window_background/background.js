@@ -214,7 +214,6 @@ ipc.on('login', function (event, arg) {
     else if (arg.username == '' && arg.password == '') {
         ipc_send("auth", {ok: true, user:-1});
         loadPlayerConfig(playerId);
-        startLogLoop();
         playerUsername = '';
     }
     else {
@@ -553,18 +552,14 @@ function get_deck_changes(deckId) {
 // Read the log
 // Set variables to default first
 const mtgaLog = require('./mtga-log');
-let logLoopStarted = null;
-let logLoadTooSlow = false;
+let logLoopProgress = -1;
+let logLoopProgressChanged = new Date();
 let prevLogSize = 0;
 let logLoopMode = 0;
 
 const logUri = mtgaLog.path();
 console.log(logUri);
 window.setInterval(attemptLogLoop, 250);
-
-function startLogLoop() {
-    logLoopStarted = new Date();
-}
 
 async function attemptLogLoop() {
     try {
@@ -621,14 +616,7 @@ async function logLoop() {
         processLogUser(logSegment);
     } else {
         // We are looking to read the whole log (processLog)
-        try {
-            processLog(logSegment);
-        } catch (err) {
-            if (new Date() - logLoopStarted > 5000) {
-                logLoadTooSlow = true;
-            }
-            throw err;
-        }
+        processLog(logSegment);
     }
 
     prevLogSize = size;
@@ -647,13 +635,19 @@ function processLog(rawString) {
         }
         */
 
-        processLogData(value);
-        if (firstPass) {
-            if (logLoadTooSlow) {
+        const progress = Math.round(100 / splitString.length * index);
+        try {
+            processLogData(value);
+        } catch (err) {
+            if (firstPass && logLoopProgress === progress && new Date() - logLoopProgressChanged > 5000) {
                 ipc_send("too_slow", "");
-            } else {
-                ipc_send("popup", {"text": "Processing log: "+Math.round(100/splitString.length*index)+"%", "time": 0});
             }
+            throw err;
+        }
+        if (firstPass && logLoopProgress < progress) {
+            logLoopProgress = progress;
+            logLoopProgressChanged = new Date();
+            ipc_send("popup", {"text": "Processing log: "+progress+"%", "time": 0});
         }
         
         if (debugLog) {
@@ -2383,7 +2377,6 @@ function httpBasic() {
 
                             ipc_send("auth", parsedResult);
                             loadPlayerConfig(playerId);
-                            startLogLoop();
                         }
                         if (_headers.method == 'get_top_decks') {
                             ipc_send("set_explore", parsedResult.result);
