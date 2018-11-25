@@ -972,13 +972,16 @@ function processLogData(data) {
     strCheck = '<== Event.GetPlayerCourse(';
     json = checkJsonWithStart(data, strCheck, '', ')');
     if (json != false) {
+        /*
+        // Setting time to local datetime causes timestamp on the server to go crazy?
+        // Proper timezone onversion is required here
         strCheck = 'Logger]';
         if (data.indexOf(strCheck) > -1) {
             var str = dataChop(data, strCheck, 'M')+'M';
             var logTime = parseWotcTime(str);
             json.date = logTime;
         }
-
+        */
         if (json.Id != "00000000-0000-0000-0000-000000000000") {
             json._id = json.Id;
             delete json.Id;
@@ -986,7 +989,8 @@ function processLogData(data) {
             select_deck(json);
             if (json.CourseDeck != null) {
                 json.CourseDeck.colors = get_deck_colors(json.CourseDeck);
-                console.log(json.CourseDeck, json.CourseDeck.colors)
+                  json.date = timestamp();
+                  console.log(json.CourseDeck, json.CourseDeck.colors)
                 httpSubmitCourse(json);
                 saveCourse(json);
             }
