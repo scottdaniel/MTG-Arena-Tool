@@ -1990,18 +1990,42 @@ a:hover {
 }
 
 .tournament_list_cont {
-    width: 50%;
     margin: 16px;
     overflow: auto;
 }
 
 .tou_container {
     display: flex;
+    cursor: pointer;
     height: 32px;
+    -webkit-transition: all .25s cubic-bezier(0.2, 0.5, 0.35, 1);
+}
+
+.tou_container:hover {
+    background-color: rgba(220, 195, 150, 0.3);
+}
+
+.tou_name {
+    width: 200px;
+    color: rgba(250, 229, 210, 1);
+    font-size: 14px;
+    font-weight: bold;
+    line-height: 32px;
+    margin-left: 16px;
 }
 
 .tou_state {
+    width: 150px;
     color: rgba(250, 229, 210, 0.8);
     font-size: 14px;
     line-height: 32px;
+    margin-right: 16px;
+}
+
+.tou_cell {
+    width: 100px;
+    color: rgba(250, 229, 210, 0.8);
+    font-size: 14px;
+    line-height: 32px;
+    margin-right: 16px;
 }

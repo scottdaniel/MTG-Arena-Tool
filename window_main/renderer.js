@@ -1973,13 +1973,16 @@ function setHome(arg) {
 		tournaments = arg;
 	}
 
-	var mainDiv = document.getElementById("ux_0");
+	let mainDiv = document.getElementById("ux_0");
 	mainDiv.classList.remove("flex_item");
 	mainDiv.innerHTML = '';
 
-	var d = document.createElement("div");
+	let d = document.createElement("div");
 	d.classList.add("list_fill");
 	mainDiv.appendChild(d);
+
+	cont = document.createElement("div");
+	cont.classList.add("tournament_list_cont");
 
 	cont = document.createElement("div");
 	cont.classList.add("tournament_list_cont");
@@ -1987,42 +1990,77 @@ function setHome(arg) {
 	tournaments.forEach(function(tou) {
 		console.log(tou);
 
-		var div = document.createElement("div");
+		let div = document.createElement("div");
 		div.classList.add("tou_container");
+		div.id = tou._id+"tou";
 
-		var now = timestamp();
-		timeDiff = now - tou.serverTime;
-		now = tou.serverTime - timeDiff;
-		
 
-		var state = "-";
-		var stateb = "-";
+		let sd = tou.signupDuration;
+		let rd = tou.roundDuration;
+		let now = timestamp();
+
+		let roundsStart = tou.starts + (sd * 60*60);
+		let roundEnd = tou.starts + (sd * 60*60) + (tou.currentRound * 60*60);
+
+		let state = "-";
+		let stateb = "-";
 		if (tou.state == -1) {
-			state = "Sign ups begin in";
+			state = "Registration begin in "+(toHHMM(now - tou.starts));
 		}
 		if (tou.state == 0) {
-			state = "Sign ups in progress.";
+			state = "Registration in progress.";
+			stateb = toHHMM(roundsStart-now)+" left";
 		}
 		if (tou.state == 1) {
 			state = "Round "+tou.currentRound+" in progress.";
+			stateb = toHHMM(roundEnd-now)+" left";
 		}
 		if (tou.state == 4) {
 			state = "Tournament finish.";
+			stateb = tou.winner.slice(0, -6);
 		}
 
-		var st = document.createElement("div");
+		let nam = document.createElement("div");
+		nam.classList.add("tou_name");
+		nam.innerHTML = tou.name;
+
+		let st = document.createElement("div");
 		st.classList.add("tou_state");
 		st.innerHTML = state;
 
-		var stb = document.createElement("div");
-		stb.classList.add("tou_state");
-		stb.innerHTML = state;
+		let pln = document.createElement("div");
+		pln.classList.add("tou_cell");
+		pln.innerHTML = stateb;
 
+		let stb = document.createElement("div");
+		stb.classList.add("tou_cell");
+		stb.innerHTML = tou.players.length;
+
+		div.appendChild(nam);
 		div.appendChild(st);
+		div.appendChild(stb);
+		div.appendChild(pln);
 		cont.appendChild(div);
+
 	});
 
 	mainDiv.appendChild(cont);
+
+	$('.tou_container').each(function(index) {
+		$(this).on("click", function() {
+			let tid = $(this).attr('id');
+			openTournament(tid);
+			$('.moving_ux').animate({'left': '-100%'}, 250, 'easeInOutCubic');
+		});
+	});
+}
+
+//
+function openTournament(_id) {
+	let mainDiv = $("#ux_1");
+	mainDiv.html('');
+
+
 }
 
 //
