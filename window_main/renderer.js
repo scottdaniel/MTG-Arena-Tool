@@ -1,48 +1,84 @@
-var electron = require('electron');
-var desktopCapturer = electron.desktopCapturer;
-var shell = electron.shell;
-window.ipc = electron.ipcRenderer;
-var decks = null;
-var changes = null;
-var matchesHistory = [];
-var economyHistory = [];
-var eventsHistory = [];
+/*
+global
+	setsList,
+	cardsDb,
+	makeId,
+	ConicGradient,
+	daysPast,
+	timeSince,
+	toMMSS,
+	selectAdd,
+	addCardHover,
+	get_set_scryfall,
+	get_colation_set,
+	getEventId,
+	addCardSeparator,
+	addCardTile,
+	getReadableEvent,
+	get_collection_export,
+	get_collection_stats,
+	get_deck_colors,
+	get_deck_types_ammount,
+	get_deck_curve,
+	get_deck_colors_ammount,
+	get_deck_lands_ammount,
+	get_deck_missing,
+	get_deck_export,
+	get_deck_export_txt,
+	get_rank_index_16,
+	get_rank_index,
+	draftRanks
+	get_card_type_sort,
+	collectionSortSet,
+	collectionSortName,
+	collectionSortCmc,
+	collectionSortRarity,
+	compare_colors,
+	compare_cards,
+*/
 
-var explore = null;
-var cards = {};
-var cardsNew = {};
-var settings = null;
-var updateState =  {state: -1, available: false, progress: 0, speed: 0};
-var sidebarActive = -1;
-var arenaRunning = false;
-var renderer = 0;
-var collectionPage = 0;
-var eventFilters = null;
-var sortingAlgorithm = 'Set';
-var filterEvent = 'All';
-var filterEconomy = 'All';
-var filteredSets = [];
-var filteredMana = [];
-var draftPosition = 1;
-var overlayAlpha = 1;
-var overlayAlphaBack = 1;
-var cardSizePos = 4;
-var cardSize = 140;
-var cardQuality = "normal";
-var inputTimer = undefined;
-var loadHistory = 0;
-var loadEvents = 0;
-var defaultBackground = "";
-var currentOpenDeck = null;
-var lastSettingsSection = 1;
-var serverStatus = undefined;
-var loggedIn = false;
-var canLogin = false;
-var offlineMode = false;
+const electron = require('electron');
+const remote = require('electron').remote;
 
-var rankOffset = 0;
-var rankTitle = "";
-var userName = ""
+let shell = electron.shell;
+let ipc = electron.ipcRenderer;
+let decks = null;
+let changes = null;
+let matchesHistory = [];
+let economyHistory = [];
+let eventsHistory = [];
+
+let explore = null;
+let cards = {};
+let cardsNew = {};
+let settings = null;
+let updateState =  {state: -1, available: false, progress: 0, speed: 0};
+let sidebarActive = -1;
+let collectionPage = 0;
+let eventFilters = null;
+let sortingAlgorithm = 'Set';
+let filterEvent = 'All';
+let filterEconomy = 'All';
+let filteredSets = [];
+let filteredMana = [];
+let draftPosition = 1;
+let overlayAlpha = 1;
+let overlayAlphaBack = 1;
+let cardSizePos = 4;
+let cardSize = 140;
+let cardQuality = "normal";
+let loadHistory = 0;
+let loadEvents = 0;
+let defaultBackground = "";
+let currentOpenDeck = null;
+let lastSettingsSection = 1;
+let loggedIn = false;
+let canLogin = false;
+let offlineMode = false;
+
+let rankOffset = 0;
+let rankTitle = "";
+let userName = ""
 
 //const chartjs = require('chart.js');
 const sha1 	= require('js-sha1');
@@ -51,11 +87,11 @@ const path  = require('path');
 
 const actionLogDir = path.join((electron.app || electron.remote.app).getPath('userData'), 'actionlogs');
 
-var mana = {0: "", 1: "white", 2: "blue", 3: "black", 4: "red", 5: "green", 6: "colorless", 7: "", 8: "x"}
+let mana = {0: "", 1: "white", 2: "blue", 3: "black", 4: "red", 5: "green", 6: "colorless", 7: "", 8: "x"}
 
-ipc_send = function (method, arg) {
+function ipc_send(method, arg) {
     ipc.send('ipc_switch', method, arg);
-};
+}
 
 
 //document.addEventListener('DOMContentLoaded', windowReady);
@@ -82,10 +118,10 @@ process.on('uncaughtException', function(err){
 process.on('warning', (warning) => {
 	ipc_send("ipc_log", "Warning: "+warning.message);
 	ipc_send("ipc_log", "> "+warning.stack);
-});;
+});
 
 //
-ipc.on('clear_pwd', function (event, arg) {
+ipc.on('clear_pwd', function () {
 	document.getElementById("signin_pass").value = "";
 });
 
@@ -102,7 +138,7 @@ ipc.on('auth', function (event, arg) {
 });
 
 //
-ipc.on('too_slow', function (event, arg) {
+ipc.on('too_slow', function () {
 	pop('Loading is taking too long, please read our <a class="trouble_link">troubleshooting guide</a>.', 0);
 
 	$('.popup').css("left", "calc(50% - 280px)");
@@ -117,7 +153,7 @@ ipc.on('too_slow', function (event, arg) {
 //
 ipc.on('set_db', function (event, arg) {
 	setsList = arg.sets;
-	eventsList = arg.events;
+	//eventsList = arg.events;
 	delete arg.sets;
 	delete arg.events;
 	canLogin = true;
@@ -155,7 +191,8 @@ ipc.on('set_decks', function (event, arg) {
 	setDecks(arg);
 });
 
-//
+// 
+// Whats this?
 ipc.on('set_deck_updated', function (event, str) {
     try {
         deck = JSON.parse(str);
@@ -169,12 +206,12 @@ ipc.on('set_deck_updated', function (event, str) {
 //
 ipc.on('set_history', function (event, arg) {
 	if (arg != null) {
-	    try {
-	        matchesHistory = JSON.parse(arg);
-	    } catch(e) {
-	        console.log("Error parsing JSON:", str);
-	        return false;
-	    }
+		try {
+			matchesHistory = JSON.parse(arg);
+		} catch(e) {
+			console.log("Error parsing JSON:", arg);
+		return false;
+		}
 	}
 	
 	setHistory(0);
@@ -190,12 +227,12 @@ ipc.on('set_history_data', function (event, arg) {
 //
 ipc.on('set_events', function (event, arg) {
 	if (arg != null) {
-	    try {
-	        eventsHistory = JSON.parse(arg);
-	    } catch(e) {
-	        console.log("Error parsing JSON:", str);
-	        return false;
-	    }
+		try {
+			eventsHistory = JSON.parse(arg);
+		} catch(e) {
+			console.log("Error parsing JSON:", arg);
+			return false;
+		}
 	}
 
 	setEvents(0);
@@ -204,12 +241,12 @@ ipc.on('set_events', function (event, arg) {
 
 ipc.on('set_economy', function (event, arg) {
 	if (arg != null) {
-	    try {
-	        economyHistory = JSON.parse(arg);
-	    } catch(e) {
-	        console.log("Error parsing JSON:", str);
-	        return false;
-	    }
+		try {
+			economyHistory = JSON.parse(arg);
+		} catch(e) {
+			console.log("Error parsing JSON:", arg);
+			return false;
+		}
 	}
 
 	setEconomy(0);
@@ -218,13 +255,13 @@ ipc.on('set_economy', function (event, arg) {
 //
 ipc.on('set_deck_changes', function (event, arg) {
 	if (arg != null) {
-	    try {
-	        changes = JSON.parse(arg);
-	        console.log(changes);
-	    } catch(e) {
-	        console.log("Error parsing JSON:", str);
-	        return false;
-	    }
+		try {
+			changes = JSON.parse(arg);
+			console.log(changes);
+		} catch(e) {
+			console.log("Error parsing JSON:", arg);
+			return false;
+		}
 	}
 
 	if (changes != null) {
@@ -295,10 +332,10 @@ ipc.on('set_status', function (event, arg) {
 		$('.top_status').addClass('status_red');
 	}
 
-	$('.top_status').on('mouseenter', function(e) {
+	$('.top_status').on('mouseenter', function() {
 		$('.top_status_pop').css("opacity", 1);
 	});
-	$('.top_status').on('mouseleave', function(e) {
+	$('.top_status').on('mouseleave', function() {
 		$('.top_status_pop').css("opacity", 0);
 	});
 });
@@ -336,7 +373,7 @@ ipc.on('set_settings', function (event, arg) {
         settings.back_color = 'rgba(0,0,0,0.3)';
     }
     if (settings.back_url == undefined) {
-        back_url = "";
+        settings.back_url = "";
     }
     else {
         defaultBackground = settings.back_url;
@@ -361,30 +398,30 @@ ipc.on('show_notification', function (event, arg) {
     $('.notification').attr("title", arg);
 
     if (arg == "Update available" || arg == "Update downloaded") {
-	    $('.notification').click(function() {
-	        force_open_about();
-	    });
+		$('.notification').click(function() {
+			force_open_about();
+		});
 	}
 });
 
 //
-ipc.on('hide_notification', function (event, arg) {
+ipc.on('hide_notification', function () {
     $('.notification').hide();
     $('.notification').attr("title", "");
 });
 
 //
-ipc.on('force_open_settings', function (event, arg) {
+ipc.on('force_open_settings', function () {
 	force_open_settings();
 });
 
 //
-ipc.on('force_open_about', function (event, arg) {
+ipc.on('force_open_about', function () {
 	force_open_about();
 });
 
 //
-ipc.on('init_login', function (event, arg) {
+ipc.on('init_login', function () {
 	$('.authenticate').show();
 	$('.message_center').css('display', 'none');
 	$('.init_loading').hide();
@@ -403,12 +440,14 @@ ipc.on('set_remember', function (event, arg) {
 });
 
 //
+/* eslint-disable */
 function rememberMe() {
 	ipc_send("remember", document.getElementById("rememberme").checked);
 }
+/* eslint-enable */
 
 //
-ipc.on('initialize', function (event, arg) {
+ipc.on('initialize', function () {
 	$('.top_username').html(userName.slice(0, -6));
 	$('.top_username_id').html(userName.slice(-6));
 
@@ -439,7 +478,7 @@ ipc.on('no_log', function (event, arg) {
 		$('.dialog').css('height', '200px');
 		$('.dialog').css('top', 'calc(50% - 100px)');
 
-		$('.dialog_wrapper').on('click', function(e) {
+		$('.dialog_wrapper').on('click', function() {
 			console.log('.dialog_wrapper on click')
 			//e.stopPropagation();
 			$('.dialog_wrapper').css('opacity', 0);
@@ -475,7 +514,7 @@ ipc.on('no_log', function (event, arg) {
 		but.appendTo(dialog);
 
 		but.click(function () {
-		    ipc_send('set_log', document.getElementById("log_input").value);
+			ipc_send('set_log', document.getElementById("log_input").value);
 			console.log('.dialog_wrapper on click')
 			//e.stopPropagation();
 			$('.dialog_wrapper').css('opacity', 0);
@@ -492,7 +531,7 @@ ipc.on('no_log', function (event, arg) {
 });
 
 
-ipc.on('log_ok', function (event, arg) {
+ipc.on('log_ok', function () {
 	logDialogOpen = false;
 	$('.dialog_wrapper').css('opacity', 0);
 	$('.dialog_wrapper').css('pointer-events', 'none');
@@ -505,7 +544,7 @@ ipc.on('log_ok', function (event, arg) {
 });
 
 //
-ipc.on('offline', function (event, arg) {
+ipc.on('offline', function () {
 	document.body.style.cursor = "auto";
 	$('#ux_0').html('<div class="message_center" style="display: flex; position: fixed;"><div class="message_unlink"></div><div class="message_big red">Oops, you are offline!</div><div class="message_sub_16 white">You can <a class="signup_link">sign up</a> to access online features.</div></div>');
 	$(".signup_link").click(function() {
@@ -514,7 +553,7 @@ ipc.on('offline', function (event, arg) {
 });
 
 //
-ipc.on('log_read', function (event, arg) {
+ipc.on('log_read', function () {
 	if ($('.top_nav').hasClass('hidden')) {
 		$('.top_nav').removeClass('hidden');
 		$('.overflow_ux').removeClass('hidden');
@@ -538,27 +577,28 @@ function pop(str, timeout) {
     $('.popup').css("opacity", 1);
     $('.popup').html(str);
     if (popTimeout != null) {
-	    clearTimeout(popTimeout);
+		clearTimeout(popTimeout);
     }
     if (timeout < 1) {
-    	popTimeout = null;
+		popTimeout = null;
     }
     else {
-	    popTimeout = setTimeout(function() {
-	    	$('.popup').css("opacity", 0);
-	    	popTimeout = null;
-	    }, timeout);
+		popTimeout = setTimeout(function() {
+			$('.popup').css("opacity", 0);
+			popTimeout = null;
+		}, timeout);
     }
 }
 
-//
+/* eslint-disable */
 function installUpdate() {
 	ipc_send('renderer_update_install', 1);
 }
+/* eslint-enable */
 
 function force_open_settings() {
 	sidebarActive = 6;
-	$(".top_nav_item").each(function(index) {
+	$(".top_nav_item").each(function() {
 		$(this).removeClass("item_selected");
 		if ($(this).hasClass("it6")) {
 			$(this).addClass("item_selected");
@@ -570,7 +610,7 @@ function force_open_settings() {
 
 function force_open_about() {
 	sidebarActive = 9;
-	$(".top_nav_item").each(function(index) {
+	$(".top_nav_item").each(function() {
 		$(this).removeClass("item_selected");
 		if ($(this).hasClass("it7")) {
 			$(this).addClass("item_selected");
@@ -578,44 +618,6 @@ function force_open_about() {
 	});
 	$('.moving_ux').animate({'left': '0px'}, 250, 'easeInOutCubic'); 
 	open_settings(5);
-}
-
-function arenaCheckLoop() {
-	if (!arenaRunning) {
-		console.log("Arena is NOT running")
-		$('.top_nav').addClass('hidden');
-		$('.overflow_ux').addClass('hidden');
-		$('.message_center').css('display', 'flex');
-		$('.message_center').html('<div class="message_big red">Open MTG Arena</div><div class="message_sub white">...</div>');
-	}
-	else {
-		console.log("Arena is running")
-		$('.top_nav').removeClass('hidden');
-		$('.overflow_ux').removeClass('hidden');
-		$('.message_center').css('display', 'none');
-	}
-
-	isArenaRunning();
-	setTimeout( function() {
-		arenaCheckLoop();
-	}, 100);
-}
-
-function isArenaRunning() {
-	// This is not quite working as expected
-    desktopCapturer.getSources({
-        types: ['window', 'screen']
-    }, (error, sources) => {
-        if (error) throw error
-		arenaRunning = false;
-        for (let i = 0; i < sources.length; ++i) {
-        	// sometimes arena does not show up here
-        	console.log(sources[i].name);
-            if (sources[i].name.indexOf('MTGA') !== -1) {
-            	arenaRunning = true;
-            }
-        }
-    });
 }
 
 $(document).ready(function() {
@@ -627,7 +629,7 @@ $(document).ready(function() {
 	$(".offline_link").click(function() {
 		ipc_send("login", {username: '', password: ''});
 		offlineMode = true;
-	    $('.unlink').show();
+		$('.unlink').show();
 	});
 
 	$(".forgot_link").click(function() {
@@ -649,12 +651,12 @@ $(document).ready(function() {
 
 	//
 	$(".close").click(function () {
-	    ipc_send('renderer_window_close', 1);
+		ipc_send('renderer_window_close', 1);
 	});
 
 	//
 	$(".minimize").click(function () {
-	    ipc_send('renderer_window_minimize', 1);
+		ipc_send('renderer_window_minimize', 1);
 	});
 
 	//
@@ -670,7 +672,7 @@ $(document).ready(function() {
 		if (!$(this).hasClass("item_selected")) {
 			$('.moving_ux').animate({'left': '0px'}, 250, 'easeInOutCubic'); 
 
-			$(".top_nav_item").each(function(index) {
+			$(".top_nav_item").each(function() {
 				$(this).removeClass("item_selected");
 			});
 
@@ -730,9 +732,7 @@ class economyDay {
 //
 function setEconomy(loadMore) {
 	var mainDiv = document.getElementById("ux_0");
-	if (loadMore > 0) {
-	}
-	else {
+	if (loadMore <= 0) {
 		loadMore = 25;
 		daysago = 0;
 		dayList = [];
@@ -741,8 +741,8 @@ function setEconomy(loadMore) {
 
 		var selectItems = ["All"];
 		for (var n = 0; n < economyHistory.changes.length; n++) {
-			var economy_id = economyHistory.changes[n];
-			var change = economyHistory[economy_id];
+			let economy_id = economyHistory.changes[n];
+			let change = economyHistory[economy_id];
 
 			if (!selectItems.includes(change.context)) {
 				selectItems.push(change.context);
@@ -827,14 +827,14 @@ function setEconomy(loadMore) {
 		mainDiv.appendChild(div);
 		mainDiv.appendChild(d);
 
-		loadEconomy = 0;
+		var loadEconomy = 0;
 		daysago = -1;
 	}
 
 	//console.log("Load more: ", loadEconomy, loadMore, loadEconomy+loadMore);
 	for (var loadEnd = loadEconomy + loadMore; loadEconomy < loadEnd; loadEconomy++) {
-		var economy_id = economyHistory.changes[loadEconomy];
-		var change = economyHistory[economy_id];
+		let economy_id = economyHistory.changes[loadEconomy];
+		let change = economyHistory[economy_id];
 
 		if (change == undefined) continue;
 		if (filterEconomy !== 'All' && change.context !== filterEconomy) {
@@ -928,14 +928,16 @@ function setEconomy(loadMore) {
 		flr.classList.add("tiny_scroll");
 		flr.classList.add("list_economy_awarded");
 
-		checkGemsPaid = false;
-		checkGoldPaid = false;
-		checkCardsAdded = false;
-		checkBoosterAdded = false;
-		checkAetherized = false;
-		checkWildcardsAdded = false;
-		checkGemsEarnt = false;
-		checkGoldEarnt = false;
+		let checkGemsPaid = false;
+		let checkGoldPaid = false;
+		let checkCardsAdded = false;
+		let checkBoosterAdded = false;
+		let checkAetherized = false;
+		let checkWildcardsAdded = false;
+		let checkGemsEarnt = false;
+		let checkGoldEarnt = false;
+
+		var bon, bos;
 
 		if (change.context == "Booster Open") {
 			change.delta.boosterDelta.forEach(function(booster) {
@@ -971,7 +973,7 @@ function setEconomy(loadMore) {
 			checkGemsPaid = true;
 			checkGoldPaid = true;
 
-			var bos = document.createElement("div");
+			bos = document.createElement("div");
 			bos.classList.add("economy_ticket_med");
 			bos.title = "Event Entry";
 
@@ -984,7 +986,7 @@ function setEconomy(loadMore) {
 			if (change.delta.wcRareDelta != undefined)		imgUri = "wc_rare";
 			if (change.delta.wcMythicDelta != undefined)	imgUri = "wc_mythic";
 			if (imgUri != "") {
-				var bos = document.createElement("div");
+				bos = document.createElement("div");
 				bos.classList.add("economy_wc");
 				bos.style.backgroundImage = 'url(../images/'+imgUri+'.png)';
 
@@ -1004,11 +1006,11 @@ function setEconomy(loadMore) {
 		}
 
 		if (checkGemsPaid && change.delta.gemsDelta != undefined) {
-			var bos = document.createElement("div");
+			bos = document.createElement("div");
 			bos.classList.add("economy_gems");
 			bos.title = "Gems";
 
-			var bon = document.createElement("div");
+			bon = document.createElement("div");
 			bon.style.lineHeight = "32px";
 			bon.classList.add("economy_sub");
 			bon.innerHTML = Math.abs(change.delta.gemsDelta);
@@ -1018,11 +1020,11 @@ function setEconomy(loadMore) {
 		}
 
 		if (checkGoldPaid && change.delta.goldDelta != undefined) {
-			var bos = document.createElement("div");
+			bos = document.createElement("div");
 			bos.classList.add("economy_gold");
 			bos.title = "Gold";
 
-			var bon = document.createElement("div");
+			bon = document.createElement("div");
 			bon.style.lineHeight = "32px";
 			bon.classList.add("economy_sub");
 			bon.innerHTML = Math.abs(change.delta.goldDelta);
@@ -1032,11 +1034,11 @@ function setEconomy(loadMore) {
 		}
 
 		if (checkGemsEarnt && change.delta.gemsDelta != undefined) {
-			var bos = document.createElement("div");
+			bos = document.createElement("div");
 			bos.classList.add("economy_gems_med");
 			bos.title = "Gems";
 
-			var bon = document.createElement("div");
+			bon = document.createElement("div");
 			bon.style.lineHeight = "64px";
 			bon.classList.add("economy_sub");
 			bon.innerHTML = Math.abs(change.delta.gemsDelta);
@@ -1046,11 +1048,11 @@ function setEconomy(loadMore) {
 		}
 
 		if (checkGoldEarnt && change.delta.goldDelta != undefined) {
-			var bos = document.createElement("div");
+			bos = document.createElement("div");
 			bos.classList.add("economy_gold_med");
 			bos.title = "Gold";
 
-			var bon = document.createElement("div");
+			bon = document.createElement("div");
 			bon.style.lineHeight = "64px";
 			bon.classList.add("economy_sub");
 			bon.innerHTML = Math.abs(change.delta.goldDelta);
@@ -1080,12 +1082,12 @@ function setEconomy(loadMore) {
 
 		if (checkWildcardsAdded) {
 			if (change.delta.wcCommonDelta != undefined) {
-				var bos = document.createElement("div");
+				bos = document.createElement("div");
 				bos.classList.add("economy_wc");
 				bos.title = 'Common Wildcard';
 				bos.style.margin = 'auto 4px';
 				bos.style.backgroundImage = 'url(../images/wc_common.png)';
-				var bon = document.createElement("div");
+				bon = document.createElement("div");
 				bon.style.lineHeight = "64px";
 				bon.classList.add("economy_sub");
 				bon.innerHTML = "x"+Math.abs(change.delta.wcCommonDelta);
@@ -1094,12 +1096,12 @@ function setEconomy(loadMore) {
 			}
 
 			if (change.delta.wcUncommonDelta != undefined) {
-				var bos = document.createElement("div");
+				bos = document.createElement("div");
 				bos.classList.add("economy_wc");
 				bos.title = 'Uncommon Wildcard';
 				bos.style.margin = 'auto 4px';
 				bos.style.backgroundImage = 'url(../images/wc_uncommon.png)';
-				var bon = document.createElement("div");
+				bon = document.createElement("div");
 				bon.style.lineHeight = "64px";
 				bon.classList.add("economy_sub");
 				bon.innerHTML = "x"+Math.abs(change.delta.wcUncommonDelta);
@@ -1108,12 +1110,12 @@ function setEconomy(loadMore) {
 			}
 
 			if (change.delta.wcRareDelta != undefined) {
-				var bos = document.createElement("div");
+				bos = document.createElement("div");
 				bos.classList.add("economy_wc");
 				bos.title = 'Rare Wildcard';
 				bos.style.margin = 'auto 4px';
 				bos.style.backgroundImage = 'url(../images/wc_rare.png)';
-				var bon = document.createElement("div");
+				bon = document.createElement("div");
 				bon.style.lineHeight = "64px";
 				bon.classList.add("economy_sub");
 				bon.innerHTML = "x"+Math.abs(change.delta.wcRareDelta);
@@ -1121,12 +1123,12 @@ function setEconomy(loadMore) {
 				flr.appendChild(bon);
 			}
 			if (change.delta.wcMythicDelta != undefined) {
-				var bos = document.createElement("div");
+				bos = document.createElement("div");
 				bos.classList.add("economy_wc");
 				bos.title = 'Mythic Wildcard';
 				bos.style.margin = 'auto 4px';
 				bos.style.backgroundImage = 'url(../images/wc_mythic.png)';
-				var bon = document.createElement("div");
+				bon = document.createElement("div");
 				bon.style.lineHeight = "64px";
 				bon.classList.add("economy_sub");
 				bon.innerHTML = "x"+Math.abs(change.delta.wcMythicDelta);
@@ -1156,12 +1158,11 @@ function setEconomy(loadMore) {
 				var imgDom = $(img);
 				addCardHover(imgDom, card);
 
-				imgDom.on('click', function(e) {
+				imgDom.on('click', function() {
 					if (cardsDb.get(grpId).dfc == 'SplitHalf')	{
 						card = cardsDb.get(card.dfcId);
 					}
-					let newname = card.name.split(' ').join('-');
-
+					//let newname = card.name.split(' ').join('-');
 					shell.openExternal('https://scryfall.com/card/'+get_set_scryfall(card.set)+'/'+card.cid+'/'+card.name);
 				});
 			});
@@ -1187,12 +1188,11 @@ function setEconomy(loadMore) {
 				var imgDom = $(img);
 				addCardHover(imgDom, card);
 
-				imgDom.on('click', function(e) {
+				imgDom.on('click', function() {
 					if (cardsDb.get(grpId).dfc == 'SplitHalf')	{
 						card = cardsDb.get(card.dfcId);
 					}
-					let newname = card.name.split(' ').join('-');
-
+					//let newname = card.name.split(' ').join('-');
 					shell.openExternal('https://scryfall.com/card/'+get_set_scryfall(card.set)+'/'+card.cid+'/'+card.name);
 				});				
 			});
@@ -1205,11 +1205,11 @@ function setEconomy(loadMore) {
 
 		mainDiv.appendChild(div);
 
-	    $('.list_economy_awarded').on("mousewheel", function(e) {
-	    	var delta = (parseInt(e.originalEvent.deltaY)/40);
-	        this.scrollLeft += delta;
-	        e.preventDefault();
-	    });
+		$('.list_economy_awarded').on("mousewheel", function(e) {
+			var delta = (parseInt(e.originalEvent.deltaY)/40);
+			this.scrollLeft += delta;
+			e.preventDefault();
+		});
 
 	}
 
@@ -1233,9 +1233,7 @@ function updateEconomy() {
 //
 function setEvents(loadMore) {
 	var mainDiv = document.getElementById("ux_0");
-	if (loadMore > 0) {
-	}
-	else {
+	if (loadMore <= 0) {
 		loadMore = 25;
 		eventsHistory.courses.sort(compare_courses); 
 
@@ -1294,7 +1292,7 @@ function setEvents(loadMore) {
 
 		var tileGrpid = course.CourseDeck.deckTileId;
 		try {
-			var tileCard = cardsDb.get(tileGrpid).set;
+			cardsDb.get(tileGrpid).set;
 		}
 		catch (e) {
 			tileGrpid = 67003;
@@ -1307,10 +1305,12 @@ function setEvents(loadMore) {
 		try {
 			tile.style.backgroundImage = "url(https://img.scryfall.com/cards"+cardsDb.get(tileGrpid).images["art_crop"]+")";
 		}
-		catch (e) {}
+		catch (e) {
+			console.error(e);
+		}
 		fltl.appendChild(tile);
 
-		var d = document.createElement("div");
+		d = document.createElement("div");
 		d.classList.add("list_deck_name");
 		d.innerHTML = getReadableEvent(course.InternalEventName);
 		flt.appendChild(d);
@@ -1333,7 +1333,7 @@ function setEvents(loadMore) {
 		}
 		fct.appendChild(d);
 
-		var d = document.createElement("div");
+		d = document.createElement("div");
 		d.classList.add("list_match_time");
 		d.innerHTML = timeSince(new Date(course.date))+' ago.';
 		fcb.appendChild(d);
@@ -1341,20 +1341,20 @@ function setEvents(loadMore) {
 		var wlGate = course.ModuleInstanceData.WinLossGate;
 
 		if (wlGate == undefined) {
-			var d = document.createElement("div");
+			d = document.createElement("div");
 			d.classList.add("list_match_result_win");
 			d.innerHTML = "0:0";
 			flr.appendChild(d);
 		}
 		else {
 			if (wlGate.MaxWins == wlGate.CurrentWins) {
-				var d = document.createElement("div");
+				d = document.createElement("div");
 				d.classList.add("list_match_result_win");
 				d.innerHTML = wlGate.CurrentWins +":"+wlGate.CurrentLosses;
 				flr.appendChild(d);
 			}
 			else {
-				var d = document.createElement("div");
+				d = document.createElement("div");
 				d.classList.add("list_match_result_loss");
 				d.innerHTML = wlGate.CurrentWins +":"+wlGate.CurrentLosses;
 				flr.appendChild(d);
@@ -1427,6 +1427,7 @@ function expandEvent(_course, expandDiv) {
 	var matchesList = _course.ModuleInstanceData.WinLossGate.ProcessedMatchIds;
 	expandDiv.innerHTML = "";
 	//console.log(matchesList);
+	var d;
 	var newHeight = 0;
 	if (matchesList != undefined) {
 		matchesList.forEach(function(_mid) {
@@ -1480,7 +1481,7 @@ function expandEvent(_course, expandDiv) {
 
 					var tileGrpid = match.playerDeck.deckTileId;
 					try {
-						var tileCard = cardsDb.get(tileGrpid).set;
+						cardsDb.get(tileGrpid).set;
 					}
 					catch (e) {
 						tileGrpid = 67003;
@@ -1493,7 +1494,9 @@ function expandEvent(_course, expandDiv) {
 					try {
 						tile.style.backgroundImage = "url(https://img.scryfall.com/cards"+cardsDb.get(tileGrpid).images["art_crop"]+")";
 					}
-					catch (e) {}
+					catch (e) {
+						console.error(e)
+					}
 					fltl.appendChild(tile);
 
 					var d = document.createElement("div");
@@ -1508,7 +1511,7 @@ function expandEvent(_course, expandDiv) {
 						flb.appendChild(m);
 					});
 
-					var d = document.createElement("div");
+					d = document.createElement("div");
 					d.classList.add("list_match_title");
 					if (match.opponent.name == null) {
 						match.opponent.name = "-";
@@ -1522,7 +1525,7 @@ function expandEvent(_course, expandDiv) {
 					or.title = match.opponent.rank+" "+match.opponent.tier;
 					fct.appendChild(or);
 
-					var d = document.createElement("div");
+					d = document.createElement("div");
 					d.classList.add("list_match_time");
 					d.innerHTML = timeSince(new Date(match.date))+' ago.';
 					fcb.appendChild(d);
@@ -1536,14 +1539,14 @@ function expandEvent(_course, expandDiv) {
 					});
 
 					if (match.player.win > match.opponent.win) {
-						var d = document.createElement("div");
+						d = document.createElement("div");
 						d.classList.add("list_match_result_win");
 						//d.innerHTML = "Win";
 						d.innerHTML = match.player.win +":"+match.opponent.win;
 						flr.appendChild(d);
 					}
 					else {
-						var d = document.createElement("div");
+						d = document.createElement("div");
 						d.classList.add("list_match_result_loss");
 						//d.innerHTML = "Loss";
 						d.innerHTML = match.player.win +":"+match.opponent.win;
@@ -1568,10 +1571,9 @@ function expandEvent(_course, expandDiv) {
 //
 function setHistory(loadMore) {
 	var mainDiv = document.getElementById("ux_0");
+	var div, d;
 	mainDiv.classList.add("flex_item");
-	if (loadMore > 0) {
-	}
-	else {
+	if (loadMore <= 0) {
 		loadMore = 25;
 		sort_history();		
 		mainDiv.innerHTML = '';
@@ -1582,7 +1584,7 @@ function setHistory(loadMore) {
 		wrap_r.classList.add("wrapper_column");
 		wrap_r.classList.add("sidebar_column_l");
 
-		var div = document.createElement("div");
+		div = document.createElement("div");
 		div.classList.add("ranks_history");
 
 		var t = document.createElement("div");
@@ -1592,9 +1594,9 @@ function setHistory(loadMore) {
 
 		// Add ranks matchup history here
 		for (var key in matchesHistory.rankwinrates) {
-		    if (matchesHistory.rankwinrates.hasOwnProperty(key)) {
-		    	var val = matchesHistory.rankwinrates[key];
-		    	if (val.t > 0) {
+			if (matchesHistory.rankwinrates.hasOwnProperty(key)) {
+				var val = matchesHistory.rankwinrates[key];
+				if (val.t > 0) {
 					var fla = document.createElement("div");
 					fla.classList.add("flex_item");
 					//fla.style.flexDirection = "column";
@@ -1617,15 +1619,15 @@ function setHistory(loadMore) {
 					fla.appendChild(r);
 					fla.appendChild(s);
 					div.appendChild(fla);
-		    	}
-		    }
+				}
+			}
 		}
 
 		var wrap_l = document.createElement("div");
 		wrap_l.classList.add("wrapper_column");
 		wrap_l.setAttribute("id", "history_column");
 
-		var d = document.createElement("div");
+		d = document.createElement("div");
 		d.classList.add("list_fill");
 
 		wrap_r.appendChild(div);
@@ -1650,7 +1652,7 @@ function setHistory(loadMore) {
 		//console.log("Load match: ", match_id, match);
 		//console.log("Match: ", loadHistory, match.type, match);
 
-		var div = document.createElement("div");
+		div = document.createElement("div");
 		div.classList.add(match.id);
 		div.classList.add("list_match");
 
@@ -1687,26 +1689,29 @@ function setHistory(loadMore) {
 		flr.classList.add("rightmost");
 		flr.classList.add("flex_item");
 
+		var tileGrpid, tile;
 		if (match.type == "match") {
-			var tileGrpid = match.playerDeck.deckTileId;
+			tileGrpid = match.playerDeck.deckTileId;
 			try {
-				var tileCard = cardsDb.get(tileGrpid).set;
+				cardsDb.get(tileGrpid).set;
 			}
 			catch (e) {
 				tileGrpid = 67003;
 			}
 
-			var tile = document.createElement("div");
+			tile = document.createElement("div");
 			tile.classList.add(match.id+"t");
 			tile.classList.add("deck_tile");
 
 			try {
 				tile.style.backgroundImage = "url(https://img.scryfall.com/cards"+cardsDb.get(tileGrpid).images["art_crop"]+")";
 			}
-			catch (e) {}
+			catch (e) {
+				console.error(e);
+			}
 			fltl.appendChild(tile);
 
-			var d = document.createElement("div");
+			d = document.createElement("div");
 			d.classList.add("list_deck_name");
 			d.innerHTML = match.playerDeck.name;
 			flt.appendChild(d);
@@ -1718,7 +1723,7 @@ function setHistory(loadMore) {
 				flb.appendChild(m);
 			});
 
-			var d = document.createElement("div");
+			d = document.createElement("div");
 			d.classList.add("list_match_title");
 			if (match.opponent.name == null) {
 				match.opponent.name = "-";
@@ -1732,7 +1737,7 @@ function setHistory(loadMore) {
 			or.title = match.opponent.rank+" "+match.opponent.tier;
 			fct.appendChild(or);
 
-			var d = document.createElement("div");
+			d = document.createElement("div");
 			d.classList.add("list_match_time");
 			d.innerHTML = timeSince(new Date(match.date))+' ago - '+toMMSS(match.duration);
 			fcb.appendChild(d);
@@ -1746,14 +1751,14 @@ function setHistory(loadMore) {
 			});
 
 			if (match.player.win > match.opponent.win) {
-				var d = document.createElement("div");
+				d = document.createElement("div");
 				d.classList.add("list_match_result_win");
 				//d.innerHTML = "Win";
 				d.innerHTML = match.player.win +":"+match.opponent.win;
 				flr.appendChild(d);
 			}
 			else {
-				var d = document.createElement("div");
+				d = document.createElement("div");
 				d.classList.add("list_match_result_loss");
 				//d.innerHTML = "Loss";
 				d.innerHTML = match.player.win +":"+match.opponent.win;
@@ -1762,38 +1767,40 @@ function setHistory(loadMore) {
 		}
 		else if (match.type == "draft") {
 			try {
-				var tileGrpid = setsList[match.set].tile;
+				tileGrpid = setsList[match.set].tile;
 			}
 			catch (e) {
-				var tileGrpid = 67003;
+				tileGrpid = 67003;
 			}
 
-			var tile = document.createElement("div");
+			tile = document.createElement("div");
 			tile.classList.add(match.id+"t");
 			tile.classList.add("deck_tile");
 
 			try {
 				tile.style.backgroundImage = "url(https://img.scryfall.com/cards"+cardsDb.get(tileGrpid).images["art_crop"]+")";
 			}
-			catch (e) {}
+			catch (e) {
+				console.error(e);
+			}
 			fltl.appendChild(tile);
 
-			var d = document.createElement("div");
+			d = document.createElement("div");
 			d.classList.add("list_deck_name");
 			d.innerHTML = match.set+" draft";
 			flt.appendChild(d);
 
-			var d = document.createElement("div");
+			d = document.createElement("div");
 			d.classList.add("list_match_time");
 			d.innerHTML = timeSince(new Date(match.date))+" ago.";
 			fcb.appendChild(d);
 
-			var d = document.createElement("div");
+			d = document.createElement("div");
 			d.classList.add("list_match_replay");
 			d.innerHTML = "See replay";
 			fct.appendChild(d);
 
-			var d = document.createElement("div");
+			d = document.createElement("div");
 			d.classList.add("list_draft_share");
 			d.classList.add(match.id+'dr');
 			flr.appendChild(d);
@@ -1863,7 +1870,7 @@ function addShare(_match) {
 		$('.dialog').css('height', '200px');
 		$('.dialog').css('top', 'calc(50% - 100px)');
 
-		$('.dialog_wrapper').on('click', function(e) {
+		$('.dialog_wrapper').on('click', function() {
 			console.log('.dialog_wrapper on click')
 			//e.stopPropagation();
 			$('.dialog_wrapper').css('opacity', 0);
@@ -1906,7 +1913,7 @@ function addShare(_match) {
 		selectAdd(select, draftShareLink);
 
 		but.click(function () {
-		    ipc_send('set_clipboard', document.getElementById("share_input").value);
+			ipc_send('set_clipboard', document.getElementById("share_input").value);
 		});
 	});
 }
@@ -1923,7 +1930,7 @@ function draftShareLink() {
 		default: 			expire = 0; break;
 
 	}
-	obj = {
+	var obj = {
 		expire: expire,
 		id: currentId
 	}
@@ -1938,25 +1945,25 @@ ipc.on('set_draft_link', function (event, arg) {
 
 //
 function addHover(_match, tileGrpid) {
-	$('.'+_match.id).on('mouseenter', function(e) {
-	    $('.'+_match.id+'t').css('opacity', 1);
-	    $('.'+_match.id+'t').css('width', '200px');
+	$('.'+_match.id).on('mouseenter', function() {
+		$('.'+_match.id+'t').css('opacity', 1);
+		$('.'+_match.id+'t').css('width', '200px');
 	});
 
-	$('.'+_match.id).on('mouseleave', function(e) {
-	    $('.'+_match.id+'t').css('opacity', 0.66);
-	    $('.'+_match.id+'t').css('width', '128px');
+	$('.'+_match.id).on('mouseleave', function() {
+		$('.'+_match.id+'t').css('opacity', 0.66);
+$('.'+_match.id+'t').css('width', '128px');
 	});
 
-	$('.'+_match.id).on('click', function(e) {
+	$('.'+_match.id).on('click', function() {
 		if (_match.type == "match") {
 			open_match(_match.id);
-		    $('.moving_ux').animate({'left': '-100%'}, 250, 'easeInOutCubic'); 
+			$('.moving_ux').animate({'left': '-100%'}, 250, 'easeInOutCubic'); 
 		}
 		else if (_match.type == "draft") {
 			draftPosition = 1;
 			open_draft(_match.id, tileGrpid, _match.set);
-		    $('.moving_ux').animate({'left': '-100%'}, 250, 'easeInOutCubic'); 
+			$('.moving_ux').animate({'left': '-100%'}, 250, 'easeInOutCubic'); 
 		}
 		else if (_match.type == "Event") {
 			expandEvent(_match, tileGrpid);
@@ -1992,7 +1999,9 @@ function setDecks(arg) {
 			try {
 				tile.style.backgroundImage = "url(https://img.scryfall.com/cards"+cardsDb.get(tileGrpid).images["art_crop"]+")";
 			}
-			catch (e) {}
+			catch (e) {
+				console.error(e);
+			}
 
 			var div = document.createElement("div");
 			div.classList.add(deck.id);
@@ -2023,7 +2032,7 @@ function setDecks(arg) {
 				deck.name = deck.name.replace('?=?Loc/Decks/Precon/', '');
 			}
 
-			var d = document.createElement("div");
+			d = document.createElement("div");
 			d.classList.add('list_deck_name');
 			d.innerHTML = deck.name;
 			flt.appendChild(d);
@@ -2031,7 +2040,7 @@ function setDecks(arg) {
 			var missingCards = false;
 			deck.mainDeck.forEach(function(card) {
 				var grpId = card.id;
-				var type = cardsDb.get(grpId).type;
+				//var type = cardsDb.get(grpId).type;
 				if (cardsDb.get(grpId).type.indexOf("Basic Land") == -1) {
 					var quantity = card.quantity;
 					if (grpId == 67306 && quantity > 4) {
@@ -2047,7 +2056,7 @@ function setDecks(arg) {
 			});
 			deck.sideboard.forEach(function(card) {
 				var grpId = card.id;
-				var type = cardsDb.get(grpId).type;
+				//var type = cardsDb.get(grpId).type;
 				if (cardsDb.get(grpId).type.indexOf("Basic Land") == -1) {
 					var quantity = card.quantity;
 					if (grpId == 67306 && quantity > 4) {
@@ -2063,7 +2072,7 @@ function setDecks(arg) {
 			});
 
 			if (missingCards) {
-				var d = document.createElement("div");
+				d = document.createElement("div");
 				d.classList.add('decklist_not_owned');
 				flt.appendChild(d);
 			}
@@ -2084,7 +2093,7 @@ function setDecks(arg) {
 				d.innerHTML = 'Wins: '+wr.wins+' / Losses: '+wr.losses+' ('+(wr.total*100).toFixed(2)+'%)';
 				flr.appendChild(d);
 
-				var d = document.createElement("div");
+				d = document.createElement("div");
 				d.classList.add('list_deck_winrate');
 				d.style.opacity = 0.6;
 				d.innerHTML = 'Since last edit: '+(wr.lastEdit*100).toFixed(2)+'%';
@@ -2100,19 +2109,19 @@ function setDecks(arg) {
 			div.appendChild(flr);
 			mainDiv.appendChild(div);
 
-			$('.'+deck.id).on('mouseenter', function(e) {
-			    $('.'+deck.id+'t').css('opacity', 1);
-			    $('.'+deck.id+'t').css('width', '200px');
+			$('.'+deck.id).on('mouseenter', function() {
+				$('.'+deck.id+'t').css('opacity', 1);
+				$('.'+deck.id+'t').css('width', '200px');
 			});
 
-			$('.'+deck.id).on('mouseleave', function(e) {
-			    $('.'+deck.id+'t').css('opacity', 0.66);
-			    $('.'+deck.id+'t').css('width', '128px');
+			$('.'+deck.id).on('mouseleave', function() {
+				$('.'+deck.id+'t').css('opacity', 0.66);
+				$('.'+deck.id+'t').css('width', '128px');
 			});
 
-			$('.'+deck.id).on('click', function(e) {
+			$('.'+deck.id).on('click', function() {
 				open_deck(index, 0);
-			    $('.moving_ux').animate({'left': '-100%'}, 250, 'easeInOutCubic'); 
+				$('.moving_ux').animate({'left': '-100%'}, 250, 'easeInOutCubic'); 
 			});
 
 		});
@@ -2134,16 +2143,16 @@ function setExplore(arg, loadMore) {
 	}
 
 	var mainDiv = document.getElementById("ux_0");
+	var dateNow, d;
+
 	mainDiv.classList.remove("flex_item");
-	if (loadMore > 0) {
-	}
-	else {
-		loadExplore = 0;
+	if (loadMore <= 0) {
+		var loadExplore = 0;
 		loadMore = 25;
 
 		mainDiv.innerHTML = '';
 
-		var d = document.createElement("div");
+		d = document.createElement("div");
 		d.classList.add("list_fill");
 		mainDiv.appendChild(d);// goes down
 
@@ -2159,7 +2168,7 @@ function setExplore(arg, loadMore) {
 			eventFilters = [];
 			eventFilters.push('All');
 
-			var dateNow = new Date();
+			dateNow = new Date();
 			dateNow = dateNow.getTime()/1000;
 
 			for (var i = 0; i < explore.length; i++) {
@@ -2183,7 +2192,7 @@ function setExplore(arg, loadMore) {
 			if(a > b) return 1;
 			return 0;
 		})
-		for (var i=0; i < eventFilters.length; i++) {
+		for (let i=0; i < eventFilters.length; i++) {
 			if (eventFilters[i] !== getReadableEvent(filterEvent)) {
 				select.append('<option value="'+eventFilters[i]+'">'+eventFilters[i]+'</option>');
 			}
@@ -2195,10 +2204,10 @@ function setExplore(arg, loadMore) {
 		input.appendTo(icd);
 		icd.appendTo($("#ux_0"));
 
-		var d = document.createElement("div");
+		d = document.createElement("div");
 		d.classList.add("list_fill");
 		mainDiv.appendChild(d);
-		var d = document.createElement("div");
+		d = document.createElement("div");
 		d.classList.add("list_fill");
 		mainDiv.appendChild(d);
 	}
@@ -2213,10 +2222,10 @@ function setExplore(arg, loadMore) {
 
 		let index = loadExplore;
 
-		var dateNow = new Date();
+		dateNow = new Date();
 		dateNow = dateNow.getTime()/1000;
-		var ss = Math.floor(dateNow - _deck.date);
-		if (Math.floor(ss / 86400) > 10) {
+		let _ss = Math.floor(dateNow - _deck.date);
+		if (Math.floor(_ss / 86400) > 10) {
 			continue;
 		}
 
@@ -2232,7 +2241,7 @@ function setExplore(arg, loadMore) {
 
 		var tileGrpid = _deck.tile;
 		try {
-			var tileCard = cardsDb.get(tileGrpid).set;
+			cardsDb.get(tileGrpid).set;
 		}
 		catch (e) {
 			tileGrpid = 67003;
@@ -2245,7 +2254,9 @@ function setExplore(arg, loadMore) {
 		try {
 			tile.style.backgroundImage = "url(https://img.scryfall.com/cards"+cardsDb.get(tileGrpid).images["art_crop"]+")";
 		}
-		catch (e) {}
+		catch (e) {
+			console.error(e);
+		}
 
 		var div = document.createElement("div");
 		div.classList.add(index);
@@ -2272,12 +2283,12 @@ function setExplore(arg, loadMore) {
 		var flb = document.createElement("div");
 		flb.classList.add("flex_bottom");
 
-		var d = document.createElement("div");
+		d = document.createElement("div");
 		d.classList.add("list_deck_name");
 		d.innerHTML = _deck.deckname;
 		flt.appendChild(d);
 
-		var d = document.createElement("div");
+		d = document.createElement("div");
 		d.classList.add("list_deck_name_it");
 		d.innerHTML = "by "+_deck.player;
 		flt.appendChild(d);
@@ -2289,12 +2300,12 @@ function setExplore(arg, loadMore) {
 			flb.appendChild(d);
 		});
 
-		var d = document.createElement("div");
+		d = document.createElement("div");
 		d.classList.add("list_deck_record");
 		d.innerHTML = _deck.wins+' - '+_deck.losses;
 		flr.appendChild(d);
 
-		var d = document.createElement("div");
+		d = document.createElement("div");
 		d.classList.add("list_deck_name_it");
 		let ee = _deck.event;
 		d.innerHTML = getReadableEvent(ee)+" - "+timeSince(new Date(_deck.date))+" ago";
@@ -2310,17 +2321,17 @@ function setExplore(arg, loadMore) {
 
 		mainDiv.appendChild(div);
 
-		$('.'+index).on('mouseenter', function(e) {
-		    $('.'+index+'t').css('opacity', 1);
-		    $('.'+index+'t').css('width', '200px');
+		$('.'+index).on('mouseenter', function() {
+			$('.'+index+'t').css('opacity', 1);
+			$('.'+index+'t').css('width', '200px');
 		});
 
-		$('.'+index).on('mouseleave', function(e) {
-		    $('.'+index+'t').css('opacity', 0.66);
-		    $('.'+index+'t').css('width', '128px');
+		$('.'+index).on('mouseleave', function() {
+			$('.'+index+'t').css('opacity', 0.66);
+			$('.'+index+'t').css('width', '128px');
 		});
 
-		$('.'+index).on('click', function(e) {
+		$('.'+index).on('click', function() {
 			open_course_request(_deck._id);
 		});
 
@@ -2344,7 +2355,8 @@ function open_course_request(courseId) {
 }
 
 // 
-function open_deck(i, type) {
+function open_deck(i, type = 0) {
+	let _deck;
 	if (type == 0) {
 		_deck = decks[i];
 	}
@@ -2355,22 +2367,22 @@ function open_deck(i, type) {
 
 	$("#ux_1").html('');
 
-	var top = $('<div class="decklist_top"><div class="button back"></div><div class="deck_name">'+_deck.name+'</div></div>');
-	flr = $('<div class="deck_top_colors" style="align-self: center;"></div>');
+	let top = $('<div class="decklist_top"><div class="button back"></div><div class="deck_name">'+_deck.name+'</div></div>');
+	let flr = $('<div class="deck_top_colors" style="align-self: center;"></div>');
 
 	_deck.colors.forEach(function(color) {
-		var m = $('<div class="mana_s20 mana_'+mana[color]+'"></div>');
+		let m = $('<div class="mana_s20 mana_'+mana[color]+'"></div>');
 		flr.append(m);
 	});
 	top.append(flr);
 
-	var tileGrpid = _deck.deckTileId;
+	let tileGrpid = _deck.deckTileId;
 	if (cardsDb.get(tileGrpid)) {
 		change_background("", tileGrpid);
 	}
-	var fld = $('<div class="flex_item"></div>');
+	let fld = $('<div class="flex_item"></div>');
 
-	var dl = $('<div class="decklist"></div>');
+	let dl = $('<div class="decklist"></div>');
 	drawDeck(dl, _deck);
 	var stats = $('<div class="stats"></div>');
 
@@ -2408,7 +2420,7 @@ function open_deck(i, type) {
 		curvediv.append($('<div class="mana_curve_column" style="height: '+(curve[i]/curveMax*100)+'%"></div>'))
 	}
 	curvediv.appendTo(stats);
-	var curvediv = $('<div class="mana_curve_numbers"></div>');
+	curvediv = $('<div class="mana_curve_numbers"></div>');
 	for (let i=0; i<curve.length; i++) {
 		curvediv.append($('<div class="mana_curve_column_number"><div style="margin: 0 auto !important" class="mana_s16 mana_'+i+'"></div></div>'))
 	}
@@ -2427,8 +2439,8 @@ function open_deck(i, type) {
 	var cp = gp+colorspie.c / colorspie.total * 100;
 
 	var gradient = new ConicGradient({
-	    stops: '#E7CA8E '+wp+'%, #AABEDF 0 '+up+'%, #A18E87 0 '+bp+'%, #DD8263 0 '+rp+'%, #B7C89E 0 '+gp+'%, #E3E3E3 0 '+cp+'%', // required
-	    size: 400 // Default: Math.max(innerWidth, innerHeight)
+		stops: '#E7CA8E '+wp+'%, #AABEDF 0 '+up+'%, #A18E87 0 '+bp+'%, #DD8263 0 '+rp+'%, #B7C89E 0 '+gp+'%, #E3E3E3 0 '+cp+'%', // required
+		size: 400 // Default: Math.max(innerWidth, innerHeight)
 	});
 	var piechart = $('<div class="pie_container"><span>Mana Symbols</span><svg class="pie">'+gradient.svg+'</svg></div>');
 	piechart.appendTo(cont);
@@ -2443,8 +2455,8 @@ function open_deck(i, type) {
 	cp = gp+colorspie.c / colorspie.total * 100;
 
 	gradient = new ConicGradient({
-	    stops: '#E7CA8E '+wp+'%, #AABEDF 0 '+up+'%, #A18E87 0 '+bp+'%, #DD8263 0 '+rp+'%, #B7C89E 0 '+gp+'%, #E3E3E3 0 '+cp+'%', // required
-	    size: 400 // Default: Math.max(innerWidth, innerHeight)
+		stops: '#E7CA8E '+wp+'%, #AABEDF 0 '+up+'%, #A18E87 0 '+bp+'%, #DD8263 0 '+rp+'%, #B7C89E 0 '+gp+'%, #E3E3E3 0 '+cp+'%', // required
+		size: 400 // Default: Math.max(innerWidth, innerHeight)
 	});
 	piechart = $('<div class="pie_container"><span>Mana Sources</span><svg class="pie">'+gradient.svg+'</svg></div>');
 	piechart.appendTo(cont);
@@ -2455,10 +2467,10 @@ function open_deck(i, type) {
 		var wr = getDeckWinrate(_deck.id, _deck.lastUpdated);
 		if (wr != 0) {
 			//$('<span>w/l vs Color combinations</span>').appendTo(stats);
-			var curvediv = $('<div class="mana_curve"></div>');
-			var curve = get_deck_curve(_deck);
+			curvediv = $('<div class="mana_curve"></div>');
+			curve = get_deck_curve(_deck);
 
-			var curveMax = 0;
+			curveMax = 0;
 			for (let i=0; i<wr.colors.length; i++) {
 				if (wr.colors[i].wins > curveMax) {
 					curveMax = wr.colors[i].wins;
@@ -2476,7 +2488,7 @@ function open_deck(i, type) {
 			}
 
 			curvediv.appendTo(stats);
-			var curvediv = $('<div class="mana_curve_costs"></div>');
+			curvediv = $('<div class="mana_curve_costs"></div>');
 			for (let i=0; i<wr.colors.length; i++) {
 				if (wr.colors[i].wins + wr.colors[i].losses > 2) {
 					var cn = $('<div class="mana_curve_column_number">'+wr.colors[i].wins+'/'+wr.colors[i].losses+'</div>');
@@ -2519,27 +2531,27 @@ function open_deck(i, type) {
 
 	//
 	$(".visualView").click(function () {
-	    drawDeckVisual(dl, stats, _deck);
+		drawDeckVisual(dl, stats, _deck);
 	});
 
 	//
 	$(".openHistory").click(function () {
-	    ipc_send('get_deck_changes', _deck.id);
+		ipc_send('get_deck_changes', _deck.id);
 	});
 
 	$(".exportDeck").click(function () {
-	    var list = get_deck_export(_deck);
-	    ipc_send('set_clipboard', list);
+		var list = get_deck_export(_deck);
+		ipc_send('set_clipboard', list);
 	});
 
 	$(".exportDeckStandard").click(function () {
-	    var list = get_deck_export_txt(_deck);
-	    ipc_send('export_txt', {str: list, name: _deck.name});
+		var list = get_deck_export_txt(_deck);
+		ipc_send('export_txt', {str: list, name: _deck.name});
 	});
 
 	$(".back").click(function () {
         change_background("default");
-	    $('.moving_ux').animate({'left': '0px'}, 250, 'easeInOutCubic'); 
+		$('.moving_ux').animate({'left': '0px'}, 250, 'easeInOutCubic'); 
 	});
 }
 
@@ -2570,10 +2582,10 @@ function drawDeck(div, deck) {
 	if (deck.sideboard != undefined) {
 		if (deck.sideboard.length > 0) {
 			addCardSeparator(99, div);
-			var prevIndex = 0;
+			prevIndex = 0;
 			deck.sideboard.forEach(function(card) {
 				var grpId = card.id;
-				var type = cardsDb.get(grpId).type;
+				//var type = cardsDb.get(grpId).type;
 				if (card.quantity > 0) {
 					addCardTile(grpId, unique+"b", card.quantity, div);
 				}
@@ -2592,9 +2604,10 @@ function drawDeckVisual(_div, _stats, deck) {
 			deck.mainDeck.forEach(function(c) {
 				var grpId = c.id;
 				var card = cardsDb.get(grpId);
+				var quantity;
 				if (card.type.indexOf("Land") == -1 && grpId != 67306) {
 					if (card.cmc == cmc) {
-						var quantity = c.quantity;
+						quantity = c.quantity;
 
 						if (quantity == qq) {
 							newMainDeck.push(c);
@@ -2602,7 +2615,7 @@ function drawDeckVisual(_div, _stats, deck) {
 					}
 				}
 				else if (cmc == 20) {
-					var quantity = c.quantity;
+					quantity = c.quantity;
 					if (qq == 0 && quantity > 4) {
 						newMainDeck.push(c);
 					}
@@ -2640,15 +2653,15 @@ function drawDeckVisual(_div, _stats, deck) {
 	});
 
 	var sz = cardSize;
-	div = $('<div class="visual_mainboard"></div>');
+	let div = $('<div class="visual_mainboard"></div>');
 	div.css("display", "flex");
 	div.css("flex-wrap", "wrap");
 	div.css("align-content", "start");
 	div.css("max-width", (sz+6)*5+"px");
 	div.appendTo(_div);
 
-	var unique = makeId(4);
-	var prevIndex = 0;
+	//var unique = makeId(4);
+	//var prevIndex = 0;
 
 	var tileNow;
 	var _n = 0;
@@ -2662,16 +2675,16 @@ function drawDeckVisual(_div, _stats, deck) {
 			if (card.dfc == 'DFC_Front') dfc = 'b';
 			if (card.dfc == 'SplitHalf') dfc = 'a';
 			if (dfc != 'b') {
-				for (i=0; i<c.quantity; i++) {
+				for (let i=0; i<c.quantity; i++) {
 					if (_n % 4 == 0) {
 						tileNow = $('<div class="deck_visual_tile"></div>');
 						tileNow.appendTo(div);
 					}
 
-			        let d = $('<div style="width: '+sz+'px !important;" class="deck_visual_card"></div>');
-			        let img = $('<img style="width: '+sz+'px !important;" class="deck_visual_card_img"></img>');
+					let d = $('<div style="width: '+sz+'px !important;" class="deck_visual_card"></div>');
+					let img = $('<img style="width: '+sz+'px !important;" class="deck_visual_card_img"></img>');
 
-			        img.attr("src", "https://img.scryfall.com/cards"+card.images[cardQuality]);
+					img.attr("src", "https://img.scryfall.com/cards"+card.images[cardQuality]);
 					img.appendTo(d);
 					d.appendTo(tileNow);
 
@@ -2699,7 +2712,7 @@ function drawDeckVisual(_div, _stats, deck) {
 			tileNow.css("display", "none");
 		}
 
-		var _n = 0;
+		_n = 0;
 		deck.sideboard.forEach(function(c) {
 			var grpId = c.id;
 			var card = cardsDb.get(grpId);
@@ -2709,15 +2722,16 @@ function drawDeckVisual(_div, _stats, deck) {
 				if (card.dfc == 'DFC_Front') dfc = 'b';
 				if (card.dfc == 'SplitHalf') dfc = 'a';
 				if (dfc != 'b') {
-					for (i=0; i<c.quantity; i++) {
+					for (let i=0; i<c.quantity; i++) {
+						var d;
 						if (_n % 2 == 1) {
-					        var d = $('<div style="width: '+sz+'px !important;" class="deck_visual_card_side"></div>');
+							d = $('<div style="width: '+sz+'px !important;" class="deck_visual_card_side"></div>');
 						}
 						else {
-					        var d = $('<div style="margin-left: 60px; width: '+sz+'px !important;" class="deck_visual_card_side"></div>');
+							d = $('<div style="margin-left: 60px; width: '+sz+'px !important;" class="deck_visual_card_side"></div>');
 						}
-				        let img = $('<img style="width: '+sz+'px !important;" class="deck_visual_card_img"></img>');
-				        img.attr("src", "https://img.scryfall.com/cards"+card.images[cardQuality]);
+						let img = $('<img style="width: '+sz+'px !important;" class="deck_visual_card_img"></img>');
+						img.attr("src", "https://img.scryfall.com/cards"+card.images[cardQuality]);
 						//img.attr("src", "https://img.scryfall.com/cards/"+cardQuality+"/en/"+get_set_scryfall(card.set)+"/"+card.cid+dfc+".jpg");
 						img.appendTo(d);
 						d.appendTo(tileNow);
@@ -2757,26 +2771,26 @@ function setChangesTimeline() {
 	title.appendTo(datbox);
 	div.appendTo(time);
 
-	butbox.on('mouseenter', function(e) {
+	butbox.on('mouseenter', function() {
 		button.css('width', '32px');
 		button.css('height', '32px');
 		button.css('top', 'calc(50% - 16px)');
 	});
 
-	butbox.on('mouseleave', function(e) {
+	butbox.on('mouseleave', function() {
 		button.css('width', '24px');
 		button.css('height', '24px');
 		button.css('top', 'calc(50% - 12px)');
 	});
 
-	butbox.on('click', function(e) {
+	butbox.on('click', function() {
 		var hasc = button.hasClass('change_button_active');
 
-		$(".change_data_box_inside").each(function(index) {
+		$(".change_data_box_inside").each(function() {
 			$(this).css('height', '0px');
 		});
 
-		$(".change_button").each(function(index) {
+		$(".change_button").each(function() {
 			$(this).removeClass('change_button_active');
 		});
 
@@ -2786,20 +2800,21 @@ function setChangesTimeline() {
 	});
 	//
 
-	cn = 0;
+	var cn = 0;
 	changes.forEach(function(change) {
 		change.changesMain.sort(compare_changes_inner);
 		change.changesSide.sort(compare_changes_inner);
 
 		let div = $('<div class="change"></div>');
+		var butb;
 		if (cn < changes.length-1) {
-			var butbox = $('<div style="background-size: 100% 100% !important;" class="change_button_cont"></div>');
+			butb = $('<div style="background-size: 100% 100% !important;" class="change_button_cont"></div>');
 		}
 		else {
-			var butbox = $('<div class="change_button_cont"></div>');
+			butb = $('<div class="change_button_cont"></div>');
 		}
 		var button = $('<div class="change_button"></div>');
-		button.appendTo(butbox);
+		button.appendTo(butb);
 		let datbox = $('<div class="change_data"></div>');
 
 		// title
@@ -2863,28 +2878,28 @@ function setChangesTimeline() {
 		data.appendTo(datbox);
 		div.appendTo(time);
 
-		butbox.on('mouseenter', function(e) {
+		butbox.on('mouseenter', function() {
 			button.css('width', '32px');
 			button.css('height', '32px');
 			button.css('top', 'calc(50% - 16px)');
 		});
 
-		butbox.on('mouseleave', function(e) {
+		butbox.on('mouseleave', function() {
 			button.css('width', '24px');
 			button.css('height', '24px');
 			button.css('top', 'calc(50% - 12px)');
 		});
 
-		butbox.on('click', function(e) {
+		butbox.on('click', function() {
 			// This requires some UX indicators
 			//drawDeck($('.decklist'), {mainDeck: change.previousMain, sideboard: change.previousSide});
 			var hasc = button.hasClass('change_button_active');
 
-			$(".change_data_box_inside").each(function(index) {
+			$(".change_data_box_inside").each(function() {
 				$(this).css('height', '0px');
 			});
 
-			$(".change_button").each(function(index) {
+			$(".change_button").each(function() {
 				$(this).removeClass('change_button_active');
 			});
 
@@ -2927,7 +2942,7 @@ function open_draft(id, tileGrpid, set) {
 	var pick = draft[key].pick;
 
 	var top = $('<div class="decklist_top"><div class="button back"></div><div class="deck_name">'+set+' Draft</div></div>');
-	flr = $('<div class="deck_top_colors"></div>');
+	let flr = $('<div class="deck_top_colors"></div>');
 	top.append(flr);
 
 	if (cardsDb.get(tileGrpid)) {
@@ -2953,7 +2968,7 @@ function open_draft(id, tileGrpid, set) {
         var d = $('<div style="width: '+cardSize+'px !important;" class="draft_card"></div>');
         var img = $('<img style="width: '+cardSize+'px !important;" class="draft_card_img"></img>');
         if (grpId == pick && draftPosition % 2 == 0) {
-        	img.addClass('draft_card_picked');
+			img.addClass('draft_card_picked');
         }
         var card = cardsDb.get(grpId);
         img.attr("src", "https://img.scryfall.com/cards"+card.images[cardQuality]);
@@ -2990,19 +3005,19 @@ function open_draft(id, tileGrpid, set) {
 	
 	$(".draft_nav_prev").on('click mouseup', function() {
 		console.log("NAV PREV UP")
-	    draftPosition -= 1;
-	    open_draft(id, tileGrpid, set);
+		draftPosition -= 1;
+		open_draft(id, tileGrpid, set);
 	});
 
 	$(".draft_nav_next").on('click mouseup', function() {
 		console.log("NAV NEXT UP")
-	    draftPosition += 1;
-	    open_draft(id, tileGrpid, set);
+		draftPosition += 1;
+		open_draft(id, tileGrpid, set);
 	});
 	//
 	$(".back").click(function () {
 		change_background("default");
-	    $('.moving_ux').animate({'left': '0px'}, 250, 'easeInOutCubic'); 
+		$('.moving_ux').animate({'left': '0px'}, 250, 'easeInOutCubic'); 
 	});
 }
 
@@ -3010,8 +3025,8 @@ function open_match(id) {
 	$("#ux_1").html('');
 	var match = matchesHistory[id];
 
-	var top = $('<div class="decklist_top"><div class="button back"></div><div class="deck_name">'+match.playerDeck.name+'</div></div>');
-	flr = $('<div class="deck_top_colors"></div>');
+	let top = $('<div class="decklist_top"><div class="button back"></div><div class="deck_name">'+match.playerDeck.name+'</div></div>');
+	let flr = $('<div class="deck_top_colors"></div>');
 
 	if (match.playerDeck.colors != undefined) {		
 		match.playerDeck.colors.forEach(function(color) {
@@ -3064,26 +3079,26 @@ function open_match(id) {
 	$('<div class="button_simple centered exportDeckPlayer">Export to Arena</div>').appendTo(dl);
 	$('<div class="button_simple centered exportDeckStandardPlayer">Export to .txt</div>').appendTo(dl);
 
-	var flt = $('<div class="flex_item" style="flex-direction: row-reverse;"></div>')
-	var fltl = $('<div class="flex_item"></div>')
-	var r = $('<div class="rank"></div>'); r.appendTo(fltl);
+	flt = $('<div class="flex_item" style="flex-direction: row-reverse;"></div>')
+	fltl = $('<div class="flex_item"></div>')
+	r = $('<div class="rank"></div>'); r.appendTo(fltl);
 
-	var fltr = $('<div class="flex_item"></div>'); fltr.css("flex-direction","column"); fltr.css("align-items","flex-end");
-	var fltrt = $('<div class="flex_top"></div>');
-	var fltrb = $('<div class="flex_bottom"></div>');
+	fltr = $('<div class="flex_item"></div>'); fltr.css("flex-direction","column"); fltr.css("align-items","flex-end");
+	fltrt = $('<div class="flex_top"></div>');
+	fltrb = $('<div class="flex_bottom"></div>');
 	fltrt.appendTo(fltr); fltrb.appendTo(fltr);
 
 	fltl.appendTo(flt);fltr.appendTo(flt);
 
-	var rank = match.opponent.rank;
-	var tier = match.opponent.tier;
+	rank = match.opponent.rank;
+	tier = match.opponent.tier;
 	r.css("background-position", (get_rank_index(rank, tier)*-48)+"px 0px").attr("title", rank+" "+tier);
 
-	var name = $('<div class="list_match_player_right">'+match.opponent.name.slice(0, -6)+' ('+match.opponent.win+')</div>');
+	name = $('<div class="list_match_player_right">'+match.opponent.name.slice(0, -6)+' ('+match.opponent.win+')</div>');
 	name.appendTo(fltrt);
 
 	if (match.player.win < match.opponent.win) {
-		var w = $('<div class="list_match_player_right green">Winner</div>');
+		w = $('<div class="list_match_player_right green">Winner</div>');
 		w.appendTo(fltrb);
 	}
 
@@ -3114,26 +3129,26 @@ function open_match(id) {
 	});
 
 	$(".exportDeckPlayer").click(function () {
-	    var list = get_deck_export(match.playerDeck);
-	    ipc_send('set_clipboard', list);
+		var list = get_deck_export(match.playerDeck);
+		ipc_send('set_clipboard', list);
 	});
 	$(".exportDeckStandardPlayer").click(function () {
-	    var list = get_deck_export_txt(match.playerDeck);
-	    ipc_send('export_txt', {str: list, name: match.playerDeck.name});
+		var list = get_deck_export_txt(match.playerDeck);
+		ipc_send('export_txt', {str: list, name: match.playerDeck.name});
 	});
 
 	$(".exportDeck").click(function () {
-	    var list = get_deck_export(match.oppDeck);
-	    ipc_send('set_clipboard', list);
+		var list = get_deck_export(match.oppDeck);
+		ipc_send('set_clipboard', list);
 	});
 	$(".exportDeckStandard").click(function () {
-	    var list = get_deck_export_txt(match.oppDeck);
-	    ipc_send('export_txt', {str: list, name: match.opponent.name.slice(0, -6)+"'s deck"});
+		var list = get_deck_export_txt(match.oppDeck);
+		ipc_send('export_txt', {str: list, name: match.opponent.name.slice(0, -6)+"'s deck"});
 	});
 
 	$(".back").click(function () {
 		change_background("default");
-	    $('.moving_ux').animate({'left': '0px'}, 250, 'easeInOutCubic'); 
+		$('.moving_ux').animate({'left': '0px'}, 250, 'easeInOutCubic'); 
 	});
 
 }
@@ -3167,8 +3182,8 @@ function open_cards() {
 	advancedButton.appendTo(flex);
 
 	flex.appendTo(basicFilters);
-	var flex = $('<div class="inventory_flex"></div>');
 
+	flex = $('<div class="inventory_flex"></div>');
 
 	var select = $('<select id="query_select">'+sortingAlgorithm+'</select>');
 	var sortby = ['Set', 'Name', 'Rarity', 'CMC'];
@@ -3191,10 +3206,10 @@ function open_cards() {
 	// "ADVANCED" FILTERS
 	var filters = $('<div class="inventory_filters"></div>');
 
-	var flex = $('<div class="inventory_flex"></div>');
+	flex = $('<div class="inventory_flex"></div>');
 
-	var icd = $('<div style="padding-bottom: 8px;" class="input_container"></div>');
-	var label = $('<label style="display: table">Type line</label>');
+	icd = $('<div style="padding-bottom: 8px;" class="input_container"></div>');
+	label = $('<label style="display: table">Type line</label>');
 	label.appendTo(icd);
 	var typeInput = $('<input type="search" id="query_type" autocomplete="off" />');
 	typeInput.appendTo(icd);
@@ -3250,19 +3265,19 @@ function open_cards() {
 	add_checkbox_search(cont, 'Exclude unselected colors', 'query_exclude', false);
 	cont.appendTo(filters);
 
-	var cont = $('<div class="buttons_container"></div>');
+	cont = $('<div class="buttons_container"></div>');
 	add_checkbox_search(cont, 'Common', 'query_common', true);
 	add_checkbox_search(cont, 'Uncommon', 'query_uncommon', true);
 	add_checkbox_search(cont, 'Rare', 'query_rare', true);
 	add_checkbox_search(cont, 'Mythic Rare', 'query_mythic', true);
 	cont.appendTo(filters);
 	
-	var cont = $('<div class="buttons_container"></div>');
+	cont = $('<div class="buttons_container"></div>');
 
-	var icd = $('<div class="input_container auto_width"></div>');
-	var label = $('<label style="display: table">CMC:</label>');
+	icd = $('<div class="input_container auto_width"></div>');
+	label = $('<label style="display: table">CMC:</label>');
 	label.appendTo(icd);
-	var input = $('<input type="number" id="query_cmc" autocomplete="off" />');
+	input = $('<input type="number" id="query_cmc" autocomplete="off" />');
 	input.appendTo(icd);
 	icd.appendTo(cont);
 
@@ -3289,16 +3304,16 @@ function open_cards() {
         }
     });
 
-	filterCmcLower 	= document.getElementById("query_cmclower");
-	filterCmcEqual 	= document.getElementById("query_cmcequal");
-	filterCmcHigher = document.getElementById("query_cmchigher");
+	//let filterCmcLower 	= document.getElementById("query_cmclower");
+	//let filterCmcEqual 	= document.getElementById("query_cmcequal");
+	//let filterCmcHigher = document.getElementById("query_cmchigher");
 
 	printCards();
 }
 
 //
 function add_checkbox_search(div, label, iid, def) {
-	var label = $('<label class="check_container hover_label">'+label+'</label>');
+	label = $('<label class="check_container hover_label">'+label+'</label>');
 	var check_new = $('<input type="checkbox" id="'+iid+'" />');
 	check_new.appendTo(label);
 	check_new.prop('checked', def);
@@ -3329,11 +3344,11 @@ function resetFilters() {
 	filteredSets = [];
 	filteredMana = [];
 	
-	$(".set_filter").each(function( index ) {
+	$(".set_filter").each(function(  ) {
 		$( this ).removeClass('set_filter_on');
 		$( this ).addClass('set_filter_on');
 	});
-	$(".mana_filter").each(function( index ) {
+	$(".mana_filter").each(function(  ) {
 		$( this ).removeClass('mana_filter_on');
 		$( this ).addClass('mana_filter_on');
 	});
@@ -3359,6 +3374,7 @@ function resetFilters() {
 }
 
 //
+/* eslint-disable */
 function exportCollection() {
 	var list = get_collection_export();
 	ipc_send('export_csvtxt', {str: list, name: "collection"});
@@ -3402,6 +3418,7 @@ function printStats() {
 		$('.moving_ux').animate({ 'left': '0px' }, 250, 'easeInOutCubic');
 	});
 }
+/* eslint-enable */
 
 //
 function renderSetStats(setStats, setIconCode, setName) {
@@ -3451,129 +3468,131 @@ function printCards() {
 	var paging = $('<div class="paging_container"></div>');
 	div.append(paging);
 
-	filterName  	= document.getElementById("query_name").value.toLowerCase();
-	filterType  	= document.getElementById("query_type").value.toLowerCase();
-	filterUnown		= document.getElementById("query_unown").checked;
-	filterNew   	= document.getElementById("query_new");
-	filterMulti 	= document.getElementById("query_multicolor");
-	filterExclude 	= document.getElementById("query_exclude");
-
-	filterCommon 	= document.getElementById("query_common");
-	filterUncommon 	= document.getElementById("query_uncommon");
-	filterRare 		= document.getElementById("query_rare");
-	filterMythic 	= document.getElementById("query_mythic");
-
-	filterCMC  		= document.getElementById("query_cmc").value;
-	filterCmcLower 	= document.getElementById("query_cmclower").checked;
-	filterCmcEqual 	= document.getElementById("query_cmcequal").checked;
-	filterCmcHigher = document.getElementById("query_cmchigher").checked;
+	let filterName  	= document.getElementById("query_name").value.toLowerCase();
+	let filterType  	= document.getElementById("query_type").value.toLowerCase();
+	let filterUnown		= document.getElementById("query_unown").checked;
+	let filterNew   	= document.getElementById("query_new");
+	let filterMulti 	= document.getElementById("query_multicolor");
+	let filterExclude 	= document.getElementById("query_exclude");
+ 
+	let filterCommon 	= document.getElementById("query_common");
+	let filterUncommon 	= document.getElementById("query_uncommon");
+	let filterRare 		= document.getElementById("query_rare");
+	let filterMythic 	= document.getElementById("query_mythic");
+ 
+	let filterCMC  		= document.getElementById("query_cmc").value;
+	let filterCmcLower 	= document.getElementById("query_cmclower").checked;
+	let filterCmcEqual 	= document.getElementById("query_cmcequal").checked;
+	let filterCmcHigher = document.getElementById("query_cmchigher").checked;
 
 	var totalCards = 0;
+	var list;
 	if (filterUnown) {
-		var list = cardsDb.getAll();
+		list = cardsDb.getAll();
 		delete list.abilities;
 		delete list.events;
 		delete list.sets;
 		delete list.ok;
 	}
 	else {
-		var list = cards;
+		list = cards;
 	}
 	
+	var keysSorted;
 	if (sortingAlgorithm == 'Set')
-		var keysSorted = Object.keys(list).sort( collectionSortSet );
+		keysSorted = Object.keys(list).sort( collectionSortSet );
 	if (sortingAlgorithm == 'Name')
-		var keysSorted = Object.keys(list).sort( collectionSortName );
+		keysSorted = Object.keys(list).sort( collectionSortName );
 	if (sortingAlgorithm == 'Rarity')
-		var keysSorted = Object.keys(list).sort( collectionSortRarity );
+		keysSorted = Object.keys(list).sort( collectionSortRarity );
 	if (sortingAlgorithm == 'CMC')
-		var keysSorted = Object.keys(list).sort( collectionSortCmc );
+		keysSorted = Object.keys(list).sort( collectionSortCmc );
 
     for (n=0; n<keysSorted.length; n++) {
 		let key = keysSorted[n];
 	
 		let grpId = key;
 		let card = cardsDb.get(grpId);
-    	let doDraw = true;
+		let doDraw = true;
 
-    	let name = card.name.toLowerCase();
-    	let type = card.type.toLowerCase();
-    	let rarity = card.rarity;
-    	let cost = card.cost;
-    	let cmc = card.cmc;
-    	let set  = card.set;
+		let name = card.name.toLowerCase();
+		let type = card.type.toLowerCase();
+		let rarity = card.rarity;
+		let cost = card.cost;
+		let cmc = card.cmc;
+		let set  = card.set;
 
-    	if (card.images == undefined) 	continue;
+		if (card.images == undefined) 	continue;
 
-    	// Filter name
-    	var arr;
-    	arr = filterName.split(" ");
-    	arr.forEach(function(s) {
+		// Filter name
+		var arr;
+		arr = filterName.split(" ");
+		arr.forEach(function(s) {
 			if (name.indexOf(s) == -1) {
 				doDraw = false;
 			}
-    	})
+		})
 
-    	// filter type
-    	arr = filterType.split(" ");
-    	arr.forEach(function(s) {
+		// filter type
+		arr = filterType.split(" ");
+		arr.forEach(function(s) {
 			if (type.indexOf(s) == -1) {
 				doDraw = false;
 			}
-    	})
+		})
 
-    	if (filterNew.checked && cardsNew[key] == undefined) {
-    		doDraw = false;
-    	}
+		if (filterNew.checked && cardsNew[key] == undefined) {
+			doDraw = false;
+		}
 
-    	if (filteredSets.length > 0) {
-	    	if (!filteredSets.includes(set)) {
-	    		doDraw = false;
-	    	}
-    	}
+		if (filteredSets.length > 0) {
+		if (!filteredSets.includes(set)) {
+			doDraw = false;
+		}
+		}
 
-    	if (filterCMC && doDraw) {
-    		if (filterCmcLower && filterCmcEqual) {
-    			if (cmc > filterCMC) {
-    				doDraw = false;
-    			}
-    		}
-    		else if (filterCmcHigher && filterCmcEqual) {
-    			if (cmc < filterCMC) {
-    				doDraw = false;
-    			}
-    		}
-    		else if (filterCmcLower && !filterCmcEqual) {
-    			if (cmc >= filterCMC) {
-    				doDraw = false;
-    			}
-    		}
-    		else if (filterCmcHigher && !filterCmcEqual) {
-    			if (cmc <= filterCMC) {
-    				doDraw = false;
-    			}
-    		}
-    		else if (!filterCmcHigher && !filterCmcLower && filterCmcEqual) {
-    			if (cmc != filterCMC) {
-    				doDraw = false;
-    			}
-    		}
-    	}
+		if (filterCMC && doDraw) {
+			if (filterCmcLower && filterCmcEqual) {
+				if (cmc > filterCMC) {
+					doDraw = false;
+				}
+			}
+			else if (filterCmcHigher && filterCmcEqual) {
+				if (cmc < filterCMC) {
+					doDraw = false;
+				}
+			}
+			else if (filterCmcLower && !filterCmcEqual) {
+				if (cmc >= filterCMC) {
+					doDraw = false;
+				}
+			}
+			else if (filterCmcHigher && !filterCmcEqual) {
+				if (cmc <= filterCMC) {
+					doDraw = false;
+				}
+			}
+			else if (!filterCmcHigher && !filterCmcLower && filterCmcEqual) {
+				if (cmc != filterCMC) {
+					doDraw = false;
+				}
+			}
+		}
 
-    	switch (rarity) {
-    		case 'land':
-    			if (!filterCommon.checked) 		doDraw = false; break;
-    		case 'common':
-    			if (!filterCommon.checked) 		doDraw = false; break;
-    		case 'uncommon':
-    			if (!filterUncommon.checked) 	doDraw = false; break;
-    		case 'rare':
-    			if (!filterRare.checked) 		doDraw = false; break;
-    		case 'mythic':
-    			if (!filterMythic.checked) 		doDraw = false; break;
+		switch (rarity) {
+			case 'land':
+				if (!filterCommon.checked) 		doDraw = false; break;
+			case 'common':
+				if (!filterCommon.checked) 		doDraw = false; break;
+			case 'uncommon':
+				if (!filterUncommon.checked) 	doDraw = false; break;
+			case 'rare':
+				if (!filterRare.checked) 		doDraw = false; break;
+			case 'mythic':
+				if (!filterMythic.checked) 		doDraw = false; break;
 			default:
 				doDraw = false;
-    			break;
+				break;
 		}
 
 		if (filterExclude.checked && cost.length == 0) {
@@ -3648,13 +3667,13 @@ function printCards() {
 			}
 		}
 
-    	if (doDraw) {
-    		totalCards++;
-    	}
+		if (doDraw) {
+			totalCards++;
+		}
 
-    	if (totalCards < collectionPage*100 || totalCards > collectionPage*100+99) {
-    		doDraw = false;
-    	}
+		if (totalCards < collectionPage*100 || totalCards > collectionPage*100+99) {
+			doDraw = false;
+		}
 
 		let dfc = '';
 
@@ -3668,33 +3687,32 @@ function printCards() {
 			doDraw = false;
 		}
 
-    	if (doDraw) {
-	        var d = $('<div style="width: '+cardSize+'px !important;" class="inventory_card"></div>');
+		if (doDraw) {
+			var d = $('<div style="width: '+cardSize+'px !important;" class="inventory_card"></div>');
 
-	        for (let i=0; i<4; i++) {
-	        	if (cardsNew[key] != undefined && i < cardsNew[key]) {
-				    $('<div style="width: '+cardSize/4+'px;" class="inventory_card_quantity_orange"></div>').appendTo(d);
-	        	}
-	        	else if (i < cards[key]) {
-			        $('<div style="width: '+cardSize/4+'px;" class="inventory_card_quantity_green"></div>').appendTo(d);
-	        	}
-	        	else {
-			        $('<div style="width: '+cardSize/4+'px;" class="inventory_card_quantity_gray"></div>').appendTo(d);
-	        	}
-	        }
+			for (let i=0; i<4; i++) {
+				if (cardsNew[key] != undefined && i < cardsNew[key]) {
+					$('<div style="width: '+cardSize/4+'px;" class="inventory_card_quantity_orange"></div>').appendTo(d);
+				}
+				else if (i < cards[key]) {
+					$('<div style="width: '+cardSize/4+'px;" class="inventory_card_quantity_green"></div>').appendTo(d);
+				}
+				else {
+					$('<div style="width: '+cardSize/4+'px;" class="inventory_card_quantity_gray"></div>').appendTo(d);
+				}
+			}
 
-	        var img = $('<img style="width: '+cardSize+'px !important;" class="inventory_card_img"></img>');
-	        img.attr("src", "https://img.scryfall.com/cards"+card.images[cardQuality]);
+			var img = $('<img style="width: '+cardSize+'px !important;" class="inventory_card_img"></img>');
+			img.attr("src", "https://img.scryfall.com/cards"+card.images[cardQuality]);
 			img.appendTo(d);
 
 			addCardHover(img, card);
 
-			img.on('click', function(e) {
+			img.on('click', function() {
 				if (cardsDb.get(grpId).dfc == 'SplitHalf')	{
 					card = cardsDb.get(card.dfcId);
 				}
-				let newname = card.name.split(' ').join('-');
-
+				//let newname = card.name.split(' ').join('-');
 				shell.openExternal('https://scryfall.com/card/'+get_set_scryfall(card.set)+'/'+card.cid+'/'+card.name);
 			});
 
@@ -3704,7 +3722,7 @@ function printCards() {
 
 	var paging_bottom = $('<div class="paging_container"></div>');
 	div.append(paging_bottom);
-
+	var but;
 	if (collectionPage <= 0) {
 		but = $('<div class="paging_button_disabled"> \< </div>');
 	}
@@ -3725,10 +3743,10 @@ function printCards() {
 		paging_bottom.append(but.clone());
 	}
 	if (collectionPage >= totalPages-1) {
-		but = $('<div class="paging_button_disabled"> \> </div>');
+		but = $('<div class="paging_button_disabled"></div>');
 	}
 	else {
-		but = $('<div class="paging_button" onClick="setCollectionPage('+(collectionPage+1)+')"> \> </div>');
+		but = $('<div class="paging_button" onClick="setCollectionPage('+(collectionPage+1)+')"></div>');
 	}
 	paging.append(but);
 	paging_bottom.append(but.clone());
@@ -3736,14 +3754,16 @@ function printCards() {
 
 
 //
+/* eslint-disable */
 function setCollectionPage(page) {
 	collectionPage = page;
 	printCards();
 }
+/* eslint-enable */
 
 //
 function add_checkbox(div, label, iid, def) {
-	var label = $('<label class="check_container hover_label">'+label+'</label>');
+	label = $('<label class="check_container hover_label">'+label+'</label>');
 	label.appendTo(div);
 	var check_new = $('<input type="checkbox" id="'+iid+'" onclick="updateSettings()" />');
 	check_new.appendTo(label);
@@ -3834,15 +3854,15 @@ function open_settings(openSection) {
 	section.appendTo(div);
 	section.append('<div class="settings_title">Visual</div>');
 
-    var label = $('<label class="but_container_label">Background URL:</label>');
+    label = $('<label class="but_container_label">Background URL:</label>');
     label.appendTo(section);
 
-    var icd = $('<div class="input_container"></div>');
+    icd = $('<div class="input_container"></div>');
     var url_input = $('<input type="search" id="query_image" autocomplete="off" value="'+settings.back_url+'" />');
     url_input.appendTo(icd);
     icd.appendTo(label);
 
-    var label = $('<label class="but_container_label">Background shade:</label>');
+    label = $('<label class="but_container_label">Background shade:</label>');
     var colorPick = $('<input type="text" id="flat" class="color_picker" />');
     colorPick.appendTo(label);
     label.appendTo(section);
@@ -3858,7 +3878,7 @@ function open_settings(openSection) {
         updateSettings();
     });
 
-	var label = $('<label class="but_container_label">Cards quality:</label>');
+	label = $('<label class="but_container_label">Cards quality:</label>');
 	label.appendTo(section);
 	var button = $('<div class="button_simple button_long" style="margin-left: 32px;" onclick="changeQuality(this)">'+cardQuality+'</div>');
 	button.appendTo(label);
@@ -3873,7 +3893,7 @@ function open_settings(openSection) {
 	var d = $('<div style="width: '+cardSize+'px; !important" class="inventory_card_settings"></div>');
 	var img = $('<img style="width: '+cardSize+'px; !important" class="inventory_card_settings_img"></img>');
 	
-	card = cardsDb.get(67518);
+	var card = cardsDb.get(67518);
 	img.attr("src", "https://img.scryfall.com/cards"+card.images[cardQuality]);
 	img.appendTo(d);
 
@@ -3886,9 +3906,9 @@ function open_settings(openSection) {
 	add_checkbox(section, 'Anonymous sharing <i>(makes your username anonymous on Explore)</i>', 'settings_anon_explore', settings.anon_explore);
 	add_checkbox(section, 'Online sharing <i>(when disabled, blocks any connections with our servers)</i>', 'settings_senddata', settings.send_data);
 
-	var label = $('<label class="check_container_but"></label>');
+	label = $('<label class="check_container_but"></label>');
 	label.appendTo(section);
-	var button = $('<div class="button_simple button_long" onclick="eraseData()">Erase my shared data</div>');
+	button = $('<div class="button_simple button_long" onclick="eraseData()">Erase my shared data</div>');
 	button.appendTo(label);
 
 	//
@@ -3899,7 +3919,7 @@ function open_settings(openSection) {
 	var about = $('<div class="about"></div>');
 	about.append('<div class="top_logo_about"></div>');
 	about.append('<div class="message_sub_15 white">By Manuel Etchegaray, 2018</div>');
-	about.append('<div class="message_sub_15 white">Version '+window.electron.remote.app.getVersion()+'</div>');
+	about.append('<div class="message_sub_15 white">Version '+remote.app.getVersion()+'</div>');
 
 	if (updateState.state == 0) {
 		about.append('<div class="message_updates white">Checking for updates..</div>');
@@ -3933,10 +3953,10 @@ function open_settings(openSection) {
 	var login = $('<div class="about"></div>');
 	section.appendTo(div);
 	if (offlineMode) {
-		var button = $('<div class="button_simple centered login_link_about">Login</div>');
+		button = $('<div class="button_simple centered login_link_about">Login</div>');
 	}
 	else {
-		var button = $('<div class="button_simple centered login_link_about">Logout</div>');
+		button = $('<div class="button_simple centered login_link_about">Logout</div>');
 	}
 	button.appendTo(login);
 	login.appendTo(section);
@@ -3974,7 +3994,6 @@ function open_settings(openSection) {
 	});
 
 	$(".login_link_about").click(function() {
-		const remote = require('electron').remote;
 		remote.app.relaunch();
 		remote.app.exit(0);
 	});
@@ -3982,10 +4001,10 @@ function open_settings(openSection) {
 
 	$(".settings_nav").click(function () {
 		if (!$(this).hasClass("nav_selected")) {
-			$(".settings_nav").each(function(index) {
+			$(".settings_nav").each(function() {
 				$(this).removeClass("nav_selected");
 			});
-			$(".settings_section").each(function(index) {
+			$(".settings_section").each(function() {
 				$(this).hide();
 			});
 
@@ -4031,7 +4050,7 @@ function open_settings(openSection) {
         }
     });
 
-    export_input.on('keyup', function (e) {
+    export_input.on('keyup', function () {
         updateSettings();
     });
 
@@ -4048,7 +4067,7 @@ function open_settings(openSection) {
 		$('.inventory_card_settings').attr('style', styles);
 
 		$('.inventory_card_settings_img').css('width', '');
-		var styles = $('.inventory_card_settings_img').attr('style');
+		styles = $('.inventory_card_settings_img').attr('style');
 		styles += 'width: '+cardSize+'px !important;'
 		$('.inventory_card_settings_img').attr('style', styles);
 	});
@@ -4096,18 +4115,18 @@ function change_background(arg, grpId = 0) {
 	var _card = cardsDb.get(grpId);
 
 	//console.log(arg, grpId, _card);
-    if (arg == "default") {
-        $('.top_artist').html("Githu Lavarunner by Jesper Ejsing");
-        if (defaultBackground == "") {
-	        $('.main_wrapper').css("background-image", "url(../images/Ghitu-Lavarunner-Dominaria-MtG-Art.jpg)");
+	if (arg == "default") {
+	$('.top_artist').html("Githu Lavarunner by Jesper Ejsing");
+	if (defaultBackground == "") {
+		$('.main_wrapper').css("background-image", "url(../images/Ghitu-Lavarunner-Dominaria-MtG-Art.jpg)");
         }
         else {
-	        $('.main_wrapper').css("background-image", "url("+defaultBackground+")");
+			$('.main_wrapper').css("background-image", "url("+defaultBackground+")");
         }
     }
     else if (_card != false) {
-    	console.log(_card.images["art_crop"]);
-	   	$('.main_wrapper').css("background-image", "url(https://img.scryfall.com/cards"+_card.images["art_crop"]+")");
+		console.log(_card.images["art_crop"]);
+		$('.main_wrapper').css("background-image", "url(https://img.scryfall.com/cards"+_card.images["art_crop"]+")");
 	}
     else if (fs.existsSync(arg)) {
         $('.main_wrapper').css("background-image", "url("+arg+")");
@@ -4125,16 +4144,19 @@ function change_background(arg, grpId = 0) {
         });
     }
 
-    if (_card) {
-    	try {
-    		artistLine = _card.name+" by "+_card.artist;
-	    	$('.top_artist').html(artistLine);
-    	}
-    	catch (e) {}
+	if (_card) {
+		try {
+			artistLine = _card.name+" by "+_card.artist;
+			$('.top_artist').html(artistLine);
+		}
+		catch (e) {
+			console.log(e);
+		}
     }
 }
 
 //
+/* eslint-disable */
 function changeQuality(dom) {
 	if (cardQuality == "normal") {
 		cardQuality = "large";
@@ -4158,6 +4180,7 @@ function eraseData() {
 		return;
 	}
 }
+/* eslint-enable */
 
 //
 function updateSettings() {
@@ -4170,9 +4193,9 @@ function updateSettings() {
     var backUrl = document.getElementById("query_image").value;
     defaultBackground = backUrl;
     if (backUrl == "")
-	    change_background("default");
+		change_background("default");
 	else
-	    change_background(backUrl);
+		change_background(backUrl);
 
 	var overlayOnTop = document.getElementById("settings_overlay_ontop").checked;
 	var closeToTray = document.getElementById("settings_closetotray").checked;
@@ -4229,7 +4252,7 @@ function getDeckWinrate(deckid, lastEdit) {
 	}
 
 	matchesHistory.matches.forEach(function(matchid, index) {
-		match = matchesHistory[matchid];
+		let match = matchesHistory[matchid];
 		if (matchid != null && match != undefined) {
 			if (match.type == "match") {
 				if (match.playerDeck.id == deckid) {
@@ -4290,8 +4313,8 @@ function getDeckWinrate(deckid, lastEdit) {
 }
 
 function compare_winrates(a, b) {
-	var _a = a.wins/a.losses;
-	var _b = b.wins/b.losses;
+	let _a = a.wins/a.losses;
+	let _b = b.wins/b.losses;
 
 	if (_a < _b)	return 1;
 	if (_a > _b)	return -1;
@@ -4300,14 +4323,14 @@ function compare_winrates(a, b) {
 }
 
 function compare_color_winrates(a, b) {
-	var a = a.colors;
-	var b = b.colors;
+	a = a.colors;
+	b = b.colors;
 
 	if (a.length < b.length)	return -1;
 	if (a.length > b.length)	return 1;
 
-	sa = a.reduce(function(_a, _b) { return _a + _b; }, 0);
-	sb = b.reduce(function(_a, _b) { return _a + _b; }, 0);
+	let sa = a.reduce(function(_a, _b) { return _a + _b; }, 0);
+	let sb = b.reduce(function(_a, _b) { return _a + _b; }, 0);
 	if (sa < sb)	return -1;
 	if (sa > sb)	return 1;
 
@@ -4456,8 +4479,6 @@ function compare_economy(a, b) {
 	return 0;
 }
 
-
-
 function compare_explore(a, b) {
 	var awlrate = a.wins-a.losses;
 	var bwlrate = b.wins-b.losses;
@@ -4466,3 +4487,4 @@ function compare_explore(a, b) {
 	if (awlrate < bwlrate)	return 1;
 	return 0;
 }
+
