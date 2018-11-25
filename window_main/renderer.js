@@ -4275,7 +4275,7 @@ function getDeckWinrate(deckid, lastEdit) {
 		}
 	});
 
-	if (wins == 0) {
+	if (wins == 0 && loss == 0) {
 		return 0;
 	}
 
