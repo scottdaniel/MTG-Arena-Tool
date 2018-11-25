@@ -11,6 +11,10 @@ const rememberCfg = {
     token: ''
 }
 
+const settingsCfg = {
+    logUri: ''
+}
+
 const defaultCfg = {
     windowBounds: { width: 800, height: 600, x: 0, y: 0 },
     overlayBounds: { width: 300, height: 600, x: 0, y: 0 },
@@ -56,8 +60,13 @@ var rstore = new Store({
 });
 
 var store = new Store({
-	configName: 'default',
-	defaults: defaultCfg
+    configName: 'default',
+    defaults: defaultCfg
+});
+
+var settingsStore = new Store({
+    configName: 'settings',
+    defaults: settingsCfg
 });
 
 const sha1 = require('js-sha1');
@@ -551,6 +560,7 @@ function get_deck_changes(deckId) {
 // Set a new log URI
 ipc.on('set_log', function (event, arg) {
     logUri = arg;
+    settingsStore.set('logUri', arg);
 });
 
 
@@ -563,6 +573,9 @@ let prevLogSize = 0;
 let logLoopMode = 0;
 
 let logUri = mtgaLog.defaultLogUri();
+if (settingsStore.get('logUri') !== '') {
+    logUri = settingsStore.get('logUri');
+}
 console.log(logUri);
 window.setInterval(attemptLogLoop, 250);
 
