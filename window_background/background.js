@@ -81,8 +81,6 @@ const serverAddress = 'mtgatool.com';
 const debugLog = false;
 const debugNet = true;
 var debugLogSpeed = 0.1;
-var timeStart = 0;
-var timeEnd = 0;
 const fs = require("fs");
 const ipc = electron.ipcRenderer;
 
@@ -856,7 +854,7 @@ function client_to_gre(json) {
 // Main function for processing log chunks
 function processLogData(data) {
 	data = data.replace(/[\r\n]/g, "");
-	var strCheck, json;
+	var strCheck, json, logTime;
 	//console.log(data);
 
 	/*
@@ -929,8 +927,8 @@ function processLogData(data) {
 			// Get sideboard changes
 			if (json.payload.type == "ClientMessageType_SubmitDeckResp") {
 
-				var tempMain = {};
-				var tempSide = {};
+				let tempMain = {};
+				let tempSide = {};
 				json.payload.submitDeckResp.deck.deckCards.forEach( function (grpId) {
 					if (tempMain[grpId] == undefined) {
 						tempMain[grpId] = 1
@@ -950,26 +948,24 @@ function processLogData(data) {
 					});
 				}
 
-				// Update on overlay
-				var str = JSON.stringify(currentDeck);
-				currentDeckUpdated = JSON.parse(str);
-				ipc_send("set_deck", currentDeck);
-
-				currentDeck.mainDeck = [];
+				var newDeck = {}
+				newDeck.mainDeck = [];
 				Object.keys(tempMain).forEach(function(key) {
 					var c = {"id": key, "quantity": tempMain[key]};
-					currentDeck.mainDeck.push(c);
+					newDeck.mainDeck.push(c);
 				});
 
-				currentDeck.sideboard = [];
+				newDeck.sideboard = [];
 				if (json.payload.submitDeckResp.deck.sideboardCards !== undefined) {
 					Object.keys(tempSide).forEach(function(key) {
 						var c = {"id": key, "quantity": tempSide[key]};
-						currentDeck.sideboard.push(c);
+						newDeck.sideboard.push(c);
 					});
 				}
 
-				select_deck(currentDeck);
+				//get_deck_sideboarded(currentDeck, newDeck)
+				select_deck(newDeck);
+				currentDeck = newDeck;
 				//console.log(JSON.stringify(currentDeck));
 				//console.log(currentDeck);
 			}
@@ -985,8 +981,8 @@ function processLogData(data) {
 		// Proper timezone onversion is required here
 		strCheck = 'Logger]';
 		if (data.indexOf(strCheck) > -1) {
-			var str = dataChop(data, strCheck, 'M')+'M';
-			var logTime = parseWotcTime(str);
+			let str = dataChop(data, strCheck, 'M')+'M';
+			logTime = parseWotcTime(str);
 			json.date = logTime;
 		}
 		if (json.Id != "00000000-0000-0000-0000-000000000000") {
@@ -996,8 +992,8 @@ function processLogData(data) {
 			select_deck(json);
 			if (json.CourseDeck != null) {
 				json.CourseDeck.colors = get_deck_colors(json.CourseDeck);
-				  //json.date = timestamp();
-				  console.log(json.CourseDeck, json.CourseDeck.colors)
+				//json.date = timestamp();
+				console.log(json.CourseDeck, json.CourseDeck.colors)
 				httpSubmitCourse(json);
 				saveCourse(json);
 			}
@@ -1075,10 +1071,10 @@ function processLogData(data) {
 		strCheck = 'Logger]';
 		if (data.indexOf(strCheck) > -1) {
 			var str = dataChop(data, strCheck, 'M')+'M';
-			var logTime = parseWotcTime(str);
+			logTime = parseWotcTime(str);
 		}
 
-		decks.forEach(function(_deck, index) {
+		decks.forEach(function(_deck) {
 			if (_deck.id == json.id) {
 				var changeId = sha1(_deck.id+"-"+logTime);
 				var deltaDeck = {id: changeId, deckId: _deck.id, date: logTime, changesMain: [], changesSide: [], previousMain: _deck.mainDeck, previousSide: _deck.sideboard};
@@ -1152,7 +1148,7 @@ function processLogData(data) {
 		strCheck = 'Logger]';
 		if (data.indexOf(strCheck) > -1) {
 			var str = dataChop(data, strCheck, 'M')+'M';
-			var logTime = parseWotcTime(str);
+			logTime = parseWotcTime(str);
 		}
 		json.date = logTime;
 		
@@ -1184,7 +1180,7 @@ function processLogData(data) {
 		strCheck = 'Logger]';
 		if (data.indexOf(strCheck) > -1) {
 			var str = dataChop(data, strCheck, 'M')+'M';
-			var logTime = parseWotcTime(str);
+			logTime = parseWotcTime(str);
 		}
 
 		gold = json.gold;
@@ -1252,7 +1248,7 @@ function processLogData(data) {
 	if (json != false) {
 		strCheck = 'Logger]';
 		if (data.indexOf(strCheck) > -1) {
-			var logTime = dataChop(data, strCheck, ' (');
+			logTime = dataChop(data, strCheck, ' (');
 			matchBeginTime = parseWotcTime(logTime);
 			ipc_send("ipc_log", "MATCH CREATED: "+logTime);
 		}
@@ -1980,7 +1976,7 @@ function select_deck(arg) {
 	}
 	var str = JSON.stringify(currentDeck);
 	currentDeckUpdated = JSON.parse(str);
-	console.log(currentDeck, arg);
+	//console.log(currentDeck, arg);
 	ipc_send("set_deck", currentDeck);
 }
 

@@ -27,20 +27,21 @@ draftRanks[0] = "F";
 function addCardTile(grpId, indent, quantity, element) {
 	if (quantity !== 0) {
 		var cont = $('<div class="card_tile_container click-on"></div>');
+		var ww, ll;
 		if (!isNumber(quantity)) {
-			var ww = 64;
-			var ll = 48;
+			ww = 64;
+			ll = 48;
 			cont.append('<div class="card_tile_odds"><span>'+quantity+'</span></div>');
 		}
 		else if (quantity == 9999) {
 			quantity = 1;
-			var ww = 32;
-			var ll = 17;
+			ww = 32;
+			ll = 17;
 			cont.append('<div style="color: rgba(255, 255, 255, 0); min-width: 0px; width: 0px;" class="card_tile_quantity"><span>'+quantity+'</span></div>');
 		}
 		else {
-			var ww = 56;
-			var ll = 40;
+			ww = 56;
+			ll = 40;
 			cont.append('<div class="card_tile_quantity"><span>'+quantity+'</span></div>');
 		}
 		element.append(cont);
@@ -55,22 +56,21 @@ function addCardTile(grpId, indent, quantity, element) {
 		addCardHover(glow, card);
 		glow.on('mouseenter', function(e) {
 			var domid = $(this).attr('id');
-		    $('#'+domid).css('margin-top', '0px');
+			$('#'+domid).css('margin-top', '0px');
 		});
 
 		glow.on('click', function(e) {
 			if (card.dfc == 'SplitHalf')	{
 				card = cardsDb.get(card.dfcId);
 			}
-			let newname = card.name.split(' ').join('-');
-
+			//let newname = card.name.split(' ').join('-');
 			shell.openExternal('https://scryfall.com/card/'+get_set_scryfall(card.set)+'/'+card.cid+'/'+card.name);
 		});
 
 		glow.on('mouseleave', function(e) {
 			var domid = $(this).attr('id');
 			//$('.main_hover').css("opacity", 0);
-		    $('#'+domid).css('margin-top', '3px');
+			$('#'+domid).css('margin-top', '3px');
 			//$('.loader').css("opacity", 0);
 		});
 
@@ -112,48 +112,48 @@ function addCardTile(grpId, indent, quantity, element) {
 //
 function selectAdd(div, callback) {
 	div.each(function(){
-	    var $this = $(this), numberOfOptions = $(this).children('option').length;
-	  
-	    $this.addClass('select-hidden'); 
-	    $this.wrap('<div class="select"></div>');
-	    $this.after('<div class="select-styled"></div>');
+		var $this = $(this), numberOfOptions = $(this).children('option').length;
 
-	    var $styledSelect = $this.next('div.select-styled');
-	    $styledSelect.text($this.children('option').eq(0).text());
-	  
-	    var $list = $('<ul />', {
-	        'class': 'select-options'
-	    }).insertAfter($styledSelect);
-	  
-	    for (var i = 0; i < numberOfOptions; i++) {
-	        $('<li />', {
-	            text: $this.children('option').eq(i).text(),
-	            rel: $this.children('option').eq(i).val()
-	        }).appendTo($list);
-	    }
-	  
-	    var $listItems = $list.children('li');
-	  
-	    $styledSelect.click(function(e) {
-	        e.stopPropagation();
-	        $('div.select-styled.active').not(this).each(function(){
-	            $(this).removeClass('active').next('ul.select-options').hide();
-	        });
-	        $(this).toggleClass('active').next('ul.select-options').toggle();
-	    });
-	  
-	    $listItems.click(function(e) {
-	        e.stopPropagation();
-	        $styledSelect.text($(this).text()).removeClass('active');
-	        $this.val($(this).attr('rel'));
-	        $list.hide();
-	        callback($this.val());
-	    });
-	  
-	    $(document).click(function() {
-	        $styledSelect.removeClass('active');
-	        $list.hide();
-	    });
+		$this.addClass('select-hidden'); 
+		$this.wrap('<div class="select"></div>');
+		$this.after('<div class="select-styled"></div>');
+
+		var $styledSelect = $this.next('div.select-styled');
+		$styledSelect.text($this.children('option').eq(0).text());
+
+		var $list = $('<ul />', {
+			'class': 'select-options'
+		}).insertAfter($styledSelect);
+
+		for (var i = 0; i < numberOfOptions; i++) {
+			$('<li />', {
+				text: $this.children('option').eq(i).text(),
+				rel: $this.children('option').eq(i).val()
+			}).appendTo($list);
+		}
+
+		var $listItems = $list.children('li');
+
+		$styledSelect.click(function(e) {
+			e.stopPropagation();
+			$('div.select-styled.active').not(this).each(function(){
+				$(this).removeClass('active').next('ul.select-options').hide();
+			});
+			$(this).toggleClass('active').next('ul.select-options').toggle();
+		});
+
+		$listItems.click(function(e) {
+			e.stopPropagation();
+			$styledSelect.text($(this).text()).removeClass('active');
+			$this.val($(this).attr('rel'));
+			$list.hide();
+			callback($this.val());
+		});
+
+		$(document).click(function() {
+			$styledSelect.removeClass('active');
+			$list.hide();
+		});
 	});
 }
 
@@ -166,7 +166,7 @@ function addCardHover(div, _card) {
 		if (_card.dfc == 'DFC_Front') dfc = 'b';
 		if (_card.dfc == 'SplitHalf') dfc = 'a';
 
-		 // Split cards are readable both halves, no problem
+		// Split cards are readable both halves, no problem
 		if (dfc != '' && _card.dfc != 'SplitHalf' && renderer == 0) {
 			$('.main_hover_dfc').show();
 			$('.loader_dfc').show();
@@ -191,7 +191,7 @@ function addCardHover(div, _card) {
 		});
 	});
 
-	div.on('mouseleave', function(e) {
+	div.on('mouseleave', function() {
 		$('.main_hover').css("opacity", 0);
 		$('.main_hover_dfc').css("opacity", 0);
 		$('.loader').css("opacity", 0);
@@ -201,26 +201,26 @@ function addCardHover(div, _card) {
 
 //
 function get_rank_index(_rank, _tier) {
-    var ii = 0;
-    if (_rank == "Beginner")	ii = 0;
-    if (_rank == "Bronze")      ii = 1  + _tier;
-    if (_rank == "Silver")   	ii = 6  + _tier;
-    if (_rank == "Gold")        ii = 11 + _tier;
-    if (_rank == "Diamond")		ii = 16 + _tier;
-    if (_rank == "Master")		ii = 21;
-    return ii;
+	var ii = 0;
+	if (_rank == "Beginner")	ii = 0;
+	if (_rank == "Bronze")	  ii = 1  + _tier;
+	if (_rank == "Silver")   	ii = 6  + _tier;
+	if (_rank == "Gold")		ii = 11 + _tier;
+	if (_rank == "Diamond")		ii = 16 + _tier;
+	if (_rank == "Master")		ii = 21;
+	return ii;
 }
 
 //
 function get_rank_index_16(_rank) {
-    var ii = 0;
-    if (_rank == "Beginner")	ii = 0;
-    if (_rank == "Bronze")      ii = 1;
-    if (_rank == "Silver")   	ii = 2;
-    if (_rank == "Gold")        ii = 3;
-    if (_rank == "Diamond")		ii = 4;
-    if (_rank == "Master")		ii = 5;
-    return ii;
+	var ii = 0;
+	if (_rank == "Beginner")	ii = 0;
+	if (_rank == "Bronze")	  ii = 1;
+	if (_rank == "Silver")   	ii = 2;
+	if (_rank == "Gold")		ii = 3;
+	if (_rank == "Diamond")		ii = 4;
+	if (_rank == "Master")		ii = 5;
+	return ii;
 }
 
 //
@@ -410,11 +410,11 @@ function get_set_scryfall(set) {
 //
 function get_colation_set(collationid) {
 	var ret = "";
-    Object.keys(setsList).forEach(function(setName) {
-    	if (setsList[setName].collation == collationid) {
-    		ret = setName;
-    	}
-    });
+	Object.keys(setsList).forEach(function(setName) {
+		if (setsList[setName].collation == collationid) {
+			ret = setName;
+		}
+	});
 
 	return ret;
 }
@@ -564,27 +564,27 @@ function collectionSortCmc(a, b) {
 //
 function get_collection_export() {
 	var list = "";
-    Object.keys(cards).forEach(function(key) {
-    	var add = settings.export_format+"";
-    	var card = cardsDb.get(key);
-    	if (card) {
-	    	let name = card.name;
-	    	name = replaceAll(name, '///', '//');
-	    	add = add.replace('$Name', name);
+	Object.keys(cards).forEach(function(key) {
+		var add = settings.export_format+"";
+		var card = cardsDb.get(key);
+		if (card) {
+			let name = card.name;
+			name = replaceAll(name, '///', '//');
+			add = add.replace('$Name', name);
 
-	    	add = add.replace('$Count', cards[key]);
+			add = add.replace('$Count', cards[key]);
 
-	    	add = add.replace('$SetName', card.set);
-	    	add = add.replace('$SetCode', setsList[card.set].code);
-	    	add = add.replace('$Collector', card.cid);
-	    	add = add.replace('$Rarity', card.rarity);
-	    	add = add.replace('$Type', card.type);
-	    	add = add.replace('$Cmc', card.cmc);
+			add = add.replace('$SetName', card.set);
+			add = add.replace('$SetCode', setsList[card.set].code);
+			add = add.replace('$Collector', card.cid);
+			add = add.replace('$Rarity', card.rarity);
+			add = add.replace('$Type', card.type);
+			add = add.replace('$Cmc', card.cmc);
 			list += add+"\r\n";
-    	}
-    });
+		}
+	});
 
-    return list;
+	return list;
 }
 
 
@@ -598,7 +598,7 @@ function get_deck_colors(deck) {
 			if (card.quantity > 0) {
 				var cdb = cardsDb.get(grpid);
 				if (cdb) {
-					var card_name = cdb.name;
+					//var card_name = cdb.name;
 					var card_cost = cdb.cost;
 					if (cdb.type.indexOf("Land") !== -1 && cdb.frame.length < 3) {
 						if (cdb.frame.includes(1) && !deck.colors.includes(1))	deck.colors.push(1);
@@ -631,7 +631,7 @@ function get_ids_colors(list) {
 	list.forEach(function(grpid) {
 		var cdb = cardsDb.get(grpid);
 		if (cdb) {
-			var card_name = cdb.name;
+			//var card_name = cdb.name;
 			var card_cost = cdb.cost;
 			card_cost.forEach(function(c) {
 				if (c.indexOf('w') !== -1 && !colors.includes(1))	colors.push(1);
@@ -653,7 +653,7 @@ function add_deck_colors(colors, deck) {
 		var grpid = card.id;
 		card = cardsDb.get(grpid);
 		if (card) {
-			var card_name = card.name;
+			//var card_name = card.name;
 			var card_cost = card.cost;
 
 			card_cost.forEach(function(c) {
@@ -687,25 +687,6 @@ function compare_colors(color_a, color_b) {
 	}
 
 	return true;
-}
-
-//
-function get_ids_colors(list) {
-	var colors = [];
-	list.forEach(function(grpid) {
-		var card_name = cardsDb.get(grpid).name;
-		var card_cost = cardsDb.get(grpid).cost;
-
-		card_cost.forEach(function(c) {
-			if (c.indexOf('w') !== -1 && !colors.includes(1))	colors.push(1);
-			if (c.indexOf('u') !== -1 && !colors.includes(2))	colors.push(2);
-			if (c.indexOf('b') !== -1 && !colors.includes(3))	colors.push(3);
-			if (c.indexOf('r') !== -1 && !colors.includes(4))	colors.push(4);
-			if (c.indexOf('g') !== -1 && !colors.includes(5))	colors.push(5);
-		});
-	});
-
-	return colors;
 }
 
 //
@@ -759,6 +740,47 @@ function get_deck_missing(deck) {
 	});
 	
 	return missing;
+}
+
+//
+function get_deck_sideboarded(deck_a, deck_b) {
+	let _in = [];
+	let _out = [];
+
+
+	deck_b.mainDeck.forEach(function(card_b) {
+		let found = false;
+		deck_a.mainDeck.forEach(function(card_a) {
+			if (card_a.id == card_b.id) {
+				found = true;
+			}
+		});
+		if (!found) {
+			let c = {
+				id: card_b.id,
+				quantity: card_b.quantity
+			}
+			_in.push(c);
+		}
+	});
+
+	deck_b.sideboard.forEach(function(card_b) {
+		let found = false;
+		deck_a.sideboard.forEach(function(card_a) {
+			if (card_a.id == card_b.id) {
+				found = true;
+			}
+		});
+		if (!found) {
+			let c = {
+				id: card_b.id,
+				quantity: card_b.quantity
+			}
+			_out.push(c);
+		}
+	});
+	
+	return {in: _in, out: _out};
 }
 
 //
@@ -823,16 +845,16 @@ function get_deck_types_ammount(deck) {
 	var types = {art:0, cre: 0, enc: 0, ins: 0, lan: 0, pla: 0, sor: 0};
 
 	deck.mainDeck.forEach(function(card) {
-        var c = cardsDb.get(card.id);
-        if (c) {
-            if (c.type.includes("Land", 0))                 types.lan += card.quantity;
-            else if (c.type.includes("Creature", 0))        types.cre += card.quantity;
-            else if (c.type.includes("Artifact", 0))        types.art += card.quantity;
-            else if (c.type.includes("Enchantment", 0))     types.enc += card.quantity;
-            else if (c.type.includes("Instant", 0))         types.ins += card.quantity;
-            else if (c.type.includes("Sorcery", 0))         types.sor += card.quantity;
-            else if (c.type.includes("Planeswalker", 0))    types.pla += card.quantity;
-        }
+		var c = cardsDb.get(card.id);
+		if (c) {
+			if (c.type.includes("Land", 0))				 types.lan += card.quantity;
+			else if (c.type.includes("Creature", 0))		types.cre += card.quantity;
+			else if (c.type.includes("Artifact", 0))		types.art += card.quantity;
+			else if (c.type.includes("Enchantment", 0))	 types.enc += card.quantity;
+			else if (c.type.includes("Instant", 0))		 types.ins += card.quantity;
+			else if (c.type.includes("Sorcery", 0))		 types.sor += card.quantity;
+			else if (c.type.includes("Planeswalker", 0))	types.pla += card.quantity;
+		}
 	});
 
 	return types;
@@ -846,12 +868,12 @@ function get_deck_colors_ammount(deck) {
 	deck.mainDeck.forEach(function(card) {
 		if (card.quantity > 0) {
 			cardsDb.get(card.id).cost.forEach(function(c) {
-				if (c.indexOf('w') !== -1) { colors.w += 1; colors.total+=1 };
-				if (c.indexOf('u') !== -1) { colors.u += 1; colors.total+=1 };
-				if (c.indexOf('b') !== -1) { colors.b += 1; colors.total+=1 };
-				if (c.indexOf('r') !== -1) { colors.r += 1; colors.total+=1 };
-				if (c.indexOf('g') !== -1) { colors.g += 1; colors.total+=1 };
-				if (c.indexOf('c') !== -1) { colors.c += 1; colors.total+=1 };
+				if (c.indexOf('w') !== -1) { colors.w += 1; colors.total+=1 }
+				if (c.indexOf('u') !== -1) { colors.u += 1; colors.total+=1 }
+				if (c.indexOf('b') !== -1) { colors.b += 1; colors.total+=1 }
+				if (c.indexOf('r') !== -1) { colors.r += 1; colors.total+=1 }
+				if (c.indexOf('g') !== -1) { colors.g += 1; colors.total+=1 }
+				if (c.indexOf('c') !== -1) { colors.c += 1; colors.total+=1 }
 			});
 		}
 	});
@@ -866,7 +888,7 @@ function get_deck_lands_ammount(deck) {
 	//var mana = {0: "", 1: "white", 2: "blue", 3: "black", 4: "red", 5: "green", 6: "colorless", 7: "", 8: "x"}
 	deck.mainDeck.forEach(function(card) {
 		var quantity = card.quantity;
-		var card = cardsDb.get(card.id); 
+		card = cardsDb.get(card.id); 
 		if (quantity > 0) {
 			if (card.type.indexOf("Land") != -1 || card.type.indexOf("land") != -1) {
 				if (card.frame.length < 5) {
@@ -943,8 +965,8 @@ function get_deck_export_txt(deck) {
 	deck.mainDeck.forEach(function(card) {
 		var grpid = card.id;
 		var card_name = cardsDb.get(grpid).name;
-		var card_set = cardsDb.get(grpid).set;
-		var card_cn = cardsDb.get(grpid).cid;
+		//var card_set = cardsDb.get(grpid).set;
+		//var card_cn = cardsDb.get(grpid).cid;
 		
 		str += card.quantity+" "+card_name+"\r\n";
 	});
@@ -954,8 +976,8 @@ function get_deck_export_txt(deck) {
 	deck.sideboard.forEach(function(card) {
 		var grpid = card.id;
 		var card_name = cardsDb.get(grpid).name;
-		var card_set = cardsDb.get(grpid).set;
-		var card_cn = cardsDb.get(grpid).cid;
+		//var card_set = cardsDb.get(grpid).set;
+		//var card_cn = cardsDb.get(grpid).cid;
 		
 		str += card.quantity+" "+card_name+"\r\n";
 	});
@@ -998,29 +1020,29 @@ function timeSince(_date) {
 
   var interval = Math.floor(seconds / 31536000);
   if (interval == 1)
-    return interval + " year";
+	return interval + " year";
   if (interval > 0)
-    return interval + " years";
+	return interval + " years";
   interval = Math.floor(seconds / 2592000);
   if (interval == 1)
-    return interval + " month";
+	return interval + " month";
   if (interval > 0)
-    return interval + " months";
+	return interval + " months";
   interval = Math.floor(seconds / 86400);
   if (interval == 1)
-    return interval + " day";
+	return interval + " day";
   if (interval > 0)
-    return interval + " days";
+	return interval + " days";
   interval = Math.floor(seconds / 3600);
   if (interval == 1)
-    return interval + " hour";
+	return interval + " hour";
   if (interval > 0)
-    return interval + " hours";
+	return interval + " hours";
   interval = Math.floor(seconds / 60);
   if (interval == 1)
-    return interval + " minute";
+	return interval + " minute";
   if (interval > 0)
-    return interval + " minutes";
+	return interval + " minutes";
   return Math.floor(seconds) + " seconds";
 }
 
@@ -1033,12 +1055,11 @@ function daysPast(_date) {
 
 //
 function replaceAll(str, find, replace) {
-    return str.replace(new RegExp(find, 'g'), replace);
+	return str.replace(new RegExp(find, 'g'), replace);
 }
 
 //
-function stripTags(html)
-{
+function stripTags(html) {
    var tmp = document.createElement("DIV");
    tmp.innerHTML = html;
    return tmp.textContent || tmp.innerText || "";
@@ -1046,29 +1067,29 @@ function stripTags(html)
 
 //
 function makeId(length) {
-    var ret = "";
-    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    for (var i = 0; i < length; i++)
-    ret += possible.charAt(Math.floor(Math.random() * possible.length));
+	var ret = "";
+	var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+	for (var i = 0; i < length; i++)
+	ret += possible.charAt(Math.floor(Math.random() * possible.length));
 
-    return ret;
+	return ret;
 }
 
 //
 function debugDeck(deck) {
 	deck.forEach( function (card) {
-	    var c = cardsDb.get(card.id);
-	    ipc_send("ipc_log", card.quantity+"x "+c.name +" ("+card.id+")");
+		var c = cardsDb.get(card.id);
+		ipc_send("ipc_log", card.quantity+"x "+c.name +" ("+card.id+")");
 	});
 }
 
 //
 function toMMSS(sec_num) {
-    var hours   = Math.floor(sec_num / 3600);
-    var minutes = Math.floor((sec_num - (hours * 3600)) / 60);
-    var seconds = sec_num - (hours * 3600) - (minutes * 60);
+	var hours   = Math.floor(sec_num / 3600);
+	var minutes = Math.floor((sec_num - (hours * 3600)) / 60);
+	var seconds = sec_num - (hours * 3600) - (minutes * 60);
 
-    if (minutes < 10) {minutes = "0"+minutes;}
-    if (seconds < 10) {seconds = "0"+seconds;}
-    return minutes+':'+seconds;
+	if (minutes < 10) {minutes = "0"+minutes;}
+	if (seconds < 10) {seconds = "0"+seconds;}
+	return minutes+':'+seconds;
 }
