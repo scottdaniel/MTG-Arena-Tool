@@ -1306,7 +1306,7 @@ function setEvents(loadMore) {
 			tile.style.backgroundImage = "url(https://img.scryfall.com/cards"+cardsDb.get(tileGrpid).images["art_crop"]+")";
 		}
 		catch (e) {
-			console.error(e);
+			console.error(e, tileGrpid);
 		}
 		fltl.appendChild(tile);
 
@@ -1638,19 +1638,20 @@ function setHistory(loadMore) {
 
 	mainDiv = document.getElementById("history_column");
 	
-	//console.log("Load more: ", loadHistory, loadMore, loadHistory+loadMore);
+	console.log("Load more: ", loadHistory, loadMore, loadHistory+loadMore);
 	for (var loadEnd = loadHistory + loadMore; loadHistory < loadEnd; loadHistory++) {
 		var match_id = matchesHistory.matches[loadHistory];
 		var match = matchesHistory[match_id];
 
+		console.log("match: ", match_id, match);
 		if (match == undefined) continue;
 		if (match.type == "match") {
 			if (match.opponent == undefined) continue;
 			if (match.opponent.userid.indexOf("Familiar") !== -1) continue;
 		}
 		if (match.type == "Event")	continue;
-		//console.log("Load match: ", match_id, match);
-		//console.log("Match: ", loadHistory, match.type, match);
+		console.log("Load match: ", match_id, match);
+		console.log("Match: ", loadHistory, match.type, match);
 
 		div = document.createElement("div");
 		div.classList.add(match.id);
@@ -1693,7 +1694,7 @@ function setHistory(loadMore) {
 		if (match.type == "match") {
 			tileGrpid = match.playerDeck.deckTileId;
 			try {
-				cardsDb.get(tileGrpid).set;
+				let t = cardsDb.get(tileGrpid).set;
 			}
 			catch (e) {
 				tileGrpid = 67003;
@@ -1707,7 +1708,7 @@ function setHistory(loadMore) {
 				tile.style.backgroundImage = "url(https://img.scryfall.com/cards"+cardsDb.get(tileGrpid).images["art_crop"]+")";
 			}
 			catch (e) {
-				console.error(e);
+				console.error(e, tileGrpid);
 			}
 			fltl.appendChild(tile);
 
@@ -1766,6 +1767,7 @@ function setHistory(loadMore) {
 			}
 		}
 		else if (match.type == "draft") {
+			console.log("Draft: ", match);
 			try {
 				tileGrpid = setsList[match.set].tile;
 			}
@@ -2355,12 +2357,12 @@ function open_course_request(courseId) {
 }
 
 // 
-function open_deck(i, type = 0) {
-	let _deck;
+function open_deck(i, type) {
+	var _deck;
 	if (type == 0) {
 		_deck = decks[i];
 	}
-	if (type == 1) {
+	if (type == 1 || type == 2) {
 		_deck = i;
 	}
 	currentOpenDeck = _deck;
@@ -2463,7 +2465,7 @@ function open_deck(i, type = 0) {
 
 	cont.appendTo(stats);
 
-	if (type == 0) {
+	if (type == 0 || type == 2) {
 		var wr = getDeckWinrate(_deck.id, _deck.lastUpdated);
 		if (wr != 0) {
 			//$('<span>w/l vs Color combinations</span>').appendTo(stats);
@@ -2649,7 +2651,7 @@ function drawDeckVisual(_div, _stats, deck) {
 	$('<div class="button_simple openDeck">Normal view</div>').appendTo(_div.parent());
 
 	$(".openDeck").click(function () {
-		open_deck(currentOpenDeck);
+		open_deck(currentOpenDeck, 2);
 	});
 
 	var sz = cardSize;
@@ -2757,8 +2759,8 @@ function setChangesTimeline() {
 
 	// CURRENT DECK
 	let div = $('<div class="change"></div>');
-	var butbox = $('<div class="change_button_cont" style="transform: scaleY(-1);"></div>');
-	var button = $('<div class="change_button"></div>');
+	let butbox = $('<div class="change_button_cont" style="transform: scaleY(-1);"></div>');
+	let button = $('<div class="change_button"></div>');
 	button.appendTo(butbox);
 	let datbox = $('<div class="change_data"></div>');
 
@@ -2806,15 +2808,15 @@ function setChangesTimeline() {
 		change.changesSide.sort(compare_changes_inner);
 
 		let div = $('<div class="change"></div>');
-		var butb;
+		let butbox;
 		if (cn < changes.length-1) {
-			butb = $('<div style="background-size: 100% 100% !important;" class="change_button_cont"></div>');
+			butbox = $('<div style="background-size: 100% 100% !important;" class="change_button_cont"></div>');
 		}
 		else {
-			butb = $('<div class="change_button_cont"></div>');
+			butbox = $('<div class="change_button_cont"></div>');
 		}
 		var button = $('<div class="change_button"></div>');
-		button.appendTo(butb);
+		button.appendTo(butbox);
 		let datbox = $('<div class="change_data"></div>');
 
 		// title
@@ -2915,14 +2917,14 @@ function setChangesTimeline() {
 	$('<div class="button_simple openDeck">View stats</div>').appendTo(cont);
 
 	$(".openDeck").click(function () {
-		open_deck(currentOpenDeck);
+		open_deck(currentOpenDeck, 2);
 	});
 	time.appendTo(cont);
 }
 
 //
 function open_draft(id, tileGrpid, set) {
-	console.log("OPEN DRAFT", draftPosition)
+	console.log("OPEN DRAFT", id, draftPosition)
 	$("#ux_1").html('');
 	var draft = matchesHistory[id];
 
@@ -2991,26 +2993,22 @@ function open_draft(id, tileGrpid, set) {
 	$(".slider").off();
 
 	$(".slider").on('click mousemove', function() {
-		console.log("SLIDER MOVE", draftPosition)
 		var pa = Math.floor( (qSel.value-1)/2 / packSize) ;
 		var pi = Math.floor( ((qSel.value-1)/2) % packSize) ;
 		$('.draft_title').html('Pack '+(pa+1)+', Pick '+(pi+1));
 	});
 
 	$(".slider").on('click mouseup', function() {
-		console.log("SLIDER UP")
 		draftPosition = parseInt(qSel.value);
 		open_draft(id, tileGrpid, set);
 	});
 	
 	$(".draft_nav_prev").on('click mouseup', function() {
-		console.log("NAV PREV UP")
 		draftPosition -= 1;
 		open_draft(id, tileGrpid, set);
 	});
 
 	$(".draft_nav_next").on('click mouseup', function() {
-		console.log("NAV NEXT UP")
 		draftPosition += 1;
 		open_draft(id, tileGrpid, set);
 	});
@@ -4394,7 +4392,7 @@ function sort_history() {
 		var match = matchesHistory[mid];
 
 		if (mid != null && match != undefined) {
-			if (match.type != "draft") {
+			if (match.type != "draft" && match.type != "Event") {
 				try {
 					if (match.playerDeck.mainDeck == undefined) {
 						match.playerDeck = JSON.parse('{"deckTileId":67003,"description":null,"format":"Standard","colors":[],"id":"00000000-0000-0000-0000-000000000000","isValid":false,"lastUpdated":"2018-05-31T00:06:29.7456958","lockedForEdit":false,"lockedForUse":false,"mainDeck":[],"name":"Undefined","resourceId":"00000000-0000-0000-0000-000000000000","sideboard":[]}');
@@ -4406,7 +4404,7 @@ function sort_history() {
 					match.oppDeck.colors = get_deck_colors(match.oppDeck);
 					match.oppDeck.mainDeck.sort(compare_cards);
 				} catch (e) {
-					console.log(match);
+					console.log(e, match);
 				}
 			}
 		}
