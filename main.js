@@ -223,7 +223,15 @@ app.on('ready', () => {
                 mainWindow.webContents.send("set_tou_list", arg);
                 break;
 
+            case 'tou_set':
+                mainWindow.webContents.send("tou_set", arg);
+                break;
+
             // to background
+            case 'tou_get':
+                background.webContents.send("tou_get", arg);
+                break;
+
             case 'set_log':
                 background.webContents.send("set_log", arg);
                 break;

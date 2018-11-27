@@ -1987,12 +1987,12 @@ function setHome(arg) {
 	cont = document.createElement("div");
 	cont.classList.add("tournament_list_cont");
 
-	tournaments.forEach(function(tou) {
+	tournaments.forEach(function(tou, index) {
 		console.log(tou);
 
 		let div = document.createElement("div");
 		div.classList.add("tou_container");
-		div.id = tou._id+"tou";
+		div.id = tou._id;
 
 
 		let sd = tou.signupDuration;
@@ -2012,7 +2012,7 @@ function setHome(arg) {
 			stateb = toHHMM(roundsStart-now)+" left";
 		}
 		if (tou.state == 1) {
-			state = "Round "+tou.currentRound+" in progress.";
+			state = "Round "+(tou.currentRound+1)+" in progress.";
 			stateb = toHHMM(roundEnd-now)+" left";
 		}
 		if (tou.state == 4) {
@@ -2041,26 +2041,124 @@ function setHome(arg) {
 		div.appendChild(stb);
 		div.appendChild(pln);
 		cont.appendChild(div);
-
 	});
 
 	mainDiv.appendChild(cont);
 
 	$('.tou_container').each(function(index) {
 		$(this).on("click", function() {
-			let tid = $(this).attr('id');
-			openTournament(tid);
-			$('.moving_ux').animate({'left': '-100%'}, 250, 'easeInOutCubic');
+			let ti = $(this).attr('id');
+			ipc_send("tou_get", ti);
 		});
 	});
 }
 
+
 //
-function openTournament(_id) {
+ipc.on('tou_set', function (event, arg) {
+	openTournament(arg);
+	$('.moving_ux').animate({'left': '-100%'}, 250, 'easeInOutCubic');
+});
+
+//
+function openTournament(tou) {
 	let mainDiv = $("#ux_1");
 	mainDiv.html('');
 
+	let sd = tou.signupDuration;
+	let rd = tou.roundDuration;
+	let now = timestamp();
+	let roundsStart = tou.starts + (sd * 60*60);
+	let roundEnd = tou.starts + (sd * 60*60) + (tou.currentRound * 60*60);
 
+	let joined = false;
+	let record = '-';
+	let stats;
+	if (tou.players.indexOf(userName) !== -1) {
+		joined = true;
+		stats = tou.playerStats[userName];
+		record = stats.w+' - '+stats.d+' - '+stats.l;
+	}
+
+	var top = $('<div class="decklist_top"><div class="button back"></div><div class="deck_name">'+tou.name+'</div></div>');
+	flr = $('<div class="tou_top_status" style="align-self: center;"></div>');
+
+	let state = "";
+	if (tou.state == -1) {
+		state = "Registration begin in "+(toHHMM(now - tou.starts));
+	}
+	if (tou.state == 0) {
+		state = toHHMM(roundsStart-now)+" left to register.";
+	}
+	if (tou.state == 1) {
+		state = "Round "+(tou.currentRound+1)+" ends in "+toHHMM(roundEnd-now);
+	}
+	if (tou.state == 4) {
+		state = "Tournament finish.";
+	}
+	flr.html(state);
+	flr.appendTo(top);
+	top.appendTo(mainDiv);
+
+	$('<div class="tou_record green">'+record+'</div>').appendTo(mainDiv);
+
+	let tabs = $('<div class="tou_tabs_cont"></div>');
+	let tab_rounds = $('<div class="tou_tab tabr tou_tab_selected">Rounds</div>');
+	let tab_standings = $('<div class="tou_tab tabp ">Standings</div>');
+
+	tab_rounds.appendTo(tabs);
+	tab_standings.appendTo(tabs);
+	tabs.appendTo(mainDiv);
+
+	for (let i=0; i<tou.currentRound+1; i++) {
+		let rname = 'round_'+i;
+
+		$('<div class="tou_round_title">Round '+(i+1)+'</div>').appendTo(mainDiv);
+		let round_cont = $('<div class="tou_round_cont"></div>');
+
+		tou[rname].forEach(function(match) {
+			let cont = $('<div class="tou_match_cont"></div>');
+			let p1wc = '';
+			let p2wc = '';
+			if (match.winner == 1) {
+				p1wc = 'tou_score_win';
+			}
+			if (match.winner == 2) {
+				p2wc = 'tou_score_win';
+			}
+			let s = '';
+			if (match.p1 == userName)	s = 'style="color: rgba(183, 200, 158, 1);"';
+			let p1 = $('<div '+s+' class="tou_match_p '+match.p1+'pn">'+match.p1.slice(0, -6)+'<div class="'+p1wc+' tou_match_score">'+match.p1w+'</div></div>');
+			s = '';
+			if (match.p2 == userName)	s = 'style="color: rgba(183, 200, 158, 1);"';
+			let p2 = $('<div '+s+' class="tou_match_p '+match.p2+'pn">'+match.p2.slice(0, -6)+'<div class="'+p2wc+' tou_match_score">'+match.p2w+'</div></div>');
+
+			p1.appendTo(cont);
+			p2.appendTo(cont);
+			cont.appendTo(round_cont);
+		})
+
+		round_cont.appendTo(mainDiv);
+	}
+
+	$(".tabr").click(function () {
+		if (!$(this).hasClass("tou_tab_selected")) {
+			$(this).addClass("tou_tab_selected");
+			$(".tabp").removeClass("tou_tab_selected");
+		}
+	});
+
+	$(".tabp").click(function () {
+		if (!$(this).hasClass("tou_tab_selected")) {
+			$(this).addClass("tou_tab_selected");
+			$(".tabr").removeClass("tou_tab_selected");
+		}
+	});
+
+	$(".back").click(function () {
+        change_background("default");
+	    $('.moving_ux').animate({'left': '0px'}, 250, 'easeInOutCubic'); 
+	});
 }
 
 //
