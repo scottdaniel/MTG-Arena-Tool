@@ -7,6 +7,7 @@ global
 	daysPast,
 	timeSince,
 	toMMSS,
+	toHHMM,
 	selectAdd,
 	addCardHover,
 	get_set_scryfall,
@@ -35,6 +36,7 @@ global
 	collectionSortRarity,
 	compare_colors,
 	compare_cards,
+	timestamp
 */
 
 const electron = require('electron');
@@ -47,13 +49,14 @@ let changes = null;
 let matchesHistory = [];
 let economyHistory = [];
 let eventsHistory = [];
+let tournaments = [];
 
 let explore = null;
 let cards = {};
 let cardsNew = {};
 let settings = null;
 let updateState =  {state: -1, available: false, progress: 0, speed: 0};
-let sidebarActive = -1;
+let sidebarActive = 0//-99;
 let collectionPage = 0;
 let eventFilters = null;
 let sortingAlgorithm = 'Set';
@@ -153,7 +156,7 @@ ipc.on('too_slow', function () {
 //
 ipc.on('set_db', function (event, arg) {
 	setsList = arg.sets;
-	//eventsList = arg.events;
+	eventsList = arg.events;
 	delete arg.sets;
 	delete arg.events;
 	canLogin = true;
@@ -1999,7 +2002,7 @@ function setTourneys(arg) {
 	d.classList.add("list_fill");
 	mainDiv.appendChild(d);
 
-	cont = document.createElement("div");
+	let cont = document.createElement("div");
 	cont.classList.add("tournament_list_cont");
 
 	cont = document.createElement("div");
@@ -2018,7 +2021,7 @@ function setTourneys(arg) {
 		let now = timestamp();
 
 		let roundsStart = tou.starts + (sd * 60*60);
-		let roundEnd = tou.starts + (sd * 60*60) + (tou.currentRound * 60*60);
+		let roundEnd = tou.starts + (sd * 60*60) + (tou.currentRound * (60*60) * rd);
 
 		let state = "-";
 		let stateb = "-";
@@ -2063,7 +2066,7 @@ function setTourneys(arg) {
 
 	mainDiv.appendChild(cont);
 
-	$('.tou_container').each(function(index) {
+	$('.tou_container').each(function() {
 		$(this).on("click", function() {
 			let ti = $(this).attr('id');
 			ipc_send("tou_get", ti);
@@ -2087,7 +2090,7 @@ function openTournament(tou) {
 	let rd = tou.roundDuration;
 	let now = timestamp();
 	let roundsStart = tou.starts + (sd * 60*60);
-	let roundEnd = tou.starts + (sd * 60*60) + (tou.currentRound * 60*60);
+	let roundEnd = tou.starts + (sd * 60*60) + (tou.currentRound * 60*60 * rd);
 
 	let joined = false;
 	let record = '-';
@@ -2098,8 +2101,8 @@ function openTournament(tou) {
 		record = stats.w+' - '+stats.d+' - '+stats.l;
 	}
 
-	var top = $('<div class="decklist_top"><div class="button back"></div><div class="deck_name">'+tou.name+'</div></div>');
-	flr = $('<div class="tou_top_status" style="align-self: center;"></div>');
+	let top = $('<div class="decklist_top"><div class="button back"></div><div class="deck_name">'+tou.name+'</div></div>');
+	let flr = $('<div class="tou_top_status" style="align-self: center;"></div>');
 
 	let state = "";
 	if (tou.state == -1) {
@@ -2128,7 +2131,7 @@ function openTournament(tou) {
 	tab_standings.appendTo(tabs);
 	tabs.appendTo(mainDiv);
 
-	tab_cont_a = $('<div class="tou_cont_a"></div>');
+	let tab_cont_a = $('<div class="tou_cont_a"></div>');
 	for (let i=0; i<tou.currentRound+1; i++) {
 		let rname = 'round_'+i;
 		if (tou[rname] !== undefined) {
@@ -2153,7 +2156,9 @@ function openTournament(tou) {
 					if (match.drop1)	d1 = ' (drop)';
 					if (match.drop2)	d2 = ' (drop)';
 				}
-				catch (e) {}
+				catch (e) {
+					console.error(e);
+				}
 
 				let s = '';
 				if (match.p1 == userName)	s = 'style="color: rgba(183, 200, 158, 1);"';
@@ -2170,7 +2175,7 @@ function openTournament(tou) {
 		}
 	}
 
-	tab_cont_b = $('<div class="tou_cont_b" style="height: 0px"></div>');
+	let tab_cont_b = $('<div class="tou_cont_b" style="height: 0px"></div>');
 	tou.players.sort(function(a, b) {
 		if (tou.playerStats[a].mp > tou.playerStats[b].mp)		return -1;
 		else if (tou.playerStats[a].mp < tou.playerStats[b].mp)	return 1;
@@ -2242,7 +2247,7 @@ function openTournament(tou) {
 
 	$(".back").click(function () {
         change_background("default");
-	    $('.moving_ux').animate({'left': '0px'}, 250, 'easeInOutCubic'); 
+		$('.moving_ux').animate({'left': '0px'}, 250, 'easeInOutCubic'); 
 	});
 }
 

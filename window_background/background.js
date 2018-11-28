@@ -1,7 +1,13 @@
 /*
 global
 	get_deck_colors,
-	makeId
+	makeId,
+	daysPast,
+	setsList
+	eventsList,
+	replaceAll,
+	cardsDb,
+	stripTags
 */
 var electron = require('electron');
 
@@ -99,12 +105,10 @@ var currentDeckUpdated = {};
 var currentMatchId = null;
 var currentMatchTime = 0;
 var currentEventId = null;
-var matchWincon = "";
 var duringMatch = false;
 var matchBeginTime = 0;
 
 var arenaVersion = '';
-var playerPassword = '';
 var playerUsername = '';
 var playerName = null;
 var playerRank = null;
@@ -119,7 +123,6 @@ var oppTier = null;
 var oppId = null;
 var oppSeat = null;
 var oppWin = 0;
-var annotationsRead = [];
 
 var prevTurn = -1;
 var turnPhase = "";
@@ -128,17 +131,14 @@ var turnNumber = 0;
 var turnActive = 0;
 var turnPriority = 0;
 var turnDecision = 0;
-var turnStorm = 0;
 var playerLife = 20;
 var opponentLife = 20;
 
 var zones = {};
 var gameObjs = {};
-var hoverCard = undefined;
 var history = {};
 var drafts = {};
 var events = {};
-var topDecks = {};
 //var coursesToSubmit = {};
 var decks = [];
 
@@ -151,10 +151,6 @@ var wcUncommon = 0;
 var wcRare = 0;
 var wcMythic = 0;
 
-var updateAvailable = false;
-var updateState = -1;
-var updateProgress = -1;
-var updateSpeed = 0;
 var currentDraft = undefined;
 var currentDraftPack = undefined;
 var draftSet = "";
@@ -163,9 +159,6 @@ var overlayDeckMode = 0;
 var lastDeckUpdate = new Date();
 
 var economy = {};
-var goldHistory = [];
-var gemsHistory = [];
-var wilcardsHistory = [];
 var deck_changes_index = [];
 var deck_changes = {};
 
@@ -177,7 +170,7 @@ function ipc_send(method, arg) {
 	}
 	//console.log("ipc_switch", method, arg);
 	ipc.send('ipc_switch', method, arg);
-};
+}
 
 
 var rememberMe = false;
@@ -196,7 +189,7 @@ function loadSettings() {
 	updateSettings(settings, true);
 }
 
-ipc.on('reload_overlay', function (event, arg) {
+ipc.on('reload_overlay', function () {
 	loadSettings();
 	var obj = store.get('overlayBounds');
 	ipc_send("overlay_set_bounds", obj);
@@ -279,7 +272,7 @@ ipc.on('delete_match', function (event, arg) {
 		store.set('matches_index', history.matches);
 		store.delete(arg);
 	}
-	var i = drafts.matches.indexOf(arg);
+	i = drafts.matches.indexOf(arg);
 	if (i > -1) {
 		drafts.matches.splice(i, 1);
 		store.set('draft_index', drafts.matches);
@@ -289,7 +282,7 @@ ipc.on('delete_match', function (event, arg) {
 });
 
 //
-ipc.on('request_events', function (event, arg) {
+ipc.on('request_events', function () {
 	ipc_send("set_events", JSON.stringify(events));
 });
 
@@ -417,7 +410,7 @@ ipc.on('request_course', function (event, arg) {
 	httpGetCourse(arg);
 });
 
-ipc.on('request_tou_list', function (event, arg) {
+ipc.on('request_tou_list', function () {
     httpTournamentList();
 });
 
@@ -686,7 +679,9 @@ function processLog(rawString) {
 		
 		if (debugLog) {
 			let _time = new Date();
-			while (new Date() - _time < debugLogSpeed) {}
+			while (new Date() - _time < debugLogSpeed) {
+				/**/
+			}
 		}			
 	});
 
@@ -1299,8 +1294,8 @@ function processLogData(data) {
 	json = checkJsonWithStart(data, strCheck, '', ')');
 	if (json != false) {
 		if (json.eventName != undefined) {
-			for (var set in setsList) {
-				var setCode = setsList[set]["code"];
+			for (let set in setsList) {
+				let setCode = setsList[set]["code"];
 				if (json.eventName.indexOf(setCode) !== -1) {
 					draftSet = set;
 				}
@@ -1321,8 +1316,8 @@ function processLogData(data) {
 	if (json != false) {
 		// store pack in recording
 		if (json.eventName != undefined) {
-			for (var set in setsList) {
-				var setCode = setsList[set]["code"];
+			for (let set in setsList) {
+				let setCode = setsList[set]["code"];
 				if (json.eventName.indexOf(setCode) !== -1) {
 					draftSet = set;
 				}
@@ -1375,6 +1370,7 @@ function processLogData(data) {
 	json = checkJson(data, strCheck, '');
 	if (json != false) {
 		json = json.matchGameRoomStateChangedEvent.gameRoomInfo;
+		let eventId = "";
 
 		if (json.gameRoomConfig != undefined) {
 			currentMatchId = json.gameRoomConfig.matchId;
@@ -1448,7 +1444,9 @@ function actionLog(seat, time, str, grpId = 0) {
 		currentActionLog += hh+':'+mm+':'+ss+' '+stripTags(str)+'\r\n';
 
 		try { fs.writeFileSync(path.join(actionLogDir, currentMatchId+'.txt'), currentActionLog, 'utf-8'); }
-		catch(e) {}
+		catch(e) {
+			//
+		}
 	}
 
 	ipc_send("action_log", {seat: seat, time:time, str: str, grpId: grpId});
@@ -1464,7 +1462,7 @@ var zoneTransfers = [];
 // Here we check if the object ID the transfer refers to exists in the main objects array and process it if it does
 function tryZoneTransfers() {
 	zoneTransfers.forEach(function(obj) {
-		var _orig, _new, _src, _dest, _cat = undefined;
+		var _dest, _cat = undefined;
 		var cname = "";
 		var grpid = 0;
 		var removeFromListAnyway = false;
@@ -1503,6 +1501,7 @@ function tryZoneTransfers() {
 
 		// Try processing it
 		try {
+			var affectorGrpid;
 			//console.log("AnnotationType_ZoneTransfer", obj, obj.aff, gameObjs, _src, _dest, _cat);
 			if (_cat == "CastSpell") {
 				actionLog(owner, obj.time, getNameBySeat(owner)+" casted "+actionLogGenerateLink(grpid));
@@ -1514,7 +1513,7 @@ function tryZoneTransfers() {
 				actionLog(owner, obj.time, getNameBySeat(owner)+" played "+actionLogGenerateLink(grpid));
 			}
 			else if (_cat == "Countered") {
-				var affectorGrpid = gameObjs[obj.affectorId].grpId;
+				affectorGrpid = gameObjs[obj.affectorId].grpId;
 				if (affectorGrpid == undefined) {
 					removeFromList = false;
 				}
@@ -1523,7 +1522,7 @@ function tryZoneTransfers() {
 				}
 			}
 			else if (_cat == "Destroy") {
-				var affectorGrpid = gameObjs[obj.affectorId].grpId;
+				affectorGrpid = gameObjs[obj.affectorId].grpId;
 				if (affectorGrpid == undefined) {
 					removeFromList = false;
 				}
@@ -1569,22 +1568,23 @@ function gre_to_client(data) {
 		// Declare attackers message
 		if (msg.type == "GREMessageType_DeclareAttackersReq") {
 			msg.declareAttackersReq.attackers.forEach(function(obj) {
-				var att = obj.attackerInstanceId;
+				let att = obj.attackerInstanceId;
 				if (!attackersDetected.includes(att)) {
 					if (gameObjs[att] != undefined) {
-						var str = actionLogGenerateLink(gameObjs[att].grpId)+" attacked ";
+						let str = actionLogGenerateLink(gameObjs[att].grpId)+" attacked ";
+						let rec;
 						if (obj.selectedDamageRecipient !== undefined) {
-							var rec = obj.selectedDamageRecipient;
+							rec = obj.selectedDamageRecipient;
 							if (rec.type == "DamageRecType_Player") {
 								actionLog(gameObjs[att].controllerSeatId, new Date(), str+getNameBySeat(rec.playerSystemSeatId));
 								//ipc_send("", str+getNameBySeat(rec.playerSystemSeatId));
 							}
 						}
 						if (obj.legalDamageRecipients !== undefined) {
-							var rec = obj.legalDamageRecipients.forEach(function(rec) {
+							rec = obj.legalDamageRecipients.forEach(function(rec) {
 								if (rec.type == "DamageRecType_Player") {
 									actionLog(gameObjs[att].controllerSeatId, new Date(), str+getNameBySeat(rec.playerSystemSeatId));
-								   //ipc_send("ipc_log", str+getNameBySeat(rec.playerSystemSeatId));
+									//ipc_send("ipc_log", str+getNameBySeat(rec.playerSystemSeatId));
 								}
 							});
 						}
@@ -1628,7 +1628,6 @@ function gre_to_client(data) {
 					turnActive = msg.gameStateMessage.turnInfo.activePlayer;
 					turnPriority = msg.gameStateMessage.turnInfo.priorityPlayer;
 					turnDecision = msg.gameStateMessage.turnInfo.decisionPlayer;
-					turnStorm = msg.gameStateMessage.turnInfo.stormCount;
 
 					if (prevTurn !== turnNumber && turnNumber != undefined) {
 						attackersDetected = [];
@@ -1643,7 +1642,6 @@ function gre_to_client(data) {
 				if (msg.gameStateMessage.gameInfo != undefined) {
 					if (msg.gameStateMessage.gameInfo.matchState == "MatchState_GameComplete") {
 						let results = msg.gameStateMessage.gameInfo.results;
-						matchWincon = msg.gameStateMessage.gameInfo.matchWinCondition;
 						playerWin = 0;
 						oppWin = 0;
 						results.forEach(function(res) {
@@ -1720,20 +1718,22 @@ function gre_to_client(data) {
 										}
 									});
 									if (grpid != undefined) {
-										card = cardsDb.get(grpid);
-										var aff = obj.affectorId;
-										var pn = oppName;
+										//let card = cardsDb.get(grpid);
+										aff = obj.affectorId;
+										//var pn = oppName;
 										if (gameObjs[aff] != undefined) {
 											// We ooly check for abilities here, since cards and spells are better processed with "AnnotationType_ZoneTransfer"
 											if (gameObjs[aff].type == "GameObjectType_Ability") {
 												var src = gameObjs[aff].objectSourceGrpId;
 												var abId = gameObjs[aff].grpId;
 												var ab = cardsDb.getAbility(abId);
-												var cname = "";
+												//var cname = "";
 												try {
 													ab = replaceAll(ab, "CARDNAME", cardsDb.get(src).name);
 												}
-												catch (e) {}
+												catch (e) {
+													//
+												}
 										
 												actionLog(gameObjs[aff].controllerSeatId, new Date(), actionLogGenerateLink(src)+'\'s <a class="card_ability click-on" title="'+ab+'">ability</a>');
 												//ipc_send("ipc_log", cardsDb.get(src).name+"'s ability");
@@ -1799,7 +1799,7 @@ function gre_to_client(data) {
 												}
 											}
 											catch (e) {
-
+												//
 											}
 										}
 									});
@@ -1831,7 +1831,7 @@ function gre_to_client(data) {
 				// Update the game objects
 				if (msg.gameStateMessage.gameObjects != undefined) {
 					msg.gameStateMessage.gameObjects.forEach(function(obj) {
-						name = cardsDb.get(obj.grpId).name;
+						let name = cardsDb.get(obj.grpId).name;
 						if (name) {
 							obj.name = name;
 						}
@@ -1841,7 +1841,9 @@ function gre_to_client(data) {
 							obj.zoneName = zones[obj.zoneId].type;
 							gameObjs[obj.instanceId] = obj;
 						}
-						catch (e) {}
+						catch (e) {
+							//
+						}
 
 						//ipc_send("ipc_log", "Message: "+msg.msgId+" > ("+obj.instanceId+") created at "+zones[obj.zoneId].type);
 					});
@@ -1859,9 +1861,10 @@ function gre_to_client(data) {
 				// We only read life totals at the moment, but we also get timers and such
 				if (msg.gameStateMessage.players != undefined) {
 					msg.gameStateMessage.players.forEach(function(obj) {
-						var sign = '';
+						let sign = '';
+						let diff;
 						if (playerSeat == obj.controllerSeatId) {
-							var diff = obj.lifeTotal - playerLife;
+							diff = obj.lifeTotal - playerLife;
 							if (diff > 0) sign = '+'
 
 							if (diff != 0) {
@@ -1871,7 +1874,7 @@ function gre_to_client(data) {
 							playerLife = obj.lifeTotal;
 						}
 						else {
-							var diff = obj.lifeTotal - opponentLife;
+							diff = obj.lifeTotal - opponentLife;
 							if (diff > 0) sign = '+';
 							if (diff != 0) {
 								actionLog(obj.controllerSeatId, new Date(), getNameBySeat(obj.controllerSeatId)+'\'s life changed to '+obj.lifeTotal+' ('+sign+diff+")");
@@ -1913,7 +1916,6 @@ function createMatch(arg) {
 	actionLog(-99, new Date(), "");
 	var obj = store.get('overlayBounds');
 
-	annotationsRead = [];
 	zones = {};
 	gameObjs = {};
 	attackersDetected = [];
@@ -1949,7 +1951,7 @@ function createMatch(arg) {
 function createDraft() {
 	actionLog(-99, new Date(), "");
 	var obj = store.get('overlayBounds');
-	annotationsRead = [];
+
 	zones = {};
 	gameObjs = {};
 
@@ -2292,7 +2294,7 @@ function saveDraft() {
 		if (!history.matches.includes(draftId)) {
 			history.matches.push(draftId);
 		}
-	 
+
 		store.set('draft_index', draft_index);
 		store.set(draftId, draft);
 		history[draftId] = draft;
@@ -2321,7 +2323,7 @@ function finishLoading() {
 	requestHistorySend(0);
 	ipc_send("initialize", 1);
 
-	var obj = store.get('windowBounds');
+	obj = store.get('windowBounds');
 	ipc_send("renderer_set_bounds", obj);
 
 	if (playerName != null) {
@@ -2356,18 +2358,19 @@ function httpBasic() {
         }
         
         var http = require('https');
+        var options;
         if (_headers.method == 'get_database') {
-            var options = { protocol: 'https:', port: 443, hostname: serverAddress, path: '/database/database.json', method: 'GET'};
+            options = { protocol: 'https:', port: 443, hostname: serverAddress, path: '/database/database.json', method: 'GET'};
         }
         else if (_headers.method == 'get_status') {
             http = require('https');
-            var options = { protocol: 'https:', port: 443, hostname: 'magicthegatheringarena.statuspage.io', path: '/index.json', method: 'GET'};
+            options = { protocol: 'https:', port: 443, hostname: 'magicthegatheringarena.statuspage.io', path: '/index.json', method: 'GET'};
         }
         else if (_headers.method_path !== undefined) {
-            var options = { protocol: 'https:', port: 443, hostname: serverAddress, path: _headers.method_path, method: 'POST'};
+            options = { protocol: 'https:', port: 443, hostname: serverAddress, path: _headers.method_path, method: 'POST'};
         }
         else {
-            var options = { protocol: 'https:', port: 443, hostname: serverAddress, path: '/api.php', method: 'POST'};
+            options = { protocol: 'https:', port: 443, hostname: serverAddress, path: '/api.php', method: 'POST'};
         }
 
         if (debugNet) {
@@ -2386,7 +2389,7 @@ function httpBasic() {
             }); 
             res.on('end', function () {
                 if (debugNet) {
-    				ipc_send("ipc_log", "RECV << "+index+", "+_headers.method+", "+_headers.reqId+", "+_headers.token);
+					ipc_send("ipc_log", "RECV << "+index+", "+_headers.method+", "+_headers.reqId+", "+_headers.token);
                     ipc_send("ipc_log", "RECV << "+index+", "+_headers.method+", "+results.slice(0, 100));
                     console.log("RECV << "+index, _headers.method, results.slice(0, 500));
                 }
@@ -2468,7 +2471,9 @@ function httpBasic() {
                 try {
                     callback();
                 }
-                catch (e) {}
+                catch (e) {
+                	//
+                }
                 
 
                 removeFromHttp(_headers.reqId);
@@ -2522,7 +2527,7 @@ function httpSubmitCourse(course) {
 	httpAsync.push({'reqId': _id, 'method': 'submit_course', 'method_path': '/send_course.php', 'course': course});
 }
 
-function httpSetPlayer(name, rank, tier) {
+function httpSetPlayer() {
 	// useless I think
 	//var _id = makeId(6);
 	//httpAsync.push({'reqId': _id, 'method': 'set_player', 'name': name, 'rank': rank, 'tier': tier});
@@ -2562,7 +2567,7 @@ function httpSendError(error) {
 	httpAsync.push({'reqId': _id, 'method': 'send_error', 'method_path': '/send_error.php', 'error': error});
 }
 
-function httpDeleteData(courseId) {
+function httpDeleteData() {
 	var _id = makeId(6);
 	httpAsync.push({'reqId': _id, 'method': 'delete_data', 'method_path': '/delete_data.php'});
 }

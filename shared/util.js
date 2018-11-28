@@ -1,3 +1,10 @@
+/*
+global
+	cards
+	shell
+	settings
+*/
+
 const Database = require('../shared/database.js');
 const cardsDb = new Database();
 
@@ -54,12 +61,12 @@ function addCardTile(grpId, indent, quantity, element) {
 		cont.append(glow);
 
 		addCardHover(glow, card);
-		glow.on('mouseenter', function(e) {
+		glow.on('mouseenter', function() {
 			var domid = $(this).attr('id');
 			$('#'+domid).css('margin-top', '0px');
 		});
 
-		glow.on('click', function(e) {
+		glow.on('click', function() {
 			if (card.dfc == 'SplitHalf')	{
 				card = cardsDb.get(card.dfcId);
 			}
@@ -67,7 +74,7 @@ function addCardTile(grpId, indent, quantity, element) {
 			shell.openExternal('https://scryfall.com/card/'+get_set_scryfall(card.set)+'/'+card.cid+'/'+card.name);
 		});
 
-		glow.on('mouseleave', function(e) {
+		glow.on('mouseleave', function() {
 			var domid = $(this).attr('id');
 			//$('.main_hover').css("opacity", 0);
 			$('#'+domid).css('margin-top', '3px');
@@ -159,7 +166,7 @@ function selectAdd(div, callback) {
 
 //
 function addCardHover(div, _card) {
-	div.on('mouseenter', function(e) {
+	div.on('mouseenter', function() {
 		$('.main_hover').css("opacity", 1);
 		let dfc = '';
 		if (_card.dfc == 'DFC_Back')  dfc = 'a';
@@ -560,7 +567,6 @@ function collectionSortCmc(a, b) {
 	return 0;
 }
 
-
 //
 function get_collection_export() {
 	var list = "";
@@ -586,8 +592,6 @@ function get_collection_export() {
 
 	return list;
 }
-
-
 
 //
 function get_deck_colors(deck) {
