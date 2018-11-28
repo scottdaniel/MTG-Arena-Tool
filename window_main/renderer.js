@@ -15,7 +15,7 @@ var cards = {};
 var cardsNew = {};
 var settings = null;
 var updateState =  {state: -1, available: false, progress: 0, speed: 0};
-var sidebarActive = -99;
+var sidebarActive = 0;//-99;
 var arenaRunning = false;
 var renderer = 0;
 var collectionPage = 0;
@@ -311,7 +311,7 @@ ipc.on('set_tou_list', function (event, arg) {
 		tournaments = arg;
 	}
 	if (sidebarActive == -1) {
-		setHome();
+		setTourneys();
 	}
 });
 
@@ -425,7 +425,7 @@ ipc.on('initialize', function (event, arg) {
 	$('.top_username_id').html(userName.slice(-6));
 
 	$(".top_rank").css("background-position", (rankOffset*-48)+"px 0px").attr("title", rankTitle);
-	sidebarActive = -1;
+	sidebarActive = 0;//-1;
 	ipc_send('request_tou_list', true);
 	$('.top_nav').removeClass('hidden');
 	$('.overflow_ux').removeClass('hidden');
@@ -1968,7 +1968,7 @@ function addHover(_match, tileGrpid) {
 }
 
 //
-function setHome(arg) {
+function setTourneys(arg) {
 	if (arg != null) {
 		tournaments = arg;
 	}
