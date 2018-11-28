@@ -2405,6 +2405,7 @@ function setDecks(arg) {
 
 			$('.'+deck.id).on('click', function() {
 				var deck = decks[index];
+				currentOpenDeck = deck;
 				open_deck(deck, 2);
 				$('.moving_ux').animate({'left': '-100%'}, 250, 'easeInOutCubic'); 
 			});

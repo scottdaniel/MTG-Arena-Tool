@@ -55,12 +55,14 @@ function deckColorBar(deck) {
 
 function deckManaCurve(deck) {
     let manaCounts = get_deck_curve(deck);
-    let curveMax = Math.max(...manaCounts);
+    let curveMax = Math.max(...manaCounts.map(v=>v||0));
+
+    console.log('deckManaCurve', manaCounts, curveMax);
 
     let curve = $('<div class="mana_curve"></div>');
     let numbers = $('<div class="mana_curve_numbers"></div>');
     manaCounts.forEach((count, i) => {
-        curve.append($(`<div class="mana_curve_column" style="height: ${manaCounts[i]/curveMax*100}%"></div>`))
+        curve.append($(`<div class="mana_curve_column" style="height: ${count/curveMax*100}%"></div>`))
         numbers.append($(`<div class="mana_curve_column_number"><div style="margin: 0 auto !important" class="mana_s16 mana_${i}"></div></div>`))
     })
 
@@ -108,7 +110,7 @@ function deckWinrateCurve(deck) {
     let colorsWinrates = deckWinrates.colors
 
     //$('<span>w/l vs Color combinations</span>').appendTo(stats);
-    let curveMax = Math.max(...colorsWinrates.map(cwr=>Math.max(cwr.wins, cwr.losses)));
+    let curveMax = Math.max(...colorsWinrates.map(cwr=>Math.max(cwr.wins||0, cwr.losses||0)));
     console.log('curveMax', curveMax);
 
     let curve = $('<div class="mana_curve"></div>');
