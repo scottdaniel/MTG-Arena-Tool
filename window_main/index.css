@@ -2168,3 +2168,7 @@ a:hover {
     text-indent: 8px;
     line-height: 28px;
 }
+
+.but_join, .but_drop {
+	margin: 16px auto;
+}

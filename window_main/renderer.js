@@ -1442,7 +1442,6 @@ function expandEvent(_course, expandDiv) {
 	var matchesList = _course.ModuleInstanceData.WinLossGate.ProcessedMatchIds;
 	expandDiv.innerHTML = "";
 	//console.log(matchesList);
-	var d;
 	var newHeight = 0;
 	if (matchesList != undefined) {
 		matchesList.forEach(function(_mid) {
@@ -2008,7 +2007,7 @@ function setTourneys(arg) {
 	cont = document.createElement("div");
 	cont.classList.add("tournament_list_cont");
 
-	tournaments.forEach(function(tou, index) {
+	tournaments.forEach(function(tou) {
 		console.log(tou);
 
 		let div = document.createElement("div");
@@ -2121,129 +2120,155 @@ function openTournament(tou) {
 	flr.appendTo(top);
 	top.appendTo(mainDiv);
 
-	$('<div class="tou_record green">'+record+'</div>').appendTo(mainDiv);
-
-	let tabs = $('<div class="tou_tabs_cont"></div>');
-	let tab_rounds = $('<div class="tou_tab tabr tou_tab_selected">Rounds</div>');
-	let tab_standings = $('<div class="tou_tab tabp ">Standings</div>');
-
-	tab_rounds.appendTo(tabs);
-	tab_standings.appendTo(tabs);
-	tabs.appendTo(mainDiv);
-
-	let tab_cont_a = $('<div class="tou_cont_a"></div>');
-	for (let i=0; i<tou.currentRound+1; i++) {
-		let rname = 'round_'+i;
-		if (tou[rname] !== undefined) {
-			$('<div class="tou_round_title">Round '+(i+1)+'</div>').appendTo(tab_cont_a);
-			let round_cont = $('<div class="tou_round_cont"></div>');
-
-			tou[rname].forEach(function(match) {
-				let cont = $('<div class="tou_match_cont"></div>');
-				let p1wc = '';
-				let p2wc = '';
-				if (match.winner == 1) {
-					p1wc = 'tou_score_win';
-				}
-				if (match.winner == 2) {
-					p2wc = 'tou_score_win';
-				}
-
-				let d1 = '';
-				let d2 = '';
-				if (match.p2 == "bye")	match.p2 = "BYE#00000";
-				try {
-					if (match.drop1)	d1 = ' (drop)';
-					if (match.drop2)	d2 = ' (drop)';
-				}
-				catch (e) {
-					console.error(e);
-				}
-
-				let s = '';
-				if (match.p1 == userName)	s = 'style="color: rgba(183, 200, 158, 1);"';
-				let p1 = $('<div '+s+' class="tou_match_p '+match.p1+'pn">'+match.p1.slice(0, -6)+d1+'<div class="'+p1wc+' tou_match_score">'+match.p1w+'</div></div>');
-				s = '';
-				if (match.p2 == userName)	s = 'style="color: rgba(183, 200, 158, 1);"';
-				let p2 = $('<div '+s+' class="tou_match_p '+match.p2+'pn">'+match.p2.slice(0, -6)+d2+'<div class="'+p2wc+' tou_match_score">'+match.p2w+'</div></div>');
-
-				p1.appendTo(cont);
-				p2.appendTo(cont);
-				cont.appendTo(round_cont);
-			})
-			round_cont.appendTo(tab_cont_a);
+	if (tou.state <= 0) {
+		if (joined) {
+			$('<div class="button_simple but_drop">Drop</div>').appendTo(mainDiv);
 		}
-	}
-
-	let tab_cont_b = $('<div class="tou_cont_b" style="height: 0px"></div>');
-	tou.players.sort(function(a, b) {
-		if (tou.playerStats[a].mp > tou.playerStats[b].mp)		return -1;
-		else if (tou.playerStats[a].mp < tou.playerStats[b].mp)	return 1;
 		else {
-			if (tou.playerStats[a].omwp > tou.playerStats[b].omwp)		return -1;
-			else if (tou.playerStats[a].omwp < tou.playerStats[b].omwp)	return 1;
-			else {
-				if (tou.playerStats[a].gwp > tou.playerStats[b].gwp)		return -1;
-				else if (tou.playerStats[a].gwp < tou.playerStats[b].gwp)	return 1;
-				else {
-					if (tou.playerStats[a].ogwp > tou.playerStats[b].ogwp)		return -1;
-					else if (tou.playerStats[a].ogwp < tou.playerStats[b].ogwp)	return 1;
-				}
+			$('<div class="button_simple but_join">Join</div>').appendTo(mainDiv);
+		}
+
+		$(".but_join").click(function () {
+			ipc_send('tou_join', tou._id);
+		});
+
+		$(".but_drop").click(function () {
+			ipc_send('tou_drop', tou._id);
+		});
+
+	}
+	else {
+		$('<div class="tou_record green">'+record+'</div>').appendTo(mainDiv);
+
+		let tabs = $('<div class="tou_tabs_cont"></div>');
+		let tab_rounds = $('<div class="tou_tab tabr tou_tab_selected">Rounds</div>');
+		let tab_standings = $('<div class="tou_tab tabp ">Standings</div>');
+
+		tab_rounds.appendTo(tabs);
+		tab_standings.appendTo(tabs);
+		tabs.appendTo(mainDiv);
+
+		let tab_cont_a = $('<div class="tou_cont_a"></div>');
+		for (let i=0; i<tou.currentRound+1; i++) {
+			let rname = 'round_'+i;
+			if (tou[rname] !== undefined) {
+				$('<div class="tou_round_title">Round '+(i+1)+'</div>').appendTo(tab_cont_a);
+				let round_cont = $('<div class="tou_round_cont"></div>');
+
+				tou[rname].forEach(function(match) {
+					let cont = $('<div class="tou_match_cont"></div>');
+					let p1wc = '';
+					let p2wc = '';
+					if (match.winner == 1) {
+						p1wc = 'tou_score_win';
+					}
+					if (match.winner == 2) {
+						p2wc = 'tou_score_win';
+					}
+
+					let d1 = '';
+					let d2 = '';
+					if (match.p2 == "bye")	match.p2 = "BYE#00000";
+					try {
+						if (match.drop1)	d1 = ' (drop)';
+						if (match.drop2)	d2 = ' (drop)';
+					}
+					catch (e) {
+						console.error(e);
+					}
+
+					let s = '';
+					if (match.p1 == userName)	s = 'style="color: rgba(183, 200, 158, 1);"';
+					let p1 = $('<div '+s+' class="tou_match_p '+match.p1+'pn">'+match.p1.slice(0, -6)+d1+'<div class="'+p1wc+' tou_match_score">'+match.p1w+'</div></div>');
+					s = '';
+					if (match.p2 == userName)	s = 'style="color: rgba(183, 200, 158, 1);"';
+					let p2 = $('<div '+s+' class="tou_match_p '+match.p2+'pn">'+match.p2.slice(0, -6)+d2+'<div class="'+p2wc+' tou_match_score">'+match.p2w+'</div></div>');
+
+					p1.appendTo(cont);
+					p2.appendTo(cont);
+					cont.appendTo(round_cont);
+				})
+				round_cont.appendTo(tab_cont_a);
 			}
 		}
-		return 0;
-	});
 
-	let line = $('<div class="tou_stand_line_title line_dark"></div>');
-	$('<div class="tou_stand_name">Name</div><div class="tou_stand_cell">Points</div><div class="tou_stand_cell">Score</div><div class="tou_stand_cell">Matches</div><div class="tou_stand_cell">Games</div><div class="tou_stand_cell">OMW</div><div class="tou_stand_cell">GW</div><div class="tou_stand_cell">OGW</div>').appendTo(line);
-	line.appendTo(tab_cont_b);
+		$('<div class="button_simple but_drop">Drop</div>').appendTo(tab_cont_a);
 
-	tou.players.forEach( function(pname, index) {
-		let stat = tou.playerStats[pname];
-		if (index % 2) {
-			line = $('<div class="tou_stand_line line_dark"></div>');
-		}
-		else {
-			line = $('<div class="tou_stand_line"></div>');
-		}
-		let str = '';
+		let tab_cont_b = $('<div class="tou_cont_b" style="height: 0px"></div>');
+		tou.players.sort(function(a, b) {
+			if (tou.playerStats[a].mp > tou.playerStats[b].mp)		return -1;
+			else if (tou.playerStats[a].mp < tou.playerStats[b].mp)	return 1;
+			else {
+				if (tou.playerStats[a].omwp > tou.playerStats[b].omwp)		return -1;
+				else if (tou.playerStats[a].omwp < tou.playerStats[b].omwp)	return 1;
+				else {
+					if (tou.playerStats[a].gwp > tou.playerStats[b].gwp)		return -1;
+					else if (tou.playerStats[a].gwp < tou.playerStats[b].gwp)	return 1;
+					else {
+						if (tou.playerStats[a].ogwp > tou.playerStats[b].ogwp)		return -1;
+						else if (tou.playerStats[a].ogwp < tou.playerStats[b].ogwp)	return 1;
+					}
+				}
+			}
+			return 0;
+		});
 
-		let s = '';
-		if (pname == userName)	s = 'style="color: rgba(183, 200, 158, 1);"';
-
-		str += '<div '+s+' class="tou_stand_name">'+pname.slice(0, -6)+'</div>';
-		str += '<div class="tou_stand_cell">'+stat.mp+'</div>';
-		str += '<div class="tou_stand_cell">'+stat.w+'-'+stat.d+'-'+stat.l+'</div>';
-		str += '<div class="tou_stand_cell">'+stat.rpl+'</div>';
-		str += '<div class="tou_stand_cell">'+stat.gpl+'</div>';
-		str += '<div class="tou_stand_cell">'+Math.round(stat.omwp*10000)/100+'%</div>';
-		str += '<div class="tou_stand_cell">'+Math.round(stat.gwp*10000)/100+'%</div>';
-		str += '<div class="tou_stand_cell">'+Math.round(stat.ogwp*10000)/100+'%</div>';
-
-		$(str).appendTo(line);
+		let line = $('<div class="tou_stand_line_title line_dark"></div>');
+		$('<div class="tou_stand_name">Name</div><div class="tou_stand_cell">Points</div><div class="tou_stand_cell">Score</div><div class="tou_stand_cell">Matches</div><div class="tou_stand_cell">Games</div><div class="tou_stand_cell">OMW</div><div class="tou_stand_cell">GW</div><div class="tou_stand_cell">OGW</div>').appendTo(line);
 		line.appendTo(tab_cont_b);
-	});
 
-	tab_cont_a.appendTo(mainDiv);
-	tab_cont_b.appendTo(mainDiv);
+		tou.players.forEach( function(pname, index) {
+			let stat = tou.playerStats[pname];
+			if (index % 2) {
+				line = $('<div class="tou_stand_line line_dark"></div>');
+			}
+			else {
+				line = $('<div class="tou_stand_line"></div>');
+			}
+			let str = '';
 
-	$(".tabr").click(function () {
-		if (!$(this).hasClass("tou_tab_selected")) {
-			$(this).addClass("tou_tab_selected");
-			$(".tabp").removeClass("tou_tab_selected");
-			$(".tou_cont_a").css("height", "auto");
-			$(".tou_cont_b").css("height", "0px");
-		}
-	});
+			let s = '';
+			if (pname == userName)	s = 'style="color: rgba(183, 200, 158, 1);"';
 
-	$(".tabp").click(function () {
-		if (!$(this).hasClass("tou_tab_selected")) {
-			$(this).addClass("tou_tab_selected");
-			$(".tabr").removeClass("tou_tab_selected");
-			$(".tou_cont_b").css("height", "auto");
-			$(".tou_cont_a").css("height", "0px");
-		}
-	});
+			str += '<div '+s+' class="tou_stand_name">'+pname.slice(0, -6)+'</div>';
+			str += '<div class="tou_stand_cell">'+stat.mp+'</div>';
+			str += '<div class="tou_stand_cell">'+stat.w+'-'+stat.d+'-'+stat.l+'</div>';
+			str += '<div class="tou_stand_cell">'+stat.rpl+'</div>';
+			str += '<div class="tou_stand_cell">'+stat.gpl+'</div>';
+			str += '<div class="tou_stand_cell">'+Math.round(stat.omwp*10000)/100+'%</div>';
+			str += '<div class="tou_stand_cell">'+Math.round(stat.gwp*10000)/100+'%</div>';
+			str += '<div class="tou_stand_cell">'+Math.round(stat.ogwp*10000)/100+'%</div>';
+
+			$(str).appendTo(line);
+			line.appendTo(tab_cont_b);
+		});
+
+		tab_cont_a.appendTo(mainDiv);
+		tab_cont_b.appendTo(mainDiv);
+
+		$(".tabr").click(function () {
+			if (!$(this).hasClass("tou_tab_selected")) {
+				$(this).addClass("tou_tab_selected");
+				$(".tabp").removeClass("tou_tab_selected");
+				$(".tou_cont_a").css("height", "auto");
+				$(".tou_cont_b").css("height", "0px");
+			}
+		});
+
+		$(".tabp").click(function () {
+			if (!$(this).hasClass("tou_tab_selected")) {
+				$(this).addClass("tou_tab_selected");
+				$(".tabr").removeClass("tou_tab_selected");
+				$(".tou_cont_b").css("height", "auto");
+				$(".tou_cont_a").css("height", "0px");
+			}
+		});
+
+		$(".but_drop").click(function () {
+			ipc_send('tou_drop', tou._id);
+		});
+	}
+
 
 	$(".back").click(function () {
         change_background("default");
