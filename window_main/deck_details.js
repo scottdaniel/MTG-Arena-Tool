@@ -1,24 +1,10 @@
 /*
 global
-    setsList,
-    cardsDb,
-    makeId,
-    ConicGradient,
-    daysPast,
-    timeSince,
-    toMMSS,
-    toHHMM,
-    selectAdd,
-    addCardHover,
-    get_set_scryfall,
-    get_colation_set,
-    getEventId,
-    addCardSeparator,
-    addCardTile,
-    getReadableEvent,
-    get_collection_export,
-    get_collection_stats,
-    get_deck_colors,
+    change_background,
+    drawDeck,
+    drawDeckVisual,
+    ipc_send,
+    change_background,
     get_deck_types_ammount,
     get_deck_curve,
     get_deck_colors_ammount,
@@ -26,24 +12,17 @@ global
     get_deck_missing,
     get_deck_export,
     get_deck_export_txt,
-    get_rank_index_16,
-    get_rank_index,
-    draftRanks
-    get_card_type_sort,
-    collectionSortSet,
-    collectionSortName,
-    collectionSortCmc,
-    collectionSortRarity,
-    compare_colors,
-    compare_cards,
-    timestamp
+    mana,
+    ConicGradient,
+    getDeckWinrate,
+    cardsDb
 */
 
 // We need to store a sorted list of card types so we create the card counts in the same order.
-var orderedCardTypes = ['cre','lan','ins','sor','enc','art','pla'];
+var orderedCardTypes = ['cre', 'lan', 'ins', 'sor', 'enc', 'art', 'pla'];
 var orderedCardRarities = ['common', 'uncommon', 'rare', 'mythic'];
 var orderedColorCodes = ['w', 'u', 'b', 'r', 'g', 'c'];
-var orderedManaColors = ['#E7CA8E', '#AABEDF','#A18E87','#DD8263','#B7C89E','#E3E3E3'];
+var orderedManaColors = ['#E7CA8E', '#AABEDF', '#A18E87', '#DD8263', '#B7C89E', '#E3E3E3'];
 
 function deckColorBar(deck) {
     let deckColors = $('<div class="deck_top_colors" style="align-self: center;"></div>');
@@ -55,7 +34,7 @@ function deckColorBar(deck) {
 
 function deckManaCurve(deck) {
     let manaCounts = get_deck_curve(deck);
-    let curveMax = Math.max(...manaCounts.map(v=>v||0));
+    let curveMax = Math.max(...manaCounts.map(v => v || 0));
 
     console.log('deckManaCurve', manaCounts, curveMax);
 
@@ -110,7 +89,7 @@ function deckWinrateCurve(deck) {
     let colorsWinrates = deckWinrates.colors
 
     //$('<span>w/l vs Color combinations</span>').appendTo(stats);
-    let curveMax = Math.max(...colorsWinrates.map(cwr=>Math.max(cwr.wins||0, cwr.losses||0)));
+    let curveMax = Math.max(...colorsWinrates.map(cwr => Math.max(cwr.wins || 0, cwr.losses || 0)));
     console.log('curveMax', curveMax);
 
     let curve = $('<div class="mana_curve"></div>');
@@ -140,10 +119,10 @@ function deckWinrateCurve(deck) {
 function deckStatsSection(deck, deck_type) {
     let stats = $('<div class="stats"></div>');
 
-    $('<div class="button_simple visualView">Visual View</div>').appendTo(stats);
-    $('<div class="button_simple openHistory">History of changes</div>').appendTo(stats);
-    $('<div class="button_simple exportDeck">Export to Arena</div>').appendTo(stats);
-    $('<div class="button_simple exportDeckStandard">Export to .txt</div>').appendTo(stats);
+    $(`<div class="button_simple visualView">Visual View</div>
+    <div class="button_simple openHistory">History of changes</div>
+    <div class="button_simple exportDeck">Export to Arena</div>
+    <div class="button_simple exportDeckStandard">Export to .txt</div>`).appendTo(stats);
 
     let cardTypes = get_deck_types_ammount(deck);
     let typesContainer = $('<div class="types_container"></div>');
@@ -166,6 +145,7 @@ function deckStatsSection(deck, deck_type) {
 
     // Deck colors
     let colorCounts = get_deck_colors_ammount(deck);
+    let pieChart;
     pieChart = colorPieChart(colorCounts, 'Mana Symbols');
     pieChart.appendTo(pieContainer);
 
@@ -230,21 +210,21 @@ function openDeck(deck, deck_type) {
     container.append(fld);
 
     // Attach event handlers
-    $(".visualView").click(e => drawDeckVisual(deckListSection, statsSection, deck));
+    $(".visualView").click(() => drawDeckVisual(deckListSection, statsSection, deck));
 
-    $(".openHistory").click(e => ipc_send('get_deck_changes', deck.id));
+    $(".openHistory").click(() => ipc_send('get_deck_changes', deck.id));
 
-    $(".exportDeck").click(e => {
+    $(".exportDeck").click(() => {
         let list = get_deck_export(deck);
         ipc_send('set_clipboard', list);
     });
 
-    $(".exportDeckStandard").click(e => {
+    $(".exportDeckStandard").click(() => {
         let list = get_deck_export_txt(deck);
         ipc_send('export_txt', {str: list, name: deck.name});
     });
 
-    $(".back").click(e => {
+    $(".back").click(() => {
         change_background("default");
         $('.moving_ux').animate({'left': '0px'}, 250, 'easeInOutCubic'); 
     });
