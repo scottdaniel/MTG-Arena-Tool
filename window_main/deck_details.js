@@ -67,7 +67,7 @@ function open_deck(deck, type) {
 
     let dl = $('<div class="decklist"></div>');
     drawDeck(dl, deck);
-    var stats = $('<div class="stats"></div>');
+    let stats = $('<div class="stats"></div>');
 
 
     $('<div class="button_simple visualView">Visual View</div>').appendTo(stats);
@@ -75,8 +75,8 @@ function open_deck(deck, type) {
     $('<div class="button_simple exportDeck">Export to Arena</div>').appendTo(stats);
     $('<div class="button_simple exportDeckStandard">Export to .txt</div>').appendTo(stats);
 
-    var types = get_deck_types_ammount(deck);
-    var typesdiv = $('<div class="types_container"></div>');
+    let types = get_deck_types_ammount(deck);
+    let typesdiv = $('<div class="types_container"></div>');
     $('<div class="type_icon_cont"><div title="Creatures"       class="type_icon type_cre"></div><span>'+types.cre+'</span></div>').appendTo(typesdiv);
     $('<div class="type_icon_cont"><div title="Lands"           class="type_icon type_lan"></div><span>'+types.lan+'</span></div>').appendTo(typesdiv);
     $('<div class="type_icon_cont"><div title="Instants"        class="type_icon type_ins"></div><span>'+types.ins+'</span></div>').appendTo(typesdiv);
@@ -86,10 +86,10 @@ function open_deck(deck, type) {
     $('<div class="type_icon_cont"><div title="Planeswalkers"   class="type_icon type_pla"></div><span>'+types.pla+'</span></div>').appendTo(typesdiv);
     typesdiv.appendTo(stats);
 
-    var curvediv = $('<div class="mana_curve"></div>');
-    var curve = get_deck_curve(deck);
+    let curvediv = $('<div class="mana_curve"></div>');
+    let curve = get_deck_curve(deck);
 
-    var curveMax = 0;
+    let curveMax = 0;
     for (let i=0; i<curve.length; i++) {
         if (curve[i] == undefined) {
             curve[i] = 0;
@@ -109,23 +109,23 @@ function open_deck(deck, type) {
     }
     curvediv.appendTo(stats);
 
-    //var missing = get_deck_missing(deck);
-    var cont = $('<div class="pie_container_outer"></div>');
+    //let missing = get_deck_missing(deck);
+    let cont = $('<div class="pie_container_outer"></div>');
 
     // Deck colors
-    var colorspie = get_deck_colors_ammount(deck);
-    var wp = colorspie.w / colorspie.total * 100;
-    var up = wp+colorspie.u / colorspie.total * 100;
-    var bp = up+colorspie.b / colorspie.total * 100;
-    var rp = bp+colorspie.r / colorspie.total * 100;
-    var gp = rp+colorspie.g / colorspie.total * 100;
-    var cp = gp+colorspie.c / colorspie.total * 100;
+    let colorspie = get_deck_colors_ammount(deck);
+    let wp = colorspie.w / colorspie.total * 100;
+    let up = wp+colorspie.u / colorspie.total * 100;
+    let bp = up+colorspie.b / colorspie.total * 100;
+    let rp = bp+colorspie.r / colorspie.total * 100;
+    let gp = rp+colorspie.g / colorspie.total * 100;
+    let cp = gp+colorspie.c / colorspie.total * 100;
 
-    var gradient = new ConicGradient({
+    let gradient = new ConicGradient({
         stops: '#E7CA8E '+wp+'%, #AABEDF 0 '+up+'%, #A18E87 0 '+bp+'%, #DD8263 0 '+rp+'%, #B7C89E 0 '+gp+'%, #E3E3E3 0 '+cp+'%', // required
         size: 400 // Default: Math.max(innerWidth, innerHeight)
     });
-    var piechart = $('<div class="pie_container"><span>Mana Symbols</span><svg class="pie">'+gradient.svg+'</svg></div>');
+    let piechart = $('<div class="pie_container"><span>Mana Symbols</span><svg class="pie">'+gradient.svg+'</svg></div>');
     piechart.appendTo(cont);
 
     // Lands colors
@@ -147,7 +147,7 @@ function open_deck(deck, type) {
     cont.appendTo(stats);
 
     if (type == 0 || type == 2) {
-        var wr = getDeckWinrate(deck.id, deck.lastUpdated);
+        let wr = getDeckWinrate(deck.id, deck.lastUpdated);
         if (wr != 0) {
             //$('<span>w/l vs Color combinations</span>').appendTo(stats);
             curvediv = $('<div class="mana_curve"></div>');
@@ -174,10 +174,10 @@ function open_deck(deck, type) {
             curvediv = $('<div class="mana_curve_costs"></div>');
             for (let i=0; i<wr.colors.length; i++) {
                 if (wr.colors[i].wins + wr.colors[i].losses > 2) {
-                    var cn = $('<div class="mana_curve_column_number">'+wr.colors[i].wins+'/'+wr.colors[i].losses+'</div>');
+                    let cn = $('<div class="mana_curve_column_number">'+wr.colors[i].wins+'/'+wr.colors[i].losses+'</div>');
                     cn.append($('<div style="margin: 0 auto !important" class=""></div>'));
 
-                    var colors = wr.colors[i].colors;
+                    let colors = wr.colors[i].colors;
                     colors.forEach(function(color) {
                         cn.append($('<div style="margin: 0 auto !important" class="mana_s16 mana_'+mana[color]+'"></div>'));
                     })
@@ -188,20 +188,20 @@ function open_deck(deck, type) {
         }
     }
 
-    var missingWildcards = get_deck_missing(deck);
+    let missingWildcards = get_deck_missing(deck);
 
-    var cost = $('<div class="wildcards_cost"><span>Wildcards Needed</span></div>');
+    let cost = $('<div class="wildcards_cost"><span>Wildcards Needed</span></div>');
 
-    var _c = $('<div class="wc_cost wc_common">'+missingWildcards.common+'</div>');
+    let _c = $('<div class="wc_cost wc_common">'+missingWildcards.common+'</div>');
     _c.attr("title", "Common");
     _c.appendTo(cost);
-    var _u = $('<div class="wc_cost wc_uncommon">'+missingWildcards.uncommon+'</div>');
+    let _u = $('<div class="wc_cost wc_uncommon">'+missingWildcards.uncommon+'</div>');
     _u.appendTo(cost);
     _u.attr("title", "Uncommon");
-    var _r = $('<div class="wc_cost wc_rare">'+missingWildcards.rare+'</div>');
+    let _r = $('<div class="wc_cost wc_rare">'+missingWildcards.rare+'</div>');
     _r.appendTo(cost);
     _r.attr("title", "Rare");
-    var _m = $('<div class="wc_cost wc_mythic">'+missingWildcards.mythic+'</div>');
+    let _m = $('<div class="wc_cost wc_mythic">'+missingWildcards.mythic+'</div>');
     _m.appendTo(cost);
     _m.attr("title", "Mythic Rare");
 
@@ -212,23 +212,21 @@ function open_deck(deck, type) {
     $("#ux_1").append(top);
     $("#ux_1").append(fld);
 
-    //
     $(".visualView").click(function () {
         drawDeckVisual(dl, stats, deck);
     });
 
-    //
     $(".openHistory").click(function () {
         ipc_send('get_deck_changes', deck.id);
     });
 
     $(".exportDeck").click(function () {
-        var list = get_deck_export(deck);
+        let list = get_deck_export(deck);
         ipc_send('set_clipboard', list);
     });
 
     $(".exportDeckStandard").click(function () {
-        var list = get_deck_export_txt(deck);
+        let list = get_deck_export_txt(deck);
         ipc_send('export_txt', {str: list, name: deck.name});
     });
 
