@@ -265,6 +265,15 @@ span i {
     overflow: hidden;
 }
 
+.ith_icon {
+    width: 32px;
+    height: 32px;
+    opacity: 0.5;
+    margin: 16px auto;
+    background-repeat: no-repeat;
+    background-image: url(../images/cup.png);
+}
+
 .top_nav_item:hover {
     background-position-y: 4px;
     opacity: 1;
@@ -1978,4 +1987,184 @@ a:hover {
     overflow: hidden;
     background: #DD8263 url(../images/delete.png) no-repeat left;
     -webkit-transition: all .25s cubic-bezier(0.2, 0.5, 0.35, 1);
+}
+
+.tournament_list_cont {
+    margin: 16px;
+    overflow: auto;
+}
+
+.tou_container {
+    display: flex;
+    cursor: pointer;
+    height: 32px;
+    -webkit-transition: all .25s cubic-bezier(0.2, 0.5, 0.35, 1);
+}
+
+.tou_container:hover {
+    background-color: rgba(220, 195, 150, 0.3);
+}
+
+.tou_name {
+    width: 200px;
+    color: rgba(250, 229, 210, 1);
+    font-size: 14px;
+    font-weight: bold;
+    line-height: 32px;
+    margin-left: 16px;
+}
+
+.tou_state {
+    width: 150px;
+    color: rgba(250, 229, 210, 0.8);
+    font-size: 14px;
+    line-height: 32px;
+    margin-right: 16px;
+}
+
+.tou_cell {
+    width: 100px;
+    color: rgba(250, 229, 210, 0.8);
+    font-size: 14px;
+    line-height: 32px;
+    margin-right: 16px;
+}
+
+.tou_top_status {
+    color: rgba(250, 229, 210, 0.75);
+    width: 33%;
+    justify-content: flex-end;
+    align-self: center;
+    display: flex;
+    font-style: italic;
+    font-size: 19px;
+}
+
+.tou_record {
+    font-size: 20px;
+    text-align: center;
+    margin: 16px auto;
+}
+
+.tou_tabs_cont {
+    width: 100%;
+    height: 32px;
+    justify-content: center;
+    display: flex;
+}
+
+.tou_tab {
+    cursor: pointer;
+    color: rgba(250, 229, 210, 0.5);
+    width: 120px;
+    text-align: center;
+    line-height: 32px;
+    font-family: beleren;
+    font-size: 19px;
+    height: 32px;
+    margin: auto 32px;
+
+    -webkit-transition: all .2s ease-in-out;
+}
+
+.tou_tab:hover, .tou_tab_selected {
+    border-bottom: solid 1px rgba(210, 231, 250, 1);
+    color: rgba(250, 229, 210, 1);
+}
+
+.tou_round_cont {
+    margin: 0 auto;
+    flex-wrap: wrap;
+    display: flex;
+    justify-content: center;
+    max-width: 800px;
+    margin-bottom: 42px;
+}
+
+.tou_round_title {
+    margin: 20px auto;
+    color: rgba(250, 229, 210, 0.8);
+    font-size: 20px;
+    font-family: beleren;
+    text-align: center;
+}
+
+.tou_match_cont {
+    display: inline-flex;
+    flex-direction: column;
+    width: 240px;
+    height: 80px;
+    margin: 4px;
+    overflow: hidden;
+    border-radius: 5px;
+}
+
+.tou_match_p {
+	display: flex;
+	height: 40px;
+	font-family: beleren;
+	color: rgba(250, 229, 210, 1);
+	line-height: 40px;
+	text-align: left;
+	text-indent: 16px;
+	background-color: rgba(0, 0, 0, 0.5);
+	margin: 1px 0;
+}
+
+.tou_match_score {
+    color: #fae5d2;
+    text-align: center;
+    line-height: 40px;
+    margin-left: auto;
+    width: 40px;
+    text-indent: 0px;
+    background-color: rgba(145, 121, 97, 0.4);
+}
+
+.tou_cont_b, .tou_cont_a {
+	overflow: hidden;
+	-webkit-transition: height .2s ease-in-out;
+}
+
+.tou_score_win {
+    background-color: rgba(145, 121, 97, 1);
+}
+
+.tou_stand_line {
+	display: flex;
+    justify-content: start;
+    height: 28px;
+    max-width: 800px;
+    margin: 0 auto;
+    color: #fae5d2;
+    background-color: rgba(145, 121, 97, 0.4);
+}
+
+.tou_stand_line_title {
+	display: flex;
+    justify-content: start;
+    height: 32px;
+    max-width: 800px;
+    margin: 0 auto;
+    color: #fae5d2;
+    background-color: rgba(145, 121, 97, 0.4);
+    margin-top: 32px;
+    border-bottom: solid 1px rgba(250, 229, 210, 0.6);
+}
+
+.line_dark {
+    background-color: rgba(145, 121, 97, 0.2);
+}
+
+.tou_stand_name {
+    overflow: hidden;
+    width: 180px;
+    text-indent: 8px;
+    line-height: 28px;
+}
+
+.tou_stand_cell {
+    width: 100px;
+    text-indent: 8px;
+    line-height: 28px;
 }

@@ -1084,6 +1084,11 @@ function debugDeck(deck) {
 }
 
 //
+function timestamp() {
+	return Math.floor(Date.now() / 1000);
+}
+
+//
 function toMMSS(sec_num) {
 	var hours   = Math.floor(sec_num / 3600);
 	var minutes = Math.floor((sec_num - (hours * 3600)) / 60);

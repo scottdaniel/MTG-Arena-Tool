@@ -219,7 +219,19 @@ app.on('ready', () => {
                 mainWindow.webContents.send("open_course_deck", arg);
                 break;
 
+            case 'set_tou_list':
+                mainWindow.webContents.send("set_tou_list", arg);
+                break;
+
+            case 'tou_set':
+                mainWindow.webContents.send("tou_set", arg);
+                break;
+
             // to background
+            case 'tou_get':
+                background.webContents.send("tou_get", arg);
+                break;
+
             case 'set_log':
                 background.webContents.send("set_log", arg);
                 break;
@@ -254,6 +266,10 @@ app.on('ready', () => {
 
             case 'request_economy':
                 background.webContents.send("request_economy", arg);
+                break;
+
+            case 'request_tou_list':
+                background.webContents.send("request_tou_list", arg);
                 break;
 
             case 'renderer_state':

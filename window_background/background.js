@@ -417,6 +417,17 @@ ipc.on('request_course', function (event, arg) {
 	httpGetCourse(arg);
 });
 
+ipc.on('request_tou_list', function (event, arg) {
+    httpTournamentList();
+});
+
+ipc.on('tou_get', function (event, arg) {
+    httpTournamentGet(arg);
+});
+
+
+
+
 ipc.on('set_deck_mode', function (event, state) {
 	overlayDeckMode = state;
 	update_deck(true);
@@ -2326,158 +2337,165 @@ htttpGetStatus();
 
 // 
 function httpBasic() {
-	var httpAsyncNew = httpAsync.slice(0);
-	//var str = ""; httpAsync.forEach( function(h) {str += h.reqId+", "; }); console.log("httpAsync: ", str);
-	async.forEachOfSeries(httpAsyncNew, function (value, index, callback) {
-		var _headers = value;
+    var httpAsyncNew = httpAsync.slice(0);
+    //var str = ""; httpAsync.forEach( function(h) {str += h.reqId+", "; }); console.log("httpAsync: ", str);
+    async.forEachOfSeries(httpAsyncNew, function (value, index, callback) {
+        var _headers = value;
 
-		if (store.get("settings").send_data == false && _headers.method != 'auth' && _headers.method != 'delete_data' && _headers.method != 'get_database' && _headers.method != 'get_status' && debugLog == false) {
-			callback({message: "Settings dont allow sending data! > "+_headers.method});
-			removeFromHttp(_headers.reqId);
-		}
-		else if (tokenAuth == undefined) {
-			//callback({message: "Undefined token"});
-			//removeFromHttp(_headers.reqId);
-			_headers.token = "";
-		}
-		else {
-			_headers.token = tokenAuth;
-		}
-		
-		var http = require('https');
-		if (_headers.method == 'get_database') {
-			var options = { protocol: 'https:', port: 443, hostname: serverAddress, path: '/database/database.json', method: 'GET'};
-		}
-		else if (_headers.method == 'get_status') {
-			http = require('https');
-			var options = { protocol: 'https:', port: 443, hostname: 'magicthegatheringarena.statuspage.io', path: '/index.json', method: 'GET'};
-		}
-		else if (_headers.method_path !== undefined) {
-			var options = { protocol: 'https:', port: 443, hostname: serverAddress, path: _headers.method_path, method: 'POST'};
-		}
-		else {
-			var options = { protocol: 'https:', port: 443, hostname: serverAddress, path: '/api.php', method: 'POST'};
-		}
+        if (store.get("settings").send_data == false && _headers.method != 'auth' && _headers.method != 'delete_data' && _headers.method != 'get_database' && _headers.method != 'get_status' && debugLog == false) {
+            callback({message: "Settings dont allow sending data! > "+_headers.method});
+            removeFromHttp(_headers.reqId);
+        }
+        else if (tokenAuth == undefined) {
+            //callback({message: "Undefined token"});
+            //removeFromHttp(_headers.reqId);
+            _headers.token = "";
+        }
+        else {
+            _headers.token = tokenAuth;
+        }
+        
+        var http = require('https');
+        if (_headers.method == 'get_database') {
+            var options = { protocol: 'https:', port: 443, hostname: serverAddress, path: '/database/database.json', method: 'GET'};
+        }
+        else if (_headers.method == 'get_status') {
+            http = require('https');
+            var options = { protocol: 'https:', port: 443, hostname: 'magicthegatheringarena.statuspage.io', path: '/index.json', method: 'GET'};
+        }
+        else if (_headers.method_path !== undefined) {
+            var options = { protocol: 'https:', port: 443, hostname: serverAddress, path: _headers.method_path, method: 'POST'};
+        }
+        else {
+            var options = { protocol: 'https:', port: 443, hostname: serverAddress, path: '/api.php', method: 'POST'};
+        }
 
-		if (debugNet) {
-			console.log("SEND >> "+index+", "+_headers.method, _headers, options);
-			ipc_send("ipc_log", "SEND >> "+index+", "+_headers.method+", "+_headers.reqId+", "+_headers.token);
-		}
+        if (debugNet) {
+            console.log("SEND >> "+index+", "+_headers.method, _headers, options);
+            ipc_send("ipc_log", "SEND >> "+index+", "+_headers.method+", "+_headers.reqId+", "+_headers.token);
+        }
 
-		console.log("POST", _headers);
-		var post_data = qs.stringify(_headers);
-		options.headers = { 'Content-Type': 'application/x-www-form-urlencoded', 'Content-Length': post_data.length};
+        console.log("POST", _headers);
+        var post_data = qs.stringify(_headers);
+        options.headers = { 'Content-Type': 'application/x-www-form-urlencoded', 'Content-Length': post_data.length};
 
-		var results = ''; 
-		var req = http.request(options, function(res) {
-			res.on('data', function (chunk) {
-				results = results + chunk;
-			}); 
-			res.on('end', function () {
-				if (debugNet) {
-					ipc_send("ipc_log", "RECV << "+index+", "+_headers.method+", "+_headers.reqId+", "+_headers.token);
-					ipc_send("ipc_log", "RECV << "+index+", "+_headers.method+", "+results.slice(0, 100));
-					console.log("RECV << "+index, _headers.method, results.slice(0, 500));
-				}
-				try {
-					var parsedResult = JSON.parse(results);
-					if (_headers.method == 'get_status') {
-						delete parsedResult.page; delete parsedResult.incidents;
-						parsedResult.components.forEach(function(ob) {
-							delete ob.id; delete ob.page_id; delete ob.group_id; delete ob.showcase; delete ob.description; delete ob.position; delete ob.created_at;
-						});
-						ipc_send("set_status", parsedResult);
-					}
-					if (parsedResult.ok) {
-						if (_headers.method == 'auth') {
-							tokenAuth = parsedResult.token;
+        var results = ''; 
+        var req = http.request(options, function(res) {
+            res.on('data', function (chunk) {
+                results = results + chunk;
+            }); 
+            res.on('end', function () {
+                if (debugNet) {
+    				ipc_send("ipc_log", "RECV << "+index+", "+_headers.method+", "+_headers.reqId+", "+_headers.token);
+                    ipc_send("ipc_log", "RECV << "+index+", "+_headers.method+", "+results.slice(0, 100));
+                    console.log("RECV << "+index, _headers.method, results.slice(0, 500));
+                }
+                try {
+                    var parsedResult = JSON.parse(results);
+                    if (_headers.method == 'get_status') {
+                        delete parsedResult.page; delete parsedResult.incidents;
+                        parsedResult.components.forEach(function(ob) {
+                            delete ob.id; delete ob.page_id; delete ob.group_id; delete ob.showcase; delete ob.description; delete ob.position; delete ob.created_at;
+                        });
+                        ipc_send("set_status", parsedResult);
+                    }
+                    if (parsedResult.ok) {
+                        if (_headers.method == 'auth') {
+                            tokenAuth = parsedResult.token;
 
-							//ipc_send("auth", parsedResult.arenaids);
+                            //ipc_send("auth", parsedResult.arenaids);
 
-							if (rememberMe) {
-								rstore.set("token", tokenAuth);
-								rstore.set("email", playerUsername);
-							}
+                            if (rememberMe) {
+                                rstore.set("token", tokenAuth);
+                                rstore.set("email", playerUsername);
+                            }
 
-							ipc_send("auth", parsedResult);
-							loadPlayerConfig(playerId);
-						}
-						if (_headers.method == 'get_top_decks') {
-							ipc_send("set_explore", parsedResult.result);
-						}
-						if (_headers.method == 'get_course') {
-							ipc_send("open_course_deck", parsedResult.result);
-						}
-						if (_headers.method == 'share_draft') {
-							ipc_send("set_draft_link", parsedResult.url);
-						}
-						
-						if (_headers.method == 'get_database') {
-							delete parsedResult.ok;
-							setsList = parsedResult.sets;
-							eventsList = parsedResult.events;
-							ipc_send("set_db", parsedResult);
-							cardsDb.set(parsedResult);
-							ipc_send("popup", {"text": "Metadata: Ok", "time": 1000});
-						}
-						
-					}
-					else if (parsedResult.ok == false && parsedResult.error != undefined) {
-						if (_headers.method == 'share_draft') {
-							ipc_send("popup", {"text": parsedResult.error, "time": 3000});
-						}
-						if (_headers.method == 'auth') {
-							if (parsedResult.error == "Invalid credentials.") {
-								tokenAuth = undefined;
-								rstore.set("email", "");
-								rstore.set("token", "");
-								ipc_send("clear_pwd", 1);
-								ipc_send("set_remember", false);
-							}
-						}
-						// errors here 
-					}
-					if (_headers.method == 'auth') {
-						ipc_send("auth", parsedResult);
-					}
-				} catch (e) {
-					console.error(e.message);
-				}
-				/*
-				if (_headers.token != "") {
-				}
-				*/
-				try {
-					callback();
-				}
-				catch (e) {}
-				
+                            ipc_send("auth", parsedResult);
+                            loadPlayerConfig(playerId);
+                        }
+                        if (_headers.method == 'get_top_decks') {
+                            ipc_send("set_explore", parsedResult.result);
+                        }
+                        if (_headers.method == 'get_course') {
+                            ipc_send("open_course_deck", parsedResult.result);
+                        }
+                        if (_headers.method == 'share_draft') {
+                            ipc_send("set_draft_link", parsedResult.url);
+                        }
+                        if (_headers.method == 'tou_list') {
+                            ipc_send("set_tou_list", parsedResult.result);
+                        }
+                        if (_headers.method == 'tou_get') {
+                            ipc_send("tou_set", parsedResult.result);
+                        }
+                        
+                        if (_headers.method == 'get_database') {
+                            //resetLogLoop(100);
+                            delete parsedResult.ok;
+                            setsList = parsedResult.sets;
+                            eventsList = parsedResult.events;
+                            ipc_send("set_db", parsedResult);
+                            cardsDb.set(parsedResult);
+                            ipc_send("popup", {"text": "Metadata: Ok", "time": 1000});
+                        }
+                        
+                    }
+                    else if (parsedResult.ok == false && parsedResult.error != undefined) {
+                        if (_headers.method == 'share_draft') {
+                            ipc_send("popup", {"text": parsedResult.error, "time": 3000});
+                        }
+                        if (_headers.method == 'auth') {
+                            if (parsedResult.error == "Invalid credentials.") {
+                                tokenAuth = undefined;
+                                rstore.set("email", "");
+                                rstore.set("token", "");
+                                ipc_send("clear_pwd", 1);
+                                ipc_send("set_remember", false);
+                            }
+                        }
+                        // errors here 
+                    }
+                    if (_headers.method == 'auth') {
+                        ipc_send("auth", parsedResult);
+                    }
+                } catch (e) {
+                    console.error(e.message);
+                }
+                /*
+                if (_headers.token != "") {
+                }
+                */
+                try {
+                    callback();
+                }
+                catch (e) {}
+                
 
-				removeFromHttp(_headers.reqId);
-				if (debugNet) {
-					var str = ""; httpAsync.forEach( function(h) { str += h.reqId+", "; });
-					ipc_send("ipc_log", "httpAsync: "+str);
-				}
-			}); 
-		});
-		req.on('error', function(e) {
-			callback(e);
-			removeFromHttp(_headers.reqId);
-			ipc_send("ipc_log", e.message);
-		});
-		req.write(post_data);
-		console.log(req);
-		req.end();
+                removeFromHttp(_headers.reqId);
+                if (debugNet) {
+                    var str = ""; httpAsync.forEach( function(h) { str += h.reqId+", "; });
+                    ipc_send("ipc_log", "httpAsync: "+str);
+                }
+            }); 
+        });
+        req.on('error', function(e) {
+            callback(e);
+            removeFromHttp(_headers.reqId);
+            ipc_send("ipc_log", e.message);
+        });
+        req.write(post_data);
+        console.log(req);
+        req.end();
 
-	}, function (err) {
-		if (err) {
-			ipc_send("ipc_log", "httpBasic() Error: "+err.message);
-		}
-		// do it again
-		setTimeout( function() {
-			httpBasic();
-		}, 250);
-	});
+    }, function (err) {
+        if (err) {
+            ipc_send("ipc_log", "httpBasic() Error: "+err.message);
+        }
+        // do it again
+        setTimeout( function() {
+            httpBasic();
+        }, 250);
+    });
 }
 
 function removeFromHttp(req) {
@@ -2563,6 +2581,16 @@ function htttpGetStatus() {
 function httpDraftShareLink(did, exp) {
 	var _id = makeId(6);
 	httpAsync.push({'reqId': _id, 'method': 'share_draft', 'method_path': '/get_share_draft.php', 'id': did, 'expire': exp});
+}
+
+function httpTournamentList() {
+    var _id = makeId(6);
+    httpAsync.push({'reqId': _id, 'method': 'tou_list', 'method_path': '/tournament_list.php'});
+}
+
+function httpTournamentGet(tid) {
+    var _id = makeId(6);
+    httpAsync.push({'reqId': _id, 'method': 'tou_get', 'method_path': '/tournament_get.php', 'id': tid});
 }
 
 
