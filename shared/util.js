@@ -4,6 +4,9 @@ global
 	shell
 	settings
 */
+const windowBackground = 0;
+const windowRenderer = 1;
+const windowOverlay = 2;
 
 const Database = require('../shared/database.js');
 const cardsDb = new Database();

@@ -1,9 +1,14 @@
+/*
+global
+	windowBackground,
+	windowRenderer,
+	windowOverlay
+*/
 var electron  = require('electron');
 const {webFrame, remote} = require('electron');
 
-window.ipc = electron.ipcRenderer;
+const ipc = electron.ipcRenderer;
 var renderer = 1;
-
 
 var matchBeginTime = Date.now();
 var clockMode = 0;
@@ -34,12 +39,16 @@ var sound = new Howl({
 
 const TransparencyMouseFix = require('electron-transparency-mouse-fix');
 const fix = new TransparencyMouseFix({
-  fixPointerEvents: 'auto'
+	fixPointerEvents: 'auto'
 })
 
-ipc_send = function (method, arg) {
-    ipc.send('ipc_switch', method, arg);
-};
+function ipc_send(method, arg, to = windowBackground) {
+	if (method == "ipc_log") {
+		//console.log("IPC LOG", arg);
+	}
+	ipc.send('ipc_switch', method, windowOverlay, arg, to);
+}
+
 
 updateClock();
 
@@ -216,10 +225,6 @@ function hideDiv(div) {
 	_style += 'display: none !important;';
 	$(div).attr('style', _style);
 }
-
-
-ipc.on('ping', function (event, arg) {
-});
 
 //
 ipc.on('set_hover', function (event, arg) {
@@ -516,7 +521,7 @@ $(document).ready(function() {
 	    if (deckMode < 0) {
 	    	deckMode = 4;
 	    }
-	    ipc_send('overlay_set_deck_mode', deckMode);
+	    ipc_send('set_deck_mode', deckMode);
 	});
 	//
 	$(".deck_next").click(function () {
@@ -524,7 +529,7 @@ $(document).ready(function() {
 	    if (deckMode > 4) {
 	    	deckMode = 0;
 	    }
-	    ipc_send('overlay_set_deck_mode', deckMode);
+	    ipc_send('set_deck_mode', deckMode);
 	});
 
 	//

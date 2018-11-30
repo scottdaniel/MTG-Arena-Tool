@@ -7,7 +7,10 @@ global
 	eventsList,
 	replaceAll,
 	cardsDb,
-	stripTags
+	stripTags,
+	windowBackground,
+	windowRenderer,
+	windowOverlay
 */
 var electron = require('electron');
 
@@ -16,6 +19,7 @@ const path  = require('path');
 const Store = require('../store.js');
 const async = require("async");
 const qs	= require('qs');
+
 
 const rememberCfg = {
 	email: '',
@@ -164,12 +168,12 @@ var deck_changes = {};
 
 
 // Begin of IPC messages recievers
-function ipc_send(method, arg) {
+function ipc_send(method, arg, to = windowRenderer) {
 	if (method == "ipc_log") {
-		//console.log("IPC LOG", arg);
+		//
 	}
-	//console.log("ipc_switch", method, arg);
-	ipc.send('ipc_switch', method, arg);
+	console.log("IPC SEND", method, arg, to);
+	ipc.send('ipc_switch', method, windowBackground, arg, to);
 }
 
 
@@ -1449,7 +1453,7 @@ function actionLog(seat, time, str, grpId = 0) {
 		}
 	}
 
-	ipc_send("action_log", {seat: seat, time:time, str: str, grpId: grpId});
+	ipc_send("action_log", {seat: seat, time:time, str: str, grpId: grpId}, windowOverlay);
 
 }
 
@@ -1942,9 +1946,9 @@ function createMatch(arg) {
 	oppWin = 0;
 
 	ipc_send("ipc_log", "vs "+oppName);
-	ipc_send("set_timer", matchBeginTime);
-	ipc_send("set_opponent", oppName);
-	ipc_send("set_opponent_rank", get_rank_index(oppRank, oppTier), oppRank+" "+oppTier);
+	ipc_send("set_timer", matchBeginTime, windowOverlay);
+	ipc_send("set_opponent", oppName, windowOverlay);
+	ipc_send("set_opponent_rank", get_rank_index(oppRank, oppTier), oppRank+" "+oppTier, windowOverlay);
 }
 
 //
@@ -1973,10 +1977,10 @@ function createDraft() {
 	playerWin = 0;
 	oppWin = 0;
 
-	ipc_send("set_draft", true);
-	ipc_send("set_timer", -1);
-	ipc_send("set_opponent", oppName);
-	ipc_send("set_opponent_rank", get_rank_index(oppRank, oppTier), oppRank+" "+oppTier);
+	ipc_send("set_draft", true, windowOverlay);
+	ipc_send("set_timer", -1, windowOverlay);
+	ipc_send("set_opponent", oppName, windowOverlay);
+	ipc_send("set_opponent_rank", get_rank_index(oppRank, oppTier), oppRank+" "+oppTier, windowOverlay);
 }
 
 //
@@ -1990,13 +1994,13 @@ function select_deck(arg) {
 	var str = JSON.stringify(currentDeck);
 	currentDeckUpdated = JSON.parse(str);
 	//console.log(currentDeck, arg);
-	ipc_send("set_deck", currentDeck);
+	ipc_send("set_deck", currentDeck, windowOverlay);
 }
 
 //
 function clear_deck() {
 	var deck = {mainDeck: [], sideboard : [], name: ""};
-	ipc_send("set_deck", deck);
+	ipc_send("set_deck", deck, windowOverlay);
 }
 
 //
@@ -2004,20 +2008,20 @@ function update_deck(force) {
 	var nd = new Date()
 	if (nd - lastDeckUpdate > 1000 || debugLog || !firstPass || force) {
 		if (overlayDeckMode == 0) {
-			ipc_send("set_deck", currentDeckUpdated);
+			ipc_send("set_deck", currentDeckUpdated, windowOverlay);
 		}
 		if (overlayDeckMode == 1) {
-			ipc_send("set_deck", currentDeck);
+			ipc_send("set_deck", currentDeck, windowOverlay);
 		}
 		if (overlayDeckMode == 2) {
-			ipc_send("set_deck", currentDeckUpdated);
+			ipc_send("set_deck", currentDeckUpdated, windowOverlay);
 		}
 		if (overlayDeckMode == 3) {
 			var currentOppDeck = getOppDeck();
-			ipc_send("set_deck", currentOppDeck);
+			ipc_send("set_deck", currentOppDeck, windowOverlay);
 		}
 		if (overlayDeckMode == 4) {
-			ipc_send("set_deck", currentDeckUpdated);
+			ipc_send("set_deck", currentDeckUpdated, windowOverlay);
 		}
 		lastDeckUpdate = nd;
 	}

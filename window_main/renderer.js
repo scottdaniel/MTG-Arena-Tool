@@ -20,10 +20,6 @@ global
 	get_collection_stats,
 	get_deck_colors,
 	get_deck_types_ammount,
-	get_deck_curve,
-	get_deck_colors_ammount,
-	get_deck_lands_ammount,
-	get_deck_missing,
 	get_deck_export,
 	get_deck_export_txt,
 	get_rank_index_16,
@@ -36,7 +32,10 @@ global
 	collectionSortRarity,
 	compare_colors,
 	compare_cards,
-	timestamp
+	timestamp,
+	windowBackground,
+	windowRenderer,
+	windowOverlay
 */
 
 const electron = require('electron');
@@ -94,15 +93,17 @@ const actionLogDir = path.join((electron.app || electron.remote.app).getPath('us
 
 let mana = {0: "", 1: "white", 2: "blue", 3: "black", 4: "red", 5: "green", 6: "colorless", 7: "", 8: "x"}
 
-function ipc_send(method, arg) {
-    ipc.send('ipc_switch', method, arg);
+function ipc_send(method, arg, to = windowBackground) {
+	// 0: Main window
+	// 1: background
+	// 2: overlay
+    ipc.send('ipc_switch', method, windowRenderer, arg, to);
 }
-
 
 //document.addEventListener('DOMContentLoaded', windowReady);
 
 //function windowReady(){
-//	ipc_send('renderer_state', 1);
+//	ipc_send('set_renderer_state', 1);
 //}
 
 window.onerror = (msg, url, line, col, err) => {
@@ -704,7 +705,7 @@ $(document).ready(function() {
 			if ($(this).hasClass("it1")) {
 				sidebarActive = 1;
 				$("#ux_0").html('');
-				ipc_send('renderer_request_history', 1);
+				ipc_send('request_history', 1);
 			}
 			if ($(this).hasClass("it2")) {
 				sidebarActive = 2;
@@ -715,7 +716,7 @@ $(document).ready(function() {
 				sidebarActive = 3;
 				$("#ux_0").html('<div class="loading_bar ux_loading"><div class="loading_color loading_w"></div><div class="loading_color loading_u"></div><div class="loading_color loading_b"></div><div class="loading_color loading_r"></div><div class="loading_color loading_g"></div></div>');
 				document.body.style.cursor = "progress";
-				ipc_send('renderer_request_explore', filterEvent);
+				ipc_send('request_explore', filterEvent);
 			}
 			if ($(this).hasClass("it4")) {
 				sidebarActive = 4;
@@ -2662,7 +2663,7 @@ function setExplore(arg, loadMore) {
 
 //
 function open_course_request(courseId) {
-	ipc_send('renderer_request_course', courseId);
+	ipc_send('request_course', courseId);
 }
 
 
@@ -4283,7 +4284,7 @@ function changeQuality(dom) {
 //
 function eraseData() {
 	if (confirm('This will erase all of your decks and events shared online, are you sure?')) {
-		ipc_send('renderer_erase_data', true);
+		ipc_send('delete_data', true);
 	} else {
 		return;
 	}
