@@ -1,35 +1,44 @@
 /*
 global
 	windowBackground,
-	windowRenderer,
-	windowOverlay
+	windowOverlay,
+	get_deck_colors,
+	removeDuplicates,
+	compare_chances,
+	compare_cards,
+	get_ids_colors,
+	compare_draft_cards,
+	addCardTile,
+	draftRanks,
+	cardsDb
 */
-var electron  = require('electron');
+const electron 	= require('electron');
 const {webFrame, remote} = require('electron');
 
 const ipc = electron.ipcRenderer;
-var renderer = 1;
 
 var matchBeginTime = Date.now();
 var clockMode = 0;
 var draftMode = 1;
 var deckMode = 0;
 var overlayMode = 0;
+var renderer = 1;
 
-var turnPhase = 0;
-var turnStep = 0;
-var turnNumber = 0;
-var turnActive = 0;
+//var turnPhase = 0;
+//var turnStep = 0;
+//var turnNumber = 0;
+//var turnActive = 0;
+//var turnDecision = 0;
+
 var turnPriority = 0;
-var turnDecision = 0;
 var soundPriority = false;
-var overlayAlpha = 1;
+let overlayAlpha = 1;
+let overlayAlphaBack = 1;
 
 var showSideboard = false;
 var actionLog = [];
 
 var cards = {};
-
 var mana = {0: "", 1: "white", 2: "blue", 3: "black", 4: "red", 5: "green", 6: "colorless", 7: "", 8: "x"};
 
 const Howler = require('howler');
@@ -53,18 +62,24 @@ function ipc_send(method, arg, to = windowBackground) {
 updateClock();
 
 function updateClock() {
-	if (clockMode == 0) {
+	var hh, mm, ss;
+	if (matchBeginTime == 0) {
+		hh = 0;
+		mm = 0;
+		ss = 0;
+	}
+	else if (clockMode == 0) {
 		var diff = Math.floor((Date.now() - matchBeginTime)/1000);
-		var hh = Math.floor(diff / 3600);
-		var mm = Math.floor(diff % (3600) / 60);
-		var ss = Math.floor(diff % 60);
+		hh = Math.floor(diff / 3600);
+		mm = Math.floor(diff % (3600) / 60);
+		ss = Math.floor(diff % 60);
 		//console.log(diff, Date.now(), matchBeginTime);
 	}
-	if (clockMode == 1) {
+	else if (clockMode == 1) {
 		var d = new Date();
-		var hh = d.getHours();
-		var mm = d.getMinutes();
-		var ss = d.getSeconds();
+		hh = d.getHours();
+		mm = d.getMinutes();
+		ss = d.getSeconds();
 	}
 
 	hh = ('0' + hh).slice(-2);
@@ -107,7 +122,7 @@ ipc.on('set_timer', function (event, arg) {
 		matchBeginTime = Date.now();
 	}
 	else {
-		matchBeginTime = Date.parse(arg);
+		matchBeginTime = arg == 0 ? 0 : Date.parse(arg);
 	}
 	//console.log("set time", arg);
 });
@@ -257,9 +272,10 @@ ipc.on('set_deck', function (event, arg) {
 	$(".overlay_deckcolors").html('');
 
 	if (arg != null) {
+		let deckListDiv;
 		if (deckMode == 4) {
 			$(".overlay_deckname").html("Action Log");
-			var deckListDiv = $(".overlay_decklist");
+			deckListDiv = $(".overlay_decklist");
 
 			actionLog.forEach(function(log) {
 				var d = new Date(log.time);
@@ -280,9 +296,9 @@ ipc.on('set_deck', function (event, arg) {
 				deckListDiv.scrollTop(deckListDiv[0].scrollHeight);
 			}
 
-			$(".card_link").each(function(index) {
+			$(".card_link").each(function() {
 				$(this).click(function() {
-				    return false;
+					return false;
 				});
 				var grpId = $( this ).attr("href");
 				addCardHover($( this ), cardsDb.get(grpId));
@@ -315,10 +331,10 @@ ipc.on('set_deck', function (event, arg) {
 			arg.mainDeck.sort(compare_cards);
 		}
 
-		var deckListDiv = $(".overlay_decklist");
+		deckListDiv = $(".overlay_decklist");
 		var prevIndex = 0;
 
-		if (arg.cardsLeft && (deckMode == 0 || deckMode == 2)) {
+		if (arg.cardsLeft && (deckMode == 1 || deckMode == 2)) {
 			deckListDiv.append('<div class="chance_title">'+arg.cardsLeft+' cards left</div>');
 		}
 		else {
@@ -384,12 +400,12 @@ ipc.on("set_turn", function (event, _we, _phase, _step, _number, _active, _prior
 	if (turnPriority != _priority && _priority == _we && soundPriority) {
 		sound.play();
 	}
-	turnPhase = _phase;
-	turnStep = _step;
-	turnNumber = _number;
-	turnActive = _active;
+	//turnPhase = _phase;
+	//turnStep = _step;
+	//turnNumber = _number;
+	//turnActive = _active;
 	turnPriority = _priority;
-	turnDecision = _decision;
+	//turnDecision = _decision;
 	if (turnPriority == _we) {
 		$('.clock_turn').html("You have priority.");
 	}
@@ -402,9 +418,9 @@ function setDraft() {
 	$(".overlay_decklist").html('');
 	$(".overlay_deckcolors").html('');
 	$(".overlay_deckname").html("Pack "+packN+" - Pick "+pickN);
-
+	let colors;
 	if (draftMode == 0) {
-		var colors = get_ids_colors(draftPick);
+		colors = get_ids_colors(draftPick);
 		colors.forEach(function(color) {
 			$(".overlay_deckcolors").append('<div class="mana_s20 mana_'+mana[color]+'"></div>');
 		});
@@ -416,7 +432,7 @@ function setDraft() {
 		});
 	}
 	else if (draftMode == 1) {
-		var colors = get_ids_colors(draftPack);
+		colors = get_ids_colors(draftPack);
 		colors.forEach(function(color) {
 			$(".overlay_deckcolors").append('<div class="mana_s20 mana_'+mana[color]+'"></div>');
 		});
@@ -434,16 +450,16 @@ function setDraft() {
 			var od = $(".overlay_decklist");
 			var cont = $('<div class="overlay_card_quantity"></div>');
 
-	        for (let i=0; i<4; i++) {
-	        	if (i < cards[grpId]) {
-			        $('<div style="width: 24px; " class="inventory_card_quantity_green"></div>').appendTo(cont);
-	        	}
-	        	else {
-			        $('<div style="width: 24px; " class="inventory_card_quantity_gray"></div>').appendTo(cont);
-	        	}
-	        }
+			for (let i=0; i<4; i++) {
+				if (i < cards[grpId]) {
+					$('<div style="width: 24px; " class="inventory_card_quantity_green"></div>').appendTo(cont);
+				}
+				else {
+					$('<div style="width: 24px; " class="inventory_card_quantity_gray"></div>').appendTo(cont);
+				}
+			}
 
-	        cont.appendTo(od);
+			cont.appendTo(od);
 			addCardTile(grpId, 'a', draftRanks[rank], od);
 		});
 	}
@@ -470,10 +486,10 @@ function hoverCard(grpId) {
 		$('.overlay_hover').css("opacity", 0);
 	}
 	else {
-		let dfc = '';
-		if (cardsDb.get(grpId).dfc == 'DFC_Back')	dfc = 'a';
-		if (cardsDb.get(grpId).dfc == 'DFC_Front')	dfc = 'b';
-		if (cardsDb.get(grpId).dfc == 'SplitHalf')	dfc = 'a';
+		//let dfc = '';
+		//if (cardsDb.get(grpId).dfc == 'DFC_Back')	dfc = 'a';
+		//if (cardsDb.get(grpId).dfc == 'DFC_Front')	dfc = 'b';
+		//if (cardsDb.get(grpId).dfc == 'SplitHalf')	dfc = 'a';
 		$('.overlay_hover').css("opacity", 1);
 		$('.overlay_hover').attr("src", "https://img.scryfall.com/cards"+cardsDb.get(grpId).images["normal"]);
 		setTimeout(function () {
@@ -486,60 +502,60 @@ function hoverCard(grpId) {
 $(document).ready(function() {
 	//
 	$(".clock_prev").click(function () {
-	    clockMode -= 1;
-	    if (clockMode < 0) {
-	    	clockMode = 1;
-	    }
+		clockMode -= 1;
+		if (clockMode < 0) {
+			clockMode = 1;
+		}
 	});
 	//
 	$(".clock_next").click(function () {
-	    clockMode += 1;
-	    if (clockMode > 1) {
-	    	clockMode = 0;
-	    }
+		clockMode += 1;
+		if (clockMode > 1) {
+			clockMode = 0;
+		}
 
 	});
 	//
 	$(".draft_prev").click(function () {
-	    draftMode -= 1;
-	    if (draftMode < 0) {
-	    	draftMode = 1;
-	    }
-	    setDraft();
+		draftMode -= 1;
+		if (draftMode < 0) {
+			draftMode = 1;
+		}
+		setDraft();
 	});
 	//
 	$(".draft_next").click(function () {
-	    draftMode += 1;
-	    if (draftMode > 1) {
-	    	draftMode = 0;
-	    }
-	    setDraft();
+		draftMode += 1;
+		if (draftMode > 1) {
+			draftMode = 0;
+		}
+		setDraft();
 	});
 	//
 	$(".deck_prev").click(function () {
-	    deckMode -= 1;
-	    if (deckMode < 0) {
-	    	deckMode = 4;
-	    }
-	    ipc_send('set_deck_mode', deckMode);
+		deckMode -= 1;
+		if (deckMode < 0) {
+			deckMode = 4;
+		}
+		ipc_send('set_deck_mode', deckMode);
 	});
 	//
 	$(".deck_next").click(function () {
-	    deckMode += 1;
-	    if (deckMode > 4) {
-	    	deckMode = 0;
-	    }
-	    ipc_send('set_deck_mode', deckMode);
+		deckMode += 1;
+		if (deckMode > 4) {
+			deckMode = 0;
+		}
+		ipc_send('set_deck_mode', deckMode);
 	});
 
 	//
 	$(".close").click(function () {
-	    ipc_send('overlay_close', 1);
+		ipc_send('overlay_close', 1);
 	});
 
 	//
 	$(".minimize").click(function () {
-	    ipc_send('overlay_minimize', 1);
+		ipc_send('overlay_minimize', 1);
 	});
 
 	//

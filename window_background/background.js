@@ -104,6 +104,7 @@ var tokenAuth = undefined;
 
 var renderer_state = 0;
 var oppDeck = {mainDeck: [], sideboard: []};
+var originalDeck = {};
 var currentDeck = {};
 var currentDeckUpdated = {};
 var currentMatchId = null;
@@ -974,8 +975,9 @@ function processLogData(data) {
 				}
 
 				//get_deck_sideboarded(currentDeck, newDeck)
-				select_deck(newDeck);
+				//select_deck(newDeck);
 				currentDeck = newDeck;
+				ipc_send("set_deck", currentDeck, windowOverlay);
 				//console.log(JSON.stringify(currentDeck));
 				//console.log(currentDeck);
 			}
@@ -999,7 +1001,6 @@ function processLogData(data) {
 			json._id = json.Id;
 			delete json.Id;
 
-			select_deck(json);
 			if (json.CourseDeck != null) {
 				json.CourseDeck.colors = get_deck_colors(json.CourseDeck);
 				//json.date = timestamp();
@@ -1007,6 +1008,7 @@ function processLogData(data) {
 				httpSubmitCourse(json);
 				saveCourse(json);
 			}
+			select_deck(json);
 		}
 		return;
 	}
@@ -1991,6 +1993,7 @@ function select_deck(arg) {
 	else {
 		currentDeck = arg;
 	}
+	originalDeck = currentDeck;
 	var str = JSON.stringify(currentDeck);
 	currentDeckUpdated = JSON.parse(str);
 	//console.log(currentDeck, arg);
@@ -2008,10 +2011,10 @@ function update_deck(force) {
 	var nd = new Date()
 	if (nd - lastDeckUpdate > 1000 || debugLog || !firstPass || force) {
 		if (overlayDeckMode == 0) {
-			ipc_send("set_deck", currentDeckUpdated, windowOverlay);
+			ipc_send("set_deck", originalDeck, windowOverlay);
 		}
 		if (overlayDeckMode == 1) {
-			ipc_send("set_deck", currentDeck, windowOverlay);
+			ipc_send("set_deck", currentDeckUpdated, windowOverlay);
 		}
 		if (overlayDeckMode == 2) {
 			ipc_send("set_deck", currentDeckUpdated, windowOverlay);
@@ -2245,7 +2248,7 @@ function saveMatch() {
 	}
 
 	match.eventId = currentEventId;
-	match.playerDeck = currentDeck;
+	match.playerDeck = originalDeck;
 	match.oppDeck = getOppDeck();
 	match.date = new Date();
 
@@ -2271,6 +2274,7 @@ function saveMatch() {
 	history[currentMatchId].type = "match";
 	httpSetMatch(match);
 	requestHistorySend(0);
+	ipc_send("set_timer", 0, windowOverlay);
 	ipc_send("popup", {"text": "Match saved!", "time": 3000});
 }
 
