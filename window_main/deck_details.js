@@ -34,7 +34,10 @@ function deckColorBar(deck) {
 
 function deckManaCurve(deck) {
     let manaCounts = get_deck_curve(deck);
-    let curveMax = Math.max(...manaCounts.map(v => v || 0));
+    let curveMax = Math.max(...manaCounts.filter(function(v) {
+        if (v == undefined) return false;
+        return true;
+    }).map(v => v || 0));
 
     console.log('deckManaCurve', manaCounts, curveMax);
 
