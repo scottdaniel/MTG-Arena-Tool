@@ -173,7 +173,7 @@ function ipc_send(method, arg, to = windowRenderer) {
 	if (method == "ipc_log") {
 		//
 	}
-	console.log("IPC SEND", method, arg, to);
+	//console.log("IPC SEND", method, arg, to);
 	ipc.send('ipc_switch', method, windowBackground, arg, to);
 }
 
@@ -674,7 +674,7 @@ function processLog(rawString) {
 			if (firstPass && logLoopProgress === progress && new Date() - logLoopProgressChanged > 5000) {
 				ipc_send("too_slow", "");
 			}
-			throw err;
+			console.error(err);
 		}
 		if (firstPass && logLoopProgress < progress) {
 			logLoopProgress = progress;
@@ -1455,6 +1455,7 @@ function actionLog(seat, time, str, grpId = 0) {
 		}
 	}
 
+	console.log("action_log", str, {seat: seat, time:time, grpId: grpId});
 	ipc_send("action_log", {seat: seat, time:time, str: str, grpId: grpId}, windowOverlay);
 
 }
@@ -1646,13 +1647,14 @@ function gre_to_client(data) {
 				}
 
 				if (msg.gameStateMessage.gameInfo != undefined) {
-					if (msg.gameStateMessage.gameInfo.matchState == "MatchState_GameComplete") {
+					//if (msg.gameStateMessage.gameInfo.matchState == "MatchState_GameComplete") {
+					if (msg.gameStateMessage.gameInfo.stage == "GameStage_GameOver") {
+						console.log("msg.gameStateMessage.gameInfo", msg.gameStateMessage.gameInfo);
 						let results = msg.gameStateMessage.gameInfo.results;
 						playerWin = 0;
 						oppWin = 0;
 						results.forEach(function(res) {
 							if (res.scope == "MatchScope_Game") {
-								actionLog(res.winningTeamId, new Date(), '');
 								actionLog(-1, new Date(), getNameBySeat(res.winningTeamId)+' Wins!');
 								if (res.winningTeamId == playerSeat) {
 									playerWin += 1;
@@ -1661,6 +1663,8 @@ function gre_to_client(data) {
 									oppWin += 1;
 								}
 							}
+							
+							console.log("playerWin", playerWin, "oppWin", oppWin);
 							if (res.scope == "MatchScope_Match") {
 								duringMatch = false;
 							}
