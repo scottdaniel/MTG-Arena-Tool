@@ -45,7 +45,10 @@ function ArenaLogDecoder() {
 					break;
 				case "full":
 					bufferUsed = match.index + length;
-					callback({ position: bufferDiscarded + match.index, entry });
+					callback({
+						...entry,
+						position: bufferDiscarded + match.index,
+					});
 					break;
 			}
 		}

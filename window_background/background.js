@@ -605,7 +605,7 @@ function startWatchingLog() {
     });
 }
 
-function onLogEntryFound({ position, entry }) {
+function onLogEntryFound(entry) {
     switch(entry.type) {
         case "connection":
             playerId = entry.socket.PlayerId;
