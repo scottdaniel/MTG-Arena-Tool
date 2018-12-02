@@ -606,14 +606,457 @@ function startWatchingLog() {
 }
 
 function onLogEntryFound(entry) {
-    switch(entry.type) {
-        case "connection":
-            playerId = entry.socket.PlayerId;
-            arenaVersion = entry.socket.ClientVersion;
-            playerName = entry.socket.PlayerScreenName;
-            ipc_send("set_username", playerName);
-            break;
-    }
+	let json;
+	switch (entry.type) {
+		case "connection":
+			playerId = entry.socket.PlayerId;
+			arenaVersion = entry.socket.ClientVersion;
+			playerName = entry.socket.PlayerScreenName;
+			ipc_send("set_username", playerName);
+		break;
+
+		case "Log.Info":
+			if (entry.arrow == "==>") {
+				json = entry.json();
+				if (json) {
+					if (json.params.messageName == 'DuelScene.GameStop') {
+						var mid = json.params.payloadObject.matchId;
+						var time = json.params.payloadObject.secondsCount;
+						if (mid == currentMatchId) {
+							currentMatchTime = time;
+							saveMatch();
+						}
+					}
+				}
+			}
+		break;
+
+		case "GreToClientEvent":
+			if (json) {
+				gre_to_client(json.greToClientEvent.greToClientMessages);
+			}
+		break;
+
+		case "ClientToMatchServiceMessageType_ClientToGREMessage":
+			json = entry.json();
+			if (json) {
+				// Check for more message types!
+				if (json.payload.type == "ClientMessageType_SubmitDeckResp") {
+					let tempMain = {};
+					let tempSide = {};
+					json.payload.submitDeckResp.deck.deckCards.forEach( function (grpId) {
+						if (tempMain[grpId] == undefined) {
+							tempMain[grpId] = 1
+						}
+						else {
+							tempMain[grpId] += 1;
+						}
+					});
+					if (json.payload.submitDeckResp.deck.sideboardCards !== undefined) {
+						json.payload.submitDeckResp.deck.sideboardCards.forEach( function (grpId) {
+							if (tempSide[grpId] == undefined) {
+								tempSide[grpId] = 1
+							}
+							else {
+								tempSide[grpId] += 1;
+							}
+						});
+					}
+
+					var newDeck = {}
+					newDeck.mainDeck = [];
+					Object.keys(tempMain).forEach(function(key) {
+						var c = {"id": key, "quantity": tempMain[key]};
+						newDeck.mainDeck.push(c);
+					});
+
+					newDeck.sideboard = [];
+					if (json.payload.submitDeckResp.deck.sideboardCards !== undefined) {
+						Object.keys(tempSide).forEach(function(key) {
+							var c = {"id": key, "quantity": tempSide[key]};
+							newDeck.sideboard.push(c);
+						});
+					}
+
+					currentDeck = newDeck;
+					ipc_send("set_deck", currentDeck, windowOverlay);
+					//get_deck_sideboarded(currentDeck, newDeck)
+					//select_deck(newDeck);
+					//console.log(JSON.stringify(currentDeck));
+					//console.log(currentDeck);
+				}
+			}
+		break;
+
+		case "Event.GetPlayerCourse":
+			if (entry.arrow == "<==") {
+				json = entry.json();
+				if (json) {
+					if (json.Id != "00000000-0000-0000-0000-000000000000") {
+						json.date = parseWotcTime(entry.timestamp);
+						json._id = json.Id;
+						delete json.Id;
+
+						if (json.CourseDeck != null) {
+							json.CourseDeck.colors = get_deck_colors(json.CourseDeck);
+							//json.date = timestamp();
+							console.log(json.CourseDeck, json.CourseDeck.colors)
+							httpSubmitCourse(json);
+							saveCourse(json);
+						}
+						select_deck(json);
+					}
+					return;
+				}
+			}
+		break;
+
+		case "Event.GetCombinedRankInfo":
+			if (entry.arrow == "<==") {
+				json = entry.json();
+				if (json) {
+					playerRank = json.constructedClass;
+					playerTier = json.constructedTier;
+
+					let rank = get_rank_index(playerRank, playerTier);
+					ipc_send("set_rank", {rank: rank, str: playerRank+" "+playerTier});
+				}
+			}
+		break;
+
+		case "Deck.GetDeckLists":
+			if (entry.arrow == "<==") {
+				json = entry.json();
+				if (json) {
+					decks = json;
+					requestHistorySend(0);
+					ipc_send("set_decks", JSON.stringify(json));
+				}
+			}
+		break;
+
+		case "Deck.UpdateDeck":
+			if (entry.arrow == "<==") {
+				json = entry.json();
+				if (json) {
+					let logTime = parseWotcTime(entry.timestamp);
+
+					decks.forEach(function(_deck) {
+						if (_deck.id == json.id) {
+							var changeId = sha1(_deck.id+"-"+logTime);
+							var deltaDeck = {id: changeId, deckId: _deck.id, date: logTime, changesMain: [], changesSide: [], previousMain: _deck.mainDeck, previousSide: _deck.sideboard};
+
+							// Check Mainboard
+							_deck.mainDeck.forEach(function(card) {
+								var cardObj = cardsDb.get(card.id);
+
+								var diff = 0 - card.quantity;
+								json.mainDeck.forEach(function(cardB) {
+									var cardObjB = cardsDb.get(cardB.id);
+									if (cardObj.name == cardObjB.name) {
+										cardB.existed = true;
+										diff = cardB.quantity - card.quantity;
+									}
+								});
+
+								if (diff !== 0) {
+									deltaDeck.changesMain.push({id: card.id, quantity: diff});
+								}
+							});
+
+							json.mainDeck.forEach(function(card) {
+								if (card.existed == undefined) {
+									//let cardObj = cardsDb.get(card.id);
+									deltaDeck.changesMain.push({id: card.id, quantity: card.quantity});
+								}
+							});
+							// Check sideboard
+							_deck.sideboard.forEach(function(card) {
+								var cardObj = cardsDb.get(card.id);
+
+								var diff = 0 - card.quantity;
+								json.sideboard.forEach(function(cardB) {
+									var cardObjB = cardsDb.get(cardB.id);
+									if (cardObj.name == cardObjB.name) {
+										cardB.existed = true;
+										diff = cardB.quantity - card.quantity;
+									}
+								});
+
+								if (diff !== 0) {
+									deltaDeck.changesSide.push({id: card.id, quantity: diff});
+								}
+							});
+
+							json.sideboard.forEach(function(card) {
+								if (card.existed == undefined) {
+									//let cardObj = cardsDb.get(card.id);
+									deltaDeck.changesSide.push({id: card.id, quantity: card.quantity});
+								}
+							});
+
+							if (!deck_changes_index.includes(changeId)) {
+								deck_changes_index.push(changeId);
+								deck_changes[changeId] = deltaDeck;
+
+								store.set("deck_changes_index", deck_changes_index);
+								store.set("deck_changes."+changeId, deltaDeck);
+							}
+						}
+					});
+				}
+			}
+		break;
+
+		case "Inventory.Updated":
+			json = entry.json();
+			if (json) {
+				json.date = parseWotcTime(entry.timestamp);
+
+				if (json.delta.boosterDelta.length == 0)		delete json.delta.boosterDelta;
+				if (json.delta.cardsAdded.length == 0)		  delete json.delta.cardsAdded;
+				if (json.delta.decksAdded.length == 0)		  delete json.delta.decksAdded;
+				if (json.delta.vanityItemsAdded.length == 0)	delete json.delta.vanityItemsAdded;
+				if (json.delta.vanityItemsRemoved.length == 0)  delete json.delta.vanityItemsRemoved;
+
+				if (json.delta.gemsDelta == 0)		   delete json.delta.gemsDelta;
+				if (json.delta.draftTokensDelta == 0)	delete json.delta.draftTokensDelta;
+				if (json.delta.goldDelta == 0)		   delete json.delta.goldDelta;
+				if (json.delta.sealedTokensDelta == 0)   delete json.delta.sealedTokensDelta;
+				if (json.delta.vaultProgressDelta == 0)  delete json.delta.vaultProgressDelta;
+				if (json.delta.wcCommonDelta == 0)	   delete json.delta.wcCommonDelta;
+				if (json.delta.wcMythicDelta == 0)	   delete json.delta.wcMythicDelta;
+				if (json.delta.wcRareDelta == 0)		 delete json.delta.wcRareDelta;
+				if (json.delta.wcUncommonDelta == 0)	 delete json.delta.wcUncommonDelta;
+
+				saveEconomy(json);
+			}
+		break;
+
+		case "PlayerInventory.GetPlayerInventory":
+			if (entry.arrow == "<==") {
+				json = entry.json();
+				if (json) {
+					gold = json.gold;
+					gems = json.gems;
+					vault = json.vaultProgress;
+					wcTrack = json.wcTrackPosition;
+					wcCommon = json.wcCommon;
+					wcUncommon = json.wcUncommon;
+					wcRare = json.wcRare;
+					wcMythic = json.wcMythic;
+				}
+			}
+		break;
+
+		case "PlayerInventory.GetPlayerCardsV3":
+			if (entry.arrow == "<==") {
+				json = entry.json();
+				if (json) {
+					var date = new Date(store.get('cards.cards_time'));
+					var now = new Date();
+					var diff = Math.abs(now.getTime() - date.getTime());
+					var days = Math.floor(diff / (1000 * 3600 * 24));
+
+					if (store.get('cards.cards_time') == 0) {
+						store.set('cards.cards_time', now);
+						store.set('cards.cards_before', json);
+						store.set('cards.cards', json);
+					}
+					// If a day has passed since last update
+					else if (days > 0) {
+						var cardsPrev = store.get('cards.cards');
+						store.set('cards.cards_time', now);
+						store.set('cards.cards_before', cardsPrev);
+						store.set('cards.cards', json);
+					}
+
+					var cardsPrevious = store.get('cards.cards_before');
+					var cardsNewlyAdded = {};
+
+					Object.keys(json).forEach(function(key) {
+						// get differences
+						if (cardsPrevious[key] == undefined) {
+							cardsNewlyAdded[key] = json[key];
+						}
+						else if (cardsPrevious[key] < json[key]) {
+							cardsNewlyAdded[key] = json[key] - cardsPrevious[key];
+						}
+					});
+
+					ipc_send("set_cards", {cards: json, new: cardsNewlyAdded});
+				}
+			}
+		break;
+
+		case "Event.DeckSubmit":
+			if (entry.arrow == "<==") {
+				json = entry.json();
+				if (json) {
+					select_deck(json);
+				}
+			}
+		break;
+
+		case "Event.MatchCreated":
+			json = entry.json();
+			if (json) {
+				matchBeginTime = parseWotcTime(entry.timestamp);
+				ipc_send("ipc_log", "MATCH CREATED: "+entry.timestamp);
+
+				if (json.eventId != "NPE") {
+					createMatch(json);
+				}
+			}
+		break;
+
+		case "DirectGame.Challenge":
+			if (entry.arrow == "==>") {
+				json = entry.json();
+				if (json) {
+					var deck = json.params.deck;
+					
+					deck = replaceAll(deck, '"Id"', '"id"');
+					deck = replaceAll(deck, '"Quantity"', '"quantity"');
+					deck = JSON.parse(deck);
+					select_deck(deck);
+				}
+			}
+		break;
+
+		case "Draft.DraftStatus":
+			if (entry.arrow == "<==") {
+				json = entry.json();
+				if (json) {
+					if (json.eventName != undefined) {
+						for (let set in setsList) {
+							let setCode = setsList[set]["code"];
+							if (json.eventName.indexOf(setCode) !== -1) {
+								draftSet = set;
+							}
+						}
+					}
+
+					if (currentDraft == undefined || (json.packNumber == 0 && json.pickNumber <= 0)) {
+						createDraft();
+					}
+					setDraftCards(json);
+					currentDraftPack = json.draftPack.slice(0);
+				}
+			}
+		break;
+
+		case "Draft.MakePick":
+			if (entry.arrow == "<==") {
+				json = entry.json();
+				if (json) {
+					// store pack in recording
+					if (json.eventName != undefined) {
+						for (let set in setsList) {
+							let setCode = setsList[set]["code"];
+							if (json.eventName.indexOf(setCode) !== -1) {
+								draftSet = set;
+							}
+						}
+					}
+
+					if (json.draftPack != undefined) {
+						if (currentDraft == undefined) {
+							createDraft();
+						}
+						setDraftCards(json);
+						currentDraftPack = json.draftPack.slice(0);
+					}
+				}
+			}
+			else {
+				json = entry.json();
+				if (json) {
+					// store pick in recording
+					var value = {};
+					value.pick = json.params.cardId;
+					value.pack = currentDraftPack;
+					var key = "pack_"+json.params.packNumber+"pick_"+json.params.pickNumber;
+					currentDraft[key] = value;
+					debugLogSpeed = 200;
+				}
+			}
+		break;
+
+		case "Event.CompleteDraft":
+			if (entry.arrow == "<==") {
+				json = entry.json();
+				if (json) {
+					ipc_send("save_overlay_pos", 1);
+					clear_deck();
+					if (!store.get('settings.show_overlay_always')) {
+						ipc_send("overlay_close", 1);
+					}
+					//ipc_send("renderer_show", 1);
+
+					draftId = json.Id;
+					console.log("Complete draft", json);
+					saveDraft();
+				}
+			}
+		break;
+
+		case "MatchGameRoomStateChangedEvent":
+			json = entry.json();
+			if (json) {
+				json = json.matchGameRoomStateChangedEvent.gameRoomInfo;
+				let eventId = "";
+
+				if (json.gameRoomConfig != undefined) {
+					currentMatchId = json.gameRoomConfig.matchId;
+					eventId = json.gameRoomConfig.eventId;
+					duringMatch = true;
+				}
+
+				if (json.stateType == "MatchGameRoomStateType_MatchCompleted" && eventId != "NPE") {
+					playerWin = 0;
+					oppWin = 0;
+					json.finalMatchResult.resultList.forEach(function(res) {
+						if (res.scope == "MatchScope_Game") {
+							if (res.winningTeamId == playerSeat) {
+								playerWin += 1;
+							}
+							if (res.winningTeamId == oppSeat) {
+								oppWin += 1;
+							}
+						}
+						if (res.scope == "MatchScope_Match") {
+							duringMatch = false;
+						}
+					});
+
+					ipc_send("save_overlay_pos", 1);
+					clear_deck();
+					if (!store.get('settings.show_overlay_always')) {
+						ipc_send("overlay_close", 1);
+					}
+					//ipc_send("renderer_show", 1);
+					//saveMatch();
+				}
+
+				if (json.players != undefined) {
+					json.players.forEach(function(player) {
+						if (player.userId == playerId) {
+							playerSeat = player.systemSeatId;
+						}
+						else {
+							oppId = player.userId;
+							oppSeat = player.systemSeatId;
+						}
+					});
+				}
+			}
+		break;
+
+		default:
+			console.log("Entry:", entry.label, entry, entry.json());
+		break;
+	}
 }
 
 window.setInterval(attemptLogLoop, 250);
@@ -846,550 +1289,6 @@ function client_to_gre(json) {
 	}
 }
 
-// Main function for processing log chunks
-function processLogData(data) {
-	data = data.replace(/[\r\n]/g, "");
-	var strCheck, json, logTime;
-	//console.log(data);
-
-	/*
-
-	Using a combination of the previous functions we can extract almost any data from the chunks extracted from the log
-	In almost every case we are returned with a parsed JSON object, from there it depends on the data how we read it
-	For example, to read all decks we need to locate '<== Deck.GetDeckLists(9)' inside the log;
-
-[UnityCrossThreadLogger]11/1/2018 6:50:07 PM
-<== Deck.GetDeckLists(9)
-[
-  {
-
-
-	From here we know '<== Deck.GetDeckLists(' wont change, the date and the (9) after are variables, so we do;
-
-		strCheck = '<== Deck.GetDeckLists(';
-		json = checkJsonWithStart(data, strCheck, '', ')');
-
-	We check if strCheck exists within this chunk, if it does we locate it and find a JSON object starting after ')'
-	See below to how we handle the parsed json data
-
-	*/
-
-	// Log info
-	if (data.indexOf('==> Log.Info(') > -1) {
-		if (data.indexOf('DuelScene.GameStop') > -1) {
-			strCheck = '==> Log.Info(';
-			json = checkJsonWithStart(data, strCheck, '', '):');
-			if (json != false) {
-				if (json.params.messageName == 'DuelScene.GameStop') {
-					var mid = json.params.payloadObject.matchId;
-					var time = json.params.payloadObject.secondsCount;
-					if (mid == currentMatchId) {
-						currentMatchTime = time;
-						saveMatch();
-					}
-				}
-				return;
-			}
-		}
-		else {
-			return;
-		}
-	}
-
-	// Gre to Client Event
-	// Gre to Client contains most data about in-progress games.
-	strCheck = 'GreToClientEvent';
-	json = checkJson(data, strCheck, '');
-	if (json != false) {
-		gre_to_client(json.greToClientEvent.greToClientMessages);
-		return;
-	}
-
-	// Gre to Client Event
-	// Obsolete now packets are decoded by the logger
-	//strCheck = 'ClientToMatchServiceMessageType';
-	//if (data.indexOf(strCheck) > -1) {
-	//	let rawJson = data.substr(data.indexOf('{')).trim();
-	//	if (rawJson.slice(-1) !== '}') rawJson = rawJson.replace(/}[^}]*/, '}');
-		//client_to_gre(JSON.parse(rawJson));
-	//	return;
-	//}
-	
-	strCheck = 'ClientToMatchServiceMessageType_ClientToGREMessage';
-	json = checkJson(data, strCheck, '');
-	if (json != false) {
-		if (json.payload.type !== undefined) {
-			// Get sideboard changes
-			if (json.payload.type == "ClientMessageType_SubmitDeckResp") {
-
-				let tempMain = {};
-				let tempSide = {};
-				json.payload.submitDeckResp.deck.deckCards.forEach( function (grpId) {
-					if (tempMain[grpId] == undefined) {
-						tempMain[grpId] = 1
-					}
-					else {
-						tempMain[grpId] += 1;
-					}
-				});
-				if (json.payload.submitDeckResp.deck.sideboardCards !== undefined) {
-					json.payload.submitDeckResp.deck.sideboardCards.forEach( function (grpId) {
-						if (tempSide[grpId] == undefined) {
-							tempSide[grpId] = 1
-						}
-						else {
-							tempSide[grpId] += 1;
-						}
-					});
-				}
-
-				var newDeck = {}
-				newDeck.mainDeck = [];
-				Object.keys(tempMain).forEach(function(key) {
-					var c = {"id": key, "quantity": tempMain[key]};
-					newDeck.mainDeck.push(c);
-				});
-
-				newDeck.sideboard = [];
-				if (json.payload.submitDeckResp.deck.sideboardCards !== undefined) {
-					Object.keys(tempSide).forEach(function(key) {
-						var c = {"id": key, "quantity": tempSide[key]};
-						newDeck.sideboard.push(c);
-					});
-				}
-
-				//get_deck_sideboarded(currentDeck, newDeck)
-				//select_deck(newDeck);
-				currentDeck = newDeck;
-				ipc_send("set_deck", currentDeck, windowOverlay);
-				//console.log(JSON.stringify(currentDeck));
-				//console.log(currentDeck);
-			}
-		}
-		return;
-	}
-
-	// Get courses
-	strCheck = '<== Event.GetPlayerCourse(';
-	json = checkJsonWithStart(data, strCheck, '', ')');
-	if (json != false) {
-		// Setting time to local datetime causes timestamp on the server to go crazy?
-		// Proper timezone onversion is required here
-		strCheck = 'Logger]';
-		if (data.indexOf(strCheck) > -1) {
-			let str = dataChop(data, strCheck, 'M')+'M';
-			logTime = parseWotcTime(str);
-			json.date = logTime;
-		}
-		if (json.Id != "00000000-0000-0000-0000-000000000000") {
-			json._id = json.Id;
-			delete json.Id;
-
-			if (json.CourseDeck != null) {
-				json.CourseDeck.colors = get_deck_colors(json.CourseDeck);
-				//json.date = timestamp();
-				console.log(json.CourseDeck, json.CourseDeck.colors)
-				httpSubmitCourse(json);
-				saveCourse(json);
-			}
-			select_deck(json);
-		}
-		return;
-	}
-
-	/*
-	// Use this to get precon decklists
-	strCheck = '<== Deck.GetPreconDecks(';
-	json = checkJsonWithStart(data, strCheck, '', ')');
-	if (json != false) {
-		var str = "";
-		var newline = '\n';
-		json.forEach(function(_deck) {
-			str += "**"_deck.name.replace("?=?Loc/Decks/Precon/", "")+newline;
-			_deck.mainDeck.forEach(function(_card) {
-				str += _card.quantity+" "+cardsDb.get(_card.id).name+newline;
-			});
-			str += newline+newline;
-		});
-		console.log(str);
-		return;
-	}
-	*/
-
-	// Get Ranks
-	strCheck = '<== Event.GetCombinedRankInfo(';
-	json = checkJsonWithStart(data, strCheck, '', ')');
-	if (json != false) {
-		playerRank = json.constructedClass;
-		playerTier = json.constructedTier;
-
-		let rank = get_rank_index(playerRank, playerTier);
-
-		ipc_send("set_rank", {rank: rank, str: playerRank+" "+playerTier});
-		return;
-	}
-
-	// Get Decks
-	strCheck = '<== Deck.GetDeckLists(';
-	json = checkJsonWithStart(data, strCheck, '', ')');
-	if (json != false) {
-		decks = json;
-		requestHistorySend(0);
-		ipc_send("set_decks", JSON.stringify(json));
-		return;
-	}
-
-	// Get deck updated
-	strCheck = '<== Deck.UpdateDeck(';
-	json = checkJsonWithStart(data, strCheck, '', ')');
-	if (json != false) {
-		//
-		strCheck = 'Logger]';
-		if (data.indexOf(strCheck) > -1) {
-			var str = dataChop(data, strCheck, 'M')+'M';
-			logTime = parseWotcTime(str);
-		}
-
-		decks.forEach(function(_deck) {
-			if (_deck.id == json.id) {
-				var changeId = sha1(_deck.id+"-"+logTime);
-				var deltaDeck = {id: changeId, deckId: _deck.id, date: logTime, changesMain: [], changesSide: [], previousMain: _deck.mainDeck, previousSide: _deck.sideboard};
-
-				// Check Mainboard
-				_deck.mainDeck.forEach(function(card) {
-					var cardObj = cardsDb.get(card.id);
-
-					var diff = 0 - card.quantity;
-					json.mainDeck.forEach(function(cardB) {
-						var cardObjB = cardsDb.get(cardB.id);
-						if (cardObj.name == cardObjB.name) {
-							cardB.existed = true;
-							diff = cardB.quantity - card.quantity;
-						}
-					});
-
-					if (diff !== 0) {
-						deltaDeck.changesMain.push({id: card.id, quantity: diff});
-					}
-				});
-
-				json.mainDeck.forEach(function(card) {
-					if (card.existed == undefined) {
-						let cardObj = cardsDb.get(card.id);
-						deltaDeck.changesMain.push({id: card.id, quantity: card.quantity});
-					}
-				});
-				// Check sideboard
-				_deck.sideboard.forEach(function(card) {
-					var cardObj = cardsDb.get(card.id);
-
-					var diff = 0 - card.quantity;
-					json.sideboard.forEach(function(cardB) {
-						var cardObjB = cardsDb.get(cardB.id);
-						if (cardObj.name == cardObjB.name) {
-							cardB.existed = true;
-							diff = cardB.quantity - card.quantity;
-						}
-					});
-
-					if (diff !== 0) {
-						deltaDeck.changesSide.push({id: card.id, quantity: diff});
-					}
-				});
-
-				json.sideboard.forEach(function(card) {
-					if (card.existed == undefined) {
-						let cardObj = cardsDb.get(card.id);
-						deltaDeck.changesSide.push({id: card.id, quantity: card.quantity});
-					}
-				});
-
-				if (!deck_changes_index.includes(changeId)) {
-					deck_changes_index.push(changeId);
-					deck_changes[changeId] = deltaDeck;
-
-					store.set("deck_changes_index", deck_changes_index);
-					store.set("deck_changes."+changeId, deltaDeck);
-				}
-			}
-		});
-
-		return;
-	}
-
-	// Get inventory changes
-	strCheck = 'Incoming Inventory.Updated';
-	json = checkJson(data, strCheck, '');
-	if (json != false) {
-		strCheck = 'Logger]';
-		if (data.indexOf(strCheck) > -1) {
-			var str = dataChop(data, strCheck, 'M')+'M';
-			logTime = parseWotcTime(str);
-		}
-		json.date = logTime;
-		
-		if (json.delta.boosterDelta.length == 0)		delete json.delta.boosterDelta;
-		if (json.delta.cardsAdded.length == 0)		  delete json.delta.cardsAdded;
-		if (json.delta.decksAdded.length == 0)		  delete json.delta.decksAdded;
-		if (json.delta.vanityItemsAdded.length == 0)	delete json.delta.vanityItemsAdded;
-		if (json.delta.vanityItemsRemoved.length == 0)  delete json.delta.vanityItemsRemoved;
-
-		if (json.delta.gemsDelta == 0)		   delete json.delta.gemsDelta;
-		if (json.delta.draftTokensDelta == 0)	delete json.delta.draftTokensDelta;
-		if (json.delta.goldDelta == 0)		   delete json.delta.goldDelta;
-		if (json.delta.sealedTokensDelta == 0)   delete json.delta.sealedTokensDelta;
-		if (json.delta.vaultProgressDelta == 0)  delete json.delta.vaultProgressDelta;
-		if (json.delta.wcCommonDelta == 0)	   delete json.delta.wcCommonDelta;
-		if (json.delta.wcMythicDelta == 0)	   delete json.delta.wcMythicDelta;
-		if (json.delta.wcRareDelta == 0)		 delete json.delta.wcRareDelta;
-		if (json.delta.wcUncommonDelta == 0)	 delete json.delta.wcUncommonDelta;
-
-		saveEconomy(json);
-		return;
-	}
-
-	// Get inventory
-	strCheck = '<== PlayerInventory.GetPlayerInventory(';
-	json = checkJsonWithStart(data, strCheck, '', ')');
-	if (json != false) {
-		//This checks time, use with caution!
-		strCheck = 'Logger]';
-		if (data.indexOf(strCheck) > -1) {
-			var str = dataChop(data, strCheck, 'M')+'M';
-			logTime = parseWotcTime(str);
-		}
-
-		gold = json.gold;
-		gems = json.gems;
-		vault = json.vaultProgress;
-		wcTrack = json.wcTrackPosition;
-		wcCommon = json.wcCommon;
-		wcUncommon = json.wcUncommon;
-		wcRare = json.wcRare;
-		wcMythic = json.wcMythic;
-
-		return;
-	}
-
-	// Get Cards
-	strCheck = '<== PlayerInventory.GetPlayerCardsV3(';
-	json = checkJsonWithStart(data, strCheck, '', ')');
-	if (json != false) {
-		var date = new Date(store.get('cards.cards_time'));
-		var now = new Date();
-		var diff = Math.abs(now.getTime() - date.getTime());
-		var days = Math.floor(diff / (1000 * 3600 * 24));
-
-		if (store.get('cards.cards_time') == 0) {
-			store.set('cards.cards_time', now);
-			store.set('cards.cards_before', json);
-			store.set('cards.cards', json);
-		}
-		// If a day has passed since last update
-		else if (days > 0) {
-			var cardsPrev = store.get('cards.cards');
-			store.set('cards.cards_time', now);
-			store.set('cards.cards_before', cardsPrev);
-			store.set('cards.cards', json);
-		}
-
-		var cardsPrevious = store.get('cards.cards_before');
-		var cardsNewlyAdded = {};
-
-		Object.keys(json).forEach(function(key) {
-			// get differences
-			if (cardsPrevious[key] == undefined) {
-				cardsNewlyAdded[key] = json[key];
-			}
-			else if (cardsPrevious[key] < json[key]) {
-				cardsNewlyAdded[key] = json[key] - cardsPrevious[key];
-			}
-		});
-
-		ipc_send("set_cards", {cards: json, new: cardsNewlyAdded});
-		return;
-	}
-
-	// Select deck
-	strCheck = '<== Event.DeckSubmit(';
-	json = checkJsonWithStart(data, strCheck, '', ')');
-	if (json != false) {
-		select_deck(json);
-		return;
-	}
-
-	// Match created
-	strCheck = ' Event.MatchCreated ';
-	json = checkJson(data, strCheck, '');
-	if (json != false) {
-		strCheck = 'Logger]';
-		if (data.indexOf(strCheck) > -1) {
-			logTime = dataChop(data, strCheck, ' (');
-			matchBeginTime = parseWotcTime(logTime);
-			ipc_send("ipc_log", "MATCH CREATED: "+logTime);
-		}
-		if (json.eventId != "NPE") {
-			createMatch(json);
-		}
-		return;
-	}
-
-	// Direct Challenge
-	strCheck = '==> DirectGame.Challenge(';
-	json = checkJsonWithStart(data, strCheck, '', '):');
-	if (json != false) {
-		var deck = json.params.deck;
-		
-		deck = replaceAll(deck, '"Id"', '"id"');
-		deck = replaceAll(deck, '"Quantity"', '"quantity"');
-		deck = JSON.parse(deck);
-		select_deck(deck);
-
-		return;
-	}
-
-	// Draft status / draft start
-	/*
-	strCheck = '<== Event.Draft(';
-	json = checkJsonWithStart(data, strCheck, '', ')');
-	if (json != false) {
-		console.log("Draft start");
-		draftId = json.Id;
-		return;
-	}
-	*/
-
-	//   
-	strCheck = '<== Draft.DraftStatus(';
-	json = checkJsonWithStart(data, strCheck, '', ')');
-	if (json != false) {
-		if (json.eventName != undefined) {
-			for (let set in setsList) {
-				let setCode = setsList[set]["code"];
-				if (json.eventName.indexOf(setCode) !== -1) {
-					draftSet = set;
-				}
-			}
-		}
-
-		if (currentDraft == undefined || (json.packNumber == 0 && json.pickNumber <= 0)) {
-			createDraft();
-		}
-		setDraftCards(json);
-		currentDraftPack = json.draftPack.slice(0);
-		return;
-	}
-
-	// make pick (get the whole action)
-	strCheck = '<== Draft.MakePick(';
-	json = checkJsonWithStart(data, strCheck, '', ')');
-	if (json != false) {
-		// store pack in recording
-		if (json.eventName != undefined) {
-			for (let set in setsList) {
-				let setCode = setsList[set]["code"];
-				if (json.eventName.indexOf(setCode) !== -1) {
-					draftSet = set;
-				}
-			}
-		}
-
-		if (json.draftPack != undefined) {
-			if (currentDraft == undefined) {
-				createDraft();
-			}
-			setDraftCards(json);
-			currentDraftPack = json.draftPack.slice(0);
-		}
-		return;
-	}
-
-	// make pick (get just what we picked)
-	strCheck = '==> Draft.MakePick(';
-	json = checkJsonWithStart(data, strCheck, '', '):');
-	if (json != false) {
-		// store pick in recording
-		var value = {};
-		value.pick = json.params.cardId;
-		value.pack = currentDraftPack;
-		var key = "pack_"+json.params.packNumber+"pick_"+json.params.pickNumber;
-		currentDraft[key] = value;
-		debugLogSpeed = 200;
-		return;
-	}
-
-	//end draft
-	strCheck = '<== Event.CompleteDraft(';
-	json = checkJsonWithStart(data, strCheck, '', ')');
-	if (json != false) {
-		ipc_send("save_overlay_pos", 1);
-		clear_deck();
-		if (!store.get('settings.show_overlay_always')) {
-			ipc_send("overlay_close", 1);
-		}
-		//ipc_send("renderer_show", 1);
-
-		draftId = json.Id;
-		console.log("Complete draft", json);
-		saveDraft();
-		return;
-	}
-
-	// Game Room State Changed
-	strCheck = 'MatchGameRoomStateChangedEvent';
-	json = checkJson(data, strCheck, '');
-	if (json != false) {
-		json = json.matchGameRoomStateChangedEvent.gameRoomInfo;
-		let eventId = "";
-
-		if (json.gameRoomConfig != undefined) {
-			currentMatchId = json.gameRoomConfig.matchId;
-			eventId = json.gameRoomConfig.eventId;
-			duringMatch = true;
-		}
-
-		if (json.stateType == "MatchGameRoomStateType_MatchCompleted" && eventId != "NPE") {
-			playerWin = 0;
-			oppWin = 0;
-			json.finalMatchResult.resultList.forEach(function(res) {
-				if (res.scope == "MatchScope_Game") {
-					if (res.winningTeamId == playerSeat) {
-						playerWin += 1;
-					}
-					if (res.winningTeamId == oppSeat) {
-						oppWin += 1;
-					}
-				}
-				if (res.scope == "MatchScope_Match") {
-					duringMatch = false;
-				}
-			});
-
-			ipc_send("save_overlay_pos", 1);
-			clear_deck();
-			if (!store.get('settings.show_overlay_always')) {
-				ipc_send("overlay_close", 1);
-			}
-			//ipc_send("renderer_show", 1);
-			//saveMatch();
-		}
-
-		if (json.players != undefined) {
-			json.players.forEach(function(player) {
-				if (player.userId == playerId) {
-					playerSeat = player.systemSeatId;
-				}
-				else {
-					oppId = player.userId;
-					oppSeat = player.systemSeatId;
-				}
-			});
-		}
-		return;
-	}
-}
-
-
 function setDraftCards(json) {
 	ipc.send("set_draft_cards", json.draftPack, json.pickedCards, json.packNumber+1, json.pickNumber);
 }
@@ -1398,7 +1297,6 @@ function actionLogGenerateLink(grpId) {
 	var card = cardsDb.get(grpId);
 	return '<a class="card_link click-on" href="'+grpId+'">'+card.name+'</a>';
 }
-
 
 var currentActionLog = "";
 
