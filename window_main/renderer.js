@@ -1663,7 +1663,7 @@ function setExplore(arg, loadMore) {
 
 		// Search box
 		var icd = $('<div class="input_container"></div>');
-		var label = $('<label style="display: table; margin-top: 6px !important;">Filter by event</label>');
+		var label = $('<label style="display: table; margin-top: 6px !important; color: #fae5d2;">Filter by event</label>');
 		label.appendTo(icd);
 		
 		var input = $('<div class="query_explore" style="margin-left: 16px;"></div>');

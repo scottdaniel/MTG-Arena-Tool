@@ -202,7 +202,7 @@ span i {
     font-size: 20px;
     margin-left: 16px;
     align-self: center;
-    font-family: Beleren;
+    font-family: "belerenbold";
     cursor: default;
 }
 
@@ -211,7 +211,7 @@ span i {
     font-size: 20px;
     margin-right: 32px;
     align-self: center;
-    font-family: Beleren;
+    font-family: "belerenbold";
     cursor: default;
 }
 
@@ -251,7 +251,7 @@ span i {
     width: 100px;
     height: 64px;
     cursor: pointer;
-    font-family: Beleren;
+    font-family: "belerenbold";
     font-size: 16px;
     line-height: 64px;
     text-align: center;
@@ -767,7 +767,7 @@ a:hover {
     text-align: center;
     color: #FAE5D2;
     width: 100%;
-    font-family: beleren;
+    font-family: "belerenbold";
 }
 
 .mana_curve_column span {
@@ -1176,7 +1176,7 @@ a:hover {
 .economy_title {
     padding-left: 16px;
     line-height: 64px;
-    font-family: 'Beleren';
+    font-family: 'belerenbold';
     font-size: 18px;
     background-color: rgba(145, 121, 97, 0.2);
 }
@@ -1917,7 +1917,7 @@ a:hover {
     font-size: 18px;
     line-height: 40px;
     height: 40px;
-    font-family: Beleren;
+    font-family: "belerenbold";
     margin-left: 24px;
     -webkit-transition: all .25s cubic-bezier(0.2, 0.5, 0.35, 1);
 }
@@ -2059,7 +2059,7 @@ a:hover {
     width: 120px;
     text-align: center;
     line-height: 32px;
-    font-family: beleren;
+    font-family: "belerenbold";
     font-size: 19px;
     height: 32px;
     margin: auto 32px;
@@ -2085,7 +2085,7 @@ a:hover {
     margin: 20px auto;
     color: rgba(250, 229, 210, 0.8);
     font-size: 20px;
-    font-family: beleren;
+    font-family: "belerenbold";
     text-align: center;
 }
 
@@ -2102,7 +2102,7 @@ a:hover {
 .tou_match_p {
 	display: flex;
 	height: 40px;
-	font-family: beleren;
+	font-family: "belerenbold";
 	color: rgba(250, 229, 210, 1);
 	line-height: 40px;
 	text-align: left;
