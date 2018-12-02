@@ -573,7 +573,9 @@ function get_deck_changes(deckId) {
 
 // Set a new log URI
 ipc.on('set_log', function (event, arg) {
-	logUri = arg;
+    stopWatchingLog();
+    logUri = arg;
+    stopWatchingLog = startWatchingLog();
 	settingsStore.set('logUri', arg);
 });
 
@@ -591,6 +593,29 @@ if (settingsStore.get('logUri') !== '') {
 	logUri = settingsStore.get('logUri');
 }
 console.log(logUri);
+const ArenaLogWatcher = require('./arena-log-watcher');
+let stopWatchingLog = startWatchingLog();
+
+function startWatchingLog() {
+    return ArenaLogWatcher.start({
+        path: logUri,
+        chunkSize: 1024 * 1024 * 1024, // 1 gig of memory
+        onLogEntry: onLogEntryFound,
+        onError: err => console.error(err),
+    });
+}
+
+function onLogEntryFound({ position, entry }) {
+    switch(entry.type) {
+        case "connection":
+            playerId = entry.socket.PlayerId;
+            arenaVersion = entry.socket.ClientVersion;
+            playerName = entry.socket.PlayerScreenName;
+            ipc_send("set_username", playerName);
+            break;
+    }
+}
+
 window.setInterval(attemptLogLoop, 250);
 
 async function attemptLogLoop() {
@@ -644,8 +669,7 @@ async function logLoop() {
 		: await mtgaLog.readSegment(logUri, 0, size);
 
 	if (logLoopMode == 0) {
-		// We are looping only to get user data (processLogUser)
-		processLogUser(logSegment);
+        ipc_send("init_login");
 	} else {
 		// We are looking to read the whole log (processLog)
 		processLog(logSegment);
@@ -693,46 +717,6 @@ function processLog(rawString) {
 	if (firstPass) {
 		finishLoading();
 		ipc_send("popup", {"text": "100%", "time": 3000});
-	}
-}
-
-// Process only the user data for initial loading (prior to log in)
-// Same logic as processLog() but without the processLogData() function
-function processLogUser(rawString) {
-	var splitString = rawString.split('[UnityCrossThread');
-
-	splitString.forEach(value => {
-		//ipc_send("ipc_log", "Async: ("+index+")");
-
-		// Get player Id
-		let strCheck = '"PlayerId":"';
-		if (value.indexOf(strCheck) > -1) {
-			playerId = dataChop(value, strCheck, '"');
-		}
-
-		// Get User name
-		strCheck = '"PlayerScreenName":"';
-		if (value.indexOf(strCheck) > -1) {
-			playerName = dataChop(value, strCheck, '"');
-			ipc_send("init_login", playerName);
-			ipc_send("ipc_log", 'Arena screen name: '+playerName);
-		}
-
-		// Get Client Version
-		strCheck = '"ClientVersion":"';
-		if (value.indexOf(strCheck) > -1) {
-			arenaVersion = dataChop(value, strCheck, '"');
-			ipc_send("ipc_log", 'Arena version: '+arenaVersion);
-		}
-		/*
-		if (firstPass) {
-			ipc_send("popup", {"text": "Reading: "+Math.round(100/splitString.length*index)+"%", "time": 1000});
-		}
-		*/
-	});
-
-	if (firstPass && playerName == null) {
-		ipc_send("popup", {"text": "output_log contains no player data", "time": 0});
 	}
 }
 
@@ -1010,26 +994,6 @@ function processLogData(data) {
 			}
 			select_deck(json);
 		}
-		return;
-	}
-
-	// Get player Id
-	strCheck = '"PlayerId":"';
-	if (data.indexOf(strCheck) > -1) {
-		playerId = dataChop(data, strCheck, '"');
-	}
-
-	// Get Client Version
-	strCheck = '"ClientVersion":"';
-	if (data.indexOf(strCheck) > -1) {
-		arenaVersion = dataChop(data, strCheck, '"');
-	}
-
-	// Get User name
-	strCheck = '"PlayerScreenName":"';
-	if (data.indexOf(strCheck) > -1) {
-		playerName = dataChop(data, strCheck, '"');
-		ipc_send("set_username", playerName);
 		return;
 	}
 
