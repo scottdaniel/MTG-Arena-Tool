@@ -4,16 +4,18 @@ const jsonText = require('./json-text');
 const CONNECTION_JSON_PATTERN =
 	'\\[(?:UnityCrossThreadLogger|Client GRE)\\]WebSocketClient (.*) WebSocketSharp\\.WebSocket connecting to .*: (.*)\\r\\n';
 
-const LABELED_JSON_PATTERNS = [
+const LABEL_JSON_PATTERNS = [
 	'\\[Client GRE\\].*: .*: (.*)\\r\\n',
 	'\\[UnityCrossThreadLogger\\].* \\(.*\\) Incoming (.*) ',
 	'\\[UnityCrossThreadLogger\\]Received unhandled GREMessageType: (.*)\\r\\n',
-	'\\[UnityCrossThreadLogger\\].*\\r\\n[<=]=[=>] (.*)\\(.*\\):?\\r\\n',
 ];
+
+const LABEL_ARROW_JSON_PATTERN = '\\[UnityCrossThreadLogger\\].*\\r\\n([<=]=[=>]) (.*)\\(.*\\):?\\r\\n';
 
 const ALL_PATTERNS = [
 	CONNECTION_JSON_PATTERN,
-	...LABELED_JSON_PATTERNS,
+	...LABEL_JSON_PATTERNS,
+	LABEL_ARROW_JSON_PATTERN,
 ];
 
 const maxLinesOfAnyPattern = Math.max(...ALL_PATTERNS.map(text => occurrences(text, /\\n/g)));
@@ -61,8 +63,8 @@ function ArenaLogDecoder() {
 }
 
 function parseLogEntry(text, matchText, position) {
-	let rematches = matchText.match(createRegExp(CONNECTION_JSON_PATTERN));
-	if (rematches) {
+	let rematches;
+	if (rematches = matchText.match(createRegExp(CONNECTION_JSON_PATTERN))) {
 		return ['full', matchText.length, {
 			type: 'connection',
 			client: JSON.parse(rematches[1]),
@@ -70,7 +72,34 @@ function parseLogEntry(text, matchText, position) {
 		}];
 	}
 
-	for (let pattern of LABELED_JSON_PATTERNS) {
+	if (rematches = matchText.match(createRegExp(LABEL_ARROW_JSON_PATTERN))) {
+		const jsonStart = position + matchText.length;
+		if (jsonStart >= text.length) {
+			return ['partial'];
+		}
+		if (!jsonText.starts(text, jsonStart)) {
+			return ['invalid', matchText.length];
+		}
+
+		const jsonLen = jsonText.length(text, jsonStart);
+		if (jsonLen === -1) {
+			return ['partial'];
+		}
+
+		const textAfterJson = text.substr(jsonStart + jsonLen, 2);
+		if (textAfterJson !== '\r\n') {
+			return ['partial'];
+		}
+
+		return ['full', matchText.length + jsonLen + textAfterJson.length, {
+			type: 'label_arrow_json',
+			label: rematches[2],
+			arrow: rematches[1],
+			json: () => JSON.parse(text.substr(jsonStart, jsonLen)),
+		}];
+	}
+
+	for (let pattern of LABEL_JSON_PATTERNS) {
 		rematches = matchText.match(createRegExp(pattern));
 		if (!rematches) continue;
 
@@ -93,7 +122,7 @@ function parseLogEntry(text, matchText, position) {
 		}
 
 		return ['full', matchText.length + jsonLen + textAfterJson.length, {
-			type: 'labeled_json',
+			type: 'label_json',
 			label: rematches[1],
 			json: () => JSON.parse(text.substr(jsonStart, jsonLen)),
 		}];
