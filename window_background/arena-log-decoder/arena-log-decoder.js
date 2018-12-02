@@ -5,12 +5,12 @@ const CONNECTION_JSON_PATTERN =
 	'\\[(?:UnityCrossThreadLogger|Client GRE)\\]WebSocketClient (.*) WebSocketSharp\\.WebSocket connecting to .*: (.*)\\r\\n';
 
 const LABEL_JSON_PATTERNS = [
-	'\\[Client GRE\\].*: .*: (.*)\\r\\n',
-	'\\[UnityCrossThreadLogger\\].* \\(.*\\) Incoming (.*) ',
-	'\\[UnityCrossThreadLogger\\]Received unhandled GREMessageType: (.*)\\r\\n',
+	'\\[Client GRE\\](.*): .*: (.*)\\r\\n',
+	'\\[UnityCrossThreadLogger\\](.*) \\(.*\\) Incoming (.*) ',
+	'\\[UnityCrossThreadLogger\\]Received unhandled GREMessageType:() (.*)\\r\\n',
 ];
 
-const LABEL_ARROW_JSON_PATTERN = '\\[UnityCrossThreadLogger\\].*\\r\\n([<=]=[=>]) (.*)\\(.*\\):?\\r\\n';
+const LABEL_ARROW_JSON_PATTERN = '\\[UnityCrossThreadLogger\\](.*)\\r\\n([<=]=[=>]) (.*)\\(.*\\):?\\r\\n';
 
 const ALL_PATTERNS = [
 	CONNECTION_JSON_PATTERN,
@@ -96,8 +96,9 @@ function parseLogEntry(text, matchText, position) {
 
 		return ['full', matchText.length + jsonLen + textAfterJson.length, {
 			type: 'label_arrow_json',
-			label: rematches[2],
-			arrow: rematches[1],
+            label: rematches[3],
+            arrow: rematches[2],
+            timestamp: rematches[1],
 			json: () => JSON.parse(text.substr(jsonStart, jsonLen)),
 		}];
 	}
@@ -126,7 +127,8 @@ function parseLogEntry(text, matchText, position) {
 
 		return ['full', matchText.length + jsonLen + textAfterJson.length, {
 			type: 'label_json',
-			label: rematches[1],
+            label: rematches[2],
+            timestamp: rematches[1],
 			json: () => JSON.parse(text.substr(jsonStart, jsonLen)),
 		}];
 	}
