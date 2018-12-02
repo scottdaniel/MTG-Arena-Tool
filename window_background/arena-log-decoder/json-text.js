@@ -28,6 +28,7 @@ function length(text, position) {
 						break;
 					case '"':
 						inString = !inString;
+						break;
 				}
 				if (openedArrays === 0 && openedObjects === 0) {
 					return i - position + 1;
