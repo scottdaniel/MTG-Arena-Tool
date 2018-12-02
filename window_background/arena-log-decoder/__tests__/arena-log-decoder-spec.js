@@ -3,9 +3,12 @@ const ArenaLogDecoder = require('../arena-log-decoder');
 
 const text = fs.readFileSync(__dirname + '/output_log.txt', 'utf-8');
 
-const getJson = logEntry => ({
-	...logEntry,
-	json: logEntry.json && logEntry.json(),
+const getJson = result => ({
+	...result,
+	entry: {
+		...result.entry,
+		json: result.entry.json && result.entry.json(),
+	},
 });
 
 describe('arena-log-decoder', () => {
