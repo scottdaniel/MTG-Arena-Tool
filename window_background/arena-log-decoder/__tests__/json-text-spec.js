@@ -1,3 +1,4 @@
+/* eslint-env jest */
 const { starts, length } = require('../json-text');
 
 describe('starts', () => {

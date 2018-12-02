@@ -1,3 +1,4 @@
+/* eslint-env jest */
 const nthLastIndexOf = require('../nth-last-index-of');
 
 describe('nthLastIndexOf', () => {
@@ -19,7 +20,7 @@ describe('nthLastIndexOf', () => {
 		expect(i).toEqual(-1);
 
 		const j = nthLastIndexOf('aba', 'c', 1);
-		expect(i).toEqual(-1);
+		expect(j).toEqual(-1);
 	});
 
 	it('throws if n is less than 1', () => {

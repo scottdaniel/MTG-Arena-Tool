@@ -27,7 +27,7 @@ function start({ path, chunkSize, onLogEntry, onError }) {
 		q.end();
 	}
 
-	function schedule(stats) {
+	function schedule() {
 		q.push(attempt);
 		q.start();
 	}
