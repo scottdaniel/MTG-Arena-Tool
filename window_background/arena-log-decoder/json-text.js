@@ -8,20 +8,26 @@ function length(text, position) {
 		case '[': {
 			let openedObjects = 0;
 			let openedArrays = 0;
+			let inString = false;
 			for (let i = position; i < text.length; i++) {
 				switch (text.charAt(i)) {
+					case '\\':
+						if (inString) i++;
+						break;
 					case '{':
-						openedObjects++;
+						if (!inString) openedObjects++;
 						break;
 					case '}':
-						openedObjects--;
+						if (!inString) openedObjects--;
 						break;
 					case '[':
-						openedArrays++;
+						if (!inString) openedArrays++;
 						break;
 					case ']':
-						openedArrays--;
+						if (!inString) openedArrays--;
 						break;
+					case '"':
+						inString = !inString;
 				}
 				if (openedArrays === 0 && openedObjects === 0) {
 					return i - position + 1;

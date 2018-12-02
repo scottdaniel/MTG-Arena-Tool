@@ -7,6 +7,11 @@ describe('starts', () => {
 		expect(starts(str, 6)).toEqual(true);
 		expect(starts(str, 16)).toEqual(true);
 	});
+
+	it('handles brackets in strings correctly', () => {
+		const str = '{ "key": "a value which contains \" and { and [" }';
+		expect(starts(str, 0)).toEqual(true);
+	});
 });
 
 describe('length', () => {
