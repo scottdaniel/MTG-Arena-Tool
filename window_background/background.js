@@ -500,7 +500,9 @@ function loadPlayerConfig(playerId) {
 		if (id != null) {
 			item = entireConfig[id];
 			if (item != undefined) {
-				history.matches.push(id);
+				if (history.matches.indexOf(id) == -1) {
+					history.matches.push(id);
+				}
 				history[id] = item;
 				history[id].type = "draft";
 			}
@@ -546,6 +548,15 @@ function loadPlayerConfig(playerId) {
 			}
 		}
 	}
+
+	// Remove duplicates, sorry :(
+	let length = history.matches.length;
+    history.matches = history.matches.sort().filter(function(item, pos, ary) {
+        return !pos || item != ary[pos - 1];
+    });
+    if (length !== history.matches.length) {
+		store.set('matches_index', history.matches);
+    }
 
 	deck_changes_index = entireConfig["deck_changes_index"];
 	deck_changes = entireConfig["deck_changes"];
