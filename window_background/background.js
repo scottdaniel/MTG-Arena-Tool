@@ -66,6 +66,8 @@ const defaultCfg = {
 	draft_index:[],
 	gems_history:[],
 	gold_history:[],
+	decks_index: [],
+	decks: {},
 	wildcards_history:[]
 }
 
@@ -144,8 +146,9 @@ var gameObjs = {};
 var history = {};
 var drafts = {};
 var events = {};
+var economy = {};
+var decks = {};
 //var coursesToSubmit = {};
-var decks = [];
 
 var gold = 0;
 var gems = 0;
@@ -163,7 +166,6 @@ var draftId = undefined;
 var overlayDeckMode = 0;
 var lastDeckUpdate = new Date();
 
-var economy = {};
 var deck_changes_index = [];
 var deck_changes = {};
 
@@ -517,6 +519,19 @@ function loadPlayerConfig(playerId) {
 		}
 	}
 
+	decks.index = store.get('decks_index');
+	for (let i=0; i<decks.index.length; i++) {
+		ipc_send("popup", {"text": "Reading decks: "+i+" / "+decks.index.length, "time": 0});
+		id = decks.index[i];
+
+		if (id != null) {
+			let deck = entireConfig.decks[id];
+			if (deck != undefined) {
+				decks[id] = deck;
+			}
+		}
+	}
+
 	deck_changes_index = entireConfig["deck_changes_index"];
 	deck_changes = entireConfig["deck_changes"];
 
@@ -777,8 +792,8 @@ function checkJsonWithStart(str, check, chop, start) {
 			str = dataChop(str, start, chop);
 			str = findFirstJSON(str);
 			return JSON.parse(str);
-		} catch(e) {
-			console.log(str);
+		} catch (e) {
+			console.error(e, str);
 			return false;
 		}
 	}
@@ -802,22 +817,26 @@ function checkJsonWithStartNoParse(str, check, chop, start) {
 // Finds the first JSON object inside "str", then returns it as a string
 function findFirstJSON(str) {
 	//str.replace("Logger]", "");
-	var _br = 0;
-	var _cu = 0;
-	var endpos = 0;
-	for (var i = 0, len = str.length; i < len; i++) {
+	let _br = 0;
+	let _cu = 0;
+	let endpos = 0;
+	let inString = false;
+	for (let i = 0, len = str.length; i < len; i++) {
 		let c = str.charAt(i);
-		if (c == '[')   _br++;
-		else if (c == ']')   _br--;
-		else if (c == '{')   _cu++;
-		else if (c == '}')   _cu--;
+		if (c == '"')			inString = !inString;
+		if (!inString) {
+			if (c == '[')			_br++;
+			else if (c == ']')		_br--;
+			else if (c == '{')		_cu++;
+			else if (c == '}')		_cu--;
+		}
 		if (_br == 0 && _cu == 0 && i > 10) {
 			endpos = i+1;
 			break;
 		}
 	}
 
-	//console.log("STR >> ", str);
+	//console.log("STR >> ", str, endpos, "CUT > "+str.slice(0, endpos));
 	//console.log("ENDPOS >> ", endpos);
 	//console.log("JSON >> ", str.slice(0, endpos));
 	return str.slice(0, endpos);
@@ -1065,15 +1084,45 @@ function processLogData(data) {
 		return;
 	}
 
-	// Get Decks
-	strCheck = '<== Deck.GetDeckLists(';
+	strCheck = '<== Event.GetPlayerCourses(';
 	json = checkJsonWithStart(data, strCheck, '', ')');
 	if (json != false) {
-		decks = json;
-		requestHistorySend(0);
-		ipc_send("set_decks", JSON.stringify(json));
+		json.forEach((course) => {
+			if (course.CurrentEventState != "PreMatch") {
+				if (course.CourseDeck != null) {
+					if (decks.index.indexOf(course.CourseDeck.id) == -1) {
+						decks.index.push(course.CourseDeck.id);
+					}
+					decks[course.CourseDeck.id] = course.CourseDeck;
+
+					store.set("decks_index", decks.index);
+					store.set("decks."+course.CourseDeck.id, course.CourseDeck);
+
+				}
+			}			
+		});
 		return;
 	}
+
+
+	// Get Decks
+    strCheck = '<== Deck.GetDeckLists(';
+    //console.log(data);
+    json = checkJsonWithStart(data, strCheck, '', ')');
+	if (json != false) {
+		json.forEach((deck) => {
+			let deckId = deck.id;
+			decks[deckId] = deck;
+
+			if (decks.index.indexOf(deck.id) == -1) {
+				decks.index.push(deck.id);
+			}
+		});
+		requestHistorySend(0);
+		ipc_send("set_decks", JSON.stringify(decks));
+		return;
+	}
+
 
 	// Get deck updated
 	strCheck = '<== Deck.UpdateDeck(';
@@ -1455,7 +1504,7 @@ function actionLog(seat, time, str, grpId = 0) {
 		}
 	}
 
-	console.log("action_log", str, {seat: seat, time:time, grpId: grpId});
+	//console.log("action_log", str, {seat: seat, time:time, grpId: grpId});
 	ipc_send("action_log", {seat: seat, time:time, str: str, grpId: grpId}, windowOverlay);
 
 }

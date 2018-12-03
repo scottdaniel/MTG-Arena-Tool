@@ -1477,7 +1477,8 @@ ipc.on('tou_set', function (event, arg) {
 //
 function setDecks(arg) {
 	if (arg != null) {
-		decks = arg;//JSON.parse(arg);
+		delete arg.index;
+		decks = Object.values(arg);
 	}
 	if (sidebarActive == 0 && decks != null) {
 		sort_decks();
