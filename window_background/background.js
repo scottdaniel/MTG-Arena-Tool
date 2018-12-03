@@ -272,6 +272,21 @@ ipc.on('delete_course', function (event, arg) {
 });
 
 //
+ipc.on('delete_deck', function (event, arg) {
+	var i = decks.index.indexOf(arg);
+	if (i > -1) {
+		decks.index.splice(i, 1);
+		delete decks[arg];
+		store.set('decks_index', decks.index);
+		store.delete('decks.'+arg);
+	}
+	// If we do it imediately it looks awful
+	setTimeout(() => {
+		ipc_send("set_decks", JSON.stringify(decks));
+	}, 200);
+});
+
+//
 ipc.on('delete_match', function (event, arg) {
 	var i = history.matches.indexOf(arg);
 	if (i > -1) {
@@ -1022,6 +1037,7 @@ function processLogData(data) {
 
 			if (json.CourseDeck != null) {
 				json.CourseDeck.colors = get_deck_colors(json.CourseDeck);
+				json.courseDeck.custom = true;
 				//json.date = timestamp();
 				console.log(json.CourseDeck, json.CourseDeck.colors)
 				httpSubmitCourse(json);

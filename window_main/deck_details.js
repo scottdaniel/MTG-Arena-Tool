@@ -23,6 +23,7 @@ var orderedCardTypes = ['cre', 'lan', 'ins', 'sor', 'enc', 'art', 'pla'];
 var orderedCardRarities = ['common', 'uncommon', 'rare', 'mythic'];
 var orderedColorCodes = ['w', 'u', 'b', 'r', 'g', 'c'];
 var orderedManaColors = ['#E7CA8E', '#AABEDF', '#A18E87', '#DD8263', '#B7C89E', '#E3E3E3'];
+var currentOpenDeck = null;
 
 function deckColorBar(deck) {
     let deckColors = $('<div class="deck_top_colors" style="align-self: center;"></div>');
@@ -186,6 +187,13 @@ function openDeck(deck, deck_type) {
         1 = event deck
         2 = normal deck
     */
+
+    if (deck == -1) {
+        deck = currentOpenDeck;
+    }
+    else {
+        currentOpenDeck = deck;
+    }
 
     // #ux_1 is right side, #ux_0 is left side
     let container = $("#ux_1");
