@@ -754,6 +754,7 @@ function setEvents(loadMore) {
 		var course = eventsHistory[course_id];
 
 		if (course == undefined) continue;
+		if (course.CourseDeck == undefined) continue;
 
 		var div = document.createElement("div");
 		div.classList.add(course.id);
