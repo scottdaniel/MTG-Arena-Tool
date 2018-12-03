@@ -945,7 +945,7 @@ function processLogData(data) {
 					var mid = json.params.payloadObject.matchId;
 					var time = json.params.payloadObject.secondsCount;
 					if (mid == currentMatchId) {
-						currentMatchTime = time;
+						currentMatchTime += time;
 						saveMatch();
 					}
 				}
