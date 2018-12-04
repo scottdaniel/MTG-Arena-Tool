@@ -628,7 +628,7 @@ let prevLogSize = 0;
 let logLoopMode = 0;
 
 let logUri = mtgaLog.defaultLogUri();
-if (settingsStore.get('logUri') !== '') {
+if (settingsStore.get('logUri')) {
 	logUri = settingsStore.get('logUri');
 }
 console.log(logUri);
