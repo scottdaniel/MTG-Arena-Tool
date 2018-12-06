@@ -628,8 +628,9 @@ let prevLogSize = 0;
 let logLoopMode = 0;
 
 let logUri = mtgaLog.defaultLogUri();
-if (settingsStore.get('logUri')) {
-	logUri = settingsStore.get('logUri');
+let settingsLogUri = settingsStore.get('logUri');
+if (settingsLogUri) {
+	logUri = settingsLogUri;
 }
 console.log(logUri);
 window.setInterval(attemptLogLoop, 250);
@@ -1043,12 +1044,12 @@ function processLogData(data) {
 			json.date = logTime;
 		}
 		if (json.Id != "00000000-0000-0000-0000-000000000000") {
+			console.log("Save course:", json);
 			json._id = json.Id;
 			delete json.Id;
-
-			if (json.CourseDeck != null) {
+			if (json.CourseDeck) {
 				json.CourseDeck.colors = get_deck_colors(json.CourseDeck);
-				json.courseDeck.custom = true;
+				json.CourseDeck.custom = true;
 				//json.date = timestamp();
 				console.log(json.CourseDeck, json.CourseDeck.colors)
 				httpSubmitCourse(json);
@@ -1441,7 +1442,7 @@ function processLogData(data) {
 		}
 		//ipc_send("renderer_show", 1);
 
-		draftId = json.Id;
+		draftId = json.Id+'-draft';
 		console.log("Complete draft", json);
 		saveDraft();
 		return;
