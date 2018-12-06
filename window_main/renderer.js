@@ -55,6 +55,7 @@ let matchesHistory = [];
 let eventsHistory = [];
 
 let explore = null;
+let loadExplore = 0;
 let cards = {};
 let cardsNew = {};
 let settings = null;
@@ -982,7 +983,7 @@ function expandEvent(_course, expandDiv) {
 
 					var tileGrpid = match.playerDeck.deckTileId;
 					try {
-						cardsDb.get(tileGrpid).set;
+						cardsDb.get(tileGrpid).images["art_crop"];
 					}
 					catch (e) {
 						tileGrpid = 67003;
@@ -1195,7 +1196,7 @@ function setHistory(loadMore) {
 		if (match.type == "match") {
 			tileGrpid = match.playerDeck.deckTileId;
 			try {
-				let t = cardsDb.get(tileGrpid).set;
+				let t = cardsDb.get(tileGrpid).images["art_crop"];
 			}
 			catch (e) {
 				tileGrpid = 67003;
@@ -1501,8 +1502,8 @@ function setExplore(arg, loadMore) {
 
 	mainDiv.classList.remove("flex_item");
 	if (loadMore <= 0) {
-		var loadExplore = 0;
-		loadMore = 25;
+		loadExplore = 0;
+		loadMore = 20;
 
 		mainDiv.innerHTML = '';
 
@@ -1595,7 +1596,7 @@ function setExplore(arg, loadMore) {
 
 		var tileGrpid = _deck.tile;
 		try {
-			cardsDb.get(tileGrpid).set;
+			let a = cardsDb.get(tileGrpid).images["art_crop"];
 		}
 		catch (e) {
 			tileGrpid = 67003;
@@ -1604,13 +1605,7 @@ function setExplore(arg, loadMore) {
 		var tile = document.createElement("div");
 		tile.classList.add(index+"t");
 		tile.classList.add("deck_tile");
-
-		try {
-			tile.style.backgroundImage = "url(https://img.scryfall.com/cards"+cardsDb.get(tileGrpid).images["art_crop"]+")";
-		}
-		catch (e) {
-			console.error(e);
-		}
+		tile.style.backgroundImage = "url(https://img.scryfall.com/cards"+cardsDb.get(tileGrpid).images["art_crop"]+")";
 
 		var div = document.createElement("div");
 		div.classList.add(index);
@@ -1691,8 +1686,8 @@ function setExplore(arg, loadMore) {
 
 	}
 
-	if (loadMore == 0 && actuallyLoaded < 20) {
-		setExplore(null, 50);
+	if (loadMore == 0 && loadExplore-actuallyLoaded < 20) {
+		setExplore(null, 20);
 	}
 
 	$(this).off();
