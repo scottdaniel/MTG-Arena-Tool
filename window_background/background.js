@@ -2248,7 +2248,7 @@ function saveEconomy(json) {
 		json.context = "Player Rewards";
 	}
 	if (ctx.indexOf("WildCard.Redeem") !== -1) {
-		json.context = "Redeem Wilcard";
+		json.context = "Redeem Wildcard";
 	}
 	if (ctx.indexOf("Store.Fulfillment") !== -1) {
 		json.context = "Store";
