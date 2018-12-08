@@ -148,6 +148,7 @@ var drafts = {};
 var events = {};
 var economy = {};
 var decks = {};
+var staticDecks = [];
 //var coursesToSubmit = {};
 
 var gold = 0;
@@ -1044,14 +1045,12 @@ function processLogData(data) {
 			json.date = logTime;
 		}
 		if (json.Id != "00000000-0000-0000-0000-000000000000") {
-			console.log("Save course:", json);
 			json._id = json.Id;
 			delete json.Id;
 			if (json.CourseDeck) {
 				json.CourseDeck.colors = get_deck_colors(json.CourseDeck);
-				json.CourseDeck.custom = true;
 				//json.date = timestamp();
-				console.log(json.CourseDeck, json.CourseDeck.colors)
+				//console.log(json.CourseDeck, json.CourseDeck.colors)
 				httpSubmitCourse(json);
 				saveCourse(json);
 			}
@@ -1122,10 +1121,9 @@ function processLogData(data) {
 						decks.index.push(course.CourseDeck.id);
 					}
 					decks[course.CourseDeck.id] = course.CourseDeck;
-
+					updateCustomDecks();
 					store.set("decks_index", decks.index);
 					store.set("decks."+course.CourseDeck.id, course.CourseDeck);
-
 				}
 			}			
 		});
@@ -1138,14 +1136,17 @@ function processLogData(data) {
     //console.log(data);
     json = checkJsonWithStart(data, strCheck, '', ')');
 	if (json != false) {
+		staticDecks = [];
 		json.forEach((deck) => {
 			let deckId = deck.id;
 			decks[deckId] = deck;
-
 			if (decks.index.indexOf(deck.id) == -1) {
 				decks.index.push(deck.id);
 			}
+			staticDecks.push(deck.id);
 		});
+
+		updateCustomDecks();
 		requestHistorySend(0);
 		ipc_send("set_decks", JSON.stringify(decks));
 		return;
@@ -1163,9 +1164,10 @@ function processLogData(data) {
 			logTime = parseWotcTime(str);
 		}
 
-		decks.forEach(function(_deck) {
-			if (_deck.id == json.id) {
-				var changeId = sha1(_deck.id+"-"+logTime);
+		decks.index.forEach(function(_deckid) {
+			if (_deckid == json.id) {
+				let _deck = decks[_deckid];
+				var changeId = sha1(_deckid+"-"+logTime);
 				var deltaDeck = {id: changeId, deckId: _deck.id, date: logTime, changesMain: [], changesSide: [], previousMain: _deck.mainDeck, previousSide: _deck.sideboard};
 
 				// Check Mainboard
@@ -1442,7 +1444,7 @@ function processLogData(data) {
 		}
 		//ipc_send("renderer_show", 1);
 
-		draftId = json.Id+'-draft';
+		draftId = json.Id;
 		console.log("Complete draft", json);
 		saveDraft();
 		return;
@@ -1726,7 +1728,7 @@ function gre_to_client(data) {
 				if (msg.gameStateMessage.gameInfo != undefined) {
 					//if (msg.gameStateMessage.gameInfo.matchState == "MatchState_GameComplete") {
 					if (msg.gameStateMessage.gameInfo.stage == "GameStage_GameOver") {
-						console.log("msg.gameStateMessage.gameInfo", msg.gameStateMessage.gameInfo);
+						//console.log("msg.gameStateMessage.gameInfo", msg.gameStateMessage.gameInfo);
 						let results = msg.gameStateMessage.gameInfo.results;
 						playerWin = 0;
 						oppWin = 0;
@@ -1741,7 +1743,7 @@ function gre_to_client(data) {
 								}
 							}
 							
-							console.log("playerWin", playerWin, "oppWin", oppWin);
+							//console.log("playerWin", playerWin, "oppWin", oppWin);
 							if (res.scope == "MatchScope_Match") {
 								duringMatch = false;
 							}
@@ -1996,6 +1998,24 @@ function getNameBySeat(seat) {
 	catch (e) {
 		return "???";
 	}
+}
+
+//
+function updateCustomDecks() {
+	decks.index.forEach((_deckid) => {
+		let _deck = decks[_deckid];
+		try {
+			console.log(_deck.id, _deck);
+			decks[_deck.id].custom = false;
+			if (staticDecks.indexOf(_deck.id) == -1) {
+				console.error("CUSTOM!");
+				decks[_deck.id].custom = true;
+			}				
+		}
+		catch (e) {
+			//
+		}
+	});
 }
 
 //
@@ -2437,7 +2457,7 @@ function httpBasic() {
             callback({message: "Settings dont allow sending data! > "+_headers.method});
             removeFromHttp(_headers.reqId);
         }
-        else if (tokenAuth == undefined) {
+        else if (!tokenAuth) {
             //callback({message: "Undefined token"});
             //removeFromHttp(_headers.reqId);
             _headers.token = "";

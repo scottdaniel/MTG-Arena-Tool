@@ -135,7 +135,7 @@ function open_decks_tab() {
 				flr.appendChild(d);
 			}
 
-			if (deck.custom != undefined) {
+			if (deck.custom) {
 				var fldel = document.createElement("div");
 				fldel.classList.add("flex_item");
 				fldel.classList.add(deck.id+"_del");
@@ -149,7 +149,7 @@ function open_decks_tab() {
 			flc.appendChild(flt);
 			flc.appendChild(flb);
 			div.appendChild(flr);
-			if (deck.custom != undefined) {
+			if (deck.custom) {
 				div.appendChild(fldel);
 			}
 
@@ -171,7 +171,7 @@ function open_decks_tab() {
 				$('.moving_ux').animate({'left': '-100%'}, 250, 'easeInOutCubic'); 
 			});
 
-			if (deck.custom != undefined) {
+			if (deck.custom) {
 				deleteDeck(deck);
 			}
 
