@@ -281,7 +281,7 @@ function open_economy_tab(loadMore) {
 
 			flr.appendChild(bos);
 		}
-		else if (change.context == "Redeem Wilcard") {
+		else if (change.context == "Redeem Wildcard") {
 			var imgUri = "";
 			if (change.delta.wcCommonDelta != undefined)	imgUri = "wc_common";
 			if (change.delta.wcUncommonDelta != undefined)	imgUri = "wc_uncommon";
