@@ -2005,10 +2005,10 @@ function updateCustomDecks() {
 	decks.index.forEach((_deckid) => {
 		let _deck = decks[_deckid];
 		try {
-			console.log(_deck.id, _deck);
+			//console.log(_deck.id, _deck);
 			decks[_deck.id].custom = false;
 			if (staticDecks.indexOf(_deck.id) == -1) {
-				console.error("CUSTOM!");
+				//console.error("CUSTOM!");
 				decks[_deck.id].custom = true;
 			}				
 		}
@@ -2457,15 +2457,9 @@ function httpBasic() {
             callback({message: "Settings dont allow sending data! > "+_headers.method});
             removeFromHttp(_headers.reqId);
         }
-        else if (!tokenAuth) {
-            //callback({message: "Undefined token"});
-            //removeFromHttp(_headers.reqId);
-            _headers.token = "";
-        }
-        else {
-            _headers.token = tokenAuth;
-        }
         
+        _headers.token = tokenAuth;
+
         var http = require('https');
         var options;
         if (_headers.method == 'get_database') {
