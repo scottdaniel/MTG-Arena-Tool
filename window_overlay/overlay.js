@@ -357,7 +357,7 @@ ipc.on('set_deck', function (event, arg) {
 			}
 			prevIndex = grpId;
 		});
-		if (showSideboard) {
+		if (showSideboard && arg.sideboard !== undefined) {
 			deckListDiv.append('<div class="card_tile_separator">Sideboard</div>');
 			
 			arg.sideboard.forEach(function(card) {
