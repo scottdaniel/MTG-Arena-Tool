@@ -332,6 +332,7 @@ span i {
 }
 
 .list_deck {
+    margin-right: 10px;
     cursor: pointer;
     justify-content: space-between;
 	padding-left: 16px;
