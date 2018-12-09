@@ -441,6 +441,13 @@ ipc.on('tou_get', function (event, arg) {
     httpTournamentGet(arg);
 });
 
+ipc.on('tou_join', function (event, arg) {
+    httpTournamentJoin(arg);
+});
+
+ipc.on('tou_drop', function (event, arg) {
+    httpTournamentDrop(arg);
+});
 
 
 
@@ -2701,6 +2708,16 @@ function httpTournamentGet(tid) {
     httpAsync.push({'reqId': _id, 'method': 'tou_get', 'method_path': '/tournament_get.php', 'id': tid});
 }
 
+function httpTournamentJoin(tid, deck) {
+    var _id = makeId(6);
+    deck = JSON.stringify([]);
+    httpAsync.push({'reqId': _id, 'method': 'tou_join', 'method_path': '/tournament_join.php', 'id': tid, 'deck': deck});
+}
+
+function httpTournamentDrop(tid) {
+    var _id = makeId(6);
+    httpAsync.push({'reqId': _id, 'method': 'tou_drop', 'method_path': '/tournament_drop.php', 'id': tid});
+}
 
 // Utility functions that belong only to background
 
