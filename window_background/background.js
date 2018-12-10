@@ -442,7 +442,7 @@ ipc.on('tou_get', function (event, arg) {
 });
 
 ipc.on('tou_join', function (event, arg) {
-    httpTournamentJoin(arg);
+    httpTournamentJoin(arg.id, arg.deck);
 });
 
 ipc.on('tou_drop', function (event, arg) {
@@ -2526,6 +2526,9 @@ function httpBasic() {
                             ipc_send("auth", parsedResult);
                             loadPlayerConfig(playerId);
                         }
+                        if (_headers.method == 'tou_join' || _headers.method == 'tou_drop') {
+                        	httpTournamentGet(parsedResult.id);
+                        }
                         if (_headers.method == 'get_top_decks') {
                             ipc_send("set_explore", parsedResult.result);
                         }
@@ -2551,7 +2554,6 @@ function httpBasic() {
                             cardsDb.set(parsedResult);
                             ipc_send("popup", {"text": "Metadata: Ok", "time": 1000});
                         }
-                        
                     }
                     else if (parsedResult.ok == false && parsedResult.error != undefined) {
                         if (_headers.method == 'share_draft') {
@@ -2708,9 +2710,9 @@ function httpTournamentGet(tid) {
     httpAsync.push({'reqId': _id, 'method': 'tou_get', 'method_path': '/tournament_get.php', 'id': tid});
 }
 
-function httpTournamentJoin(tid, deck) {
-    var _id = makeId(6);
-    deck = JSON.stringify([]);
+function httpTournamentJoin(tid, _deck) {
+    let _id = makeId(6);
+    let deck = JSON.stringify(decks[_deck]);
     httpAsync.push({'reqId': _id, 'method': 'tou_join', 'method_path': '/tournament_join.php', 'id': tid, 'deck': deck});
 }
 

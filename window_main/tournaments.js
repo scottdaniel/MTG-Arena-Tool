@@ -4,10 +4,14 @@ global
 	toHHMM,
 	userName,
 	ipc_send,
-	change_background
+	change_background,decks
+	get_deck_colors,
+	selectAdd,
+	mana
 */
 
 let tournaments_list;
+let tournamentDeck = null;
 
 // Should separate these two into smaller functions
 function open_tournaments_tab(arg) {
@@ -42,7 +46,7 @@ function open_tournaments_tab(arg) {
 		let now = timestamp();
 
 		let roundsStart = tou.starts + (sd * 60*60);
-		let roundEnd = tou.starts + (sd * 60*60) + (tou.currentRound * (60*60) * rd);
+		let roundEnd = tou.starts + (sd * 60*60) + ((tou.currentRound+1) * (60*60) * rd);
 
 		let state = "-";
 		let stateb = "-";
@@ -54,12 +58,12 @@ function open_tournaments_tab(arg) {
 			stateb = toHHMM(roundsStart-now)+" left";
 		}
 		if (tou.state == 1) {
-			state = "Round "+(tou.currentRound+1)+" in progress.";
+			state = "Round "+(tou.currentRound+1)+"/"+tou.maxRounds+" in progress.";
 			stateb = toHHMM(roundEnd-now)+" left";
 		}
 		if (tou.state == 4) {
 			state = "Tournament finish.";
-			stateb = tou.winner.slice(0, -6);
+			stateb = "Winner: "+tou.winner.slice(0, -6);
 		}
 
 		let nam = document.createElement("div");
@@ -70,13 +74,14 @@ function open_tournaments_tab(arg) {
 		st.classList.add("tou_state");
 		st.innerHTML = state;
 
-		let pln = document.createElement("div");
-		pln.classList.add("tou_cell");
-		pln.innerHTML = stateb;
-
 		let stb = document.createElement("div");
 		stb.classList.add("tou_cell");
-		stb.innerHTML = tou.players.length;
+		stb.innerHTML = tou.players.length+" players.";
+
+		let pln = document.createElement("div");
+		pln.classList.add("tou_cell");
+		pln.style.width = "200px";
+		pln.innerHTML = stateb;
 
 		div.appendChild(nam);
 		div.appendChild(st);
@@ -103,7 +108,7 @@ function open_tournament(tou) {
 	let rd = tou.roundDuration;
 	let now = timestamp();
 	let roundsStart = tou.starts + (sd * 60*60);
-	let roundEnd = tou.starts + (sd * 60*60) + (tou.currentRound * 60*60 * rd);
+	let roundEnd = tou.starts + (sd * 60*60) + ((tou.currentRound+1) * 60*60 * rd);
 
 	let joined = false;
 	let record = '-';
@@ -137,14 +142,36 @@ function open_tournament(tou) {
 
 	if (tou.state <= 0) {
 		if (joined) {
+			let deckContainer = $('<div class="flex_item"></div>');
+			let deckvisual = $('<div class="decklist"></div>');
+			deckvisual.appendTo(deckContainer);
+			if (tou.deck) {
+				drawDeckVisual(deckvisual, $('.dummy'), tou.deck);
+			}
+			deckContainer.appendTo(mainDiv);
 			$('<div class="button_simple but_drop">Drop</div>').appendTo(mainDiv);
 		}
 		else {
-			$('<div class="button_simple but_join">Join</div>').appendTo(mainDiv);
+			var select = $('<select id="deck_select">Select Deck</select>');
+			decks.forEach((_deck) => {
+				try {
+					select.append(`<option value="${_deck.id}">${_deck.name}</option>`);
+				}
+				catch (e) {
+					console.log(e);
+				}
+			});
+			select.appendTo(mainDiv);
+			selectAdd(select, selectTourneyDeck);
+			select.parent().css('width', '300px');
+			select.parent().css('margin', '16px auto');
+			$('<div class="button_simple_disabled but_join">Join</div>').appendTo(mainDiv);
 		}
 
 		$(".but_join").click(function () {
-			ipc_send('tou_join', tou._id);
+			if ($(this).hasClass('button_simple')) {
+				ipc_send('tou_join', {id: tou._id, deck: tournamentDeck});
+			}
 		});
 
 		$(".but_drop").click(function () {
@@ -156,11 +183,13 @@ function open_tournament(tou) {
 		$(`<div class="tou_record green">${record}</div>`).appendTo(mainDiv);
 
 		let tabs = $('<div class="tou_tabs_cont"></div>');
-		let tab_rounds = $('<div class="tou_tab tabr tou_tab_selected">Rounds</div>');
-		let tab_standings = $('<div class="tou_tab tabp ">Standings</div>');
+		let tab_rounds = $('<div class="tou_tab tab_a tou_tab_selected">Rounds</div>');
+		let tab_standings = $('<div class="tou_tab tab_b ">Standings</div>');
+		let tab_decklist = $('<div class="tou_tab tab_c ">Decklist</div>');
 
 		tab_rounds.appendTo(tabs);
 		tab_standings.appendTo(tabs);
+		tab_decklist.appendTo(tabs);
 		tabs.appendTo(mainDiv);
 
 		let tab_cont_a = $('<div class="tou_cont_a"></div>');
@@ -244,7 +273,7 @@ function open_tournament(tou) {
 			let s = '';
 			if (pname == userName)	s = 'style="color: rgba(183, 200, 158, 1);"';
 
-			let str = `<div ${s} class="tou_stand_name">${pname.slice(0, -6)}</div>
+			let str = `<div ${s} class="tou_stand_name">${pname.slice(0, -6)} ${tou.drops.indexOf(pname) !== -1 ? ' (drop)' : ''}</div>
 			<div class="tou_stand_cell">${stat.mp}</div>
 			<div class="tou_stand_cell">${stat.w}-${stat.d}-${stat.l}</div>
 			<div class="tou_stand_cell">${stat.rpl}</div>
@@ -257,24 +286,31 @@ function open_tournament(tou) {
 			line.appendTo(tab_cont_b);
 		});
 
+		let tab_cont_c = $('<div class="tou_cont_c" style="height: 0px"></div>');
+
+
 		tab_cont_a.appendTo(mainDiv);
 		tab_cont_b.appendTo(mainDiv);
+		tab_cont_c.appendTo(mainDiv);
 
-		$(".tabr").click(function () {
+		$(".tou_tab").click(function () {
 			if (!$(this).hasClass("tou_tab_selected")) {
+				$(".tou_tab").each(function() {
+					$(this).removeClass("tou_tab_selected");
+				});
 				$(this).addClass("tou_tab_selected");
-				$(".tabp").removeClass("tou_tab_selected");
-				$(".tou_cont_a").css("height", "auto");
-				$(".tou_cont_b").css("height", "0px");
-			}
-		});
-
-		$(".tabp").click(function () {
-			if (!$(this).hasClass("tou_tab_selected")) {
-				$(this).addClass("tou_tab_selected");
-				$(".tabr").removeClass("tou_tab_selected");
-				$(".tou_cont_b").css("height", "auto");
 				$(".tou_cont_a").css("height", "0px");
+				$(".tou_cont_b").css("height", "0px");
+				$(".tou_cont_c").css("height", "0px");
+				if ($(this).hasClass('tab_a')) {
+					$(".tou_cont_a").css("height", "auto");
+				}
+				if ($(this).hasClass('tab_b')) {
+					$(".tou_cont_b").css("height", "auto");
+				}
+				if ($(this).hasClass('tab_c')) {
+					$(".tou_cont_c").css("height", "auto");
+				}
 			}
 		});
 
@@ -288,6 +324,11 @@ function open_tournament(tou) {
         change_background("default");
 		$('.moving_ux').animate({'left': '0px'}, 250, 'easeInOutCubic'); 
 	});
+}
+
+function selectTourneyDeck() {
+	tournamentDeck = document.getElementById("deck_select").value;
+	$(".but_join").addClass("button_simple");
 }
 
 module.exports = {
