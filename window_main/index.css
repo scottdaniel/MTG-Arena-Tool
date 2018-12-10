@@ -2174,3 +2174,16 @@ a:hover {
 .but_join, .but_drop {
 	margin: 16px auto;
 }
+
+
+.tou_cont_c {
+    justify-content: center;
+    display: flex;
+    overflow: hidden;
+}
+
+.decklist_divided {
+    margin: 24px;
+    width: 50%;
+    max-width: 400px;
+}

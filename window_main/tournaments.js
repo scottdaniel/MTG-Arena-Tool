@@ -5,9 +5,13 @@ global
 	userName,
 	ipc_send,
 	change_background,decks
-	get_deck_colors,
+	drawDeckVisual,
 	selectAdd,
-	mana
+	get_card_type_sort,
+	addCardSeparator,
+	addCardTile,
+	cardsDb,
+	makeId
 */
 
 let tournaments_list;
@@ -149,7 +153,10 @@ function open_tournament(tou) {
 				drawDeckVisual(deckvisual, $('.dummy'), tou.deck);
 			}
 			deckContainer.appendTo(mainDiv);
-			$('<div class="button_simple but_drop">Drop</div>').appendTo(mainDiv);
+
+			if (tou.state !== 4) {
+				$('<div class="button_simple but_drop">Drop</div>').appendTo(mainDiv);
+			}
 		}
 		else {
 			var select = $('<select id="deck_select">Select Deck</select>');
@@ -165,7 +172,10 @@ function open_tournament(tou) {
 			selectAdd(select, selectTourneyDeck);
 			select.parent().css('width', '300px');
 			select.parent().css('margin', '16px auto');
-			$('<div class="button_simple_disabled but_join">Join</div>').appendTo(mainDiv);
+
+			if (tou.state == 0) {
+				$('<div class="button_simple_disabled but_join">Join</div>').appendTo(mainDiv);
+			}
 		}
 
 		$(".but_join").click(function () {
@@ -177,7 +187,6 @@ function open_tournament(tou) {
 		$(".but_drop").click(function () {
 			ipc_send('tou_drop', tou._id);
 		});
-
 	}
 	else {
 		$(`<div class="tou_record green">${record}</div>`).appendTo(mainDiv);
@@ -287,11 +296,12 @@ function open_tournament(tou) {
 		});
 
 		let tab_cont_c = $('<div class="tou_cont_c" style="height: 0px"></div>');
-
+		drawSideboardableDeck(tou.deck, tab_cont_c);
 
 		tab_cont_a.appendTo(mainDiv);
 		tab_cont_b.appendTo(mainDiv);
 		tab_cont_c.appendTo(mainDiv);
+
 
 		$(".tou_tab").click(function () {
 			if (!$(this).hasClass("tou_tab_selected")) {
@@ -329,6 +339,44 @@ function open_tournament(tou) {
 function selectTourneyDeck() {
 	tournamentDeck = document.getElementById("deck_select").value;
 	$(".but_join").addClass("button_simple");
+}
+
+function drawSideboardableDeck(_deck, _div) {
+	let unique = makeId(4);
+	_div.html('');
+	_div.css("dsiplay", "flex");
+	let mainboardDiv = $('<div class="decklist_divided"></dii>');
+
+	let prevIndex = 0;
+	addCardSeparator(98, mainboardDiv);
+	_deck.mainDeck.forEach(function(card) {
+		let grpId = card.id;
+		let type = cardsDb.get(grpId).type;
+
+		if (card.quantity > 0) {
+			addCardTile(grpId, unique+"a", card.quantity, mainboardDiv);
+		}
+		
+		prevIndex = grpId;
+	});
+
+	let sideboardDiv = $('<div class="decklist_divided"></dii>');
+
+	if (_deck.sideboard != undefined) {
+		if (_deck.sideboard.length > 0) {
+			addCardSeparator(99, sideboardDiv);
+			prevIndex = 0;
+			_deck.sideboard.forEach(function(card) {
+				let grpId = card.id;
+				if (card.quantity > 0) {
+					addCardTile(grpId, unique+"b", card.quantity, sideboardDiv);
+				}
+			});
+		}
+	}
+
+	_div.append(mainboardDiv);
+	_div.append(sideboardDiv);
 }
 
 module.exports = {
