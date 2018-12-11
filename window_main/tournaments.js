@@ -7,16 +7,16 @@ global
 	change_background,decks
 	drawDeckVisual,
 	selectAdd,
-	get_card_type_sort,
 	addCardSeparator,
 	addCardTile,
-	cardsDb,
+	get_deck_export,
 	makeId
 */
 
 let tournaments_list;
 let tournamentDeck = null;
 let currentDeck = null;
+let originalDeck = null;
 
 // Should separate these two into smaller functions
 function open_tournaments_tab(arg) {
@@ -116,6 +116,7 @@ function open_tournament(tou) {
 	let roundEnd = tou.starts + (sd * 60*60) + ((tou.currentRound+1) * 60*60 * rd);
 
 	currentDeck = tou.deck;
+	originalDeck = $.extend(true, {}, tou.deck);
 
 	let joined = false;
 	let record = '-';
@@ -305,8 +306,9 @@ function open_tournament(tou) {
 		tab_cont_b.appendTo(mainDiv);
 
 		$('<div class="button_simple exportDeck">Export to Arena</div>').appendTo(tab_cont_c);
+		$('<div class="button_simple resetDeck">Reset</div>').appendTo(tab_cont_c);
 		decklistCont.appendTo(tab_cont_c);
-		
+
 		tab_cont_c.appendTo(mainDiv);
 
 		drawSideboardableDeck();
@@ -314,6 +316,11 @@ function open_tournament(tou) {
 		$(".exportDeck").click(() => {
 			let list = get_deck_export(currentDeck);
 			ipc_send('set_clipboard', list);
+		});
+
+		$(".resetDeck").click(() => {
+			currentDeck = $.extend(true, {}, originalDeck);
+			drawSideboardableDeck();
 		});
 
 		$(".tou_tab").click(function () {
@@ -373,7 +380,7 @@ function drawSideboardableDeck() {
 			jQuery.data(tile[0], "board", 0);
 			tile.click(function() {
 				moveCard($(this)[0]);
-				drawSideboardableDeck(currentDeck);
+				drawSideboardableDeck();
 			});
 		}
 	});
@@ -394,7 +401,7 @@ function drawSideboardableDeck() {
 					jQuery.data(tile[0], "board", 1);
 					tile.click(function() {
 						moveCard($(this)[0]);
-						drawSideboardableDeck(currentDeck);
+						drawSideboardableDeck();
 					});
 				}
 			});
