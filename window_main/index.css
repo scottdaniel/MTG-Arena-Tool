@@ -2177,6 +2177,7 @@ a:hover {
 
 
 .tou_cont_c {
+    flex-direction: column;
     justify-content: center;
     display: flex;
     overflow: hidden;
@@ -2186,4 +2187,11 @@ a:hover {
     margin: 24px;
     width: 50%;
     max-width: 400px;
+}
+
+.sideboarder_container {
+    width: 100%;
+    max-width: 800px;
+    margin: auto;
+    display: flex;
 }

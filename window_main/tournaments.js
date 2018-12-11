@@ -16,6 +16,7 @@ global
 
 let tournaments_list;
 let tournamentDeck = null;
+let currentDeck = null;
 
 // Should separate these two into smaller functions
 function open_tournaments_tab(arg) {
@@ -113,6 +114,8 @@ function open_tournament(tou) {
 	let now = timestamp();
 	let roundsStart = tou.starts + (sd * 60*60);
 	let roundEnd = tou.starts + (sd * 60*60) + ((tou.currentRound+1) * 60*60 * rd);
+
+	currentDeck = tou.deck;
 
 	let joined = false;
 	let record = '-';
@@ -296,12 +299,22 @@ function open_tournament(tou) {
 		});
 
 		let tab_cont_c = $('<div class="tou_cont_c" style="height: 0px"></div>');
-		drawSideboardableDeck(tou.deck, tab_cont_c);
+		let decklistCont = $('<div class="sideboarder_container"></div>');
 
 		tab_cont_a.appendTo(mainDiv);
 		tab_cont_b.appendTo(mainDiv);
+
+		$('<div class="button_simple exportDeck">Export to Arena</div>').appendTo(tab_cont_c);
+		decklistCont.appendTo(tab_cont_c);
+		
 		tab_cont_c.appendTo(mainDiv);
 
+		drawSideboardableDeck();
+
+		$(".exportDeck").click(() => {
+			let list = get_deck_export(currentDeck);
+			ipc_send('set_clipboard', list);
+		});
 
 		$(".tou_tab").click(function () {
 			if (!$(this).hasClass("tou_tab_selected")) {
@@ -341,35 +354,48 @@ function selectTourneyDeck() {
 	$(".but_join").addClass("button_simple");
 }
 
-function drawSideboardableDeck(_deck, _div) {
+function drawSideboardableDeck() {
 	let unique = makeId(4);
+	let _div = $(".sideboarder_container");
 	_div.html('');
 	_div.css("dsiplay", "flex");
 	let mainboardDiv = $('<div class="decklist_divided"></dii>');
 
-	let prevIndex = 0;
-	addCardSeparator(98, mainboardDiv);
-	_deck.mainDeck.forEach(function(card) {
+	let size = 0;
+	currentDeck.mainDeck.forEach(function(card) { size += card.quantity; });
+	addCardSeparator(`Mainboard (${size})`, mainboardDiv);
+	currentDeck.mainDeck.forEach(function(card) {
 		let grpId = card.id;
-		let type = cardsDb.get(grpId).type;
 
 		if (card.quantity > 0) {
-			addCardTile(grpId, unique+"a", card.quantity, mainboardDiv);
+			let tile = addCardTile(grpId, unique+"a", card.quantity, mainboardDiv);
+			tile.children(".card_tile_glow").off("click");
+			jQuery.data(tile[0], "board", 0);
+			tile.click(function() {
+				moveCard($(this)[0]);
+				drawSideboardableDeck(currentDeck);
+			});
 		}
-		
-		prevIndex = grpId;
 	});
 
 	let sideboardDiv = $('<div class="decklist_divided"></dii>');
 
-	if (_deck.sideboard != undefined) {
-		if (_deck.sideboard.length > 0) {
-			addCardSeparator(99, sideboardDiv);
-			prevIndex = 0;
-			_deck.sideboard.forEach(function(card) {
+	if (currentDeck.sideboard != undefined) {
+		if (currentDeck.sideboard.length > 0) {
+			size = 0;
+			currentDeck.sideboard.forEach(function(card) { size += card.quantity; });
+			addCardSeparator(`Sideboard (${size})`, sideboardDiv);
+
+			currentDeck.sideboard.forEach(function(card) {
 				let grpId = card.id;
 				if (card.quantity > 0) {
-					addCardTile(grpId, unique+"b", card.quantity, sideboardDiv);
+					let tile = addCardTile(grpId, unique+"b", card.quantity, sideboardDiv);
+					tile.children(".card_tile_glow").off("click");
+					jQuery.data(tile[0], "board", 1);
+					tile.click(function() {
+						moveCard($(this)[0]);
+						drawSideboardableDeck(currentDeck);
+					});
 				}
 			});
 		}
@@ -377,6 +403,43 @@ function drawSideboardableDeck(_deck, _div) {
 
 	_div.append(mainboardDiv);
 	_div.append(sideboardDiv);
+}
+
+function moveCard(_cardTile) {
+	let grpId 		= jQuery.data(_cardTile, "grpId");
+	let board 		= jQuery.data(_cardTile, "board");
+
+	let moved = false;
+
+	let _from = currentDeck.mainDeck;
+	let _to = currentDeck.sideboard;
+	if (board == 1) {
+		_from = currentDeck.sideboard;
+		_to = currentDeck.mainDeck;
+	}
+
+	_from.forEach(function(card, index, object) {
+		if (!moved ) {
+			if (grpId == card.id) {
+				card.quantity -= 1;
+				moved = true;
+			}
+			if (card.quantity == 0) {
+				object.splice(index, 1);
+			}
+		}
+	});
+	let added = false;
+	_to.forEach(function(card) {
+		if (grpId == card.id) {
+			card.quantity += 1;
+			added = true;
+		}
+	});
+	if (!added) {
+		let obj = {id: grpId, quantity: 1};
+		_to.push(obj);
+	}
 }
 
 module.exports = {

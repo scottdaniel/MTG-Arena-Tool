@@ -37,6 +37,10 @@ draftRanks[0] = "F";
 function addCardTile(grpId, indent, quantity, element) {
 	if (quantity !== 0) {
 		var cont = $('<div class="card_tile_container click-on"></div>');
+		jQuery.data(cont[0], "grpId", grpId);
+		jQuery.data(cont[0], "id", indent);
+		jQuery.data(cont[0], "quantity", quantity);
+
 		var ww, ll;
 		if (!isNumber(quantity)) {
 			ww = 64;
@@ -116,7 +120,10 @@ function addCardTile(grpId, indent, quantity, element) {
 				}
 			}
 		}
+
+		return cont;
 	}
+	return false;
 }
 
 //
@@ -246,7 +253,7 @@ function addCardSeparator(i, element) {
 		case 7: str = "Land"; break;
 		case 98: str = "Mainboard"; break;
 		case 99: str = "Sideboard"; break;
-		default: str = ""; break;
+		default: str = i; break;
 	}
 
 	var cont = $('<div class="card_tile_separator">'+str+'</div>');
