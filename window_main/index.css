@@ -663,6 +663,11 @@ a:hover {
 	flex-direction: column;
 }
 
+.decks_top {
+    display: flex;
+    height: 64px;
+    margin: 0 16px;
+}
 
 .list_deck_name {
     -webkit-user-select:none;
@@ -732,6 +737,43 @@ a:hover {
     justify-content: flex-end;
     align-self: center;
     display: flex;
+}
+
+.deck_tags_container {
+    margin: 6px 16px;
+    display: flex;
+    flex-wrap: wrap;
+    flex-grow: 2;
+}
+
+.deck_tag {
+    font-size: 13px;
+    opacity: 1;
+    overflow: hidden;
+    margin-right: 12px;
+    margin-bottom: 4px;
+    height: 20px;
+    line-height: 20px;
+    text-indent: 8px;
+    border-radius: 16px;
+    display: flex;
+    justify-content: space-between;
+    -webkit-transition: all .2s ease-in-out;
+}
+
+.deck_tag_close {
+    cursor: pointer;
+    background: url(../images/close_tag.png);
+    opacity: 0.5;
+    width: 16px;
+    height: 16px;
+    display: block;
+    margin: 2px 2px 2px 8px;
+    -webkit-transition: all .2s ease-in-out;
+}
+
+.deck_tag_close:hover {
+    opacity: 1;
 }
 
 .mana_curve {

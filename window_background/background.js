@@ -67,6 +67,8 @@ const defaultCfg = {
 	gems_history:[],
 	gold_history:[],
 	decks_index: [],
+	decks_tags: {},
+	tags_colors: {},
 	decks: {},
 	wildcards_history:[]
 }
@@ -169,7 +171,8 @@ var lastDeckUpdate = new Date();
 
 var deck_changes_index = [];
 var deck_changes = {};
-
+var decks_tags = {};
+var tags_colors = {};
 
 // Begin of IPC messages recievers
 function ipc_send(method, arg, to = windowRenderer) {
@@ -450,6 +453,16 @@ ipc.on('tou_drop', function (event, arg) {
 });
 
 
+ipc.on('delete_tag', function (event, arg) {
+	if (decks_tags[arg.deck]) {
+		decks_tags[arg.deck].forEach((tag, index) => {
+			if (tag == arg.name) {
+				decks_tags[arg.deck].splice(index, 1);
+			}
+		});
+	}
+	store.set("decks_tags", decks_tags);
+});
 
 ipc.on('set_deck_mode', function (event, state) {
 	overlayDeckMode = state;
@@ -551,7 +564,9 @@ function loadPlayerConfig(playerId) {
 
 		if (id != null) {
 			let deck = entireConfig.decks[id];
+			let tags = entireConfig.decks_tags[id];
 			if (deck != undefined) {
+				deck.tags = tags;
 				decks[id] = deck;
 			}
 		}
@@ -568,8 +583,12 @@ function loadPlayerConfig(playerId) {
 
 	deck_changes_index = entireConfig["deck_changes_index"];
 	deck_changes = entireConfig["deck_changes"];
+	decks_tags = entireConfig["decks_tags"];
+	tags_colors = entireConfig["tags_colors"];
 
 	var obj = store.get('overlayBounds');
+
+	ipc_send("set_tags_colors", tags_colors);
 	ipc_send("overlay_set_bounds", obj);
 
 	loadSettings();
@@ -1146,6 +1165,7 @@ function processLogData(data) {
 		staticDecks = [];
 		json.forEach((deck) => {
 			let deckId = deck.id;
+			deck.tags = decks_tags[deckId];
 			decks[deckId] = deck;
 			if (decks.index.indexOf(deck.id) == -1) {
 				decks.index.push(deck.id);

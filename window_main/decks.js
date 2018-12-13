@@ -6,7 +6,9 @@ global
 	sort_decks,
 	cards,
 	getDeckWinrate,
-	open_deck
+	open_deck,
+	tags_colors,
+	ipc_send
 */
 
 //
@@ -19,6 +21,27 @@ function open_decks_tab() {
 		var d = document.createElement("div");
 		d.classList.add("list_fill");
 		mainDiv.appendChild(d);
+
+		// Tags and filters
+		let decks_top = document.createElement("div");
+		decks_top.classList.add('decks_top');
+
+		let tags_list = [];
+		decks.forEach(function(deck) {
+			if (deck.tags) {
+				deck.tags.forEach((tag) => {
+					if (tags_list.indexOf(tag) == -1) {
+						tags_list.push(tag);
+					}
+				});
+			}
+		});
+
+		tags_list.forEach((tag) => {
+			createTag(tag, decks_top);
+		});
+
+		mainDiv.appendChild(decks_top);
 
 		decks.forEach(function(deck, index) {
 			var tileGrpid = deck.deckTileId;
@@ -50,8 +73,14 @@ function open_decks_tab() {
 			flc.style.flexDirection = "column";
 
 			var flcf = document.createElement("div");
-			flcf.classList.add('flex_item');
-			flcf.style.flexGrow = 2;
+			flcf.classList.add('deck_tags_container');
+
+			if (deck.tags) {
+				deck.tags.forEach((tag) => {
+					let t = createTag(tag, flcf);
+					jQuery.data(t, "deck", deck.id);
+				});
+			}
 
 			var flr = document.createElement("div");
 			flr.classList.add('flex_item');
@@ -189,7 +218,49 @@ function open_decks_tab() {
 	}
 }
 
-//
+function createTag(tag, div) {
+	var t = document.createElement("div");
+	t.classList.add('deck_tag');
+	t.innerHTML = tag;
+	t.style.backgroundColor = getTagColor(tag);
+
+	var tc = document.createElement("div");
+	tc.classList.add('deck_tag_close');
+
+	t.appendChild(tc);
+	div.appendChild(t);
+
+	$(tc).on('click', function(e) {
+		e.stopPropagation();
+
+		let deckid = jQuery.data($(this).parent()[0], "deck");
+
+		let obj = {deck: deckid, name: $(this).parent().text()};
+		ipc_send("delete_tag", obj);
+
+		$(this).css("width", "0px");
+		$(this).css("margin", "0px");
+		$(this).parent().css("opacity", 0);
+		$(this).parent().css("font-size", 0);
+		$(this).parent().css("margin-right", "0px");
+		$(this).parent().css("color", $(this).css("background-color"));
+
+		setTimeout(() => {
+		//	$(this).parent().css("display", "none");
+		}, 200);
+
+	});
+
+	return t;
+} 
+
+function getTagColor(tag) {
+	let tc = tags_colors[tag];
+	if (tc)	return tc;
+
+	return "#FAE5D2";
+}
+
 function deleteDeck(_deck) {
 	$('.'+_deck.id+'_del').on('click', function(e) {
 		let currentId = _deck.id;
