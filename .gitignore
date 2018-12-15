@@ -5,3 +5,4 @@ main.sublime-project
 *.sublime-workspace
 *.sublime-project
 *.sublime-settings
+.vscode
