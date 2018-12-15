@@ -866,7 +866,8 @@ async function logLoop() {
 		: await mtgaLog.readSegment(logUri, 0, size);
 
 	if (logLoopMode == 0) {
-        ipc_send("init_login");
+		// We are looping only to get user data (processLogUser)
+		processLogUser(logSegment);
 	} else {
 		// We are looking to read the whole log (processLog)
 		processLog(logSegment);
