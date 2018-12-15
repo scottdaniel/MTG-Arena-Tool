@@ -4,13 +4,31 @@ global
 	makeId,
 	daysPast,
 	setsList
-	eventsList,
 	replaceAll,
 	cardsDb,
 	stripTags,
 	windowBackground,
 	windowRenderer,
 	windowOverlay
+	onLabelOutLogInfo,
+	onLabelGreToClient,
+	onLabelClientToMatchServiceMessageTypeClientToGREMessage,
+	onLabelInEventGetPlayerCourse,
+	onLabelInEventGetCombinedRankInfo,
+	onLabelInDeckGetDeckLists,
+	onLabelInEventGetPlayerCourses,
+	onLabelInDeckUpdateDeck,
+	onLabelInventoryUpdated,
+	onLabelInPlayerInventoryGetPlayerInventory,
+	onLabelInPlayerInventoryGetPlayerCardsV3,
+	onLabelInEventDeckSubmit,
+	onLabelEventMatchCreated,
+	onLabelOutDirectGameChallenge,
+	onLabelInDraftDraftStatus,
+	onLabelInDraftMakePick,
+	onLabelOutDraftMakePick,
+	onLabelInEventCompleteDraft,
+	onLabelMatchGameRoomStateChangedEvent
 */
 var electron = require('electron');
 
