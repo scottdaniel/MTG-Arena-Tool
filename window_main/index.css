@@ -747,6 +747,7 @@ a:hover {
 }
 
 .deck_tag {
+    cursor: pointer;
     font-size: 13px;
     opacity: 1;
     overflow: hidden;

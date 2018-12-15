@@ -452,6 +452,16 @@ ipc.on('tou_drop', function (event, arg) {
     httpTournamentDrop(arg);
 });
 
+ipc.on('edit_tag', function (event, arg) {
+	Object.keys(tags_colors).forEach(function(key) {
+		if (key == arg.tag) {
+			tags_colors[key] = arg.color;
+		}
+	});
+
+	store.set("tags_colors", tags_colors);
+});
+
 
 ipc.on('delete_tag', function (event, arg) {
 	if (decks_tags[arg.deck]) {

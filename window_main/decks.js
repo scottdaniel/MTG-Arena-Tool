@@ -11,6 +11,8 @@ global
 	ipc_send
 */
 
+let filterTag = null;
+
 //
 function open_decks_tab() {
 	if (sidebarActive == 0 && decks != null) {
@@ -38,7 +40,7 @@ function open_decks_tab() {
 		});
 
 		tags_list.forEach((tag) => {
-			createTag(tag, decks_top);
+			createTag(tag, decks_top, false);
 		});
 
 		mainDiv.appendChild(decks_top);
@@ -218,39 +220,58 @@ function open_decks_tab() {
 	}
 }
 
-function createTag(tag, div) {
+function createTag(tag, div, showClose = true) {
+	let tagCol = getTagColor(tag);
 	var t = document.createElement("div");
 	t.classList.add('deck_tag');
 	t.innerHTML = tag;
-	t.style.backgroundColor = getTagColor(tag);
+	t.style.backgroundColor = tagCol;
 
-	var tc = document.createElement("div");
-	tc.classList.add('deck_tag_close');
+	var colorPick = $(t);
+	colorPick.spectrum({
+		showInitial: true,
+		showAlpha: false,
+		showButtons: false
+	});
+	colorPick.spectrum("set", tagCol);
 
-	t.appendChild(tc);
-	div.appendChild(t);
+	colorPick.on('move.spectrum', function(e, color) {
+		let tag = $(this).text();
+		let col = color.toRgbString();
+		ipc_send("edit_tag", {tag: tag, color: col});
+		tags_colors[tag] = col;
 
-	$(tc).on('click', function(e) {
-		e.stopPropagation();
-
-		let deckid = jQuery.data($(this).parent()[0], "deck");
-
-		let obj = {deck: deckid, name: $(this).parent().text()};
-		ipc_send("delete_tag", obj);
-
-		$(this).css("width", "0px");
-		$(this).css("margin", "0px");
-		$(this).parent().css("opacity", 0);
-		$(this).parent().css("font-size", 0);
-		$(this).parent().css("margin-right", "0px");
-		$(this).parent().css("color", $(this).css("background-color"));
-
-		setTimeout(() => {
-		//	$(this).parent().css("display", "none");
-		}, 200);
-
+		$('.deck_tag').each((index, obj) => {
+			let tag = $(obj).text();
+			$(obj).css("background-color", tags_colors[tag])
+		});
 	});
 
+	if (showClose) {
+		let tc = document.createElement("div");
+		tc.classList.add('deck_tag_close');
+		t.appendChild(tc);
+
+		$(tc).on('click', function(e) {
+			e.stopPropagation();
+
+			let deckid = jQuery.data($(this).parent()[0], "deck");
+
+			let obj = {deck: deckid, name: $(this).parent().text()};
+			ipc_send("delete_tag", obj);
+
+			$(this).css("width", "0px");
+			$(this).css("margin", "0px");
+			$(this).parent().css("opacity", 0);
+			$(this).parent().css("font-size", 0);
+			$(this).parent().css("margin-right", "0px");
+			$(this).parent().css("color", $(this).css("background-color"));
+		});
+	}
+	else {
+		t.style.paddingRight = "12px";
+	}
+	div.appendChild(t);
 	return t;
 } 
 
