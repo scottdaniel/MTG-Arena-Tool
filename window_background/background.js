@@ -684,16 +684,18 @@ async function logLoop() {
 		return;
 	}
 
-	const delta = size - prevLogSize;
+	const delta = Math.min(268435440, size - prevLogSize);
 
 	if (delta === 0) {
 		// The log has not changed since we last checked
 		return;
 	}
 
+	console.log("ReadSegment Start:", "prevLogSize", prevLogSize, "delta", delta, "size", size);
 	const logSegment = delta > 0
 		? await mtgaLog.readSegment(logUri, prevLogSize, delta)
 		: await mtgaLog.readSegment(logUri, 0, size);
+	console.log("ReadSegment End");
 
 	if (logLoopMode == 0) {
 		// We are looping only to get user data (processLogUser)
@@ -703,6 +705,7 @@ async function logLoop() {
 		processLog(logSegment);
 	}
 
+	console.log("processLog End");
 	prevLogSize = size;
 }
 
