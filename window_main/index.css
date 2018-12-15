@@ -216,13 +216,23 @@ span i {
 }
 
 
-.top_rank {
+.top_constructed_rank {
     -webkit-app-region: no-drag;
     align-self: center;
     margin-left: 16px;
     width: 48px;
     height: 48px;
-    background: url(../images/ranks_48.png);
+    background: url(../images/ranks_constructed_48.png);
+    background-position: 0px 0px;
+}
+
+.top_limited_rank {
+    -webkit-app-region: no-drag;
+    align-self: center;
+    margin-left: 16px;
+    width: 48px;
+    height: 48px;
+    background: url(../images/ranks_limited_48.png);
     background-position: 0px 0px;
 }
 
@@ -232,7 +242,7 @@ span i {
     margin-left: 16px;
     width: 48px;
     height: 48px;
-    background: url(../images/ranks_48.png);
+    background: url(../images/ranks_constructed_48.png);
     background-position: 0px 0px;
 }
 

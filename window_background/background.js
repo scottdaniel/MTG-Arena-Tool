@@ -118,8 +118,10 @@ var matchBeginTime = 0;
 var arenaVersion = '';
 var playerUsername = '';
 var playerName = null;
-var playerRank = null;
-var playerTier = null;
+var playerConstructedRank = null;
+var playerConstructedTier = null;
+var playerLimitedRank = null;
+var playerLimitedTier = null;
 var playerId = null;
 var playerSeat = null;
 var playerWin = 0;
@@ -988,54 +990,56 @@ function processLogData(data) {
 	strCheck = 'ClientToMatchServiceMessageType_ClientToGREMessage';
 	json = checkJson(data, strCheck, '');
 	if (json != false) {
-		if (json.payload.type !== undefined) {
-			// Get sideboard changes
-			if (json.payload.type == "ClientMessageType_SubmitDeckResp") {
+		if (json.payload) {
+			if (json.payload.type !== undefined) {
+				// Get sideboard changes
+				if (json.payload.type == "ClientMessageType_SubmitDeckResp") {
 
-				let tempMain = {};
-				let tempSide = {};
-				json.payload.submitDeckResp.deck.deckCards.forEach( function (grpId) {
-					if (tempMain[grpId] == undefined) {
-						tempMain[grpId] = 1
-					}
-					else {
-						tempMain[grpId] += 1;
-					}
-				});
-				if (json.payload.submitDeckResp.deck.sideboardCards !== undefined) {
-					json.payload.submitDeckResp.deck.sideboardCards.forEach( function (grpId) {
-						if (tempSide[grpId] == undefined) {
-							tempSide[grpId] = 1
+					let tempMain = {};
+					let tempSide = {};
+					json.payload.submitDeckResp.deck.deckCards.forEach( function (grpId) {
+						if (tempMain[grpId] == undefined) {
+							tempMain[grpId] = 1
 						}
 						else {
-							tempSide[grpId] += 1;
+							tempMain[grpId] += 1;
 						}
 					});
-				}
+					if (json.payload.submitDeckResp.deck.sideboardCards !== undefined) {
+						json.payload.submitDeckResp.deck.sideboardCards.forEach( function (grpId) {
+							if (tempSide[grpId] == undefined) {
+								tempSide[grpId] = 1
+							}
+							else {
+								tempSide[grpId] += 1;
+							}
+						});
+					}
 
-				var newDeck = {}
-				newDeck.mainDeck = [];
-				Object.keys(tempMain).forEach(function(key) {
-					var c = {"id": key, "quantity": tempMain[key]};
-					newDeck.mainDeck.push(c);
-				});
-
-				newDeck.sideboard = [];
-				if (json.payload.submitDeckResp.deck.sideboardCards !== undefined) {
-					Object.keys(tempSide).forEach(function(key) {
-						var c = {"id": key, "quantity": tempSide[key]};
-						newDeck.sideboard.push(c);
+					var newDeck = {}
+					newDeck.mainDeck = [];
+					Object.keys(tempMain).forEach(function(key) {
+						var c = {"id": key, "quantity": tempMain[key]};
+						newDeck.mainDeck.push(c);
 					});
-				}
 
-				//get_deck_sideboarded(currentDeck, newDeck)
-				//select_deck(newDeck);
-				currentDeck = newDeck;
-				ipc_send("set_deck", currentDeck, windowOverlay);
-				//console.log(JSON.stringify(currentDeck));
-				//console.log(currentDeck);
+					newDeck.sideboard = [];
+					if (json.payload.submitDeckResp.deck.sideboardCards !== undefined) {
+						Object.keys(tempSide).forEach(function(key) {
+							var c = {"id": key, "quantity": tempSide[key]};
+							newDeck.sideboard.push(c);
+						});
+					}
+
+					//get_deck_sideboarded(currentDeck, newDeck)
+					//select_deck(newDeck);
+					currentDeck = newDeck;
+					ipc_send("set_deck", currentDeck, windowOverlay);
+					//console.log(JSON.stringify(currentDeck));
+					//console.log(currentDeck);
+				}
 			}
-		}
+			}
 		return;
 	}
 
@@ -1109,12 +1113,18 @@ function processLogData(data) {
 	strCheck = '<== Event.GetCombinedRankInfo(';
 	json = checkJsonWithStart(data, strCheck, '', ')');
 	if (json != false) {
-		playerRank = json.constructedClass;
-		playerTier = json.constructedTier;
+		playerConstructedRank = json.constructedClass;
+		playerConstructedTier = json.constructedLevel;
+		playerLimitedRank = json.limitedClass;
+		playerLimitedTier = json.limitedLevel;
 
-		let rank = get_rank_index(playerRank, playerTier);
+		let rank;
+		rank = get_rank_index(playerConstructedRank, playerConstructedTier);
+		ipc_send("set_constructed_rank", {rank: rank, str: playerConstructedRank+" "+playerConstructedTier});
 
-		ipc_send("set_rank", {rank: rank, str: playerRank+" "+playerTier});
+		rank = get_rank_index(playerLimitedRank, playerLimitedTier);
+		ipc_send("set_limited_rank", {rank: rank, str: playerLimitedRank+" "+playerLimitedTier});
+
 		return;
 	}
 
@@ -2139,18 +2149,6 @@ function update_deck(force) {
 }
 
 //
-function get_rank_index(_rank, _tier) {
-	var ii = 0;
-	if (_rank == "Beginner")	ii = 0;
-	if (_rank == "Bronze")	  ii = 1  + _tier;
-	if (_rank == "Silver")	  ii = 6  + _tier;
-	if (_rank == "Gold")		ii = 11 + _tier;
-	if (_rank == "Diamond")	 ii = 16 + _tier;
-	if (_rank == "Master")	  ii = 21;
-	return ii;
-}
-
-//
 function forceDeckUpdate() {
 	var decksize = 0;
 	var cardsleft = 0;
@@ -2348,8 +2346,8 @@ function saveMatch() {
 	}
 	match.player = {
 		name: playerName,
-		rank: playerRank,
-		tier: playerTier,
+		rank: playerConstructedRank,
+		tier: playerConstructedTier,
 		userid: playerId,
 		seat: playerSeat, 
 		win: playerWin
@@ -2443,7 +2441,7 @@ function finishLoading() {
 	ipc_send("renderer_set_bounds", obj);
 
 	if (playerName != null) {
-		httpSetPlayer(playerName, playerRank, playerTier);  
+		httpSetPlayer(playerName, playerConstructedRank, playerConstructedTier, playerLimitedRank, playerLimitedTier);
 	}
 }
 

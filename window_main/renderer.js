@@ -173,11 +173,20 @@ ipc.on('set_username', function (event, arg) {
 });
 
 //
-ipc.on('set_rank', function (event, offset, rank) {
-	rankOffset = offset;
-	rankTitle = rank;
+ipc.on('set_constructed_rank', function (event, _rank) {
+	rankOffset = _rank.rank;
+	rankTitle = _rank.str;
 	if (sidebarActive != -99) {
-		$(".top_rank").css("background-position", (rankOffset*-48)+"px 0px").attr("title", rankTitle);
+		$(".top_constructed_rank").css("background-position", (rankOffset*-48)+"px 0px").attr("title", rankTitle);
+	}
+});
+
+//
+ipc.on('set_limited_rank', function (event, _rank) {
+	rankOffset = _rank.rank;
+	rankTitle = _rank.str;
+	if (sidebarActive != -99) {
+		$(".top_limited_rank").css("background-position", (rankOffset*-48)+"px 0px").attr("title", rankTitle);
 	}
 });
 
