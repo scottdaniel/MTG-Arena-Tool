@@ -82,6 +82,8 @@ const defaultCfg = {
 	gems_history:[],
 	gold_history:[],
 	decks_index: [],
+	decks_tags: {},
+	tags_colors: {},
 	decks: {},
 	wildcards_history:[]
 }
@@ -186,7 +188,8 @@ var lastDeckUpdate = new Date();
 
 var deck_changes_index = [];
 var deck_changes = {};
-
+var decks_tags = {};
+var tags_colors = {};
 
 // Begin of IPC messages recievers
 function ipc_send(method, arg, to = windowRenderer) {
@@ -466,7 +469,37 @@ ipc.on('tou_drop', function (event, arg) {
     httpTournamentDrop(arg);
 });
 
+ipc.on('edit_tag', function (event, arg) {
+	Object.keys(tags_colors).forEach(function(key) {
+		if (key == arg.tag) {
+			tags_colors[key] = arg.color;
+		}
+	});
 
+	store.set("tags_colors", tags_colors);
+});
+
+
+ipc.on('delete_tag', function (event, arg) {
+	if (decks_tags[arg.deck]) {
+		decks_tags[arg.deck].forEach((tag, index) => {
+			if (tag == arg.name) {
+				decks_tags[arg.deck].splice(index, 1);
+			}
+		});
+	}
+	store.set("decks_tags", decks_tags);
+});
+
+ipc.on('add_tag', function (event, arg) {
+	if (decks_tags[arg.deck]) {
+		decks_tags[arg.deck].push(arg.name);
+	}
+	else {
+		decks_tags[arg.deck] = [arg.name];
+	}
+	store.set("decks_tags", decks_tags);
+});
 
 ipc.on('set_deck_mode', function (event, state) {
 	overlayDeckMode = state;
@@ -566,7 +599,9 @@ function loadPlayerConfig(playerId) {
 
 		if (id != null) {
 			let deck = entireConfig.decks[id];
+			let tags = entireConfig.decks_tags[id];
 			if (deck != undefined) {
+				deck.tags = tags;
 				decks[id] = deck;
 			}
 		}
@@ -583,8 +618,12 @@ function loadPlayerConfig(playerId) {
 
 	deck_changes_index = entireConfig["deck_changes_index"];
 	deck_changes = entireConfig["deck_changes"];
+	decks_tags = entireConfig["decks_tags"];
+	tags_colors = entireConfig["tags_colors"];
 
 	var obj = store.get('overlayBounds');
+
+	ipc_send("set_tags_colors", tags_colors);
 	ipc_send("overlay_set_bounds", obj);
 
 	loadSettings();
@@ -930,7 +969,6 @@ function dataChop(data, startStr, endStr) {
 
 	return data;
 }
-
 
 function setDraftCards(json) {
 	ipc.send("set_draft_cards", json.draftPack, json.pickedCards, json.packNumber+1, json.pickNumber);

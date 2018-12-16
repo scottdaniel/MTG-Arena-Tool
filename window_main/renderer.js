@@ -86,6 +86,8 @@ let rankOffset = 0;
 let rankTitle = "";
 let userName = ""
 
+let tags_colors = {};
+
 const sha1 	= require('js-sha1');
 const fs 	= require("fs");
 const path  = require('path');
@@ -149,6 +151,13 @@ ipc.on('too_slow', function () {
 	$(".trouble_link").click(function() {
 		shell.openExternal('https://github.com/Manuel-777/MTG-Arena-Tool/blob/master/TROUBLESHOOTING.md');
 	});
+});
+
+
+
+//
+ipc.on('set_tags_colors', function (event, arg) {
+	tags_colors = arg;
 });
 
 //
