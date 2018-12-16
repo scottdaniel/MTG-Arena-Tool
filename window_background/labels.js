@@ -729,7 +729,21 @@ function onLabelMatchGameRoomStateChangedEvent(entry, json) {
 		duringMatch = true;
 	}
 
-	if (json.stateType == "MatchGameRoomStateType_MatchCompleted" && eventId != "NPE") {
+	if (eventId == "NPE")	return;
+
+	if (json.stateType == "MatchGameRoomStateType_Playing") {
+		json.gameRoomConfig.reservedPlayers.forEach((player) => {
+			if (player.userId == playerId) {
+				playerSeat = player.systemSeatId;
+			}
+			else {
+				oppName = player.playerName;
+				oppId = player.userId;
+				oppSeat = player.systemSeatId;
+			}
+		});
+	}
+	if (json.stateType == "MatchGameRoomStateType_MatchCompleted") {
 		playerWin = 0;
 		oppWin = 0;
 		json.finalMatchResult.resultList.forEach(function(res) {

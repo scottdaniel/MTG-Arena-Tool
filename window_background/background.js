@@ -686,6 +686,8 @@ function onLogEntryFound(entry) {
 		ipc_send("set_username", playerName);
 	}
 	else {
+		console.log("Entry:", entry.label, entry, entry.json());
+
 		switch (entry.label) {
 			case "Log.Info":
 				if (entry.arrow == "==>") {
@@ -807,9 +809,7 @@ function onLogEntryFound(entry) {
 				onLabelMatchGameRoomStateChangedEvent(entry, json);
 			break;
 
-
 			default:
-				console.log("Entry:", entry.label, entry, entry.json());
 			break;
 		}
 	}
@@ -870,7 +870,7 @@ async function logLoop() {
 	// We are looping only to get user data (processLogUser)
 	processLogUser(logSegment);
 
-	if (playerId && playerName && arenaVersion) {
+	if (playerId) {
 		clearInterval(logLoopInterval);
 	}
 	prevLogSize = size;

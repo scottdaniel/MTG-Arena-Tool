@@ -17,25 +17,21 @@ function start({ path, chunkSize, onLogEntry, onError, onFinish }) {
 	let stringDecoder = new StringDecoder();
 	let logDecoder = new ArenaLogDecoder();
 
-	console.log('scheduling');
 	schedule();
-	const watcher = fs.watch(path, schedule);
+	//const watcher = fs.watch(path, schedule);
 	return stop;
 
 	function stop() {
-		console.error("Watcher close()");
-		watcher.close();
+		//watcher.close();
 		q.end();
 	}
 
 	function schedule() {
-		console.error("Watcher schedule()");
 		q.push(attempt);
 		q.start();
 	}
 
 	async function attempt() {
-		console.log('attempting');
 		try {
 			await read();
 		} catch (err) {
@@ -45,7 +41,7 @@ function start({ path, chunkSize, onLogEntry, onError, onFinish }) {
 
 	async function read() {
 		const { size } = await fsAsync.stat(path);
-		console.log("position", position, "size", size, "chunkSize", chunkSize);
+		//console.log("position", position, "size", size, "chunkSize", chunkSize);
 		if (position > size) {
 			// the file has been recreated, we must reset our state
 			stringDecoder = new StringDecoder();
@@ -61,6 +57,8 @@ function start({ path, chunkSize, onLogEntry, onError, onFinish }) {
 		if (position >= size) {
 			onFinish();
 		}
+
+		setTimeout(schedule, 250);
 	}
 }
 

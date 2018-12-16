@@ -6,7 +6,7 @@ const CONNECTION_JSON_PATTERN =
 
 const LABEL_JSON_PATTERNS = [
 	'\\[Client GRE\\](.*): .*: (.*)\\r\\n',
-	'\\[UnityCrossThreadLogger\\](.*) \\(.*\\) Incoming (.*) ',
+	'\\[UnityCrossThreadLogger\\](.*)[\r\n]{0,}\\(.*\\) Incoming (.*) ',
 	'\\[UnityCrossThreadLogger\\]Received unhandled GREMessageType:() (.*)\\r\\n',
 ];
 
