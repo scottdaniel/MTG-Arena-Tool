@@ -3,7 +3,7 @@
 	"description": "An MTG Arena deck tracker and statistics manager.",
 	"author": "Manuel-777",
 	"repository": "https://github.com/Manuel-777/MTG-Arena-Tool",
-	"version": "2.2.2",
+	"version": "2.2.3",
 	"main": "main.js",
 	"build": {
 		"appId": "com.github.manuel777.mtgatool",
@@ -19,7 +19,8 @@
 	"scripts": {
 		"start": "electron .",
 		"postinstall": "install-app-deps",
-		"dist": "build --ia32 --x64 -w"
+		"dist": "build --ia32 --x64 -w",
+		"test": "jest"
 	},
 	"dependencies": {
 		"async": "^2.6.1",
@@ -31,10 +32,12 @@
 		"google-protobuf": "^3.6.1",
 		"howler": "^2.0.15",
 		"js-sha1": "^0.6.0",
-		"qs": "^6.6.0"
+		"qs": "^6.6.0",
+		"queue": "^4.5.1"
 	},
 	"devDependencies": {
 		"electron": "^2.0.14",
-		"electron-builder": "^20.38.2"
+		"electron-builder": "^20.38.2",
+		"jest": "^23.6.0"
 	}
 }

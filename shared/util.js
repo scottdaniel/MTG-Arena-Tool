@@ -219,24 +219,26 @@ function addCardHover(div, _card) {
 //
 function get_rank_index(_rank, _tier) {
 	var ii = 0;
-	if (_rank == "Beginner")	ii = 0;
-	if (_rank == "Bronze")	  ii = 1  + _tier;
-	if (_rank == "Silver")   	ii = 6  + _tier;
-	if (_rank == "Gold")		ii = 11 + _tier;
-	if (_rank == "Diamond")		ii = 16 + _tier;
-	if (_rank == "Master")		ii = 21;
+	if (_rank == "Unranked")	ii = 0;
+	if (_rank == "Bronze")	  	ii = 1  + (_tier-1);//1 2 3 4
+	if (_rank == "Silver")   	ii = 5  + (_tier-1);//5 6 7 8
+	if (_rank == "Gold")		ii = 9  + (_tier-1);//9 0 1 2
+	if (_rank == "Platinum")	ii = 13 + (_tier-1);//3 4 5 6
+	if (_rank == "Diamond")		ii = 17 + (_tier-1);//7 8 9 0
+	if (_rank == "Mythic")		ii = 21 + (_tier-1);//1 2 3 4
 	return ii;
 }
 
 //
 function get_rank_index_16(_rank) {
 	var ii = 0;
-	if (_rank == "Beginner")	ii = 0;
-	if (_rank == "Bronze")	  ii = 1;
+	if (_rank == "Unranked")	ii = 0;
+	if (_rank == "Bronze")	  	ii = 1;
 	if (_rank == "Silver")   	ii = 2;
 	if (_rank == "Gold")		ii = 3;
-	if (_rank == "Diamond")		ii = 4;
-	if (_rank == "Master")		ii = 5;
+	if (_rank == "Platinum")	ii = 4;
+	if (_rank == "Diamond")		ii = 5;
+	if (_rank == "Mythic")		ii = 6;
 	return ii;
 }
 
@@ -586,9 +588,9 @@ function get_collection_export() {
 		if (card) {
 			let name = card.name;
 			name = replaceAll(name, '///', '//');
-			add = add.replace('$Name', name);
+			add = add.replace('$Name', '"'+name+'"');
 
-			add = add.replace('$Count', cards[key]);
+			add = add.replace('$Count', (cards[key] == 9999 ? 1 : cards[key]));
 
 			add = add.replace('$SetName', card.set);
 			add = add.replace('$SetCode', setsList[card.set].code);
@@ -942,13 +944,15 @@ function get_deck_export(deck) {
 		var card_name = cardsDb.get(grpid).name;
 		var card_set = cardsDb.get(grpid).set;
 		var card_cn = cardsDb.get(grpid).cid;
+		var card_q = card.quantity;
+		if (card_q == 9999)	card_q = 1;
 		
 		try {
 			card_set = setsList[card_set].arenacode;
-			str += card.quantity+" "+card_name+" ("+card_set+") "+card_cn+"\r\n";
+			str += card_q+" "+card_name+" ("+card_set+") "+card_cn+"\r\n";
 		}
 		catch (e) {
-			str += card.quantity+" "+card_name+" ("+get_set_code(card_set)+") "+card_cn+"\r\n";
+			str += card_q+" "+card_name+" ("+get_set_code(card_set)+") "+card_cn+"\r\n";
 		}
 	});
 
@@ -959,13 +963,16 @@ function get_deck_export(deck) {
 		var card_name = cardsDb.get(grpid).name;
 		var card_set = cardsDb.get(grpid).set;
 		var card_cn = cardsDb.get(grpid).cid;
+		var card_q = card.quantity;
+		if (card_q == 9999)	card_q = 1;
 		
+
 		try {
 			card_set = setsList[card_set].arenacode;
-			str += card.quantity+" "+card_name+" ("+card_set+") "+card_cn+"\r\n";
+			str += card_q+" "+card_name+" ("+card_set+") "+card_cn+"\r\n";
 		}
 		catch (e) {
-			str += card.quantity+" "+card_name+" ("+get_set_code(card_set)+") "+card_cn+"\r\n";
+			str += card_q+" "+card_name+" ("+get_set_code(card_set)+") "+card_cn+"\r\n";
 		}
 	});
 
@@ -982,7 +989,7 @@ function get_deck_export_txt(deck) {
 		//var card_set = cardsDb.get(grpid).set;
 		//var card_cn = cardsDb.get(grpid).cid;
 		
-		str += card.quantity+" "+card_name+"\r\n";
+		str += (card.quantity == 9999 ? 1 : card.quantity)+" "+card_name+"\r\n";
 	});
 
 	str += "\r\n";
@@ -993,7 +1000,7 @@ function get_deck_export_txt(deck) {
 		//var card_set = cardsDb.get(grpid).set;
 		//var card_cn = cardsDb.get(grpid).cid;
 		
-		str += card.quantity+" "+card_name+"\r\n";
+		str += (card.quantity == 9999 ? 1 : card.quantity)+" "+card_name+"\r\n";
 	});
 
 	return str;

@@ -20,6 +20,7 @@ global
 
 // We need to store a sorted list of card types so we create the card counts in the same order.
 var orderedCardTypes = ['cre', 'lan', 'ins', 'sor', 'enc', 'art', 'pla'];
+var orderedCardTypesDesc = ['Creatures', 'Lands', 'Instants', 'Sorceries', 'Enchantments', 'Artifacts', 'Planeswalkers'];
 var orderedCardRarities = ['common', 'uncommon', 'rare', 'mythic'];
 var orderedColorCodes = ['w', 'u', 'b', 'r', 'g', 'c'];
 var orderedManaColors = ['#E7CA8E', '#AABEDF', '#A18E87', '#DD8263', '#B7C89E', '#E3E3E3'];
@@ -130,9 +131,9 @@ function deckStatsSection(deck, deck_type) {
 
     let cardTypes = get_deck_types_ammount(deck);
     let typesContainer = $('<div class="types_container"></div>');
-    orderedCardTypes.forEach(cardTypeKey => {
+    orderedCardTypes.forEach((cardTypeKey, index) => {
         $(`<div class="type_icon_cont">
-            <div title="Creatures" class="type_icon type_${cardTypeKey}"></div>
+            <div title="${orderedCardTypesDesc[index]}" class="type_icon type_${cardTypeKey}"></div>
             <span>${cardTypes[cardTypeKey]}</span>
         </div>`)
         .appendTo(typesContainer);

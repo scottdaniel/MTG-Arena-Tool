@@ -1,16 +1,31 @@
 /*
 global
-	get_deck_colors,
 	makeId,
 	daysPast,
-	setsList
-	eventsList,
-	replaceAll,
 	cardsDb,
 	stripTags,
 	windowBackground,
 	windowRenderer,
 	windowOverlay
+	onLabelOutLogInfo,
+	onLabelGreToClient,
+	onLabelClientToMatchServiceMessageTypeClientToGREMessage,
+	onLabelInEventGetPlayerCourse,
+	onLabelInEventGetCombinedRankInfo,
+	onLabelInDeckGetDeckLists,
+	onLabelInEventGetPlayerCourses,
+	onLabelInDeckUpdateDeck,
+	onLabelInventoryUpdated,
+	onLabelInPlayerInventoryGetPlayerInventory,
+	onLabelInPlayerInventoryGetPlayerCardsV3,
+	onLabelInEventDeckSubmit,
+	onLabelEventMatchCreated,
+	onLabelOutDirectGameChallenge,
+	onLabelInDraftDraftStatus,
+	onLabelInDraftMakePick,
+	onLabelOutDraftMakePick,
+	onLabelInEventCompleteDraft,
+	onLabelMatchGameRoomStateChangedEvent
 */
 var electron = require('electron');
 
@@ -120,8 +135,10 @@ var matchBeginTime = 0;
 var arenaVersion = '';
 var playerUsername = '';
 var playerName = null;
-var playerRank = null;
-var playerTier = null;
+var playerConstructedRank = null;
+var playerConstructedTier = null;
+var playerLimitedRank = null;
+var playerLimitedTier = null;
 var playerId = null;
 var playerSeat = null;
 var playerWin = 0;
@@ -508,8 +525,6 @@ function rememberLogin(bool) {
 
 // Loads this player's configuration file
 function loadPlayerConfig(playerId) {
-	logLoopMode = 1;
-	prevLogSize = 0;
 	ipc_send("ipc_log", "Load player ID: "+playerId);
 	store = new Store({
 		configName: playerId,
@@ -613,6 +628,9 @@ function loadPlayerConfig(playerId) {
 
 	loadSettings();
 	requestHistorySend(0);
+
+	watchingLog = true;
+	stopWatchingLog = startWatchingLog();
 }
 
 
@@ -661,6 +679,10 @@ function get_deck_changes(deckId) {
 
 // Set a new log URI
 ipc.on('set_log', function (event, arg) {
+    if (watchingLog) {
+		stopWatchingLog();
+		stopWatchingLog = startWatchingLog();
+    }
 	logUri = arg;
 	settingsStore.set('logUri', arg);
 });
@@ -669,10 +691,9 @@ ipc.on('set_log', function (event, arg) {
 // Read the log
 // Set variables to default first
 const mtgaLog = require('./mtga-log');
-let logLoopProgress = -1;
-let logLoopProgressChanged = new Date();
 let prevLogSize = 0;
-let logLoopMode = 0;
+let watchingLog = false;
+let stopWatchingLog;
 
 let logUri = mtgaLog.defaultLogUri();
 let settingsLogUri = settingsStore.get('logUri');
@@ -680,8 +701,160 @@ if (settingsLogUri) {
 	logUri = settingsLogUri;
 }
 console.log(logUri);
-window.setInterval(attemptLogLoop, 250);
+const ArenaLogWatcher = require('./arena-log-watcher');
 
+function startWatchingLog() {
+    return ArenaLogWatcher.start({
+        path: logUri,
+        chunkSize: 268435440,
+        onLogEntry: onLogEntryFound,
+        onError: err => console.error(err),
+        onFinish: finishLoading
+    });
+}
+
+function onLogEntryFound(entry) {
+	let json;
+	if (entry.type == "connection") {
+		playerId = entry.socket.PlayerId;
+		arenaVersion = entry.socket.ClientVersion;
+		playerName = entry.socket.PlayerScreenName;
+		ipc_send("set_username", playerName);
+	}
+	else {
+		console.log("Entry:", entry.label, entry, entry.json());
+		if (firstPass) {
+			updateLoading(entry);
+		}
+		switch (entry.label) {
+			case "Log.Info":
+				if (entry.arrow == "==>") {
+					json = entry.json();
+					onLabelOutLogInfo(entry, json);
+				}
+			break;
+
+			case "GreToClientEvent":
+				json = entry.json();
+				onLabelGreToClient(entry, json);
+			break;
+
+			case "ClientToMatchServiceMessageType_ClientToGREMessage":
+				json = entry.json();
+				onLabelClientToMatchServiceMessageTypeClientToGREMessage(entry, json);
+			break;
+
+			case "Event.GetPlayerCourse":
+				if (entry.arrow == "<==") {
+					json = entry.json();
+					onLabelInEventGetPlayerCourse(entry, json);
+				}
+			break;
+
+			case "Event.GetCombinedRankInfo":
+				if (entry.arrow == "<==") {
+					json = entry.json();
+					onLabelInEventGetCombinedRankInfo(entry, json);
+				}
+			break;
+
+			case "Event.GetPlayerCourses":
+				if (entry.arrow == "<==") {
+					json = entry.json();
+					onLabelInEventGetPlayerCourses(entry, json);
+				}
+			break;
+			
+			case "Deck.GetDeckLists":
+				if (entry.arrow == "<==") {
+					json = entry.json();
+					onLabelInDeckGetDeckLists(entry, json);
+				}
+			break;
+
+			case "Deck.UpdateDeck":
+				if (entry.arrow == "<==") {
+					json = entry.json();
+					onLabelInDeckUpdateDeck(entry, json);
+				}
+			break;
+
+			case "Inventory.Updated":
+				json = entry.json();
+				onLabelInventoryUpdated(entry, json);
+			break;
+
+			case "PlayerInventory.GetPlayerInventory":
+				if (entry.arrow == "<==") {
+					json = entry.json();
+					onLabelInPlayerInventoryGetPlayerInventory(entry, json);
+				}
+			break;
+
+			case "PlayerInventory.GetPlayerCardsV3":
+				if (entry.arrow == "<==") {
+					json = entry.json();
+					onLabelInPlayerInventoryGetPlayerCardsV3(entry, json);
+				}
+			break;
+
+			case "Event.DeckSubmit":
+				if (entry.arrow == "<==") {
+					json = entry.json();
+					onLabelInEventDeckSubmit(entry, json);
+				}
+			break;
+
+			case "Event.MatchCreated":
+				json = entry.json();
+				onLabelEventMatchCreated(entry, json);
+			break;
+
+			case "DirectGame.Challenge":
+				if (entry.arrow == "==>") {
+					json = entry.json();
+					onLabelOutDirectGameChallenge(entry, json);
+				}
+			break;
+
+			case "Draft.DraftStatus":
+				if (entry.arrow == "<==") {
+					json = entry.json();
+					onLabelInDraftDraftStatus(entry, json);
+				}
+			break;
+
+			case "Draft.MakePick":
+				if (entry.arrow == "<==") {
+					json = entry.json();
+					onLabelInDraftMakePick(entry, json);
+				}
+				else {
+					json = entry.json();
+					onLabelOutDraftMakePick(entry, json);
+				}
+			break;
+
+			case "Event.CompleteDraft":
+				if (entry.arrow == "<==") {
+					json = entry.json();
+					onLabelInEventCompleteDraft(entry, json);
+				}
+			break;
+
+			case "MatchGameRoomStateChangedEvent":
+				json = entry.json();
+				onLabelMatchGameRoomStateChangedEvent(entry, json);
+			break;
+
+			default:
+			break;
+		}
+	}
+}
+
+// Old parser
+let logLoopInterval = window.setInterval(attemptLogLoop, 250);
 async function attemptLogLoop() {
 	try {
 		await logLoop();
@@ -721,7 +894,7 @@ async function logLoop() {
 		return;
 	}
 
-	const delta = size - prevLogSize;
+	const delta = Math.min(268435440, size - prevLogSize);
 
 	if (delta === 0) {
 		// The log has not changed since we last checked
@@ -732,58 +905,15 @@ async function logLoop() {
 		? await mtgaLog.readSegment(logUri, prevLogSize, delta)
 		: await mtgaLog.readSegment(logUri, 0, size);
 
-	if (logLoopMode == 0) {
-		// We are looping only to get user data (processLogUser)
-		processLogUser(logSegment);
-	} else {
-		// We are looking to read the whole log (processLog)
-		processLog(logSegment);
-	}
+	// We are looping only to get user data (processLogUser)
+	processLogUser(logSegment);
 
+	if (playerId) {
+		clearInterval(logLoopInterval);
+	}
 	prevLogSize = size;
 }
 
-// We are reading the whole log
-function processLog(rawString) {
-	// We split it into smaller chunks to read it 
-	var splitString = rawString.split(/(\[UnityCrossThread|\[Client GRE\])+/);
-
-	splitString.forEach((value, index) => {
-		//ipc_send("ipc_log", "Async: ("+index+")");
-		/*
-		if (value.indexOf("") > -1) {
-			console.log(value);
-		}
-		*/
-
-		const progress = Math.round(100 / splitString.length * index);
-		try {
-			processLogData(value);
-		} catch (err) {
-			if (firstPass && logLoopProgress === progress && new Date() - logLoopProgressChanged > 5000) {
-				ipc_send("too_slow", "");
-			}
-			console.error(err);
-		}
-		if (firstPass && logLoopProgress < progress) {
-			logLoopProgress = progress;
-			logLoopProgressChanged = new Date();
-			ipc_send("popup", {"text": "Processing log: "+progress+"%", "time": 0});
-		}
-		
-		if (debugLog) {
-			let _time = new Date();
-			while (new Date() - _time < debugLogSpeed) {
-				/**/
-			}
-		}			
-	});
-
-	if (firstPass) {
-		finishLoading();
-		ipc_send("popup", {"text": "100%", "time": 3000});
-	}
-}
 
 // Process only the user data for initial loading (prior to log in)
 // Same logic as processLog() but without the processLogData() function
@@ -825,22 +955,6 @@ function processLogUser(rawString) {
 	}
 }
 
-// Check if the string contains a JSON object, return it parsed as JS object
-// If its not found, return false
-function checkJson(str, check, chop) {
-	if (str.indexOf(check) > -1) {
-		try {
-			str = dataChop(str, check, chop);
-			str = findFirstJSON(str);
-			return JSON.parse(str);
-		} catch(e) {
-			return false;
-		}
-	}
-	return false;
-}
-
-
 // Cuts the string "data" between first ocurrences of the two selected words "startStr" and "endStr";
 function dataChop(data, startStr, endStr) {
 	var start = data.indexOf(startStr)+startStr.length;
@@ -856,702 +970,6 @@ function dataChop(data, startStr, endStr) {
 	return data;
 }
 
-
-// Cuts "str" if "check" exists, between "chop" and after "start", then returns the first JSON found.
-// If "chop" is empty it will find the whole string, aka, from "check" and after "start" to end.
-function checkJsonWithStart(str, check, chop, start) {
-	if (str.indexOf(check) > -1) {
-		try {
-			str = dataChop(str, check, chop);
-			str = dataChop(str, start, chop);
-			str = findFirstJSON(str);
-			return JSON.parse(str);
-		} catch (e) {
-			console.error(e, str);
-			return false;
-		}
-	}
-	return false;
-}
-
-// cuts "str" if "check" exists, between "chop" and after "start", then returns the JSON as a string
-/*
-// Defined but never used
-function checkJsonWithStartNoParse(str, check, chop, start) {
-	if (str.indexOf(check) > -1) {
-		str = dataChop(str, check, chop);
-		str = dataChop(str, start, chop);
-		str = findFirstJSON(str);
-		return str;
-	}
-	return false;
-}
-*/
-
-// Finds the first JSON object inside "str", then returns it as a string
-function findFirstJSON(str) {
-	//str.replace("Logger]", "");
-	let _br = 0;
-	let _cu = 0;
-	let endpos = 0;
-	let inString = false;
-	for (let i = 0, len = str.length; i < len; i++) {
-		let c = str.charAt(i);
-		if (c == '"')			inString = !inString;
-		if (!inString) {
-			if (c == '[')			_br++;
-			else if (c == ']')		_br--;
-			else if (c == '{')		_cu++;
-			else if (c == '}')		_cu--;
-		}
-		if (_br == 0 && _cu == 0 && i > 10) {
-			endpos = i+1;
-			break;
-		}
-	}
-
-	//console.log("STR >> ", str, endpos, "CUT > "+str.slice(0, endpos));
-	//console.log("ENDPOS >> ", endpos);
-	//console.log("JSON >> ", str.slice(0, endpos));
-	return str.slice(0, endpos);
-}
-
-
-/*
-
-	unnecessarily long text to mark a point in the code that is fairly important because I cant remember the line number \^.^/
-
-*/
-
-// In testing
-function client_to_gre(json) {
-	const messages = require('./messages_pb');
-
-	const msgType = json.clientToMatchServiceMessageType.split('_')[1],
-	binaryMsg = new Buffer(json.payload, 'base64');
-
-	try {
-		let msgDeserialiser;
-	if (msgType === 'ClientToGREMessage' || msgType === 'ClientToGREUIMessage') {
-		msgDeserialiser = messages.ClientToGREMessage;
-	} else if (msgType === 'ClientToMatchDoorConnectRequest') {
-		msgDeserialiser = messages.ClientToMatchDoorConnectRequest;
-	} else if (msgType === 'AuthenticateRequest') {
-		msgDeserialiser = messages.AuthenticateRequest;
-	} else if (msgType === 'CreateMatchGameRoomRequest') {
-		msgDeserialiser = messages.CreateMatchGameRoomRequest;
-	} else if (msgType === 'EchoRequest') {
-		msgDeserialiser = messages.EchoRequest;
-	} else {
-		console.warn(`${msgType} - unknown message type`);
-		return;
-	}
-	const msg = msgDeserialiser.deserializeBinary(binaryMsg);
-	console.log(json.payload);
-	console.log(msg.toObject());
-	console.log("");
-	} catch (e) {
-		console.log(e.message);
-	}
-}
-
-// Main function for processing log chunks
-function processLogData(data) {
-	data = data.replace(/[\r\n]/g, "");
-	var strCheck, json, logTime;
-	//console.log(data);
-
-	/*
-
-	Using a combination of the previous functions we can extract almost any data from the chunks extracted from the log
-	In almost every case we are returned with a parsed JSON object, from there it depends on the data how we read it
-	For example, to read all decks we need to locate '<== Deck.GetDeckLists(9)' inside the log;
-
-[UnityCrossThreadLogger]11/1/2018 6:50:07 PM
-<== Deck.GetDeckLists(9)
-[
-  {
-
-
-	From here we know '<== Deck.GetDeckLists(' wont change, the date and the (9) after are variables, so we do;
-
-		strCheck = '<== Deck.GetDeckLists(';
-		json = checkJsonWithStart(data, strCheck, '', ')');
-
-	We check if strCheck exists within this chunk, if it does we locate it and find a JSON object starting after ')'
-	See below to how we handle the parsed json data
-
-	*/
-
-	// Log info
-	if (data.indexOf('==> Log.Info(') > -1) {
-		if (data.indexOf('DuelScene.GameStop') > -1) {
-			strCheck = '==> Log.Info(';
-			json = checkJsonWithStart(data, strCheck, '', '):');
-			if (json != false) {
-				if (json.params.messageName == 'DuelScene.GameStop') {
-					var mid = json.params.payloadObject.matchId;
-					var time = json.params.payloadObject.secondsCount;
-					if (mid == currentMatchId) {
-						currentMatchTime += time;
-						saveMatch();
-					}
-				}
-				return;
-			}
-		}
-		else {
-			return;
-		}
-	}
-
-	// Gre to Client Event
-	// Gre to Client contains most data about in-progress games.
-	strCheck = 'GreToClientEvent';
-	json = checkJson(data, strCheck, '');
-	if (json != false) {
-		gre_to_client(json.greToClientEvent.greToClientMessages);
-		return;
-	}
-
-	// Gre to Client Event
-	// Obsolete now packets are decoded by the logger
-	//strCheck = 'ClientToMatchServiceMessageType';
-	//if (data.indexOf(strCheck) > -1) {
-	//	let rawJson = data.substr(data.indexOf('{')).trim();
-	//	if (rawJson.slice(-1) !== '}') rawJson = rawJson.replace(/}[^}]*/, '}');
-		//client_to_gre(JSON.parse(rawJson));
-	//	return;
-	//}
-	
-	strCheck = 'ClientToMatchServiceMessageType_ClientToGREMessage';
-	json = checkJson(data, strCheck, '');
-	if (json != false) {
-		if (json.payload.type !== undefined) {
-			// Get sideboard changes
-			if (json.payload.type == "ClientMessageType_SubmitDeckResp") {
-
-				let tempMain = {};
-				let tempSide = {};
-				json.payload.submitDeckResp.deck.deckCards.forEach( function (grpId) {
-					if (tempMain[grpId] == undefined) {
-						tempMain[grpId] = 1
-					}
-					else {
-						tempMain[grpId] += 1;
-					}
-				});
-				if (json.payload.submitDeckResp.deck.sideboardCards !== undefined) {
-					json.payload.submitDeckResp.deck.sideboardCards.forEach( function (grpId) {
-						if (tempSide[grpId] == undefined) {
-							tempSide[grpId] = 1
-						}
-						else {
-							tempSide[grpId] += 1;
-						}
-					});
-				}
-
-				var newDeck = {}
-				newDeck.mainDeck = [];
-				Object.keys(tempMain).forEach(function(key) {
-					var c = {"id": key, "quantity": tempMain[key]};
-					newDeck.mainDeck.push(c);
-				});
-
-				newDeck.sideboard = [];
-				if (json.payload.submitDeckResp.deck.sideboardCards !== undefined) {
-					Object.keys(tempSide).forEach(function(key) {
-						var c = {"id": key, "quantity": tempSide[key]};
-						newDeck.sideboard.push(c);
-					});
-				}
-
-				//get_deck_sideboarded(currentDeck, newDeck)
-				//select_deck(newDeck);
-				currentDeck = newDeck;
-				ipc_send("set_deck", currentDeck, windowOverlay);
-				//console.log(JSON.stringify(currentDeck));
-				//console.log(currentDeck);
-			}
-		}
-		return;
-	}
-
-	// Get courses
-	strCheck = '<== Event.GetPlayerCourse(';
-	json = checkJsonWithStart(data, strCheck, '', ')');
-	if (json != false) {
-		// Setting time to local datetime causes timestamp on the server to go crazy?
-		// Proper timezone onversion is required here
-		strCheck = 'Logger]';
-		if (data.indexOf(strCheck) > -1) {
-			let str = dataChop(data, strCheck, 'M')+'M';
-			logTime = parseWotcTime(str);
-			json.date = logTime;
-		}
-		if (json.Id != "00000000-0000-0000-0000-000000000000") {
-			json._id = json.Id;
-			delete json.Id;
-			if (json.CourseDeck) {
-				json.CourseDeck.colors = get_deck_colors(json.CourseDeck);
-				//json.date = timestamp();
-				//console.log(json.CourseDeck, json.CourseDeck.colors)
-				httpSubmitCourse(json);
-				saveCourse(json);
-			}
-			select_deck(json);
-		}
-		return;
-	}
-
-	// Get player Id
-	strCheck = '"PlayerId":"';
-	if (data.indexOf(strCheck) > -1) {
-		playerId = dataChop(data, strCheck, '"');
-	}
-
-	// Get Client Version
-	strCheck = '"ClientVersion":"';
-	if (data.indexOf(strCheck) > -1) {
-		arenaVersion = dataChop(data, strCheck, '"');
-	}
-
-	// Get User name
-	strCheck = '"PlayerScreenName":"';
-	if (data.indexOf(strCheck) > -1) {
-		playerName = dataChop(data, strCheck, '"');
-		ipc_send("set_username", playerName);
-		return;
-	}
-
-	/*
-	// Use this to get precon decklists
-	strCheck = '<== Deck.GetPreconDecks(';
-	json = checkJsonWithStart(data, strCheck, '', ')');
-	if (json != false) {
-		var str = "";
-		var newline = '\n';
-		json.forEach(function(_deck) {
-			str += "**"_deck.name.replace("?=?Loc/Decks/Precon/", "")+newline;
-			_deck.mainDeck.forEach(function(_card) {
-				str += _card.quantity+" "+cardsDb.get(_card.id).name+newline;
-			});
-			str += newline+newline;
-		});
-		console.log(str);
-		return;
-	}
-	*/
-
-	// Get Ranks
-	strCheck = '<== Event.GetCombinedRankInfo(';
-	json = checkJsonWithStart(data, strCheck, '', ')');
-	if (json != false) {
-		playerRank = json.constructedClass;
-		playerTier = json.constructedTier;
-
-		let rank = get_rank_index(playerRank, playerTier);
-
-		ipc_send("set_rank", {rank: rank, str: playerRank+" "+playerTier});
-		return;
-	}
-
-	strCheck = '<== Event.GetPlayerCourses(';
-	json = checkJsonWithStart(data, strCheck, '', ')');
-	if (json != false) {
-		json.forEach((course) => {
-			if (course.CurrentEventState != "PreMatch") {
-				if (course.CourseDeck != null) {
-					if (decks.index.indexOf(course.CourseDeck.id) == -1) {
-						decks.index.push(course.CourseDeck.id);
-					}
-					decks[course.CourseDeck.id] = course.CourseDeck;
-					updateCustomDecks();
-					store.set("decks_index", decks.index);
-					store.set("decks."+course.CourseDeck.id, course.CourseDeck);
-				}
-			}			
-		});
-		return;
-	}
-
-
-	// Get Decks
-    strCheck = '<== Deck.GetDeckLists(';
-    //console.log(data);
-    json = checkJsonWithStart(data, strCheck, '', ')');
-	if (json != false) {
-		staticDecks = [];
-		json.forEach((deck) => {
-			let deckId = deck.id;
-			deck.tags = decks_tags[deckId];
-			decks[deckId] = deck;
-			if (decks.index.indexOf(deck.id) == -1) {
-				decks.index.push(deck.id);
-			}
-			staticDecks.push(deck.id);
-		});
-
-		updateCustomDecks();
-		requestHistorySend(0);
-		ipc_send("set_decks", JSON.stringify(decks));
-		return;
-	}
-
-
-	// Get deck updated
-	strCheck = '<== Deck.UpdateDeck(';
-	json = checkJsonWithStart(data, strCheck, '', ')');
-	if (json != false) {
-		//
-		strCheck = 'Logger]';
-		if (data.indexOf(strCheck) > -1) {
-			var str = dataChop(data, strCheck, 'M')+'M';
-			logTime = parseWotcTime(str);
-		}
-
-		decks.index.forEach(function(_deckid) {
-			if (_deckid == json.id) {
-				let _deck = decks[_deckid];
-				var changeId = sha1(_deckid+"-"+logTime);
-				var deltaDeck = {id: changeId, deckId: _deck.id, date: logTime, changesMain: [], changesSide: [], previousMain: _deck.mainDeck, previousSide: _deck.sideboard};
-
-				// Check Mainboard
-				_deck.mainDeck.forEach(function(card) {
-					var cardObj = cardsDb.get(card.id);
-
-					var diff = 0 - card.quantity;
-					json.mainDeck.forEach(function(cardB) {
-						var cardObjB = cardsDb.get(cardB.id);
-						if (cardObj.name == cardObjB.name) {
-							cardB.existed = true;
-							diff = cardB.quantity - card.quantity;
-						}
-					});
-
-					if (diff !== 0) {
-						deltaDeck.changesMain.push({id: card.id, quantity: diff});
-					}
-				});
-
-				json.mainDeck.forEach(function(card) {
-					if (card.existed == undefined) {
-						let cardObj = cardsDb.get(card.id);
-						deltaDeck.changesMain.push({id: card.id, quantity: card.quantity});
-					}
-				});
-				// Check sideboard
-				_deck.sideboard.forEach(function(card) {
-					var cardObj = cardsDb.get(card.id);
-
-					var diff = 0 - card.quantity;
-					json.sideboard.forEach(function(cardB) {
-						var cardObjB = cardsDb.get(cardB.id);
-						if (cardObj.name == cardObjB.name) {
-							cardB.existed = true;
-							diff = cardB.quantity - card.quantity;
-						}
-					});
-
-					if (diff !== 0) {
-						deltaDeck.changesSide.push({id: card.id, quantity: diff});
-					}
-				});
-
-				json.sideboard.forEach(function(card) {
-					if (card.existed == undefined) {
-						let cardObj = cardsDb.get(card.id);
-						deltaDeck.changesSide.push({id: card.id, quantity: card.quantity});
-					}
-				});
-
-				if (!deck_changes_index.includes(changeId)) {
-					deck_changes_index.push(changeId);
-					deck_changes[changeId] = deltaDeck;
-
-					store.set("deck_changes_index", deck_changes_index);
-					store.set("deck_changes."+changeId, deltaDeck);
-				}
-			}
-		});
-
-		return;
-	}
-
-	// Get inventory changes
-	strCheck = 'Incoming Inventory.Updated';
-	json = checkJson(data, strCheck, '');
-	if (json != false) {
-		strCheck = 'Logger]';
-		if (data.indexOf(strCheck) > -1) {
-			var str = dataChop(data, strCheck, 'M')+'M';
-			logTime = parseWotcTime(str);
-		}
-		json.date = logTime;
-		
-		if (json.delta.boosterDelta.length == 0)		delete json.delta.boosterDelta;
-		if (json.delta.cardsAdded.length == 0)		  delete json.delta.cardsAdded;
-		if (json.delta.decksAdded.length == 0)		  delete json.delta.decksAdded;
-		if (json.delta.vanityItemsAdded.length == 0)	delete json.delta.vanityItemsAdded;
-		if (json.delta.vanityItemsRemoved.length == 0)  delete json.delta.vanityItemsRemoved;
-
-		if (json.delta.gemsDelta == 0)		   delete json.delta.gemsDelta;
-		if (json.delta.draftTokensDelta == 0)	delete json.delta.draftTokensDelta;
-		if (json.delta.goldDelta == 0)		   delete json.delta.goldDelta;
-		if (json.delta.sealedTokensDelta == 0)   delete json.delta.sealedTokensDelta;
-		if (json.delta.vaultProgressDelta == 0)  delete json.delta.vaultProgressDelta;
-		if (json.delta.wcCommonDelta == 0)	   delete json.delta.wcCommonDelta;
-		if (json.delta.wcMythicDelta == 0)	   delete json.delta.wcMythicDelta;
-		if (json.delta.wcRareDelta == 0)		 delete json.delta.wcRareDelta;
-		if (json.delta.wcUncommonDelta == 0)	 delete json.delta.wcUncommonDelta;
-
-		saveEconomy(json);
-		return;
-	}
-
-	// Get inventory
-	strCheck = '<== PlayerInventory.GetPlayerInventory(';
-	json = checkJsonWithStart(data, strCheck, '', ')');
-	if (json != false) {
-		//This checks time, use with caution!
-		strCheck = 'Logger]';
-		if (data.indexOf(strCheck) > -1) {
-			var str = dataChop(data, strCheck, 'M')+'M';
-			logTime = parseWotcTime(str);
-		}
-
-		gold = json.gold;
-		gems = json.gems;
-		vault = json.vaultProgress;
-		wcTrack = json.wcTrackPosition;
-		wcCommon = json.wcCommon;
-		wcUncommon = json.wcUncommon;
-		wcRare = json.wcRare;
-		wcMythic = json.wcMythic;
-
-		return;
-	}
-
-	// Get Cards
-	strCheck = '<== PlayerInventory.GetPlayerCardsV3(';
-	json = checkJsonWithStart(data, strCheck, '', ')');
-	if (json != false) {
-		var date = new Date(store.get('cards.cards_time'));
-		var now = new Date();
-		var diff = Math.abs(now.getTime() - date.getTime());
-		var days = Math.floor(diff / (1000 * 3600 * 24));
-
-		if (store.get('cards.cards_time') == 0) {
-			store.set('cards.cards_time', now);
-			store.set('cards.cards_before', json);
-			store.set('cards.cards', json);
-		}
-		// If a day has passed since last update
-		else if (days > 0) {
-			var cardsPrev = store.get('cards.cards');
-			store.set('cards.cards_time', now);
-			store.set('cards.cards_before', cardsPrev);
-			store.set('cards.cards', json);
-		}
-
-		var cardsPrevious = store.get('cards.cards_before');
-		var cardsNewlyAdded = {};
-
-		Object.keys(json).forEach(function(key) {
-			// get differences
-			if (cardsPrevious[key] == undefined) {
-				cardsNewlyAdded[key] = json[key];
-			}
-			else if (cardsPrevious[key] < json[key]) {
-				cardsNewlyAdded[key] = json[key] - cardsPrevious[key];
-			}
-		});
-
-		ipc_send("set_cards", {cards: json, new: cardsNewlyAdded});
-		return;
-	}
-
-	// Select deck
-	strCheck = '<== Event.DeckSubmit(';
-	json = checkJsonWithStart(data, strCheck, '', ')');
-	if (json != false) {
-		select_deck(json);
-		return;
-	}
-
-	// Match created
-	strCheck = ' Event.MatchCreated ';
-	json = checkJson(data, strCheck, '');
-	if (json != false) {
-		strCheck = 'Logger]';
-		if (data.indexOf(strCheck) > -1) {
-			logTime = dataChop(data, strCheck, ' (');
-			matchBeginTime = parseWotcTime(logTime);
-			ipc_send("ipc_log", "MATCH CREATED: "+logTime);
-		}
-		if (json.eventId != "NPE") {
-			createMatch(json);
-		}
-		return;
-	}
-
-	// Direct Challenge
-	strCheck = '==> DirectGame.Challenge(';
-	json = checkJsonWithStart(data, strCheck, '', '):');
-	if (json != false) {
-		var deck = json.params.deck;
-		
-		deck = replaceAll(deck, '"Id"', '"id"');
-		deck = replaceAll(deck, '"Quantity"', '"quantity"');
-		deck = JSON.parse(deck);
-		select_deck(deck);
-
-		return;
-	}
-
-	// Draft status / draft start
-	/*
-	strCheck = '<== Event.Draft(';
-	json = checkJsonWithStart(data, strCheck, '', ')');
-	if (json != false) {
-		console.log("Draft start");
-		draftId = json.Id;
-		return;
-	}
-	*/
-
-	//   
-	strCheck = '<== Draft.DraftStatus(';
-	json = checkJsonWithStart(data, strCheck, '', ')');
-	if (json != false) {
-		if (json.eventName != undefined) {
-			for (let set in setsList) {
-				let setCode = setsList[set]["code"];
-				if (json.eventName.indexOf(setCode) !== -1) {
-					draftSet = set;
-				}
-			}
-		}
-
-		if (currentDraft == undefined || (json.packNumber == 0 && json.pickNumber <= 0)) {
-			createDraft();
-		}
-		setDraftCards(json);
-		currentDraftPack = json.draftPack.slice(0);
-		return;
-	}
-
-	// make pick (get the whole action)
-	strCheck = '<== Draft.MakePick(';
-	json = checkJsonWithStart(data, strCheck, '', ')');
-	if (json != false) {
-		// store pack in recording
-		if (json.eventName != undefined) {
-			for (let set in setsList) {
-				let setCode = setsList[set]["code"];
-				if (json.eventName.indexOf(setCode) !== -1) {
-					draftSet = set;
-				}
-			}
-		}
-
-		if (json.draftPack != undefined) {
-			if (currentDraft == undefined) {
-				createDraft();
-			}
-			setDraftCards(json);
-			currentDraftPack = json.draftPack.slice(0);
-		}
-		return;
-	}
-
-	// make pick (get just what we picked)
-	strCheck = '==> Draft.MakePick(';
-	json = checkJsonWithStart(data, strCheck, '', '):');
-	if (json != false) {
-		// store pick in recording
-		var value = {};
-		value.pick = json.params.cardId;
-		value.pack = currentDraftPack;
-		var key = "pack_"+json.params.packNumber+"pick_"+json.params.pickNumber;
-		currentDraft[key] = value;
-		debugLogSpeed = 200;
-		return;
-	}
-
-	//end draft
-	strCheck = '<== Event.CompleteDraft(';
-	json = checkJsonWithStart(data, strCheck, '', ')');
-	if (json != false) {
-		ipc_send("save_overlay_pos", 1);
-		clear_deck();
-		if (!store.get('settings.show_overlay_always')) {
-			ipc_send("overlay_close", 1);
-		}
-		//ipc_send("renderer_show", 1);
-
-		draftId = json.Id;
-		console.log("Complete draft", json);
-		saveDraft();
-		return;
-	}
-
-	// Game Room State Changed
-	strCheck = 'MatchGameRoomStateChangedEvent';
-	json = checkJson(data, strCheck, '');
-	if (json != false) {
-		json = json.matchGameRoomStateChangedEvent.gameRoomInfo;
-		let eventId = "";
-
-		if (json.gameRoomConfig != undefined) {
-			currentMatchId = json.gameRoomConfig.matchId;
-			eventId = json.gameRoomConfig.eventId;
-			duringMatch = true;
-		}
-
-		if (json.stateType == "MatchGameRoomStateType_MatchCompleted" && eventId != "NPE") {
-			playerWin = 0;
-			oppWin = 0;
-			json.finalMatchResult.resultList.forEach(function(res) {
-				if (res.scope == "MatchScope_Game") {
-					if (res.winningTeamId == playerSeat) {
-						playerWin += 1;
-					}
-					if (res.winningTeamId == oppSeat) {
-						oppWin += 1;
-					}
-				}
-				if (res.scope == "MatchScope_Match") {
-					duringMatch = false;
-				}
-			});
-
-			ipc_send("save_overlay_pos", 1);
-			clear_deck();
-			if (!store.get('settings.show_overlay_always')) {
-				ipc_send("overlay_close", 1);
-			}
-			//ipc_send("renderer_show", 1);
-			//saveMatch();
-		}
-
-		if (json.players != undefined) {
-			json.players.forEach(function(player) {
-				if (player.userId == playerId) {
-					playerSeat = player.systemSeatId;
-				}
-				else {
-					oppId = player.userId;
-					oppSeat = player.systemSeatId;
-				}
-			});
-		}
-		return;
-	}
-}
-
-
 function setDraftCards(json) {
 	ipc.send("set_draft_cards", json.draftPack, json.pickedCards, json.packNumber+1, json.pickNumber);
 }
@@ -1560,7 +978,6 @@ function actionLogGenerateLink(grpId) {
 	var card = cardsDb.get(grpId);
 	return '<a class="card_link click-on" href="'+grpId+'">'+card.name+'</a>';
 }
-
 
 var currentActionLog = "";
 
@@ -1684,352 +1101,6 @@ function tryZoneTransfers() {
 	if (zoneTransfers.length > 0) {
 		zoneTransfers = zoneTransfers.filter(obj => obj.remove == false);
 	}
-}
-
-
-function gre_to_client(data) {
-	data.forEach(function(msg) {
-		//console.log("Message: "+msg.msgId, msg);
-		// Sometimes Gre messages have many bulked messages at once
-		// Process each individually
-
-		// Nothing here..
-		if (msg.type == "GREMessageType_SubmitDeckReq") {
-			gameObjs = {};
-		}
-
-		// Declare attackers message
-		if (msg.type == "GREMessageType_DeclareAttackersReq") {
-			msg.declareAttackersReq.attackers.forEach(function(obj) {
-				let att = obj.attackerInstanceId;
-				if (!attackersDetected.includes(att)) {
-					if (gameObjs[att] != undefined) {
-						let str = actionLogGenerateLink(gameObjs[att].grpId)+" attacked ";
-						let rec;
-						if (obj.selectedDamageRecipient !== undefined) {
-							rec = obj.selectedDamageRecipient;
-							if (rec.type == "DamageRecType_Player") {
-								actionLog(gameObjs[att].controllerSeatId, new Date(), str+getNameBySeat(rec.playerSystemSeatId));
-								//ipc_send("", str+getNameBySeat(rec.playerSystemSeatId));
-							}
-						}
-						if (obj.legalDamageRecipients !== undefined) {
-							rec = obj.legalDamageRecipients.forEach(function(rec) {
-								if (rec.type == "DamageRecType_Player") {
-									actionLog(gameObjs[att].controllerSeatId, new Date(), str+getNameBySeat(rec.playerSystemSeatId));
-									//ipc_send("ipc_log", str+getNameBySeat(rec.playerSystemSeatId));
-								}
-							});
-						}
-						attackersDetected.push(att);
-					}
-				}
-			});
-		}
-
-		// An update about the game state, can either be;
-		// - A change (diff)
-		// - The entire board state (full)
-		// - binary (we dont check that one)
-		if (msg.type == "GREMessageType_GameStateMessage") {
-			if (msg.gameStateMessage.type == "GameStateType_Full") {
-				// For the full board state we only update the zones
-				// We DO NOT update gameObjs array here, this is because sometimes cards become invisible for us
-				// and updating the entire gameobjs array to what the server says we should be looking at will remove those from our view
-				// This includes also cards and actions we STILL havent processed!
-
-				if (msg.gameStateMessage.zones != undefined) {
-					msg.gameStateMessage.zones.forEach(function(zone) {
-						zones[zone.zoneId] = zone;
-					});
-				}
-			}
-			else if (msg.gameStateMessage.type == "GameStateType_Diff") {
-				// Most game updates happen here
-				// Sometimes, especially with annotations, stuff gets sent to us repeatedly
-				// Like if we recieve an object moved from zone A to B , we may recieve the same message many times
-				// So we should be careful reading stuff as it may:
-				// - not be unique
-				// - reference changes we still havent recieved
-				// - reference objects that may be deleted
-
-				if (msg.gameStateMessage.turnInfo != undefined) {
-					prevTurn = turnNumber;
-					turnPhase = msg.gameStateMessage.turnInfo.phase;
-					turnStep  = msg.gameStateMessage.turnInfo.step;
-					turnNumber = msg.gameStateMessage.turnInfo.turnNumber;
-					turnActive = msg.gameStateMessage.turnInfo.activePlayer;
-					turnPriority = msg.gameStateMessage.turnInfo.priorityPlayer;
-					turnDecision = msg.gameStateMessage.turnInfo.decisionPlayer;
-
-					if (prevTurn !== turnNumber && turnNumber != undefined) {
-						attackersDetected = [];
-						actionLog(-1, new Date(),  getNameBySeat(turnActive)+"'s turn begin. (#"+turnNumber+")");
-						//ipc_send("ipc_log", playerName+"'s turn begin. (#"+turnNumber+")");
-					}
-					if (!firstPass) {
-						ipc.send("set_turn", playerSeat, turnPhase, turnStep, turnNumber, turnActive, turnPriority, turnDecision);
-					}
-				}
-
-				if (msg.gameStateMessage.gameInfo != undefined) {
-					//if (msg.gameStateMessage.gameInfo.matchState == "MatchState_GameComplete") {
-					if (msg.gameStateMessage.gameInfo.stage == "GameStage_GameOver") {
-						//console.log("msg.gameStateMessage.gameInfo", msg.gameStateMessage.gameInfo);
-						let results = msg.gameStateMessage.gameInfo.results;
-						playerWin = 0;
-						oppWin = 0;
-						results.forEach(function(res) {
-							if (res.scope == "MatchScope_Game") {
-								actionLog(-1, new Date(), getNameBySeat(res.winningTeamId)+' Wins!');
-								if (res.winningTeamId == playerSeat) {
-									playerWin += 1;
-								}   
-								if (res.winningTeamId == oppSeat) {
-									oppWin += 1;
-								}
-							}
-							
-							//console.log("playerWin", playerWin, "oppWin", oppWin);
-							if (res.scope == "MatchScope_Match") {
-								duringMatch = false;
-							}
-						});
-					}
-					if (msg.gameStateMessage.gameInfo.matchState == "MatchState_MatchComplete") {
-						ipc_send("save_overlay_pos", 1);
-						clear_deck();
-						if (!store.get('settings.show_overlay_always')) {
-							ipc_send("overlay_close", 1);
-						}
-
-						saveMatch();
-					}
-				}
-
-				if (msg.gameStateMessage.annotations != undefined) {
-					msg.gameStateMessage.annotations.forEach(function(obj) {
-						let affector = obj.affectorId;
-						let affected = obj.affectedIds;
-
-						if (affected != undefined) {
-							affected.forEach(function(aff) {
-								// An object ID changed, create new object and move it
-								if (obj.type.includes("AnnotationType_ObjectIdChanged")) {
-									var _orig = undefined;
-									var _new = undefined;
-									obj.details.forEach(function(detail) {
-										if (detail.key == "orig_id") {
-											_orig = detail.valueInt32[0];
-										}
-										if (detail.key == "new_id") {
-											_new = detail.valueInt32[0];
-										}
-									});
-
-									if (_orig == undefined || _new == undefined) {
-										console.log("undefined value: ", obj)
-									}
-									else if (gameObjs[_orig] != undefined) {
-										//console.log("AnnotationType_ObjectIdChanged", aff, _orig, _new, gameObjs[_orig], gameObjs);
-										gameObjs[_new] = JSON.parse(JSON.stringify(gameObjs[_orig]));
-										gameObjs[_orig] = undefined;
-									}
-								}
-
-								// An object changed zone, here we only update the gameobjs array
-								if (obj.type.includes("AnnotationType_EnteredZoneThisTurn")) {
-									if (gameObjs[aff] !== undefined) {
-										//console.log("AnnotationType_EnteredZoneThisTurn", aff, affector, gameObjs[aff], zones[affector], gameObjs);
-										gameObjs[aff].zoneId = affector;
-										gameObjs[aff].zoneName = zones[affector].type;
-									}
-								}
-
-								if (obj.type.includes("AnnotationType_ResolutionStart")) {
-									var grpid = undefined;
-									obj.details.forEach(function(detail) {
-										if (detail.key == "grpid") {
-											grpid = detail.valueInt32[0];
-										}
-									});
-									if (grpid != undefined) {
-										//let card = cardsDb.get(grpid);
-										aff = obj.affectorId;
-										//var pn = oppName;
-										if (gameObjs[aff] != undefined) {
-											// We ooly check for abilities here, since cards and spells are better processed with "AnnotationType_ZoneTransfer"
-											if (gameObjs[aff].type == "GameObjectType_Ability") {
-												var src = gameObjs[aff].objectSourceGrpId;
-												var abId = gameObjs[aff].grpId;
-												var ab = cardsDb.getAbility(abId);
-												//var cname = "";
-												try {
-													ab = replaceAll(ab, "CARDNAME", cardsDb.get(src).name);
-												}
-												catch (e) {
-													//
-												}
-										
-												actionLog(gameObjs[aff].controllerSeatId, new Date(), actionLogGenerateLink(src)+'\'s <a class="card_ability click-on" title="'+ab+'">ability</a>');
-												//ipc_send("ipc_log", cardsDb.get(src).name+"'s ability");
-												//console.log(cardsDb.get(src).name+"'s ability", gameObjs[aff]);
-											}
-											else {
-												//actionLog(gameObjs[aff].controllerSeatId, new Date(), getNameBySeat(gameObjs[aff].controllerSeatId)+" cast "+card.name);
-												//ipc_send("ipc_log", gameObjs[aff].controllerSeatId+" cast "+card.name);
-												//console.log(getNameBySeat(gameObjs[aff].controllerSeatId)+" cast "+card.name, gameObjs[aff]);
-											}
-										}
-									}
-								}
-
-								/*
-								// Life total changed, see below (msg.gameStateMessage.players) 
-								// Not optimal, this triggers too many times
-								if (obj.type.includes("AnnotationType_ModifiedLife")) {
-									obj.details.forEach(function(detail) {
-										if (detail.key == "life") {
-											var change = detail.valueInt32[0];
-											if (change < 0) {
-												actionLog(aff, new Date(), getNameBySeat(aff)+' lost '+Math.abs(change)+' life');
-											}
-											else {
-												actionLog(aff, new Date(), getNameBySeat(aff)+' gained '+Math.abs(change)+' life');
-											}
-										}
-									});
-								}
-								*/
-
-								// Something moved between zones
-								// This requires some "async" work, as data referenced by annotations sometimes has future data
-								// That is , data we have already recieved and still havent processed (particularly, game objects)
-								if (obj.type.includes("AnnotationType_ZoneTransfer")) {
-									obj.remove = false;
-									obj.aff = aff;
-									obj.time = new Date();
-									zoneTransfers.push(obj);
-								}
-
-								if (obj.type.includes("AnnotationType_DamageDealt")) {
-									var aff = obj.affectorId;
-									var affected = obj.affectedIds;
-									var damage = 0;
-									obj.details.forEach(function(detail) {
-										if (detail.key == "damage") {
-											damage = detail.valueInt32[0];
-										}
-									});
-
-									affected.forEach(function(affd) {
-										if (gameObjs[aff] !== undefined) {
-											try {
-												if (affd == playerSeat || affd == oppSeat) {
-													actionLog(gameObjs[aff].controllerSeatId, new Date(), actionLogGenerateLink(gameObjs[aff].grpId)+" dealt "+damage+" damage to "+getNameBySeat(affd));
-													//ipc_send("ipc_log", gameObjs[aff].name+" dealt "+damage+" damage to "+getNameBySeat(affd));
-												}
-												else {
-													actionLog(gameObjs[aff].controllerSeatId, new Date(), actionLogGenerateLink(gameObjs[aff].grpId)+" dealt "+damage+" damage to "+actionLogGenerateLink(gameObjs[affd].grpId));
-													//ipc_send("ipc_log", gameObjs[aff].name+" dealt "+damage+" damage to "+gameObjs[affd]);
-												}
-											}
-											catch (e) {
-												//
-											}
-										}
-									});
-								}
-							});
-						}
-					});
-				}
-
-				// Update the zones
-				// Each zone has every object ID that lives inside that zone
-				// Sometimes object IDs we dont have any data from are here
-				// So, for example, a card in the opp library HAS an ID in its zone, but we just dont have any data about it
-				if (msg.gameStateMessage.zones != undefined) {
-					//ipc_send("ipc_log", "Zones updated");
-					msg.gameStateMessage.zones.forEach(function(zone) {
-						zones[zone.zoneId] = zone;
-						if (zone.objectInstanceIds != undefined) {
-							zone.objectInstanceIds.forEach(function(objId) {
-								if (gameObjs[objId] != undefined) {
-									gameObjs[objId].zoneId = zone.zoneId;
-									gameObjs[objId].zoneName = zone.type;
-								}
-							});
-						}
-					});
-				}
-
-				// Update the game objects
-				if (msg.gameStateMessage.gameObjects != undefined) {
-					msg.gameStateMessage.gameObjects.forEach(function(obj) {
-						let name = cardsDb.get(obj.grpId).name;
-						if (name) {
-							obj.name = name;
-						}
-
-						// This should be a delayed check
-						try {
-							obj.zoneName = zones[obj.zoneId].type;
-							gameObjs[obj.instanceId] = obj;
-						}
-						catch (e) {
-							//
-						}
-
-						//ipc_send("ipc_log", "Message: "+msg.msgId+" > ("+obj.instanceId+") created at "+zones[obj.zoneId].type);
-					});
-				}
-				
-				// An object has been deleted
-				// Removing this caused some objects to end up duplicated , unfortunately
-				if (msg.gameStateMessage.diffDeletedInstanceIds != undefined) {
-					msg.gameStateMessage.diffDeletedInstanceIds.forEach(function(obj) {
-						gameObjs[obj] = undefined;
-					});
-				}
-
-				// Players data update
-				// We only read life totals at the moment, but we also get timers and such
-				if (msg.gameStateMessage.players != undefined) {
-					msg.gameStateMessage.players.forEach(function(obj) {
-						let sign = '';
-						let diff;
-						if (playerSeat == obj.controllerSeatId) {
-							diff = obj.lifeTotal - playerLife;
-							if (diff > 0) sign = '+'
-
-							if (diff != 0) {
-								actionLog(obj.controllerSeatId, new Date(), getNameBySeat(obj.controllerSeatId)+'\'s life changed to '+obj.lifeTotal+' ('+sign+diff+")");
-							}
-							
-							playerLife = obj.lifeTotal;
-						}
-						else {
-							diff = obj.lifeTotal - opponentLife;
-							if (diff > 0) sign = '+';
-							if (diff != 0) {
-								actionLog(obj.controllerSeatId, new Date(), getNameBySeat(obj.controllerSeatId)+'\'s life changed to '+obj.lifeTotal+' ('+sign+diff+")");
-							}
-
-							opponentLife = obj.lifeTotal;
-						}
-					});
-				}
-			}
-		}
-		//
-	});
-	tryZoneTransfers();
-
-	var str = JSON.stringify(currentDeck);
-	currentDeckUpdated = JSON.parse(str);
-	forceDeckUpdate();
-	update_deck(false);
 }
 
 // Get player name by seat in the game
@@ -2179,18 +1250,6 @@ function update_deck(force) {
 }
 
 //
-function get_rank_index(_rank, _tier) {
-	var ii = 0;
-	if (_rank == "Beginner")	ii = 0;
-	if (_rank == "Bronze")	  ii = 1  + _tier;
-	if (_rank == "Silver")	  ii = 6  + _tier;
-	if (_rank == "Gold")		ii = 11 + _tier;
-	if (_rank == "Diamond")	 ii = 16 + _tier;
-	if (_rank == "Master")	  ii = 21;
-	return ii;
-}
-
-//
 function forceDeckUpdate() {
 	var decksize = 0;
 	var cardsleft = 0;
@@ -2216,25 +1275,27 @@ function forceDeckUpdate() {
 	}
 	Object.keys(gameObjs).forEach(function(key) {
 		if (gameObjs[key] != undefined) {
-			if (zones[gameObjs[key].zoneId].type != "ZoneType_Limbo" && zones[gameObjs[key].zoneId].type != "ZoneType_Library") {
-				if (gameObjs[key].ownerSeatId == playerSeat && gameObjs[key].type != "GameObjectType_Token" && gameObjs[key].type != "GameObjectType_Ability") {
-					/*
-					// DEBUG
-					if (gameObjs[key].grpId != 3) {
-						decksize += 1;
-						cardsleft += 1;
-						currentDeckUpdated.mainDeck.push({id: gameObjs[key].grpId, quantity: gameObjs[key].zoneId})
-					}
-					*/
-					
-					cardsleft -= 1;
-					if (currentDeckUpdated.mainDeck != undefined) {
-						currentDeckUpdated.mainDeck.forEach(function(card) {
-							if (card.id == gameObjs[key].grpId) {
-								//console.log(gameObjs[key].instanceId, cardsDb.get(gameObjs[key].grpId).name, zones[gameObjs[key].zoneId].type);
-								card.quantity -= 1;
-							}
-						});
+			if (zones[gameObjs[key].zoneId]) {
+				if (zones[gameObjs[key].zoneId].type != "ZoneType_Limbo" && zones[gameObjs[key].zoneId].type != "ZoneType_Library") {
+					if (gameObjs[key].ownerSeatId == playerSeat && gameObjs[key].type != "GameObjectType_Token" && gameObjs[key].type != "GameObjectType_Ability") {
+						/*
+						// DEBUG
+						if (gameObjs[key].grpId != 3) {
+							decksize += 1;
+							cardsleft += 1;
+							currentDeckUpdated.mainDeck.push({id: gameObjs[key].grpId, quantity: gameObjs[key].zoneId})
+						}
+						*/
+						
+						cardsleft -= 1;
+						if (currentDeckUpdated.mainDeck != undefined) {
+							currentDeckUpdated.mainDeck.forEach(function(card) {
+								if (card.id == gameObjs[key].grpId) {
+									//console.log(gameObjs[key].instanceId, cardsDb.get(gameObjs[key].grpId).name, zones[gameObjs[key].zoneId].type);
+									card.quantity -= 1;
+								}
+							});
+						}
 					}
 				}
 			}
@@ -2388,8 +1449,8 @@ function saveMatch() {
 	}
 	match.player = {
 		name: playerName,
-		rank: playerRank,
-		tier: playerTier,
+		rank: playerConstructedRank,
+		tier: playerConstructedTier,
 		userid: playerId,
 		seat: playerSeat, 
 		win: playerWin
@@ -2465,25 +1526,34 @@ function saveDraft() {
 }
 
 //
-function finishLoading() {
-	firstPass = false;
-
-	if (duringMatch) {
-		ipc_send("renderer_hide", 1);
-		ipc_send("overlay_show", 1);
-		update_deck(false);
+function updateLoading(entry) {
+	if (firstPass) {
+		ipc_send("popup", {"text": `Reading log: ${Math.round(100/entry.size*entry.position)}%`, "time": 0});
 	}
-	var obj = store.get('overlayBounds');
-	ipc_send("overlay_set_bounds", obj);
+}
 
-	requestHistorySend(0);
-	ipc_send("initialize", 1);
+///
+function finishLoading() {
+	if (firstPass) {
+		firstPass = false;
 
-	obj = store.get('windowBounds');
-	ipc_send("renderer_set_bounds", obj);
+		if (duringMatch) {
+			ipc_send("renderer_hide", 1);
+			ipc_send("overlay_show", 1);
+			update_deck(false);
+		}
+		var obj = store.get('overlayBounds');
+		ipc_send("overlay_set_bounds", obj);
 
-	if (playerName != null) {
-		httpSetPlayer(playerName, playerRank, playerTier);  
+		requestHistorySend(0);
+		ipc_send("initialize", 1);
+
+		obj = store.get('windowBounds');
+		ipc_send("renderer_set_bounds", obj);
+
+		if (playerName != null) {
+			httpSetPlayer(playerName, playerConstructedRank, playerConstructedTier, playerLimitedRank, playerLimitedTier);
+		}
 	}
 }
 

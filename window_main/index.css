@@ -216,13 +216,23 @@ span i {
 }
 
 
-.top_rank {
+.top_constructed_rank {
     -webkit-app-region: no-drag;
     align-self: center;
     margin-left: 16px;
     width: 48px;
     height: 48px;
-    background: url(../images/ranks_48.png);
+    background: url(../images/ranks_constructed_48.png);
+    background-position: 0px 0px;
+}
+
+.top_limited_rank {
+    -webkit-app-region: no-drag;
+    align-self: center;
+    margin-left: 16px;
+    width: 48px;
+    height: 48px;
+    background: url(../images/ranks_limited_48.png);
     background-position: 0px 0px;
 }
 
@@ -232,7 +242,7 @@ span i {
     margin-left: 16px;
     width: 48px;
     height: 48px;
-    background: url(../images/ranks_48.png);
+    background: url(../images/ranks_constructed_48.png);
     background-position: 0px 0px;
 }
 
@@ -1693,7 +1703,7 @@ a:hover {
     align-self: center;
     width: 48px;
     height: 48px;
-    background: url(../images/ranks_48.png);
+    background: url(../images/ranks_constructed_48.png);
     background-position: 0px 0px;
 }
 
@@ -1956,14 +1966,14 @@ a:hover {
     pointer-events: none;
     opacity: 0;
     top: calc(100% - 42px);
-    /* top: 100%; */
-    left: calc(50% - 120px);
+    font-size: 15px;
+    left: calc(50% - 200px);
     position: absolute;
     background: rgba(0, 0, 0, 0.5);
     color: rgba(250, 229, 210, 1);
     text-align: center;
     line-height: 30px;
-    width: 240px;
+    width: 400px;
     border-radius: 2px;
     z-index: 100;
     height: 30px;
