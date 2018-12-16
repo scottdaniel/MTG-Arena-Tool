@@ -1554,6 +1554,7 @@ function finishLoading() {
 		if (playerName != null) {
 			httpSetPlayer(playerName, playerConstructedRank, playerConstructedTier, playerLimitedRank, playerLimitedTier);
 		}
+		ipc_send("popup", {"text": `Reading log: 100%`, "time": 1000});
 	}
 }
 
