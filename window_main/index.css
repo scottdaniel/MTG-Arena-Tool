@@ -746,6 +746,20 @@ a:hover {
     flex-grow: 2;
 }
 
+.deck_tag_input {
+    height: 16px;
+    min-width: 32px;
+    margin: 1px 0px 1px 12px;
+    /* border-radius: 9px; */
+    background-color: rgba(0, 0, 0, 0);
+    border: none;
+    /* border-bottom: solid 2px gray; */
+}
+
+.deck_tag_input:focus {
+    outline: none !important;
+}
+
 .deck_tag {
     cursor: pointer;
     font-size: 13px;

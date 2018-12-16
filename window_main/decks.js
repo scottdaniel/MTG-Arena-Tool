@@ -77,9 +77,11 @@ function open_decks_tab() {
 			var flcf = document.createElement("div");
 			flcf.classList.add('deck_tags_container');
 
+			let t = createTag(null, flcf, false);
+			jQuery.data(t, "deck", deck.id);
 			if (deck.tags) {
 				deck.tags.forEach((tag) => {
-					let t = createTag(tag, flcf);
+					t = createTag(tag, flcf);
 					jQuery.data(t, "deck", deck.id);
 				});
 			}
@@ -224,37 +226,62 @@ function createTag(tag, div, showClose = true) {
 	let tagCol = getTagColor(tag);
 	var t = document.createElement("div");
 	t.classList.add('deck_tag');
-	t.innerHTML = tag;
+	t.innerHTML = (tag == null ? 'Add': tag);
 	t.style.backgroundColor = tagCol;
 
-	var colorPick = $(t);
-	colorPick.spectrum({
-		showInitial: true,
-		showAlpha: false,
-		showButtons: false
-	});
-	colorPick.spectrum("set", tagCol);
-
-	colorPick.on('move.spectrum', function(e, color) {
-		let tag = $(this).text();
-		let col = color.toRgbString();
-		ipc_send("edit_tag", {tag: tag, color: col});
-		tags_colors[tag] = col;
-
-		$('.deck_tag').each((index, obj) => {
-			let tag = $(obj).text();
-			$(obj).css("background-color", tags_colors[tag])
+	if (tag) {
+		var colorPick = $(t);
+		colorPick.spectrum({
+			showInitial: true,
+			showAlpha: false,
+			showButtons: false
 		});
-	});
+		colorPick.spectrum("set", tagCol);
+
+		colorPick.on('move.spectrum', function(e, color) {
+			let tag = $(this).text();
+			let col = color.toRgbString();
+			ipc_send("edit_tag", {tag: tag, color: col});
+			tags_colors[tag] = col;
+
+			$('.deck_tag').each((index, obj) => {
+				let tag = $(obj).text();
+				$(obj).css("background-color", tags_colors[tag])
+			});
+		});
+	}
+	else {
+		$(t).on('click', function(e) {
+			if ($(this).html() == "Add") {
+				t.innerHTML = '';
+				let input = $('<input size="1" onFocus="this.select()" class="deck_tag_input"></input>');
+				$(t).prepend(input);
+
+				input[0].focus();
+				input[0].select();
+				input.keydown(function(e) {
+					setTimeout(() => {
+						input.css("width", $(this).val().length*8);
+					}, 10);
+					if (e.keyCode == 13) {
+						let val = $(this).val();
+						console.log(val);
+						let masterdiv = $(this).parent().parent()[0];
+						$(this).parent().html("Add");
+						createTag(val, masterdiv);
+					}
+				});
+			}
+			e.stopPropagation();
+		});
+	}
 
 	if (showClose) {
 		let tc = document.createElement("div");
 		tc.classList.add('deck_tag_close');
 		t.appendChild(tc);
 
-		$(tc).on('click', function(e) {
-			e.stopPropagation();
-
+		$(tc).on('click', function() {
 			let deckid = jQuery.data($(this).parent()[0], "deck");
 
 			let obj = {deck: deckid, name: $(this).parent().text()};
