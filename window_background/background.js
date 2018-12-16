@@ -667,7 +667,7 @@ const ArenaLogWatcher = require('./arena-log-watcher');
 function startWatchingLog() {
     return ArenaLogWatcher.start({
         path: logUri,
-        chunkSize: 1024 * 1024 * 256, // 1 gig of memory
+        chunkSize: 268435440,
         onLogEntry: onLogEntryFound,
         onError: err => console.error(err),
         onFinish: finishLoading
@@ -685,7 +685,7 @@ function onLogEntryFound(entry) {
 	else {
 		console.log("Entry:", entry.label, entry, entry.json());
 		if (firstPass) {
-			updateLoading(entry.label);
+			updateLoading(entry);
 		}
 		switch (entry.label) {
 			case "Log.Info":
@@ -1488,15 +1488,15 @@ function saveDraft() {
 }
 
 //
-function updateLoading(stat) {
+function updateLoading(entry) {
 	if (firstPass) {
-		ipc_send("popup", {"text": `Reading log: ${stat}`, "time": 0});
+		ipc_send("popup", {"text": `Reading log: ${Math.round(100/entry.size*entry.position)}%`, "time": 0});
 	}
 }
 
 ///
 function finishLoading() {
-	if (firstPass == 2) {
+	if (firstPass) {
 		firstPass = false;
 
 		if (duringMatch) {

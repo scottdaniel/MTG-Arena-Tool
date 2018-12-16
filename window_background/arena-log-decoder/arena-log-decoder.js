@@ -47,6 +47,7 @@ function ArenaLogDecoder() {
 					bufferUsed = match.index + length;
 					callback({
 						...entry,
+						size: buffer.length,
 						position: bufferDiscarded + match.index,
 					});
 					break;
