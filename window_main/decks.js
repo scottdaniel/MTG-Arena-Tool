@@ -265,10 +265,11 @@ function createTag(tag, div, showClose = true) {
 					}, 10);
 					if (e.keyCode == 13) {
 						let val = $(this).val();
-						console.log(val);
+						let deckid = jQuery.data($(this).parent()[0], "deck");
+
 						let masterdiv = $(this).parent().parent()[0];
+						addTag(deckid, val, masterdiv);
 						$(this).parent().html("Add");
-						createTag(val, masterdiv);
 					}
 				});
 			}
@@ -283,9 +284,9 @@ function createTag(tag, div, showClose = true) {
 
 		$(tc).on('click', function() {
 			let deckid = jQuery.data($(this).parent()[0], "deck");
+			let val = $(this).parent().text();
 
-			let obj = {deck: deckid, name: $(this).parent().text()};
-			ipc_send("delete_tag", obj);
+			deleteTag(deckid, val);
 
 			$(this).css("width", "0px");
 			$(this).css("margin", "0px");
@@ -301,6 +302,42 @@ function createTag(tag, div, showClose = true) {
 	div.appendChild(t);
 	return t;
 } 
+
+function addTag(deckid, tag, div) {
+	decks.forEach(function(deck) {
+		if (deck.id == deckid) {
+			if (deck.tags) {
+				if (deck.tags.indexOf(tag) == -1) {
+					deck.tags.push(tag);
+				}
+			}
+			else {
+				deck.tags = [tag];
+			}
+		}
+	});
+
+	let obj = {deck: deckid, name: tag};
+	ipc_send("add_tag", obj);
+	
+	createTag(tag, div);
+}
+
+function deleteTag(deckid, tag) {
+	decks.forEach(function(deck) {
+		if (deck.id == deckid) {
+			if (deck.tags) {
+				let ind = deck.tags.indexOf(tag);
+				if (ind !== -1) {
+					deck.tags.splice(ind, 1);
+				}
+			}
+		}
+	});
+
+	let obj = {deck: deckid, name: tag};
+	ipc_send("delete_tag", obj);
+}
 
 function getTagColor(tag) {
 	let tc = tags_colors[tag];

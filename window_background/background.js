@@ -474,6 +474,16 @@ ipc.on('delete_tag', function (event, arg) {
 	store.set("decks_tags", decks_tags);
 });
 
+ipc.on('add_tag', function (event, arg) {
+	if (decks_tags[arg.deck]) {
+		decks_tags[arg.deck].push(arg.name);
+	}
+	else {
+		decks_tags[arg.deck] = [arg.name];
+	}
+	store.set("decks_tags", decks_tags);
+});
+
 ipc.on('set_deck_mode', function (event, state) {
 	overlayDeckMode = state;
 	update_deck(true);
