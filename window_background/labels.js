@@ -453,6 +453,7 @@ function onLabelInDeckGetDeckLists(entry, json) {
 	staticDecks = [];
 	json.forEach((deck) => {
 		let deckId = deck.id;
+		deck.tags = decks_tags[deckId];
 		decks[deckId] = deck;
 		if (decks["index"].indexOf(deckId) == -1) {
 			decks["index"].push(deck.id);

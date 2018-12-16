@@ -180,7 +180,6 @@ function open_decks_tab() {
 					flt.appendChild(d);
 				}
 
-
 				deck.colors.forEach(function(color) {
 					var d = document.createElement("div");
 					d.classList.add('mana_s20');
@@ -334,7 +333,8 @@ function createTag(tag, div, showClose = true) {
 		tc.classList.add('deck_tag_close');
 		t.appendChild(tc);
 
-		$(tc).on('click', function() {
+		$(tc).on('click', function(e) {
+			e.stopPropagation();
 			let deckid = jQuery.data($(this).parent()[0], "deck");
 			let val = $(this).parent().text();
 
