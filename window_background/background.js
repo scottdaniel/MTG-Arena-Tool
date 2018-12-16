@@ -667,7 +667,7 @@ const ArenaLogWatcher = require('./arena-log-watcher');
 function startWatchingLog() {
     return ArenaLogWatcher.start({
         path: logUri,
-        chunkSize: 1024 * 1024 * 1024, // 1 gig of memory
+        chunkSize: 1024 * 1024 * 256, // 1 gig of memory
         onLogEntry: onLogEntryFound,
         onError: err => console.error(err),
         onFinish: finishLoading
