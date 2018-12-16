@@ -18,11 +18,11 @@ function start({ path, chunkSize, onLogEntry, onError, onFinish }) {
 	let logDecoder = new ArenaLogDecoder();
 
 	schedule();
-	//const watcher = fs.watch(path, schedule);
+	const stopWatching = fsWatch(path, schedule, 250);
 	return stop;
 
 	function stop() {
-		//watcher.close();
+		stopWatching();
 		q.end();
 	}
 
@@ -41,7 +41,6 @@ function start({ path, chunkSize, onLogEntry, onError, onFinish }) {
 
 	async function read() {
 		const { size } = await fsAsync.stat(path);
-		//console.log("position", position, "size", size, "chunkSize", chunkSize);
 		if (position > size) {
 			// the file has been recreated, we must reset our state
 			stringDecoder = new StringDecoder();
@@ -51,14 +50,33 @@ function start({ path, chunkSize, onLogEntry, onError, onFinish }) {
 		while (position < size) {
 			const buffer = await readChunk(path, position, Math.min(size - position, chunkSize));
 			const text = stringDecoder.write(buffer);
-			logDecoder.append(text, onLogEntry);
+			logDecoder.append(text, entry => onLogEntry({ ...entry, size }));
 			position += buffer.length;
 		}
-		if (position >= size) {
-			onFinish();
-		}
+		onFinish();
+	}
+}
 
-		setTimeout(schedule, 250);
+function fsWatch(path, onChanged, interval) {
+	let lastStats;
+	let handle;
+	start();
+	return stop;
+
+	async function start() {
+		lastStats = await fsAsync.stat(path);
+		handle = setInterval(checkFile, interval);
+	}
+
+	async function checkFile() {
+		const stats = await fsAsync.stat(path);
+		if (lastStats.size === stats.size) return;
+		lastStats = stats;
+		onChanged();
+	}
+
+	function stop() {
+		if (handle) clearInterval(handle);
 	}
 }
 
