@@ -11,7 +11,7 @@ const fsAsync = {
 	stat: promisify(fs.stat),
 };
 
-function start({ path, chunkSize, onLogEntry, onError }) {
+function start({ path, chunkSize, onLogEntry, onError, onFinish }) {
 	const q = queue({ concurrency: 1 });
 	let position = 0;
 	let stringDecoder = new StringDecoder();
@@ -23,11 +23,13 @@ function start({ path, chunkSize, onLogEntry, onError }) {
 	return stop;
 
 	function stop() {
+		console.error("Watcher close()");
 		watcher.close();
 		q.end();
 	}
 
 	function schedule() {
+		console.error("Watcher schedule()");
 		q.push(attempt);
 		q.start();
 	}
@@ -43,6 +45,7 @@ function start({ path, chunkSize, onLogEntry, onError }) {
 
 	async function read() {
 		const { size } = await fsAsync.stat(path);
+		console.log("position", position, "size", size, "chunkSize", chunkSize);
 		if (position > size) {
 			// the file has been recreated, we must reset our state
 			stringDecoder = new StringDecoder();
@@ -54,6 +57,9 @@ function start({ path, chunkSize, onLogEntry, onError }) {
 			const text = stringDecoder.write(buffer);
 			logDecoder.append(text, onLogEntry);
 			position += buffer.length;
+		}
+		if (position >= size) {
+			onFinish();
 		}
 	}
 }
