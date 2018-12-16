@@ -1,4 +1,6 @@
-function onLabelOutLogInfo(json) {
+/* eslint-disable */
+
+function onLabelOutLogInfo(entry, json) {
 	if (!json) return;
 	if (json.params.messageName == 'DuelScene.GameStop') {
 		var mid = json.params.payloadObject.matchId;
@@ -8,10 +10,9 @@ function onLabelOutLogInfo(json) {
 			saveMatch();
 		}
 	}
-	return;
 }
 
-function onLabelGreToClient(json) {
+function onLabelGreToClient(entry, json) {
 	if (!json)	return;
 	json = json.greToClientEvent.greToClientMessages;
 	json.forEach(function(msg) {
@@ -165,7 +166,7 @@ function onLabelGreToClient(json) {
 
 								// An object changed zone, here we only update the gameobjs array
 								if (obj.type.includes("AnnotationType_EnteredZoneThisTurn")) {
-									if (gameObjs[aff] !== undefined) {
+									if (gameObjs[aff] && zones[affector]) {
 										//console.log("AnnotationType_EnteredZoneThisTurn", aff, affector, gameObjs[aff], zones[affector], gameObjs);
 										gameObjs[aff].zoneId = affector;
 										gameObjs[aff].zoneName = zones[affector].type;
@@ -358,7 +359,7 @@ function onLabelGreToClient(json) {
 	update_deck(false);
 }
 
-function onLabelClientToMatchServiceMessageTypeClientToGREMessage(json) {
+function onLabelClientToMatchServiceMessageTypeClientToGREMessage(entry, json) {
 	if (!json) return;
 	if (!json.payload)	return
 	if (!json.payload.type)	return
@@ -411,7 +412,7 @@ function onLabelClientToMatchServiceMessageTypeClientToGREMessage(json) {
 	}
 }
 
-function onLabelInEventGetPlayerCourse(json) {
+function onLabelInEventGetPlayerCourse(entry, json) {
 	if (!json)	return;
 
 	if (json.Id != "00000000-0000-0000-0000-000000000000") {
@@ -430,7 +431,7 @@ function onLabelInEventGetPlayerCourse(json) {
 	}
 }
 
-function onLabelInEventGetCombinedRankInfo(json) {
+function onLabelInEventGetCombinedRankInfo(entry, json) {
 	if (!json)	return;
 
 	playerConstructedRank = json.constructedClass;
@@ -446,15 +447,15 @@ function onLabelInEventGetCombinedRankInfo(json) {
 	ipc_send("set_limited_rank", {rank: rank, str: playerLimitedRank+" "+playerLimitedTier});
 }
 
-function onLabelInDeckGetDeckLists(json) {
+function onLabelInDeckGetDeckLists(entry, json) {
 	if (!json)	return;
 
 	staticDecks = [];
 	json.forEach((deck) => {
 		let deckId = deck.id;
 		decks[deckId] = deck;
-		if (decks.index.indexOf(deck.id) == -1) {
-			decks.index.push(deck.id);
+		if (decks["index"].indexOf(deckId) == -1) {
+			decks["index"].push(deck.id);
 		}
 		staticDecks.push(deck.id);
 	});
@@ -464,7 +465,7 @@ function onLabelInDeckGetDeckLists(json) {
 	ipc_send("set_decks", JSON.stringify(decks));
 }
 
-function onLabelInEventGetPlayerCourses(json) {
+function onLabelInEventGetPlayerCourses(entry, json) {
 	if (!json)	return;
 
 	json.forEach((course) => {
@@ -482,7 +483,7 @@ function onLabelInEventGetPlayerCourses(json) {
 	});
 }
 
-function onLabelInDeckUpdateDeck(json) {
+function onLabelInDeckUpdateDeck(entry, json) {
 	if (!json)	return;
 	logTime = parseWotcTime(entry.timestamp);
 
@@ -550,12 +551,11 @@ function onLabelInDeckUpdateDeck(json) {
 			}
 		}
 	});
-
 }
 
-function onLabelInventoryUpdated(json) {
+function onLabelInventoryUpdated(entry, json) {
 	if (!json)	return;
-	json.date   parseWotcTime(entry.timestamp);
+	json.date = parseWotcTime(entry.timestamp);
 	
 	if (json.delta.boosterDelta.length == 0)		delete json.delta.boosterDelta;
 	if (json.delta.cardsAdded.length == 0)		  delete json.delta.cardsAdded;
@@ -576,7 +576,7 @@ function onLabelInventoryUpdated(json) {
 	saveEconomy(json);
 }
 
-function onLabelInPlayerInventoryGetPlayerInventory(json) {
+function onLabelInPlayerInventoryGetPlayerInventory(entry, json) {
 	if (!json)	return;
 	logTime = parseWotcTime(entry.timestamp);
 
@@ -590,7 +590,7 @@ function onLabelInPlayerInventoryGetPlayerInventory(json) {
 	wcMythic = json.wcMythic;
 }
 
-function onLabelInPlayerInventoryGetPlayerCardsV3(json) {
+function onLabelInPlayerInventoryGetPlayerCardsV3(entry, json) {
 	if (!json)	return;
 
 	var date = new Date(store.get('cards.cards_time'));
@@ -627,12 +627,12 @@ function onLabelInPlayerInventoryGetPlayerCardsV3(json) {
 	ipc_send("set_cards", {cards: json, new: cardsNewlyAdded});
 }
 
-function onLabelInEventDeckSubmit(json) {
+function onLabelInEventDeckSubmit(entry, json) {
 	if (!json)	return;
 	select_deck(json);
 }
 
-function onLabelEventMatchCreated(json) {
+function onLabelEventMatchCreated(entry, json) {
 	if (!json)	return;
 	logTime = parseWotcTime(entry.timestamp);
 
@@ -642,7 +642,7 @@ function onLabelEventMatchCreated(json) {
 	}
 }
 
-function onLabelOutDirectGameChallenge(json) {
+function onLabelOutDirectGameChallenge(entry, json) {
 	if (!json)	return;
 	var deck = json.params.deck;
 	
@@ -652,7 +652,7 @@ function onLabelOutDirectGameChallenge(json) {
 	select_deck(deck);
 }
 
-function onLabelInDraftDraftStatus(json) {
+function onLabelInDraftDraftStatus(entry, json) {
 	if (!json)	return;
 
 	if (json.eventName != undefined) {
@@ -671,7 +671,7 @@ function onLabelInDraftDraftStatus(json) {
 	currentDraftPack = json.draftPack.slice(0);
 }
 
-function onLabelInDraftMakePick(json) {
+function onLabelInDraftMakePick(entry, json) {
 	if (!json)	return;
 	// store pack in recording
 	if (json.eventName != undefined) {
@@ -692,7 +692,7 @@ function onLabelInDraftMakePick(json) {
 	}
 }
 
-function onLabelOutDraftMakePick(json) {
+function onLabelOutDraftMakePick(entry, json) {
 	if (!json)	return;
 	// store pick in recording
 	var value = {};
@@ -703,7 +703,7 @@ function onLabelOutDraftMakePick(json) {
 	debugLogSpeed = 200;
 }
 
-function onLabelInEventCompleteDraft(json) {
+function onLabelInEventCompleteDraft(entry, json) {
 	if (!json)	return;
 	ipc_send("save_overlay_pos", 1);
 	clear_deck();
@@ -717,7 +717,7 @@ function onLabelInEventCompleteDraft(json) {
 	saveDraft();
 }
 
-function onLabelMatchGameRoomStateChangedEvent(json) {
+function onLabelMatchGameRoomStateChangedEvent(entry, json) {
 	if (!json)	return;
 
 	json = json.matchGameRoomStateChangedEvent.gameRoomInfo;

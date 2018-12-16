@@ -495,8 +495,6 @@ function rememberLogin(bool) {
 
 // Loads this player's configuration file
 function loadPlayerConfig(playerId) {
-	logLoopMode = 1;
-	prevLogSize = 0;
 	ipc_send("ipc_log", "Load player ID: "+playerId);
 	store = new Store({
 		configName: playerId,
@@ -594,6 +592,9 @@ function loadPlayerConfig(playerId) {
 
 	loadSettings();
 	requestHistorySend(0);
+
+	watchingLog = true;
+	stopWatchingLog = startWatchingLog();
 }
 
 
@@ -642,8 +643,10 @@ function get_deck_changes(deckId) {
 
 // Set a new log URI
 ipc.on('set_log', function (event, arg) {
-    //stopWatchingLog();
-    //stopWatchingLog = startWatchingLog();
+    if (watchingLog) {
+		stopWatchingLog();
+		stopWatchingLog = startWatchingLog();
+    }
 	logUri = arg;
 	settingsStore.set('logUri', arg);
 });
@@ -652,10 +655,9 @@ ipc.on('set_log', function (event, arg) {
 // Read the log
 // Set variables to default first
 const mtgaLog = require('./mtga-log');
-let logLoopProgress = -1;
-let logLoopProgressChanged = new Date();
 let prevLogSize = 0;
-let logLoopMode = 0;
+let watchingLog = false;
+let stopWatchingLog;
 
 let logUri = mtgaLog.defaultLogUri();
 let settingsLogUri = settingsStore.get('logUri');
@@ -663,8 +665,7 @@ if (settingsLogUri) {
 	logUri = settingsLogUri;
 }
 console.log(logUri);
-//const ArenaLogWatcher = require('./arena-log-watcher');
-//let stopWatchingLog = startWatchingLog();
+const ArenaLogWatcher = require('./arena-log-watcher');
 
 function startWatchingLog() {
     return ArenaLogWatcher.start({
@@ -672,6 +673,7 @@ function startWatchingLog() {
         chunkSize: 1024 * 1024 * 1024, // 1 gig of memory
         onLogEntry: onLogEntryFound,
         onError: err => console.error(err),
+        onFinish: finishLoading
     });
 }
 
@@ -688,121 +690,121 @@ function onLogEntryFound(entry) {
 			case "Log.Info":
 				if (entry.arrow == "==>") {
 					json = entry.json();
-					onLabelOutLogInfo(json);
+					onLabelOutLogInfo(entry, json);
 				}
 			break;
 
 			case "GreToClientEvent":
 				json = entry.json();
-				onLabelGreToClient(json);
+				onLabelGreToClient(entry, json);
 			break;
 
 			case "ClientToMatchServiceMessageType_ClientToGREMessage":
 				json = entry.json();
-				onLabelClientToMatchServiceMessageTypeClientToGREMessage(json);
+				onLabelClientToMatchServiceMessageTypeClientToGREMessage(entry, json);
 			break;
 
 			case "Event.GetPlayerCourse":
 				if (entry.arrow == "<==") {
 					json = entry.json();
-					onLabelInEventGetPlayerCourse(json);
+					onLabelInEventGetPlayerCourse(entry, json);
 				}
 			break;
 
 			case "Event.GetCombinedRankInfo":
 				if (entry.arrow == "<==") {
 					json = entry.json();
-					onLabelInEventGetCombinedRankInfo(json);
+					onLabelInEventGetCombinedRankInfo(entry, json);
 				}
 			break;
 
 			case "Event.GetPlayerCourses":
 				if (entry.arrow == "<==") {
 					json = entry.json();
-					onLabelInEventGetPlayerCourses(json);
+					onLabelInEventGetPlayerCourses(entry, json);
 				}
 			break;
 			
 			case "Deck.GetDeckLists":
 				if (entry.arrow == "<==") {
 					json = entry.json();
-					onLabelInDeckGetDeckLists(json);
+					onLabelInDeckGetDeckLists(entry, json);
 				}
 			break;
 
 			case "Deck.UpdateDeck":
 				if (entry.arrow == "<==") {
 					json = entry.json();
-					onLabelInDeckUpdateDeck(json);
+					onLabelInDeckUpdateDeck(entry, json);
 				}
 			break;
 
 			case "Inventory.Updated":
 				json = entry.json();
-				onLabelInventoryUpdated(json);
+				onLabelInventoryUpdated(entry, json);
 			break;
 
 			case "PlayerInventory.GetPlayerInventory":
 				if (entry.arrow == "<==") {
 					json = entry.json();
-					onLabelInPlayerInventoryGetPlayerInventory(json);
+					onLabelInPlayerInventoryGetPlayerInventory(entry, json);
 				}
 			break;
 
 			case "PlayerInventory.GetPlayerCardsV3":
 				if (entry.arrow == "<==") {
 					json = entry.json();
-					onLabelInPlayerInventoryGetPlayerCardsV3(json);
+					onLabelInPlayerInventoryGetPlayerCardsV3(entry, json);
 				}
 			break;
 
 			case "Event.DeckSubmit":
 				if (entry.arrow == "<==") {
 					json = entry.json();
-					onLabelInEventDeckSubmit(json);
+					onLabelInEventDeckSubmit(entry, json);
 				}
 			break;
 
 			case "Event.MatchCreated":
 				json = entry.json();
-				onLabelEventMatchCreated(json);
+				onLabelEventMatchCreated(entry, json);
 			break;
 
 			case "DirectGame.Challenge":
 				if (entry.arrow == "==>") {
 					json = entry.json();
-					onLabelOutDirectGameChallenge(json);
+					onLabelOutDirectGameChallenge(entry, json);
 				}
 			break;
 
 			case "Draft.DraftStatus":
 				if (entry.arrow == "<==") {
 					json = entry.json();
-					onLabelInDraftDraftStatus(json);
+					onLabelInDraftDraftStatus(entry, json);
 				}
 			break;
 
 			case "Draft.MakePick":
 				if (entry.arrow == "<==") {
 					json = entry.json();
-					onLabelInDraftMakePick(json);
+					onLabelInDraftMakePick(entry, json);
 				}
 				else {
 					json = entry.json();
-					onLabelOutDraftMakePick(json);
+					onLabelOutDraftMakePick(entry, json);
 				}
 			break;
 
 			case "Event.CompleteDraft":
 				if (entry.arrow == "<==") {
 					json = entry.json();
-					onLabelInEventCompleteDraft(json);
+					onLabelInEventCompleteDraft(entry, json);
 				}
 			break;
 
 			case "MatchGameRoomStateChangedEvent":
 				json = entry.json();
-				onLabelMatchGameRoomStateChangedEvent(json);
+				onLabelMatchGameRoomStateChangedEvent(entry, json);
 			break;
 
 
@@ -814,7 +816,7 @@ function onLogEntryFound(entry) {
 }
 
 // Old parser
-window.setInterval(attemptLogLoop, 250);
+let logLoopInterval = window.setInterval(attemptLogLoop, 250);
 async function attemptLogLoop() {
 	try {
 		await logLoop();
@@ -865,58 +867,15 @@ async function logLoop() {
 		? await mtgaLog.readSegment(logUri, prevLogSize, delta)
 		: await mtgaLog.readSegment(logUri, 0, size);
 
-	if (logLoopMode == 0) {
-		// We are looping only to get user data (processLogUser)
-		processLogUser(logSegment);
-	} else {
-		// We are looking to read the whole log (processLog)
-		processLog(logSegment);
-	}
+	// We are looping only to get user data (processLogUser)
+	processLogUser(logSegment);
 
+	if (playerId && playerName && arenaVersion) {
+		clearInterval(logLoopInterval);
+	}
 	prevLogSize = size;
 }
 
-// We are reading the whole log
-function processLog(rawString) {
-	// We split it into smaller chunks to read it 
-	var splitString = rawString.split(/(\[UnityCrossThread|\[Client GRE\])+/);
-
-	splitString.forEach((value, index) => {
-		//ipc_send("ipc_log", "Async: ("+index+")");
-		/*
-		if (value.indexOf("") > -1) {
-			console.log(value);
-		}
-		*/
-
-		const progress = Math.round(100 / splitString.length * index);
-		try {
-			processLogData(value);
-		} catch (err) {
-			if (firstPass && logLoopProgress === progress && new Date() - logLoopProgressChanged > 5000) {
-				ipc_send("too_slow", "");
-			}
-			console.error(err);
-		}
-		if (firstPass && logLoopProgress < progress) {
-			logLoopProgress = progress;
-			logLoopProgressChanged = new Date();
-			ipc_send("popup", {"text": "Processing log: "+progress+"%", "time": 0});
-		}
-		
-		if (debugLog) {
-			let _time = new Date();
-			while (new Date() - _time < debugLogSpeed) {
-				/**/
-			}
-		}			
-	});
-
-	if (firstPass) {
-		finishLoading();
-		ipc_send("popup", {"text": "100%", "time": 3000});
-	}
-}
 
 // Process only the user data for initial loading (prior to log in)
 // Same logic as processLog() but without the processLogData() function
@@ -960,6 +919,7 @@ function processLogUser(rawString) {
 
 // Check if the string contains a JSON object, return it parsed as JS object
 // If its not found, return false
+/*
 function checkJson(str, check, chop) {
 	if (str.indexOf(check) > -1) {
 		try {
@@ -972,7 +932,7 @@ function checkJson(str, check, chop) {
 	}
 	return false;
 }
-
+*/
 
 // Cuts the string "data" between first ocurrences of the two selected words "startStr" and "endStr";
 function dataChop(data, startStr, endStr) {
@@ -992,6 +952,7 @@ function dataChop(data, startStr, endStr) {
 
 // Cuts "str" if "check" exists, between "chop" and after "start", then returns the first JSON found.
 // If "chop" is empty it will find the whole string, aka, from "check" and after "start" to end.
+/*
 function checkJsonWithStart(str, check, chop, start) {
 	if (str.indexOf(check) > -1) {
 		try {
@@ -1006,6 +967,7 @@ function checkJsonWithStart(str, check, chop, start) {
 	}
 	return false;
 }
+*/
 
 // cuts "str" if "check" exists, between "chop" and after "start", then returns the JSON as a string
 /*
@@ -1022,6 +984,7 @@ function checkJsonWithStartNoParse(str, check, chop, start) {
 */
 
 // Finds the first JSON object inside "str", then returns it as a string
+/*
 function findFirstJSON(str) {
 	//str.replace("Logger]", "");
 	let _br = 0;
@@ -1048,15 +1011,9 @@ function findFirstJSON(str) {
 	//console.log("JSON >> ", str.slice(0, endpos));
 	return str.slice(0, endpos);
 }
-
-
-/*
-
-	unnecessarily long text to mark a point in the code that is fairly important because I cant remember the line number \^.^/
-
 */
 
-// In testing
+/*
 function client_to_gre(json) {
 	const messages = require('./messages_pb');
 
@@ -1125,16 +1082,6 @@ function processLogData(data) {
 		return;
 	}
 
-	// Gre to Client Event
-	// Obsolete now packets are decoded by the logger
-	//strCheck = 'ClientToMatchServiceMessageType';
-	//if (data.indexOf(strCheck) > -1) {
-	//	let rawJson = data.substr(data.indexOf('{')).trim();
-	//	if (rawJson.slice(-1) !== '}') rawJson = rawJson.replace(/}[^}]*/, '}');
-		//client_to_gre(JSON.parse(rawJson));
-	//	return;
-	//}
-	
 	strCheck = 'ClientToMatchServiceMessageType_ClientToGREMessage';
 	json = checkJson(data, strCheck, '');
 	if (json != false) {
@@ -1237,25 +1184,6 @@ function processLogData(data) {
 		ipc_send("set_username", playerName);
 		return;
 	}
-
-	/*
-	// Use this to get precon decklists
-	strCheck = '<== Deck.GetPreconDecks(';
-	json = checkJsonWithStart(data, strCheck, '', ')');
-	if (json != false) {
-		var str = "";
-		var newline = '\n';
-		json.forEach(function(_deck) {
-			str += "**"_deck.name.replace("?=?Loc/Decks/Precon/", "")+newline;
-			_deck.mainDeck.forEach(function(_card) {
-				str += _card.quantity+" "+cardsDb.get(_card.id).name+newline;
-			});
-			str += newline+newline;
-		});
-		console.log(str);
-		return;
-	}
-	*/
 
 	// Get Ranks
 	strCheck = '<== Event.GetCombinedRankInfo(';
@@ -1528,17 +1456,6 @@ function processLogData(data) {
 		return;
 	}
 
-	// Draft status / draft start
-	/*
-	strCheck = '<== Event.Draft(';
-	json = checkJsonWithStart(data, strCheck, '', ')');
-	if (json != false) {
-		console.log("Draft start");
-		draftId = json.Id;
-		return;
-	}
-	*/
-
 	//   
 	strCheck = '<== Draft.DraftStatus(';
 	json = checkJsonWithStart(data, strCheck, '', ')');
@@ -1669,6 +1586,7 @@ function processLogData(data) {
 	}
 }
 
+*/
 
 function setDraftCards(json) {
 	ipc.send("set_draft_cards", json.draftPack, json.pickedCards, json.packNumber+1, json.pickNumber);
@@ -1803,7 +1721,7 @@ function tryZoneTransfers() {
 	}
 }
 
-
+/*
 function gre_to_client(data) {
 	data.forEach(function(msg) {
 		//console.log("Message: "+msg.msgId, msg);
@@ -2001,24 +1919,6 @@ function gre_to_client(data) {
 									}
 								}
 
-								/*
-								// Life total changed, see below (msg.gameStateMessage.players) 
-								// Not optimal, this triggers too many times
-								if (obj.type.includes("AnnotationType_ModifiedLife")) {
-									obj.details.forEach(function(detail) {
-										if (detail.key == "life") {
-											var change = detail.valueInt32[0];
-											if (change < 0) {
-												actionLog(aff, new Date(), getNameBySeat(aff)+' lost '+Math.abs(change)+' life');
-											}
-											else {
-												actionLog(aff, new Date(), getNameBySeat(aff)+' gained '+Math.abs(change)+' life');
-											}
-										}
-									});
-								}
-								*/
-
 								// Something moved between zones
 								// This requires some "async" work, as data referenced by annotations sometimes has future data
 								// That is , data we have already recieved and still havent processed (particularly, game objects)
@@ -2148,6 +2048,7 @@ function gre_to_client(data) {
 	forceDeckUpdate();
 	update_deck(false);
 }
+*/
 
 // Get player name by seat in the game
 function getNameBySeat(seat) {
@@ -2321,25 +2222,27 @@ function forceDeckUpdate() {
 	}
 	Object.keys(gameObjs).forEach(function(key) {
 		if (gameObjs[key] != undefined) {
-			if (zones[gameObjs[key].zoneId].type != "ZoneType_Limbo" && zones[gameObjs[key].zoneId].type != "ZoneType_Library") {
-				if (gameObjs[key].ownerSeatId == playerSeat && gameObjs[key].type != "GameObjectType_Token" && gameObjs[key].type != "GameObjectType_Ability") {
-					/*
-					// DEBUG
-					if (gameObjs[key].grpId != 3) {
-						decksize += 1;
-						cardsleft += 1;
-						currentDeckUpdated.mainDeck.push({id: gameObjs[key].grpId, quantity: gameObjs[key].zoneId})
-					}
-					*/
-					
-					cardsleft -= 1;
-					if (currentDeckUpdated.mainDeck != undefined) {
-						currentDeckUpdated.mainDeck.forEach(function(card) {
-							if (card.id == gameObjs[key].grpId) {
-								//console.log(gameObjs[key].instanceId, cardsDb.get(gameObjs[key].grpId).name, zones[gameObjs[key].zoneId].type);
-								card.quantity -= 1;
-							}
-						});
+			if (zones[gameObjs[key].zoneId]) {
+				if (zones[gameObjs[key].zoneId].type != "ZoneType_Limbo" && zones[gameObjs[key].zoneId].type != "ZoneType_Library") {
+					if (gameObjs[key].ownerSeatId == playerSeat && gameObjs[key].type != "GameObjectType_Token" && gameObjs[key].type != "GameObjectType_Ability") {
+						/*
+						// DEBUG
+						if (gameObjs[key].grpId != 3) {
+							decksize += 1;
+							cardsleft += 1;
+							currentDeckUpdated.mainDeck.push({id: gameObjs[key].grpId, quantity: gameObjs[key].zoneId})
+						}
+						*/
+						
+						cardsleft -= 1;
+						if (currentDeckUpdated.mainDeck != undefined) {
+							currentDeckUpdated.mainDeck.forEach(function(card) {
+								if (card.id == gameObjs[key].grpId) {
+									//console.log(gameObjs[key].instanceId, cardsDb.get(gameObjs[key].grpId).name, zones[gameObjs[key].zoneId].type);
+									card.quantity -= 1;
+								}
+							});
+						}
 					}
 				}
 			}
@@ -2571,24 +2474,26 @@ function saveDraft() {
 
 //
 function finishLoading() {
-	firstPass = false;
+	if (firstPass) {
+		firstPass = false;
 
-	if (duringMatch) {
-		ipc_send("renderer_hide", 1);
-		ipc_send("overlay_show", 1);
-		update_deck(false);
-	}
-	var obj = store.get('overlayBounds');
-	ipc_send("overlay_set_bounds", obj);
+		if (duringMatch) {
+			ipc_send("renderer_hide", 1);
+			ipc_send("overlay_show", 1);
+			update_deck(false);
+		}
+		var obj = store.get('overlayBounds');
+		ipc_send("overlay_set_bounds", obj);
 
-	requestHistorySend(0);
-	ipc_send("initialize", 1);
+		requestHistorySend(0);
+		ipc_send("initialize", 1);
 
-	obj = store.get('windowBounds');
-	ipc_send("renderer_set_bounds", obj);
+		obj = store.get('windowBounds');
+		ipc_send("renderer_set_bounds", obj);
 
-	if (playerName != null) {
-		httpSetPlayer(playerName, playerConstructedRank, playerConstructedTier, playerLimitedRank, playerLimitedTier);
+		if (playerName != null) {
+			httpSetPlayer(playerName, playerConstructedRank, playerConstructedTier, playerLimitedRank, playerLimitedTier);
+		}
 	}
 }
 
