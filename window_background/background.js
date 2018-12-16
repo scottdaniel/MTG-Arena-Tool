@@ -684,7 +684,9 @@ function onLogEntryFound(entry) {
 	}
 	else {
 		console.log("Entry:", entry.label, entry, entry.json());
-
+		if (firstPass) {
+			updateLoading(entry.label);
+		}
 		switch (entry.label) {
 			case "Log.Info":
 				if (entry.arrow == "==>") {
@@ -1486,8 +1488,15 @@ function saveDraft() {
 }
 
 //
-function finishLoading() {
+function updateLoading(stat) {
 	if (firstPass) {
+		ipc_send("popup", {"text": `Reading log: ${stat}`, "time": 0});
+	}
+}
+
+///
+function finishLoading() {
+	if (firstPass == 2) {
 		firstPass = false;
 
 		if (duringMatch) {
