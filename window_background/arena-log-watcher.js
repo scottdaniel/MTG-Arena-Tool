@@ -54,9 +54,7 @@ function start({ path, chunkSize, onLogEntry, onError, onFinish }) {
 			logDecoder.append(text, entry => onLogEntry({ ...entry, size }));
 			position += buffer.length;
 		}
-		if (position >= size) {
-			onFinish();
-		}
+		onFinish();
 
 		setTimeout(schedule, 250);
 	}
