@@ -17,6 +17,7 @@ const enums = {"CounterType":{"1":"+1\/+1","2":"-1\/-1","3":"Poison","4":"Wind",
 var setsList = cardsDb.get("sets");
 var eventsList = cardsDb.get("events");
 var renderer = 0;
+var rarities = ["common", "uncommon", "rare", "mythic"];
 
 var draftRanks = [];
 draftRanks[12] = "A+";
@@ -112,11 +113,15 @@ function addCardTile(grpId, indent, quantity, element) {
 					quantity = 4;
 				}
 
+				let xoff = (rarities.indexOf(card.rarity)) * -24;
+
 				if (cards[grpId] == undefined) {
-					cont.append('<div style="left: calc(0px - 100% + '+(ww-14)+'px);" class="not_owned_'+quantity+' card_tile_not_owned" title="'+quantity+' missing"></div>');
+					let yoff = 4 * -24;
+					cont.append(`<div style="background-position: ${xoff}px ${yoff}px; left: calc(0px - 100% + ${(ww-14)}px);" class="not_owned_sprite" title="${quantity} missing"></div>`);
 				}
 				else if (quantity > cards[grpId]) {
-					cont.append('<div style="left: calc(0px - 100% + '+(ww-14)+'px);" class="not_owned_'+quantity+' card_tile_not_owned" title="'+(quantity-cards[grpId])+' missing"></div>');
+					let yoff = (quantity - cards[grpId]) * -24;
+					cont.append(`<div style="background-position: ${xoff}px ${yoff}px; left: calc(0px - 100% + ${(ww-14)}px);" class="not_owned_sprite" title="${(quantity-cards[grpId])} missing"></div>`);
 				}
 			}
 		}

@@ -547,17 +547,14 @@ span {
     background: url(../images/not_owned.png) center no-repeat;
 }
 
-.not_owned_1 {
-    background: url(../images/not_owned_1.png) center no-repeat !important;
-}
-.not_owned_2 {
-    background: url(../images/not_owned_2.png) center no-repeat !important;
-}
-.not_owned_3 {
-    background: url(../images/not_owned_3.png) center no-repeat !important;
-}
-.not_owned_4 {
-    background: url(../images/not_owned_4.png) center no-repeat !important;
+.not_owned_sprite {
+    margin-top: 2px;
+    min-width: 24px;
+    width: 24px;
+    height: 24px;
+    left: calc(0px - 100% + 42px);
+    position: relative;
+    background-image: url(../images/not_owned_sprite.png);
 }
 
 .decklist_not_owned {
