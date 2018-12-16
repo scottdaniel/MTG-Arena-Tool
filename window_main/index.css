@@ -667,6 +667,7 @@ a:hover {
     display: flex;
     height: 64px;
     margin: 0 16px;
+    justify-content: space-between;
 }
 
 .list_deck_name {
