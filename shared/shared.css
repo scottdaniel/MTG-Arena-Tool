@@ -547,6 +547,19 @@ span {
     background: url(../images/not_owned.png) center no-repeat;
 }
 
+.not_owned_1 {
+    background: url(../images/not_owned_1.png) center no-repeat !important;
+}
+.not_owned_2 {
+    background: url(../images/not_owned_2.png) center no-repeat !important;
+}
+.not_owned_3 {
+    background: url(../images/not_owned_3.png) center no-repeat !important;
+}
+.not_owned_4 {
+    background: url(../images/not_owned_4.png) center no-repeat !important;
+}
+
 .decklist_not_owned {
     min-width: 24px;
     margin-left: 8px;

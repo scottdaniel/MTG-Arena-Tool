@@ -113,10 +113,10 @@ function addCardTile(grpId, indent, quantity, element) {
 				}
 
 				if (cards[grpId] == undefined) {
-					cont.append('<div style="left: calc(0px - 100% + '+(ww-14)+'px);" class="card_tile_not_owned" title="'+quantity+' missing"></div>');
+					cont.append('<div style="left: calc(0px - 100% + '+(ww-14)+'px);" class="not_owned_'+quantity+' card_tile_not_owned" title="'+quantity+' missing"></div>');
 				}
 				else if (quantity > cards[grpId]) {
-					cont.append('<div style="left: calc(0px - 100% + '+(ww-14)+'px);" class="card_tile_not_owned" title="'+(quantity-cards[grpId])+' missing"></div>');
+					cont.append('<div style="left: calc(0px - 100% + '+(ww-14)+'px);" class="not_owned_'+quantity+' card_tile_not_owned" title="'+(quantity-cards[grpId])+' missing"></div>');
 				}
 			}
 		}
