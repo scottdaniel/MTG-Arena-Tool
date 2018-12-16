@@ -51,7 +51,7 @@ function start({ path, chunkSize, onLogEntry, onError, onFinish }) {
 		while (position < size) {
 			const buffer = await readChunk(path, position, Math.min(size - position, chunkSize));
 			const text = stringDecoder.write(buffer);
-			logDecoder.append(text, onLogEntry);
+			logDecoder.append(text, entry => onLogEntry({ ...entry, size }));
 			position += buffer.length;
 		}
 		if (position >= size) {
