@@ -281,25 +281,34 @@ function createTag(tag, div, showClose = true) {
 	t.style.backgroundColor = tagCol;
 
 	if (tag) {
-		var colorPick = $(t);
-		colorPick.spectrum({
-			showInitial: true,
-			showAlpha: false,
-			showButtons: false
-		});
-		colorPick.spectrum("set", tagCol);
-
-		colorPick.on('move.spectrum', function(e, color) {
-			let tag = $(this).text();
-			let col = color.toRgbString();
-			ipc_send("edit_tag", {tag: tag, color: col});
-			tags_colors[tag] = col;
-
-			$('.deck_tag').each((index, obj) => {
-				let tag = $(obj).text();
-				$(obj).css("background-color", tags_colors[tag])
+		$(t).on('click', function(e) {
+			var colorPick = $(t);
+			colorPick.spectrum({
+				showInitial: true,
+				showAlpha: false,
+				showButtons: false
 			});
+			colorPick.spectrum("set", tagCol);
+			colorPick.spectrum("show");
+
+			colorPick.on('move.spectrum', function(e, color) {
+				let tag = $(this).text();
+				let col = color.toRgbString();
+				ipc_send("edit_tag", {tag: tag, color: col});
+				tags_colors[tag] = col;
+
+				$('.deck_tag').each((index, obj) => {
+					let tag = $(obj).text();
+					$(obj).css("background-color", tags_colors[tag])
+				});
+			});
+
+			colorPick.on('hide.spectrum', () => {
+				colorPick.spectrum("destroy");
+			});
+			e.stopPropagation();
 		});
+
 	}
 	else {
 		$(t).on('click', function(e) {
