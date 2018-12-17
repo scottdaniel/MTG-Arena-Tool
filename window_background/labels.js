@@ -635,9 +635,9 @@ function onLabelInEventDeckSubmit(entry, json) {
 
 function onLabelEventMatchCreated(entry, json) {
 	if (!json)	return;
-	logTime = parseWotcTime(entry.timestamp);
+	matchBeginTime = parseWotcTime(entry.timestamp);
 
-	ipc_send("ipc_log", "MATCH CREATED: "+logTime);
+	ipc_send("ipc_log", "MATCH CREATED: "+matchBeginTime);
 	if (json.eventId != "NPE") {
 		createMatch(json);
 	}

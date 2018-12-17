@@ -58,8 +58,9 @@ function ipc_send(method, arg, to = windowBackground) {
 	ipc.send('ipc_switch', method, windowOverlay, arg, to);
 }
 
-
-updateClock();
+window.setInterval(() => {
+	updateClock();
+}, 250);
 
 function updateClock() {
 	var hh, mm, ss;
@@ -86,9 +87,6 @@ function updateClock() {
 	mm = ('0' + mm).slice(-2);
 	ss = ('0' + ss).slice(-2);
 	$(".clock_elapsed").html(hh+":"+mm+":"+ss);
-	setTimeout(function () {
-		updateClock();
-	}, 250);
 }
 
 //
