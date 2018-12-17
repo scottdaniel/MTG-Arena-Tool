@@ -15,6 +15,7 @@ global
 */
 
 var economyHistory = [];
+var loadEconomy = 0;
 let filterEconomy = 'All';
 let daysago = 0;
 let dayList = [];
@@ -129,7 +130,7 @@ function open_economy_tab(loadMore) {
 		mainDiv.appendChild(div);
 		mainDiv.appendChild(d);
 
-		var loadEconomy = 0;
+		loadEconomy = 0;
 		daysago = -1;
 	}
 
