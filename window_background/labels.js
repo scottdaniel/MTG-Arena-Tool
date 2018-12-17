@@ -436,8 +436,10 @@ function onLabelInEventGetCombinedRankInfo(entry, json) {
 
 	playerConstructedRank = json.constructedClass;
 	playerConstructedTier = json.constructedLevel;
+	playerConstructedStep = json.constructedStep;
 	playerLimitedRank = json.limitedClass;
 	playerLimitedTier = json.limitedLevel;
+	playerLimitedStep = json.limitedStep;
 
 	let rank;
 	rank = get_rank_index(playerConstructedRank, playerConstructedTier);
@@ -781,4 +783,23 @@ function onLabelMatchGameRoomStateChangedEvent(entry, json) {
 			}
 		});
 	}
+}
+
+function onLabelInEventGetSeasonAndRankDetail(entry, json) {
+	if (!json)	return;
+
+	season_starts = new Date(json.currentSeason.seasonStartTime);
+	season_ends   = new Date(json.currentSeason.seasonEndTime);
+
+	json.constructedRankInfo.forEach((rank) => {
+		if (rank.rankClass == playerConstructedRank && rank.level == playerConstructedTier) {
+			playerConstructedSteps = rank.steps;
+		}
+	});
+
+	json.limitedRankInfo.forEach((rank) => {
+		if (rank.rankClass == playerLimitedRank && rank.level == playerLimitedTier) {
+			playerLimitedSteps = rank.steps;
+		}
+	});
 }

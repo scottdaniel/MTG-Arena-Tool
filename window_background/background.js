@@ -25,7 +25,8 @@ global
 	onLabelInDraftMakePick,
 	onLabelOutDraftMakePick,
 	onLabelInEventCompleteDraft,
-	onLabelMatchGameRoomStateChangedEvent
+	onLabelMatchGameRoomStateChangedEvent.
+	onLabelInEventGetSeasonAndRankDetail
 */
 var electron = require('electron');
 
@@ -137,11 +138,17 @@ var playerUsername = '';
 var playerName = null;
 var playerConstructedRank = null;
 var playerConstructedTier = null;
+var playerConstructedSteps = 4;
+var playerConstructedStep = 0;
 var playerLimitedRank = null;
 var playerLimitedTier = null;
+var playerLimitedSteps = 4;
+var playerLimitedStep = 0;
 var playerId = null;
 var playerSeat = null;
 var playerWin = 0;
+var season_starts = null;
+var season_ends = null;
 
 var oppName = null;
 var oppRank = null;
@@ -845,6 +852,13 @@ function onLogEntryFound(entry) {
 			case "MatchGameRoomStateChangedEvent":
 				json = entry.json();
 				onLabelMatchGameRoomStateChangedEvent(entry, json);
+			break;
+
+			case "Event.GetSeasonAndRankDetail":
+				if (entry.arrow == "<==") {
+					json = entry.json();
+					onLabelInEventGetSeasonAndRankDetail(entry, json);
+				}
 			break;
 
 			default:
