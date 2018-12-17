@@ -371,10 +371,11 @@ label {
 .main_hover, .main_hover_dfc {
     pointer-events: none;
     align-self: right;
-    max-width: 240px;
+    /* max-width: 240px; */
     opacity: 1;
     display: block;
-   /*margin-left: auto;*/
+    max-height: 340px;
+    /* margin-left: auto; */
     margin-right: 24px;
     margin-bottom: 12px;
     -webkit-border-radius: 4.75% / 3.5%;
