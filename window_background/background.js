@@ -1230,10 +1230,10 @@ function update_deck(force) {
 	var nd = new Date()
 	if (nd - lastDeckUpdate > 1000 || debugLog || !firstPass || force) {
 		if (overlayDeckMode == 0) {
-			ipc_send("set_deck", originalDeck, windowOverlay);
+			ipc_send("set_deck", currentDeckUpdated, windowOverlay);
 		}
 		if (overlayDeckMode == 1) {
-			ipc_send("set_deck", currentDeckUpdated, windowOverlay);
+			ipc_send("set_deck", originalDeck, windowOverlay);
 		}
 		if (overlayDeckMode == 2) {
 			ipc_send("set_deck", currentDeckUpdated, windowOverlay);
