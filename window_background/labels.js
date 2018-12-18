@@ -441,12 +441,14 @@ function onLabelInEventGetCombinedRankInfo(entry, json) {
 	playerLimitedTier = json.limitedLevel;
 	playerLimitedStep = json.limitedStep;
 
-	let rank;
-	rank = get_rank_index(playerConstructedRank, playerConstructedTier);
-	ipc_send("set_constructed_rank", {rank: rank, str: playerConstructedRank+" "+playerConstructedTier});
+	PlayerConstructedMatchesWon = json.constructedMatchesWon;
+	PlayerConstructedMatchesLost = json.constructedMatchesLost;
+	PlayerConstructedMatchesDrawn = json.constructedMatchesDrawn;
+	PlayerLimitedMatchesWon = json.limitedMatchesWon;
+	PlayerLimitedMatchesLost = json.limitedMatchesLost;
+	PlayerLimitedMatchesDrawn = json.limitedMatchesDrawn;
 
-	rank = get_rank_index(playerLimitedRank, playerLimitedTier);
-	ipc_send("set_limited_rank", {rank: rank, str: playerLimitedRank+" "+playerLimitedTier});
+	updateRank();
 }
 
 function onLabelInDeckGetDeckLists(entry, json) {
@@ -802,4 +804,7 @@ function onLabelInEventGetSeasonAndRankDetail(entry, json) {
 			playerLimitedSteps = rank.steps;
 		}
 	});
+
+	ipc_send("set_season", {starts: season_starts, ends: season_ends});
+	updateRank();
 }

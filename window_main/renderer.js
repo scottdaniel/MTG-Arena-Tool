@@ -79,6 +79,8 @@ let offlineMode = false;
 let rankOffset = 0;
 let rankTitle = "";
 let userName = ""
+let season_starts = new Date();
+let season_ends = new Date();
 
 let tags_colors = {};
 
@@ -192,6 +194,13 @@ ipc.on('set_limited_rank', function (event, _rank) {
 		$(".top_limited_rank").css("background-position", (rankOffset*-48)+"px 0px").attr("title", rankTitle);
 	}
 });
+
+//
+ipc.on('set_season', function (event, arg) {
+	season_starts = arg.starts;
+	season_ends = arg.ends;
+});
+
 
 //
 ipc.on('set_decks', function (event, arg) {

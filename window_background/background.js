@@ -6,7 +6,8 @@ global
 	stripTags,
 	windowBackground,
 	windowRenderer,
-	windowOverlay
+	windowOverlay,
+	get_rank_index,
 	onLabelOutLogInfo,
 	onLabelGreToClient,
 	onLabelClientToMatchServiceMessageTypeClientToGREMessage,
@@ -25,7 +26,7 @@ global
 	onLabelInDraftMakePick,
 	onLabelOutDraftMakePick,
 	onLabelInEventCompleteDraft,
-	onLabelMatchGameRoomStateChangedEvent.
+	onLabelMatchGameRoomStateChangedEvent,
 	onLabelInEventGetSeasonAndRankDetail
 */
 var electron = require('electron');
@@ -144,6 +145,13 @@ var playerLimitedRank = null;
 var playerLimitedTier = null;
 var playerLimitedSteps = 4;
 var playerLimitedStep = 0;
+var PlayerConstructedMatchesWon = 0;
+var PlayerConstructedMatchesLost = 0;
+var PlayerConstructedMatchesDrawn = 0;
+var PlayerLimitedMatchesWon = 0;
+var PlayerLimitedMatchesLost = 0;
+var PlayerLimitedMatchesDrawn = 0;
+
 var playerId = null;
 var playerSeat = null;
 var playerWin = 0;
@@ -387,7 +395,32 @@ function requestHistorySend(state) {
 
 // Calculates winrates for history tabs (set to last 10 dys as default)
 function calculateRankWins() {
-	var rankwinrates = {beginner: {w:0, l:0, t:0, r:"Beginner"}, bronze: {w:0, l:0, t:0, r:"Bronze"}, silver: {w:0, l:0, t:0, r:"Silver"}, gold: {w:0, l:0, t:0, r:"Gold"}, diamond: {w:0, l:0, t:0, r:"Diamond"}, master: {w:0, l:0, t:0, r:"Master"}};
+	var rankwinrates = {
+		constructed: {
+			bronze: {w:0, l:0, t:0, r:"Bronze"},
+			silver: {w:0, l:0, t:0, r:"Silver"},
+			gold: {w:0, l:0, t:0, r:"Gold"},
+			platinum: {w:0, l:0, t:0, r:"Platinum"},
+			diamond: {w:0, l:0, t:0, r:"Diamond"},
+			mythic: {w:0, l:0, t:0, r:"Mythic"},
+			step: playerConstructedStep,
+			steps: playerConstructedSteps,
+			total: {w:PlayerConstructedMatchesWon, l:PlayerConstructedMatchesLost, t:PlayerConstructedMatchesWon+PlayerConstructedMatchesLost}
+		},
+		limited: {
+			bronze: {w:0, l:0, t:0, r:"Bronze"},
+			silver: {w:0, l:0, t:0, r:"Silver"},
+			gold: {w:0, l:0, t:0, r:"Gold"},
+			platinum: {w:0, l:0, t:0, r:"Platinum"},
+			diamond: {w:0, l:0, t:0, r:"Diamond"},
+			mythic: {w:0, l:0, t:0, r:"Mythic"},
+			step: playerLimitedStep,
+			steps: playerLimitedSteps,
+			total: {w:PlayerLimitedMatchesWon, l:PlayerLimitedMatchesLost, t:PlayerLimitedMatchesWon+PlayerLimitedMatchesLost}
+		},
+
+	};
+
 	for (var i = 0; i < history.matches.length; i++) {
 		let match_id = history.matches[i];
 		let match = history[match_id];
@@ -396,27 +429,37 @@ function calculateRankWins() {
 		if (match.type != "match") continue;
 		if (match.opponent == undefined) continue;
 
-		if (daysPast(match.date) > 10) continue;
+		if (match.date < season_starts) continue;
+		if (match.date > season_ends) continue;
 
-		let struct = undefined;
+		let struct;
+		if (match.eventId == "Ladder") {
+			struct = rankwinrates.constructed;
+		}
+		else if (match.eventId == "QuickDraft_DOM_12072018") {
+			struct = rankwinrates.limited;
+		}
+		else {
+			continue;
+		}
 		switch (match.opponent.rank) {
-			case "Beginner":
-				struct = rankwinrates.beginner;	break;
 			case "Bronze":
-				struct = rankwinrates.bronze;	break;
+				struct = struct.bronze;		break;
 			case "Silver":
-				struct = rankwinrates.silver;	break;
+				struct = struct.silver;		break;
 			case "Gold":
-				struct = rankwinrates.gold;		break;
+				struct = struct.gold;		break;
+			case "Platinum":
+				struct = struct.platinum;	break;
 			case "Diamond":
-				struct = rankwinrates.diamond;	break;
-			case "Master":
-				struct = rankwinrates.master;	break;
+				struct = struct.diamond;	break;
+			case "Mythic":
+				struct = struct.mythic;		break;
 			default:
-				struct = undefined;	break;
+				struct = undefined;			break;
 		}
 
-		if (struct != undefined) {
+		if (struct) {
 			struct.t += 1;
 			if (match.opponent.win > match.player.win)
 				struct.l += 1;
@@ -1544,6 +1587,16 @@ function updateLoading(entry) {
 	if (firstPass) {
 		ipc_send("popup", {"text": `Reading log: ${Math.round(100/entry.size*entry.position)}%`, "time": 0});
 	}
+}
+
+//
+function updateRank() {
+	let rank;
+	rank = get_rank_index(playerConstructedRank, playerConstructedTier);
+	ipc_send("set_constructed_rank", {rank: rank, step: playerConstructedStep, steps: playerConstructedSteps, str: playerConstructedRank+" "+playerConstructedTier});
+
+	rank = get_rank_index(playerLimitedRank, playerLimitedTier);
+	ipc_send("set_limited_rank", {rank: rank, step: playerLimitedStep, steps: playerLimitedSteps, str: playerLimitedRank+" "+playerLimitedTier});
 }
 
 ///

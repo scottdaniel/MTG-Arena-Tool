@@ -37,13 +37,13 @@ function open_history_tab(loadMore) {
 
 		var t = document.createElement("div");
 		t.classList.add("ranks_history_title");
-		t.innerHTML = "Stats from last 10 days:";
+		t.innerHTML = "Stats from this season:";
 		div.appendChild(t);
 
 		// Add ranks matchup history here
-		for (var key in matchesHistory.rankwinrates) {
-			if (matchesHistory.rankwinrates.hasOwnProperty(key)) {
-				var val = matchesHistory.rankwinrates[key];
+		for (var key in matchesHistory.rankwinrates.constructed) {
+			if (matchesHistory.rankwinrates.constructed.hasOwnProperty(key)) {
+				var val = matchesHistory.rankwinrates.constructed[key];
 				if (val.t > 0) {
 					var fla = document.createElement("div");
 					fla.classList.add("flex_item");
