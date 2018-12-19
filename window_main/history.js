@@ -12,7 +12,13 @@ globals
 	setsList,
 	addHover,
 	selectAdd,
-	compare_cards
+	compare_cards,
+	rankLimited,
+	rankLimitedStep,
+	rankLimitedTier,
+	rankConstructed,
+	rankConstructedStep,
+	rankConstructedTier
 
 */
 let loadHistory = 0;
@@ -37,13 +43,15 @@ function open_history_tab(loadMore) {
 
 		var t = document.createElement("div");
 		t.classList.add("ranks_history_title");
-		t.innerHTML = "Stats from this season:";
+		t.innerHTML = "Current contructed season:";
 		div.appendChild(t);
 
 		// Add ranks matchup history here
-		for (var key in matchesHistory.rankwinrates.constructed) {
-			if (matchesHistory.rankwinrates.constructed.hasOwnProperty(key)) {
-				var val = matchesHistory.rankwinrates.constructed[key];
+		let rc = matchesHistory.rankwinrates.constructed;
+		let lastWinrate;
+		for (var key in rc) {
+			if (rc.hasOwnProperty(key)) {
+				var val = rc[key];
 				if (val.t > 0) {
 					var fla = document.createElement("div");
 					fla.classList.add("flex_item");
@@ -61,7 +69,9 @@ function open_history_tab(loadMore) {
 
 					var s = document.createElement("div");
 					s.classList.add("ranks_history_title");
-					s.innerHTML = Math.round(val.w/val.t*100)+"%";
+
+					lastWinrate = Math.round(val.w/val.t*100);
+					s.innerHTML = lastWinrate+"%";
 
 					fla.appendChild(v);
 					fla.appendChild(r);
@@ -70,6 +80,17 @@ function open_history_tab(loadMore) {
 				}
 			}
 		}
+
+		t = document.createElement("div");
+		t.classList.add("ranks_history_title");
+		t.innerHTML = `Total: ${Math.round(100 / rc.total.t * rc.total.w)} %`;
+		div.appendChild(t);
+
+		let expected = getStepsUntilNextRank(0, lastWinrate/100);
+		t = document.createElement("div");
+		t.classList.add("ranks_history_title");
+		t.innerHTML = `Matches until ${getNextRank(0)}: ${expected}`;
+		div.appendChild(t);
 
 		var wrap_l = document.createElement("div");
 		wrap_l.classList.add("wrapper_column");
@@ -297,7 +318,52 @@ function open_history_tab(loadMore) {
 	loadHistory = loadEnd;
 }
 
-var currentId = null;
+function getNextRank(mode) {
+	let cr = rankLimited;
+	if (!mode)	cr = rankConstructed;
+
+	if (cr == "Bronze")		return "Silver";
+	if (cr == "Silver")		return "Gold";
+	if (cr == "Gold")		return "Platinum";
+	if (cr == "Platinum")	return "Diamond";
+	if (cr == "Diamond")	return "Mythic";
+	return;
+}
+
+function getStepsUntilNextRank(mode, winrate) {
+	let cr = rankLimited;
+	let cs = rankLimitedStep
+	let ct = rankLimitedTier;
+	if (!mode) {
+		cr = rankConstructed;
+		cs = rankConstructedStep;
+		ct = rankConstructedTier;
+	}
+
+	let st = 1;
+	let stw = 1;
+	let stl = 0;
+	if (cr == "Bronze")		{st = 4; stw = 2; stl = 0;}
+	if (cr == "Silver")		{st = 5; stw = 2; stl = 1;}
+	if (cr == "Gold")		{st = 6; stw = 1; stl = 1;}
+	if (cr == "Platinum")	{st = 7; stw = 1; stl = 1;}
+	if (cr == "Diamond")	{st = 1; stw = 1; stl = 1;}
+
+	let stepsNeeded = (st * ct) - cs;
+
+	if (winrate < 0.5)	return "&#x221e";
+	let expected = 0;
+	let n = 0;
+	console.log("stepsNeeded", stepsNeeded);
+	while (expected <= stepsNeeded) {
+		expected = ((n * winrate) * stw) - (n * (1 - winrate) * stl);
+		console.log("expected", expected, "N", n);
+		n++;
+	}
+
+	return n;
+}
+
 function addShare(_match) {
 	$('.'+_match.id+'dr').on('click', function(e) {
 		currentId = _match.id;

@@ -79,6 +79,13 @@ let offlineMode = false;
 let rankOffset = 0;
 let rankTitle = "";
 let userName = ""
+let rankConstructed = 'Bronze';
+let rankConstructedStep = 1;
+let rankConstructedTier = 4;
+let rankLimited = 'Bronze';
+let rankLimitedStep = 1;
+let rankLimitedTier = 4;
+
 let season_starts = new Date();
 let season_ends = new Date();
 
@@ -179,6 +186,9 @@ ipc.on('set_username', function (event, arg) {
 
 //
 ipc.on('set_constructed_rank', function (event, _rank) {
+	rankConstructed = _rank.rankName;
+	rankConstructedStep = _rank.rankStep;
+	rankConstructedTier = _rank.rankTier;
 	rankOffset = _rank.rank;
 	rankTitle = _rank.str;
 	if (sidebarActive != -99) {
@@ -188,6 +198,9 @@ ipc.on('set_constructed_rank', function (event, _rank) {
 
 //
 ipc.on('set_limited_rank', function (event, _rank) {
+	rankLimited = _rank.rankName;
+	rankLimitedStep = _rank.rankStep;
+	rankLimitedTier = _rank.rankTier;
 	rankOffset = _rank.rank;
 	rankTitle = _rank.str;
 	if (sidebarActive != -99) {

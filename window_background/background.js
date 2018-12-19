@@ -1593,10 +1593,10 @@ function updateLoading(entry) {
 function updateRank() {
 	let rank;
 	rank = get_rank_index(playerConstructedRank, playerConstructedTier);
-	ipc_send("set_constructed_rank", {rank: rank, step: playerConstructedStep, steps: playerConstructedSteps, str: playerConstructedRank+" "+playerConstructedTier});
+	ipc_send("set_constructed_rank", {rankName: playerConstructedRank, rankTier: playerConstructedTier, rank: rank, rankStep: playerConstructedStep, steps: playerConstructedSteps, str: playerConstructedRank+" "+playerConstructedTier});
 
 	rank = get_rank_index(playerLimitedRank, playerLimitedTier);
-	ipc_send("set_limited_rank", {rank: rank, step: playerLimitedStep, steps: playerLimitedSteps, str: playerLimitedRank+" "+playerLimitedTier});
+	ipc_send("set_limited_rank", {rankName: playerLimitedRank, rankTier: playerLimitedTier, rank: rank, rankStep: playerLimitedStep, steps: playerLimitedSteps, str: playerLimitedRank+" "+playerLimitedTier});
 }
 
 ///
