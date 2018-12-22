@@ -1030,10 +1030,10 @@ function expandEvent(_course, expandDiv) {
 					try {
 						tile.style.backgroundImage = "url(https://img.scryfall.com/cards"+cardsDb.get(tileGrpid).images["art_crop"]+")";
 					}
-					catch (e) {
+					catch (e) {timeSince(new Date(match.date))+' ago - '+toMMSS(match.duration)
 						console.error(e)
 					}
-					fltl.appendChild(tile);
+					//fltl.appendChild(tile);
 
 					var d = document.createElement("div");
 					d.classList.add("list_deck_name");
@@ -1063,7 +1063,7 @@ function expandEvent(_course, expandDiv) {
 
 					d = document.createElement("div");
 					d.classList.add("list_match_time");
-					d.innerHTML = timeSince(new Date(match.date))+' ago.';
+					d.innerHTML = timeSince(new Date(match.date))+' ago - '+toMMSS(match.duration);
 					fcb.appendChild(d);
 
 					var cc = get_deck_colors(match.oppDeck);

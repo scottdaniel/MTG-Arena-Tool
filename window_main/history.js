@@ -186,6 +186,11 @@ function open_history_tab(loadMore) {
 			d.innerHTML = match.playerDeck.name;
 			flt.appendChild(d);
 
+			d = document.createElement("div");
+			d.classList.add("list_deck_name_it");
+			d.innerHTML = getReadableEvent(match.eventId);
+			flt.appendChild(d);
+
 			match.playerDeck.colors.forEach(function(color) {
 				var m = document.createElement("div");
 				m.classList.add("mana_s20");
