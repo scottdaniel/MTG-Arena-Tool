@@ -424,7 +424,7 @@ function onLabelInEventGetPlayerCourse(entry, json) {
 			json.CourseDeck.colors = get_deck_colors(json.CourseDeck);
 			//json.date = timestamp();
 			//console.log(json.CourseDeck, json.CourseDeck.colors)
-			httpSubmitCourse(json);
+			httpApi.httpSubmitCourse(json);
 			saveCourse(json);
 		}
 		select_deck(json);
