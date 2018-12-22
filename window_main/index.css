@@ -949,9 +949,14 @@ a:hover {
     background-repeat: no-repeat;
 }
 
-.wc_explore_cont {
-
+.wc_complete {
+    width: 40px;
+    height: 64px;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-image: url('../images/complete.png');
 }
+
 
 .wc_common      { background-image: url('../images/wc_common.png'); }
 .wc_uncommon    { background-image: url('../images/wc_uncommon.png'); }

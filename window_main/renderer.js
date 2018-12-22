@@ -1280,17 +1280,19 @@ function setExplore(arg, loadMore) {
 		var flc = document.createElement("div");
 		flc.classList.add("flex_item");
 		flc.style.flexDirection = "column";
-		flc.style.flexGrow = 1;
+		flc.style.width = '40%';
 
 		var flcf = document.createElement("div");
 		flcf.classList.add("flex_item");
-		flcf.style.flexGrow = 1;
+		flcf.style.width = '20%';
 		flcf.style.justifyContent = 'center';
 
 		let rarityShort = {c: 'common', u: 'uncommon', r: 'rare', m: 'mythic'};
 		let wc;
+		let n = 0;
 		for (var key in rarityShort) {
 			if (_deck.wildcards.hasOwnProperty(key)) {
+				n++;
 				wc = document.createElement("div");
 				wc.classList.add("wc_explore_cost");
 				wc.classList.add("wc_"+rarityShort[key]);
@@ -1298,11 +1300,16 @@ function setExplore(arg, loadMore) {
 				flcf.appendChild(wc);
 			}
 		}
+		if (n == 0) {
+			wc = document.createElement("div");
+			wc.classList.add("wc_complete");
+			flcf.appendChild(wc);
+		}
 
 		var flr = document.createElement("div");
 		flr.classList.add("flex_item");
 		flr.style.flexDirection = "column";
-		flr.style.flexGrow = 1;
+		flr.style.width = '40%';
 
 		var flt = document.createElement("div");
 		flt.classList.add("flex_top");
