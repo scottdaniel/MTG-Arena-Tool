@@ -48,11 +48,11 @@ function open_history_tab(loadMore) {
 
 		// Add ranks matchup history here
 		let rc = matchesHistory.rankwinrates.constructed;
-		let lastWinrate;
+		let lastWinrate = Math.round(100 / rc.total.t * rc.total.w);
 		for (var key in rc) {
 			if (rc.hasOwnProperty(key)) {
 				var val = rc[key];
-				if (val.t > 0) {
+				if (val.t > 0 && val.r)  {
 					var fla = document.createElement("div");
 					fla.classList.add("flex_item");
 					//fla.style.flexDirection = "column";
@@ -89,7 +89,7 @@ function open_history_tab(loadMore) {
 		let expected = getStepsUntilNextRank(0, lastWinrate/100);
 		t = document.createElement("div");
 		t.classList.add("ranks_history_title");
-		t.innerHTML = `Matches until ${getNextRank(0)}: ${expected}`;
+		t.innerHTML = `Games until ${getNextRank(0)}: ${expected}`;
 		div.appendChild(t);
 
 		var wrap_l = document.createElement("div");

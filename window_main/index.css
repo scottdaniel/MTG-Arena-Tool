@@ -1710,6 +1710,7 @@ a:hover {
 .ranks_history_title {
     -webkit-user-select: none;
     align-self: center;
+    margin-top: 8px;
     color: #FAE5D2;
     text-align: center;
 }
