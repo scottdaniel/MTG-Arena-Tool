@@ -860,7 +860,7 @@ function setEvents(loadMore) {
 		});
 
 		var d = document.createElement("div");
-		if (course.CurrentEventState == "DoneWithMatches") {
+		if (course.CurrentEventState == "DoneWithMatches" || course.CurrentEventState == 2) {
 			d.innerHTML = "Completed";
 			d.classList.add("list_event_phase");
 		}
