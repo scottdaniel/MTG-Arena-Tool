@@ -116,7 +116,7 @@ function addCardTile(grpId, indent, quantity, element) {
 				let xoff = (rarities.indexOf(card.rarity)) * -24;
 
 				if (cards[grpId] == undefined) {
-					let yoff = 4 * -24;
+					let yoff = quantity * -24;
 					cont.append(`<div style="background-position: ${xoff}px ${yoff}px; left: calc(0px - 100% + ${(ww-14)}px);" class="not_owned_sprite" title="${quantity} missing"></div>`);
 				}
 				else if (quantity > cards[grpId]) {
