@@ -1,7 +1,5 @@
 /*
 global
-	makeId,
-	daysPast,
 	cardsDb,
 	stripTags,
 	windowBackground,
@@ -34,9 +32,11 @@ var electron = require('electron');
 const {app, net, clipboard} = require('electron');
 const path  = require('path');
 const Store = require('../store.js');
-const async = require("async");
-const qs	= require('qs');
+const fs	= require("fs");
+const sha1	= require('js-sha1');
+const ipc	= electron.ipcRenderer;
 
+const httpApi = require('./http-api');
 
 const rememberCfg = {
 	email: '',
@@ -105,15 +105,10 @@ var settingsStore = new Store({
 	defaults: settingsCfg
 });
 
-const sha1 = require('js-sha1');
-
-const serverAddress = 'mtgatool.com';
 
 const debugLog = false;
 const debugNet = true;
 var debugLogSpeed = 0.1;
-const fs = require("fs");
-const ipc = electron.ipcRenderer;
 
 const actionLogDir = path.join((electron.app || electron.remote.app).getPath('userData'), 'actionlogs');
 if (!fs.existsSync(actionLogDir)){
@@ -215,7 +210,6 @@ function ipc_send(method, arg, to = windowRenderer) {
 	ipc.send('ipc_switch', method, windowBackground, arg, to);
 }
 
-
 var rememberMe = false;
 
 //
@@ -256,7 +250,7 @@ ipc.on('login', function (event, arg) {
 	if (arg.password == "********") {
 		tokenAuth = rstore.get("token");
 		playerUsername = arg.username;
-		httpAuth(arg.username, arg.password);
+		httpApi.httpAuth(arg.username, arg.password);
 	}
 	else if (arg.username == '' && arg.password == '') {
 		ipc_send("auth", {ok: true, user:-1});
@@ -266,13 +260,13 @@ ipc.on('login', function (event, arg) {
 	else {
 		playerUsername = arg.username;
 		tokenAuth = '';
-		httpAuth(arg.username, arg.password);
+		httpApi.httpAuth(arg.username, arg.password);
 	}
 });
 
 //
 ipc.on('request_draft_link', function (event, obj) {
-	httpDraftShareLink(obj.id, obj.expire);
+	httpApi.httpDraftShareLink(obj.id, obj.expire);
 });
 
 //
@@ -293,7 +287,7 @@ ipc.on('save_settings', function (event, settings) {
 
 //
 ipc.on('delete_data', function () {
-	httpDeleteData();
+	httpApi.httpDeleteData();
 });
 
 //
@@ -357,7 +351,7 @@ window.onerror = (msg, url, line, col, err) => {
 		col: col
 	}
 	error.id = sha1(error.msg + playerId);
-	httpSendError(error);
+	httpApi.httpSendError(error);
 }
 
 process.on('uncaughtException', function(err){
@@ -369,13 +363,13 @@ process.on('uncaughtException', function(err){
 	}
 	console.log("ERROR: ", error);
 	error.id = sha1(error.msg + playerId);
-	httpSendError(error);
+	httpApi.httpSendError(error);
 })
 
 //
 ipc.on('error', function (event, err) {
 	err.id = sha1(err.msg + playerId);
-	httpSendError(err);
+	httpApi.httpSendError(err);
 });
 
 //
@@ -478,10 +472,10 @@ ipc.on('request_explore', function (event, arg) {
 	else {
 		let cards = store.get('cards.cards');
 		if (arg == "all" || arg == "All" ) {
-			httpGetTopDecks("", cards);
+			httpApi.httpGetTopDecks("", cards);
 		}
 		else {
-			httpGetTopDecks(arg, cards);
+			httpApi.httpGetTopDecks(arg, cards);
 		}
 	}
 });
@@ -500,23 +494,23 @@ ipc.on('request_economy', function () {
 });
 
 ipc.on('request_course', function (event, arg) {
-	httpGetCourse(arg);
+	httpApi.httpGetCourse(arg);
 });
 
 ipc.on('request_tou_list', function () {
-    httpTournamentList();
+    httpApi.httpTournamentList();
 });
 
 ipc.on('tou_get', function (event, arg) {
-    httpTournamentGet(arg);
+    httpApi.httpTournamentGet(arg);
 });
 
 ipc.on('tou_join', function (event, arg) {
-    httpTournamentJoin(arg.id, arg.deck);
+    httpApi.httpTournamentJoin(arg.id, arg.deck);
 });
 
 ipc.on('tou_drop', function (event, arg) {
-    httpTournamentDrop(arg);
+    httpApi.httpTournamentDrop(arg);
 });
 
 ipc.on('edit_tag', function (event, arg) {
@@ -1454,7 +1448,7 @@ function saveEconomy(json) {
 		economy_index.push(json.id);
 	}
 
-	httpSetEconomy(json);
+	httpApi.httpSetEconomy(json);
 	
 	economy[json.id] = json;
 	economy.changes = economy_index;
@@ -1538,7 +1532,7 @@ function saveMatch() {
 
 	history[currentMatchId] = match;
 	history[currentMatchId].type = "match";
-	httpSetMatch(match);
+	httpApi.httpSetMatch(match);
 	requestHistorySend(0);
 	ipc_send("set_timer", 0, windowOverlay);
 	ipc_send("popup", {"text": "Match saved!", "time": 3000});
@@ -1573,7 +1567,7 @@ function saveDraft() {
 		store.set(draftId, draft);
 		history[draftId] = draft;
 		history[draftId].type = "draft";
-		httpSetDraft(draft);
+		httpApi.httpSetDraft(draft);
 		requestHistorySend(0);
 		ipc_send("popup", {"text": "Draft saved!", "time": 3000});		
 	}
@@ -1619,285 +1613,10 @@ function finishLoading() {
 		ipc_send("renderer_set_bounds", obj);
 
 		if (playerName != null) {
-			httpSetPlayer(playerName, playerConstructedRank, playerConstructedTier, playerLimitedRank, playerLimitedTier);
+			httpApi.httpSetPlayer(playerName, playerConstructedRank, playerConstructedTier, playerLimitedRank, playerLimitedTier);
 		}
 		ipc_send("popup", {"text": `Reading log: 100%`, "time": 1000});
 	}
-}
-
-// HTTP stuff starts here
-var httpAsync = [];
-httpBasic();
-httpGetDatabase();
-htttpGetStatus();
-
-// 
-function httpBasic() {
-    var httpAsyncNew = httpAsync.slice(0);
-    //var str = ""; httpAsync.forEach( function(h) {str += h.reqId+", "; }); console.log("httpAsync: ", str);
-    async.forEachOfSeries(httpAsyncNew, function (value, index, callback) {
-        var _headers = value;
-
-        if (store.get("settings").send_data == false && _headers.method != 'auth' && _headers.method != 'delete_data' && _headers.method != 'get_database' && _headers.method != 'get_status' && debugLog == false) {
-            callback({message: "Settings dont allow sending data! > "+_headers.method});
-            removeFromHttp(_headers.reqId);
-        }
-        
-        _headers.token = tokenAuth;
-
-        var http = require('https');
-        var options;
-        if (_headers.method == 'get_database') {
-            options = { protocol: 'https:', port: 443, hostname: serverAddress, path: '/database/database.json', method: 'GET'};
-        }
-        else if (_headers.method == 'get_status') {
-            http = require('https');
-            options = { protocol: 'https:', port: 443, hostname: 'magicthegatheringarena.statuspage.io', path: '/index.json', method: 'GET'};
-        }
-        else if (_headers.method_path !== undefined) {
-            options = { protocol: 'https:', port: 443, hostname: serverAddress, path: _headers.method_path, method: 'POST'};
-        }
-        else {
-            options = { protocol: 'https:', port: 443, hostname: serverAddress, path: '/api.php', method: 'POST'};
-        }
-
-        if (debugNet) {
-            console.log("SEND >> "+index+", "+_headers.method, _headers, options);
-            ipc_send("ipc_log", "SEND >> "+index+", "+_headers.method+", "+_headers.reqId+", "+_headers.token);
-        }
-
-        console.log("POST", _headers);
-        var post_data = qs.stringify(_headers);
-        options.headers = { 'Content-Type': 'application/x-www-form-urlencoded', 'Content-Length': post_data.length};
-
-        var results = ''; 
-        var req = http.request(options, function(res) {
-            res.on('data', function (chunk) {
-                results = results + chunk;
-            }); 
-            res.on('end', function () {
-                if (debugNet) {
-					ipc_send("ipc_log", "RECV << "+index+", "+_headers.method+", "+_headers.reqId+", "+_headers.token);
-                    ipc_send("ipc_log", "RECV << "+index+", "+_headers.method+", "+results.slice(0, 100));
-                    console.log("RECV << "+index, _headers.method, results.slice(0, 500));
-                }
-                try {
-                    var parsedResult = JSON.parse(results);
-                    if (_headers.method == 'get_status') {
-                        delete parsedResult.page; delete parsedResult.incidents;
-                        parsedResult.components.forEach(function(ob) {
-                            delete ob.id; delete ob.page_id; delete ob.group_id; delete ob.showcase; delete ob.description; delete ob.position; delete ob.created_at;
-                        });
-                        ipc_send("set_status", parsedResult);
-                    }
-                    if (parsedResult.ok) {
-                        if (_headers.method == 'auth') {
-                            tokenAuth = parsedResult.token;
-
-                            //ipc_send("auth", parsedResult.arenaids);
-
-                            if (rememberMe) {
-                                rstore.set("token", tokenAuth);
-                                rstore.set("email", playerUsername);
-                            }
-
-                            ipc_send("auth", parsedResult);
-                            loadPlayerConfig(playerId);
-                        }
-                        if (_headers.method == 'tou_join' || _headers.method == 'tou_drop') {
-                        	httpTournamentGet(parsedResult.id);
-                        }
-                        if (_headers.method == 'get_top_decks') {
-                            ipc_send("set_explore", parsedResult.result);
-                        }
-                        if (_headers.method == 'get_course') {
-                            ipc_send("open_course_deck", parsedResult.result);
-                        }
-                        if (_headers.method == 'share_draft') {
-                            ipc_send("set_draft_link", parsedResult.url);
-                        }
-                        if (_headers.method == 'tou_list') {
-                            ipc_send("set_tou_list", parsedResult.result);
-                        }
-                        if (_headers.method == 'tou_get') {
-                            ipc_send("tou_set", parsedResult.result);
-                        }
-                        
-                        if (_headers.method == 'get_database') {
-                            //resetLogLoop(100);
-                            delete parsedResult.ok;
-                            setsList = parsedResult.sets;
-                            eventsList = parsedResult.events;
-                            ipc_send("set_db", parsedResult);
-                            cardsDb.set(parsedResult);
-                            ipc_send("popup", {"text": "Metadata: Ok", "time": 1000});
-                        }
-                    }
-                    else if (parsedResult.ok == false && parsedResult.error != undefined) {
-                        if (_headers.method == 'share_draft') {
-                            ipc_send("popup", {"text": parsedResult.error, "time": 3000});
-                        }
-                        if (_headers.method == 'auth') {
-                            if (parsedResult.error == "Invalid credentials.") {
-                                tokenAuth = undefined;
-                                rstore.set("email", "");
-                                rstore.set("token", "");
-                                ipc_send("clear_pwd", 1);
-                                ipc_send("set_remember", false);
-                            }
-                        }
-                        // errors here 
-                    }
-                    if (_headers.method == 'auth') {
-                        ipc_send("auth", parsedResult);
-                    }
-                } catch (e) {
-                    console.error(e.message);
-                }
-                /*
-                if (_headers.token != "") {
-                }
-                */
-                try {
-                    callback();
-                }
-                catch (e) {
-                	//
-                }
-                
-
-                removeFromHttp(_headers.reqId);
-                if (debugNet) {
-                    var str = ""; httpAsync.forEach( function(h) { str += h.reqId+", "; });
-                    ipc_send("ipc_log", "httpAsync: "+str);
-                }
-            }); 
-        });
-        req.on('error', function(e) {
-            callback(e);
-            removeFromHttp(_headers.reqId);
-            ipc_send("ipc_log", e.message);
-        });
-        req.write(post_data);
-        console.log(req);
-        req.end();
-
-    }, function (err) {
-        if (err) {
-            ipc_send("ipc_log", "httpBasic() Error: "+err.message);
-        }
-        // do it again
-        setTimeout( function() {
-            httpBasic();
-        }, 250);
-    });
-}
-
-function removeFromHttp(req) {
-	httpAsync.forEach( function(h, i) {
-		if (h.reqId == req) {
-			httpAsync.splice(i, 1);
-		}
-	});
-}
-
-function httpAuth(user, pass) {
-	var _id = makeId(6);
-	playerUsername = user;
-	httpAsync.push({'reqId': _id, 'method': 'auth', 'method_path': '/login.php', 'email': user, 'password': pass, 'playerid': playerId, 'playername': playerName, 'mtgaversion': arenaVersion, 'version': window.electron.remote.app.getVersion()});
-}
-
-function httpSubmitCourse(course) {
-	var _id = makeId(6);
-	if (store.get("settings").anon_explore == true) {
-		course.PlayerId = "000000000000000";
-		course.PlayerName = "Anonymous";
-	}
-	course = JSON.stringify(course);
-	httpAsync.push({'reqId': _id, 'method': 'submit_course', 'method_path': '/send_course.php', 'course': course});
-}
-
-function httpSetPlayer() {
-	// useless I think
-	//var _id = makeId(6);
-	//httpAsync.push({'reqId': _id, 'method': 'set_player', 'name': name, 'rank': rank, 'tier': tier});
-}
-
-function httpGetTopDecks(query, collection) {
-	var _id = makeId(6);
-	collection = JSON.stringify(collection);
-	httpAsync.push({'reqId': _id, 'method': 'get_top_decks', 'method_path': '/get_courses_list.php', 'query': query, 'collection': collection});
-}
-
-function httpGetCourse(courseId) {
-	var _id = makeId(6);
-	httpAsync.push({'reqId': _id, 'method': 'get_course', 'method_path': '/get_course.php', 'courseid': courseId});
-}
-
-function httpSetMatch(match) {
-	var _id = makeId(6);
-	match = JSON.stringify(match);
-	httpAsync.push({'reqId': _id, 'method': 'set_match', 'method_path': '/send_match.php', 'match': match});
-}
-
-function httpSetDraft(draft) {
-	var _id = makeId(6);
-	draft = JSON.stringify(draft);
-	httpAsync.push({'reqId': _id, 'method': 'set_draft', 'method_path': '/send_draft.php', 'draft': draft});
-}
-
-function httpSetEconomy(change) {
-	var _id = makeId(6);
-	change = JSON.stringify(change);
-	httpAsync.push({'reqId': _id, 'method': 'set_economy', 'method_path': '/send_economy.php', 'change': change});
-}
-
-function httpSendError(error) {
-	var _id = makeId(6);
-	error = JSON.stringify(error);
-	httpAsync.push({'reqId': _id, 'method': 'send_error', 'method_path': '/send_error.php', 'error': error});
-}
-
-function httpDeleteData() {
-	var _id = makeId(6);
-	httpAsync.push({'reqId': _id, 'method': 'delete_data', 'method_path': '/delete_data.php'});
-}
-
-function httpGetDatabase() {
-	var _id = makeId(6);
-	ipc_send("popup", {"text": "Downloading metadata", "time": 0});
-	httpAsync.push({'reqId': _id, 'method': 'get_database'});
-}
-
-function htttpGetStatus() {
-	var _id = makeId(6);
-	httpAsync.push({'reqId': _id, 'method': 'get_status'});
-}
-
-function httpDraftShareLink(did, exp) {
-	var _id = makeId(6);
-	httpAsync.push({'reqId': _id, 'method': 'share_draft', 'method_path': '/get_share_draft.php', 'id': did, 'expire': exp});
-}
-
-function httpTournamentList() {
-    var _id = makeId(6);
-    httpAsync.push({'reqId': _id, 'method': 'tou_list', 'method_path': '/tournament_list.php'});
-}
-
-function httpTournamentGet(tid) {
-    var _id = makeId(6);
-    httpAsync.push({'reqId': _id, 'method': 'tou_get', 'method_path': '/tournament_get.php', 'id': tid});
-}
-
-function httpTournamentJoin(tid, _deck) {
-    let _id = makeId(6);
-    let deck = JSON.stringify(decks[_deck]);
-    httpAsync.push({'reqId': _id, 'method': 'tou_join', 'method_path': '/tournament_join.php', 'id': tid, 'deck': deck});
-}
-
-function httpTournamentDrop(tid) {
-    var _id = makeId(6);
-    httpAsync.push({'reqId': _id, 'method': 'tou_drop', 'method_path': '/tournament_drop.php', 'id': tid});
 }
 
 // Utility functions that belong only to background
