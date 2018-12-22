@@ -89,7 +89,7 @@ function open_history_tab(loadMore) {
 		let expected = getStepsUntilNextRank(0, lastWinrate/100);
 		t = document.createElement("div");
 		t.classList.add("ranks_history_title");
-		t.innerHTML = `Games until ${getNextRank(0)}: ${expected}`;
+		t.innerHTML = `Games until ${getNextRank(0)}: ~${expected}`;
 		div.appendChild(t);
 
 		var wrap_l = document.createElement("div");

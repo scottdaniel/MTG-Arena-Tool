@@ -1280,14 +1280,29 @@ function setExplore(arg, loadMore) {
 		var flc = document.createElement("div");
 		flc.classList.add("flex_item");
 		flc.style.flexDirection = "column";
+		flc.style.flexGrow = 1;
 
 		var flcf = document.createElement("div");
 		flcf.classList.add("flex_item");
-		flcf.style.flexGrow = 2;
+		flcf.style.flexGrow = 1;
+		flcf.style.justifyContent = 'center';
+
+		let rarityShort = {c: 'common', u: 'uncommon', r: 'rare', m: 'mythic'};
+		let wc;
+		for (var key in rarityShort) {
+			if (_deck.wildcards.hasOwnProperty(key)) {
+				wc = document.createElement("div");
+				wc.classList.add("wc_explore_cost");
+				wc.classList.add("wc_"+rarityShort[key]);
+				wc.innerHTML = _deck.wildcards[key];
+				flcf.appendChild(wc);
+			}
+		}
 
 		var flr = document.createElement("div");
 		flr.classList.add("flex_item");
 		flr.style.flexDirection = "column";
+		flr.style.flexGrow = 1;
 
 		var flt = document.createElement("div");
 		flt.classList.add("flex_top");
@@ -1318,7 +1333,7 @@ function setExplore(arg, loadMore) {
 		flr.appendChild(d);
 
 		d = document.createElement("div");
-		d.classList.add("list_deck_name_it");
+		d.classList.add("list_deck_right_it");
 		let ee = _deck.event;
 		d.innerHTML = getReadableEvent(ee)+" - "+timeSince(new Date(_deck.date))+" ago";
 		flr.appendChild(d);

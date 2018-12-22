@@ -697,6 +697,17 @@ a:hover {
     opacity: 0.5;
 }
 
+.list_deck_right_it {
+    -webkit-user-select: none;
+    line-height: 32px;
+    margin-left: 8px;
+    text-align: right;
+    margin-right: 16px;
+    color: #FAE5D2;
+    font-family: Mplantin-italic;
+    opacity: 0.5;
+}
+
 .list_deck_winrate {
     -webkit-user-select: none;
     margin-left: auto;
@@ -925,6 +936,21 @@ a:hover {
     text-align: right;
     background-position: left;
     background-repeat: no-repeat;
+}
+
+.wc_explore_cost {
+    font-family: Mplantin;
+    color: #FAE5D2;
+    width: 40px;
+    line-height: 80px;
+    height: 64px;
+    text-align: center;
+    background-position: center 4px;
+    background-repeat: no-repeat;
+}
+
+.wc_explore_cont {
+
 }
 
 .wc_common      { background-image: url('../images/wc_common.png'); }

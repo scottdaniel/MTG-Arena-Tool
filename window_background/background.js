@@ -476,12 +476,12 @@ ipc.on('request_explore', function (event, arg) {
 		ipc_send("offline", 1);
 	}
 	else {
+		let cards = store.get('cards.cards');
 		if (arg == "all" || arg == "All" ) {
-			httpGetTopDecks("");
+			httpGetTopDecks("", cards);
 		}
 		else {
-			//arg = arg.replace("_m_", "_m19_");// dirty hack :(
-			httpGetTopDecks(arg);
+			httpGetTopDecks(arg, cards);
 		}
 	}
 });
@@ -1823,9 +1823,10 @@ function httpSetPlayer() {
 	//httpAsync.push({'reqId': _id, 'method': 'set_player', 'name': name, 'rank': rank, 'tier': tier});
 }
 
-function httpGetTopDecks(query) {
+function httpGetTopDecks(query, collection) {
 	var _id = makeId(6);
-	httpAsync.push({'reqId': _id, 'method': 'get_top_decks', 'method_path': '/get_courses_list.php', 'query': query});
+	collection = JSON.stringify(collection);
+	httpAsync.push({'reqId': _id, 'method': 'get_top_decks', 'method_path': '/get_courses_list.php', 'query': query, 'collection': collection});
 }
 
 function httpGetCourse(courseId) {
