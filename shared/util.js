@@ -1133,3 +1133,8 @@ function toHHMM(sec_num) {
 	if (minutes < 10) {minutes = "0"+minutes;}
 	return hours+':'+minutes;
 }
+
+//
+String.prototype.capitalize = function() {
+    return this.charAt(0).toUpperCase() + this.slice(1);
+}
