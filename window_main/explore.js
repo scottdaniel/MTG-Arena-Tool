@@ -16,6 +16,8 @@ let loadExplore = 0;
 let eventFilters = null;
 let onlyOwned = false;
 
+let rarityBooster = {c: 3, u: 3, r: 6, m: 13};
+
 function updateExplore() {
 	filterEvent = getEventId(document.getElementById("query_select").value);
 	ipc_send('request_explore', filterEvent);
@@ -126,12 +128,18 @@ function open_explore_tab(arg, loadMore) {
 		let rarityShort = {c: 'common', u: 'uncommon', r: 'rare', m: 'mythic'};
 		let wc;
 		let n = 0;
+		let boosterCost = 0;
 		for (var key in rarityShort) {
 			if (_deck.wildcards.hasOwnProperty(key)) {
 				n++;
+				let bc = rarityBooster[key] * _deck.wildcards[key];
+				if (bc > boosterCost) {
+					boosterCost = bc;
+				}
 				wc = document.createElement("div");
 				wc.classList.add("wc_explore_cost");
 				wc.classList.add("wc_"+rarityShort[key]);
+				wc.title = rarityShort[key].capitalize()+" wldcards needed.";
 				wc.innerHTML = _deck.wildcards[key];
 				flcf.appendChild(wc);
 			}
@@ -143,6 +151,13 @@ function open_explore_tab(arg, loadMore) {
 		}
 		else if (onlyOwned) {
 			continue;
+		}
+		else {
+			let bo = document.createElement("div");
+			bo.classList.add("bo_explore_cost");
+			bo.innerHTML = boosterCost;
+			bo.title = "Aproximate boosters needed";
+			flcf.appendChild(bo);
 		}
 
 		actuallyLoaded++;

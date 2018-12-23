@@ -949,6 +949,18 @@ a:hover {
     background-repeat: no-repeat;
 }
 
+.bo_explore_cost {
+    font-family: Mplantin;
+    color: #FAE5D2;
+    width: 40px;
+    line-height: 80px;
+    height: 64px;
+    text-align: center;
+    background-position: center 4px;
+    background-repeat: no-repeat;
+    background-image: url('../images/booster.png');
+}
+
 .wc_complete {
     width: 40px;
     height: 64px;
