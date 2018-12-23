@@ -55,8 +55,8 @@ function addCardTile(grpId, indent, quantity, element) {
 			cont.append('<div style="color: rgba(255, 255, 255, 0); min-width: 0px; width: 0px;" class="card_tile_quantity"><span>'+quantity+'</span></div>');
 		}
 		else {
-			ww = 56;
-			ll = 40;
+			ww = 64;
+			ll = 49;
 			cont.append('<div class="card_tile_quantity"><span>'+quantity+'</span></div>');
 		}
 		element.append(cont);

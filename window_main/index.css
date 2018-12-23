@@ -1374,6 +1374,12 @@ a:hover {
     margin: 8px 16px;
 }
 
+.explore_buttons_container {
+    display: flex;
+    height: 24px;
+    margin: 8px 16px;
+}
+
 .input_container input {
     background-color: rgba(145, 121, 97, 0.35);
     border: 1px solid rgba(250, 229, 210, 0.5);
