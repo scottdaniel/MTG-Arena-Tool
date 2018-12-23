@@ -356,13 +356,13 @@ function getStepsUntilNextRank(mode, winrate) {
 
 	let stepsNeeded = (st * ct) - cs;
 
-	if (winrate < 0.5)	return "&#x221e";
+	if (winrate <= 0.5)	return "&#x221e";
 	let expected = 0;
 	let n = 0;
 	console.log("stepsNeeded", stepsNeeded);
-	while (expected <= stepsNeeded && n < 9999) {
+	while (expected <= stepsNeeded) {
 		expected = ((n * winrate) * stw) - (n * (1 - winrate) * stl);
-		//console.log("expected", expected, "N", n);
+		//console.log("stepsNeeded:", stepsNeeded, "expected:", expected, "N:", n);
 		n++;
 	}
 
