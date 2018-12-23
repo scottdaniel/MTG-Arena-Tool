@@ -360,9 +360,9 @@ function getStepsUntilNextRank(mode, winrate) {
 	let expected = 0;
 	let n = 0;
 	console.log("stepsNeeded", stepsNeeded);
-	while (expected <= stepsNeeded) {
+	while (expected <= stepsNeeded && n < 9999) {
 		expected = ((n * winrate) * stw) - (n * (1 - winrate) * stl);
-		console.log("expected", expected, "N", n);
+		//console.log("expected", expected, "N", n);
 		n++;
 	}
 
