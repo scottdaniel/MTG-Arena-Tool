@@ -25,6 +25,7 @@ var orderedCardRarities = ['common', 'uncommon', 'rare', 'mythic'];
 var orderedColorCodes = ['w', 'u', 'b', 'r', 'g', 'c'];
 var orderedManaColors = ['#E7CA8E', '#AABEDF', '#A18E87', '#DD8263', '#B7C89E', '#E3E3E3'];
 var currentOpenDeck = null;
+let rarityBooster = {common: 3, uncommon: 3, rare: 6, mythic: 13};
 
 function deckColorBar(deck) {
     let deckColors = $('<div class="deck_top_colors" style="align-self: center;"></div>');
@@ -172,13 +173,17 @@ function deckStatsSection(deck, deck_type) {
     // Deck crafting cost section
     let missingWildcards = get_deck_missing(deck);
     let costSection = $('<div class="wildcards_cost"><span>Wildcards Needed</span></div>');
+    let boosterCost = 0;
     orderedCardRarities.forEach(cardRarity => {
+        let bp = rarityBooster[cardRarity] * missingWildcards[cardRarity];
+        if (bp > boosterCost)   boosterCost = bp;
         $(`<div title="${cardRarity}" class="wc_cost wc_${cardRarity}">
             ${missingWildcards[cardRarity]}</div>`)
             .appendTo(costSection);
     });
+    $(`<div title="Aproximate boosters" class="wc_cost wc_booster">${boosterCost}</div>`).appendTo(costSection);
+    
     costSection.appendTo(stats);
-
     return stats;
 }
 

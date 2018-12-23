@@ -969,11 +969,11 @@ a:hover {
     background-image: url('../images/complete.png');
 }
 
-
 .wc_common      { background-image: url('../images/wc_common.png'); }
 .wc_uncommon    { background-image: url('../images/wc_uncommon.png'); }
 .wc_rare        { background-image: url('../images/wc_rare.png'); }
 .wc_mythic      { background-image: url('../images/wc_mythic.png'); }
+.wc_booster     { background-image: url('../images/booster.png'); height: 34px; line-height: 34px; }
 
 .inventory {
     padding-left: 8px;
