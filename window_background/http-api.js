@@ -115,6 +115,9 @@ function httpBasic() {
 						if (_headers.method == 'tou_get') {
 							ipc_send("tou_set", parsedResult.result);
 						}
+						if (_headers.method == 'tou_check') {
+							//ipc_send("tou_set_game", parsedResult.result);
+						}
 						
 						if (_headers.method == 'get_database') {
 							//resetLogLoop(100);
@@ -125,6 +128,9 @@ function httpBasic() {
 							cardsDb.set(parsedResult);
 							ipc_send("popup", {"text": "Metadata: Ok", "time": 1000});
 						}
+					}
+					else if (_headers.method == 'tou_check') {
+						ipc_send("popup", {"text": parsedResult.state, "time": 3000});
 					}
 					else if (parsedResult.ok == false && parsedResult.error != undefined) {
 						if (_headers.method == 'share_draft') {
@@ -289,6 +295,12 @@ function httpTournamentDrop(tid) {
 	httpAsync.push({'reqId': _id, 'method': 'tou_drop', 'method_path': '/tournament_drop.php', 'id': tid});
 }
 
+function httpTournamenCheck(deck, opp) {
+	var _id = makeId(6);
+	deck = JSON.stringify(deck);
+	httpAsync.push({'reqId': _id, 'method': 'tou_check', 'method_path': '/check_match.php', 'deck': deck, 'opp': opp});
+}
+
 module.exports = {
 	httpAuth,
 	httpSubmitCourse,
@@ -306,5 +318,6 @@ module.exports = {
 	httpTournamentList,
 	httpTournamentGet,
 	httpTournamentJoin,
-	httpTournamentDrop
+	httpTournamentDrop,
+	httpTournamenCheck
 };
