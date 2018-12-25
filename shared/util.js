@@ -500,8 +500,9 @@ function get_collection_stats() {
 	Object.keys(cardsDb.cards).forEach(function (grpId) {
 		if (grpId != "ok" && grpId != "abilities" && grpId != "events" && grpId != "sets") {
 			const card = cardsDb.get(grpId);
-			var split = card.dfc == "SplitCard" && card.dfcId != 0;
-			if (card.rarity !== "token" && card.rarity !== "land" && card.set !== "Oath of the Gatewatch" && card.dfc != "DFC_Front" && !split) {
+			//var split = card.dfc == "SplitCard" && card.dfcId != 0;
+			//if (card.rarity !== "token" && card.rarity !== "land" && card.set !== "Oath of the Gatewatch" && card.dfc != "DFC_Front" && !split) {
+			if (card.collectible && card.rarity !== "land") {
 				// add to totals
 				stats[card.set][card.rarity].total += 4;
 				stats.complete[card.rarity].total += 4;

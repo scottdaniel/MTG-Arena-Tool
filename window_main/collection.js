@@ -412,6 +412,7 @@ function printCards() {
 		let set  = card.set;
 
 		if (card.images == undefined) 	continue;
+		if (!card.collectible)			continue;
 
 		// Filter name
 		var arr;
@@ -565,7 +566,7 @@ function printCards() {
 		}
 
 		let dfc = '';
-
+		/*
 		if (card.dfc == 'DFC_Back')	 dfc = 'a';
 		if (card.dfc == 'DFC_Front') dfc = 'b';
 		if (card.dfc == 'SplitHalf') {
@@ -575,6 +576,7 @@ function printCards() {
 		if (dfc == 'b') {
 			doDraw = false;
 		}
+		*/
 
 		if (doDraw) {
 			var d = $('<div style="width: '+cardSize+'px !important;" class="inventory_card"></div>');
