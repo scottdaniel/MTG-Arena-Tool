@@ -14,6 +14,8 @@ function onLabelOutLogInfo(entry, json) {
 
 function onLabelGreToClient(entry, json) {
 	if (!json)	return;
+	logTime = parseWotcTime(entry.timestamp);
+
 	json = json.greToClientEvent.greToClientMessages;
 	json.forEach(function(msg) {
 		//console.log("Message: "+msg.msgId, msg);
@@ -81,6 +83,9 @@ function onLabelGreToClient(entry, json) {
 				// - reference objects that may be deleted
 
 				if (msg.gameStateMessage.turnInfo != undefined) {
+					if (msg.gameStateMessage.turnInfo.priorityPlayer !== turnPriority) {
+						changePriority(msg.gameStateMessage.turnInfo.priorityPlayer, turnPriority, logTime);
+					}
 					prevTurn = turnNumber;
 					turnPhase = msg.gameStateMessage.turnInfo.phase;
 					turnStep  = msg.gameStateMessage.turnInfo.step;

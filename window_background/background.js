@@ -766,7 +766,7 @@ function onLogEntryFound(entry) {
 		ipc_send("set_username", playerName);
 	}
 	else {
-		console.log("Entry:", entry.label, entry, entry.json());
+		//console.log("Entry:", entry.label, entry, entry.json());
 		if (firstPass) {
 			updateLoading(entry);
 		}
@@ -1154,6 +1154,19 @@ function tryZoneTransfers() {
 	}
 }
 
+let priorityTimers = [0,0,0,0,0];
+let lastPriorityChangeTime = 0;
+//
+function changePriority(previous, current, time) {
+	priorityTimers[previous] += time - lastPriorityChangeTime;
+
+	lastPriorityChangeTime = time;
+	priorityTimers[0] = lastPriorityChangeTime;
+	console.log(priorityTimers);
+	console.log("since match begin:", time - matchBeginTime);
+	ipc_send('set_priority_timer', priorityTimers, windowOverlay);
+}
+
 // Get player name by seat in the game
 function getNameBySeat(seat) {
 	try {
@@ -1216,6 +1229,8 @@ function createMatch(arg) {
 	currentMatchTime = 0;
 	playerWin = 0;
 	oppWin = 0;
+	priorityTimers = [0,0,0,0,0];
+	lastPriorityChangeTime = matchBeginTime;
 
 	ipc_send("ipc_log", "vs "+oppName);
 	ipc_send("set_timer", matchBeginTime, windowOverlay);
