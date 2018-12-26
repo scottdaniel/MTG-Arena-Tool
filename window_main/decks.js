@@ -188,17 +188,27 @@ function open_decks_tab() {
 				});
 
 				var wr = getDeckWinrate(deck.id, deck.lastUpdated);
+				
 				if (wr != 0) {
 					var d = document.createElement("div");
 					d.classList.add('list_deck_winrate');
-					//d.innerHTML = 'Winrate: '+(wr.total*100).toFixed(2)+'%';
-					d.innerHTML = 'Wins: '+wr.wins+' / Losses: '+wr.losses+' ('+(wr.total*100).toFixed(2)+'%)';
+
+					let colClass = 'white';
+					if (wr.total < 0.4)	colClass = 'red';
+					if (wr.total > 0.55)	colClass = 'green';
+					if (wr.total > 0.65)	colClass = 'blue';
+					d.innerHTML = `'Wins: ${wr.wins} / Losses: ${wr.losses} <span class="${colClass}">(${(wr.total*100).toFixed(2)}%)</span>`;
 					flr.appendChild(d);
 
 					d = document.createElement("div");
 					d.classList.add('list_deck_winrate');
 					d.style.opacity = 0.6;
-					d.innerHTML = 'Since last edit: '+(wr.lastEdit*100).toFixed(2)+'%';
+
+					colClass = 'white';
+					if (wr.lastEdit < 0.4)	colClass = 'red';
+					if (wr.lastEdit > 0.55)	colClass = 'green';
+					if (wr.lastEdit > 0.65)	colClass = 'blue';
+					d.innerHTML = `Since last edit: <span class="${colClass}">${(wr.lastEdit*100).toFixed(2)}%</span>`;
 					flr.appendChild(d);
 
 					wrTotalWins += wr.wins;
@@ -252,7 +262,12 @@ function open_decks_tab() {
 		d = document.createElement("div");
 		d.classList.add('list_deck_winrate');
 		wrTotal = 1 / wrTotal * wrTotalWins;
-		d.innerHTML = 'Wins: '+wrTotalWins+' / Losses: '+wrTotalLosses+' ('+(wrTotal*100).toFixed(2)+'%)';
+
+		let colClass = 'white';
+		if (wrTotal < 0.4)	colClass = 'red';
+		if (wrTotal > 0.55)	colClass = 'green';
+		if (wrTotal > 0.65)	colClass = 'blue';
+		d.innerHTML = `'Wins: ${wrTotalWins} / Losses: ${wrTotalLosses} (<span class="${colClass}">${(wrTotal*100).toFixed(2)}%</span>)`;
 		dtwr.appendChild(d);
 
 		$("#ux_0").append('<div class="list_fill"></div>');

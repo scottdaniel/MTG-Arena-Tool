@@ -100,9 +100,9 @@ function deckWinrateCurve(deck) {
 
     let curve = $('<div class="mana_curve"></div>');
     let numbers = $('<div class="mana_curve_costs"></div>');
-
+    
     colorsWinrates.forEach(cwr => {
-        if (cwr.wins + cwr.losses > 2) {
+        if (cwr.wins + cwr.losses > 1) {
             curve.append($(`<div class="mana_curve_column back_green" style="height: ${(cwr.wins/curveMax*100)}%"></div>`));
             curve.append($(`<div class="mana_curve_column back_red" style="height: ${(cwr.losses/curveMax*100)}%"></div>`));
 

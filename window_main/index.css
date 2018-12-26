@@ -536,6 +536,10 @@ span i {
     color: rgba(183, 200, 158, 1) !important;
 }
 
+.blue {
+    color: rgba(170, 190, 223, 1) !important;
+}
+
 .red {
     color: rgba(221, 130, 99, 1) !important;
 }
