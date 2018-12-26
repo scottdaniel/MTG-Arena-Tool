@@ -514,12 +514,7 @@ ipc.on('tou_drop', function (event, arg) {
 });
 
 ipc.on('edit_tag', function (event, arg) {
-	Object.keys(tags_colors).forEach(function(key) {
-		if (key == arg.tag) {
-			tags_colors[key] = arg.color;
-		}
-	});
-
+	tags_colors[arg.tag] = arg.color;
 	store.set("tags_colors", tags_colors);
 });
 
