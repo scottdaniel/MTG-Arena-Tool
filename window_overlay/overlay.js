@@ -3,6 +3,7 @@ global
 	windowBackground,
 	windowOverlay,
 	get_deck_colors,
+	get_deck_uniquestring,
 	removeDuplicates,
 	compare_chances,
 	compare_cards,
@@ -17,11 +18,11 @@ const {webFrame, remote} = require('electron');
 
 const ipc = electron.ipcRenderer;
 
-var matchBeginTime = Date.now();
-var clockMode = 0;
-var draftMode = 1;
-var deckMode = 0;
-var overlayMode = 0;
+let matchBeginTime = Date.now();
+let clockMode = 0;
+let draftMode = 1;
+let deckMode = 0;
+let overlayMode = 0;
 var renderer = 1;
 
 //var turnPhase = 0;
@@ -30,19 +31,20 @@ var renderer = 1;
 //var turnActive = 0;
 //var turnDecision = 0;
 
-var turnPriority = 0;
-var soundPriority = false;
+let turnPriority = 0;
+let soundPriority = false;
 let overlayAlpha = 1;
 let overlayAlphaBack = 1;
 
-var showSideboard = false;
-var actionLog = [];
+let showSideboard = false;
+let actionLog = [];
 
-var cards = {};
-var mana = {0: "", 1: "white", 2: "blue", 3: "black", 4: "red", 5: "green", 6: "colorless", 7: "", 8: "x"};
+let currentDeck = null;
+let cards = {};
+let mana = {0: "", 1: "white", 2: "blue", 3: "black", 4: "red", 5: "green", 6: "colorless", 7: "", 8: "x"};
 
 const Howler = require('howler');
-var sound = new Howl({
+let sound = new Howl({
 	src: ['../sounds/blip.mp3']
 });
 
@@ -266,10 +268,14 @@ ipc.on('set_deck', function (event, arg) {
 		doscroll = true;
 	}
 
-	$(".overlay_decklist").html('');
-	$(".overlay_deckcolors").html('');
-
 	if (arg != null) {
+		let oldstr = get_deck_uniquestring(currentDeck);
+		if (oldstr == get_deck_uniquestring(arg))	return;
+
+		$(".overlay_decklist").html('');
+		$(".overlay_deckcolors").html('');
+		currentDeck = arg;
+
 		let deckListDiv;
 		if (deckMode == 4) {
 			$(".overlay_deckname").html("Action Log");
