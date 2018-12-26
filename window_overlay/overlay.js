@@ -75,7 +75,11 @@ function updateClock() {
 		ss = 0;
 	}
 	else if (clockMode == 0) {
-		time = priorityTimers[1] / 1000;
+		let time = priorityTimers[1] / 1000;
+		let now = new Date();
+		if (turnPriority == 1) {
+			time += (now - new Date(priorityTimers[0])) / 1000;
+		}
 
 		mm = Math.floor(time % (3600) / 60);
 		mm = ('0' + mm).slice(-2);
@@ -84,6 +88,9 @@ function updateClock() {
 		$(".clock_priority_1").html(mm+":"+ss);
 
 		time = priorityTimers[2] / 1000;
+		if (turnPriority == 2) {
+			time += (now - new Date(priorityTimers[0])) / 1000;
+		}
 
 		mm = Math.floor(time % (3600) / 60);
 		mm = ('0' + mm).slice(-2);
@@ -115,15 +122,15 @@ function updateClock() {
 
 function recreateClock() {
 	if (clockMode == 0) {
-		p1 = $('<div class="clock_priority_1"></div>');
-		p2 = $('<div class="clock_priority_2"></div>');
-		p1name = oppName;
-		p2name = 'You';
+		let p1 = $('<div class="clock_priority_1"></div>');
+		let p2 = $('<div class="clock_priority_2"></div>');
+		let p1name = oppName;
+		let p2name = 'You';
 		if (playerSeat == 1) {
 			p1name = 'You';
 			p2name = oppName;
 		}
-		$('.clock_turn').append('<div class="clock_pname1">'+p1name+'</div><div class="clock_pname2">'+p2name+'</div>');
+		$('.clock_turn').html('<div class="clock_pname1">'+p1name+'</div><div class="clock_pname2">'+p2name+'</div>');
 		$('.clock_elapsed').html('');
 		$('.clock_elapsed').append(p1);
 		$('.clock_elapsed').append(p2);
@@ -131,6 +138,13 @@ function recreateClock() {
 	else {
 		$('.clock_turn').html('');
 		$('.clock_elapsed').html('');
+
+		if (turnPriority == playerSeat) {
+			$('.clock_turn').html("You have priority.");
+		}
+		else {
+			$('.clock_turn').html("Opponent has priority.");
+		}
 	}
 
 	updateClock();
@@ -301,9 +315,10 @@ ipc.on('set_hover', function (event, arg) {
 //
 ipc.on('set_opponent', function (event, arg) {
 	oppName = arg.slice(0, -6);
+	recreateClock();
 	$('.top_username').html(oppName);
 });
-oppName
+
 //
 ipc.on('set_opponent_rank', function (event, rank, title) {
 	$(".top_rank").css("background-position", (rank*-48)+"px 0px").attr("title", title);
@@ -464,11 +479,13 @@ ipc.on("set_turn", function (event, _we, _phase, _step, _number, _active, _prior
 	//turnActive = _active;
 	turnPriority = _priority;
 	//turnDecision = _decision;
-	if (turnPriority == _we) {
-		$('.clock_turn').html("You have priority.");
-	}
-	else {
-		$('.clock_turn').html("Opponent has priority.");
+	if (clockMode > 0) {
+		if (turnPriority == _we) {
+			$('.clock_turn').html("You have priority.");
+		}
+		else {
+			$('.clock_turn').html("Opponent has priority.");
+		}
 	}
 });
 

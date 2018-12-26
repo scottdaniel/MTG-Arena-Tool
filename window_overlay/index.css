@@ -131,6 +131,7 @@ body {pointer-events: none}
 }
 
 .clock_turn {
+    justify-content: center;
     display: flex;
     margin-left: 32px;
     width: calc(100% - 64px);
