@@ -1154,7 +1154,7 @@ function tryZoneTransfers() {
 	}
 }
 
-let priorityTimers = [0,0,0,0,0];
+let priorityTimers = [0,0,0];
 let lastPriorityChangeTime = 0;
 //
 function changePriority(previous, current, time) {
@@ -1163,7 +1163,7 @@ function changePriority(previous, current, time) {
 	lastPriorityChangeTime = time;
 	priorityTimers[0] = lastPriorityChangeTime;
 	console.log(priorityTimers);
-	console.log("since match begin:", time - matchBeginTime);
+	//console.log("since match begin:", time - matchBeginTime);
 	ipc_send('set_priority_timer', priorityTimers, windowOverlay);
 }
 

@@ -118,8 +118,11 @@ body {pointer-events: none}
 }
 
 .clock_elapsed {
+    justify-content: center;
+    display: flex;
+    margin-left: 32px;
+    width: calc(100% - 64px);
     height: 48px;
-    width: 100%;
     text-align: center;
     line-height: 48px;
     font-size: 25px;
@@ -128,15 +131,25 @@ body {pointer-events: none}
 }
 
 .clock_turn {
+    display: flex;
+    margin-left: 32px;
+    width: calc(100% - 64px);
     height: 16px;
     position: relative;
     top: 5px;
-    width: 100%;
     text-align: center;
     line-height: 16px;
     font-size: 15px;
     color: #d4c6af;
     z-index: 50;
+}
+
+.clock_priority_1, .clock_priority_2 {
+    margin: 6px;
+}
+
+.clock_priority_1, .clock_priority_2, .clock_pname1, .clock_pname2 {
+    width: 50%
 }
 
 .clock_prev, .draft_prev, .deck_prev {

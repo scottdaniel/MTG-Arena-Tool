@@ -19,6 +19,7 @@ const {webFrame, remote} = require('electron');
 const ipc = electron.ipcRenderer;
 
 let matchBeginTime = Date.now();
+let priorityTimers = [];
 let clockMode = 0;
 let draftMode = 1;
 let deckMode = 0;
@@ -30,7 +31,9 @@ var renderer = 1;
 //var turnNumber = 0;
 //var turnActive = 0;
 //var turnDecision = 0;
-
+ 
+let playerSeat = 0;
+let oppName = '';
 let turnPriority = 0;
 let soundPriority = false;
 let overlayAlpha = 1;
@@ -72,23 +75,65 @@ function updateClock() {
 		ss = 0;
 	}
 	else if (clockMode == 0) {
+		time = priorityTimers[1] / 1000;
+
+		mm = Math.floor(time % (3600) / 60);
+		mm = ('0' + mm).slice(-2);
+		ss = Math.floor(time % 60);
+		ss = ('0' + ss).slice(-2);
+		$(".clock_priority_1").html(mm+":"+ss);
+
+		time = priorityTimers[2] / 1000;
+
+		mm = Math.floor(time % (3600) / 60);
+		mm = ('0' + mm).slice(-2);
+		ss = Math.floor(time % 60);
+		ss = ('0' + ss).slice(-2);
+		$(".clock_priority_2").html(mm+":"+ss);
+	}
+	else if (clockMode == 1) {
 		var diff = Math.floor((Date.now() - matchBeginTime)/1000);
 		hh = Math.floor(diff / 3600);
 		mm = Math.floor(diff % (3600) / 60);
 		ss = Math.floor(diff % 60);
-		//console.log(diff, Date.now(), matchBeginTime);
+		hh = ('0' + hh).slice(-2);
+		mm = ('0' + mm).slice(-2);
+		ss = ('0' + ss).slice(-2);
+		$(".clock_elapsed").html(hh+":"+mm+":"+ss);
 	}
-	else if (clockMode == 1) {
+	else if (clockMode == 2) {
 		var d = new Date();
 		hh = d.getHours();
 		mm = d.getMinutes();
 		ss = d.getSeconds();
+		hh = ('0' + hh).slice(-2);
+		mm = ('0' + mm).slice(-2);
+		ss = ('0' + ss).slice(-2);
+		$(".clock_elapsed").html(hh+":"+mm+":"+ss);
+	}
+}
+
+function recreateClock() {
+	if (clockMode == 0) {
+		p1 = $('<div class="clock_priority_1"></div>');
+		p2 = $('<div class="clock_priority_2"></div>');
+		p1name = oppName;
+		p2name = 'You';
+		if (playerSeat == 1) {
+			p1name = 'You';
+			p2name = oppName;
+		}
+		$('.clock_turn').append('<div class="clock_pname1">'+p1name+'</div><div class="clock_pname2">'+p2name+'</div>');
+		$('.clock_elapsed').html('');
+		$('.clock_elapsed').append(p1);
+		$('.clock_elapsed').append(p2);
+	}
+	else {
+		$('.clock_turn').html('');
+		$('.clock_elapsed').html('');
 	}
 
-	hh = ('0' + hh).slice(-2);
-	mm = ('0' + mm).slice(-2);
-	ss = ('0' + ss).slice(-2);
-	$(".clock_elapsed").html(hh+":"+mm+":"+ss);
+	updateClock();
 }
 
 //
@@ -121,10 +166,17 @@ ipc.on('set_timer', function (event, arg) {
 		overlayMode = 1;
 		matchBeginTime = Date.now();
 	}
-	else {
-		matchBeginTime = arg == 0 ? 0 : Date.parse(arg);
+	else if (arg !== 0) {
+		//matchBeginTime = arg == 0 ? 0 : Date.parse(arg);
+		matchBeginTime = Date.parse(arg);
 	}
 	//console.log("set time", arg);
+});
+
+ipc.on('set_priority_timer', function(event, arg) {
+	if (arg) {
+		priorityTimers = arg;
+	}
 });
 
 $( window ).resize(function() {
@@ -248,9 +300,10 @@ ipc.on('set_hover', function (event, arg) {
 
 //
 ipc.on('set_opponent', function (event, arg) {
-	$('.top_username').html(arg.slice(0, -6));
+	oppName = arg.slice(0, -6);
+	$('.top_username').html(oppName);
 });
-
+oppName
 //
 ipc.on('set_opponent_rank', function (event, rank, title) {
 	$(".top_rank").css("background-position", (rank*-48)+"px 0px").attr("title", title);
@@ -401,6 +454,7 @@ ipc.on('set_draft_cards', function (event, pack, picks, packn, pickn) {
 
 //
 ipc.on("set_turn", function (event, _we, _phase, _step, _number, _active, _priority, _decision) {
+	playerSeat = _we;
 	if (turnPriority != _priority && _priority == _we && soundPriority) {
 		sound.play();
 	}
@@ -504,20 +558,22 @@ function hoverCard(grpId) {
 
 
 $(document).ready(function() {
+	recreateClock();
 	//
 	$(".clock_prev").click(function () {
 		clockMode -= 1;
 		if (clockMode < 0) {
-			clockMode = 1;
+			clockMode = 2;
 		}
+		recreateClock();
 	});
 	//
 	$(".clock_next").click(function () {
 		clockMode += 1;
-		if (clockMode > 1) {
+		if (clockMode > 2) {
 			clockMode = 0;
 		}
-
+		recreateClock();
 	});
 	//
 	$(".draft_prev").click(function () {
