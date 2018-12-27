@@ -37,6 +37,13 @@ const open_collection_tab		= require('./collection').open_collection_tab;
 const open_economy_tab 			= require('./economy').open_economy_tab;
 const set_economy_history		= require('./economy').set_economy_history;
 
+var orderedCardTypes = ['cre', 'lan', 'ins', 'sor', 'enc', 'art', 'pla'];
+var orderedCardTypesDesc = ['Creatures', 'Lands', 'Instants', 'Sorceries', 'Enchantments', 'Artifacts', 'Planeswalkers'];
+var orderedCardRarities = ['common', 'uncommon', 'rare', 'mythic'];
+var orderedColorCodes = ['w', 'u', 'b', 'r', 'g', 'c'];
+var orderedManaColors = ['#E7CA8E', '#AABEDF', '#A18E87', '#DD8263', '#B7C89E', '#E3E3E3'];
+var rarityBooster = {common: 3, uncommon: 3, rare: 6, mythic: 13};
+
 let shell = electron.shell;
 let ipc = electron.ipcRenderer;
 let decks = null;
