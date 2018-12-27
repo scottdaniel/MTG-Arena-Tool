@@ -15,7 +15,8 @@ global
     mana,
     ConicGradient,
     getDeckWinrate,
-    cardsDb
+    cardsDb,
+    add
 */
 
 // We need to store a sorted list of card types so we create the card counts in the same order.
@@ -37,17 +38,34 @@ function deckColorBar(deck) {
 
 function deckManaCurve(deck) {
     let manaCounts = get_deck_curve(deck);
-    let curveMax = Math.max(...manaCounts.filter(function(v) {
+    let curveMax = Math.max(...manaCounts.filter((v) => {
         if (v == undefined) return false;
         return true;
-    }).map(v => v || 0));
+    }).map(v => v[0] || 0));
 
     console.log('deckManaCurve', manaCounts, curveMax);
 
     let curve = $('<div class="mana_curve"></div>');
     let numbers = $('<div class="mana_curve_numbers"></div>');
-    manaCounts.forEach((count, i) => {
-        curve.append($(`<div class="mana_curve_column" style="height: ${count/curveMax*100}%"></div>`))
+    manaCounts.forEach((cost, i) => {
+        let total = cost[0];
+
+        let gradient = '';
+        let manaTotal = cost.reduce(add, 0) - total;
+        let _start = 0;
+        let _end = 0;
+        orderedManaColors.forEach((mc, ind) => {
+            if (ind < 5 && cost[ind+1] > 0) {
+                _end = Math.round(cost[ind+1] / manaTotal * 100);
+
+                if (gradient !== '')    gradient += ',';
+                gradient += mc+' '+_start+'%, '+mc+' '+_end+'%';
+
+                _start = _end;
+            }
+        });
+
+        curve.append($(`<div class="mana_curve_column" style="height: ${total/curveMax*100}%; background-image: linear-gradient(${gradient})">${(total > 0 ? total : '')}</div>`))
         numbers.append($(`<div class="mana_curve_column_number"><div style="margin: 0 auto !important" class="mana_s16 mana_${i}"></div></div>`))
     })
 
