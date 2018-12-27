@@ -75,6 +75,8 @@ let rankLimited = 'Bronze';
 let rankLimitedStep = 1;
 let rankLimitedTier = 4;
 
+let economyHistory = [];
+
 let season_starts = new Date();
 let season_ends = new Date();
 
@@ -266,11 +268,10 @@ ipc.on('set_events', function (event, arg) {
 	setEvents(0);
 });
 
-
 ipc.on('set_economy', function (event, arg) {
 	if (arg != null) {
 		try {
-			set_economy_history(JSON.parse(arg));
+			economyHistory = JSON.parse(arg);
 		} catch(e) {
 			console.log("Error parsing JSON:", arg);
 			return false;

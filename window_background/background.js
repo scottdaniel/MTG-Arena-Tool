@@ -481,16 +481,7 @@ ipc.on('request_explore', function (event, arg) {
 });
 
 ipc.on('request_economy', function () { 
-	var ec = economy;
-	ec.gold = gold;
-	ec.gems = gems;
-	ec.vault = vault;
-	ec.wcTrack = wcTrack;
-	ec.wcCommon = wcCommon;
-	ec.wcUncommon = wcUncommon;
-	ec.wcRare = wcRare;
-	ec.wcMythic = wcMythic;
-	ipc_send("set_economy", JSON.stringify(ec));
+	sendEconomy();
 });
 
 ipc.on('request_course', function (event, arg) {
@@ -549,6 +540,18 @@ ipc.on('get_deck_changes', function (event, arg) {
 	get_deck_changes(arg);
 });
 
+function sendEconomy() {
+	var ec = economy;
+	ec.gold = gold;
+	ec.gems = gems;
+	ec.vault = vault;
+	ec.wcTrack = wcTrack;
+	ec.wcCommon = wcCommon;
+	ec.wcUncommon = wcUncommon;
+	ec.wcRare = wcRare;
+	ec.wcMythic = wcMythic;
+	ipc_send("set_economy", JSON.stringify(ec));
+}
 /*
 function rememberLogin(bool) {
 	if (bool) {

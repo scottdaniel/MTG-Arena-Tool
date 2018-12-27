@@ -100,7 +100,7 @@ function deckWinrateCurve(deck) {
 
     let curve = $('<div class="mana_curve"></div>');
     let numbers = $('<div class="mana_curve_costs"></div>');
-    
+
     colorsWinrates.forEach(cwr => {
         if (cwr.wins + cwr.losses > 1) {
             curve.append($(`<div class="mana_curve_column back_green" style="height: ${(cwr.wins/curveMax*100)}%"></div>`));
@@ -171,14 +171,20 @@ function deckStatsSection(deck, deck_type) {
     }
 
     // Deck crafting cost section
+    let ownedWildcards = {
+        common: economyHistory.wcCommon,
+        uncommon: economyHistory.wcUncommon,
+        rare: economyHistory.wcRare,
+        mythic: economyHistory.wcMythic
+    };
+
     let missingWildcards = get_deck_missing(deck);
-    let costSection = $('<div class="wildcards_cost"><span>Wildcards Needed</span></div>');
+    let costSection = $('<div class="wildcards_cost"><span>Wildcards you have/need</span></div>');
     let boosterCost = 0;
     orderedCardRarities.forEach(cardRarity => {
-        let bp = rarityBooster[cardRarity] * missingWildcards[cardRarity];
+        let bp = rarityBooster[cardRarity] * (missingWildcards[cardRarity] - ownedWildcards[cardRarity]);
         if (bp > boosterCost)   boosterCost = bp;
-        $(`<div title="${cardRarity}" class="wc_cost wc_${cardRarity}">
-            ${missingWildcards[cardRarity]}</div>`)
+        $(`<div title="${cardRarity}" class="wc_cost wc_${cardRarity}">${(ownedWildcards[cardRarity] > 0 ? ownedWildcards[cardRarity]+' / ' : '')}${missingWildcards[cardRarity]}</div>`)
             .appendTo(costSection);
     });
     $(`<div title="Aproximate boosters" class="wc_cost wc_booster">${boosterCost}</div>`).appendTo(costSection);

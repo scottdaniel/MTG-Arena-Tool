@@ -11,10 +11,11 @@ global
 	get_set_scryfall,
 	collectionSortRarity,
 	addCardHover,
-	selectAdd
+	selectAdd,
+	economyHistory
 */
 
-var economyHistory = [];
+
 var loadEconomy = 0;
 let filterEconomy = 'All';
 let daysago = 0;
@@ -27,10 +28,6 @@ class economyDay {
 		this.goldSpent = goldSpent;
 		this.gemsSpent = gemsSpent;
 	}
-}
-
-function set_economy_history(history) {
-	economyHistory = history;
 }
 
 function open_economy_tab(loadMore) {
@@ -553,6 +550,5 @@ function compare_economy(a, b) {
 }
 
 module.exports = {
-	open_economy_tab: open_economy_tab,
-	set_economy_history: set_economy_history
+	open_economy_tab: open_economy_tab
 }

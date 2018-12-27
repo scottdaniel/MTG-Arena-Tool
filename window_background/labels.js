@@ -598,6 +598,8 @@ function onLabelInPlayerInventoryGetPlayerInventory(entry, json) {
 	wcUncommon = json.wcUncommon;
 	wcRare = json.wcRare;
 	wcMythic = json.wcMythic;
+
+	sendEconomy();
 }
 
 function onLabelInPlayerInventoryGetPlayerCardsV3(entry, json) {

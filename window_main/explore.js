@@ -9,7 +9,8 @@ globals
 	ipc_send,
 	getEventId,
 	explore,
-	add_checkbox
+	add_checkbox,
+	economyHistory
 */
 
 let loadExplore = 0;
@@ -31,6 +32,9 @@ function open_explore_tab(arg, loadMore) {
 
 	var mainDiv = document.getElementById("ux_0");
 	var dateNow, d;
+	let rarityShort = {c: 'common', u: 'uncommon', r: 'rare', m: 'mythic'};
+	console.log(economyHistory);
+	let ownedWildcards = {c: economyHistory.wcCommon, u: economyHistory.wcUncommon, r: economyHistory.wcRare, m: economyHistory.wcMythic};
 
 	mainDiv.classList.remove("flex_item");
 	if (loadMore <= 0) {
@@ -125,14 +129,13 @@ function open_explore_tab(arg, loadMore) {
 		flcf.style.width = '20%';
 		flcf.style.justifyContent = 'center';
 
-		let rarityShort = {c: 'common', u: 'uncommon', r: 'rare', m: 'mythic'};
 		let wc;
 		let n = 0;
 		let boosterCost = 0;
 		for (var key in rarityShort) {
 			if (_deck.wildcards.hasOwnProperty(key)) {
 				n++;
-				let bc = rarityBooster[key] * _deck.wildcards[key];
+				let bc = rarityBooster[key] * (_deck.wildcards[key] - ownedWildcards[key]);
 				if (bc > boosterCost) {
 					boosterCost = bc;
 				}
@@ -140,7 +143,7 @@ function open_explore_tab(arg, loadMore) {
 				wc.classList.add("wc_explore_cost");
 				wc.classList.add("wc_"+rarityShort[key]);
 				wc.title = rarityShort[key].capitalize()+" wldcards needed.";
-				wc.innerHTML = _deck.wildcards[key];
+				wc.innerHTML = (ownedWildcards[key] > 0 ? ownedWildcards[key] + '/' : '') + _deck.wildcards[key];
 				flcf.appendChild(wc);
 			}
 		}
