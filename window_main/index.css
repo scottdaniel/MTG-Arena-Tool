@@ -532,12 +532,40 @@ span i {
     -webkit-transition: all .2s ease-in;
 }
 
+.green_bright {
+    color: #D3EBB0 !important;
+}
+
+.blue_bright {
+    color: #BDD6FF !important;
+}
+
+.orange_bright {
+    color: #FFBA85 !important;
+}
+
+.red_bright {
+    color: #FF9B78 !important;
+}
+
+.yellow_bright {
+    color: #FFDF9E !important;
+}
+
+.white_bright {
+    color: #FAE5D2 !important;
+}
+
 .green {
     color: rgba(183, 200, 158, 1) !important;
 }
 
 .blue {
     color: rgba(170, 190, 223, 1) !important;
+}
+
+.orange {
+    color: rgba(226, 166, 120, 1) !important;
 }
 
 .red {

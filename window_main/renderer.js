@@ -278,7 +278,9 @@ ipc.on('set_economy', function (event, arg) {
 		}
 	}
 
-	open_economy_tab(0);
+	if (sidebarActive == 4) {
+		open_economy_tab(0);
+	}
 });
 
 //
