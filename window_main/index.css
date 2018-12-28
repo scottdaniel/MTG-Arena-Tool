@@ -1381,6 +1381,15 @@ a:hover {
     background-size: contain;
 }
 
+.economy_wc_med {
+    background-repeat: no-repeat;
+    margin: auto 8px;
+    margin-left: 18px;
+    width: 28px;
+    height: 28px;
+    background-size: contain;
+}
+
 .economy_gold {
     background-repeat: no-repeat;
     margin: auto 4px;
@@ -1393,6 +1402,7 @@ a:hover {
 .economy_gold_med {
     background-repeat: no-repeat;
     margin: auto 4px;
+    margin-left: 16px;
     width: 28px;
     height: 28px;
     background-image: url(../images/gold.png);

@@ -114,7 +114,7 @@ function open_decks_tab() {
 				flcf.classList.add('deck_tags_container');
 
 				var flcfwc = document.createElement("div");
-				//flcfwc.style.flexGrow = 2;
+				flcfwc.style.marginRight = '8px';
 				flcfwc.classList.add('flex_item');
 
 				let t = createTag(null, flcf, false);

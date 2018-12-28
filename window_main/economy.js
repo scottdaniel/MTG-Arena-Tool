@@ -44,11 +44,11 @@ function open_economy_tab(loadMore) {
 			let economy_id = economyHistory.changes[n];
 			let change = economyHistory[economy_id];
 
+			if (change == undefined) continue;
+
 			if (!selectItems.includes(change.context)) {
 				selectItems.push(change.context);
-			}
-			
-			if (change == undefined) continue;
+			}		
 
 			if (change.delta.gemsDelta != undefined) {
 				if (change.delta.gemsDelta > 0)
@@ -95,6 +95,25 @@ function open_economy_tab(loadMore) {
 		select.next('div.select-styled').text(filterEconomy);
 
 		//
+		let icwcc = document.createElement("div");
+		icwcc.classList.add("economy_wc_med");
+		icwcc.classList.add("wc_common");
+		icwcc.title = "Common Wildcards";
+
+		let icwcu = document.createElement("div");
+		icwcu.classList.add("economy_wc_med");
+		icwcu.classList.add("wc_uncommon");
+		icwcu.title = "Uncommon Wildcards";
+
+		let icwcr = document.createElement("div");
+		icwcr.classList.add("economy_wc_med");
+		icwcr.classList.add("wc_rare");
+		icwcr.title = "Rare Wildcards";
+
+		let icwcm = document.createElement("div");
+		icwcm.classList.add("economy_wc_med");
+		icwcm.classList.add("wc_mythic");
+		icwcm.title = "Mythic Wildcards";
 
 		let icgo = document.createElement("div");
 		icgo.classList.add("economy_gold_med");
@@ -109,8 +128,29 @@ function open_economy_tab(loadMore) {
 		tx.style.lineHeight = "64px";
 		tx.classList.add("economy_sub");
 
-		div.appendChild(icgo);
+		div.appendChild(icwcc);
 		let ntx = tx.cloneNode(true);
+		ntx.innerHTML = economyHistory.wcCommon;
+		div.appendChild(ntx);
+
+		div.appendChild(icwcu);
+		ntx = tx.cloneNode(true);
+		ntx.innerHTML = economyHistory.wcUncommon;
+		div.appendChild(ntx);
+
+		div.appendChild(icwcr);
+		ntx = tx.cloneNode(true);
+		ntx.innerHTML = economyHistory.wcRare;
+		div.appendChild(ntx);
+
+		div.appendChild(icwcm);
+		ntx = tx.cloneNode(true);
+		ntx.innerHTML = economyHistory.wcMythic;
+		div.appendChild(ntx);
+
+
+		div.appendChild(icgo);
+		ntx = tx.cloneNode(true);
 		ntx.innerHTML = economyHistory.gold;
 		div.appendChild(ntx);
 
