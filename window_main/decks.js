@@ -194,11 +194,7 @@ function open_decks_tab() {
 					var d = document.createElement("div");
 					d.classList.add('list_deck_winrate');
 
-					let colClass = 'white';
-					if (wr.total > 0.55)	colClass = 'green';
-					if (wr.total > 0.65)	colClass = 'blue';
-					if (wr.total < 0.45)	colClass = 'orange';
-					if (wr.total < 0.35)	colClass = 'red';
+					let colClass = getWinrateClass(wr.total);
 					d.innerHTML = `'Wins: ${wr.wins} / Losses: ${wr.losses} <span class="${colClass}_bright">(${Math.round(wr.total*100)}%)</span>`;
 					flr.appendChild(d);
 
@@ -206,11 +202,7 @@ function open_decks_tab() {
 					d.classList.add('list_deck_winrate');
 					d.style.opacity = 0.6;
 
-					colClass = 'white';
-					if (wr.lastEdit > 0.55)	colClass = 'green';
-					if (wr.lastEdit > 0.65)	colClass = 'blue';
-					if (wr.lastEdit < 0.45)	colClass = 'orange';
-					if (wr.lastEdit < 0.35)	colClass = 'red';
+					colClass = getWinrateClass(wr.lastEdit);
 					d.innerHTML = `Since last edit: <span class="${colClass}_bright">${Math.round(wr.lastEdit*100)}%</span>`;
 					flr.appendChild(d);
 
@@ -267,11 +259,7 @@ function open_decks_tab() {
 		d.classList.add('list_deck_winrate');
 		wrTotal = 1 / wrTotal * wrTotalWins;
 
-		let colClass = 'white';
-		if (wrTotal > 0.55)	colClass = 'green';
-		if (wrTotal > 0.65)	colClass = 'blue';
-		if (wrTotal < 0.45)	colClass = 'orange';
-		if (wrTotal < 0.35)	colClass = 'red';
+		let colClass = getWinrateClass(wrTotal);
 		d.innerHTML = `'Wins: ${wrTotalWins} / Losses: ${wrTotalLosses} (<span class="${colClass}_bright">${Math.round(wrTotal*100)}%</span>)`;
 		dtwr.appendChild(d);
 
