@@ -2216,6 +2216,15 @@ function updateSettings() {
 }
 
 //
+function getWinrateClass(wr) {
+	if (wr > 0.65)	return 'blue';
+	if (wr > 0.55)	return 'green';
+	if (wr < 0.45)	return 'orange';
+	if (wr < 0.35)	return 'red';
+	return 'white';
+}
+
+//
 function getDeckWinrate(deckid, lastEdit) {
 	var wins = 0;
 	var loss = 0;

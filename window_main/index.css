@@ -712,6 +712,13 @@ a:hover {
     justify-content: space-between;
 }
 
+.history_top {
+    display: flex;
+    height: 64px;
+    margin-left: 16px;
+    justify-content: space-between;
+}
+
 .list_deck_name {
     -webkit-user-select:none;
     align-self: center;
@@ -2032,6 +2039,9 @@ a:hover {
 .select-options {
     display: none;
     position: absolute;
+    max-height: 384px;
+    overflow-y: auto;
+    overflow-x: hidden;
     top: 100%;
     right: 0;
     left: 0;

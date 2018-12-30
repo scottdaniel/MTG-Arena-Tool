@@ -18,10 +18,13 @@ globals
 	rankLimitedTier,
 	rankConstructed,
 	rankConstructedStep,
-	rankConstructedTier
+	rankConstructedTier,
+	getReadableEvent
 
 */
 let loadHistory = 0;
+let filterEvent = 'All';
+let filteredSampleSize = 0;
 
 function open_history_tab(loadMore) {
 	var mainDiv = document.getElementById("ux_0");
@@ -106,21 +109,84 @@ function open_history_tab(loadMore) {
 	}
 
 	mainDiv = document.getElementById("history_column");
+
+	// Event ID filter
+	if (loadHistory == 0) {
+		let events_list = [];
+		let wins = 0;
+		let losses = 0;
+		filteredSampleSize = 0;
+		matchesHistory.matches.forEach((matchId) => {
+			let match = matchesHistory[matchId];
+			if (match) {
+				if (match.eventId) {
+					if (events_list.indexOf(match.eventId) == -1) {
+						events_list.push(match.eventId);
+					}
+					if (filterEvent == 'All' || match.eventId == filterEvent) {
+						wins += match.player.win;
+						losses += match.opponent.win;
+						filteredSampleSize++;
+					}
+				}
+			}
+		});
+		if (filteredSampleSize == 0)	filteredSampleSize = matchesHistory.matches.length;
+
+		div = document.createElement("div");
+		div.classList.add("history_top");
+
+		let history_top_filter = document.createElement("div");
+		history_top_filter.classList.add('history_top_filter');
+
+		let history_top_winrate = document.createElement("div");
+		history_top_winrate.classList.add('history_top_winrate');
+
+		d = document.createElement("div");
+		d.classList.add('list_deck_winrate');
+		let wrTotal = 1 / (wins+losses) * wins;
+
+		let colClass = getWinrateClass(wrTotal);
+
+		d.innerHTML = `'Wins: ${wins} / Losses: ${losses} (<span class="${colClass}_bright">${Math.round(wrTotal*100)}%</span>)`;
+		history_top_winrate.appendChild(d);
+
+		div.appendChild(history_top_filter);
+		div.appendChild(history_top_winrate);
+
+		var select = $('<select id="query_select"></select>');
+		if (filterEvent != "All") {
+			select.append('<option value="All">All</option>');
+		}
+		events_list.forEach((evId) => {
+			if (evId !== filterEvent) {
+				select.append('<option value="'+evId+'">'+getReadableEvent(evId)+'</option>');
+			}
+		});
+		history_top_filter.appendChild(select[0]);
+		mainDiv.appendChild(div);
+		selectAdd(select, filterHistory);
+		select.next('div.select-styled').text(getReadableEvent(filterEvent));
+	}
 	
-	console.log("Load more: ", loadHistory, loadMore, loadHistory+loadMore);
-	for (var loadEnd = loadHistory + loadMore; loadHistory < loadEnd; loadHistory++) {
+	//console.log("Load more: ", loadHistory, loadMore, loadHistory+loadMore);
+	var actuallyLoaded = loadHistory;
+	for (var loadEnd = loadHistory + loadMore; actuallyLoaded < loadEnd && loadHistory <= matchesHistory.matches.length && actuallyLoaded < filteredSampleSize; loadHistory++) {
 		var match_id = matchesHistory.matches[loadHistory];
 		var match = matchesHistory[match_id];
 
-		console.log("match: ", match_id, match);
+		//console.log("match: ", match_id, match);
 		if (match == undefined) continue;
 		if (match.type == "match") {
 			if (match.opponent == undefined) continue;
 			if (match.opponent.userid.indexOf("Familiar") !== -1) continue;
 		}
 		if (match.type == "Event")	continue;
-		console.log("Load match: ", match_id, match);
-		console.log("Match: ", loadHistory, match.type, match);
+		if (filterEvent !== 'All' && filterEvent !== match.eventId)		continue;
+
+		actuallyLoaded++;
+		//console.log("Load match: ", match_id, match);
+		//console.log("Match: ", loadHistory, match.type, match);
 
 		div = document.createElement("div");
 		div.classList.add(match.id);
@@ -321,6 +387,11 @@ function open_history_tab(loadMore) {
 	);
 
 	loadHistory = loadEnd;
+}
+
+function filterHistory(filter) {
+	filterEvent = filter;
+	open_history_tab(0);
 }
 
 function getNextRank(mode) {
