@@ -108,9 +108,14 @@ function open_decks_tab() {
 				var flc = document.createElement("div");
 				flc.classList.add('flex_item');
 				flc.style.flexDirection = "column";
+				flc.style.whiteSpace = "nowrap";
 
 				var flcf = document.createElement("div");
 				flcf.classList.add('deck_tags_container');
+
+				var flcfwc = document.createElement("div");
+				flcfwc.style.marginRight = '8px';
+				flcfwc.classList.add('flex_item');
 
 				let t = createTag(null, flcf, false);
 				jQuery.data(t, "deck", deck.id);
@@ -120,6 +125,42 @@ function open_decks_tab() {
 						jQuery.data(t, "deck", deck.id);
 					});
 				}
+
+    // Deck crafting cost section
+    let ownedWildcards = {
+        common: economyHistory.wcCommon,
+        uncommon: economyHistory.wcUncommon,
+        rare: economyHistory.wcRare,
+        mythic: economyHistory.wcMythic
+    };
+
+    let missingWildcards = get_deck_missing(deck);
+
+		let wc;
+		let n = 0;
+		let boosterCost = 0;
+		orderedCardRarities.forEach(cardRarity => {
+			if (missingWildcards[cardRarity]) {
+				n++;
+				let bc = rarityBooster[cardRarity] * (missingWildcards[cardRarity] - ownedWildcards[cardRarity]);
+				if (bc > boosterCost) {
+					boosterCost = bc;
+				}
+				wc = document.createElement("div");
+				wc.classList.add("wc_explore_cost");
+				wc.classList.add("wc_"+cardRarity);
+				wc.title = cardRarity.capitalize()+" wldcards needed.";
+				wc.innerHTML = (ownedWildcards[cardRarity] > 0 ? ownedWildcards[cardRarity] + '/' : '') + missingWildcards[cardRarity];
+				flcfwc.appendChild(wc);
+			}
+		});
+		if (n !== 0) {
+			let bo = document.createElement("div");
+			bo.classList.add("bo_explore_cost");
+			bo.innerHTML = boosterCost;
+			bo.title = "Aproximate boosters needed";
+			flcfwc.appendChild(bo);			
+		}
 
 				var flr = document.createElement("div");
 				flr.classList.add('flex_item');
@@ -140,46 +181,6 @@ function open_decks_tab() {
 				d.innerHTML = deck.name;
 				flt.appendChild(d);
 
-				var missingCards = false;
-				deck.mainDeck.forEach(function(card) {
-					var grpId = card.id;
-					//var type = cardsDb.get(grpId).type;
-					if (cardsDb.get(grpId).type.indexOf("Basic Land") == -1) {
-						var quantity = card.quantity;
-						if (grpId == 67306 && quantity > 4) {
-							quantity = 4;
-						}
-						if (cards[grpId] == undefined) {
-							missingCards = true
-						}
-						else if (quantity > cards[grpId]) {
-							missingCards = true;
-						}
-					}
-				});
-				deck.sideboard.forEach(function(card) {
-					var grpId = card.id;
-					//var type = cardsDb.get(grpId).type;
-					if (cardsDb.get(grpId).type.indexOf("Basic Land") == -1) {
-						var quantity = card.quantity;
-						if (grpId == 67306 && quantity > 4) {
-							quantity = 4;
-						}
-						if (cards[grpId] == undefined) {
-							missingCards = true
-						}
-						else if (quantity > cards[grpId]) {
-							missingCards = true;
-						}
-					}
-				});
-
-				if (missingCards) {
-					d = document.createElement("div");
-					d.classList.add('decklist_not_owned');
-					flt.appendChild(d);
-				}
-
 				deck.colors.forEach(function(color) {
 					var d = document.createElement("div");
 					d.classList.add('mana_s20');
@@ -188,17 +189,21 @@ function open_decks_tab() {
 				});
 
 				var wr = getDeckWinrate(deck.id, deck.lastUpdated);
+				
 				if (wr != 0) {
 					var d = document.createElement("div");
 					d.classList.add('list_deck_winrate');
-					//d.innerHTML = 'Winrate: '+(wr.total*100).toFixed(2)+'%';
-					d.innerHTML = 'Wins: '+wr.wins+' / Losses: '+wr.losses+' ('+(wr.total*100).toFixed(2)+'%)';
+
+					let colClass = getWinrateClass(wr.total);
+					d.innerHTML = `'Wins: ${wr.wins} / Losses: ${wr.losses} <span class="${colClass}_bright">(${Math.round(wr.total*100)}%)</span>`;
 					flr.appendChild(d);
 
 					d = document.createElement("div");
 					d.classList.add('list_deck_winrate');
 					d.style.opacity = 0.6;
-					d.innerHTML = 'Since last edit: '+(wr.lastEdit*100).toFixed(2)+'%';
+
+					colClass = getWinrateClass(wr.lastEdit);
+					d.innerHTML = `Since last edit: <span class="${colClass}_bright">${Math.round(wr.lastEdit*100)}%</span>`;
 					flr.appendChild(d);
 
 					wrTotalWins += wr.wins;
@@ -217,6 +222,7 @@ function open_decks_tab() {
 				fll.appendChild(tile);
 				div.appendChild(flc);
 				div.appendChild(flcf);
+				div.appendChild(flcfwc);
 				flc.appendChild(flt);
 				flc.appendChild(flb);
 				div.appendChild(flr);
@@ -252,7 +258,9 @@ function open_decks_tab() {
 		d = document.createElement("div");
 		d.classList.add('list_deck_winrate');
 		wrTotal = 1 / wrTotal * wrTotalWins;
-		d.innerHTML = 'Wins: '+wrTotalWins+' / Losses: '+wrTotalLosses+' ('+(wrTotal*100).toFixed(2)+'%)';
+
+		let colClass = getWinrateClass(wrTotal);
+		d.innerHTML = `'Wins: ${wrTotalWins} / Losses: ${wrTotalLosses} (<span class="${colClass}_bright">${Math.round(wrTotal*100)}%</span>)`;
 		dtwr.appendChild(d);
 
 		$("#ux_0").append('<div class="list_fill"></div>');

@@ -3,6 +3,7 @@ global
 	windowBackground,
 	windowOverlay,
 	get_deck_colors,
+	get_deck_uniquestring,
 	removeDuplicates,
 	compare_chances,
 	compare_cards,
@@ -17,11 +18,12 @@ const {webFrame, remote} = require('electron');
 
 const ipc = electron.ipcRenderer;
 
-var matchBeginTime = Date.now();
-var clockMode = 0;
-var draftMode = 1;
-var deckMode = 0;
-var overlayMode = 0;
+let matchBeginTime = Date.now();
+let priorityTimers = [];
+let clockMode = 0;
+let draftMode = 1;
+let deckMode = 0;
+let overlayMode = 0;
 var renderer = 1;
 
 //var turnPhase = 0;
@@ -29,20 +31,23 @@ var renderer = 1;
 //var turnNumber = 0;
 //var turnActive = 0;
 //var turnDecision = 0;
-
-var turnPriority = 0;
-var soundPriority = false;
+ 
+let playerSeat = 0;
+let oppName = '';
+let turnPriority = 0;
+let soundPriority = false;
 let overlayAlpha = 1;
 let overlayAlphaBack = 1;
 
-var showSideboard = false;
-var actionLog = [];
+let showSideboard = false;
+let actionLog = [];
 
-var cards = {};
-var mana = {0: "", 1: "white", 2: "blue", 3: "black", 4: "red", 5: "green", 6: "colorless", 7: "", 8: "x"};
+let currentDeck = null;
+let cards = {};
+let mana = {0: "", 1: "white", 2: "blue", 3: "black", 4: "red", 5: "green", 6: "colorless", 7: "", 8: "x"};
 
 const Howler = require('howler');
-var sound = new Howl({
+let sound = new Howl({
 	src: ['../sounds/blip.mp3']
 });
 
@@ -70,23 +75,79 @@ function updateClock() {
 		ss = 0;
 	}
 	else if (clockMode == 0) {
+		let time = priorityTimers[1] / 1000;
+		let now = new Date();
+		if (turnPriority == 1) {
+			time += (now - new Date(priorityTimers[0])) / 1000;
+		}
+
+		mm = Math.floor(time % (3600) / 60);
+		mm = ('0' + mm).slice(-2);
+		ss = Math.floor(time % 60);
+		ss = ('0' + ss).slice(-2);
+		$(".clock_priority_1").html(mm+":"+ss);
+
+		time = priorityTimers[2] / 1000;
+		if (turnPriority == 2) {
+			time += (now - new Date(priorityTimers[0])) / 1000;
+		}
+
+		mm = Math.floor(time % (3600) / 60);
+		mm = ('0' + mm).slice(-2);
+		ss = Math.floor(time % 60);
+		ss = ('0' + ss).slice(-2);
+		$(".clock_priority_2").html(mm+":"+ss);
+	}
+	else if (clockMode == 1) {
 		var diff = Math.floor((Date.now() - matchBeginTime)/1000);
 		hh = Math.floor(diff / 3600);
 		mm = Math.floor(diff % (3600) / 60);
 		ss = Math.floor(diff % 60);
-		//console.log(diff, Date.now(), matchBeginTime);
+		hh = ('0' + hh).slice(-2);
+		mm = ('0' + mm).slice(-2);
+		ss = ('0' + ss).slice(-2);
+		$(".clock_elapsed").html(hh+":"+mm+":"+ss);
 	}
-	else if (clockMode == 1) {
+	else if (clockMode == 2) {
 		var d = new Date();
 		hh = d.getHours();
 		mm = d.getMinutes();
 		ss = d.getSeconds();
+		hh = ('0' + hh).slice(-2);
+		mm = ('0' + mm).slice(-2);
+		ss = ('0' + ss).slice(-2);
+		$(".clock_elapsed").html(hh+":"+mm+":"+ss);
+	}
+}
+
+function recreateClock() {
+	if (clockMode == 0) {
+		let p1 = $('<div class="clock_priority_1"></div>');
+		let p2 = $('<div class="clock_priority_2"></div>');
+		let p1name = oppName;
+		let p2name = 'You';
+		if (playerSeat == 1) {
+			p1name = 'You';
+			p2name = oppName;
+		}
+		$('.clock_turn').html('<div class="clock_pname1">'+p1name+'</div><div class="clock_pname2">'+p2name+'</div>');
+		$('.clock_elapsed').html('');
+		$('.clock_elapsed').append(p1);
+		$('.clock_elapsed').append(p2);
+	}
+	else {
+		$('.clock_turn').html('');
+		$('.clock_elapsed').html('');
+
+		if (turnPriority == playerSeat) {
+			$('.clock_turn').html("You have priority.");
+		}
+		else {
+			$('.clock_turn').html("Opponent has priority.");
+		}
 	}
 
-	hh = ('0' + hh).slice(-2);
-	mm = ('0' + mm).slice(-2);
-	ss = ('0' + ss).slice(-2);
-	$(".clock_elapsed").html(hh+":"+mm+":"+ss);
+	updateClock();
 }
 
 //
@@ -119,10 +180,17 @@ ipc.on('set_timer', function (event, arg) {
 		overlayMode = 1;
 		matchBeginTime = Date.now();
 	}
-	else {
-		matchBeginTime = arg == 0 ? 0 : Date.parse(arg);
+	else if (arg !== 0) {
+		//matchBeginTime = arg == 0 ? 0 : Date.parse(arg);
+		matchBeginTime = Date.parse(arg);
 	}
 	//console.log("set time", arg);
+});
+
+ipc.on('set_priority_timer', function(event, arg) {
+	if (arg) {
+		priorityTimers = arg;
+	}
 });
 
 $( window ).resize(function() {
@@ -246,7 +314,9 @@ ipc.on('set_hover', function (event, arg) {
 
 //
 ipc.on('set_opponent', function (event, arg) {
-	$('.top_username').html(arg.slice(0, -6));
+	oppName = arg.slice(0, -6);
+	recreateClock();
+	$('.top_username').html(oppName);
 });
 
 //
@@ -266,10 +336,14 @@ ipc.on('set_deck', function (event, arg) {
 		doscroll = true;
 	}
 
-	$(".overlay_decklist").html('');
-	$(".overlay_deckcolors").html('');
-
 	if (arg != null) {
+		let oldstr = get_deck_uniquestring(currentDeck);
+		if (oldstr == get_deck_uniquestring(arg))	return;
+
+		$(".overlay_decklist").html('');
+		$(".overlay_deckcolors").html('');
+		currentDeck = arg;
+
 		let deckListDiv;
 		if (deckMode == 4) {
 			$(".overlay_deckname").html("Action Log");
@@ -395,6 +469,7 @@ ipc.on('set_draft_cards', function (event, pack, picks, packn, pickn) {
 
 //
 ipc.on("set_turn", function (event, _we, _phase, _step, _number, _active, _priority, _decision) {
+	playerSeat = _we;
 	if (turnPriority != _priority && _priority == _we && soundPriority) {
 		sound.play();
 	}
@@ -404,11 +479,13 @@ ipc.on("set_turn", function (event, _we, _phase, _step, _number, _active, _prior
 	//turnActive = _active;
 	turnPriority = _priority;
 	//turnDecision = _decision;
-	if (turnPriority == _we) {
-		$('.clock_turn').html("You have priority.");
-	}
-	else {
-		$('.clock_turn').html("Opponent has priority.");
+	if (clockMode > 0) {
+		if (turnPriority == _we) {
+			$('.clock_turn').html("You have priority.");
+		}
+		else {
+			$('.clock_turn').html("Opponent has priority.");
+		}
 	}
 });
 
@@ -498,20 +575,22 @@ function hoverCard(grpId) {
 
 
 $(document).ready(function() {
+	recreateClock();
 	//
 	$(".clock_prev").click(function () {
 		clockMode -= 1;
 		if (clockMode < 0) {
-			clockMode = 1;
+			clockMode = 2;
 		}
+		recreateClock();
 	});
 	//
 	$(".clock_next").click(function () {
 		clockMode += 1;
-		if (clockMode > 1) {
+		if (clockMode > 2) {
 			clockMode = 0;
 		}
-
+		recreateClock();
 	});
 	//
 	$(".draft_prev").click(function () {

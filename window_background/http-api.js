@@ -18,6 +18,7 @@ global
 */
 const async = require("async");
 const qs	= require('qs');
+let metadataState = false;
 
 var httpAsync = [];
 httpBasic();
@@ -121,6 +122,7 @@ function httpBasic() {
 						
 						if (_headers.method == 'get_database') {
 							//resetLogLoop(100);
+							metadataState = true;
 							delete parsedResult.ok;
 							setsList = parsedResult.sets;
 							eventsList = parsedResult.events;
@@ -169,6 +171,11 @@ function httpBasic() {
 			}); 
 		});
 		req.on('error', function(e) {
+			console.error(`problem with request: ${e.message}`);
+			if (!metadataState) {
+				ipc_send("popup", {"text": "Server unreachable, try offline mode.", "time": 0});
+			}
+
 			callback(e);
 			removeFromHttp(_headers.reqId);
 			ipc_send("ipc_log", e.message);

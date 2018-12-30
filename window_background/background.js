@@ -481,16 +481,7 @@ ipc.on('request_explore', function (event, arg) {
 });
 
 ipc.on('request_economy', function () { 
-	var ec = economy;
-	ec.gold = gold;
-	ec.gems = gems;
-	ec.vault = vault;
-	ec.wcTrack = wcTrack;
-	ec.wcCommon = wcCommon;
-	ec.wcUncommon = wcUncommon;
-	ec.wcRare = wcRare;
-	ec.wcMythic = wcMythic;
-	ipc_send("set_economy", JSON.stringify(ec));
+	sendEconomy();
 });
 
 ipc.on('request_course', function (event, arg) {
@@ -514,12 +505,7 @@ ipc.on('tou_drop', function (event, arg) {
 });
 
 ipc.on('edit_tag', function (event, arg) {
-	Object.keys(tags_colors).forEach(function(key) {
-		if (key == arg.tag) {
-			tags_colors[key] = arg.color;
-		}
-	});
-
+	tags_colors[arg.tag] = arg.color;
 	store.set("tags_colors", tags_colors);
 });
 
@@ -554,6 +540,18 @@ ipc.on('get_deck_changes', function (event, arg) {
 	get_deck_changes(arg);
 });
 
+function sendEconomy() {
+	var ec = economy;
+	ec.gold = gold;
+	ec.gems = gems;
+	ec.vault = vault;
+	ec.wcTrack = wcTrack;
+	ec.wcCommon = wcCommon;
+	ec.wcUncommon = wcUncommon;
+	ec.wcRare = wcRare;
+	ec.wcMythic = wcMythic;
+	ipc_send("set_economy", JSON.stringify(ec));
+}
 /*
 function rememberLogin(bool) {
 	if (bool) {
@@ -766,7 +764,7 @@ function onLogEntryFound(entry) {
 		ipc_send("set_username", playerName);
 	}
 	else {
-		console.log("Entry:", entry.label, entry, entry.json());
+		//console.log("Entry:", entry.label, entry, entry.json());
 		if (firstPass) {
 			updateLoading(entry);
 		}
@@ -1154,6 +1152,19 @@ function tryZoneTransfers() {
 	}
 }
 
+let priorityTimers = [0,0,0];
+let lastPriorityChangeTime = 0;
+//
+function changePriority(previous, current, time) {
+	priorityTimers[previous] += time - lastPriorityChangeTime;
+
+	lastPriorityChangeTime = time;
+	priorityTimers[0] = lastPriorityChangeTime;
+	console.log(priorityTimers);
+	//console.log("since match begin:", time - matchBeginTime);
+	ipc_send('set_priority_timer', priorityTimers, windowOverlay);
+}
+
 // Get player name by seat in the game
 function getNameBySeat(seat) {
 	try {
@@ -1216,6 +1227,8 @@ function createMatch(arg) {
 	currentMatchTime = 0;
 	playerWin = 0;
 	oppWin = 0;
+	priorityTimers = [0,0,0,0,0];
+	lastPriorityChangeTime = matchBeginTime;
 
 	ipc_send("ipc_log", "vs "+oppName);
 	ipc_send("set_timer", matchBeginTime, windowOverlay);
@@ -1225,6 +1238,8 @@ function createMatch(arg) {
 	if (currentEventId == "DirectGame") {
 		httpApi.httpTournamenCheck(currentDeck, oppName);
 	}
+
+	ipc_send('set_priority_timer', priorityTimers, windowOverlay);
 }
 
 //

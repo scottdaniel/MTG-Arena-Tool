@@ -500,8 +500,9 @@ function get_collection_stats() {
 	Object.keys(cardsDb.cards).forEach(function (grpId) {
 		if (grpId != "ok" && grpId != "abilities" && grpId != "events" && grpId != "sets") {
 			const card = cardsDb.get(grpId);
-			var split = card.dfc == "SplitCard" && card.dfcId != 0;
-			if (card.rarity !== "token" && card.rarity !== "land" && card.set !== "Oath of the Gatewatch" && card.dfc != "DFC_Front" && !split) {
+			//var split = card.dfc == "SplitCard" && card.dfcId != 0;
+			//if (card.rarity !== "token" && card.rarity !== "land" && card.set !== "Oath of the Gatewatch" && card.dfc != "DFC_Front" && !split) {
+			if (card.collectible && card.rarity !== "land") {
 				// add to totals
 				stats[card.set][card.rarity].total += 4;
 				stats.complete[card.rarity].total += 4;
@@ -764,6 +765,25 @@ function get_deck_missing(deck) {
 }
 
 //
+function get_deck_uniquestring(deck, side = true) {
+	if (!deck)	return '';
+	deck.mainDeck.sort(compare_cards);
+
+	let str = '';
+	deck.mainDeck.forEach((card) => {
+		str += card.id+','+card.quantity+',';
+	});
+
+	if (side) {
+		deck.sideboard.forEach((card) => {
+			str += card.id+','+card.quantity+',';
+		});
+	}
+
+	return str;
+}
+
+//
 function get_deck_sideboarded(deck_a, deck_b) {
 	let _in = [];
 	let _out = [];
@@ -838,10 +858,20 @@ function get_deck_curve(deck) {
 	deck.mainDeck.forEach(function(card) {
 		var grpid = card.id;
 		var cmc = cardsDb.get(grpid).cmc;
-		if (curve[cmc] == undefined)	curve[cmc] = 0;
+		if (curve[cmc] == undefined)	curve[cmc] = [0,0,0,0,0,0];
+
+		let card_cost = cardsDb.get(grpid).cost;
 
 		if (cardsDb.get(grpid).type.indexOf("Land") == -1) {
-			curve[cmc] += card.quantity
+			card_cost.forEach(function(c) {
+				if (c.indexOf('w') !== -1)	curve[cmc][1] += card.quantity;
+				if (c.indexOf('u') !== -1)	curve[cmc][2] += card.quantity;
+				if (c.indexOf('b') !== -1)	curve[cmc][3] += card.quantity;
+				if (c.indexOf('r') !== -1)	curve[cmc][4] += card.quantity;
+				if (c.indexOf('g') !== -1)	curve[cmc][5] += card.quantity;
+			});
+
+			curve[cmc][0] += card.quantity
 		}
 	});
 	/*
@@ -889,12 +919,12 @@ function get_deck_colors_ammount(deck) {
 	deck.mainDeck.forEach(function(card) {
 		if (card.quantity > 0) {
 			cardsDb.get(card.id).cost.forEach(function(c) {
-				if (c.indexOf('w') !== -1) { colors.w += 1; colors.total+=1 }
-				if (c.indexOf('u') !== -1) { colors.u += 1; colors.total+=1 }
-				if (c.indexOf('b') !== -1) { colors.b += 1; colors.total+=1 }
-				if (c.indexOf('r') !== -1) { colors.r += 1; colors.total+=1 }
-				if (c.indexOf('g') !== -1) { colors.g += 1; colors.total+=1 }
-				if (c.indexOf('c') !== -1) { colors.c += 1; colors.total+=1 }
+				if (c.indexOf('w') !== -1) { colors.w += card.quantity; colors.total+=card.quantity }
+				if (c.indexOf('u') !== -1) { colors.u += card.quantity; colors.total+=card.quantity }
+				if (c.indexOf('b') !== -1) { colors.b += card.quantity; colors.total+=card.quantity }
+				if (c.indexOf('r') !== -1) { colors.r += card.quantity; colors.total+=card.quantity }
+				if (c.indexOf('g') !== -1) { colors.g += card.quantity; colors.total+=card.quantity }
+				if (c.indexOf('c') !== -1) { colors.c += card.quantity; colors.total+=card.quantity }
 			});
 		}
 	});
@@ -1137,4 +1167,9 @@ function toHHMM(sec_num) {
 //
 String.prototype.capitalize = function() {
     return this.charAt(0).toUpperCase() + this.slice(1);
+}
+
+//
+function add(a, b) {
+    return a + b;
 }

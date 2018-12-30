@@ -18,10 +18,15 @@ globals
 	rankLimitedTier,
 	rankConstructed,
 	rankConstructedStep,
-	rankConstructedTier
+	rankConstructedTier,
+	getReadableEvent,
+	getWinrateClass
 
 */
 let loadHistory = 0;
+let filterEvent = 'All';
+let filteredSampleSize = 0;
+let seasonView = 0;
 
 function open_history_tab(loadMore) {
 	var mainDiv = document.getElementById("ux_0");
@@ -41,56 +46,7 @@ function open_history_tab(loadMore) {
 		div = document.createElement("div");
 		div.classList.add("ranks_history");
 
-		var t = document.createElement("div");
-		t.classList.add("ranks_history_title");
-		t.innerHTML = "Current contructed season:";
-		div.appendChild(t);
-
-		// Add ranks matchup history here
-		let rc = matchesHistory.rankwinrates.constructed;
-		let lastWinrate = Math.round(100 / rc.total.t * rc.total.w);
-		for (var key in rc) {
-			if (rc.hasOwnProperty(key)) {
-				var val = rc[key];
-				if (val.t > 0 && val.r)  {
-					var fla = document.createElement("div");
-					fla.classList.add("flex_item");
-					//fla.style.flexDirection = "column";
-					fla.style.justifyContent = "center";
-
-					var v = document.createElement("div");
-					v.classList.add("ranks_history_title");
-					v.innerHTML = "Vs.";
-
-					var r = document.createElement("div");
-					r.classList.add("ranks_history_badge");
-					r.style.backgroundPosition = (get_rank_index(val.r, 1)*-48)+"px 0px";
-					r.title = val.r;
-
-					var s = document.createElement("div");
-					s.classList.add("ranks_history_title");
-
-					lastWinrate = Math.round(val.w/val.t*100);
-					s.innerHTML = lastWinrate+"%";
-
-					fla.appendChild(v);
-					fla.appendChild(r);
-					fla.appendChild(s);
-					div.appendChild(fla);
-				}
-			}
-		}
-
-		t = document.createElement("div");
-		t.classList.add("ranks_history_title");
-		t.innerHTML = `Total: ${Math.round(100 / rc.total.t * rc.total.w)} %`;
-		div.appendChild(t);
-
-		let expected = getStepsUntilNextRank(0, lastWinrate/100);
-		t = document.createElement("div");
-		t.classList.add("ranks_history_title");
-		t.innerHTML = `Games until ${getNextRank(0)}: ~${expected}`;
-		div.appendChild(t);
+		renderRanksStats(div);
 
 		var wrap_l = document.createElement("div");
 		wrap_l.classList.add("wrapper_column");
@@ -106,21 +62,84 @@ function open_history_tab(loadMore) {
 	}
 
 	mainDiv = document.getElementById("history_column");
+
+	// Event ID filter
+	if (loadHistory == 0) {
+		let events_list = [];
+		let wins = 0;
+		let losses = 0;
+		filteredSampleSize = 0;
+		matchesHistory.matches.forEach((matchId) => {
+			let match = matchesHistory[matchId];
+			if (match) {
+				if (match.eventId) {
+					if (events_list.indexOf(match.eventId) == -1) {
+						events_list.push(match.eventId);
+					}
+					if (filterEvent == 'All' || match.eventId == filterEvent) {
+						wins += match.player.win;
+						losses += match.opponent.win;
+						filteredSampleSize++;
+					}
+				}
+			}
+		});
+		if (filteredSampleSize == 0)	filteredSampleSize = matchesHistory.matches.length;
+
+		div = document.createElement("div");
+		div.classList.add("history_top");
+
+		let history_top_filter = document.createElement("div");
+		history_top_filter.classList.add('history_top_filter');
+
+		let history_top_winrate = document.createElement("div");
+		history_top_winrate.classList.add('history_top_winrate');
+
+		d = document.createElement("div");
+		d.classList.add('list_deck_winrate');
+		let wrTotal = 1 / (wins+losses) * wins;
+
+		let colClass = getWinrateClass(wrTotal);
+
+		d.innerHTML = `'Wins: ${wins} / Losses: ${losses} (<span class="${colClass}_bright">${Math.round(wrTotal*100)}%</span>)`;
+		history_top_winrate.appendChild(d);
+
+		div.appendChild(history_top_filter);
+		div.appendChild(history_top_winrate);
+
+		var select = $('<select id="query_select"></select>');
+		if (filterEvent != "All") {
+			select.append('<option value="All">All</option>');
+		}
+		events_list.forEach((evId) => {
+			if (evId !== filterEvent) {
+				select.append('<option value="'+evId+'">'+getReadableEvent(evId)+'</option>');
+			}
+		});
+		history_top_filter.appendChild(select[0]);
+		mainDiv.appendChild(div);
+		selectAdd(select, filterHistory);
+		select.next('div.select-styled').text(getReadableEvent(filterEvent));
+	}
 	
-	console.log("Load more: ", loadHistory, loadMore, loadHistory+loadMore);
-	for (var loadEnd = loadHistory + loadMore; loadHistory < loadEnd; loadHistory++) {
+	//console.log("Load more: ", loadHistory, loadMore, loadHistory+loadMore);
+	var actuallyLoaded = loadHistory;
+	for (var loadEnd = loadHistory + loadMore; actuallyLoaded < loadEnd && loadHistory <= matchesHistory.matches.length && actuallyLoaded < filteredSampleSize; loadHistory++) {
 		var match_id = matchesHistory.matches[loadHistory];
 		var match = matchesHistory[match_id];
 
-		console.log("match: ", match_id, match);
+		//console.log("match: ", match_id, match);
 		if (match == undefined) continue;
 		if (match.type == "match") {
 			if (match.opponent == undefined) continue;
 			if (match.opponent.userid.indexOf("Familiar") !== -1) continue;
 		}
 		if (match.type == "Event")	continue;
-		console.log("Load match: ", match_id, match);
-		console.log("Match: ", loadHistory, match.type, match);
+		if (filterEvent !== 'All' && filterEvent !== match.eventId)		continue;
+
+		actuallyLoaded++;
+		//console.log("Load match: ", match_id, match);
+		//console.log("Match: ", loadHistory, match.type, match);
 
 		div = document.createElement("div");
 		div.classList.add(match.id);
@@ -321,6 +340,83 @@ function open_history_tab(loadMore) {
 	);
 
 	loadHistory = loadEnd;
+}
+
+function renderRanksStats(div) {
+	$(div).html('');
+
+	let but = document.createElement("div");
+	but.classList.add("button_simple");
+	but.classList.add("button_thin");
+	but.classList.add("season_toggle");
+	but.style.marginTop = "32px !important;";
+	but.innerHTML = `Show ${(seasonView == 1 ? 'constructed' : 'limited')}`;
+	div.appendChild(but);
+
+	var t = document.createElement("div");
+	t.classList.add("ranks_history_title");
+	t.innerHTML = `Current ${(seasonView == 0 ? 'constructed' : 'limited')} season:`;
+	div.appendChild(t);
+
+	// Add ranks matchup history here
+	let rc = matchesHistory.rankwinrates.constructed;
+	if (seasonView == 1)	rc = matchesHistory.rankwinrates.limited;
+
+	let lastWinrate = Math.round(100 / rc.total.t * rc.total.w);
+	for (var key in rc) {
+		if (rc.hasOwnProperty(key)) {
+			var val = rc[key];
+			if (val.t > 0 && val.r)  {
+				var fla = document.createElement("div");
+				fla.classList.add("flex_item");
+				//fla.style.flexDirection = "column";
+				fla.style.justifyContent = "center";
+
+				var v = document.createElement("div");
+				v.classList.add("ranks_history_title");
+				v.innerHTML = "Vs.";
+
+				var r = document.createElement("div");
+				r.classList.add("ranks_history_badge");
+				r.style.backgroundPosition = (get_rank_index(val.r, 1)*-48)+"px 0px";
+				r.title = val.r;
+
+				var s = document.createElement("div");
+				s.classList.add("ranks_history_title");
+
+				lastWinrate = Math.round(val.w/val.t*100);
+				s.innerHTML = lastWinrate+"%";
+
+				fla.appendChild(v);
+				fla.appendChild(r);
+				fla.appendChild(s);
+				div.appendChild(fla);
+			}
+		}
+	}
+
+	t = document.createElement("div");
+	t.classList.add("ranks_history_title");
+	t.innerHTML = `Total: ${Math.round(100 / rc.total.t * rc.total.w)} %`;
+	div.appendChild(t);
+
+	let expected = getStepsUntilNextRank(seasonView, lastWinrate/100);
+	t = document.createElement("div");
+	t.classList.add("ranks_history_title");
+	t.innerHTML = `Games until ${getNextRank(seasonView)}: ~${expected}`;
+	div.appendChild(t);
+
+
+
+	$(but).click(() => {
+		seasonView = !seasonView;
+		renderRanksStats($('.ranks_history')[0]);
+	});
+} 
+
+function filterHistory(filter) {
+	filterEvent = filter;
+	open_history_tab(0);
 }
 
 function getNextRank(mode) {

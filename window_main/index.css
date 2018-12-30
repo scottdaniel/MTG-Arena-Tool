@@ -532,8 +532,40 @@ span i {
     -webkit-transition: all .2s ease-in;
 }
 
+.green_bright {
+    color: #D3EBB0 !important;
+}
+
+.blue_bright {
+    color: #BDD6FF !important;
+}
+
+.orange_bright {
+    color: #FFBA85 !important;
+}
+
+.red_bright {
+    color: #FF9B78 !important;
+}
+
+.yellow_bright {
+    color: #FFDF9E !important;
+}
+
+.white_bright {
+    color: #FAE5D2 !important;
+}
+
 .green {
     color: rgba(183, 200, 158, 1) !important;
+}
+
+.blue {
+    color: rgba(170, 190, 223, 1) !important;
+}
+
+.orange {
+    color: rgba(226, 166, 120, 1) !important;
 }
 
 .red {
@@ -680,6 +712,13 @@ a:hover {
     justify-content: space-between;
 }
 
+.history_top {
+    display: flex;
+    height: 64px;
+    margin-left: 16px;
+    justify-content: space-between;
+}
+
 .list_deck_name {
     -webkit-user-select:none;
     align-self: center;
@@ -822,7 +861,14 @@ a:hover {
     width: 100%;
 }
 .mana_curve_column {
+    text-align: center;
+    font-size: 16px;
+    text-shadow: 3px 3px 3px #000000ad;
+    font-family: Beleren;
+    color: #fae5d2;
+    justify-content: space-around;
     width: 1000px;
+    flex-direction: column;
     margin: 0px 2px;
     display: flex;
     background-color: rgba(250, 229, 210, 0.8);
@@ -930,7 +976,7 @@ a:hover {
     font-family: Mplantin;
     text-indent: 48px;
     color: #FAE5D2;
-    width: 64px;
+    width: 96px;
     line-height: 29px;
     height: 24px;
     text-align: right;
@@ -1342,6 +1388,15 @@ a:hover {
     background-size: contain;
 }
 
+.economy_wc_med {
+    background-repeat: no-repeat;
+    margin: auto 8px;
+    margin-left: 18px;
+    width: 28px;
+    height: 35px;
+    background-size: contain;
+}
+
 .economy_gold {
     background-repeat: no-repeat;
     margin: auto 4px;
@@ -1354,6 +1409,7 @@ a:hover {
 .economy_gold_med {
     background-repeat: no-repeat;
     margin: auto 4px;
+    margin-left: 16px;
     width: 28px;
     height: 28px;
     background-image: url(../images/gold.png);
@@ -1737,6 +1793,9 @@ a:hover {
 
 .ranks_history {
     margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    margin-top: 16px;
     /*
     justify-content: space-evenly;
     display: flex;
@@ -1983,6 +2042,9 @@ a:hover {
 .select-options {
     display: none;
     position: absolute;
+    max-height: 384px;
+    overflow-y: auto;
+    overflow-x: hidden;
     top: 100%;
     right: 0;
     left: 0;
