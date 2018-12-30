@@ -919,12 +919,12 @@ function get_deck_colors_ammount(deck) {
 	deck.mainDeck.forEach(function(card) {
 		if (card.quantity > 0) {
 			cardsDb.get(card.id).cost.forEach(function(c) {
-				if (c.indexOf('w') !== -1) { colors.w += 1; colors.total+=1 }
-				if (c.indexOf('u') !== -1) { colors.u += 1; colors.total+=1 }
-				if (c.indexOf('b') !== -1) { colors.b += 1; colors.total+=1 }
-				if (c.indexOf('r') !== -1) { colors.r += 1; colors.total+=1 }
-				if (c.indexOf('g') !== -1) { colors.g += 1; colors.total+=1 }
-				if (c.indexOf('c') !== -1) { colors.c += 1; colors.total+=1 }
+				if (c.indexOf('w') !== -1) { colors.w += card.quantity; colors.total+=card.quantity }
+				if (c.indexOf('u') !== -1) { colors.u += card.quantity; colors.total+=card.quantity }
+				if (c.indexOf('b') !== -1) { colors.b += card.quantity; colors.total+=card.quantity }
+				if (c.indexOf('r') !== -1) { colors.r += card.quantity; colors.total+=card.quantity }
+				if (c.indexOf('g') !== -1) { colors.g += card.quantity; colors.total+=card.quantity }
+				if (c.indexOf('c') !== -1) { colors.c += card.quantity; colors.total+=card.quantity }
 			});
 		}
 	});
