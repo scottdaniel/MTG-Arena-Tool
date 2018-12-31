@@ -416,6 +416,7 @@ function drawSideboardableDeck() {
 	}
 
 	_div.append(mainboardDiv);
+	_div.append($('<div class="swap_icon"></div>'));
 	_div.append(sideboardDiv);
 }
 

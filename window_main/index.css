@@ -2357,6 +2357,14 @@ a:hover {
     border-bottom: solid 1px rgba(250, 229, 210, 0.6);
 }
 
+.swap_icon {
+    align-self: center;
+    width: 28px;
+    height: 72px;
+    opacity: 0.8;
+    background: url(../images/swap.png) no-repeat center;
+}
+
 .line_dark {
     background-color: rgba(145, 121, 97, 0.2);
 }
