@@ -2394,6 +2394,11 @@ a:hover {
     overflow: hidden;
 }
 
+.join_decklist {
+    max-width: 420px;
+    margin: auto auto 32px auto;
+}
+
 .decklist_divided {
     margin: 24px;
     width: 50%;

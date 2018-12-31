@@ -183,6 +183,8 @@ function open_tournament(tou) {
 			if (tou.state == 0) {
 				$('<div class="button_simple_disabled but_join">Join</div>').appendTo(mainDiv);
 			}
+			
+			$('<div class="join_decklist"></div>').appendTo(mainDiv);
 		}
 
 		$(".but_join").click(function () {
@@ -367,6 +369,12 @@ function open_tournament(tou) {
 
 function selectTourneyDeck() {
 	tournamentDeck = document.getElementById("deck_select").value;
+	decks.forEach((_deck) => {
+		if (_deck.id == tournamentDeck) {
+			drawDeck($('.join_decklist'), _deck);
+		}
+	});
+	
 	$(".but_join").addClass("button_simple");
 }
 
