@@ -10,7 +10,8 @@ global
 	addCardSeparator,
 	addCardTile,
 	get_deck_export,
-	makeId
+	makeId,
+	pop
 */
 
 let tournaments_list;
@@ -194,6 +195,12 @@ function open_tournament(tou) {
 	}
 	else {
 		$(`<div class="tou_record green">${record}</div>`).appendTo(mainDiv);
+		$(`<div class="tou_opp"><span>Your opponent: </span><span style="margin-left: 10px; color: rgb(250, 229, 210);">${tou.current_opponent}</span><div class="copy_button"></div></div>`).appendTo(mainDiv);
+
+		$('.copy_button').click(() => {
+			pop("Copied to clipboard", 1000);
+			ipc_send('set_clipboard', tou.current_opponent);
+		});
 
 		let tabs = $('<div class="tou_tabs_cont"></div>');
 		let tab_rounds = $('<div class="tou_tab tab_a tou_tab_selected">Rounds</div>');
