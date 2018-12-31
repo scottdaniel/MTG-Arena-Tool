@@ -131,6 +131,9 @@ function httpBasic() {
 							ipc_send("popup", {"text": "Metadata: Ok", "time": 1000});
 						}
 					}
+					else if (_headers.method == 'tou_join' ) {
+						ipc_send("popup", {"text": parsedResult.error, "time": 10000});
+					}
 					else if (_headers.method == 'tou_check') {
 						ipc_send("popup", {"text": parsedResult.state, "time": 3000});
 					}

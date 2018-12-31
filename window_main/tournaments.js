@@ -164,6 +164,7 @@ function open_tournament(tou) {
 			}
 		}
 		else {
+			let cont = $('<div class="flex_item"></div>');
 			var select = $('<select id="deck_select">Select Deck</select>');
 			decks.forEach((_deck) => {
 				try {
@@ -173,7 +174,8 @@ function open_tournament(tou) {
 					console.log(e);
 				}
 			});
-			select.appendTo(mainDiv);
+			select.appendTo(cont);
+			cont.appendTo(mainDiv);
 			selectAdd(select, selectTourneyDeck);
 			select.parent().css('width', '300px');
 			select.parent().css('margin', '16px auto');
