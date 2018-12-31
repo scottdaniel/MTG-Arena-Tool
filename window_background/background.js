@@ -28,6 +28,8 @@ global
 	onLabelInEventGetSeasonAndRankDetail
 */
 var electron = require('electron');
+const math = require('mathjs');
+math.config({precision: 2000});
 
 const {app, net, clipboard} = require('electron');
 const path  = require('path');
@@ -1665,24 +1667,6 @@ function parseWotcTime(str) {
 }
 
 //
-function fact(arg0) {
-	let _f = 1;
-	let _i = 1;
-	for (_i=1; _i<=arg0; _i++) {
-		_f = _f * _i;
-	}
-
-	return _f;
-}
-
-//
-function comb(arg0, arg1) {
-	let ret = fact(arg0) / fact(arg0-arg1) / fact(arg1);
-	
-	return ret;
-}
-
-//
 function hypergeometric(arg0, arg1, arg2, arg3) {
 	if (arg0 > arg3) {
 		return 0;
@@ -1690,14 +1674,14 @@ function hypergeometric(arg0, arg1, arg2, arg3) {
 
 	let _x, _N, _n, _k;
 
-	_x = arg0;// Number of successes in sample (x) <= 
-	_N = arg1;// Population size
-	_n = arg2;// Sample size
-	_k = arg3;// Number of successes in population  
+	_x = math.bignumber(arg0);// Number of successes in sample (x) <= 
+	_N = math.bignumber(arg1);// Population size
+	_n = math.bignumber(arg2);// Sample size
+	_k = math.bignumber(arg3);// Number of successes in population  
 
-	let _a = comb(_k, _x)
-	let _b = comb(_N-_k, _n-_x);
-	let _c = comb(_N, _n);
+	let _a = math.combinations(_k, _x)
+	let _b = math.combinations(math.subtract(_N,_k), math.subtract(_n,_x));
+	let _c = math.combinations(_N, _n);
 
-	return _a * _b / _c;
+	return math.number(math.divide(math.multiply(_a, _b) , _c));
 }
