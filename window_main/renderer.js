@@ -19,7 +19,8 @@ global
 	compare_colors,
 	compare_cards,
 	windowBackground,
-	windowRenderer
+	windowRenderer,
+	deck_count_types
 */
 
 const electron 	= require('electron');
@@ -1149,14 +1150,17 @@ function drawDeck(div, deck) {
 	div.html('');
 	var prevIndex = 0;
 	deck.mainDeck.forEach(function(card) {
-		var grpId = card.id;
-		var type = cardsDb.get(grpId).type;
+		let grpId = card.id;
+		let type = cardsDb.get(grpId).type;
+		let cardTypeSort = get_card_type_sort(type);
 		if (prevIndex == 0) {
-			addCardSeparator(get_card_type_sort(type), div);
+			let q = deck_count_types(deck, type, false);
+			addCardSeparator(cardTypeSort, div, q);
 		}
 		else if (prevIndex != 0) {
-			if (get_card_type_sort(type) != get_card_type_sort(cardsDb.get(prevIndex).type)) {
-				addCardSeparator(get_card_type_sort(type), div);
+			if (cardTypeSort != get_card_type_sort(cardsDb.get(prevIndex).type)) {
+				let q = deck_count_types(deck, type, false);
+				addCardSeparator(cardTypeSort, div, q);
 			}
 		}
 
@@ -1169,7 +1173,7 @@ function drawDeck(div, deck) {
 
 	if (deck.sideboard != undefined) {
 		if (deck.sideboard.length > 0) {
-			addCardSeparator(99, div);
+			addCardSeparator(99, div, deck.sideboard.sum('quantity'));
 			prevIndex = 0;
 			deck.sideboard.forEach(function(card) {
 				var grpId = card.id;

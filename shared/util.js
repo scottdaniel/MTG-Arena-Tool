@@ -248,7 +248,7 @@ function get_rank_index_16(_rank) {
 }
 
 //
-function addCardSeparator(i, element) {
+function addCardSeparator(i, element, number = 0) {
 	var str = "";
 	switch (i) {
 		case 1: str = "Creature"; break;
@@ -263,7 +263,11 @@ function addCardSeparator(i, element) {
 		default: str = i; break;
 	}
 
-	var cont = $('<div class="card_tile_separator">'+str+'</div>');
+	if (number > 0) {
+		str += ` (${number})`;
+	}
+
+	var cont = $(`<div class="card_tile_separator">${str}</div>`);
 	element.append(cont);
 }
 
@@ -333,6 +337,36 @@ function get_card_type_sort(a) {
 	if (a.includes("Enchantment", 0)) 	return 6;
 	if (a.includes("Land", 0))			return 7;
 	return 0;
+}
+
+//
+function deck_count_types(deck, type, side) {
+	if (type.includes("Land", 0))				type = "Land";
+	else if (type.includes("Creature", 0))		type = "Creature";
+	else if (type.includes("Artifact", 0))		type = "Artifact";
+	else if (type.includes("Enchantment", 0))	type = "Enchantment";
+	else if (type.includes("Instant", 0))		type = "Instant";
+	else if (type.includes("Sorcery", 0))		type = "Sorcery";
+	else if (type.includes("Planeswalker", 0))	type = "Planeswalker";
+
+	let count = 0;
+	deck.mainDeck.forEach((card) => {
+		let c = cardsDb.get(card.id);
+		if (c.type.includes(type, 0)) {
+			count+=card.quantity;
+		}
+	});
+
+	if (side) {
+		deck.sideboard.forEach((card) => {
+			let c = cardsDb.get(card.id);
+			if (c.type.includes(type, 0)) {
+				count+=card.quantity;
+			}
+		});
+	}
+
+	return count;
 }
 
 //
@@ -1172,4 +1206,13 @@ String.prototype.capitalize = function() {
 //
 function add(a, b) {
     return a + b;
+}
+
+//
+Array.prototype.sum = function(prop) {
+    var total = 0
+    for ( var i = 0, _len = this.length; i < _len; i++ ) {
+        total += this[i][prop]
+    }
+    return total
 }
