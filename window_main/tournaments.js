@@ -76,6 +76,10 @@ function open_tournaments_tab(arg) {
 		nam.classList.add("tou_name");
 		nam.innerHTML = tou.name;
 
+		let fo = document.createElement("div");
+		fo.classList.add("tou_cell");
+		fo.innerHTML = tou.format;
+
 		let st = document.createElement("div");
 		st.classList.add("tou_state");
 		st.innerHTML = state;
@@ -90,6 +94,7 @@ function open_tournaments_tab(arg) {
 		pln.innerHTML = stateb;
 
 		div.appendChild(nam);
+		div.appendChild(fo);
 		div.appendChild(st);
 		div.appendChild(stb);
 		div.appendChild(pln);
