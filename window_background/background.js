@@ -1432,6 +1432,7 @@ function getOppDeck() {
 function saveEconomy(json) {
 	var ctx = json.context;
 	json.id = sha1(json.date.getTime()+ctx);
+	json.date = new Date();
 	
 	if (ctx.indexOf("Quest.Completed") !== -1) {
 		json.context = "Quest Completed";
