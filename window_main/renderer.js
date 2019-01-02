@@ -1226,7 +1226,9 @@ function drawDeckVisual(_div, _stats, deck) {
 	$('<div class="type_icon_cont"><div title="Planeswalkers" 	class="type_icon type_pla"></div><span>'+types.pla+'</span></div>').appendTo(typesdiv);
 	typesdiv.prependTo(_div.parent());
 
-	_stats.hide();
+	if (_stats) {
+		_stats.hide();
+	}
 	_div.css("display", "flex");
 	_div.css("width", "auto");
 	_div.css("margin", "0 auto");
@@ -1234,11 +1236,13 @@ function drawDeckVisual(_div, _stats, deck) {
 
 	_div.parent().css("flex-direction", "column");
 
-	$('<div class="button_simple openDeck">Normal view</div>').appendTo(_div.parent());
+	if (_stats) {
+		$('<div class="button_simple openDeck">Normal view</div>').appendTo(_div.parent());
 
-	$(".openDeck").click(function () {
-		open_deck(-1, 2);
-	});
+		$(".openDeck").click(function () {
+			open_deck(-1, 2);
+		});
+	}
 
 	var sz = cardSize;
 	let div = $('<div class="visual_mainboard"></div>');

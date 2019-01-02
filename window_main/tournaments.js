@@ -20,9 +20,10 @@ let currentDeck = null;
 let originalDeck = null;
 
 // Should separate these two into smaller functions
-function open_tournaments_tab(arg) {
+function open_tournaments_tab(arg, opentab = true) {
 	if (arg != null) {
 		tournaments_list = arg;
+		if (!opentab)	return
 	}
 
 	let mainDiv = document.getElementById("ux_0");
@@ -160,7 +161,7 @@ function open_tournament(tou) {
 			let deckvisual = $('<div class="decklist"></div>');
 			deckvisual.appendTo(deckContainer);
 			if (tou.deck) {
-				drawDeckVisual(deckvisual, $('.dummy'), tou.deck);
+				drawDeckVisual(deckvisual, undefined, tou.deck);
 			}
 			deckContainer.appendTo(mainDiv);
 
