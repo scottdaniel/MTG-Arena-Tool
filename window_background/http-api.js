@@ -135,7 +135,7 @@ function httpBasic() {
 						ipc_send("popup", {"text": parsedResult.error, "time": 10000});
 					}
 					else if (_headers.method == 'tou_check') {
-						ipc_send("popup", {"text": parsedResult.state, "time": 3000});
+						ipc_send("popup", {"text": parsedResult.state, "time": 10000});
 					}
 					else if (parsedResult.ok == false && parsedResult.error != undefined) {
 						if (_headers.method == 'share_draft') {
