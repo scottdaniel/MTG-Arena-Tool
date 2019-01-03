@@ -18,6 +18,8 @@ let tournaments_list;
 let tournamentDeck = null;
 let currentDeck = null;
 let originalDeck = null;
+let tou = null;
+let listInterval = [];
 
 // Should separate these two into smaller functions
 function open_tournaments_tab(arg, opentab = true) {
@@ -40,7 +42,11 @@ function open_tournaments_tab(arg, opentab = true) {
 	cont = document.createElement("div");
 	cont.classList.add("tournament_list_cont");
 
-	tournaments_list.forEach(function(tou) {
+	listInterval.forEach((_id) => {
+		clearInterval(_id);
+	});
+	listInterval = [];
+	tournaments_list.forEach(function(tou, index) {
 		console.log(tou);
 
 		let div = document.createElement("div");
@@ -58,15 +64,33 @@ function open_tournaments_tab(arg, opentab = true) {
 		let state = "-";
 		let stateb = "-";
 		if (tou.state == -1) {
-			state = "Registration begin in "+(toHHMM(now - tou.starts));
+			state = '';
+			listInterval.push(
+				window.setInterval(() => {
+					let now = timestamp();
+					$('.list_state_'+index).html("Registration begins in "+(toHHMMSS(now - tou.starts)));
+				}, 250)
+			);
 		}
 		if (tou.state == 0) {
 			state = "Registration in progress.";
-			stateb = toHHMM(roundsStart-now)+" left";
+			stateb = '';
+			listInterval.push(
+				window.setInterval(() => {
+					let now = timestamp();
+					$('.list_stateb_'+index).html(toHHMMSS(roundsStart-now)+" left");
+				}, 250)
+			);
 		}
 		if (tou.state == 1) {
 			state = "Round "+(tou.currentRound+1)+"/"+tou.maxRounds+" in progress.";
-			stateb = toHHMM(roundEnd-now)+" left";
+			stateb = "";
+			listInterval.push(
+				window.setInterval(() => {
+					let now = timestamp();
+					$('.list_stateb_'+index).html(toHHMMSS(roundEnd-now)+" left");
+				}, 250)
+			);
 		}
 		if (tou.state == 4) {
 			state = "Tournament finish.";
@@ -83,6 +107,7 @@ function open_tournaments_tab(arg, opentab = true) {
 
 		let st = document.createElement("div");
 		st.classList.add("tou_state");
+		st.classList.add("list_state_"+index);
 		st.innerHTML = state;
 
 		let stb = document.createElement("div");
@@ -91,6 +116,7 @@ function open_tournaments_tab(arg, opentab = true) {
 
 		let pln = document.createElement("div");
 		pln.classList.add("tou_cell");
+		pln.classList.add("list_stateb_"+index);
 		pln.style.width = "200px";
 		pln.innerHTML = stateb;
 
@@ -108,17 +134,25 @@ function open_tournaments_tab(arg, opentab = true) {
 		$(this).on("click", function() {
 			let ti = $(this).attr('id');
 			ipc_send("tou_get", ti);
+
+			listInterval.forEach((_id) => {
+				clearInterval(_id);
+			});
+			listInterval = [];
 		});
 	});
 }
 
-function open_tournament(tou) {
+let stateClockInterval = null;
+let lastSeenInterval = null;
+
+function open_tournament(t) {
+	tou = t;
 	let mainDiv = $("#ux_1");
 	mainDiv.html('');
 
 	let sd = tou.signupDuration;
 	let rd = tou.roundDuration;
-	let now = timestamp();
 	let roundsStart = tou.starts + (sd * 60*60);
 	let roundEnd = tou.starts + (sd * 60*60) + ((tou.currentRound+1) * 60*60 * rd);
 
@@ -135,17 +169,31 @@ function open_tournament(tou) {
 	}
 
 	let top = $(`<div class="decklist_top"><div class="button back"></div><div class="deck_name">${tou.name}</div></div>`);
-	let flr = $(`<div class="tou_top_status" style="align-self: center;"></div>`);
+	let flr = $(`<div class="tou_top_status state_clock" style="align-self: center;"></div>`);
 
 	let state = "";
+	if (stateClockInterval !== null)	clearInterval(stateClockInterval);
 	if (tou.state == -1) {
-		state = "Registration begin in "+(toHHMM(now - tou.starts));
+		state = '';
+		stateClockInterval = window.setInterval(() => {
+			let tst = timestamp();
+			$('.state_clock').html("Registration begin in "+(toHHMMSS(tst - tou.starts)));
+		}, 1000);
 	}
 	if (tou.state == 0) {
-		state = toHHMM(roundsStart-now)+" left to register.";
+		state = '';
+		stateClockInterval = window.setInterval(() => {
+			let tst = timestamp();
+			$('.state_clock').html(toHHMMSS(roundsStart-tst)+" left to register.");
+		}, 1000);
 	}
 	if (tou.state == 1) {
-		state = "Round "+(tou.currentRound+1)+" ends in "+toHHMM(roundEnd-now);
+		state = '';
+		stateClockInterval = window.setInterval(() => {
+			let tst = timestamp();
+			$('.state_clock').html("Round "+(tou.currentRound+1)+" ends in "+toHHMMSS(roundEnd - tst));
+		}, 1000);
+
 	}
 	if (tou.state == 4) {
 		state = "Tournament finish.";
@@ -206,6 +254,17 @@ function open_tournament(tou) {
 	else {
 		$(`<div class="tou_record green">${record}</div>`).appendTo(mainDiv);
 		$(`<div class="tou_opp"><span>Your opponent: </span><span style="margin-left: 10px; color: rgb(250, 229, 210);">${tou.current_opponent}</span><div class="copy_button"></div></div>`).appendTo(mainDiv);
+
+		$(`<div class="tou_opp tou_opp_sub"><span class="last_seen_clock"></span></div></div>`).appendTo(mainDiv);
+
+		if (lastSeenInterval !== null)	clearInterval(lastSeenInterval);
+		if (tou.current_opponent_last !== tou.server_time) {
+			lastSeenInterval = window.setInterval(() => {
+				let tst = timestamp();
+				let diff = tst - tou.current_opponent_last;
+				$('.last_seen_clock').html(`Last seen ${toHHMMSS(diff)} ago.`)
+			}, 250);
+		}
 
 		$('.copy_button').click(() => {
 			pop("Copied to clipboard", 1000);

@@ -2234,7 +2234,12 @@ a:hover {
     display: flex;
     font-size: 18px;
     text-align: center;
-    margin: 16px auto;
+    margin: 16px auto 4px auto;
+}
+
+.tou_opp_sub {
+    font-size: 16px;
+    margin: 0px 0px 12px 0px;
 }
 
 .copy_button {
