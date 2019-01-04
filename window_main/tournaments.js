@@ -36,8 +36,10 @@ function open_tournaments_tab(arg, opentab = true) {
 	d.classList.add("list_fill");
 	mainDiv.appendChild(d);
 
-	let cont = document.createElement("div");
-	cont.classList.add("tournament_list_cont");
+	let title = document.createElement("div");
+	title.classList.add("tournament_title");
+	title.innerHTML = "Tournaments List:";
+	mainDiv.appendChild(title);
 
 	cont = document.createElement("div");
 	cont.classList.add("tournament_list_cont");
@@ -134,11 +136,6 @@ function open_tournaments_tab(arg, opentab = true) {
 		$(this).on("click", function() {
 			let ti = $(this).attr('id');
 			ipc_send("tou_get", ti);
-
-			listInterval.forEach((_id) => {
-				clearInterval(_id);
-			});
-			listInterval = [];
 		});
 	});
 }
@@ -156,8 +153,10 @@ function open_tournament(t) {
 	let roundsStart = tou.starts + (sd * 60*60);
 	let roundEnd = tou.starts + (sd * 60*60) + ((tou.currentRound+1) * 60*60 * rd);
 
-	currentDeck = tou.deck;
-	originalDeck = $.extend(true, {}, tou.deck);
+	if (tou.deck) {
+		currentDeck = tou.deck;
+		originalDeck = $.extend(true, {}, tou.deck);
+	}
 
 	let joined = false;
 	let record = '-';
@@ -184,7 +183,12 @@ function open_tournament(t) {
 		state = '';
 		stateClockInterval = window.setInterval(() => {
 			let tst = timestamp();
-			$('.state_clock').html(toHHMMSS(roundsStart-tst)+" left to register.");
+			if (joined) {
+				$('.state_clock').html("Starts in "+toHHMMSS(roundsStart-tst));
+			}
+			else {
+				$('.state_clock').html(toHHMMSS(roundsStart-tst)+" left to register.");
+			}
 		}, 1000);
 	}
 	if (tou.state == 1) {
@@ -252,33 +256,38 @@ function open_tournament(t) {
 		});
 	}
 	else {
-		$(`<div class="tou_record green">${record}</div>`).appendTo(mainDiv);
-		$(`<div class="tou_opp"><span>Your opponent: </span><span style="margin-left: 10px; color: rgb(250, 229, 210);">${tou.current_opponent}</span><div class="copy_button"></div></div>`).appendTo(mainDiv);
+		if (joined) {
+			$(`<div class="tou_record green">${record}</div>`).appendTo(mainDiv);
+			$(`<div class="tou_opp"><span>Your opponent: </span><span style="margin-left: 10px; color: rgb(250, 229, 210);">${tou.current_opponent}</span><div class="copy_button"></div></div>`).appendTo(mainDiv);
 
-		$(`<div class="tou_opp tou_opp_sub"><span class="last_seen_clock"></span></div></div>`).appendTo(mainDiv);
+			$(`<div class="tou_opp tou_opp_sub"><span class="last_seen_clock"></span></div></div>`).appendTo(mainDiv);
 
-		if (lastSeenInterval !== null)	clearInterval(lastSeenInterval);
-		if (tou.current_opponent_last !== tou.server_time) {
-			lastSeenInterval = window.setInterval(() => {
-				let tst = timestamp();
-				let diff = tst - tou.current_opponent_last;
-				$('.last_seen_clock').html(`Last seen ${toHHMMSS(diff)} ago.`)
-			}, 250);
+			if (lastSeenInterval !== null)	clearInterval(lastSeenInterval);
+			if (tou.current_opponent_last !== tou.server_time) {
+				lastSeenInterval = window.setInterval(() => {
+					let tst = timestamp();
+					let diff = tst - tou.current_opponent_last;
+					$('.last_seen_clock').html(`Last seen ${toHHMMSS(diff)} ago.`)
+				}, 250);
+			}
+
+			$('.copy_button').click(() => {
+				pop("Copied to clipboard", 1000);
+				ipc_send('set_clipboard', tou.current_opponent);
+			});
 		}
-
-		$('.copy_button').click(() => {
-			pop("Copied to clipboard", 1000);
-			ipc_send('set_clipboard', tou.current_opponent);
-		});
 
 		let tabs = $('<div class="tou_tabs_cont"></div>');
 		let tab_rounds = $('<div class="tou_tab tab_a tou_tab_selected">Rounds</div>');
 		let tab_standings = $('<div class="tou_tab tab_b ">Standings</div>');
-		let tab_decklist = $('<div class="tou_tab tab_c ">Decklist</div>');
 
 		tab_rounds.appendTo(tabs);
 		tab_standings.appendTo(tabs);
-		tab_decklist.appendTo(tabs);
+		if (joined) {
+			let tab_decklist = $('<div class="tou_tab tab_c ">Decklist</div>');
+			tab_decklist.appendTo(tabs);
+		}
+
 		tabs.appendTo(mainDiv);
 
 		let tab_cont_a = $('<div class="tou_cont_a"></div>');
@@ -375,29 +384,30 @@ function open_tournament(t) {
 			line.appendTo(tab_cont_b);
 		});
 
-		let tab_cont_c = $('<div class="tou_cont_c" style="height: 0px"></div>');
-		let decklistCont = $('<div class="sideboarder_container"></div>');
-
 		tab_cont_a.appendTo(mainDiv);
 		tab_cont_b.appendTo(mainDiv);
+		if (joined) {
+			let tab_cont_c = $('<div class="tou_cont_c" style="height: 0px"></div>');
+			let decklistCont = $('<div class="sideboarder_container"></div>');
 
-		$('<div class="button_simple exportDeck">Export to Arena</div>').appendTo(tab_cont_c);
-		$('<div class="button_simple resetDeck">Reset</div>').appendTo(tab_cont_c);
-		decklistCont.appendTo(tab_cont_c);
+			$('<div class="button_simple exportDeck">Export to Arena</div>').appendTo(tab_cont_c);
+			$('<div class="button_simple resetDeck">Reset</div>').appendTo(tab_cont_c);
+			decklistCont.appendTo(tab_cont_c);
 
-		tab_cont_c.appendTo(mainDiv);
+			tab_cont_c.appendTo(mainDiv);
 
-		drawSideboardableDeck();
-
-		$(".exportDeck").click(() => {
-			let list = get_deck_export(currentDeck);
-			ipc_send('set_clipboard', list);
-		});
-
-		$(".resetDeck").click(() => {
-			currentDeck = $.extend(true, {}, originalDeck);
 			drawSideboardableDeck();
-		});
+
+			$(".exportDeck").click(() => {
+				let list = get_deck_export(currentDeck);
+				ipc_send('set_clipboard', list);
+			});
+
+			$(".resetDeck").click(() => {
+				currentDeck = $.extend(true, {}, originalDeck);
+				drawSideboardableDeck();
+			});
+		}
 
 		$(".tou_tab").click(function () {
 			if (!$(this).hasClass("tou_tab_selected")) {
@@ -420,9 +430,11 @@ function open_tournament(t) {
 			}
 		});
 
-		$(".but_drop").click(function () {
-			ipc_send('tou_drop', tou._id);
-		});
+		if (joined) {
+			$(".but_drop").click(function () {
+				ipc_send('tou_drop', tou._id);
+			});
+		}
 	}
 
 

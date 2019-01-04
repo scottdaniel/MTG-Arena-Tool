@@ -2399,6 +2399,14 @@ a:hover {
     overflow: hidden;
 }
 
+.tournament_title {
+    color: rgba(250, 229, 210, 0.85);
+    margin-left: 30px;
+    margin-top: 8px;
+    font-family: Beleren;
+    font-size: 18px;
+}
+
 .join_decklist {
     max-width: 420px;
     margin: auto auto 32px auto;
