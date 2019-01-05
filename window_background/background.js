@@ -476,6 +476,9 @@ ipc.on('request_explore', function (event, arg) {
 		if (arg == "all" || arg == "All" ) {
 			httpApi.httpGetTopDecks("", cards);
 		}
+		else if (arg == "Ranked Ladder" ) {
+			httpApi.httpGetTopLadderDecks();
+		}
 		else {
 			httpApi.httpGetTopDecks(arg, cards);
 		}

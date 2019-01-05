@@ -33,6 +33,7 @@ const open_decks_tab 			= require('./decks').open_decks_tab;
 const open_history_tab			= require('./history').open_history_tab;
 const open_explore_tab			= require('./explore').open_explore_tab;
 const update_explore_filters	= require('./explore').update_explore_filters;
+const set_explore_mode			= require('./explore').set_explore_mode;
 const open_collection_tab		= require('./collection').open_collection_tab;
 
 const open_economy_tab 			= require('./economy').open_economy_tab;
@@ -53,6 +54,7 @@ let matchesHistory = [];
 let eventsHistory = [];
 
 let explore = null;
+let ladder = null;
 let cards = {};
 let cardsNew = {};
 let settings = null;
@@ -390,7 +392,23 @@ ipc.on('set_tou_list', function (event, arg) {
 ipc.on('set_explore', function (event, arg) {
 	if (sidebarActive == 3) {
 		arg.sort(compare_explore);
+		set_explore_mode(0);
 		open_explore_tab(arg, 0);
+	}
+});
+
+//
+ipc.on('set_ladder_decks', function (event, arg) {
+	if (sidebarActive == 3) {
+		set_explore_mode(1);
+
+		arg.decks.forEach(function(deck) {
+			deck.colors = [];
+			deck.colors = get_deck_colors(deck);
+			deck.mainDeck.sort(compare_cards); 
+		});
+
+		open_explore_tab(arg.decks, 0);
 	}
 });
 
