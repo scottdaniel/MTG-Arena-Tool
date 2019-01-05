@@ -21,6 +21,7 @@ let loadExplore = 0;
 let eventFilters = null;
 let onlyOwned = false;
 let exploreMode = 0;
+let filteredMana = [];
 
 const open_deck = require('./deck_details').open_deck;
 
@@ -111,6 +112,33 @@ function open_explore_tab(arg, loadMore) {
 
 		input.appendTo(icd);
 
+		var manas = $('<div class="mana_filters_explore"><label>Filter by color:</label></div>');
+		var ms = ["w", "u", "b", "r", "g"];
+		ms.forEach(function(s, i) {
+			var mi = [1, 2, 3, 4, 5];
+			var mf = "";
+			if (!filteredMana.includes(mi[i])) {
+				mf = "mana_filter_on";
+			}
+			var manabutton = $('<div class="mana_filter '+mf+'" style="background-image: url(../images/'+s+'20.png)"></div>');
+			manabutton.appendTo(manas);
+			manabutton.click(function() {
+				if (manabutton.hasClass('mana_filter_on')) {
+					manabutton.removeClass('mana_filter_on');
+					filteredMana.push(mi[i]);
+				}
+				else {
+					manabutton.addClass('mana_filter_on');
+					let n = filteredMana.indexOf(mi[i]);
+					if (n > -1) {
+						filteredMana.splice(n, 1);
+					}
+				}
+				update_explore_filters();
+			});
+		});
+		manas.appendTo(icd);
+
 		let lab = add_checkbox($(icd), 'Only owned', 'settings_owned', onlyOwned, 'update_explore_filters()');
 		lab.css("margin-top", "6px");
 
@@ -154,7 +182,17 @@ function ladderLoadMore(loadMore, ownedWildcards) {
 			continue;
 		}
 		_deck.wildcards = get_deck_missing(_deck);
-		console.log(_deck);
+
+		if (filteredMana.length > 0) {
+			let filterOut = false;
+			filteredMana.forEach((i) => {
+				if (!_deck.colors.includes(i)) {
+					filterOut = true;
+				}
+			});
+
+			if (filterOut)	continue;
+		}
 
 		let index = 'ladder_'+loadExplore;
 
@@ -189,6 +227,7 @@ function ladderLoadMore(loadMore, ownedWildcards) {
 			wc.classList.add("wc_complete");
 			flcf.appendChild(wc);
 		}
+
 		else if (onlyOwned) {
 			continue;
 		}
@@ -327,6 +366,20 @@ function exploreLoadMore(loadMore, ownedWildcards) {
 			continue;
 		}
 
+		if (_deck.colors == undefined) {
+			_deck.colors = [];
+		}
+		if (filteredMana.length > 0) {
+			let filterOut = false;
+			filteredMana.forEach((i) => {
+				if (!_deck.colors.includes(i)) {
+					filterOut = true;
+				}
+			});
+
+			if (filterOut)	continue;
+		}
+
 		var flcf = document.createElement("div");
 		flcf.classList.add("flex_item");
 		flcf.style.width = '20%';
@@ -368,9 +421,6 @@ function exploreLoadMore(loadMore, ownedWildcards) {
 
 		actuallyLoaded++;
 
-		if (_deck.colors == undefined) {
-			_deck.colors = [];
-		}
 		if (_deck.wins == undefined) {
 			_deck.wins = 0;
 			_deck.losses = 0;
