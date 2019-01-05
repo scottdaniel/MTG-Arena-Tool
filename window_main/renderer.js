@@ -723,6 +723,7 @@ $(document).ready(function() {
 
 			if ($(this).hasClass("ith")) {
 				sidebarActive = -1;
+				$("#ux_0").html('<div class="loading_bar ux_loading"><div class="loading_color loading_w"></div><div class="loading_color loading_u"></div><div class="loading_color loading_b"></div><div class="loading_color loading_r"></div><div class="loading_color loading_g"></div></div>');
 				ipc_send('request_tou_list', true);
 			}
 			if ($(this).hasClass("it0")) {
@@ -1230,7 +1231,9 @@ function drawDeckVisual(_div, _stats, deck) {
 	$('<div class="type_icon_cont"><div title="Planeswalkers" 	class="type_icon type_pla"></div><span>'+types.pla+'</span></div>').appendTo(typesdiv);
 	typesdiv.prependTo(_div.parent());
 
-	_stats.hide();
+	if (_stats) {
+		_stats.hide();
+	}
 	_div.css("display", "flex");
 	_div.css("width", "auto");
 	_div.css("margin", "0 auto");
@@ -1238,11 +1241,13 @@ function drawDeckVisual(_div, _stats, deck) {
 
 	_div.parent().css("flex-direction", "column");
 
-	$('<div class="button_simple openDeck">Normal view</div>').appendTo(_div.parent());
+	if (_stats) {
+		$('<div class="button_simple openDeck">Normal view</div>').appendTo(_div.parent());
 
-	$(".openDeck").click(function () {
-		open_deck(-1, 2);
-	});
+		$(".openDeck").click(function () {
+			open_deck(-1, 2);
+		});
+	}
 
 	var sz = cardSize;
 	let div = $('<div class="visual_mainboard"></div>');

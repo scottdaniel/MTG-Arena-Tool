@@ -10,18 +10,22 @@ global
 	addCardSeparator,
 	addCardTile,
 	get_deck_export,
-	makeId
+	makeId,
+	pop
 */
 
 let tournaments_list;
 let tournamentDeck = null;
 let currentDeck = null;
 let originalDeck = null;
+let tou = null;
+let listInterval = [];
 
 // Should separate these two into smaller functions
-function open_tournaments_tab(arg) {
+function open_tournaments_tab(arg, opentab = true) {
 	if (arg != null) {
 		tournaments_list = arg;
+		if (!opentab)	return
 	}
 
 	let mainDiv = document.getElementById("ux_0");
@@ -32,13 +36,19 @@ function open_tournaments_tab(arg) {
 	d.classList.add("list_fill");
 	mainDiv.appendChild(d);
 
-	let cont = document.createElement("div");
-	cont.classList.add("tournament_list_cont");
+	let title = document.createElement("div");
+	title.classList.add("tournament_title");
+	title.innerHTML = "Tournaments List:";
+	mainDiv.appendChild(title);
 
 	cont = document.createElement("div");
 	cont.classList.add("tournament_list_cont");
 
-	tournaments_list.forEach(function(tou) {
+	listInterval.forEach((_id) => {
+		clearInterval(_id);
+	});
+	listInterval = [];
+	tournaments_list.forEach(function(tou, index) {
 		console.log(tou);
 
 		let div = document.createElement("div");
@@ -56,15 +66,33 @@ function open_tournaments_tab(arg) {
 		let state = "-";
 		let stateb = "-";
 		if (tou.state == -1) {
-			state = "Registration begin in "+(toHHMM(now - tou.starts));
+			state = '';
+			listInterval.push(
+				window.setInterval(() => {
+					let now = timestamp();
+					$('.list_state_'+index).html("Registration begins in "+(toHHMMSS(now - tou.starts)));
+				}, 250)
+			);
 		}
 		if (tou.state == 0) {
 			state = "Registration in progress.";
-			stateb = toHHMM(roundsStart-now)+" left";
+			stateb = '';
+			listInterval.push(
+				window.setInterval(() => {
+					let now = timestamp();
+					$('.list_stateb_'+index).html(toHHMMSS(roundsStart-now)+" left");
+				}, 250)
+			);
 		}
 		if (tou.state == 1) {
 			state = "Round "+(tou.currentRound+1)+"/"+tou.maxRounds+" in progress.";
-			stateb = toHHMM(roundEnd-now)+" left";
+			stateb = "";
+			listInterval.push(
+				window.setInterval(() => {
+					let now = timestamp();
+					$('.list_stateb_'+index).html(toHHMMSS(roundEnd-now)+" left");
+				}, 250)
+			);
 		}
 		if (tou.state == 4) {
 			state = "Tournament finish.";
@@ -75,8 +103,13 @@ function open_tournaments_tab(arg) {
 		nam.classList.add("tou_name");
 		nam.innerHTML = tou.name;
 
+		let fo = document.createElement("div");
+		fo.classList.add("tou_cell");
+		fo.innerHTML = tou.format;
+
 		let st = document.createElement("div");
 		st.classList.add("tou_state");
+		st.classList.add("list_state_"+index);
 		st.innerHTML = state;
 
 		let stb = document.createElement("div");
@@ -85,10 +118,12 @@ function open_tournaments_tab(arg) {
 
 		let pln = document.createElement("div");
 		pln.classList.add("tou_cell");
+		pln.classList.add("list_stateb_"+index);
 		pln.style.width = "200px";
 		pln.innerHTML = stateb;
 
 		div.appendChild(nam);
+		div.appendChild(fo);
 		div.appendChild(st);
 		div.appendChild(stb);
 		div.appendChild(pln);
@@ -105,18 +140,23 @@ function open_tournaments_tab(arg) {
 	});
 }
 
-function open_tournament(tou) {
+let stateClockInterval = null;
+let lastSeenInterval = null;
+
+function open_tournament(t) {
+	tou = t;
 	let mainDiv = $("#ux_1");
 	mainDiv.html('');
 
 	let sd = tou.signupDuration;
 	let rd = tou.roundDuration;
-	let now = timestamp();
 	let roundsStart = tou.starts + (sd * 60*60);
 	let roundEnd = tou.starts + (sd * 60*60) + ((tou.currentRound+1) * 60*60 * rd);
 
-	currentDeck = tou.deck;
-	originalDeck = $.extend(true, {}, tou.deck);
+	if (tou.deck) {
+		currentDeck = tou.deck;
+		originalDeck = $.extend(true, {}, tou.deck);
+	}
 
 	let joined = false;
 	let record = '-';
@@ -128,17 +168,36 @@ function open_tournament(tou) {
 	}
 
 	let top = $(`<div class="decklist_top"><div class="button back"></div><div class="deck_name">${tou.name}</div></div>`);
-	let flr = $(`<div class="tou_top_status" style="align-self: center;"></div>`);
+	let flr = $(`<div class="tou_top_status state_clock" style="align-self: center;"></div>`);
 
 	let state = "";
+	if (stateClockInterval !== null)	clearInterval(stateClockInterval);
 	if (tou.state == -1) {
-		state = "Registration begin in "+(toHHMM(now - tou.starts));
+		state = '';
+		stateClockInterval = window.setInterval(() => {
+			let tst = timestamp();
+			$('.state_clock').html("Registration begin in "+(toHHMMSS(tst - tou.starts)));
+		}, 1000);
 	}
 	if (tou.state == 0) {
-		state = toHHMM(roundsStart-now)+" left to register.";
+		state = '';
+		stateClockInterval = window.setInterval(() => {
+			let tst = timestamp();
+			if (joined) {
+				$('.state_clock').html("Starts in "+toHHMMSS(roundsStart-tst));
+			}
+			else {
+				$('.state_clock').html(toHHMMSS(roundsStart-tst)+" left to register.");
+			}
+		}, 1000);
 	}
 	if (tou.state == 1) {
-		state = "Round "+(tou.currentRound+1)+" ends in "+toHHMM(roundEnd-now);
+		state = '';
+		stateClockInterval = window.setInterval(() => {
+			let tst = timestamp();
+			$('.state_clock').html("Round "+(tou.currentRound+1)+" ends in "+toHHMMSS(roundEnd - tst));
+		}, 1000);
+
 	}
 	if (tou.state == 4) {
 		state = "Tournament finish.";
@@ -154,7 +213,7 @@ function open_tournament(tou) {
 			let deckvisual = $('<div class="decklist"></div>');
 			deckvisual.appendTo(deckContainer);
 			if (tou.deck) {
-				drawDeckVisual(deckvisual, $('.dummy'), tou.deck);
+				drawDeckVisual(deckvisual, undefined, tou.deck);
 			}
 			deckContainer.appendTo(mainDiv);
 
@@ -163,6 +222,7 @@ function open_tournament(tou) {
 			}
 		}
 		else {
+			let cont = $('<div class="flex_item"></div>');
 			var select = $('<select id="deck_select">Select Deck</select>');
 			decks.forEach((_deck) => {
 				try {
@@ -172,7 +232,8 @@ function open_tournament(tou) {
 					console.log(e);
 				}
 			});
-			select.appendTo(mainDiv);
+			select.appendTo(cont);
+			cont.appendTo(mainDiv);
 			selectAdd(select, selectTourneyDeck);
 			select.parent().css('width', '300px');
 			select.parent().css('margin', '16px auto');
@@ -180,6 +241,8 @@ function open_tournament(tou) {
 			if (tou.state == 0) {
 				$('<div class="button_simple_disabled but_join">Join</div>').appendTo(mainDiv);
 			}
+			
+			$('<div class="join_decklist"></div>').appendTo(mainDiv);
 		}
 
 		$(".but_join").click(function () {
@@ -193,16 +256,38 @@ function open_tournament(tou) {
 		});
 	}
 	else {
-		$(`<div class="tou_record green">${record}</div>`).appendTo(mainDiv);
+		if (joined) {
+			$(`<div class="tou_record green">${record}</div>`).appendTo(mainDiv);
+			$(`<div class="tou_opp"><span>Your opponent: </span><span style="margin-left: 10px; color: rgb(250, 229, 210);">${tou.current_opponent}</span><div class="copy_button"></div></div>`).appendTo(mainDiv);
+
+			$(`<div class="tou_opp tou_opp_sub"><span class="last_seen_clock"></span></div></div>`).appendTo(mainDiv);
+
+			if (lastSeenInterval !== null)	clearInterval(lastSeenInterval);
+			if (tou.current_opponent_last !== tou.server_time) {
+				lastSeenInterval = window.setInterval(() => {
+					let tst = timestamp();
+					let diff = tst - tou.current_opponent_last;
+					$('.last_seen_clock').html(`Last seen ${toHHMMSS(diff)} ago.`)
+				}, 250);
+			}
+
+			$('.copy_button').click(() => {
+				pop("Copied to clipboard", 1000);
+				ipc_send('set_clipboard', tou.current_opponent);
+			});
+		}
 
 		let tabs = $('<div class="tou_tabs_cont"></div>');
 		let tab_rounds = $('<div class="tou_tab tab_a tou_tab_selected">Rounds</div>');
 		let tab_standings = $('<div class="tou_tab tab_b ">Standings</div>');
-		let tab_decklist = $('<div class="tou_tab tab_c ">Decklist</div>');
 
 		tab_rounds.appendTo(tabs);
 		tab_standings.appendTo(tabs);
-		tab_decklist.appendTo(tabs);
+		if (joined) {
+			let tab_decklist = $('<div class="tou_tab tab_c ">Decklist</div>');
+			tab_decklist.appendTo(tabs);
+		}
+
 		tabs.appendTo(mainDiv);
 
 		let tab_cont_a = $('<div class="tou_cont_a"></div>');
@@ -249,7 +334,9 @@ function open_tournament(tou) {
 			}
 		}
 
-		$('<div class="button_simple but_drop">Drop</div>').appendTo(tab_cont_a);
+		if (joined) {
+			$('<div class="button_simple but_drop">Drop</div>').appendTo(tab_cont_a);
+		}
 
 		let tab_cont_b = $('<div class="tou_cont_b" style="height: 0px"></div>');
 		tou.players.sort(function(a, b) {
@@ -299,29 +386,30 @@ function open_tournament(tou) {
 			line.appendTo(tab_cont_b);
 		});
 
-		let tab_cont_c = $('<div class="tou_cont_c" style="height: 0px"></div>');
-		let decklistCont = $('<div class="sideboarder_container"></div>');
-
 		tab_cont_a.appendTo(mainDiv);
 		tab_cont_b.appendTo(mainDiv);
+		if (joined) {
+			let tab_cont_c = $('<div class="tou_cont_c" style="height: 0px"></div>');
+			let decklistCont = $('<div class="sideboarder_container"></div>');
 
-		$('<div class="button_simple exportDeck">Export to Arena</div>').appendTo(tab_cont_c);
-		$('<div class="button_simple resetDeck">Reset</div>').appendTo(tab_cont_c);
-		decklistCont.appendTo(tab_cont_c);
+			$('<div class="button_simple exportDeck">Export to Arena</div>').appendTo(tab_cont_c);
+			$('<div class="button_simple resetDeck">Reset</div>').appendTo(tab_cont_c);
+			decklistCont.appendTo(tab_cont_c);
 
-		tab_cont_c.appendTo(mainDiv);
+			tab_cont_c.appendTo(mainDiv);
 
-		drawSideboardableDeck();
-
-		$(".exportDeck").click(() => {
-			let list = get_deck_export(currentDeck);
-			ipc_send('set_clipboard', list);
-		});
-
-		$(".resetDeck").click(() => {
-			currentDeck = $.extend(true, {}, originalDeck);
 			drawSideboardableDeck();
-		});
+
+			$(".exportDeck").click(() => {
+				let list = get_deck_export(currentDeck);
+				ipc_send('set_clipboard', list);
+			});
+
+			$(".resetDeck").click(() => {
+				currentDeck = $.extend(true, {}, originalDeck);
+				drawSideboardableDeck();
+			});
+		}
 
 		$(".tou_tab").click(function () {
 			if (!$(this).hasClass("tou_tab_selected")) {
@@ -344,9 +432,11 @@ function open_tournament(tou) {
 			}
 		});
 
-		$(".but_drop").click(function () {
-			ipc_send('tou_drop', tou._id);
-		});
+		if (joined) {
+			$(".but_drop").click(function () {
+				ipc_send('tou_drop', tou._id);
+			});
+		}
 	}
 
 
@@ -358,6 +448,12 @@ function open_tournament(tou) {
 
 function selectTourneyDeck() {
 	tournamentDeck = document.getElementById("deck_select").value;
+	decks.forEach((_deck) => {
+		if (_deck.id == tournamentDeck) {
+			drawDeck($('.join_decklist'), _deck);
+		}
+	});
+	
 	$(".but_join").addClass("button_simple");
 }
 
@@ -409,6 +505,7 @@ function drawSideboardableDeck() {
 	}
 
 	_div.append(mainboardDiv);
+	_div.append($('<div class="swap_icon"></div>'));
 	_div.append(sideboardDiv);
 }
 

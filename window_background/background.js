@@ -1236,6 +1236,11 @@ function createMatch(arg) {
 	ipc_send("set_timer", matchBeginTime, windowOverlay);
 	ipc_send("set_opponent", oppName, windowOverlay);
 	ipc_send("set_opponent_rank", get_rank_index(oppRank, oppTier), oppRank+" "+oppTier, windowOverlay);
+
+	if (currentEventId == "DirectGame") {
+		httpApi.httpTournamenCheck(currentDeck, oppName);
+	}
+
 	ipc_send('set_priority_timer', priorityTimers, windowOverlay);
 }
 

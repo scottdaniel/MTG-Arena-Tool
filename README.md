@@ -26,23 +26,20 @@ An MTG Arena deck tracker and collection manager.
 	- Win/loss ratios
 	- Wildcards needed
 	- Show cards missing
-	- mana curve
+	- Mana curve
 	- Winrate vs color combinations
 	- Visual view
 	- Deck export (to mtga, to .txt)
 - Draft tracker
 	- In-draft overlay
-	- assistant (shows best picks)
-	- replayer
+	- Assistant (shows best picks)
+	- Replayer
 	- Draft sharing
 - Explore decks
 	- Filter by event
+	- Filter by owned
+	- See wildcards and boosters needed
 	- Sorted by wins/losses
-
-## Roadmap
-`These are some features I would like to include, not ordered in any way`
-- Metagame / Archetypes on decks explorer `this requires more data to be able to play with`
-- Deck editor/modifier, for adding things like specific basic lands and then importing them to MTG Arena.
 
 ### Compiling / Run from source
 MTG Arena Tool is developed using Electron JS, To get started simply clone this repo and install:
