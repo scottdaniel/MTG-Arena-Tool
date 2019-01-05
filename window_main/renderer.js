@@ -722,6 +722,7 @@ $(document).ready(function() {
 
 			if ($(this).hasClass("ith")) {
 				sidebarActive = -1;
+				$("#ux_0").html('<div class="loading_bar ux_loading"><div class="loading_color loading_w"></div><div class="loading_color loading_u"></div><div class="loading_color loading_b"></div><div class="loading_color loading_r"></div><div class="loading_color loading_g"></div></div>');
 				ipc_send('request_tou_list', true);
 			}
 			if ($(this).hasClass("it0")) {

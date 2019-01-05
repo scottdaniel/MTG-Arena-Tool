@@ -334,7 +334,9 @@ function open_tournament(t) {
 			}
 		}
 
-		$('<div class="button_simple but_drop">Drop</div>').appendTo(tab_cont_a);
+		if (joined) {
+			$('<div class="button_simple but_drop">Drop</div>').appendTo(tab_cont_a);
+		}
 
 		let tab_cont_b = $('<div class="tou_cont_b" style="height: 0px"></div>');
 		tou.players.sort(function(a, b) {
