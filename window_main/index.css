@@ -1130,6 +1130,39 @@ a:hover {
     background: center no-repeat url('../images/quantity_orange.png');
 }
 
+.icon_search_unowned {
+    display: -webkit-inline-box;
+    width: 20px;
+    margin-right: 16px;
+    height: 20px;
+    background: center no-repeat url('../images/quantity_gray.png');
+}
+
+.icon_search_new {
+    display: -webkit-inline-box;
+    width: 20px;
+    margin-right: 16px;
+    height: 20px;
+    background: center no-repeat url('../images/quantity_orange.png');
+}
+
+.icon_search_multi {
+    display: -webkit-inline-box;
+    width: 20px;
+    margin-right: 16px;
+    height: 20px;
+    background: center no-repeat url('../images/filter_multi.png');
+}
+
+.wc_search_icon {
+    width: 24px;
+    height: 20px;
+    margin-right: 12px;
+    background-position-y: -4px;
+    background-repeat: no-repeat;
+}
+
+
 .paging_container {
     margin: 16px 24px;
     display: flex;
@@ -1457,7 +1490,7 @@ a:hover {
     margin-left: 20px;
 }
 
-.mana_filter:hover {
+.mana_filter:hover, .mana_filter_search:hover, .mana_filters_explore:hover {
     opacity: 0.9;
 }
 
@@ -1555,10 +1588,11 @@ a:hover {
 }
 
 .check_container {
+    display: flex;
     margin-top: 12px;
     margin-left: 16px;
-    display: block;
     position: relative;
+    line-height: 20px;
     padding-left: 35px;
     margin-bottom: 12px;
     cursor: pointer;

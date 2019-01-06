@@ -55,7 +55,7 @@ function open_collection_tab() {
 
 	var searchButton = $('<div class="button_simple button_thin">Search</div>');	
 	searchButton.appendTo(flrt);
-	var advancedButton = $('<div class="button_simple button_thin">Advanced filters</div>');
+	var advancedButton = $('<div class="button_simple button_thin">Advanced Filters</div>');
 	advancedButton.appendTo(flrt);
 
 	searchButton.click(() => {
@@ -70,7 +70,7 @@ function open_collection_tab() {
 	var select = $('<select id="query_select">'+sortingAlgorithm+'</select>');
 	var sortby = ['Set', 'Name', 'Rarity', 'CMC'];
 	for (var i=0; i < sortby.length; i++) {
-		select.append('<option value="'+sortby[i]+'">'+sortby[i]+'</option>');
+		select.append('<option value="'+sortby[i]+'">Sort by: '+sortby[i]+'</option>');
 	}
 	select.appendTo(fllb);
 	selectAdd(select, sortCollection);
@@ -160,17 +160,17 @@ function open_collection_tab() {
 	let main_but_cont = $('<div class="main_buttons_container"></div>');
 
 	var cont = $('<div class="buttons_container"></div>');
-	add_checkbox_search(cont, 'Show unowned', 'query_unown', false);
-	add_checkbox_search(cont, 'Newly acquired only', 'query_new', false);
-	add_checkbox_search(cont, 'Require multicolored', 'query_multicolor', false);
+	add_checkbox_search(cont, '<div class="icon_search_unowned"></div>Show unowned', 'query_unown', false);
+	add_checkbox_search(cont, '<div class="icon_search_new"></div>Newly acquired only', 'query_new', false);
+	add_checkbox_search(cont, '<div class="icon_search_multi"></div>Require multicolored', 'query_multicolor', false);
 	add_checkbox_search(cont, 'Exclude unselected colors', 'query_exclude', false);
 	cont.appendTo(main_but_cont);
 
 	cont = $('<div class="buttons_container"></div>');
-	add_checkbox_search(cont, 'Common', 'query_common', true);
-	add_checkbox_search(cont, 'Uncommon', 'query_uncommon', true);
-	add_checkbox_search(cont, 'Rare', 'query_rare', true);
-	add_checkbox_search(cont, 'Mythic Rare', 'query_mythic', true);
+	add_checkbox_search(cont, '<div class="wc_common wc_search_icon"></div>Common', 'query_common', true);
+	add_checkbox_search(cont, '<div class="wc_uncommon wc_search_icon"></div>Uncommon', 'query_uncommon', true);
+	add_checkbox_search(cont, '<div class="wc_rare wc_search_icon"></div>Rare', 'query_rare', true);
+	add_checkbox_search(cont, '<div class="wc_mythic wc_search_icon"></div>Mythic Rare', 'query_mythic', true);
 	cont.appendTo(main_but_cont);
 	
 	cont = $('<div class="buttons_container"></div>');
