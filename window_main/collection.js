@@ -182,13 +182,12 @@ function open_collection_tab() {
 	input.appendTo(icd);
 	icd.appendTo(cont);
 
-	add_checkbox_search(cont, 'Higher than', 'query_cmchigher', false);
+	add_checkbox_search(cont, 'Higher than', 'query_cmchigher', false, true);
 	add_checkbox_search(cont, 'Equal to', 'query_cmcequal', true);
-	add_checkbox_search(cont, 'Lower than', 'query_cmclower', false);
+	add_checkbox_search(cont, 'Lower than', 'query_cmclower', false, true);
 	
 	cont.appendTo(main_but_cont);
 	main_but_cont.appendTo(filters);
-
 
 	searchButton = $('<div style="margin: 24px auto !important;" class="button_simple button_thin">Search</div>');	
 	searchButton.appendTo(filters);
@@ -222,13 +221,14 @@ function open_collection_tab() {
 }
 
 //
-function add_checkbox_search(div, label, iid, def) {
+function add_checkbox_search(div, label, iid, def, toggle = false) {
 	label = $('<label class="check_container hover_label">'+label+'</label>');
 	var check_new = $('<input type="checkbox" id="'+iid+'" />');
 	check_new.appendTo(label);
 	check_new.prop('checked', def);
 
 	var span = $('<span class="checkmark"></span>');
+	if (toggle)		span.css("border-radius", "100%");
 	span.appendTo(label);
 	label.appendTo(div);
 }
