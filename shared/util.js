@@ -353,7 +353,8 @@ function deck_count_types(deck, type, side) {
 	deck.mainDeck.forEach((card) => {
 		let c = cardsDb.get(card.id);
 		if (c.type.includes(type, 0)) {
-			count+=card.quantity;
+			if (card.quantity == 9999)	count += 1;
+			else						count+=card.quantity;
 		}
 	});
 
@@ -361,7 +362,8 @@ function deck_count_types(deck, type, side) {
 		deck.sideboard.forEach((card) => {
 			let c = cardsDb.get(card.id);
 			if (c.type.includes(type, 0)) {
-				count+=card.quantity;
+				if (card.quantity == 9999)	count += 1;
+				else						count+=card.quantity;
 			}
 		});
 	}
