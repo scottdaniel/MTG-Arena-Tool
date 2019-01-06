@@ -101,7 +101,7 @@ function open_history_tab(loadMore) {
 
 		let colClass = getWinrateClass(wrTotal);
 
-		d.innerHTML = `'Wins: ${wins} / Losses: ${losses} (<span class="${colClass}_bright">${Math.round(wrTotal*100)}%</span>)`;
+		d.innerHTML = `Wins: ${wins} / Losses: ${losses} (<span class="${colClass}_bright">${Math.round(wrTotal*100)}%</span>)`;
 		history_top_winrate.appendChild(d);
 
 		div.appendChild(history_top_filter);

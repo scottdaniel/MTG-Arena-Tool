@@ -178,7 +178,7 @@ function open_collection_tab() {
 	icd = $('<div class="input_container_inventory auto_width"></div>');
 	label = $('<label style="display: table">CMC:</label>');
 	label.appendTo(icd);
-	input = $('<input type="number" id="query_cmc" autocomplete="off" />');
+	input = $('<input style="max-width: 80px;" type="number" id="query_cmc" autocomplete="off" />');
 	input.appendTo(icd);
 	icd.appendTo(cont);
 
