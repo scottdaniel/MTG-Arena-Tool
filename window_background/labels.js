@@ -662,6 +662,8 @@ function onLabelOutDirectGameChallenge(entry, json) {
 	deck = replaceAll(deck, '"Quantity"', '"quantity"');
 	deck = JSON.parse(deck);
 	select_deck(deck);
+
+	httpApi.httpTournamentCheck(deck, json.params.opponentDisplayName, false);
 }
 
 function onLabelInDraftDraftStatus(entry, json) {

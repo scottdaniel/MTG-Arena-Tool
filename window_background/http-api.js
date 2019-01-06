@@ -331,10 +331,10 @@ function httpTournamentDrop(tid) {
 	httpAsync.push({'reqId': _id, 'method': 'tou_drop', 'method_path': '/tournament_drop.php', 'id': tid});
 }
 
-function httpTournamenCheck(deck, opp) {
+function httpTournamentCheck(deck, opp, setCheck) {
 	var _id = makeId(6);
 	deck = JSON.stringify(deck);
-	httpAsync.push({'reqId': _id, 'method': 'tou_check', 'method_path': '/check_match.php', 'deck': deck, 'opp': opp});
+	httpAsync.push({'reqId': _id, 'method': 'tou_check', 'method_path': '/check_match.php', 'deck': deck, 'opp': opp, 'setcheck': setCheck});
 }
 
 function httpHeartbeat() {
@@ -361,5 +361,5 @@ module.exports = {
 	httpTournamentGet,
 	httpTournamentJoin,
 	httpTournamentDrop,
-	httpTournamenCheck
+	httpTournamentCheck
 };

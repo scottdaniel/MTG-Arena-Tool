@@ -1241,7 +1241,7 @@ function createMatch(arg) {
 	ipc_send("set_opponent_rank", get_rank_index(oppRank, oppTier), oppRank+" "+oppTier, windowOverlay);
 
 	if (currentEventId == "DirectGame") {
-		httpApi.httpTournamenCheck(currentDeck, oppName);
+		httpApi.httpTournamentCheck(currentDeck, oppName, true);
 	}
 
 	ipc_send('set_priority_timer', priorityTimers, windowOverlay);
