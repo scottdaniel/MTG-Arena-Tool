@@ -207,6 +207,9 @@ function open_tournament(t) {
 	flr.appendTo(top);
 	top.appendTo(mainDiv);
 
+	let desc = $(`<div class="tou_desc" style="align-self: center;">${tou.desc}</div>`);
+	desc.appendTo(mainDiv);
+
 	if (tou.state <= 0) {
 		if (joined) {
 			let deckContainer = $('<div class="flex_item"></div>');

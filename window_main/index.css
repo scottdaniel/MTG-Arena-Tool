@@ -2203,6 +2203,14 @@ a:hover {
     margin-left: 16px;
 }
 
+.tou_desc {
+    align-self: center;
+    font-size: 18px;
+    color: rgba(250, 229, 210, 0.85);
+    text-align: center;
+    margin: 14px 0;
+}
+
 .tou_state {
     width: 150px;
     color: rgba(250, 229, 210, 0.8);
