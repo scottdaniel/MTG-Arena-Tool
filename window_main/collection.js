@@ -30,14 +30,22 @@ function open_collection_tab() {
 	var div = $('<div class="inventory"></div>');
 	
 	var basicFilters = $('<div class="inventory_filters_basic"></div>');
-	var flex = $('<div class="inventory_flex"></div>');
+	var fll = $('<div class="inventory_flex_half"></div>');
+	var flr = $('<div class="inventory_flex_half"></div>');
 
-	var icd = $('<div class="input_container"></div>');
+	var fllt = $('<div class="inventory_flex"></div>');
+	var fllb = $('<div class="inventory_flex"></div>');
+	var flrt = $('<div class="inventory_flex"></div>');
+	var flrb = $('<div class="inventory_flex"></div>');
+
+
+	var icd = $('<div class="input_container_inventory"></div>');
 	var label = $('<label style="display: table">Search</label>');
 	label.appendTo(icd);
 	var input = $('<input type="search" id="query_name" autocomplete="off" />');
 	input.appendTo(icd);
-	icd.appendTo(flex);
+	icd.appendTo(fllt);
+
 
 	input.keypress(function(e) {
 		if (e.which == 13) {
@@ -46,9 +54,9 @@ function open_collection_tab() {
 	});
 
 	var searchButton = $('<div class="button_simple button_thin">Search</div>');	
-	searchButton.appendTo(flex);
+	searchButton.appendTo(flrt);
 	var advancedButton = $('<div class="button_simple button_thin">Advanced filters</div>');
-	advancedButton.appendTo(flex);
+	advancedButton.appendTo(flrt);
 
 	searchButton.click(() => {
 		printCards();
@@ -58,24 +66,21 @@ function open_collection_tab() {
 		expandFilters();
 	});
 
-	flex.appendTo(basicFilters);
-
-	flex = $('<div class="inventory_flex"></div>');
 
 	var select = $('<select id="query_select">'+sortingAlgorithm+'</select>');
 	var sortby = ['Set', 'Name', 'Rarity', 'CMC'];
 	for (var i=0; i < sortby.length; i++) {
 		select.append('<option value="'+sortby[i]+'">'+sortby[i]+'</option>');
 	}
-	select.appendTo(flex);
+	select.appendTo(fllb);
 	selectAdd(select, sortCollection);
 
 	var exp   = $('<div class="button_simple button_thin">Export Collection</div>');
-	exp.appendTo(flex);
+	exp.appendTo(fllb);
 	var reset = $('<div class="button_simple button_thin">Reset</div>');
-	reset.appendTo(flex);
+	reset.appendTo(flrb);
 	var stats = $('<div class="button_simple button_thin stats_button">Collection Stats</div>');
-	stats.appendTo(flex);
+	stats.appendTo(flrb);
 
 	exp.click(() => {
 		exportCollection();
@@ -89,15 +94,20 @@ function open_collection_tab() {
 		printStats();
 	});
 
-	flex.appendTo(basicFilters);
 
+	fllt.appendTo(fll);
+	fllb.appendTo(fll);
+	flrt.appendTo(flr);
+	flrb.appendTo(flr);
+	fll.appendTo(basicFilters);
+	flr.appendTo(basicFilters);
 
 	// "ADVANCED" FILTERS
 	var filters = $('<div class="inventory_filters"></div>');
 
-	flex = $('<div class="inventory_flex"></div>');
+	let flex = $('<div class="inventory_flex_half"></div>');
 
-	icd = $('<div style="padding-bottom: 8px;" class="input_container"></div>');
+	icd = $('<div style="padding-bottom: 8px;" class="input_container_inventory"></div>');
 	label = $('<label style="display: table">Type line</label>');
 	label.appendTo(icd);
 	var typeInput = $('<input type="search" id="query_type" autocomplete="off" />');
@@ -105,7 +115,7 @@ function open_collection_tab() {
 	icd.appendTo(flex);
 	flex.appendTo(filters);
 
-	var sets = $('<div class="sets_container"><label>Filter by set:</label></div>');
+	var sets = $('<div class="sets_container"></div>');
 	for (let set in setsList) {
 		let setbutton = $('<div class="set_filter set_filter_on" style="background-image: url(../images/sets/'+setsList[set].code+'.png)" title="'+set+'"></div>');
 		setbutton.appendTo(sets);
@@ -125,11 +135,11 @@ function open_collection_tab() {
 	}
 	sets.appendTo(filters);
 
-	var manas = $('<div class="sets_container"><label>Filter by color:</label></div>');
+	var manas = $('<div class="sets_container"></div>');
 	var ms = ["w", "u", "b", "r", "g"];
 	ms.forEach(function(s, i) {
 		var mi = [1, 2, 3, 4, 5];
-		var manabutton = $('<div class="mana_filter mana_filter_on" style="background-image: url(../images/'+s+'20.png)"></div>');
+		var manabutton = $('<div class="mana_filter_search mana_filter_on" style="background-image: url(../images/'+s+'64.png)"></div>');
 		manabutton.appendTo(manas);
 		manabutton.click(function() {
 			if (manabutton.hasClass('mana_filter_on')) {
@@ -147,35 +157,46 @@ function open_collection_tab() {
 	});
 	manas.appendTo(filters);
 
+	let main_but_cont = $('<div class="main_buttons_container"></div>');
+
 	var cont = $('<div class="buttons_container"></div>');
 	add_checkbox_search(cont, 'Show unowned', 'query_unown', false);
 	add_checkbox_search(cont, 'Newly acquired only', 'query_new', false);
 	add_checkbox_search(cont, 'Require multicolored', 'query_multicolor', false);
 	add_checkbox_search(cont, 'Exclude unselected colors', 'query_exclude', false);
-	cont.appendTo(filters);
+	cont.appendTo(main_but_cont);
 
 	cont = $('<div class="buttons_container"></div>');
 	add_checkbox_search(cont, 'Common', 'query_common', true);
 	add_checkbox_search(cont, 'Uncommon', 'query_uncommon', true);
 	add_checkbox_search(cont, 'Rare', 'query_rare', true);
 	add_checkbox_search(cont, 'Mythic Rare', 'query_mythic', true);
-	cont.appendTo(filters);
+	cont.appendTo(main_but_cont);
 	
 	cont = $('<div class="buttons_container"></div>');
 
-	icd = $('<div class="input_container auto_width"></div>');
+	icd = $('<div class="input_container_inventory auto_width"></div>');
 	label = $('<label style="display: table">CMC:</label>');
 	label.appendTo(icd);
 	input = $('<input type="number" id="query_cmc" autocomplete="off" />');
 	input.appendTo(icd);
 	icd.appendTo(cont);
 
-	add_checkbox_search(cont, 'Lower than', 'query_cmclower', false);
-	add_checkbox_search(cont, 'Equal to', 'query_cmcequal', true);
 	add_checkbox_search(cont, 'Higher than', 'query_cmchigher', false);
+	add_checkbox_search(cont, 'Equal to', 'query_cmcequal', true);
+	add_checkbox_search(cont, 'Lower than', 'query_cmclower', false);
 	
-	cont.appendTo(filters);
+	cont.appendTo(main_but_cont);
+	main_but_cont.appendTo(filters);
+
+
+	searchButton = $('<div style="margin: 24px auto !important;" class="button_simple button_thin">Search</div>');	
+	searchButton.appendTo(filters);
 	
+	searchButton.click(() => {
+		printCards();
+	});
+
 	$("#ux_0").append(basicFilters);
 	$("#ux_0").append(filters);
 	$("#ux_0").append(div);

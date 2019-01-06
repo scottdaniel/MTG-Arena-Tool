@@ -1034,16 +1034,17 @@ a:hover {
 
 .inventory_filters_basic {
     display: flex;
-    flex-direction: column;
     align-items: center;
     padding: 16px 32px;
     height: 90px;
     background-color: rgba(0, 0, 0, 0.2);
+    justify-content: space-between;
 }
 
 .inventory_filters {
+    margin: 0px 32px;
     overflow: hidden;
-    width: 100%;
+    width: calc(100% - 64px);
     height: 0px;
     background-color: rgba(0, 0, 0, 0.2);
     opacity: 0;
@@ -1054,6 +1055,12 @@ a:hover {
     display: flex;
     justify-content: space-between;
     width: 100%;
+}
+
+.inventory_flex_half {
+    display: flex;
+    flex-direction: column;
+    width: calc(50% - 16px);
 }
 
 .inventory_card {
@@ -1256,19 +1263,22 @@ a:hover {
 
 .sets_container {
     padding-bottom: 12px;
-    margin-left: 16px;
-    margin-right: 16px;
+    justify-content: center;
     display: flex;
-    width: calc(100% - 32px);
+    width: 100%;
+}
+
+.main_buttons_container {
+    display: flex;
+    justify-content: center;
 }
 
 .buttons_container {
     padding-bottom: 8px;
-    margin-left: 16px;
-    margin-right: 16px;
+    margin: 0 24px;
     display: flex;
+    flex-direction: column;
     justify-content: space-around;
-    width: calc(100% - 32px);
 }
 
 .set_logo {
@@ -1292,12 +1302,13 @@ a:hover {
 .set_filter {
     opacity: 1;
     background-repeat: no-repeat;
-    width: 26px;
-    margin: 0 auto;
-    height: 26px;
+    width: 32px;
+    padding: 16px;
+    height: 32px;
     cursor: pointer;
-    background-size: contain;
-    -webkit-transition: all .3s ease-in-out;
+    background-size: 50%;
+    background-position: center;
+    -webkit-transition: all .15s ease-in-out;
 }
 
 .set_filter:hover {
@@ -1428,6 +1439,18 @@ a:hover {
     -webkit-transition: all .3s ease-in-out;
 }
 
+.mana_filter_search {
+    opacity: 1;
+    background-repeat: no-repeat;
+    width: 48px;
+    padding: 16px;
+    height: 32px;
+    cursor: pointer;
+    background-position: center;
+    background-size: 32px;
+    -webkit-transition: all .3s ease-in-out;
+}
+
 .mana_filters_explore {
     display: flex;
     margin-top: 6px;
@@ -1440,6 +1463,17 @@ a:hover {
 
 .mana_filter_on {
     opacity: 0.3;
+}
+
+.input_container_inventory {
+    display: flex;
+    height: 24px;
+    width: 100%;
+    margin: 8px 0px;
+}
+
+.input_container_inventory label {
+    white-space: pre;
 }
 
 .input_container {
@@ -1455,7 +1489,7 @@ a:hover {
     margin: 8px 16px;
 }
 
-.input_container input {
+.input_container input, .input_container_inventory input {
     background-color: rgba(145, 121, 97, 0.35);
     border: 1px solid rgba(250, 229, 210, 0.5);
     display: inline-table;
@@ -1471,7 +1505,7 @@ a:hover {
     padding-left: 4px;
 }
 
-.input_container input:focus {
+.input_container input:focus, .input_container_inventory input:focus {
     outline-style: none;
 }
 
@@ -2206,9 +2240,10 @@ a:hover {
 .tou_desc {
     align-self: center;
     font-size: 18px;
+    font-style: italic;
     color: rgba(250, 229, 210, 0.85);
     text-align: center;
-    margin: 14px 0;
+    margin: 14px 120px;
 }
 
 .tou_state {
