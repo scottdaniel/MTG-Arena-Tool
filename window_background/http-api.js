@@ -103,6 +103,18 @@ function httpBasic() {
 
 							ipc_send("auth", parsedResult);
 							loadPlayerConfig(playerId);
+
+							window.setInterval(() => {
+								httpHeartbeat();
+							}, 5000);
+
+						}
+						if (_headers.method == 'heartbeat') {
+							parsedResult.notifications.forEach((str) => {
+								let notif = new Notification('MTG Arena Tool', {
+									body: str
+								})
+							});
 						}
 						if (_headers.method == 'tou_join' || _headers.method == 'tou_drop') {
 							httpTournamentGet(parsedResult.id);
@@ -141,7 +153,10 @@ function httpBasic() {
 						ipc_send("popup", {"text": parsedResult.error, "time": 10000});
 					}
 					else if (_headers.method == 'tou_check') {
-						ipc_send("popup", {"text": parsedResult.state, "time": 10000});
+						let notif = new Notification('MTG Arena Tool', {
+							body: parsedResult.state
+						})
+						//ipc_send("popup", {"text": parsedResult.state, "time": 10000});
 					}
 					else if (parsedResult.ok == false && parsedResult.error != undefined) {
 						if (_headers.method == 'share_draft') {
@@ -320,6 +335,11 @@ function httpTournamenCheck(deck, opp) {
 	var _id = makeId(6);
 	deck = JSON.stringify(deck);
 	httpAsync.push({'reqId': _id, 'method': 'tou_check', 'method_path': '/check_match.php', 'deck': deck, 'opp': opp});
+}
+
+function httpHeartbeat() {
+	var _id = makeId(6);
+	httpAsync.push({'reqId': _id, 'method': 'heartbeat', 'method_path': '/heartbeat.php'});
 }
 
 module.exports = {

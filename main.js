@@ -6,6 +6,8 @@ const {dialog, app, globalShortcut, Menu, Tray, clipboard} = require('electron')
 const path  = require('path');
 const fs	= require("fs");
 
+app.setAppUserModelId("com.github.manuel777.mtgatool");
+
 const {autoUpdater} = require("electron-updater");
 
 // Adds debug features like hotkeys for triggering dev tools and reload

@@ -284,8 +284,14 @@ function open_tournament(t) {
 		tab_rounds.appendTo(tabs);
 		tab_standings.appendTo(tabs);
 		if (joined) {
-			let tab_decklist = $('<div class="tou_tab tab_c ">Decklist</div>');
+			let tab_decklist = $('<div class="tou_tab tab_c">Decklist</div>');
 			tab_decklist.appendTo(tabs);
+			/*
+			if (tou.current_opponent !== '' && tou.current_opponent !== 'bye') {
+				let tab_chat = $('<div class="tou_tab tab_d">Chat</div>');
+				tab_chat.appendTo(tabs);
+			}
+			*/
 		}
 
 		tabs.appendTo(mainDiv);
@@ -410,6 +416,12 @@ function open_tournament(t) {
 				drawSideboardableDeck();
 			});
 		}
+		/*
+		if (tou.current_opponent !== '' && tou.current_opponent !== 'bye') {
+			let tab_cont_d = $('<div class="tou_cont_d" style="height: 0px"></div>');
+			tab_cont_d.appendTo(mainDiv);
+		}
+		*/
 
 		$(".tou_tab").click(function () {
 			if (!$(this).hasClass("tou_tab_selected")) {
@@ -420,6 +432,7 @@ function open_tournament(t) {
 				$(".tou_cont_a").css("height", "0px");
 				$(".tou_cont_b").css("height", "0px");
 				$(".tou_cont_c").css("height", "0px");
+				$(".tou_cont_d").css("height", "0px");
 				if ($(this).hasClass('tab_a')) {
 					$(".tou_cont_a").css("height", "auto");
 				}
@@ -428,6 +441,9 @@ function open_tournament(t) {
 				}
 				if ($(this).hasClass('tab_c')) {
 					$(".tou_cont_c").css("height", "auto");
+				}
+				if ($(this).hasClass('tab_d')) {
+					$(".tou_cont_d").css("height", "auto");
 				}
 			}
 		});
