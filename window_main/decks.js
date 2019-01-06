@@ -158,7 +158,7 @@ function open_decks_tab() {
 			let bo = document.createElement("div");
 			bo.classList.add("bo_explore_cost");
 			bo.innerHTML = boosterCost;
-			bo.title = "Aproximate boosters needed";
+			bo.title = "Boosters needed (estimated)";
 			flcfwc.appendChild(bo);			
 		}
 

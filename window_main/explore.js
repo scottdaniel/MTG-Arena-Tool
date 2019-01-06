@@ -235,7 +235,7 @@ function ladderLoadMore(loadMore, ownedWildcards) {
 			let bo = document.createElement("div");
 			bo.classList.add("bo_explore_cost");
 			bo.innerHTML = boosterCost;
-			bo.title = "Aproximate boosters needed";
+			bo.title = "Boosters needed (estimated)";
 			flcf.appendChild(bo);
 		}
 
@@ -415,7 +415,7 @@ function exploreLoadMore(loadMore, ownedWildcards) {
 			let bo = document.createElement("div");
 			bo.classList.add("bo_explore_cost");
 			bo.innerHTML = boosterCost;
-			bo.title = "Aproximate boosters needed";
+			bo.title = "Boosters needed (estimated)";
 			flcf.appendChild(bo);
 		}
 
