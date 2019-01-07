@@ -160,6 +160,7 @@ function open_tournaments_tab(arg, opentab = true) {
 	$('.tou_container').each(function() {
 		$(this).on("click", function() {
 			let ti = $(this).attr('id');
+			document.body.style.cursor = "progress";
 			ipc_send("tou_get", ti);
 		});
 	});

@@ -393,6 +393,7 @@ ipc.on('set_status', function (event, arg) {
 
 //
 ipc.on('set_tou_list', function (event, arg) {
+	document.body.style.cursor = "auto";
 	if (sidebarActive == -1) {
 		open_tournaments_tab(arg);
 	}
@@ -740,6 +741,7 @@ $(document).ready(function() {
 		$("#ux_0").off();
 		$("#history_column").off();
         change_background("default");
+        document.body.style.cursor = "auto";
 		if (!$(this).hasClass("item_selected")) {
 			$('.moving_ux').animate({'left': '0px'}, 250, 'easeInOutCubic'); 
 
@@ -757,6 +759,7 @@ $(document).ready(function() {
 					open_tournaments_tab(null, true);
 				}
 				else {
+					document.body.style.cursor = "progress";
 					ipc_send('request_tou_list', true);
 				}
 			}
@@ -1175,6 +1178,7 @@ $('.'+_match.id+'t').css('width', '128px');
 
 //
 ipc.on('tou_set', function (event, arg) {
+	document.body.style.cursor = "auto";
 	open_tournament(arg);
 	$('.moving_ux').animate({'left': '-100%'}, 250, 'easeInOutCubic');
 });
