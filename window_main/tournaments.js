@@ -11,6 +11,9 @@ global
 	addCardTile,
 	get_deck_export,
 	makeId,
+	authToken,
+	discordTag,
+	shell,
 	pop
 */
 
@@ -23,25 +26,47 @@ let listInterval = [];
 
 // Should separate these two into smaller functions
 function open_tournaments_tab(arg, opentab = true) {
+	let mainDiv = document.getElementById("ux_0");
+	mainDiv.classList.remove("flex_item");
+	mainDiv.innerHTML = '';
+
+	if (discordTag == null) {
+		let label = $('<div class="auth_label">Authorize to proceed:</div>');
+		let but = $('<div class="discord_but"></div>');
+
+		but.click(() => {
+			let url = 'https://discordapp.com/api/oauth2/authorize?client_id=531626302004789280&redirect_uri=http%3A%2F%2Fmtgatool.com%2Fdiscord%2F&response_type=code&scope=identify%20email&state='+authToken;
+			shell.openExternal(url);
+		});
+
+		label.appendTo(mainDiv);
+		but.appendTo(mainDiv);
+
+		return false;
+	}
 	if (arg != null) {
 		tournaments_list = arg;
 		if (!opentab)	return
 	}
 
-	let mainDiv = document.getElementById("ux_0");
-	mainDiv.classList.remove("flex_item");
-	mainDiv.innerHTML = '';
-
 	let d = document.createElement("div");
 	d.classList.add("list_fill");
 	mainDiv.appendChild(d);
+
+	let fl = document.createElement("div");
+	fl.classList.add("flex_item");
+	fl.style.margin = "auto";
+	fl.style.width = "fit-content";
+	let dname = discordTag.split("#")[0];
+	fl.innerHTML = `<div class="discord_icon"></div><div class="top_username">${dname}</div><div class="discord_message">Your discord tag will be visible to your opponents.</div>`;
+	mainDiv.appendChild(fl);
 
 	let title = document.createElement("div");
 	title.classList.add("tournament_title");
 	title.innerHTML = "Tournaments List:";
 	mainDiv.appendChild(title);
 
-	cont = document.createElement("div");
+	let cont = document.createElement("div");
 	cont.classList.add("tournament_list_cont");
 
 	listInterval.forEach((_id) => {
@@ -261,7 +286,8 @@ function open_tournament(t) {
 	else {
 		if (joined) {
 			$(`<div class="tou_record green">${record}</div>`).appendTo(mainDiv);
-			$(`<div class="tou_opp"><span>Your opponent: </span><span style="margin-left: 10px; color: rgb(250, 229, 210);">${tou.current_opponent}</span><div class="copy_button"></div></div>`).appendTo(mainDiv);
+			$(`<div class="tou_opp"><span>On MTGA: </span><span style="margin-left: 10px; color: rgb(250, 229, 210);">${tou.current_opponent}</span><div class="copy_button copy_mtga"></div></div>`).appendTo(mainDiv);
+			$(`<div class="tou_opp"><span>On Discord: </span><span style="margin-left: 10px; color: rgb(250, 229, 210);">${tou.current_opponent_discord}</span><div class="copy_button copy_discord"></div></div>`).appendTo(mainDiv);
 
 			$(`<div class="tou_opp tou_opp_sub"><span class="last_seen_clock"></span></div></div>`).appendTo(mainDiv);
 
@@ -274,9 +300,14 @@ function open_tournament(t) {
 				}, 250);
 			}
 
-			$('.copy_button').click(() => {
+			$('.copy_mtga').click(() => {
 				pop("Copied to clipboard", 1000);
 				ipc_send('set_clipboard', tou.current_opponent);
+			});
+
+			$('.copy_discord').click(() => {
+				pop("Copied to clipboard", 1000);
+				ipc_send('set_clipboard', tou.current_opponent_discord);
 			});
 		}
 

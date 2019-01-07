@@ -91,6 +91,8 @@ let season_starts = new Date();
 let season_ends = new Date();
 
 let tags_colors = {};
+let authToken = null;
+let discordTag = null;
 
 const sha1 	= require('js-sha1');
 const fs 	= require("fs");
@@ -134,6 +136,7 @@ ipc.on('clear_pwd', function () {
 
 //
 ipc.on('auth', function (event, arg) {
+	authToken = arg.token;
 	if (arg.ok) {
 		$('.message_center').css('display', 'flex');
 		$('.authenticate').hide();
@@ -141,6 +144,13 @@ ipc.on('auth', function (event, arg) {
 	}
 	else {
 		pop(arg.error, -1);
+	}
+});
+
+ipc.on('set_discord_tag', (event, arg) => {
+	discordTag = arg;
+	if (sidebarActive == -1) {
+		ipc_send('request_tou_list', true);
 	}
 });
 
@@ -516,7 +526,7 @@ ipc.on('initialize', function () {
 
 	$(".top_rank").css("background-position", (rankOffset*-48)+"px 0px").attr("title", rankTitle);
 	sidebarActive = 0;//-1;
-	ipc_send('request_tou_list', true);
+	//ipc_send('request_tou_list', true);
 	$('.top_nav').removeClass('hidden');
 	$('.overflow_ux').removeClass('hidden');
 	$('.message_center').css('display', 'none');
@@ -742,7 +752,13 @@ $(document).ready(function() {
 			if ($(this).hasClass("ith")) {
 				sidebarActive = -1;
 				$("#ux_0").html('<div class="loading_bar ux_loading"><div class="loading_color loading_w"></div><div class="loading_color loading_u"></div><div class="loading_color loading_b"></div><div class="loading_color loading_r"></div><div class="loading_color loading_g"></div></div>');
-				ipc_send('request_tou_list', true);
+
+				if (discordTag == null) {
+					open_tournaments_tab(null, true);
+				}
+				else {
+					ipc_send('request_tou_list', true);
+				}
 			}
 			if ($(this).hasClass("it0")) {
 				sidebarActive = 0;

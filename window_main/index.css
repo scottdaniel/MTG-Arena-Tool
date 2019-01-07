@@ -2246,6 +2246,50 @@ a:hover {
     -webkit-transition: all .25s cubic-bezier(0.2, 0.5, 0.35, 1);
 }
 
+.auth_label {
+    width: 100%;
+    margin-top: 32px;
+    margin-bottom: 20px;
+    color: #FAE5D2;
+    font-size: 20px;
+    text-align: center;
+}
+
+.discord_icon {
+    background-image:url(../images/discord_logo.png);
+    width: 32px;
+    background-size: cover;
+    height: 32px;
+}
+
+.discord_message {
+    margin-left: 32px;
+    margin-top: 10px;
+    line-height: 16px;
+    font-style: italic;
+    opacity: 0.8;
+    color: #fae5d2;
+}
+
+.discord_but {
+    position: relative;
+    cursor: pointer;
+    margin: 0 auto;
+    width: 210px;
+    border-radius: 4px;
+    height: 40px;
+    background-size: 120px;
+    background-color: #7289DA;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-image: url(../images/discord_button.png);
+    -webkit-transition: all .25s cubic-bezier(0.2, 0.5, 0.35, 1);
+}
+
+.discord_but:hover {
+    background-color: #4e5d94;
+}
+
 .tournament_list_cont {
     margin: 16px;
     overflow: auto;
@@ -2318,12 +2362,12 @@ a:hover {
     display: flex;
     font-size: 18px;
     text-align: center;
-    margin: 16px auto 4px auto;
+    margin-bottom: 6px;
 }
 
 .tou_opp_sub {
     font-size: 16px;
-    margin: 0px 0px 12px 0px;
+    margin-bottom: 16px;
 }
 
 .copy_button {
@@ -2485,8 +2529,8 @@ a:hover {
 
 .tournament_title {
     color: rgba(250, 229, 210, 0.85);
-    margin-left: 30px;
-    margin-top: 8px;
+    text-align: center;
+    margin-top: 16px;
     font-family: Beleren;
     font-size: 18px;
 }

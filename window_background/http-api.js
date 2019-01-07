@@ -95,6 +95,8 @@ function httpBasic() {
 					if (parsedResult.ok) {
 						if (_headers.method == 'auth') {
 							tokenAuth = parsedResult.token;
+
+							ipc_send('set_discord_tag', parsedResult.discord_tag);
 							//ipc_send("auth", parsedResult.arenaids);
 							if (rememberMe) {
 								rstore.set("token", tokenAuth);
@@ -111,9 +113,19 @@ function httpBasic() {
 						}
 						if (_headers.method == 'heartbeat') {
 							parsedResult.notifications.forEach((str) => {
-								let notif = new Notification('MTG Arena Tool', {
-									body: str
-								})
+								console.log("typeof:", typeof str);
+								if (typeof str == "string") {
+									console.log("Notification string:", str);
+									let notif = new Notification('MTG Arena Tool', {
+										body: str
+									})									
+								}
+								else if (typeof str == "object") {
+									console.log("Notification object:", str);
+									if (str.task) {
+										ipc_send(str.task, str.value);
+									}
+								}
 							});
 						}
 						if (_headers.method == 'tou_join' || _headers.method == 'tou_drop') {
