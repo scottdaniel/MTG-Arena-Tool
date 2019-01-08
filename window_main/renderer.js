@@ -2139,11 +2139,12 @@ function change_background(arg, grpId = 0) {
 
 	//console.log(arg, grpId, _card);
 	if (arg == "default") {
-	$('.top_artist').html("Githu Lavarunner by Jesper Ejsing");
-	if (defaultBackground == "") {
-		$('.main_wrapper').css("background-image", "url(../images/Ghitu-Lavarunner-Dominaria-MtG-Art.jpg)");
+		$('.top_artist').html("Ghitu Lavarunner by Jesper Ejsing");
+		if (defaultBackground == "") {
+			$('.main_wrapper').css("background-image", "url(../images/Ghitu-Lavarunner-Dominaria-MtG-Art.jpg)");
         }
         else {
+	     	$('.top_artist').html("");
 			$('.main_wrapper').css("background-image", "url("+defaultBackground+")");
         }
     }
@@ -2152,9 +2153,11 @@ function change_background(arg, grpId = 0) {
 		$('.main_wrapper').css("background-image", "url(https://img.scryfall.com/cards"+_card.images["art_crop"]+")");
 	}
     else if (fs.existsSync(arg)) {
+		$('.top_artist').html("");
         $('.main_wrapper').css("background-image", "url("+arg+")");
     }
     else {
+		$('.top_artist').html("");
         $.ajax({
             url: arg,
             type: 'HEAD',
