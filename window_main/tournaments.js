@@ -600,6 +600,9 @@ function drawSideboardableDeck() {
 	_div.css("dsiplay", "flex");
 	let mainboardDiv = $('<div class="decklist_divided"></dii>');
 
+	currentDeck.mainDeck.sort(compare_cards);
+	currentDeck.sideboard.sort(compare_cards);
+
 	let size = 0;
 	currentDeck.mainDeck.forEach(function(card) { size += card.quantity; });
 	addCardSeparator(`Mainboard (${size})`, mainboardDiv);

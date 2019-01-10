@@ -2414,7 +2414,7 @@ a:hover {
     margin: 0 auto;
     flex-wrap: wrap;
     display: flex;
-    justify-content: center;
+    justify-content: space-around;
     max-width: 800px;
     margin-bottom: 42px;
 }
