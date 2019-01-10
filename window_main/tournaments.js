@@ -14,7 +14,8 @@ global
 	authToken,
 	discordTag,
 	shell,
-	pop
+	pop,
+	toHHMMSS
 */
 
 let tournaments_list;
@@ -118,6 +119,10 @@ function open_tournaments_tab(arg, opentab = true) {
 					$('.list_stateb_'+index).html(toHHMMSS(roundEnd-now)+" left");
 				}, 250)
 			);
+		}
+		if (tou.state == 3) {
+			state = "Top "+(tou.top)+" in progress.";
+			stateb = "-";
 		}
 		if (tou.state == 4) {
 			state = "Tournament finish.";
@@ -224,6 +229,10 @@ function open_tournament(t) {
 			$('.state_clock').html("Round "+(tou.currentRound+1)+" ends in "+toHHMMSS(roundEnd - tst));
 		}, 1000);
 
+	}
+	if (tou.state == 3) {
+		state = '';
+		$('.state_clock').html("Top "+(tou.top));
 	}
 	if (tou.state == 4) {
 		state = "Tournament finish.";
@@ -332,7 +341,82 @@ function open_tournament(t) {
 		tabs.appendTo(mainDiv);
 
 		let tab_cont_a = $('<div class="tou_cont_a"></div>');
-		for (let i=0; i<tou.currentRound+1; i++) {
+
+
+		if (tou.top > 0 && tou.state >= 3) {
+			$(`<div class="tou_round_title">Top ${tou.top}</div>`).appendTo(tab_cont_a);
+
+			let top_matches = [];
+			let top_cont = $('<div class="tou_top"></div>');
+			let m;
+			let tou_cont_a = $('<div class="tou_top_cont"></div>');
+			let tou_cont_b = $('<div class="tou_top_cont"></div>');
+			let tou_cont_c = $('<div class="tou_top_cont"></div>');
+
+			if (tou.top >= 2) {
+				m = $('<div class="tou_match_cont top_0"></div>');	top_matches.push(m);	m.appendTo(tou_cont_c);
+			}
+			if (tou.top >= 4) {
+				m = $('<div class="tou_match_cont top_1"></div>');	top_matches.push(m);	m.appendTo(tou_cont_b);
+				m = $('<div class="tou_match_cont top_2"></div>');	top_matches.push(m);	m.appendTo(tou_cont_b);
+			}
+			if (tou.top >= 8) {
+				m = $('<div class="tou_match_cont top_3"></div>');	top_matches.push(m);	m.appendTo(tou_cont_a);
+				m = $('<div class="tou_match_cont top_4"></div>');	top_matches.push(m);	m.appendTo(tou_cont_a);
+				m = $('<div class="tou_match_cont top_5"></div>');	top_matches.push(m);	m.appendTo(tou_cont_a);
+				m = $('<div class="tou_match_cont top_6"></div>');	top_matches.push(m);	m.appendTo(tou_cont_a);
+			}
+			tou_cont_a.appendTo(top_cont);
+			tou_cont_b.appendTo(top_cont);
+			tou_cont_c.appendTo(top_cont);
+			top_cont.appendTo(tab_cont_a);
+
+			tou['round_top'].forEach(function(match) {
+				if (match.p1 == "") {
+					match.p1 = "TBD#00000";
+				}
+				if (match.p2 == "") {
+					match.p2 = "TBD#00000";
+				}
+				let cont = top_matches[match.id];
+
+				let p1wc = '';
+				let p2wc = '';
+				if (match.winner == 1) {
+					p1wc = 'tou_score_win';
+				}
+				if (match.winner == 2) {
+					p2wc = 'tou_score_win';
+				}
+
+				let d1 = '';
+				let d2 = '';
+				if (match.p2 == "bye")	match.p2 = "BYE#00000";
+				try {
+					if (match.drop1)	d1 = ' (drop)';
+					if (match.drop2)	d2 = ' (drop)';
+				}
+				catch (e) {
+					console.error(e);
+				}
+
+				let s = '';
+				if (match.p1 == userName)		s = 'style="color: rgba(183, 200, 158, 1);"';
+				if (match.p1 == "TBD#00000")	s = 'style="color: rgba(250, 229, 210, 0.65);"';
+
+				let p1 = $(`<div ${s} class="tou_match_p ${match.p1}pn">${match.p1.slice(0, -6)+d1}<div class="${p1wc} tou_match_score">${match.p1w}</div></div>`);
+				s = '';
+				if (match.p2 == userName)		s = 'style="color: rgba(183, 200, 158, 1);"';
+				if (match.p2 == "TBD#00000")	s = 'style="color: rgba(250, 229, 210, 0.65);"';
+				let p2 = $(`<div ${s} class="tou_match_p ${match.p2}pn">${match.p2.slice(0, -6)+d2}<div class="${p2wc} tou_match_score">${match.p2w}</div></div>`);
+
+				p1.appendTo(cont);
+				p2.appendTo(cont);
+			})
+		}
+
+
+		for (let i=tou.currentRound; i>=0; i--) {
 			let rname = 'round_'+i;
 			if (tou[rname] !== undefined) {
 				$(`<div class="tou_round_title">Round ${i+1}</div>`).appendTo(tab_cont_a);
@@ -364,7 +448,8 @@ function open_tournament(t) {
 					if (match.p1 == userName)	s = 'style="color: rgba(183, 200, 158, 1);"';
 					let p1 = $(`<div ${s} class="tou_match_p ${match.p1}pn">${match.p1.slice(0, -6)+d1}<div class="${p1wc} tou_match_score">${match.p1w}</div></div>`);
 					s = '';
-					if (match.p2 == userName)	s = 'style="color: rgba(183, 200, 158, 1);"';
+					if (match.p2 == userName)		s = 'style="color: rgba(183, 200, 158, 1);"';
+					if (match.p2 == "BYE#00000")	s = 'style="color: rgba(250, 229, 210, 0.65);"';
 					let p2 = $(`<div ${s} class="tou_match_p ${match.p2}pn">${match.p2.slice(0, -6)+d2}<div class="${p2wc} tou_match_score">${match.p2w}</div></div>`);
 
 					p1.appendTo(cont);

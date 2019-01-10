@@ -2464,6 +2464,10 @@ a:hover {
 	-webkit-transition: height .2s ease-in-out;
 }
 
+.tou_cont_b {
+    margin-bottom: 48px;
+}
+
 .tou_score_win {
     background-color: rgba(145, 121, 97, 1);
 }
@@ -2488,6 +2492,22 @@ a:hover {
     background-color: rgba(145, 121, 97, 0.4);
     margin-top: 32px;
     border-bottom: solid 1px rgba(250, 229, 210, 0.6);
+}
+
+.tou_top_cont {
+    width: 33%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+}
+
+.tou_top {
+    margin: 0 auto;
+    flex-wrap: wrap;
+    display: flex;
+    justify-content: center;
+    max-width: 800px;
+    margin-bottom: 42px;
 }
 
 .swap_icon {
