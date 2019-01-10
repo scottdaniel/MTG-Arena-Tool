@@ -1369,6 +1369,7 @@ function forceDeckUpdate() {
 									//console.log(gameObjs[key].instanceId, cardsDb.get(gameObjs[key].grpId).name, zones[gameObjs[key].zoneId].type);
 									card.quantity -= 1;
 								}
+								if (card.quantity < 0)	card.quantity = 0;
 							});
 						}
 					}
@@ -1381,12 +1382,12 @@ function forceDeckUpdate() {
 		currentDeckUpdated.mainDeck.forEach(function(card) {
 			var c = cardsDb.get(card.id);
 			if (c) {
-				if (c.type.includes("Land", 0))				 typeLan += card.quantity;
+				if (c.type.includes("Land", 0))				 	typeLan += card.quantity;
 				else if (c.type.includes("Creature", 0))		typeCre += card.quantity;
 				else if (c.type.includes("Artifact", 0))		typeArt += card.quantity;
-				else if (c.type.includes("Enchantment", 0))	 typeEnc += card.quantity;
-				else if (c.type.includes("Instant", 0))		 typeIns += card.quantity;
-				else if (c.type.includes("Sorcery", 0))		 typeSor += card.quantity;
+				else if (c.type.includes("Enchantment", 0))	 	typeEnc += card.quantity;
+				else if (c.type.includes("Instant", 0))		 	typeIns += card.quantity;
+				else if (c.type.includes("Sorcery", 0))		 	typeSor += card.quantity;
 				else if (c.type.includes("Planeswalker", 0))	typePla += card.quantity;
 			}
 			card.chance = Math.round(hypergeometric(1, cardsleft, 1, card.quantity)*100);
@@ -1689,7 +1690,7 @@ function hypergeometric(arg0, arg1, arg2, arg3) {
 	_k = math.bignumber(arg3);// Number of successes in population  
 
 	let _a = math.combinations(_k, _x)
-	let _b = math.combinations(math.subtract(_N,_k), math.subtract(_n,_x));
+	let _b = math.combinations(math.max(0, math.subtract(_N,_k)), math.max(0, math.subtract(_n,_x)));
 	let _c = math.combinations(_N, _n);
 
 	return math.number(math.divide(math.multiply(_a, _b) , _c));
