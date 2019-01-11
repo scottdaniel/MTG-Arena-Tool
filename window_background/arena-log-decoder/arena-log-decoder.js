@@ -5,9 +5,10 @@ const CONNECTION_JSON_PATTERN =
 	'\\[(?:UnityCrossThreadLogger|Client GRE)\\]WebSocketClient (.*) WebSocketSharp\\.WebSocket connecting to .*: (.*)\\r\\n';
 
 const LABEL_JSON_PATTERNS = [
+	'\\[Client GRE\\](.*): .*: (.*)\\r\\n\\[Message (.*)\\]',
 	'\\[Client GRE\\](.*): .*: (.*)\\r\\n',
 	'\\[UnityCrossThreadLogger\\](.*)[\r\n]{0,}\\(.*\\) Incoming (.*) ',
-	'\\[UnityCrossThreadLogger\\]Received unhandled GREMessageType:() (.*)\\r\\n',
+	'\\[UnityCrossThreadLogger\\]Received unhandled GREMessageType:() (.*)\\r\\n'
 ];
 
 const LABEL_ARROW_JSON_PATTERN = '\\[UnityCrossThreadLogger\\](.*)\\r\\n([<=]=[=>]) (.*)\\(.*\\):?\\r\\n';
@@ -128,6 +129,8 @@ function parseLogEntry(text, matchText, position) {
 		return ['full', matchText.length + jsonLen + textAfterJson.length, {
 			type: 'label_json',
             label: rematches[2],
+            //matchText: matchText,
+            //text: text.substr(jsonStart, jsonLen),
             timestamp: rematches[1],
 			json: () => JSON.parse(text.substr(jsonStart, jsonLen)),
 		}];

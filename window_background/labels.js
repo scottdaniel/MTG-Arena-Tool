@@ -6,6 +6,12 @@ function onLabelOutLogInfo(entry, json) {
 		var mid = json.params.payloadObject.matchId;
 		var time = json.params.payloadObject.secondsCount;
 		if (mid == currentMatchId) {
+			if (playerWin == 0 && oppWin == 0) {
+				if (json.params.payloadObject.winningTeamId == playerSeat)
+					playerWin += 1;
+				else
+					oppWin += 1;
+			}
 			currentMatchTime += time;
 			saveMatch();
 		}
