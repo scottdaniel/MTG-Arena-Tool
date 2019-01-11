@@ -27,18 +27,13 @@ var updateState = 0;
 var updateAvailable = 0;
 var updateProgress = 0;
 var updateSpeed = 0;
-var rendererReset = false;
-var overlayReset = false;
 
 const ipc = electron.ipcMain;
 
-var screenElectron = null;
 var mainLoaded = false;
 var backLoaded = false;
 
 app.on('ready', () => {
-	screenElectron = electron.screen;
-
 	mainWindow  = createMainWindow();
 	overlay  = createOverlay();
 	background  = createBackgroundWindow();
@@ -187,27 +182,11 @@ app.on('ready', () => {
 
 
 			case 'renderer_set_bounds':
-				if (!rendererReset) {
-					let sc = screenElectron.getPrimaryDisplay();
-					if (arg.x > sc.size.width-arg.width)	arg.x = sc.size.width-arg.width;
-					if (arg.y > sc.size.height-arg.height)  arg.y = sc.size.height-arg.height;
-					if (arg.x < 0)			  arg.x = 0;
-					if (arg.y < 0)			  arg.y = 0;
-					mainWindow.setBounds(arg);
-					rendererReset = true;
-				}
+				mainWindow.setBounds(arg);
 				break;
 
 			case 'overlay_set_bounds':
-				if (!overlayReset) {
-					let sc = screenElectron.getPrimaryDisplay();
-					if (arg.x > sc.size.width-arg.width)	arg.x = sc.size.width-arg.width;
-					if (arg.y > sc.size.height-arg.height)  arg.y = sc.size.height-arg.height;
-					if (arg.x < 0)			  arg.x = 0;
-					if (arg.y < 0)			  arg.y = 0;
-					overlay.setBounds(arg);
-					overlayReset = true;
-				}
+				overlay.setBounds(arg);
 				break;
 
 			case 'overlay_set_ontop':
