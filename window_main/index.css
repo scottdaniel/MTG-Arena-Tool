@@ -2510,6 +2510,19 @@ a:hover {
     margin-bottom: 42px;
 }
 
+.tou_list_player_name_title {
+    font-size: 16px !important;
+    color: #fae5d2 !important;
+    margin-bottom: 4px !important;
+}
+
+.tou_list_player_name {
+    color: rgba(250, 229, 210, 0.85);
+    font-size: 14px;
+    text-align: center;
+    margin-bottom: 2px;
+}
+
 .swap_icon {
     align-self: center;
     width: 28px;

@@ -283,6 +283,13 @@ function open_tournament(t) {
 			$('<div class="join_decklist"></div>').appendTo(mainDiv);
 		}
 
+		let list = $('<div class="tou_list_players"></div>');
+		$(`<div class="tou_list_player_name tou_list_player_name_title">Players joined:</div>`).appendTo(list);
+		tou.players.forEach((p) => {
+			$(`<div class="tou_list_player_name">${p.slice(0, -6)}</div>`).appendTo(list);
+		});
+		list.appendTo(mainDiv);
+
 		$(".but_join").click(function () {
 			if ($(this).hasClass('button_simple')) {
 				ipc_send('tou_join', {id: tou._id, deck: tournamentDeck});
