@@ -208,11 +208,12 @@ $( window ).resize(function() {
 		_height += 64;
 	}
 	$(".overlay_decklist").css("height", "100%").css("height", "-="+_height+"px");
-
+	/*
 	var bounds = remote.getCurrentWindow().webContents.getOwnerBrowserWindow().getBounds()
 	var w = Math.min(bounds.width, 256);
 	var sc = w / 256;
 	webFrame.setZoomFactor(sc);
+	*/
 });
 
 
@@ -235,6 +236,9 @@ ipc.on('set_settings', function (event, settings) {
 	*/
 	overlayAlpha = settings.overlay_alpha;
 	overlayAlphaBack = settings.overlay_alpha_back;
+
+	console.log(settings.overlay_scale);
+	webFrame.setZoomFactor(settings.overlay_scale/100);
 
 	$('.overlay_container').css('opacity', overlayAlpha);
 	$('.overlay_wrapper').css('opacity', overlayAlphaBack);

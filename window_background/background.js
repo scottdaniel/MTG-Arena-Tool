@@ -67,6 +67,7 @@ const defaultCfg = {
 		cards_size: 2,
 		overlay_alpha: 1,
 		overlay_alpha_back: 1,
+		overlay_scale: 100,
 		overlay_top: true,
 		overlay_title: true,
 		overlay_deck: true,
