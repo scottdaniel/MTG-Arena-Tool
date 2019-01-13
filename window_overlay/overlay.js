@@ -307,6 +307,7 @@ ipc.on('set_settings', function (event, settings) {
 
 function hideDiv(div) {
 	let _style = $(div).attr('style');
+	if (_style == undefined)	_style = '';
 	_style += 'display: none !important;';
 	$(div).attr('style', _style);
 }
