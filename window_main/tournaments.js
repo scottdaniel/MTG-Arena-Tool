@@ -175,6 +175,7 @@ let stateClockInterval = null;
 let lastSeenInterval = null;
 
 function open_tournament(t) {
+	console.log(t);
 	tou = t;
 	let mainDiv = $("#ux_1");
 	mainDiv.html('');
@@ -506,7 +507,9 @@ function open_tournament(t) {
 			let s = '';
 			if (pname == userName)	s = 'style="color: rgba(183, 200, 158, 1);"';
 
-			let str = `<div ${s} class="tou_stand_name">${pname.slice(0, -6)} ${tou.drops.indexOf(pname) !== -1 ? ' (drop)' : ''}</div>
+			let str = `
+			<img src="blank.gif" class="flag tou_flag flag-${tou.flags[pname].toLowerCase()}" />
+			<div ${s} class="tou_stand_name">${pname.slice(0, -6)} ${tou.drops.indexOf(pname) !== -1 ? ' (drop)' : ''}</div>
 			<div class="tou_stand_cell">${stat.mp}</div>
 			<div class="tou_stand_cell">${stat.w}-${stat.d}-${stat.l}</div>
 			<div class="tou_stand_cell">${stat.rpl}</div>

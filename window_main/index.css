@@ -2523,6 +2523,12 @@ a:hover {
     margin-bottom: 2px;
 }
 
+.tou_flag {
+    margin-left: 6px;
+    align-self: center;
+    width: 19px !important;
+}
+
 .swap_icon {
     align-self: center;
     width: 28px;
