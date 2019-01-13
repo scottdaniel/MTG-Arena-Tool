@@ -252,6 +252,7 @@ function openDeck(deck, deck_type) {
 
     $(".exportDeck").click(() => {
         let list = get_deck_export(deck);
+        pop("Copied to clipboard", 1000);
         ipc_send('set_clipboard', list);
     });
 
