@@ -75,7 +75,7 @@ function open_tournaments_tab(arg, opentab = true) {
 	});
 	listInterval = [];
 	tournaments_list.forEach(function(tou, index) {
-		console.log(tou);
+		//console.log(tou);
 
 		let div = document.createElement("div");
 		div.classList.add("tou_container");
@@ -175,7 +175,7 @@ let stateClockInterval = null;
 let lastSeenInterval = null;
 
 function open_tournament(t) {
-	console.log(t);
+	//console.log(t);
 	tou = t;
 	let mainDiv = $("#ux_1");
 	mainDiv.html('');
@@ -303,6 +303,7 @@ function open_tournament(t) {
 	}
 	else {
 		if (joined) {
+			$(`<div class="tou_reload"></div>`).appendTo(mainDiv);
 			$(`<div class="tou_record green">${record}</div>`).appendTo(mainDiv);
 			$(`<div class="tou_opp"><span>On MTGA: </span><span style="margin-left: 10px; color: rgb(250, 229, 210);">${tou.current_opponent}</span><div class="copy_button copy_mtga"></div></div>`).appendTo(mainDiv);
 			$(`<div class="tou_opp"><span>On Discord: </span><span style="margin-left: 10px; color: rgb(250, 229, 210);">${tou.current_opponent_discord}</span><div class="copy_button copy_discord"></div></div>`).appendTo(mainDiv);
@@ -491,6 +492,9 @@ function open_tournament(t) {
 			return 0;
 		});
 
+		let desc = $(`<div class="tou_desc" style="align-self: center;">Points are updated only when a round ends.</div>`);
+		desc.appendTo(tab_cont_b);
+
 		let line = $('<div class="tou_stand_line_title line_dark"></div>');
 		$('<div class="tou_stand_name">Name</div><div class="tou_stand_cell">Points</div><div class="tou_stand_cell">Score</div><div class="tou_stand_cell">Matches</div><div class="tou_stand_cell">Games</div><div class="tou_stand_cell">OMW</div><div class="tou_stand_cell">GW</div><div class="tou_stand_cell">OGW</div>').appendTo(line);
 		line.appendTo(tab_cont_b);
@@ -579,7 +583,10 @@ function open_tournament(t) {
 		});
 
 		if (joined) {
-			$(".but_drop").click(function () {
+			$(".tou_reload").click(() => {
+				open_tournament(t);
+			});
+			$(".but_drop").click(() => {
 				ipc_send('tou_drop', tou._id);
 			});
 		}

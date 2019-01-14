@@ -2384,6 +2384,20 @@ a:hover {
     opacity: 1;
 }
 
+.tou_reload {
+    margin: auto;
+    cursor: pointer;
+    width: 28px;
+    height: 28px;
+    opacity: 0.5;
+    background: url(../images/refresh.png) no-repeat center;
+    -webkit-transition: all .2s ease-in-out;
+}
+
+.tou_reload:hover {
+    opacity: 1;
+}
+
 .tou_tabs_cont {
     width: 100%;
     height: 32px;
