@@ -302,13 +302,16 @@ function open_tournament(t) {
 		});
 	}
 	else {
-		if (joined) {
+		if (tou.state !== 4) {
 			$(`<div class="tou_reload"></div>`).appendTo(mainDiv);
+		}
+		if (joined) {
 			$(`<div class="tou_record green">${record}</div>`).appendTo(mainDiv);
-			$(`<div class="tou_opp"><span>On MTGA: </span><span style="margin-left: 10px; color: rgb(250, 229, 210);">${tou.current_opponent}</span><div class="copy_button copy_mtga"></div></div>`).appendTo(mainDiv);
-			$(`<div class="tou_opp"><span>On Discord: </span><span style="margin-left: 10px; color: rgb(250, 229, 210);">${tou.current_opponent_discord}</span><div class="copy_button copy_discord"></div></div>`).appendTo(mainDiv);
-
-			$(`<div class="tou_opp tou_opp_sub"><span class="last_seen_clock"></span></div></div>`).appendTo(mainDiv);
+			if (tou.state !== 4) {
+				$(`<div class="tou_opp"><span>On MTGA: </span><span style="margin-left: 10px; color: rgb(250, 229, 210);">${tou.current_opponent}</span><div class="copy_button copy_mtga"></div></div>`).appendTo(mainDiv);
+				$(`<div class="tou_opp"><span>On Discord: </span><span style="margin-left: 10px; color: rgb(250, 229, 210);">${tou.current_opponent_discord}</span><div class="copy_button copy_discord"></div></div>`).appendTo(mainDiv);
+				$(`<div class="tou_opp tou_opp_sub"><span class="last_seen_clock"></span></div></div>`).appendTo(mainDiv);
+			}
 
 			if (lastSeenInterval !== null)	clearInterval(lastSeenInterval);
 			if (tou.current_opponent_last !== tou.server_time) {
