@@ -378,9 +378,9 @@ function open_tournament(t) {
 				m = $('<div class="tou_match_cont top_5"></div>');	top_matches.push(m);	m.appendTo(tou_cont_a);
 				m = $('<div class="tou_match_cont top_6"></div>');	top_matches.push(m);	m.appendTo(tou_cont_a);
 			}
-			tou_cont_a.appendTo(top_cont);
-			tou_cont_b.appendTo(top_cont);
-			tou_cont_c.appendTo(top_cont);
+			if (tou.top >= 8)	tou_cont_a.appendTo(top_cont);
+			if (tou.top >= 4)	tou_cont_b.appendTo(top_cont);
+			if (tou.top >= 2)	tou_cont_c.appendTo(top_cont);
 			top_cont.appendTo(tab_cont_a);
 
 			tou['round_top'].forEach(function(match) {
