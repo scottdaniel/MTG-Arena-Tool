@@ -2,16 +2,16 @@ const nthLastIndexOf = require('./nth-last-index-of');
 const jsonText = require('./json-text');
 
 const CONNECTION_JSON_PATTERN =
-	'\\[(?:UnityCrossThreadLogger|Client GRE)\\]WebSocketClient (.*) WebSocketSharp\\.WebSocket connecting to .*: (.*)\\r\\n';
+	'\\[(?:UnityCrossThreadLogger|Client GRE)\\]WebSocketClient (.*) WebSocketSharp\\.WebSocket connecting to .*: (.*)(?:\\r\\n|\\n)';
 
 const LABEL_JSON_PATTERNS = [
-	'\\[Client GRE\\](.*): .*: (.*)\\r\\n\\[Message (.*)\\]',
-	'\\[Client GRE\\](.*): .*: (.*)\\r\\n',
-	'\\[UnityCrossThreadLogger\\](.*)[\r\n]{0,}\\(.*\\) Incoming (.*) ',
-	'\\[UnityCrossThreadLogger\\]Received unhandled GREMessageType:() (.*)\\r\\n'
+	'\\[Client GRE\\](.*): .*: (.*)(?:\\r\\n|\\n)\\[Message (.*)\\]',
+	'\\[Client GRE\\](.*): .*: (.*)(?:\\r\\n|\\n)',
+	'\\[UnityCrossThreadLogger\\](.*)[(?:\r\n|\n)]{0,}\\(.*\\) Incoming (.*) ',
+	'\\[UnityCrossThreadLogger\\]Received unhandled GREMessageType:() (.*)(?:\\r\\n|\\n)'
 ];
 
-const LABEL_ARROW_JSON_PATTERN = '\\[UnityCrossThreadLogger\\](.*)\\r\\n([<=]=[=>]) (.*)\\(.*\\):?\\r\\n';
+const LABEL_ARROW_JSON_PATTERN = '\\[UnityCrossThreadLogger\\](.*)(?:\\r\\n|\\n)([<=]=[=>]) (.*)\\(.*\\):?(?:\\r\\n|\\n)';
 
 const ALL_PATTERNS = [
 	CONNECTION_JSON_PATTERN,
@@ -90,9 +90,12 @@ function parseLogEntry(text, matchText, position) {
 			return ['partial'];
 		}
 
-		const textAfterJson = text.substr(jsonStart + jsonLen, 2);
+		let textAfterJson = text.substr(jsonStart + jsonLen, 2);
 		if (textAfterJson !== '\r\n') {
-			return ['partial'];
+			textAfterJson = text.substr(jsonStart + jsonLen, 1);
+			if (textAfterJson !== '\n') {
+				return ['partial'];
+			}
 		}
 
 		return ['full', matchText.length + jsonLen + textAfterJson.length, {
@@ -121,9 +124,12 @@ function parseLogEntry(text, matchText, position) {
 			return ['partial'];
 		}
 
-		const textAfterJson = text.substr(jsonStart + jsonLen, 2);
+		let textAfterJson = text.substr(jsonStart + jsonLen, 2);
 		if (textAfterJson !== '\r\n') {
-			return ['partial'];
+			textAfterJson = text.substr(jsonStart + jsonLen, 1);
+			if (textAfterJson !== '\n') {
+				return ['partial'];
+			}
 		}
 
 		return ['full', matchText.length + jsonLen + textAfterJson.length, {
