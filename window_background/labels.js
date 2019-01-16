@@ -13,7 +13,7 @@ function onLabelOutLogInfo(entry, json) {
 					oppWin += 1;
 			}
 			currentMatchTime += time;
-			saveMatch();
+			saveMatch(false);
 		}
 	}
 }

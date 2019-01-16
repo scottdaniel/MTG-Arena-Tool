@@ -1510,7 +1510,7 @@ function saveCourse(json) {
 }
 
 //
-function saveMatch() {
+function saveMatch(upload = true) {
 	if (currentMatchTime == 0) {
 		return;
 	}
@@ -1559,7 +1559,9 @@ function saveMatch() {
 
 	history[currentMatchId] = match;
 	history[currentMatchId].type = "match";
-	httpApi.httpSetMatch(match);
+	if (upload) {
+		httpApi.httpSetMatch(match);
+	}
 	requestHistorySend(0);
 	ipc_send("set_timer", 0, windowOverlay);
 	ipc_send("popup", {"text": "Match saved!", "time": 3000});
