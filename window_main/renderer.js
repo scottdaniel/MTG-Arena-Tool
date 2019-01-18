@@ -444,6 +444,9 @@ ipc.on('set_settings', function (event, arg) {
 	overlayAlpha = settings.overlay_alpha;
 	overlayAlphaBack = settings.overlay_alpha_back;
 	overlayScale = settings.overlay_scale;
+    if (overlayScale == undefined) {
+		overlayScale = 100;
+    }
     if (settings.cards_quality != undefined) {
         cardQuality = settings.cards_quality;
     }
