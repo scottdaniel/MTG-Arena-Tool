@@ -481,30 +481,32 @@ function open_economy_tab(loadMore) {
 			change.aetherizedCards.forEach(function(obj) {
 				var grpId = obj.grpId;
 				var card = cardsDb.get(grpId);
-				if (card && change.delta.cardsAdded.indexOf(grpId) == -1) {
-					var d = document.createElement("div");
-					d.classList.add("inventory_card");
-					d.style.width = "39px";
-	
-					var img = document.createElement("img");
-					img.classList.add("inventory_card_img");
-					img.classList.add("inventory_card_aetherized");
-					img.style.width = "39px";
-					img.src = "https://img.scryfall.com/cards"+card.images[cardQuality];
-	
-					d.appendChild(img);
-					flr.appendChild(d);
-	
-					var imgDom = $(img);
-					addCardHover(imgDom, card);
-	
-					imgDom.on('click', function() {
-						if (cardsDb.get(grpId).dfc == 'SplitHalf')	{
-							card = cardsDb.get(card.dfcId);
-						}
-						//let newname = card.name.split(' ').join('-');
-						shell.openExternal('https://scryfall.com/card/'+get_set_scryfall(card.set)+'/'+card.cid+'/'+card.name);
-					});
+				if (card && change.delta.cardsAdded) {
+					if (change.delta.cardsAdded.indexOf(grpId) == -1) {
+						var d = document.createElement("div");
+						d.classList.add("inventory_card");
+						d.style.width = "39px";
+		
+						var img = document.createElement("img");
+						img.classList.add("inventory_card_img");
+						img.classList.add("inventory_card_aetherized");
+						img.style.width = "39px";
+						img.src = "https://img.scryfall.com/cards"+card.images[cardQuality];
+		
+						d.appendChild(img);
+						flr.appendChild(d);
+		
+						var imgDom = $(img);
+						addCardHover(imgDom, card);
+		
+						imgDom.on('click', function() {
+							if (cardsDb.get(grpId).dfc == 'SplitHalf')	{
+								card = cardsDb.get(card.dfcId);
+							}
+							//let newname = card.name.split(' ').join('-');
+							shell.openExternal('https://scryfall.com/card/'+get_set_scryfall(card.set)+'/'+card.cid+'/'+card.name);
+						});
+					}
 				}
 			});
 		}
