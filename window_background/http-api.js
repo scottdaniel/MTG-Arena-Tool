@@ -377,8 +377,15 @@ function httpTournamentCheck(deck, opp, setCheck) {
 }
 
 function httpHeartbeat() {
+	heartbeatClear();
 	var _id = makeId(6);
 	httpAsync.push({'reqId': _id, 'method': 'heartbeat', 'method_path': '/heartbeat.php'});
+}
+
+function httpSetMythicRank(opp, rank) {
+	heartbeatClear();
+	var _id = makeId(6);
+	httpAsync.push({'reqId': _id, 'method': 'mythicrank', 'method_path': '/send_mythic_rank.php', 'opp': opp, 'rank': rank});
 }
 
 module.exports = {
@@ -400,5 +407,6 @@ module.exports = {
 	httpTournamentGet,
 	httpTournamentJoin,
 	httpTournamentDrop,
-	httpTournamentCheck
+	httpTournamentCheck,
+	httpSetMythicRank
 };
