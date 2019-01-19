@@ -23,11 +23,10 @@ If the last step worked, send the the .json file to [mtgatool@gmail.com](mailto:
 
 Close MTG Arena and MTG Arena tool, then start MTG Arena. Once MTG Arena is loaded run MTG Arena Tool again.
 
-### Stuck on 'please wait a minute' in Linux/OSX
+### Stuck on 'please wait a minute' (without loading %)
 
 Refer to this issue, the solution is on the comments;
 [github.com/Manuel-777/MTG-Arena-Tool/issues/112](https://github.com/Manuel-777/MTG-Arena-Tool/issues/112)
-
 
 ### If you have any other unexpected behaviour
 
