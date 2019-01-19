@@ -258,6 +258,7 @@ function open_decks_tab() {
 		d = document.createElement("div");
 		d.classList.add('list_deck_winrate');
 		wrTotal = 1 / wrTotal * wrTotalWins;
+        wrTotal = wrTotal || 0;
 
 		let colClass = getWinrateClass(wrTotal);
 		d.innerHTML = `Wins: ${wrTotalWins} / Losses: ${wrTotalLosses} (<span class="${colClass}_bright">${Math.round(wrTotal*100)}%</span>)`;
