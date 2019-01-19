@@ -22,6 +22,9 @@ let eventFilters = null;
 let onlyOwned = false;
 let exploreMode = 0;
 let filteredMana = [];
+let filteredranks = [];
+
+let ranks_list = ["Bronze", "Silver", "Gold", "Platinum", "Diamond", "Mythic"];
 
 const open_deck = require('./deck_details').open_deck;
 
@@ -66,8 +69,6 @@ function open_explore_tab(arg, loadMore) {
 
 		// Search box
 		var icd = $('<div class="explore_buttons_container"></div>');
-		var label = $('<label style="display: table; margin-top: 6px !important; color: #fae5d2;">Filter by event</label>');
-		label.appendTo(icd);
 		
 		var input = $('<div class="query_explore" style="margin-left: 16px;"></div>');
 		var select = $('<select id="query_select"></select>');
@@ -112,7 +113,7 @@ function open_explore_tab(arg, loadMore) {
 
 		input.appendTo(icd);
 
-		var manas = $('<div class="mana_filters_explore"><label>Filter by color:</label></div>');
+		var manas = $('<div class="mana_filters_explore"></div>');
 		var ms = ["w", "u", "b", "r", "g"];
 		ms.forEach(function(s, i) {
 			var mi = [1, 2, 3, 4, 5];
@@ -138,6 +139,32 @@ function open_explore_tab(arg, loadMore) {
 			});
 		});
 		manas.appendTo(icd);
+
+		var ranks_filters = $('<div class="mana_filters_explore"></div>');
+		ranks_list.forEach(function(rr, index) {
+			var mf = "";
+			if (!filteredranks.includes(rr)) {
+				mf = "rank_filter_on";
+			}
+			var rankbutton = $(`<div title="${rr}" class="rank_filter ${mf}" style="background-position: ${((index+1)*-16)}px 0px; background-image: url(../images/ranks_16.png)"></div>`);
+			//backgroundPosition = (get_rank_index_16(match.opponent.rank)*-16)+"px 0px";
+			rankbutton.appendTo(ranks_filters);
+			rankbutton.click(function() {
+				if (rankbutton.hasClass('rank_filter_on')) {
+					rankbutton.removeClass('rank_filter_on');
+					filteredranks.push(rr);
+				}
+				else {
+					rankbutton.addClass('rank_filter_on');
+					let n = filteredranks.indexOf(rr);
+					if (n > -1) {
+						filteredranks.splice(n, 1);
+					}
+				}
+				update_explore_filters();
+			});
+		});
+		ranks_filters.appendTo(icd);
 
 		let lab = add_checkbox($(icd), 'Only owned', 'settings_owned', onlyOwned, 'update_explore_filters()');
 		lab.css("margin-top", "6px");
@@ -188,6 +215,17 @@ function ladderLoadMore(loadMore, ownedWildcards) {
 			filteredMana.forEach((i) => {
 				if (!_deck.colors.includes(i)) {
 					filterOut = true;
+				}
+			});
+
+			if (filterOut)	continue;
+		}
+
+		if (filteredranks.length > 0) {
+			let filterOut = true;
+			filteredranks.forEach((rr) => {
+				if (_deck.rank == rr) {
+					filterOut = false;
 				}
 			});
 

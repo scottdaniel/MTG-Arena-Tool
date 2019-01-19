@@ -1490,12 +1490,24 @@ a:hover {
     margin-left: 20px;
 }
 
-.mana_filter:hover, .mana_filter_search:hover, .mana_filters_explore:hover {
-    opacity: 0.9;
+.mana_filter:hover, .mana_filter_search:hover, .mana_filters_explore:hover, .rank_filter:hover {
+    opacity: 1;
 }
 
-.mana_filter_on {
+.mana_filter_on, .rank_filter_on {
     opacity: 0.3;
+}
+
+.rank_filter {
+    display: inline-block;
+    background-repeat: no-repeat;
+    width: 16px;
+    padding: 0px 6px;
+    height: 16px;
+    cursor: pointer;
+    background-clip: content-box;
+    background-origin: content-box;
+    -webkit-transition: all .3s ease-in-out; 
 }
 
 .input_container_inventory {
