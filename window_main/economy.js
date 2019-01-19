@@ -481,7 +481,7 @@ function open_economy_tab(loadMore) {
 			change.aetherizedCards.forEach(function(obj) {
 				var grpId = obj.grpId;
 				var card = cardsDb.get(grpId);
-				if (card && (obj.goldAwarded > 0 || obj.gemsAwarded > 0)) {
+				if (card && change.delta.cardsAdded.indexOf(grpId) == -1) {
 					var d = document.createElement("div");
 					d.classList.add("inventory_card");
 					d.style.width = "39px";
