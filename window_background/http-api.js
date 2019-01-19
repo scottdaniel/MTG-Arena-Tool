@@ -239,13 +239,23 @@ function removeFromHttp(req) {
 	});
 }
 
+function heartbeatClear() {
+	httpAsync.forEach( function(h, i) {
+		if (h.method == "heartbeat") {
+			httpAsync.splice(i, 1);
+		}
+	});
+}
+
 function httpAuth(user, pass) {
+	heartbeatClear();
 	var _id = makeId(6);
 	playerUsername = user;
 	httpAsync.push({'reqId': _id, 'method': 'auth', 'method_path': '/login.php', 'email': user, 'password': pass, 'playerid': playerId, 'playername': playerName, 'mtgaversion': arenaVersion, 'version': window.electron.remote.app.getVersion()});
 }
 
 function httpSubmitCourse(course) {
+	heartbeatClear();
 	var _id = makeId(6);
 	if (store.get("settings").anon_explore == true) {
 		course.PlayerId = "000000000000000";
@@ -256,94 +266,111 @@ function httpSubmitCourse(course) {
 }
 
 function httpSetPlayer() {
+	//heartbeatClear();
 	// useless I think
 	//var _id = makeId(6);
 	//httpAsync.push({'reqId': _id, 'method': 'set_player', 'name': name, 'rank': rank, 'tier': tier});
 }
 
 function httpGetTopDecks(query, collection) {
+	heartbeatClear();
 	var _id = makeId(6);
 	collection = JSON.stringify(collection);
 	httpAsync.push({'reqId': _id, 'method': 'get_top_decks', 'method_path': '/get_courses_list.php', 'query': query, 'collection': collection});
 }
 
 function httpGetTopLadderDecks() {
+	heartbeatClear();
 	var _id = makeId(6);
 	httpAsync.push({'reqId': _id, 'method': 'get_ladder_decks', 'method_path': '/top_ladder.json'});
 }
 
 function httpGetCourse(courseId) {
+	heartbeatClear();
 	var _id = makeId(6);
 	httpAsync.push({'reqId': _id, 'method': 'get_course', 'method_path': '/get_course.php', 'courseid': courseId});
 }
 
 function httpSetMatch(match) {
+	heartbeatClear();
 	var _id = makeId(6);
 	match = JSON.stringify(match);
 	httpAsync.push({'reqId': _id, 'method': 'set_match', 'method_path': '/send_match.php', 'match': match});
 }
 
 function httpSetDraft(draft) {
+	heartbeatClear();
 	var _id = makeId(6);
 	draft = JSON.stringify(draft);
 	httpAsync.push({'reqId': _id, 'method': 'set_draft', 'method_path': '/send_draft.php', 'draft': draft});
 }
 
 function httpSetEconomy(change) {
+	heartbeatClear();
 	var _id = makeId(6);
 	change = JSON.stringify(change);
 	httpAsync.push({'reqId': _id, 'method': 'set_economy', 'method_path': '/send_economy.php', 'change': change});
 }
 
 function httpSendError(error) {
+	heartbeatClear();
 	var _id = makeId(6);
 	error = JSON.stringify(error);
 	httpAsync.push({'reqId': _id, 'method': 'send_error', 'method_path': '/send_error.php', 'error': error});
 }
 
 function httpDeleteData() {
+	heartbeatClear();
 	var _id = makeId(6);
 	httpAsync.push({'reqId': _id, 'method': 'delete_data', 'method_path': '/delete_data.php'});
 }
 
 function httpGetDatabase() {
+	heartbeatClear();
 	var _id = makeId(6);
 	ipc_send("popup", {"text": "Downloading metadata", "time": 0});
 	httpAsync.push({'reqId': _id, 'method': 'get_database'});
 }
 
 function htttpGetStatus() {
+	heartbeatClear();
 	var _id = makeId(6);
 	httpAsync.push({'reqId': _id, 'method': 'get_status'});
 }
 
 function httpDraftShareLink(did, exp) {
+	heartbeatClear();
 	var _id = makeId(6);
 	httpAsync.push({'reqId': _id, 'method': 'share_draft', 'method_path': '/get_share_draft.php', 'id': did, 'expire': exp});
 }
 
 function httpTournamentList() {
+	heartbeatClear();
 	var _id = makeId(6);
 	httpAsync.push({'reqId': _id, 'method': 'tou_list', 'method_path': '/tournament_list.php'});
 }
 
 function httpTournamentGet(tid) {
+	heartbeatClear();
 	var _id = makeId(6);
 	httpAsync.push({'reqId': _id, 'method': 'tou_get', 'method_path': '/tournament_get.php', 'id': tid});
 }
 
 function httpTournamentJoin(tid, _deck) {
+	heartbeatClear();
 	let _id = makeId(6);
 	let deck = JSON.stringify(decks[_deck]);
 	httpAsync.push({'reqId': _id, 'method': 'tou_join', 'method_path': '/tournament_join.php', 'id': tid, 'deck': deck});
 }
 
 function httpTournamentDrop(tid) {
+	heartbeatClear();
 	var _id = makeId(6);
 	httpAsync.push({'reqId': _id, 'method': 'tou_drop', 'method_path': '/tournament_drop.php', 'id': tid});
 }
 
 function httpTournamentCheck(deck, opp, setCheck) {
+	heartbeatClear();
 	var _id = makeId(6);
 	deck = JSON.stringify(deck);
 	httpAsync.push({'reqId': _id, 'method': 'tou_check', 'method_path': '/check_match.php', 'deck': deck, 'opp': opp, 'setcheck': setCheck});
