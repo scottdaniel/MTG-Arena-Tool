@@ -83,6 +83,11 @@ function open_tournaments_tab(arg, opentab = true) {
 		div.classList.add("tou_container");
 		div.id = tou._id;
 
+		let stat = document.createElement("div");
+		stat.classList.add("top_status");
+		if (tou.state == -1)		stat.classList.add("status_red");
+		else if (tou.state == 4)	stat.classList.add("status_black");
+		else						stat.classList.add("status_green");
 
 		let sd = tou.signupDuration;
 		let rd = tou.roundDuration;
@@ -154,6 +159,7 @@ function open_tournaments_tab(arg, opentab = true) {
 		pln.style.width = "200px";
 		pln.innerHTML = stateb;
 
+		div.appendChild(stat);
 		div.appendChild(nam);
 		div.appendChild(fo);
 		div.appendChild(st);
@@ -626,6 +632,9 @@ function generateChecks(state, game, seat) {
 		}
 		else {
 			ch = $(`<div title="${ss == seat ? 'You' : tou.current_opponent.slice(0, -6)}" class="tou_check black_bright_bg"></div>`);
+		}
+		if (ss == 1) {
+			ch.css("margin-right", "16px");
 		}
 		ch.appendTo(checks);
 	});

@@ -42,6 +42,10 @@ span i {
     background-image: url(../images/status_red.png);
 }
 
+.status_black {
+    background-image: url(../images/status_black.png);
+}
+
 .top_logo_about {
     cursor: pointer;
     align-self: center;
