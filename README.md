@@ -46,6 +46,7 @@ MTG Arena Tool is developed using Electron JS, To get started simply clone this 
 
 ```
 git clone https://github.com/Manuel-777/MTG-Arena-Tool
+cd MTG-Arena-Tool
 npm install
 npm start
 ```

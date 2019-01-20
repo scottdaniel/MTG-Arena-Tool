@@ -24,7 +24,7 @@ body {
 }
 
 label {
-    font-family: var(--main-font-name);
+    font-family: "Roboto";
     color: rgba(250, 229, 210, 1);
     margin: auto 0;
 }

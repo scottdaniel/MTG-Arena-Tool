@@ -315,6 +315,7 @@ function ladderLoadMore(loadMore, ownedWildcards) {
 		var flr = document.createElement("div");
 		flr.classList.add("flex_item");
 		flr.style.flexDirection = "column";
+		flr.style.justifyContent = "center";
 		flr.style.width = '40%';
 
 		var flt = document.createElement("div");
@@ -344,13 +345,14 @@ function ladderLoadMore(loadMore, ownedWildcards) {
 		d = document.createElement("div");
 		d.classList.add("list_deck_record");
 		let colClass = getWinrateClass(1/_deck.t*_deck.w);
-		d.innerHTML = `'Wins: ${_deck.w} / Losses: ${_deck.l} <span class="${colClass}_bright">(${Math.round(100/_deck.t*_deck.w)}%)</span>`;
+		d.innerHTML = `${_deck.w}:${_deck.l} <span class="${colClass}_bright">(${Math.round(100/_deck.t*_deck.w)}%)</span>`;
 		flr.appendChild(d);
 
 		let rcont = document.createElement("div");
 		rcont.style.marginLeft = 'auto';
 		var pr = document.createElement("div");
 		pr.classList.add("ranks_16");
+		pr.style.marginTop = "4px";
 		pr.style.backgroundPosition = (get_rank_index_16(_deck.rank)*-16)+"px 0px";
 		pr.title = _deck.rank;
 
@@ -492,6 +494,7 @@ function exploreLoadMore(loadMore, ownedWildcards) {
 		var flr = document.createElement("div");
 		flr.classList.add("flex_item");
 		flr.style.flexDirection = "column";
+		flr.style.justifyContent = "center";
 		flr.style.width = '40%';
 
 		var flt = document.createElement("div");
@@ -520,7 +523,9 @@ function exploreLoadMore(loadMore, ownedWildcards) {
 
 		d = document.createElement("div");
 		d.classList.add("list_deck_record");
-		d.innerHTML = _deck.wins+' - '+_deck.losses;
+
+		let colClass = getWinrateClass(1/(_deck.wins+_deck.losses)*_deck.wins);
+		d.innerHTML = `${_deck.wins}:${_deck.losses} <span class="${colClass}_bright">(${Math.round(100/(_deck.wins+_deck.losses)*_deck.wins)}%)</span>`;
 		flr.appendChild(d);
 
 		d = document.createElement("div");

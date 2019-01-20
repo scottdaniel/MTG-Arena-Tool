@@ -654,6 +654,10 @@ function onLabelEventMatchCreated(entry, json) {
 	if (!json)	return;
 	matchBeginTime = parseWotcTime(entry.timestamp);
 
+	if (entry.opponentRankingClass == "Mythic") {
+		httpApi.httpSetMythicRank(entry.opponentScreenName, entry.opponentMythicLeaderboardPlace);
+	}
+
 	ipc_send("ipc_log", "MATCH CREATED: "+matchBeginTime);
 	if (json.eventId != "NPE") {
 		createMatch(json);

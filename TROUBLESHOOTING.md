@@ -1,5 +1,24 @@
 This is meant as a guide to help you locate and resolve the most common issues running MTG Arena Tool. **Please** only follow these steps if you encounter one of the issues mentioned.
 
+### Stuck on 'please wait a minute' (without loading %)
+
+Refer to this issue, the solution is on the comments;
+[github.com/Manuel-777/MTG-Arena-Tool/issues/112](https://github.com/Manuel-777/MTG-Arena-Tool/issues/112)
+
+### Overlay is a black or white box
+
+Change the 'Overlay Scale' and 'Overlay transparency' settings to any value, then restart mtgatool.
+
+### Overlay is not visible, but visible in the taskbar (offscreen)
+Use `Alt+Tab` to switch to the off-screen application.
+Press `Alt+SPACE` to bring up the system menu (you won't see it because it is off screen)
+Press `R` to select the "Restore" menu choice to ensure the windows isn't maximized (you cannot move it if it is maximized)
+Press `Alt+SPACE` again, then M to select the "Move" menu choice.
+Press one of the arrow keys to initiate the movement.
+Now just use the mouse to place the window where you want.
+
+[Link](https://superuser.com/questions/53585/how-to-move-windows-that-open-up-offscreen)
+
 ### If the app freezes in loading "Just a second" page:
 This is probably caused by an error reading the user configuration, probably due to an unhandled exception or new data added from MTGA that mtgatool is not handling properly. Bear in mind this issue is **not** because of a bad or improper installation, so reinstalling will make no difference. Altrough, you can roll back to a previous version safely if an update caused it.
 
@@ -22,11 +41,6 @@ If the last step worked, send the the .json file to [mtgatool@gmail.com](mailto:
 ### If you recieve a "No log file found" error
 
 Close MTG Arena and MTG Arena tool, then start MTG Arena. Once MTG Arena is loaded run MTG Arena Tool again.
-
-### Stuck on 'please wait a minute' (without loading %)
-
-Refer to this issue, the solution is on the comments;
-[github.com/Manuel-777/MTG-Arena-Tool/issues/112](https://github.com/Manuel-777/MTG-Arena-Tool/issues/112)
 
 ### If you have any other unexpected behaviour
 

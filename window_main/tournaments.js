@@ -25,6 +25,8 @@ let originalDeck = null;
 let tou = null;
 let listInterval = [];
 
+let touStates = {};
+
 // Should separate these two into smaller functions
 function open_tournaments_tab(arg, opentab = true) {
 	let mainDiv = document.getElementById("ux_0");
@@ -81,6 +83,11 @@ function open_tournaments_tab(arg, opentab = true) {
 		div.classList.add("tou_container");
 		div.id = tou._id;
 
+		let stat = document.createElement("div");
+		stat.classList.add("top_status");
+		if (tou.state == -1)		stat.classList.add("status_red");
+		else if (tou.state == 4)	stat.classList.add("status_black");
+		else						stat.classList.add("status_green");
 
 		let sd = tou.signupDuration;
 		let rd = tou.roundDuration;
@@ -152,6 +159,7 @@ function open_tournaments_tab(arg, opentab = true) {
 		pln.style.width = "200px";
 		pln.innerHTML = stateb;
 
+		div.appendChild(stat);
 		div.appendChild(nam);
 		div.appendChild(fo);
 		div.appendChild(st);
@@ -321,6 +329,10 @@ function open_tournament(t) {
 					$('.last_seen_clock').html(`Last seen ${toHHMMSS(diff)} ago.`)
 				}, 250);
 			}
+
+			let checks = $(`<div class="tou_checks"></div>`);
+			generateChecks(tou.current_check, tou.current_game, tou.current_seat).appendTo(checks);
+			checks.appendTo(mainDiv);
 
 			$('.copy_mtga').click(() => {
 				pop("Copied to clipboard", 1000);
@@ -602,6 +614,34 @@ function open_tournament(t) {
 	});
 }
 
+function set_tou_state(state) {
+	touStates[state.tid] = state;
+	if (state.tid == tou._id) {
+		$('.tou_checks').html('');
+		$('.tou_checks').append(generateChecks(state.check, state.game, state.seat));
+	}
+}
+
+function generateChecks(state, game, seat) {
+	let checks = $('<div class="tou_check_cont"></div>');
+	state.forEach((c, index) => {
+		let ch;
+		let ss = index % 2;
+		if (Math.floor(index / 2) <= game) {
+			ch = $(`<div title="${ss == seat ? 'You' : tou.current_opponent.slice(0, -6)}" class="tou_check ${c ? 'green_bright_bg' : 'red_bright_bg'}"></div>`);
+		}
+		else {
+			ch = $(`<div title="${ss == seat ? 'You' : tou.current_opponent.slice(0, -6)}" class="tou_check black_bright_bg"></div>`);
+		}
+		if (ss == 1) {
+			ch.css("margin-right", "16px");
+		}
+		ch.appendTo(checks);
+	});
+
+	return checks;
+}
+
 function selectTourneyDeck() {
 	tournamentDeck = document.getElementById("deck_select").value;
 	decks.forEach((_deck) => {
@@ -707,5 +747,6 @@ function moveCard(_cardTile) {
 
 module.exports = {
     open_tournaments_tab: open_tournaments_tab,
-    open_tournament: open_tournament
+    open_tournament: open_tournament,
+    set_tou_state: set_tou_state
 }
