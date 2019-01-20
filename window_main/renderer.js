@@ -723,6 +723,7 @@ $(document).ready(function() {
 				pass = sha1(pass);
 			}
 			ipc_send("login", {username: user, password: pass});
+			canLogin = false;
 		}
 	});
 
