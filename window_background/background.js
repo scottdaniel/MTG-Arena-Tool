@@ -692,6 +692,7 @@ function updateSettings(_settings, relay) {
 	if (_settings.overlay_deck  == undefined) _settings.overlay_deck  = true;
 	if (_settings.overlay_clock == undefined) _settings.overlay_clock = true;
 	if (_settings.overlay_ontop == undefined) _settings.overlay_ontop = true;
+	if (_settings.overlay_scale == undefined) _settings.overlay_scale = 100;
 
 	ipc_send("overlay_set_ontop", _settings.overlay_ontop);
 
