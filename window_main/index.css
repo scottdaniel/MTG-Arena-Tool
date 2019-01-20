@@ -378,7 +378,7 @@ span i {
     line-height: 32px;
     vertical-align: middle;
     text-align: right;
-    font-family: Mplantin;
+    font-family: var(--main-font-name);
     font-size: 16px;
     color: rgba(183, 200, 158, 1);
 }
@@ -402,7 +402,8 @@ span i {
     margin-right: 26px;
     margin-left: auto;
     line-height: 40px;
-    font-family: Mplantin-italic;
+    font-family:  var(--main-font-name-it);
+    font-style:  var(--main-font-style-it);
     text-align: right;
     font-size: 16px;
     color: rgba(183, 200, 158, 1);
@@ -413,7 +414,8 @@ span i {
     margin-right: 26px;
     margin-left: auto;
     line-height: 40px;
-    font-family: Mplantin-italic;
+    font-family:  var(--main-font-name-it);
+    font-style:  var(--main-font-style-it);
     text-align: right;
     font-size: 16px;
     color: rgba(221, 130, 99, 1);
@@ -426,7 +428,8 @@ span i {
     line-height: 32px;
     vertical-align: middle;
     text-align: right;
-    font-family: Mplantin-italic;
+    font-family:  var(--main-font-name-it);
+    font-style:  var(--main-font-style-it);
     font-size: 16px;
     color: rgba(250, 229, 210, 1);
 }
@@ -436,7 +439,8 @@ span i {
     margin-right: 8px;
     margin-left: auto;
     line-height: 22px;
-    font-family: Mplantin-italic;
+    font-family:  var(--main-font-name-it);
+    font-style:  var(--main-font-style-it);
     text-align: right;
     font-size: 16px;
     color: rgba(250, 229, 210, 0.5);
@@ -444,7 +448,7 @@ span i {
 
 
 .list_match_result_win {
-    font-family: Mplantin;
+font-family:  var(--main-font-name);
     font-size: 20px;
     line-height: 64px;
     margin-right: 8px;
@@ -453,14 +457,15 @@ span i {
 
 .list_match_result_loss {
     line-height: 64px;
-    font-family: Mplantin;
+    font-family:  var(--main-font-name);
     font-size: 20px;
     margin-right: 8px;
     color: rgba(221, 130, 99, 1);
 }
 
 .list_match_result_score {
-    font-family: Mplantin-italic;
+font-family:  var(--main-font-name-it);
+font-style:  var(--main-font-style-it);
     font-size: 20px;
     line-height: 64px;
     margin-right: 32px;
@@ -471,7 +476,8 @@ span i {
     -webkit-user-select: none;
     align-self: center;
     margin-left: 16px;
-    font-family: Mplantin-italic;
+    font-family:  var(--main-font-name-it);
+    font-style:  var(--main-font-style-it);
     color: #FAE5D2;
 }
 
@@ -479,7 +485,8 @@ span i {
     -webkit-user-select: none;
     align-self: center;
     margin-right: 16px;
-    font-family: Mplantin-italic;
+    font-family:  var(--main-font-name-it);
+    font-style:  var(--main-font-style-it);
     color: #FAE5D2;
 }
 
@@ -511,7 +518,8 @@ span i {
     line-height: 32px;
     vertical-align: middle;
     text-align: right;
-    font-family: Mplantin-italic;
+    font-family:  var(--main-font-name-it);
+    font-style:  var(--main-font-style-it);
     font-size: 16px;
     color: rgba(250, 229, 210, 1);
 }
@@ -608,7 +616,7 @@ a:hover {
 }
 
 .message_unlink {
-    background-image: url("../images/unlink_big.png"); 
+    background-image: url("../images/unlink_big.png");
     margin-bottom: 32px;
     align-self: center;
     width: 128px;
@@ -627,7 +635,7 @@ a:hover {
 
 .message_big {
     font-size: 32px;
-    font-family: Mplantin;
+    font-family:  var(--main-font-name);
     text-align: center;
     margin-bottom: 6px;
 }
@@ -635,7 +643,8 @@ a:hover {
 .message_sub {
     font-size: 20px;
     opacity: 0.9;
-    font-family: Mplantin-italic;
+    font-family:  var(--main-font-name-it);
+    font-style:  var(--main-font-style-it);
     text-align: center;
     margin-bottom: 6px;
 }
@@ -643,7 +652,8 @@ a:hover {
 .message_sub_16 {
     font-size: 16px;
     opacity: 0.9;
-    font-family: Mplantin-italic;
+    font-family:  var(--main-font-name-it);
+    font-style:  var(--main-font-style-it);
     text-align: center;
     margin-bottom: 6px;
 }
@@ -651,7 +661,8 @@ a:hover {
 .message_sub_15 {
     font-size: 15px;
     opacity: 0.9;
-    font-family: Mplantin-italic;
+    font-family:  var(--main-font-name-it);
+    font-style:  var(--main-font-style-it);
     text-align: center;
     margin-bottom: 6;
 }
@@ -659,7 +670,8 @@ a:hover {
 .message_updates {
     font-size: 18px;
     opacity: 0.9;
-    font-family: Mplantin-italic;
+    font-family:  var(--main-font-name-it);
+    font-style:  var(--main-font-style-it);
     text-align: center;
     margin-top: 6;
     margin-bottom: 6;
@@ -732,7 +744,8 @@ a:hover {
     margin-left: 8px;
     margin-right: 16px;
     color: #FAE5D2;
-    font-family: Mplantin-italic;
+    font-family:  var(--main-font-name-it);
+    font-style:  var(--main-font-style-it);
     opacity: 0.5;
 }
 
@@ -743,7 +756,8 @@ a:hover {
     text-align: right;
     margin-right: 16px;
     color: #FAE5D2;
-    font-family: Mplantin-italic;
+    font-family:  var(--main-font-name-it);
+    font-style:  var(--main-font-style-it);
     opacity: 0.5;
 }
 
@@ -953,7 +967,7 @@ a:hover {
     text-align: center;
     display: block;
     margin-bottom: 12px;
-    font-family: 'Mplantin';
+    font-family:  var(--main-font-name);
     font-size: 16px;
     color: #FAE5D2;
 }
@@ -973,7 +987,7 @@ a:hover {
 }
 
 .wc_cost {
-    font-family: Mplantin;
+font-family:  var(--main-font-name);
     text-indent: 48px;
     color: #FAE5D2;
     width: 96px;
@@ -985,7 +999,7 @@ a:hover {
 }
 
 .wc_explore_cost {
-    font-family: Mplantin;
+font-family:  var(--main-font-name);
     color: #FAE5D2;
     width: 40px;
     line-height: 80px;
@@ -996,7 +1010,7 @@ a:hover {
 }
 
 .bo_explore_cost {
-    font-family: Mplantin;
+font-family:  var(--main-font-name);
     color: #FAE5D2;
     width: 40px;
     line-height: 80px;
@@ -1353,7 +1367,7 @@ a:hover {
 }
 
 .economy_day_stats {
-    font-family: 'Mplantin';
+font-family:  var(--main-font-name);
     font-size: 16px;
     margin: auto 16px auto auto;
 }
@@ -1507,7 +1521,7 @@ a:hover {
     cursor: pointer;
     background-clip: content-box;
     background-origin: content-box;
-    -webkit-transition: all .3s ease-in-out; 
+    -webkit-transition: all .3s ease-in-out;
 }
 
 .input_container_inventory {
@@ -1546,7 +1560,7 @@ a:hover {
     width: 100%;
     font-size: 14px;
     user-select: none;
-    font-family: Mplantin;
+    font-family:  var(--main-font-name);
     padding-left: 4px;
 }
 
@@ -1572,7 +1586,7 @@ a:hover {
     width: 100%;
     font-size: 14px;
     user-select: none;
-    font-family: Mplantin;
+    font-family:  var(--main-font-name);
     padding-left: 4px;
 }
 
@@ -1591,7 +1605,8 @@ a:hover {
 }
 
 .settings_title {
-    font-family: "Mplantin";
+font-family:  var(--main-font-name-it);
+font-style:  var(--main-font-style-it);
     font-size: 20px;
     border-bottom: solid rgba(250, 229, 210, 0.28) 2px;
     color: #fae5d2;
@@ -1706,7 +1721,8 @@ a:hover {
     line-height: 20px;
     vertical-align: middle;
     text-align: center;
-    font-family: Mplantin-italic;
+    font-family:  var(--main-font-name-it);
+    font-style:  var(--main-font-style-it);
     font-size: 20px;
     color: rgba(250, 229, 210, 1);
 }
@@ -1775,7 +1791,7 @@ a:hover {
     overflow: unset;
     -webkit-appearance: none;
     appearance: none;
-    width: 100%; 
+    width: 100%;
     border-radius: 16px;
     height: 12px;
     background: rgba(255, 255, 255, 0.6);
@@ -1790,13 +1806,13 @@ a:hover {
 }
 
 .slider::-webkit-slider-thumb {
-    -webkit-appearance: none; 
+    -webkit-appearance: none;
     appearance: none;
     width: 24px;
     height: 24px;
     border-radius: 12px;
     background: rgba(183, 200, 158, 1);
-    cursor: pointer; 
+    cursor: pointer;
 }
 
 .draft_nav_container {
@@ -1956,7 +1972,8 @@ a:hover {
     width: 100%;
     font-size: 16px;
     user-select: none;
-    font-family: Mplantin;
+    font-family:  var(--main-font-name-it);
+    font-style:  var(--main-font-style-it);
     margin-right: 16px;
     padding-left: 4px;
     color: #33281e;
@@ -2086,7 +2103,7 @@ a:hover {
 }
 
 .select-styled {
-    position: absolute; 
+    position: absolute;
     border-radius: 6px;
     top: 0;
     right: 0;
@@ -2251,7 +2268,7 @@ a:hover {
 }
 
 .delete_item {
-    width: 4px; 
+    width: 4px;
     margin-left: 8px;
     overflow: hidden;
     background: #DD8263 url(../images/delete.png) no-repeat left;
