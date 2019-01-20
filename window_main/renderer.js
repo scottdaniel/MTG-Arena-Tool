@@ -1954,7 +1954,7 @@ function open_settings(openSection) {
 
 	var about = $('<div class="about"></div>');
 	about.append('<div class="top_logo_about"></div>');
-	about.append('<div class="message_sub_15 white">By Manuel Etchegaray, 2018</div>');
+	about.append('<div class="message_sub_15 white">By Manuel Etchegaray, 2019</div>');
 	about.append('<div class="message_sub_15 white">Version '+remote.app.getVersion()+'</div>');
 
 	if (updateState.state == 0) {
