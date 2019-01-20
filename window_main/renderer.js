@@ -28,6 +28,7 @@ const remote 	= require('electron').remote;
 
 const open_tournaments_tab 		= require('./tournaments').open_tournaments_tab;
 const open_tournament 			= require('./tournaments').open_tournament;
+const set_tou_state 			= require('./tournaments').set_tou_state;
 const open_deck 				= require('./deck_details').open_deck
 const open_decks_tab 			= require('./decks').open_decks_tab;
 const open_history_tab			= require('./history').open_history_tab;
@@ -153,6 +154,10 @@ ipc.on('set_discord_tag', (event, arg) => {
 	if (sidebarActive == -1) {
 		ipc_send('request_tou_list', true);
 	}
+});
+
+ipc.on('set_tou_state', (event, arg) => {
+	set_tou_state(arg);
 });
 
 //

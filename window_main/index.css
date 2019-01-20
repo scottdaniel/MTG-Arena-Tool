@@ -532,6 +532,10 @@ span i {
     -webkit-transition: all .2s ease-in;
 }
 
+.black_bright {
+    color: #A18E87 !important;  
+}
+
 .green_bright {
     color: #D3EBB0 !important;
 }
@@ -554,6 +558,34 @@ span i {
 
 .white_bright {
     color: #FAE5D2 !important;
+}
+
+.black_bright_bg {
+    background-color: #A18E87 !important;  
+}
+
+.green_bright_bg {
+    background-color: #D3EBB0 !important;
+}
+
+.blue_bright_bg {
+    background-color: #BDD6FF !important;
+}
+
+.orange_bright_bg {
+    background-color: #FFBA85 !important;
+}
+
+.red_bright_bg {
+    background-color: #FF9B78 !important;
+}
+
+.yellow_bright_bg {
+    background-color: #FFDF9E !important;
+}
+
+.white_bright_bg {
+    background-color: #FAE5D2 !important;
 }
 
 .green {
@@ -2305,6 +2337,22 @@ a:hover {
 .tournament_list_cont {
     margin: 16px;
     overflow: auto;
+}
+
+.tou_check_cont {
+    display: flex;
+}
+
+.tou_checks {
+    justify-content: center;
+    display: flex;
+    margin: 8px 0 12px 0;
+}
+
+.tou_check {
+    width: 32px;
+    margin: 0 1px;
+    height: 8px;
 }
 
 .tou_container {
