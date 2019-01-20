@@ -315,6 +315,7 @@ function ladderLoadMore(loadMore, ownedWildcards) {
 		var flr = document.createElement("div");
 		flr.classList.add("flex_item");
 		flr.style.flexDirection = "column";
+		flr.style.justifyContent = "center";
 		flr.style.width = '40%';
 
 		var flt = document.createElement("div");
@@ -351,6 +352,7 @@ function ladderLoadMore(loadMore, ownedWildcards) {
 		rcont.style.marginLeft = 'auto';
 		var pr = document.createElement("div");
 		pr.classList.add("ranks_16");
+		pr.style.marginTop = "4px";
 		pr.style.backgroundPosition = (get_rank_index_16(_deck.rank)*-16)+"px 0px";
 		pr.title = _deck.rank;
 
@@ -492,6 +494,7 @@ function exploreLoadMore(loadMore, ownedWildcards) {
 		var flr = document.createElement("div");
 		flr.classList.add("flex_item");
 		flr.style.flexDirection = "column";
+		flr.style.justifyContent = "center";
 		flr.style.width = '40%';
 
 		var flt = document.createElement("div");

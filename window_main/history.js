@@ -403,7 +403,7 @@ function renderRanksStats(div) {
 	let expected = getStepsUntilNextRank(seasonView, lastWinrate/100);
 	t = document.createElement("div");
 	t.classList.add("ranks_history_title");
-	t.innerHTML = `Games until ${getNextRank(seasonView)}: ~${expected}`;
+	t.innerHTML = `Games until ${getNextRank(seasonView)}: ${expected}`;
 	div.appendChild(t);
 
 
@@ -462,7 +462,7 @@ function getStepsUntilNextRank(mode, winrate) {
 		n++;
 	}
 
-	return n;
+	return '~'+n;
 }
 
 function addShare(_match) {

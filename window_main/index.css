@@ -140,13 +140,14 @@ span i {
     height: 32px;
     border-radius: 3px;
     color: #fae5d2 !important;
-    font-size: 18px;
+    font-size: 16px;
     text-align: center;
     line-height: 32px;
     border: 1px solid rgba(250, 226, 210, 0.5);
     background-color: rgba(145, 121, 97, 0.4);
     /* box-shadow: 0px 2px 5px 0px rgba(0, 0, 0, 0.8); */
     -webkit-transition: all .1s ease-in;
+    font-family: 'Lato';
 }
 
 .button_simple_disabled {
@@ -156,13 +157,14 @@ span i {
     width: 200px;
     height: 32px;
     border-radius: 3px;
-    font-size: 18px;
+    font-size: 16px;
     text-align: center;
     line-height: 32px;
     border: 1px solid rgba(250, 226, 210, 0.5);
     background-color: rgba(145, 121, 97, 0.4);
     -webkit-transition: all .1s ease-in;
     color: rgba(250, 229, 210, 0.4);
+    font-family: 'Lato';
 }
 
 .disabled:hover {
@@ -177,7 +179,7 @@ span i {
     /*width: 120px !important;*/
     height: 24px !important;
     line-height: 24px !important;
-    font-size: 16px !important;
+    font-size: 14px !important;
 }
 
 .button_long {
@@ -186,7 +188,7 @@ span i {
     width: 240px !important;
     height: 28px !important;
     line-height: 28px !important;
-    font-size: 16px !important;
+    font-size: 14px !important;
 }
 
 .button_simple:hover {
@@ -382,7 +384,7 @@ span i {
     line-height: 32px;
     vertical-align: middle;
     text-align: right;
-    font-family: Mplantin;
+    font-family: 'Roboto';
     font-size: 16px;
     color: rgba(183, 200, 158, 1);
 }
@@ -406,7 +408,8 @@ span i {
     margin-right: 26px;
     margin-left: auto;
     line-height: 40px;
-    font-family: Mplantin-italic;
+    font-family: 'Roboto';
+    font-style: italic;
     text-align: right;
     font-size: 16px;
     color: rgba(183, 200, 158, 1);
@@ -417,7 +420,8 @@ span i {
     margin-right: 26px;
     margin-left: auto;
     line-height: 40px;
-    font-family: Mplantin-italic;
+    font-family: 'Roboto';
+    font-style: italic;
     text-align: right;
     font-size: 16px;
     color: rgba(221, 130, 99, 1);
@@ -430,7 +434,8 @@ span i {
     line-height: 32px;
     vertical-align: middle;
     text-align: right;
-    font-family: Mplantin-italic;
+    font-family: 'Roboto';
+    font-style: italic;
     font-size: 16px;
     color: rgba(250, 229, 210, 1);
 }
@@ -440,15 +445,18 @@ span i {
     margin-right: 8px;
     margin-left: auto;
     line-height: 22px;
-    font-family: Mplantin-italic;
+    font-family: 'Roboto';
+    font-style: italic;
     text-align: right;
+    font-weight: 300;
     font-size: 16px;
     color: rgba(250, 229, 210, 0.5);
 }
 
 
 .list_match_result_win {
-    font-family: Mplantin;
+    font-family: 'Roboto';
+    font-weight: 500;
     font-size: 20px;
     line-height: 64px;
     margin-right: 8px;
@@ -457,14 +465,16 @@ span i {
 
 .list_match_result_loss {
     line-height: 64px;
-    font-family: Mplantin;
+    font-family: 'Roboto';
+    font-weight: 500;
     font-size: 20px;
     margin-right: 8px;
     color: rgba(221, 130, 99, 1);
 }
 
 .list_match_result_score {
-    font-family: Mplantin-italic;
+    font-family: 'Roboto';
+    font-weight: 500;
     font-size: 20px;
     line-height: 64px;
     margin-right: 32px;
@@ -475,7 +485,8 @@ span i {
     -webkit-user-select: none;
     align-self: center;
     margin-left: 16px;
-    font-family: Mplantin-italic;
+    font-family: 'Roboto';
+    font-style: italic;
     color: #FAE5D2;
 }
 
@@ -483,7 +494,8 @@ span i {
     -webkit-user-select: none;
     align-self: center;
     margin-right: 16px;
-    font-family: Mplantin-italic;
+    font-family: 'Roboto';
+    font-style: italic;
     color: #FAE5D2;
 }
 
@@ -515,7 +527,8 @@ span i {
     line-height: 32px;
     vertical-align: middle;
     text-align: right;
-    font-family: Mplantin-italic;
+    font-family: 'Roboto';
+    font-style: italic;
     font-size: 16px;
     color: rgba(250, 229, 210, 1);
 }
@@ -663,15 +676,16 @@ a:hover {
 
 .message_big {
     font-size: 32px;
-    font-family: Mplantin;
+    font-family: 'Lato';
     text-align: center;
-    margin-bottom: 6px;
 }
 
 .message_sub {
     font-size: 20px;
     opacity: 0.9;
-    font-family: Mplantin-italic;
+    font-family: 'Lato';
+    font-weight: 300;
+    font-style: italic;
     text-align: center;
     margin-bottom: 6px;
 }
@@ -679,7 +693,9 @@ a:hover {
 .message_sub_16 {
     font-size: 16px;
     opacity: 0.9;
-    font-family: Mplantin-italic;
+    font-family: 'Lato';
+    font-weight: 300;
+    font-style: italic;
     text-align: center;
     margin-bottom: 6px;
 }
@@ -687,7 +703,9 @@ a:hover {
 .message_sub_15 {
     font-size: 15px;
     opacity: 0.9;
-    font-family: Mplantin-italic;
+    font-weight: 300;
+    font-family: 'Lato';
+    font-style: italic;
     text-align: center;
     margin-bottom: 6;
 }
@@ -695,7 +713,8 @@ a:hover {
 .message_updates {
     font-size: 18px;
     opacity: 0.9;
-    font-family: Mplantin-italic;
+    font-family: 'Lato';
+    font-style: italic;
     text-align: center;
     margin-top: 6;
     margin-bottom: 6;
@@ -705,6 +724,7 @@ a:hover {
     text-align: center;
     margin-bottom: 6;
     color: #fae5d2;
+    font-family: "Lato";
 }
 
 .message_small a {
@@ -763,23 +783,31 @@ a:hover {
 }
 
 .list_deck_name_it {
-    -webkit-user-select:none;
-    align-self: center;
+    -webkit-user-select: none;
     margin-left: 8px;
     margin-right: 16px;
     color: #FAE5D2;
-    font-family: Mplantin-italic;
+    line-height: 32px;
+    font-family: 'Roboto';
+    text-align: -webkit-left;
+    font-size: 16px;
+    margin-top: 2px;
+    font-weight: 300;
+    font-style: italic;
     opacity: 0.5;
 }
 
 .list_deck_right_it {
     -webkit-user-select: none;
-    line-height: 32px;
+    line-height: 24px;
+    height: 24px;
     margin-left: 8px;
     text-align: right;
     margin-right: 16px;
     color: #FAE5D2;
-    font-family: Mplantin-italic;
+    font-family: 'Roboto';
+    font-weight: 300;
+    font-style: italic;
     opacity: 0.5;
 }
 
@@ -789,14 +817,17 @@ a:hover {
     margin-right: 18px;
     line-height: 32px;
     color: #FAE5D2;
+    font-weight: 300;
 }
 
 .list_deck_record {
     -webkit-user-select: none;
     text-align: right;
     margin-right: 16px;
-    line-height: 32px;
+    line-height: 24px;
+    height: 24px;
     color: #FAE5D2;
+    font-weight: 300;
 }
 
 
@@ -989,7 +1020,7 @@ a:hover {
     text-align: center;
     display: block;
     margin-bottom: 12px;
-    font-family: 'Mplantin';
+    font-family: 'Roboto';
     font-size: 16px;
     color: #FAE5D2;
 }
@@ -1009,7 +1040,7 @@ a:hover {
 }
 
 .wc_cost {
-    font-family: Mplantin;
+    font-family: 'Roboto';
     text-indent: 48px;
     color: #FAE5D2;
     width: 96px;
@@ -1021,7 +1052,7 @@ a:hover {
 }
 
 .wc_explore_cost {
-    font-family: Mplantin;
+    font-family: 'Lato';
     color: #FAE5D2;
     width: 40px;
     line-height: 80px;
@@ -1032,7 +1063,7 @@ a:hover {
 }
 
 .bo_explore_cost {
-    font-family: Mplantin;
+    font-family: 'Lato';
     color: #FAE5D2;
     width: 40px;
     line-height: 80px;
@@ -1389,7 +1420,7 @@ a:hover {
 }
 
 .economy_day_stats {
-    font-family: 'Mplantin';
+    font-family: 'Roboto';
     font-size: 16px;
     margin: auto 16px auto auto;
 }
@@ -1413,15 +1444,18 @@ a:hover {
 }
 
 .economy_title {
+    margin-left: 2px;
+    color: #FAE5D2;
     padding-left: 16px;
     line-height: 64px;
-    font-family: 'belerenbold';
+    font-family: 'belerenbold' !important;
     font-size: 18px;
     background-color: rgba(145, 121, 97, 0.2);
 }
 
 .economy_sub {
     margin-left: 2px;
+    font-family: "Lato";
     color: #FAE5D2;
 }
 
@@ -1582,7 +1616,7 @@ a:hover {
     width: 100%;
     font-size: 14px;
     user-select: none;
-    font-family: Mplantin;
+    font-family: 'Lato';
     padding-left: 4px;
 }
 
@@ -1608,7 +1642,7 @@ a:hover {
     width: 100%;
     font-size: 14px;
     user-select: none;
-    font-family: Mplantin;
+    font-family: 'Lato';
     padding-left: 4px;
 }
 
@@ -1627,7 +1661,7 @@ a:hover {
 }
 
 .settings_title {
-    font-family: "Mplantin";
+    font-family: 'Roboto';
     font-size: 20px;
     border-bottom: solid rgba(250, 229, 210, 0.28) 2px;
     color: #fae5d2;
@@ -1742,7 +1776,8 @@ a:hover {
     line-height: 20px;
     vertical-align: middle;
     text-align: center;
-    font-family: Mplantin-italic;
+    font-family: 'Roboto';
+    font-style: italic;
     font-size: 20px;
     color: rgba(250, 229, 210, 1);
 }
@@ -1992,7 +2027,7 @@ a:hover {
     width: 100%;
     font-size: 16px;
     user-select: none;
-    font-family: Mplantin;
+    font-family: 'Lato';
     margin-right: 16px;
     padding-left: 4px;
     color: #33281e;
@@ -2201,10 +2236,11 @@ a:hover {
     pointer-events: none;
     opacity: 0;
     top: calc(100% - 42px);
+    font-family: 'Lato';
     font-size: 15px;
     left: calc(50% - 200px);
     position: absolute;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.7);
     color: rgba(250, 229, 210, 1);
     text-align: center;
     line-height: 30px;
@@ -2381,11 +2417,13 @@ a:hover {
 
 .tou_desc {
     align-self: center;
-    font-size: 18px;
+    font-weight: 300;
+    font-size: 16px;
     font-style: italic;
     color: rgba(250, 229, 210, 0.85);
     text-align: center;
     margin: 14px 120px;
+    font-family: 'Lato';
 }
 
 .tou_state {
@@ -2498,6 +2536,9 @@ a:hover {
 }
 
 .tou_round_title {
+    max-width: 800px;
+    height: 32px;
+    line-height: 32px;
     margin: 20px auto;
     color: rgba(250, 229, 210, 0.8);
     font-size: 20px;
