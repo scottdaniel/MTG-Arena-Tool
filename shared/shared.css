@@ -2,7 +2,7 @@ html {
     -webkit-user-select:none;
      cursor: default;
     height: 100%;
-    font-family: "Roboto"; 
+    font-family: "Lato"; 
     -webkit-font-smoothing: antialiased !important;
     text-rendering: optimizeLegibility !important;
 }
@@ -16,7 +16,7 @@ body {
 }
 
 label {
-    font-family: "Lato";
+    font-family: "Roboto";
     color: rgba(250, 229, 210, 1);
     margin: auto 0;
 }

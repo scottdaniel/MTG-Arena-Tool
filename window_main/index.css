@@ -147,7 +147,7 @@ span i {
     background-color: rgba(145, 121, 97, 0.4);
     /* box-shadow: 0px 2px 5px 0px rgba(0, 0, 0, 0.8); */
     -webkit-transition: all .1s ease-in;
-    font-family: 'Lato';
+    font-family: 'Roboto';
 }
 
 .button_simple_disabled {
@@ -164,7 +164,7 @@ span i {
     background-color: rgba(145, 121, 97, 0.4);
     -webkit-transition: all .1s ease-in;
     color: rgba(250, 229, 210, 0.4);
-    font-family: 'Lato';
+    font-family: 'Roboto';
 }
 
 .disabled:hover {
@@ -384,7 +384,7 @@ span i {
     line-height: 32px;
     vertical-align: middle;
     text-align: right;
-    font-family: 'Roboto';
+    font-family: 'lato';
     font-size: 16px;
     color: rgba(183, 200, 158, 1);
 }
@@ -408,7 +408,7 @@ span i {
     margin-right: 26px;
     margin-left: auto;
     line-height: 40px;
-    font-family: 'Roboto';
+    font-family: 'lato';
     font-style: italic;
     text-align: right;
     font-size: 16px;
@@ -417,10 +417,10 @@ span i {
 
 .list_event_phase_red {
     width: auto;
-    margin-right: 26px;
+    margin-right: 16px;
     margin-left: auto;
     line-height: 40px;
-    font-family: 'Roboto';
+    font-family: 'lato';
     font-style: italic;
     text-align: right;
     font-size: 16px;
@@ -434,7 +434,7 @@ span i {
     line-height: 32px;
     vertical-align: middle;
     text-align: right;
-    font-family: 'Roboto';
+    font-family: 'lato';
     font-style: italic;
     font-size: 16px;
     color: rgba(250, 229, 210, 1);
@@ -445,7 +445,7 @@ span i {
     margin-right: 8px;
     margin-left: auto;
     line-height: 22px;
-    font-family: 'Roboto';
+    font-family: 'lato';
     font-style: italic;
     text-align: right;
     font-weight: 300;
@@ -456,7 +456,7 @@ span i {
 
 .list_match_result_win {
     font-family: 'Roboto';
-    font-weight: 500;
+    font-weight: 300;
     font-size: 20px;
     line-height: 64px;
     margin-right: 8px;
@@ -466,7 +466,7 @@ span i {
 .list_match_result_loss {
     line-height: 64px;
     font-family: 'Roboto';
-    font-weight: 500;
+    font-weight: 300;
     font-size: 20px;
     margin-right: 8px;
     color: rgba(221, 130, 99, 1);
@@ -474,18 +474,18 @@ span i {
 
 .list_match_result_score {
     font-family: 'Roboto';
-    font-weight: 500;
+    font-weight: 300;
     font-size: 20px;
     line-height: 64px;
     margin-right: 32px;
-    color: rgba(250, 229, 210, 0.71);
+    color: rgba(250, 229, 210, 0.8);
 }
 
 .list_match_player_left {
     -webkit-user-select: none;
     align-self: center;
     margin-left: 16px;
-    font-family: 'Roboto';
+    font-family: 'lato';
     font-style: italic;
     color: #FAE5D2;
 }
@@ -494,7 +494,7 @@ span i {
     -webkit-user-select: none;
     align-self: center;
     margin-right: 16px;
-    font-family: 'Roboto';
+    font-family: 'lato';
     font-style: italic;
     color: #FAE5D2;
 }
@@ -527,7 +527,7 @@ span i {
     line-height: 32px;
     vertical-align: middle;
     text-align: right;
-    font-family: 'Roboto';
+    font-family: 'lato';
     font-style: italic;
     font-size: 16px;
     color: rgba(250, 229, 210, 1);
@@ -676,14 +676,14 @@ a:hover {
 
 .message_big {
     font-size: 32px;
-    font-family: 'Lato';
+    font-family: 'Roboto';
     text-align: center;
 }
 
 .message_sub {
     font-size: 20px;
     opacity: 0.9;
-    font-family: 'Lato';
+    font-family: 'Roboto';
     font-weight: 300;
     font-style: italic;
     text-align: center;
@@ -693,7 +693,7 @@ a:hover {
 .message_sub_16 {
     font-size: 16px;
     opacity: 0.9;
-    font-family: 'Lato';
+    font-family: 'Roboto';
     font-weight: 300;
     font-style: italic;
     text-align: center;
@@ -704,7 +704,7 @@ a:hover {
     font-size: 15px;
     opacity: 0.9;
     font-weight: 300;
-    font-family: 'Lato';
+    font-family: 'Roboto';
     font-style: italic;
     text-align: center;
     margin-bottom: 6;
@@ -713,7 +713,7 @@ a:hover {
 .message_updates {
     font-size: 18px;
     opacity: 0.9;
-    font-family: 'Lato';
+    font-family: 'Roboto';
     font-style: italic;
     text-align: center;
     margin-top: 6;
@@ -788,7 +788,7 @@ a:hover {
     margin-right: 16px;
     color: #FAE5D2;
     line-height: 32px;
-    font-family: 'Roboto';
+    font-family: 'lato';
     text-align: -webkit-left;
     font-size: 16px;
     margin-top: 2px;
@@ -805,7 +805,7 @@ a:hover {
     text-align: right;
     margin-right: 16px;
     color: #FAE5D2;
-    font-family: 'Roboto';
+    font-family: 'lato';
     font-weight: 300;
     font-style: italic;
     opacity: 0.5;
@@ -816,6 +816,7 @@ a:hover {
     margin-left: auto;
     margin-right: 18px;
     line-height: 32px;
+    font-family: "Roboto";
     color: #FAE5D2;
     font-weight: 300;
 }
@@ -825,9 +826,10 @@ a:hover {
     text-align: right;
     margin-right: 16px;
     line-height: 24px;
-    height: 24px;
     color: #FAE5D2;
     font-weight: 300;
+    height: 24px;
+    font-family: "Roboto";
 }
 
 
@@ -1020,7 +1022,7 @@ a:hover {
     text-align: center;
     display: block;
     margin-bottom: 12px;
-    font-family: 'Roboto';
+    font-family: 'lato';
     font-size: 16px;
     color: #FAE5D2;
 }
@@ -1040,7 +1042,7 @@ a:hover {
 }
 
 .wc_cost {
-    font-family: 'Roboto';
+    font-family: 'lato';
     text-indent: 48px;
     color: #FAE5D2;
     width: 96px;
@@ -1052,7 +1054,7 @@ a:hover {
 }
 
 .wc_explore_cost {
-    font-family: 'Lato';
+    font-family: 'Roboto';
     color: #FAE5D2;
     width: 40px;
     line-height: 80px;
@@ -1063,7 +1065,7 @@ a:hover {
 }
 
 .bo_explore_cost {
-    font-family: 'Lato';
+    font-family: 'Roboto';
     color: #FAE5D2;
     width: 40px;
     line-height: 80px;
@@ -1420,7 +1422,7 @@ a:hover {
 }
 
 .economy_day_stats {
-    font-family: 'Roboto';
+    font-family: 'lato';
     font-size: 16px;
     margin: auto 16px auto auto;
 }
@@ -1616,7 +1618,7 @@ a:hover {
     width: 100%;
     font-size: 14px;
     user-select: none;
-    font-family: 'Lato';
+    font-family: 'Roboto';
     padding-left: 4px;
 }
 
@@ -1642,7 +1644,7 @@ a:hover {
     width: 100%;
     font-size: 14px;
     user-select: none;
-    font-family: 'Lato';
+    font-family: 'Roboto';
     padding-left: 4px;
 }
 
@@ -1661,7 +1663,7 @@ a:hover {
 }
 
 .settings_title {
-    font-family: 'Roboto';
+    font-family: 'lato';
     font-size: 20px;
     border-bottom: solid rgba(250, 229, 210, 0.28) 2px;
     color: #fae5d2;
@@ -1776,7 +1778,7 @@ a:hover {
     line-height: 20px;
     vertical-align: middle;
     text-align: center;
-    font-family: 'Roboto';
+    font-family: 'lato';
     font-style: italic;
     font-size: 20px;
     color: rgba(250, 229, 210, 1);
@@ -2027,7 +2029,7 @@ a:hover {
     width: 100%;
     font-size: 16px;
     user-select: none;
-    font-family: 'Lato';
+    font-family: 'Roboto';
     margin-right: 16px;
     padding-left: 4px;
     color: #33281e;
@@ -2236,7 +2238,7 @@ a:hover {
     pointer-events: none;
     opacity: 0;
     top: calc(100% - 42px);
-    font-family: 'Lato';
+    font-family: 'Roboto';
     font-size: 15px;
     left: calc(50% - 200px);
     position: absolute;
@@ -2423,7 +2425,7 @@ a:hover {
     color: rgba(250, 229, 210, 0.85);
     text-align: center;
     margin: 14px 120px;
-    font-family: 'Lato';
+    font-family: 'Roboto';
 }
 
 .tou_state {
@@ -2544,6 +2546,7 @@ a:hover {
     font-size: 20px;
     font-family: "belerenbold";
     text-align: center;
+    background: linear-gradient(90deg, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0));
 }
 
 .tou_match_cont {

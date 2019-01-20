@@ -195,7 +195,7 @@ function open_decks_tab() {
 					d.classList.add('list_deck_winrate');
 
 					let colClass = getWinrateClass(wr.total);
-					d.innerHTML = `Wins: ${wr.wins} / Losses: ${wr.losses} <span class="${colClass}_bright">(${Math.round(wr.total*100)}%)</span>`;
+					d.innerHTML = `${wr.wins}:${wr.losses} <span class="${colClass}_bright">(${Math.round(wr.total*100)}%)</span>`;
 					flr.appendChild(d);
 
 					d = document.createElement("div");
@@ -261,7 +261,7 @@ function open_decks_tab() {
         wrTotal = wrTotal || 0;
 
 		let colClass = getWinrateClass(wrTotal);
-		d.innerHTML = `Wins: ${wrTotalWins} / Losses: ${wrTotalLosses} (<span class="${colClass}_bright">${Math.round(wrTotal*100)}%</span>)`;
+		d.innerHTML = `${wrTotalWins}:${wrTotalLosses} (<span class="${colClass}_bright">${Math.round(wrTotal*100)}%</span>)`;
 		dtwr.appendChild(d);
 
 		$("#ux_0").append('<div class="list_fill"></div>');

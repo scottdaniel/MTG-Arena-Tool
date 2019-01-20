@@ -345,7 +345,7 @@ function ladderLoadMore(loadMore, ownedWildcards) {
 		d = document.createElement("div");
 		d.classList.add("list_deck_record");
 		let colClass = getWinrateClass(1/_deck.t*_deck.w);
-		d.innerHTML = `'Wins: ${_deck.w} / Losses: ${_deck.l} <span class="${colClass}_bright">(${Math.round(100/_deck.t*_deck.w)}%)</span>`;
+		d.innerHTML = `${_deck.w}:${_deck.l} <span class="${colClass}_bright">(${Math.round(100/_deck.t*_deck.w)}%)</span>`;
 		flr.appendChild(d);
 
 		let rcont = document.createElement("div");
@@ -523,7 +523,9 @@ function exploreLoadMore(loadMore, ownedWildcards) {
 
 		d = document.createElement("div");
 		d.classList.add("list_deck_record");
-		d.innerHTML = _deck.wins+' - '+_deck.losses;
+
+		let colClass = getWinrateClass(1/(_deck.wins+_deck.losses)*_deck.wins);
+		d.innerHTML = `${_deck.wins}:${_deck.losses} <span class="${colClass}_bright">(${Math.round(100/(_deck.wins+_deck.losses)*_deck.wins)}%)</span>`;
 		flr.appendChild(d);
 
 		d = document.createElement("div");
