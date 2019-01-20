@@ -181,6 +181,8 @@ function selectAdd(div, callback) {
 
 //
 function addCardHover(div, _card) {
+	if (!_card || !_card.images) return;
+
 	div.on('mouseenter', function() {
 		$('.main_hover').css("opacity", 1);
 		let dfc = '';
