@@ -1,8 +1,16 @@
+:root {
+  --main-font-name:  'proximanova', sans-serif;
+  --main-font-name-it:  'proximanova-italic', sans-serif;
+  --main-font-name-bold:  'proximanova-bold', sans-serif;
+  --main-font-name-bold-it:  'proximanova-bold-italic', sans-serif;
+  --main-font-style-it: normal;
+}
+
 html {
     -webkit-user-select:none;
      cursor: default;
     height: 100%;
-    font-family: "Lato"; 
+    font-family: var(--main-font-name);
     -webkit-font-smoothing: antialiased !important;
     text-rendering: optimizeLegibility !important;
 }
@@ -33,6 +41,69 @@ label {
 @font-face {
     font-family: 'belerenbold';
     src: url('../fonts/belerenbold.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'montserrat';
+    src: url('../fonts/montserrat-v12-latin-regular.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'montserrat-italic';
+    src: url('../fonts/montserrat-v12-latin-italic.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'montserrat-bold';
+    src: url('../fonts/montserrat-v12-latin-600.woff') format('woff');
+}
+
+
+@font-face {
+    font-family: 'roboto-bold-italic';
+    src: url('../fonts/montserrat-v12-latin-600italic.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'roboto';
+    src: url('../fonts/roboto-v18-latin-regular.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'roboto-italic';
+    src: url('../fonts/roboto-v18-latin-italic.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'roboto-bold';
+    src: url('../fonts/roboto-v18-v12-latin-500.woff') format('woff');
+}
+
+
+@font-face {
+    font-family: 'roboto-bold-italic';
+    src: url('../fonts/roboto-v18-latin-500italic.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'proximanova';
+    src: url('../fonts/Proxima-Nova-Regular.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'proximanova-italic';
+    src: url('../fonts/Proxima-Nova-Regular-It.woff') format('woff');
+}
+
+@font-face {
+    font-family: 'proximanova-bold';
+    src: url('../fonts/Proxima-Nova-Bold.woff') format('woff');
+}
+
+
+@font-face {
+    font-family: 'proximanova-bold-italic';
+    src: url('../fonts/Proxima-Nova-Bold-It.woff') format('woff');
 }
 
 @font-face {
@@ -67,7 +138,7 @@ label {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: #B59579; 
+    background: #B59579;
 }
 
 
@@ -87,7 +158,7 @@ label {
 }
 
 .tiny_scroll::-webkit-scrollbar-thumb:hover {
-    background: #ffe9d3; 
+    background: #ffe9d3;
 }
 
 
@@ -162,16 +233,16 @@ label {
 @keyframes color {
     0%  {background-color: #E7CA8E;}
     19% {background-color: #E7CA8E;}
-    
+
     20% {background-color: #AABEDF;}
     39% {background-color: #AABEDF;}
-    
+
     40% {background-color: #A18E87;}
     59% {background-color: #A18E87;}
-    
+
     60% {background-color: #DD8263;}
     79% {background-color: #DD8263;}
-    
+
     80% {background-color: #B7C89E;}
     99% {background-color: #B7C89E;}
 }
@@ -259,7 +330,7 @@ label {
     /* background-color: red; */
     background-size: 100% 100%;
     /* opacity: 0.9; */
-    z-index: -4; 
+    z-index: -4;
     /* filter: hue-rotate(200deg); */
 }
 
@@ -519,7 +590,7 @@ span {
     margin-top: 3px;
     margin-bottom: 3px;
     text-align: center;
-    font-family: Mplantin;
+        font-family: var(--main-font-name);
     background: url(../images/quantity.png);
     background-size: cover;
 }
@@ -536,7 +607,7 @@ span {
     margin-top: 3px;
     margin-bottom: 3px;
     text-align: center;
-    font-family: Mplantin;
+        font-family: var(--main-font-name);
     background: url(../images/odds.png);
     background-size: cover;
 }
