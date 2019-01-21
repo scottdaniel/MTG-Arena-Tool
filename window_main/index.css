@@ -206,7 +206,7 @@ span i {
 .top_username {
     color: #FAE5D2;
     font-size: 20px;
-    margin-left: 16px;
+    margin-left: 8px;
     align-self: center;
     font-family: "belerenbold";
     cursor: default;
@@ -225,7 +225,7 @@ span i {
 .top_constructed_rank {
     -webkit-app-region: no-drag;
     align-self: center;
-    margin-left: 16px;
+    margin-left: 8px;
     width: 48px;
     height: 48px;
     background: url(../images/ranks_constructed_48.png);
@@ -235,7 +235,7 @@ span i {
 .top_limited_rank {
     -webkit-app-region: no-drag;
     align-self: center;
-    margin-left: 16px;
+    margin-left: 8px;
     width: 48px;
     height: 48px;
     background: url(../images/ranks_limited_48.png);
@@ -253,33 +253,62 @@ span i {
 }
 
 .top_nav {
-    background-color: rgba(145, 121, 97, 0.25);
     position: relative;
+    align-items: stretch;
+    width: 100%;
     height: 64px;
     display: flex;
+    z-index: 10;
+    background-color: rgba(145, 121, 97, 0.25);
     box-shadow: 0px 6px 20px 6px rgba(0, 0, 0, 0.2);
     border-bottom: solid 1px rgba(250, 229, 210, 0.5);
     -webkit-transition: all .5s ease-in-out;
-    z-index: 10;
+}
+
+.top_nav_icons {
+    flex-grow: 2;
+    display: flex;
+    align-items: stretch;
+}
+
+.top_nav_info {
+    flex-grow: 1;
+    display: flex;
+    flex-basis: auto;
+}
+
+span.top_nav_item_text {
+    font-family: "belerenbold";
+    font-size: 16px;
+    line-height: 64px;
+    white-space: nowrap;
+    text-align: center;
+    overflow: hidden;
+    display: inline-block;
 }
 
 .top_nav_item {
-    width: 100px;
+    max-width: 100px;
+    min-width: 48px;
     height: 64px;
     cursor: pointer;
     font-family: "belerenbold";
     font-size: 16px;
     line-height: 64px;
+    white-space: nowrap;
     text-align: center;
     color: #FAE5D2;
     opacity: 0.5;
     background-position-y: 64px;
     background-repeat: no-repeat;
-    background-image: url(../images/nav_hover.png);
+    background-image: url(file:///C:/Users/Manuh/Desktop/MTG%20Arena%20Tool/MTG-Arena-Tool/window_main/../images/nav_hover.png);
     -webkit-transition: all .2s ease-in-out;
     border-bottom: solid 1px rgba(210, 231, 250, 0);
     overflow: hidden;
-}
+    flex-grow: 2;
+    width: auto;
+    display: inline-grid;
+} 
 
 .ith_icon {
     width: 32px;
