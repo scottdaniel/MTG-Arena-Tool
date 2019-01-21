@@ -2135,7 +2135,7 @@ a:hover {
 .change_remove {
     width: 30px;
     height: 30px;
-    background: url(file:///C:/Users/Manuh/Desktop/MTG%20Arena%20Tool/MTG-Arena-Tool/window_main/../images/removed.png) no-repeat center;
+    background: url(../images/removed.png) no-repeat center;
 }
 }
 
