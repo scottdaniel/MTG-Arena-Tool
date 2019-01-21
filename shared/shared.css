@@ -1,8 +1,12 @@
 :root {
-  --main-font-name:  'proximanova', sans-serif;
-  --main-font-name-it:  'proximanova-italic', sans-serif;
-  --main-font-name-bold:  'proximanova-bold', sans-serif;
-  --main-font-name-bold-it:  'proximanova-bold-italic', sans-serif;
+  --main-font-name:  'lato', sans-serif;
+  --main-font-name-it:  'lato-italic', sans-serif;
+  --main-font-name-bold:  'lato-bold', sans-serif;
+  --main-font-name-bold-it:  'lato-bold-italic', sans-serif;
+  --sub-font-name:  'roboto', sans-serif;
+  --sub-font-name-it:  'roboto-italic', sans-serif;
+  --sub-font-name-bold:  'roboto-bold', sans-serif;
+  --sub-font-name-bold-it:  'roboto-bold-italic', sans-serif;
   --main-font-style-it: normal;
 }
 
@@ -24,7 +28,7 @@ body {
 }
 
 label {
-    font-family: "Roboto";
+    font-family: var(--main-font-name);
     color: rgba(250, 229, 210, 1);
     margin: auto 0;
 }
@@ -44,27 +48,6 @@ label {
 }
 
 @font-face {
-    font-family: 'montserrat';
-    src: url('../fonts/montserrat-v12-latin-regular.woff') format('woff');
-}
-
-@font-face {
-    font-family: 'montserrat-italic';
-    src: url('../fonts/montserrat-v12-latin-italic.woff') format('woff');
-}
-
-@font-face {
-    font-family: 'montserrat-bold';
-    src: url('../fonts/montserrat-v12-latin-600.woff') format('woff');
-}
-
-
-@font-face {
-    font-family: 'roboto-bold-italic';
-    src: url('../fonts/montserrat-v12-latin-600italic.woff') format('woff');
-}
-
-@font-face {
     font-family: 'roboto';
     src: url('../fonts/roboto-v18-latin-regular.woff') format('woff');
 }
@@ -79,31 +62,30 @@ label {
     src: url('../fonts/roboto-v18-v12-latin-500.woff') format('woff');
 }
 
-
 @font-face {
     font-family: 'roboto-bold-italic';
     src: url('../fonts/roboto-v18-latin-500italic.woff') format('woff');
 }
 
 @font-face {
-    font-family: 'proximanova';
-    src: url('../fonts/Proxima-Nova-Regular.woff') format('woff');
+    font-family: 'lato';
+    src: url('../fonts/Lato-Regular.woff') format('woff');
 }
 
 @font-face {
-    font-family: 'proximanova-italic';
-    src: url('../fonts/Proxima-Nova-Regular-It.woff') format('woff');
+    font-family: 'lato-italic';
+    src: url('../fonts/Lato-Italic.woff') format('woff');
 }
 
 @font-face {
-    font-family: 'proximanova-bold';
-    src: url('../fonts/Proxima-Nova-Bold.woff') format('woff');
+    font-family: 'lato-bold';
+    src: url('../fonts/Lato-Bold.woff') format('woff');
 }
 
 
 @font-face {
-    font-family: 'proximanova-bold-italic';
-    src: url('../fonts/Proxima-Nova-Bold-It.woff') format('woff');
+    font-family: 'lato-bold-italic';
+    src: url('../fonts/Lato-BoldItalic.woff') format('woff');
 }
 
 @font-face {
@@ -358,7 +340,7 @@ label {
 
 .top_artist {
     line-height: 32px;
-    font-style: italic;
+    font-family:  var(--main-font-name-it);
     color: rgba(250, 229, 210, 0.4);
 }
 

@@ -147,7 +147,7 @@ span i {
     background-color: rgba(145, 121, 97, 0.4);
     /* box-shadow: 0px 2px 5px 0px rgba(0, 0, 0, 0.8); */
     -webkit-transition: all .1s ease-in;
-    font-family: 'Roboto';
+    font-family: var(--main-font-name);
 }
 
 .button_simple_disabled {
@@ -164,7 +164,7 @@ span i {
     background-color: rgba(145, 121, 97, 0.4);
     -webkit-transition: all .1s ease-in;
     color: rgba(250, 229, 210, 0.4);
-    font-family: 'Roboto';
+    font-family: var(--main-font-name);
 }
 
 .disabled:hover {
@@ -438,7 +438,6 @@ span.top_nav_item_text {
     margin-left: auto;
     line-height: 40px;
     font-family:  var(--main-font-name-it);
-    font-style:  var(--main-font-style-it);
     text-align: right;
     font-size: 16px;
     color: rgba(183, 200, 158, 1);
@@ -450,7 +449,6 @@ span.top_nav_item_text {
     margin-left: auto;
     line-height: 40px;
     font-family:  var(--main-font-name-it);
-    font-style:  var(--main-font-style-it);
     text-align: right;
     font-size: 16px;
     color: rgba(221, 130, 99, 1);
@@ -464,7 +462,6 @@ span.top_nav_item_text {
     vertical-align: middle;
     text-align: right;
     font-family:  var(--main-font-name-it);
-    font-style:  var(--main-font-style-it);
     font-size: 16px;
     color: rgba(250, 229, 210, 1);
 }
@@ -475,7 +472,6 @@ span.top_nav_item_text {
     margin-left: auto;
     line-height: 22px;
     font-family:  var(--main-font-name-it);
-    font-style:  var(--main-font-style-it);
     text-align: right;
     font-weight: 300;
     font-size: 16px;
@@ -501,7 +497,6 @@ font-family:  var(--main-font-name);
 
 .list_match_result_score {
     font-family:  var(--main-font-name-it);
-    font-style:  var(--main-font-style-it);
     font-size: 20px;
     line-height: 64px;
     margin-right: 32px;
@@ -513,7 +508,6 @@ font-family:  var(--main-font-name);
     align-self: center;
     margin-left: 16px;
     font-family:  var(--main-font-name-it);
-    font-style:  var(--main-font-style-it);
     color: #FAE5D2;
 }
 
@@ -522,7 +516,6 @@ font-family:  var(--main-font-name);
     align-self: center;
     margin-right: 16px;
     font-family:  var(--main-font-name-it);
-    font-style:  var(--main-font-style-it);
     color: #FAE5D2;
 }
 
@@ -555,7 +548,6 @@ font-family:  var(--main-font-name);
     vertical-align: middle;
     text-align: right;
     font-family:  var(--main-font-name-it);
-    font-style:  var(--main-font-style-it);
     font-size: 16px;
     color: rgba(250, 229, 210, 1);
 }
@@ -711,7 +703,6 @@ a:hover {
     font-size: 20px;
     opacity: 0.9;
     font-family:  var(--main-font-name-it);
-    font-style:  var(--main-font-style-it);
     text-align: center;
     margin-bottom: 6px;
 }
@@ -720,7 +711,6 @@ a:hover {
     font-size: 16px;
     opacity: 0.9;
     font-family:  var(--main-font-name-it);
-    font-style:  var(--main-font-style-it);
     text-align: center;
     margin-bottom: 6px;
 }
@@ -729,7 +719,6 @@ a:hover {
     font-size: 15px;
     opacity: 0.9;
     font-family:  var(--main-font-name-it);
-    font-style:  var(--main-font-style-it);
     text-align: center;
     margin-bottom: 6;
 }
@@ -738,7 +727,6 @@ a:hover {
     font-size: 18px;
     opacity: 0.9;
     font-family:  var(--main-font-name-it);
-    font-style:  var(--main-font-style-it);
     text-align: center;
     margin-top: 6;
     margin-bottom: 6;
@@ -816,7 +804,6 @@ a:hover {
     text-align: -webkit-left;
     font-size: 16px;
     font-family:  var(--main-font-name-it);
-    font-style:  var(--main-font-style-it);
     opacity: 0.5;
 }
 
@@ -829,7 +816,6 @@ a:hover {
     margin-right: 16px;
     color: #FAE5D2;
     font-family:  var(--main-font-name-it);
-    font-style:  var(--main-font-style-it);
     opacity: 0.5;
 }
 
@@ -838,7 +824,7 @@ a:hover {
     margin-left: auto;
     margin-right: 18px;
     line-height: 32px;
-    font-family: "Roboto";
+    font-family: var(--sub-font-name);
     color: #FAE5D2;
     font-weight: 300;
 }
@@ -851,7 +837,7 @@ a:hover {
     color: #FAE5D2;
     font-weight: 300;
     height: 24px;
-    font-family: "Roboto";
+    font-family: var(--sub-font-name);
 }
 
 
@@ -913,6 +899,7 @@ a:hover {
 }
 
 .deck_tag {
+    font-family: var(--sub-font-name);
     cursor: pointer;
     font-size: 13px;
     opacity: 1;
@@ -1064,7 +1051,7 @@ a:hover {
 }
 
 .wc_cost {
-  font-family:  var(--main-font-name);
+    font-family:  var(--sub-font-name);
     text-indent: 48px;
     color: #FAE5D2;
     width: 96px;
@@ -1076,7 +1063,7 @@ a:hover {
 }
 
 .wc_explore_cost {
-  font-family:  var(--main-font-name);
+    font-family:  var(--sub-font-name);
     color: #FAE5D2;
     width: 40px;
     line-height: 80px;
@@ -1087,7 +1074,7 @@ a:hover {
 }
 
 .bo_explore_cost {
-  font-family:  var(--main-font-name);
+    font-family:  var(--sub-font-name);
     color: #FAE5D2;
     width: 40px;
     line-height: 80px;
@@ -1479,7 +1466,7 @@ a:hover {
 
 .economy_sub {
     margin-left: 2px;
-    font-family: "Lato";
+    font-family: var(--sub-font-name);
     color: #FAE5D2;
 }
 
@@ -1685,8 +1672,7 @@ a:hover {
 }
 
 .settings_title {
-font-family:  var(--main-font-name-it);
-font-style:  var(--main-font-style-it);
+    font-family:  var(--main-font-name-it);
     font-size: 20px;
     border-bottom: solid rgba(250, 229, 210, 0.28) 2px;
     color: #fae5d2;
@@ -1802,7 +1788,6 @@ font-style:  var(--main-font-style-it);
     vertical-align: middle;
     text-align: center;
     font-family:  var(--main-font-name-it);
-    font-style:  var(--main-font-style-it);
     font-size: 20px;
     color: rgba(250, 229, 210, 1);
 }
@@ -2053,7 +2038,6 @@ font-style:  var(--main-font-style-it);
     font-size: 16px;
     user-select: none;
     font-family:  var(--main-font-name-it);
-    font-style:  var(--main-font-style-it);
     margin-right: 16px;
     padding-left: 4px;
     color: #33281e;
@@ -2262,7 +2246,7 @@ font-style:  var(--main-font-style-it);
     pointer-events: none;
     opacity: 0;
     top: calc(100% - 42px);
-    font-family: 'Roboto';
+    font-family: var(--sub-font-name);
     font-size: 15px;
     left: calc(50% - 200px);
     position: absolute;
@@ -2376,7 +2360,7 @@ font-style:  var(--main-font-style-it);
     margin-left: 32px;
     margin-top: 10px;
     line-height: 16px;
-    font-style: italic;
+    font-family: var(--main-font-name-it);
     opacity: 0.8;
     color: #fae5d2;
 }
@@ -2445,11 +2429,10 @@ font-style:  var(--main-font-style-it);
     align-self: center;
     font-weight: 300;
     font-size: 16px;
-    font-style: italic;
     color: rgba(250, 229, 210, 0.85);
     text-align: center;
     margin: 14px 120px;
-    font-family: 'Roboto';
+    font-family: var(--sub-font-name-it);
 }
 
 .tou_state {
@@ -2474,7 +2457,7 @@ font-style:  var(--main-font-style-it);
     justify-content: flex-end;
     align-self: center;
     display: flex;
-    font-style: italic;
+    font-family: var(--main-font-name-it);
     font-size: 19px;
 }
 
@@ -2482,6 +2465,7 @@ font-style:  var(--main-font-style-it);
     font-size: 20px;
     text-align: center;
     margin: 16px auto;
+    font-family: var(--sub-font-name);
 }
 
 .tou_opp {
@@ -2491,6 +2475,10 @@ font-style:  var(--main-font-style-it);
     font-size: 18px;
     text-align: center;
     margin-bottom: 6px;
+}
+
+.last_seen_clock {
+    font-family: var(--sub-font-name);
 }
 
 .tou_opp_sub {
