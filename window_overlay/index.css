@@ -9,8 +9,9 @@ body {pointer-events: none}
 
 .overlay_decklist {
     padding-left: 2px;
-    height: calc(100% - 210px);
-    overflow: overlay;
+    overflow-x: hidden;
+    overflow-y: auto;
+    flex-grow: 2;
 }
 
 .overlay_decklist a {
@@ -68,13 +69,13 @@ body {pointer-events: none}
 }
 
 .overlay_clock_container {
-    -webkit-app-region:drag;
-    position: absolute;
+    -webkit-app-region: drag;
+    position: relative;
     display: flex;
     flex-direction: column;
     bottom: 0;
-    float: center;
     width: 100%;
+    min-height: 64px;
     height: 64px;
     z-index: 40;
     background-color: rgba(0,0,0,0.5);
@@ -86,9 +87,9 @@ body {pointer-events: none}
     flex-direction: column;
     justify-content: space-around;
     bottom: 0;
-    float: center;
     width: 100%;
     height: 64px;
+    min-height: 64px;
     top: 64px;
     z-index: 40;
 }
@@ -100,16 +101,14 @@ body {pointer-events: none}
     display: flex;
     justify-content: space-between;
     bottom: 0;
-    float: center;
     width: 100%;
     height: 64px;
     top: 64px;
     z-index: 40;
 }
 
-
 .chance_title {
-    font-size: 15px;
+    font-size: 14px;
     height: 20px;
     line-height: 20px;
     margin: 0px auto;

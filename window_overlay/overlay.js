@@ -160,23 +160,6 @@ ipc.on('set_db', function (event, arg) {
 //
 ipc.on('set_timer', function (event, arg) {
 	if (arg == -1) {
-		$(".overlay_clock_container").hide();
-		$(".overlay_deck_container").hide();
-		$(".overlay_draft_container").show();
-		$(".overlay_draft_container").css("display", "flex");
-
-
-		let _height = 114;
-		if ($('.top').css('display') == 'none') {
-			_height -= 32;
-		}
-		if ($('.overlay_deckname').css('display') == 'none') {
-			_height -= 78;
-		}
-		if ($('.overlay_clock_container').css('display') == 'none') {
-			_height -= 64;
-		}
-		$(".overlay_decklist").css("height", "100%").css("height", "-="+_height+"px");
 		overlayMode = 1;
 		matchBeginTime = Date.now();
 	}
@@ -192,30 +175,6 @@ ipc.on('set_priority_timer', function(event, arg) {
 		priorityTimers = arg;
 	}
 });
-
-$( window ).resize(function() {
-	let _height = 178//114;
-	if ($('.top').css('display') == 'none') {
-		_height -= 32;
-	}
-	if ($('.overlay_deckname').css('display') == 'none') {
-		_height -= 78;
-	}
-	if ($('.overlay_clock_container').css('display') == 'none') {
-		_height -= 64;
-	}
-	if (overlayMode == 1) {
-		_height += 64;
-	}
-	$(".overlay_decklist").css("height", "100%").css("height", "-="+_height+"px");
-	/*
-	var bounds = remote.getCurrentWindow().webContents.getOwnerBrowserWindow().getBounds()
-	var w = Math.min(bounds.width, 256);
-	var sc = w / 256;
-	webFrame.setZoomFactor(sc);
-	*/
-});
-
 
 ipc.on('action_log', function (event, arg) {
 	actionLog.push(arg);
@@ -289,21 +248,6 @@ ipc.on('set_settings', function (event, settings) {
 	if (!settings.overlay_clock || overlayMode == 1) {
 		hideDiv('.overlay_clock_container');
 	}
-
-	let _height = 174;
-	if (overlayMode == 1) {
-		_height = 110;
-	}
-	if (!settings.overlay_top) {
-		_height -= 32;
-	}
-	if (!settings.overlay_title) {
-		_height -= 78;
-	}
-	if (!settings.overlay_clock) {
-		_height -= 64;
-	}
-	$(".overlay_decklist").css("height", "100%").css("height", "-="+_height+"px");
 });
 
 function hideDiv(div) {
@@ -349,6 +293,9 @@ ipc.on('set_deck', function (event, arg) {
 			if (oldstr == get_deck_uniquestring(arg))	return;
 		}
 		changedMode = true;
+
+		$(".overlay_deck_container").show();
+		$(".overlay_draft_container").hide();
 
 		$(".overlay_decklist").html('');
 		$(".overlay_deckcolors").html('');

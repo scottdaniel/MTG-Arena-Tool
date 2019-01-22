@@ -386,6 +386,9 @@ label {
     overflow: hidden;
     height: calc(100% - 4px);
     width: calc(100% - 4px);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
     -webkit-backface-visibility: hidden;
 }
 
@@ -410,6 +413,7 @@ label {
     position: relative;
     z-index: 30;
     height: 32px;
+    min-height: 32px;
     background-color: rgba(145,121,97,0.6);
     display: flex;
     justify-content: space-between;
