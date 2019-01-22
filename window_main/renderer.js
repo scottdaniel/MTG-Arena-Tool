@@ -704,7 +704,29 @@ function force_open_about() {
 	open_settings(5);
 }
 
+let top_compact = false;
 $(document).ready(function() {
+	$(window).on('resize', () => {
+		if ($('.top_nav_icons').width() < 500) {
+			if (!top_compact) {
+				$('span.top_nav_item_text').css("opacity", 0);
+				$('.top_nav_icon').css("display", "block");
+				$('.top_nav_icon').css("opacity", 1);
+				top_compact = true;
+			}
+		}
+		else {
+			if (top_compact) {
+				$('span.top_nav_item_text').css("opacity", 1);
+				$('.top_nav_icon').css("opacity", 0);
+				window.setTimeout(() => {
+					$('.top_nav_icon').css("display", false);
+				}, 500);
+				top_compact = false;
+			}
+		}
+	});
+
 	//document.getElementById("rememberme").checked = false;
 	$(".signup_link").click(function() {
 		shell.openExternal('https://mtgatool.com/signup/');
