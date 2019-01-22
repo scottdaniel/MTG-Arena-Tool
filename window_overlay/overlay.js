@@ -15,8 +15,8 @@ global
 */
 const electron 	= require('electron');
 const {webFrame, remote} = require('electron');
-
-const ipc = electron.ipcRenderer;
+const fs 	= require("fs");
+const ipc 	= electron.ipcRenderer;
 
 let matchBeginTime = Date.now();
 let priorityTimers = [];
@@ -236,6 +236,7 @@ ipc.on('set_settings', function (event, settings) {
 	*/
 	overlayAlpha = settings.overlay_alpha;
 	overlayAlphaBack = settings.overlay_alpha_back;
+	change_background(settings.back_url);
 
 	console.log(settings.overlay_scale);
 	webFrame.setZoomFactor(settings.overlay_scale/100);
@@ -580,6 +581,27 @@ function hoverCard(grpId) {
 			$('.overlay_hover').css("opacity", 0);
 		}, 10000);
 	}
+}
+
+function change_background(arg) {
+	if (arg == "default" || arg == "") {
+		$('.overlay_bg_image').css("background-image", "");
+    }
+    else if (fs.existsSync(arg)) {
+        $('.overlay_bg_image').css("background-image", "url("+arg+")");
+    }
+    else {
+        $.ajax({
+            url: arg,
+            type: 'HEAD',
+            error: function() {
+                $('.overlay_bg_image').css("background-image", "");
+            },
+            success: function() {
+                $('.overlay_bg_image').css("background-image", "url("+arg+")");
+            }
+        });
+    }
 }
 
 
