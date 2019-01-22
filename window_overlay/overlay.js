@@ -334,6 +334,7 @@ ipc.on('set_cards', function (event, _cards) {
 	cards = _cards;
 });
 
+let changedMode = true;
 //
 ipc.on('set_deck', function (event, arg) {
 	var doscroll = false;
@@ -341,9 +342,12 @@ ipc.on('set_deck', function (event, arg) {
 		doscroll = true;
 	}
 
-	if (arg != null) {
-		let oldstr = get_deck_uniquestring(currentDeck);
-		if (oldstr == get_deck_uniquestring(arg))	return;
+	if (arg !== null) {
+		if (!changedMode) {
+			let oldstr = get_deck_uniquestring(currentDeck);
+			if (oldstr == get_deck_uniquestring(arg))	return;
+		}
+		changedMode = true;
 
 		$(".overlay_decklist").html('');
 		$(".overlay_deckcolors").html('');
@@ -385,7 +389,7 @@ ipc.on('set_deck', function (event, arg) {
 			return;
 		}
 
-		if (arg.name != null) {
+		if (arg.name !== null) {
 			if (deckMode == 3) {
 				$(".overlay_deckname").html("Played by "+arg.name.slice(0, -6));
 			}
@@ -599,6 +603,7 @@ $(document).ready(function() {
 	});
 	//
 	$(".draft_prev").click(function () {
+		changedMode = true;
 		draftMode -= 1;
 		if (draftMode < 0) {
 			draftMode = 1;
@@ -607,6 +612,7 @@ $(document).ready(function() {
 	});
 	//
 	$(".draft_next").click(function () {
+		changedMode = true;
 		draftMode += 1;
 		if (draftMode > 1) {
 			draftMode = 0;
@@ -615,6 +621,7 @@ $(document).ready(function() {
 	});
 	//
 	$(".deck_prev").click(function () {
+		changedMode = true;
 		deckMode -= 1;
 		if (deckMode < 0) {
 			deckMode = 4;
@@ -623,6 +630,7 @@ $(document).ready(function() {
 	});
 	//
 	$(".deck_next").click(function () {
+		changedMode = true;
 		deckMode += 1;
 		if (deckMode > 4) {
 			deckMode = 0;
