@@ -2568,6 +2568,7 @@ a:hover {
 .tou_stand_line {
 	display: flex;
     justify-content: start;
+    font-size: 14px;
     height: 28px;
     max-width: 800px;
     margin: 0 auto;
@@ -2643,6 +2644,12 @@ a:hover {
 
 .tou_stand_cell {
     width: 100px;
+    text-indent: 8px;
+    line-height: 28px;
+}
+
+.tou_stand_small {
+    width: 45px;
     text-indent: 8px;
     line-height: 28px;
 }

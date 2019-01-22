@@ -330,9 +330,11 @@ function open_tournament(t) {
 				}, 250);
 			}
 
-			let checks = $(`<div class="tou_checks"></div>`);
-			generateChecks(tou.current_check, tou.current_game, tou.current_seat).appendTo(checks);
-			checks.appendTo(mainDiv);
+			if (tou.state !== 4 && tou.current_opponent !== "bye" && tou.current_opponent !== "") {
+				let checks = $(`<div class="tou_checks"></div>`);
+				generateChecks(tou.current_check, tou.current_game, tou.current_seat).appendTo(checks);
+				checks.appendTo(mainDiv);
+			}
 
 			$('.copy_mtga').click(() => {
 				pop("Copied to clipboard", 1000);
@@ -511,7 +513,17 @@ function open_tournament(t) {
 		desc.appendTo(tab_cont_b);
 
 		let line = $('<div class="tou_stand_line_title line_dark"></div>');
-		$('<div class="tou_stand_name">Name</div><div class="tou_stand_cell">Points</div><div class="tou_stand_cell">Score</div><div class="tou_stand_cell">Matches</div><div class="tou_stand_cell">Games</div><div class="tou_stand_cell">OMW</div><div class="tou_stand_cell">GW</div><div class="tou_stand_cell">OGW</div>').appendTo(line);
+		$(`
+			<div class="tou_stand_small">Pos</div>
+			<div class="tou_stand_name" style="width: 206px;">Name</div>
+			<div class="tou_stand_cell">Points</div>
+			<div class="tou_stand_cell">Score</div>
+			<div class="tou_stand_cell">Matches</div>
+			<div class="tou_stand_cell">Games</div>
+			<div class="tou_stand_cell">OMW</div>
+			<div class="tou_stand_cell">GW</div>
+			<div class="tou_stand_cell">OGW</div>
+		`).appendTo(line);
 		line.appendTo(tab_cont_b);
 
 		tou.players.forEach( function(pname, index) {
@@ -527,6 +539,7 @@ function open_tournament(t) {
 			if (pname == userName)	s = 'style="color: rgba(183, 200, 158, 1);"';
 
 			let str = `
+			<div class="tou_stand_small">${index+1}</div>
 			<img src="blank.gif" class="flag tou_flag flag-${tou.flags[pname].toLowerCase()}" />
 			<div ${s} class="tou_stand_name">${pname.slice(0, -6)} ${tou.drops.indexOf(pname) !== -1 ? ' (drop)' : ''}</div>
 			<div class="tou_stand_cell">${stat.mp}</div>
