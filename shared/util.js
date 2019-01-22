@@ -307,7 +307,9 @@ function removeDuplicates(decklist) {
 			newList.forEach(function(c) {
 				var cn = cardsDb.get(c.id).name;
 				if (cn == cname) {
-					c.quantity += card.quantity;
+					if (c.quantity !== 9999) {
+						c.quantity += card.quantity;
+					}
 					if (c.chance != undefined) {
 						c.chance += card.chance;
 					}
