@@ -1577,6 +1577,7 @@ function saveMatch(upload = true) {
 //
 function saveDraft() {
 	if (draftId != undefined) {
+		draftId = draftId+'-draft';
 		var draft = currentDraft;
 		draft.id = draftId;
 		draft.date = new Date();
