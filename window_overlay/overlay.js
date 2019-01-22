@@ -77,7 +77,7 @@ function updateClock() {
 	else if (clockMode == 0) {
 		let time = priorityTimers[1] / 1000;
 		let now = new Date();
-		if (turnPriority == 1) {
+		if (turnPriority == 1 && time > 0) {
 			time += (now - new Date(priorityTimers[0])) / 1000;
 		}
 
@@ -88,7 +88,7 @@ function updateClock() {
 		$(".clock_priority_1").html(mm+":"+ss);
 
 		time = priorityTimers[2] / 1000;
-		if (turnPriority == 2) {
+		if (turnPriority == 2 && time > 0) {
 			time += (now - new Date(priorityTimers[0])) / 1000;
 		}
 
