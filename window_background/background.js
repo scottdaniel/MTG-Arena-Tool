@@ -433,7 +433,7 @@ function calculateRankWins() {
 		if (match.eventId == "Ladder") {
 			struct = rankwinrates.constructed;
 		}
-		else if (match.eventId == "QuickDraft_DOM_12072018") {
+		else if (match.eventId == "QuickDraft_DOM_12072018" || match.eventId == "QuickDraft_RIX_20190104" || match.eventId == "QuickDraft_GRN_20181221") {
 			struct = rankwinrates.limited;
 		}
 		else {
