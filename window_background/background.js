@@ -763,6 +763,12 @@ function startWatchingLog() {
 }
 
 function onLogEntryFound(entry) {
+	if (debugLog) {
+		let currentTime = new Date().getTime();
+		while (currentTime + debugLogSpeed >= new Date().getTime()) {
+			// sleep
+		}
+	}
 	let json;
 	if (entry.type == "connection") {
 		playerId = entry.socket.PlayerId;
