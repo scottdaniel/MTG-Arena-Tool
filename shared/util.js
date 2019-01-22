@@ -46,7 +46,8 @@ function addCardTile(grpId, indent, quantity, element) {
 		if (!isNumber(quantity)) {
 			ww = 64;
 			ll = 48;
-			cont.append('<div class="card_tile_odds"><span>'+quantity+'</span></div>');
+			let col = get_rank_class(quantity);
+			cont.append(`<div class="card_tile_odds ${col}"><span>${quantity}</span></div>`);
 		}
 		else if (quantity == 9999) {
 			quantity = 1;
@@ -747,6 +748,26 @@ function compare_colors(color_a, color_b) {
 	}
 
 	return true;
+}
+
+function get_rank_class(ranking) {
+	switch (ranking) {
+		case 'A+': return 'blue';
+		case 'A': return 'blue';
+
+		case 'A-': return 'green';
+		case 'B+': return 'green';
+		case 'B': return 'green';
+
+		case 'C-': return 'orange';
+		case 'D+': return 'orange';
+
+		case 'D': return 'orange';
+		case 'D-': return 'red';
+		case 'F': return 'red';
+
+		default: return 'white';
+	}
 }
 
 //
