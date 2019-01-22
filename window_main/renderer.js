@@ -1597,7 +1597,7 @@ function open_draft(id, tileGrpid, set) {
 	if (draftPosition > (packSize*6))	draftPosition = (packSize*6); 
 
 	var packSize = 14;
-	if (draft.set == "Guilds of Ravnica") {
+	if (draft.set == "Guilds of Ravnica" || draft.set == "Ravnica Allegiance") {
 		packSize = 15;
 	}
 
