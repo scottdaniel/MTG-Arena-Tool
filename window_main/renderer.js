@@ -629,12 +629,16 @@ ipc.on('log_ok', function () {
 
 //
 ipc.on('offline', function () {
+	showOfflineSplash();
+});
+
+function showOfflineSplash() {
 	document.body.style.cursor = "auto";
 	$('#ux_0').html('<div class="message_center" style="display: flex; position: fixed;"><div class="message_unlink"></div><div class="message_big red">Oops, you are offline!</div><div class="message_sub_16 white">You can <a class="signup_link">sign up</a> to access online features.</div></div>');
 	$(".signup_link").click(function() {
 		shell.openExternal('https://mtgatool.com/signup/');
 	});
-});
+}
 
 //
 ipc.on('log_read', function () {
@@ -786,14 +790,19 @@ $(document).ready(function() {
 
 			if ($(this).hasClass("ith")) {
 				sidebarActive = -1;
-				$("#ux_0").html('<div class="loading_bar ux_loading"><div class="loading_color loading_w"></div><div class="loading_color loading_u"></div><div class="loading_color loading_b"></div><div class="loading_color loading_r"></div><div class="loading_color loading_g"></div></div>');
-
-				if (discordTag == null) {
-					open_tournaments_tab(null, true);
+				if (offlineMode) {
+					showOfflineSplash();
 				}
 				else {
-					document.body.style.cursor = "progress";
-					ipc_send('request_tou_list', true);
+					$("#ux_0").html('<div class="loading_bar ux_loading"><div class="loading_color loading_w"></div><div class="loading_color loading_u"></div><div class="loading_color loading_b"></div><div class="loading_color loading_r"></div><div class="loading_color loading_g"></div></div>');
+
+					if (discordTag == null) {
+						open_tournaments_tab(null, true);
+					}
+					else {
+						document.body.style.cursor = "progress";
+						ipc_send('request_tou_list', true);
+					}
 				}
 			}
 			if ($(this).hasClass("it0")) {
@@ -1912,7 +1921,7 @@ function open_settings(openSection) {
 	var sliderScaleInput = $('<input type="range" min="10" max="200" step="10" value="'+overlayScale+'" class="slider sliderD" id="scaleRange">');
 	sliderScaleInput.appendTo(sliderScale);
 
-	$('<div class="button_simple centered resetOverlayPos" onclick="resetOverlay(this)">Reset Position</div>').appendTo(section);
+	$('<div class="button_simple centered resetOverlayPos">Reset Position</div>').appendTo(section);
 
 	//
 	section = $('<div class="settings_section ss3"></div>');

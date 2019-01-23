@@ -495,7 +495,12 @@ ipc.on('request_course', function (event, arg) {
 });
 
 ipc.on('request_tou_list', function () {
-    httpApi.httpTournamentList();
+	if (playerUsername == '') {
+		ipc_send("offline", 1);
+	}
+	else {
+		httpApi.httpTournamentList();
+	}
 });
 
 ipc.on('tou_get', function (event, arg) {
