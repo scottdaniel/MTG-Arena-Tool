@@ -1912,6 +1912,8 @@ function open_settings(openSection) {
 	var sliderScaleInput = $('<input type="range" min="10" max="200" step="10" value="'+overlayScale+'" class="slider sliderD" id="scaleRange">');
 	sliderScaleInput.appendTo(sliderScale);
 
+	$('<div class="button_simple centered resetOverlayPos" onclick="resetOverlay(this)">Reset Position</div>').appendTo(section);
+
 	//
 	section = $('<div class="settings_section ss3"></div>');
 	section.appendTo(div);
@@ -2031,6 +2033,10 @@ function open_settings(openSection) {
 
 	$(".ss"+openSection).show();
 	$(".sn"+openSection).addClass("nav_selected");
+
+	$(".resetOverlayPos").click(function() {
+		ipc_send('reset_overlay_pos', true);
+	});
 
 	$(".top_logo_about").click(function() {
 		shell.openExternal('https://mtgatool.com');

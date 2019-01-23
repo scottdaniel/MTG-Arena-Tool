@@ -206,6 +206,10 @@ app.on('ready', () => {
 				clipboard.writeText(arg);
 				break;
 
+			case 'reset_overlay_pos':
+				overlay.setPosition(0, 0);
+				break;
+
 			case 'export_txt':
 				dialog.showSaveDialog({
 					filters: [{
