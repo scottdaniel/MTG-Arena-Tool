@@ -23,10 +23,19 @@ globals
 	getWinrateClass
 
 */
+const RANKS = [
+	"Bronze",
+	"Silver",
+	"Gold",
+	"Platinum",
+	"Diamond",
+	"Mythic"
+];
+
 let loadHistory = 0;
 let filterEvent = 'All';
 let filteredSampleSize = 0;
-let seasonView = 0;
+let viewingLimitSeason = false;
 
 function open_history_tab(loadMore) {
 	var mainDiv = document.getElementById("ux_0");
@@ -341,75 +350,125 @@ function open_history_tab(loadMore) {
 	loadHistory = loadEnd;
 }
 
-function renderRanksStats(div) {
-	$(div).html('');
+function createDivision(classNames, innerHTML) {
+	// Utility function. Create a <div> element with specified class names and content
+	let div = document.createElement("div");
 
-	let but = document.createElement("div");
-	but.classList.add("button_simple");
-	but.classList.add("button_thin");
-	but.classList.add("season_toggle");
-	but.style.marginTop = "32px !important;";
-	but.innerHTML = `Show ${(seasonView == 1 ? 'constructed' : 'limited')}`;
-	div.appendChild(but);
+	if (classNames !== undefined) {
+		classNames.forEach(
+			className => div.classList.add(className)
+		);
+	}
+	if (innerHTML !== undefined) {
+		div.innerHTML = innerHTML;
+	}
+	return div;
+}
 
-	var t = document.createElement("div");
-	t.classList.add("ranks_history_title");
-	t.innerHTML = `Current ${(seasonView == 0 ? 'constructed' : 'limited')} season:`;
-	div.appendChild(t);
+function formatPercent(percent, precision) {
+	// Utility function: converts a number to rounded percent
+	// converts number to percent
+	// 0.333333 -> 33%
+	// 20 -> 2000%
+	precision = precision || 0;
+	return (100 * percent).toFixed(precision);
+}
+
+function renderRanksStats(container) {
+	/*
+		globals used:
+			viewingLimitSeason
+			matchesHistory
+			get_rank_index
+			getStepsUntilNextRank
+			createButton
+			formatPercent
+			rankLimited
+			rankConstructed
+	*/
+	container.innerHTML = '';
+
+	let seasonName = !viewingLimitSeason ? 'constructed' : 'limited';
+	let switchSeasonName = viewingLimitSeason ? 'constructed' : 'limited';
+
+	let seasonToggleButton = createDivision(
+		["button_simple", "button_thin", "season_toggle"],
+		`Show ${switchSeasonName}`
+	);
+	seasonToggleButton.style.marginTop = "32px !important;";
+	
+	container.appendChild(seasonToggleButton);
+
+	var title = createDivision(
+		["ranks_history_title"],
+		`Current ${seasonName} season:`);
+	container.appendChild(title);
 
 	// Add ranks matchup history here
-	let rc = matchesHistory.rankwinrates.constructed;
-	if (seasonView == 1)	rc = matchesHistory.rankwinrates.limited;
+	let rc = matchesHistory.rankwinrates[seasonName];
+	var lastWinrate; // used later
 
-	let lastWinrate = Math.round(100 / rc.total.t * rc.total.w);
-	for (var key in rc) {
-		if (rc.hasOwnProperty(key)) {
-			var val = rc[key];
-			if (val.t > 0 && val.r)  {
-				var fla = document.createElement("div");
-				fla.classList.add("flex_item");
-				//fla.style.flexDirection = "column";
-				fla.style.justifyContent = "center";
+	Object.values(rc).forEach(object => {
+		// object is either rank win/loss data OR metadata
+		// See function calculateRankWins() in background.js
+		var rankName = object.r;
+		var totalGames = object.t;
+		var wonGames = object.w;
+		var lostGames = object.l;
 
-				var v = document.createElement("div");
-				v.classList.add("ranks_history_title");
-				v.innerHTML = "Vs.";
-
-				var r = document.createElement("div");
-				r.classList.add("ranks_history_badge");
-				r.style.backgroundPosition = (get_rank_index(val.r, 1)*-48)+"px 0px";
-				r.title = val.r;
-
-				var s = document.createElement("div");
-				s.classList.add("ranks_history_title");
-
-				lastWinrate = Math.round(val.w/val.t*100);
-				s.innerHTML = lastWinrate+"%";
-
-				fla.appendChild(v);
-				fla.appendChild(r);
-				fla.appendChild(s);
-				div.appendChild(fla);
-			}
+		if (!rankName || totalGames <= 0) {
+			// this is a not winrate object OR
+			// we have no data for this rank so don't display it
+			return; 
 		}
-	}
 
-	t = document.createElement("div");
-	t.classList.add("ranks_history_title");
-	t.innerHTML = `Total: ${Math.round(100 / rc.total.t * rc.total.w)} %`;
-	div.appendChild(t);
+		var rowContainer = createDivision(["flex_item"]);
+		//rowContainer.style.flexDirection = "column";
+		rowContainer.style.justifyContent = "center";
 
-	let expected = getStepsUntilNextRank(seasonView, lastWinrate/100);
-	t = document.createElement("div");
-	t.classList.add("ranks_history_title");
-	t.innerHTML = `Games until ${getNextRank(seasonView)}: ${expected}`;
-	div.appendChild(t);
+		var versusPrefix = createDivision(["ranks_history_title"], "Vs.");
+		rowContainer.appendChild(versusPrefix);
+
+		var rankBadge = createDivision(["ranks_history_badge"]);
+		rankBadge.title = rankName;
+		rankBadge.style.backgroundPosition = `${get_rank_index(rankName, 1) * -48}px 0px`;
+		rowContainer.appendChild(rankBadge);
+
+		var rankSpecificWinrate = createDivision(
+			["ranks_history_title"], 
+			`${wonGames}:${lostGames} (${formatPercent(wonGames / totalGames)}%)`);
+	
+		// let sampleSize = `Sample size: ${totalGames}`;
+		// rankSpecificWinrate.title = sampleSize;
+
+		rowContainer.appendChild(rankSpecificWinrate);
+
+		container.appendChild(rowContainer);
+
+		lastWinrate = wonGames / totalGames;
+	});
+
+	let totalWon = rc.total.w;
+	let totalLost = rc.total.l;
+	let totalWinrate = totalWon / rc.total.t;
+	title = createDivision(["ranks_history_title"], `Total: ${totalWon}:${totalLost} (${formatPercent(totalWinrate)}%)`);
+	// let sampleSize = `Sample size: ${rc.total.t}`;
+	// title.title = sampleSize;
+	container.appendChild(title);
 
 
+	let currentRank = viewingLimitSeason ? rankLimited : rankConstructed;
+	let expected = getStepsUntilNextRank(viewingLimitSeason, lastWinrate);
 
-	$(but).click(() => {
-		seasonView = !seasonView;
-		renderRanksStats($('.ranks_history')[0]);
+	title = createDivision(
+		["ranks_history_title"], 
+		`Games until ${getNextRank(currentRank)}: ${expected}`);
+	title.title = `Using ${formatPercent(lastWinrate)}% winrate`;
+	container.appendChild(title);
+
+	seasonToggleButton.addEventListener('click', (event) => {
+		viewingLimitSeason = !viewingLimitSeason;
+		renderRanksStats(container);
 	});
 } 
 
@@ -418,16 +477,17 @@ function filterHistory(filter) {
 	open_history_tab(0);
 }
 
-function getNextRank(mode) {
-	let cr = rankLimited;
-	if (!mode)	cr = rankConstructed;
 
-	if (cr == "Bronze")		return "Silver";
-	if (cr == "Silver")		return "Gold";
-	if (cr == "Gold")		return "Platinum";
-	if (cr == "Platinum")	return "Diamond";
-	if (cr == "Diamond")	return "Mythic";
-	return;
+function getNextRank(currentRank) {
+	/*
+		Globals used: RANKS
+	*/
+	var rankIndex = RANKS.indexOf(currentRank);
+	if (rankIndex < RANKS.length - 1) {
+		return RANKS[rankIndex + 1];
+	} else {s
+		return undefined;
+	}
 }
 
 function getStepsUntilNextRank(mode, winrate) {
