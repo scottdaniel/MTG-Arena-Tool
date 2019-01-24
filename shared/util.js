@@ -1255,3 +1255,19 @@ Array.prototype.sum = function(prop) {
     }
     return total
 }
+
+//
+function createDivision(classNames, innerHTML) {
+	// Utility function. Create a <div> element with specified class names and content
+	let div = document.createElement("div");
+
+	if (classNames !== undefined) {
+		classNames.forEach(
+			className => div.classList.add(className)
+		);
+	}
+	if (innerHTML !== undefined) {
+		div.innerHTML = innerHTML;
+	}
+	return div;
+}
