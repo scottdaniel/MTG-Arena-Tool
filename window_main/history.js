@@ -45,24 +45,18 @@ function open_history_tab(loadMore) {
 		loadMore = 25;
 		sort_history();		
 		mainDiv.innerHTML = '';
-
 		loadHistory = 0;
-		
-		var wrap_r = document.createElement("div");
-		wrap_r.classList.add("wrapper_column");
-		wrap_r.classList.add("sidebar_column_l");
 
-		div = document.createElement("div");
-		div.classList.add("ranks_history");
+		let wrap_r = createDivision(["wrapper_column", "sidebar_column_l"]);
+
+		div = createDivision(["ranks_history"]);
 
 		renderRanksStats(div);
 
-		var wrap_l = document.createElement("div");
-		wrap_l.classList.add("wrapper_column");
+		let wrap_l = createDivision(["wrapper_column"]);
 		wrap_l.setAttribute("id", "history_column");
 
-		d = document.createElement("div");
-		d.classList.add("list_fill");
+		d = createDivision(["list_fill"]);
 
 		wrap_r.appendChild(div);
 		mainDiv.appendChild(wrap_l);
@@ -95,21 +89,16 @@ function open_history_tab(loadMore) {
 		});
 		if (filteredSampleSize == 0)	filteredSampleSize = matchesHistory.matches.length;
 
-		div = document.createElement("div");
-		div.classList.add("history_top");
+		div = createDivision(["history_top"]);
 
-		let history_top_filter = document.createElement("div");
-		history_top_filter.classList.add('history_top_filter');
+		let history_top_filter = createDivision(["history_top_filter"]);
 
-		let history_top_winrate = document.createElement("div");
-		history_top_winrate.classList.add('history_top_winrate');
+		let history_top_winrate = createDivision(["history_top_winrate"]);
 
-		d = document.createElement("div");
-		d.classList.add('list_deck_winrate');
 		let wrTotal = 1 / (wins+losses) * wins;
-
 		let colClass = getWinrateClass(wrTotal);
-		d.innerHTML = `${wins} : ${losses} (<span class="${colClass}_bright">${Math.round(wrTotal*100)}%</span>)`;
+		d = createDivision(["list_deck_winrate"], `${wins} : ${losses} (<span class="${colClass}_bright">${Math.round(wrTotal*100)}%</span>)`);
+
 		history_top_winrate.appendChild(d);
 
 		div.appendChild(history_top_filter);
@@ -148,43 +137,27 @@ function open_history_tab(loadMore) {
 		actuallyLoaded++;
 		//console.log("Load match: ", match_id, match);
 		//console.log("Match: ", loadHistory, match.type, match);
-
-		div = document.createElement("div");
-		div.classList.add(match.id);
-		div.classList.add("list_match");
-
-		var fltl = document.createElement("div");
-		fltl.classList.add("flex_item");
-
-		var fll = document.createElement("div");
-		fll.classList.add("flex_item");
+		
+		let div = createDivision([match.id, "list_match"]);
+		let fltl = createDivision(["flex_item"]);
+		let fll = createDivision(["flex_item"]);
 		fll.style.flexDirection = "column";
-
-		var flt = document.createElement("div");
-		flt.classList.add("flex_top");
+		let flt = createDivision(["flex_top"]);
+		let flb = createDivision(["flex_bottom"]);
 		fll.appendChild(flt);
-
-		var flb = document.createElement("div");
-		flb.classList.add("flex_bottom");
 		fll.appendChild(flb);
+		let fct = createDivision(["flex_top"]);
 
-		var flc = document.createElement("div");
-		flc.classList.add("flex_item");
+		let flc = createDivision(["flex_item"]);
 		flc.style.flexDirection = "column";
 		flc.style.flexGrow = 2;
-
-		var fct = document.createElement("div");
-		fct.classList.add("flex_top");
 		flc.appendChild(fct);
 
-		var fcb = document.createElement("div");
-		fcb.classList.add("flex_bottom");
+		let fcb = createDivision(["flex_bottom"]);
 		fcb.style.marginRight = "14px";
 		flc.appendChild(fcb);
 
-		var flr = document.createElement("div");
-		flr.classList.add("rightmost");
-		flr.classList.add("flex_item");
+		let flr = createDivision(["rightmost", "flex_item"]);
 
 		var tileGrpid, tile;
 		if (match.type == "match") {
@@ -196,9 +169,7 @@ function open_history_tab(loadMore) {
 				tileGrpid = 67003;
 			}
 
-			tile = document.createElement("div");
-			tile.classList.add(match.id+"t");
-			tile.classList.add("deck_tile");
+			tile = createDivision([match.id+"t", "deck_tile"]);
 
 			try {
 				tile.style.backgroundImage = "url(https://img.scryfall.com/cards"+cardsDb.get(tileGrpid).images["art_crop"]+")";
@@ -208,64 +179,39 @@ function open_history_tab(loadMore) {
 			}
 			fltl.appendChild(tile);
 
-			d = document.createElement("div");
-			d.classList.add("list_deck_name");
-			d.innerHTML = match.playerDeck.name;
+			d = createDivision(["list_deck_name"], match.playerDeck.name);
 			flt.appendChild(d);
 
-			d = document.createElement("div");
-			d.classList.add("list_deck_name_it");
-			d.innerHTML = getReadableEvent(match.eventId);
+			d = createDivision(["list_deck_name_it"], getReadableEvent(match.eventId));
 			flt.appendChild(d);
 
 			match.playerDeck.colors.forEach(function(color) {
-				var m = document.createElement("div");
-				m.classList.add("mana_s20");
-				m.classList.add("mana_"+mana[color]);
+				var m = createDivision(["mana_s20", "mana_"+mana[color]]);
 				flb.appendChild(m);
 			});
 
-			d = document.createElement("div");
-			d.classList.add("list_match_title");
 			if (match.opponent.name == null) {
 				match.opponent.name = "-";
 			}
-			d.innerHTML = "vs "+match.opponent.name.slice(0, -6);
+			d = createDivision(["list_match_title"], "vs "+match.opponent.name.slice(0, -6));
 			fct.appendChild(d);
 
-			var or = document.createElement("div");
-			or.classList.add("ranks_16");
+			var or = createDivision(["ranks_16"]);
 			or.style.backgroundPosition = (get_rank_index_16(match.opponent.rank)*-16)+"px 0px";
 			or.title = match.opponent.rank+" "+match.opponent.tier;
 			fct.appendChild(or);
 
-			d = document.createElement("div");
-			d.classList.add("list_match_time");
-			d.innerHTML = timeSince(new Date(match.date))+' ago - '+toMMSS(match.duration);
+			d = createDivision(["list_match_time"], timeSince(new Date(match.date))+' ago - '+toMMSS(match.duration));
 			fcb.appendChild(d);
 
 			var cc = get_deck_colors(match.oppDeck);
 			cc.forEach(function(color) {
-				var m = document.createElement("div");
-				m.classList.add("mana_s20");
-				m.classList.add("mana_"+mana[color]);
+				var m = createDivision(["mana_s20", "mana_"+mana[color]]);
 				fcb.appendChild(m);
 			});
 
-			if (match.player.win > match.opponent.win) {
-				d = document.createElement("div");
-				d.classList.add("list_match_result_win");
-				//d.innerHTML = "Win";
-				d.innerHTML = match.player.win +":"+match.opponent.win;
-				flr.appendChild(d);
-			}
-			else {
-				d = document.createElement("div");
-				d.classList.add("list_match_result_loss");
-				//d.innerHTML = "Loss";
-				d.innerHTML = match.player.win +":"+match.opponent.win;
-				flr.appendChild(d);
-			}
+			d = createDivision([(match.player.win > match.opponent.win ? "list_match_result_win" : "list_match_result_loss")], `${match.player.win}:${match.opponent.win}`);
+			flr.appendChild(d);
 		}
 		else if (match.type == "draft") {
 			console.log("Draft: ", match);
@@ -276,9 +222,7 @@ function open_history_tab(loadMore) {
 				tileGrpid = 67003;
 			}
 
-			tile = document.createElement("div");
-			tile.classList.add(match.id+"t");
-			tile.classList.add("deck_tile");
+			tile = createDivision([match.id+"t", "deck_tile"]);
 
 			try {
 				tile.style.backgroundImage = "url(https://img.scryfall.com/cards"+cardsDb.get(tileGrpid).images["art_crop"]+")";
@@ -288,33 +232,21 @@ function open_history_tab(loadMore) {
 			}
 			fltl.appendChild(tile);
 
-			d = document.createElement("div");
-			d.classList.add("list_deck_name");
-			d.innerHTML = match.set+" draft";
+			d = createDivision(["list_deck_name"], match.set+" draft");
 			flt.appendChild(d);
 
-			d = document.createElement("div");
-			d.classList.add("list_match_time");
-			d.innerHTML = timeSince(new Date(match.date))+" ago.";
+			d = createDivision(["list_match_time"], timeSince(new Date(match.date))+" ago.");
 			fcb.appendChild(d);
 
-			d = document.createElement("div");
-			d.classList.add("list_match_replay");
-			d.innerHTML = "See replay";
+			d = createDivision(["list_match_replay"], "See replay");
 			fct.appendChild(d);
 
-			d = document.createElement("div");
-			d.classList.add("list_draft_share");
-			d.classList.add(match.id+'dr');
+			d = createDivision(["list_draft_share", match.id+'dr']);
 			flr.appendChild(d);
 
 		}
 
-		var fldel = document.createElement("div");
-		fldel.classList.add("flex_item");
-		fldel.classList.add(match.id+"_del");
-		fldel.classList.add("delete_item");
-
+		var fldel = createDivision(["flex_item", match.id+"_del", "delete_item"]);
 
 		div.appendChild(fltl);
 		div.appendChild(fll);
