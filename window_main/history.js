@@ -20,8 +20,8 @@ globals
 	rankConstructedStep,
 	rankConstructedTier,
 	getReadableEvent,
-	getWinrateClass
-
+	getWinrateClass,
+	createDivision
 */
 const RANKS = [
 	"Bronze",

@@ -15,7 +15,8 @@ global
 	discordTag,
 	shell,
 	pop,
-	toHHMMSS
+	toHHMMSS,
+	createDivision
 */
 
 let tournaments_list;
@@ -51,26 +52,23 @@ function open_tournaments_tab(arg, opentab = true) {
 		tournaments_list = arg;
 		if (!opentab)	return
 	}
-
-	let d = document.createElement("div");
-	d.classList.add("list_fill");
+	
+	let d = createDivision(["list_fill"]);
 	mainDiv.appendChild(d);
 
-	let fl = document.createElement("div");
-	fl.classList.add("flex_item");
+	let dname = discordTag.split("#")[0];
+	let fl = createDivision(
+		["flex_item"],
+		`<div class="discord_icon"></div><div class="top_username">${dname}</div><div class="discord_message">Your discord tag will be visible to your opponents.</div>`
+	);
 	fl.style.margin = "auto";
 	fl.style.width = "fit-content";
-	let dname = discordTag.split("#")[0];
-	fl.innerHTML = `<div class="discord_icon"></div><div class="top_username">${dname}</div><div class="discord_message">Your discord tag will be visible to your opponents.</div>`;
 	mainDiv.appendChild(fl);
 
-	let title = document.createElement("div");
-	title.classList.add("tournament_title");
-	title.innerHTML = "Tournaments List:";
+	let title = createDivision(["tournament_title"], "Tournaments List:");
 	mainDiv.appendChild(title);
 
-	let cont = document.createElement("div");
-	cont.classList.add("tournament_list_cont");
+	let cont = createDivision(["tournament_list_cont"]);
 
 	listInterval.forEach((_id) => {
 		clearInterval(_id);
@@ -79,19 +77,17 @@ function open_tournaments_tab(arg, opentab = true) {
 	tournaments_list.forEach(function(tou, index) {
 		//console.log(tou);
 
-		let div = document.createElement("div");
-		div.classList.add("tou_container");
+		let div = createDivision(["tou_container"]);
 		div.id = tou._id;
 
-		let stat = document.createElement("div");
-		stat.classList.add("top_status");
+		let stat = createDivision(["top_status"]);
 		if (tou.state == -1)		stat.classList.add("status_red");
 		else if (tou.state == 4)	stat.classList.add("status_black");
 		else						stat.classList.add("status_green");
 
 		let sd = tou.signupDuration;
 		let rd = tou.roundDuration;
-		let now = timestamp();
+		//let now = timestamp();
 
 		let roundsStart = tou.starts + (sd * 60*60);
 		let roundEnd = tou.starts + (sd * 60*60) + ((tou.currentRound+1) * (60*60) * rd);
@@ -136,28 +132,16 @@ function open_tournaments_tab(arg, opentab = true) {
 			stateb = "Winner: "+tou.winner.slice(0, -6);
 		}
 
-		let nam = document.createElement("div");
-		nam.classList.add("tou_name");
-		nam.innerHTML = tou.name;
+		let nam = createDivision(["tou_name"], tou.name);
 
-		let fo = document.createElement("div");
-		fo.classList.add("tou_cell");
-		fo.innerHTML = tou.format;
+		let fo = createDivision(["tou_cell"], tou.format);
 
-		let st = document.createElement("div");
-		st.classList.add("tou_state");
-		st.classList.add("list_state_"+index);
-		st.innerHTML = state;
+		let st = createDivision(["tou_state", "list_state_"+index], state);
 
-		let stb = document.createElement("div");
-		stb.classList.add("tou_cell");
-		stb.innerHTML = tou.players.length+" players.";
+		let stb = createDivision(["tou_cell"], tou.players.length+" players.");
 
-		let pln = document.createElement("div");
-		pln.classList.add("tou_cell");
-		pln.classList.add("list_stateb_"+index);
+		let pln = createDivision(["tou_cell", "list_stateb_"+index], stateb);
 		pln.style.width = "200px";
-		pln.innerHTML = stateb;
 
 		div.appendChild(stat);
 		div.appendChild(nam);
