@@ -297,6 +297,7 @@ function open_tournament(t) {
 		tou.players.forEach((p) => {
 			$(`<div class="tou_list_player_name">${p.slice(0, -6)}</div>`).appendTo(list);
 		});
+		$(`<br><br>`).appendTo(list);
 		list.appendTo(mainDiv);
 
 		$(".but_join").click(function () {
