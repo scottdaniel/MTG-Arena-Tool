@@ -406,6 +406,8 @@ function renderRanksStats(container) {
 
 	// Add ranks matchup history here
 	let rc = matchesHistory.rankwinrates[seasonName];
+	var lastWinrate; // used later
+
 	Object.values(rc).forEach(object => {
 		// object is either rank win/loss data OR metadata
 		// See function calculateRankWins() in background.js
@@ -442,6 +444,8 @@ function renderRanksStats(container) {
 		rowContainer.appendChild(rankSpecificWinrate);
 
 		container.appendChild(rowContainer);
+
+		lastWinrate = wonGames / totalGames;
 	});
 
 	let totalWon = rc.total.w;
@@ -454,11 +458,12 @@ function renderRanksStats(container) {
 
 
 	let currentRank = viewingLimitSeason ? rankLimited : rankConstructed;
-	let expected = getStepsUntilNextRank(viewingLimitSeason, totalWinrate);
+	let expected = getStepsUntilNextRank(viewingLimitSeason, lastWinrate);
 
 	title = createDivision(
 		["ranks_history_title"], 
 		`Games until ${getNextRank(currentRank)}: ${expected}`);
+	title.title = `Using ${formatPercent(lastWinrate)}% winrate`;
 	container.appendChild(title);
 
 	seasonToggleButton.addEventListener('click', (event) => {

@@ -390,6 +390,15 @@ function requestHistorySend(state) {
 	}
 }
 
+const RANKED_DRAFT_EVENT_CODES = [
+	"QuickDraft_M19_20190118",
+	"QuickDraft_RIX_20190104",
+	"QuickDraft_GRN_20181221"
+];
+// code and time when ranked draft _started_
+const UNRANKED_RANKED_CHANGE_CODE = "QuickDraft_DOM_12072018";
+const UNRANKED_RANKED_CHANGE_DATE =  new Date("2018-12-14T16:00:00.000Z");
+
 // Calculates winrates for history tabs (set to last 10 dys as default)
 function calculateRankWins() {
 	var rankwinrates = {
@@ -432,29 +441,14 @@ function calculateRankWins() {
 		let struct;
 		if (match.eventId == "Ladder") {
 			struct = rankwinrates.constructed;
-		}
-		else if (match.eventId == "QuickDraft_DOM_12072018" || match.eventId == "QuickDraft_RIX_20190104" || match.eventId == "QuickDraft_GRN_20181221") {
+		} else if (RANKED_DRAFT_EVENT_CODES.includes(match.eventId)
+			|| (match.eventId === UNRANKED_RANKED_CHANGE_CODE && match.date >= UNRANKED_RANKED_CHANGE_DATE)) {
 			struct = rankwinrates.limited;
-		}
-		else {
+		} else {
 			continue;
 		}
-		switch (match.opponent.rank) {
-			case "Bronze":
-				struct = struct.bronze;		break;
-			case "Silver":
-				struct = struct.silver;		break;
-			case "Gold":
-				struct = struct.gold;		break;
-			case "Platinum":
-				struct = struct.platinum;	break;
-			case "Diamond":
-				struct = struct.diamond;	break;
-			case "Mythic":
-				struct = struct.mythic;		break;
-			default:
-				struct = undefined;			break;
-		}
+
+		struct = struct[match.opponent.rank.toLowerCase()];
 
 		if (struct) {
 			struct.t += 1;
