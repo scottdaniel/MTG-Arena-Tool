@@ -152,6 +152,10 @@ body {pointer-events: none}
     width: 50%
 }
 
+.pname_priority {
+    color: #bdd6ff;
+}
+
 .clock_prev, .draft_prev, .deck_prev {
     -webkit-app-region:no-drag;
     position: absolute;

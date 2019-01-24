@@ -130,7 +130,7 @@ function recreateClock() {
 			p1name = 'You';
 			p2name = oppName;
 		}
-		$('.clock_turn').html('<div class="clock_pname1">'+p1name+'</div><div class="clock_pname2">'+p2name+'</div>');
+		$('.clock_turn').html(`<div class="clock_pname1 ${(turnPriority == 1 ? 'pname_priority' : '')}">${p1name}</div><div class="clock_pname2 ${(turnPriority == 2 ? 'pname_priority' : '')}">${p2name}</div>`);
 		$('.clock_elapsed').html('');
 		$('.clock_elapsed').append(p1);
 		$('.clock_elapsed').append(p2);
@@ -436,6 +436,9 @@ ipc.on("set_turn", function (event, _we, _phase, _step, _number, _active, _prior
 	//turnActive = _active;
 	turnPriority = _priority;
 	//turnDecision = _decision;
+	if (clockMode == 0) {
+		recreateClock();
+	}
 	if (clockMode > 0) {
 		if (turnPriority == _we) {
 			$('.clock_turn').html("You have priority.");
