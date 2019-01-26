@@ -807,6 +807,12 @@ a:hover {
     width: calc(50% - 32px);
 }
 
+.cardlist {
+    padding: 16px;
+    min-width: calc(33% - 32px);
+    width: calc(33% - 32px);
+}
+
 .stats {
     padding: 32px 0;
     width: calc(50% - 48px);
@@ -2691,4 +2697,98 @@ a:hover {
     max-width: 800px;
     margin: auto;
     display: flex;
+}
+
+[tooltip-top], [tooltip-bottom] {
+    position: relative;
+    color: #FAE5D2;
+    text-decoration: underline dotted;
+}
+
+[tooltip-top]::before, [tooltip-bottom]::before {
+    visibility: hidden;
+    content: attr(tooltip-content);
+    position: absolute;
+    left: 50%;
+    width: 200px;
+    margin-left: -116px;
+    background-color: black;
+    padding: 8px 16px;
+    border-radius: 6px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 100000;
+}
+
+[tooltip-top]::before {
+    bottom: calc(100% + 10px);
+}
+
+[tooltip-bottom]::before {
+    top: calc(100% + 10px);
+}
+
+[tooltip-top]::after, [tooltip-bottom]::after {
+    visibility: hidden;
+    content: "";
+    position: absolute;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 100000;
+}
+
+[tooltip-top]::after {
+    bottom: 100%;
+    border-color: black transparent transparent transparent;
+}
+
+[tooltip-bottom]::after {
+    top: 100%;
+    border-color: transparent transparent black transparent;
+}
+
+[tooltip-top]:hover::before, [tooltip-top]:hover::after, [tooltip-bottom]:hover::before, [tooltip-bottom]:hover::after {
+    visibility: visible;
+    opacity: 1;
+}
+
+.library_list {
+    display: grid;
+    grid-template-columns: 4fr repeat(4, 1fr);
+    width: calc(100% - 60px);
+}
+
+.library_card {
+    grid-column: 1;
+    padding: 0 16px;
+}
+
+.library_hand {
+    grid-column: 2 / span 4;
+    grid-row-start: 1;
+    color: #FAE5D2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border: 1px solid;
+}
+
+.library_stat {
+    color: #FAE5D2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border: 1px solid;
+}
+
+.card_lists_list {
+    display: flex;
+    overflow: auto;
+    justify-content: center;
 }

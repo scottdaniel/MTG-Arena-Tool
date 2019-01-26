@@ -1268,6 +1268,14 @@ function drawDeck(div, deck) {
 }
 
 //
+function drawCardList(div, cards) {
+	let unique = makeId(4);
+	let counts = {};
+	cards.forEach(cardId => counts[cardId] = (counts[cardId] || 0) + 1);
+	Object.keys(counts).forEach(cardId => addCardTile(cardId, unique, counts[cardId], div));
+}
+
+//
 function drawDeckVisual(_div, _stats, deck) {
 	// attempt at sorting visually.. 
 	var newMainDeck = [];
@@ -1792,10 +1800,116 @@ function open_match(id) {
 
 	dl.appendTo(fld);
 	odl.appendTo(fld);
+
 	$("#ux_1").append(top);
 	$("#ux_1").append(flc);
 	$("#ux_1").append(fld);
-	
+
+	if (match.gameStats) {
+		match.gameStats.forEach((game, gameIndex) => {
+			if (game.sideboardChanges) {
+				addCardSeparator("Game " + (gameIndex + 1) + " Sideboard Changes", $("#ux_1"));
+
+				let sideboardDiv = $('<div class="card_lists_list"></div>');
+				let additionsDiv = $('<div class="cardlist"></div>');
+				addCardSeparator("Sideboarded In", additionsDiv);
+				drawCardList(additionsDiv, game.sideboardChanges.added);
+				additionsDiv.appendTo(sideboardDiv);
+				let removalsDiv = $('<div class="cardlist"></div>');
+				addCardSeparator("Sideboarded Out", removalsDiv);
+				drawCardList(removalsDiv, game.sideboardChanges.removed);
+				removalsDiv.appendTo(sideboardDiv);
+
+				$("#ux_1").append(sideboardDiv);
+			}
+
+			addCardSeparator("Game " + (gameIndex + 1) + " Hands Drawn", $("#ux_1"));
+
+			let handsDiv = $('<div class="card_lists_list"></div>');
+			if (game.handsDrawn.length > 3) {
+				// The default value of "center" apparently causes padding to be omitted in the calculation of how far
+				// the scrolling should go. So, if there are enough hands to actually need scrolling, override it.
+				handsDiv.css("justify-content", "start");
+			}
+
+			game.handsDrawn.forEach((hand, i) => {
+				let handDiv = $('<div class="cardlist"></div>');
+				drawCardList(handDiv, hand);
+				handDiv.appendTo(handsDiv);
+				if (game.bestOf == 1 && i == 0) {
+					let landSpan = $('<div style="margin: auto; text-align: center;" tooltip-top tooltip-content='
+						+ '"This hand was drawn with weighted odds that Wizards of the Coast has not disclosed because it is the first hand in a best-of-one match. '
+						+ 'It should be more likely to have a close to average number of lands, but only they could calculate the exact odds.">Land Percentile: Unknown</div>');
+					landSpan.appendTo(handDiv);
+				} else {
+					let chance = math.bignumber(0);
+					let percentile = math.bignumber(0);
+					let average = math.bignumber(0);
+					for (let i = 0; i < hand.length; i++) {
+						chance = hypergeometric(i, game.deckSize, hand.length, game.landsInDeck, true);
+						percentile = math.add(percentile, chance);
+						average = math.add(average, math.multiply(percentile, chance));
+					}
+					let actualPercentile = (hypergeometricRange(0, game.handLands[i], game.deckSize, hand.length, game.landsInDeck) * 100).toFixed(2);
+					let landSpan = $('<div style="margin: auto; text-align: center;" tooltip-top tooltip-content='
+						+ '"The probability of a random hand of the same size having the same number of lands or fewer. '
+						+ 'For this deck and hand size, this should average about ' + (math.number(average) * 100).toFixed(2) + '%.">Land Percentile: ' + actualPercentile + '%</div>');
+					landSpan.appendTo(handDiv);
+				}
+			});
+
+			$("#ux_1").append(handsDiv);
+
+			addCardSeparator("Game " + (gameIndex + 1) + " Shuffled Order", $("#ux_1"));
+			let libraryDiv = $('<div class="library_list"></div>');
+			let unique = makeId(4);
+
+			game.shuffledOrder.forEach((cardId, libraryIndex) => {
+				let cardDiv = $('<div class="library_card"></div>');
+				addCardTile(cardId, unique + libraryIndex, "#" + (libraryIndex + 1), cardDiv)
+				cardDiv.appendTo(libraryDiv);
+			});
+
+			let handSize = 8 - game.handsDrawn.length;
+			let handExplanation = $('<div class="library_hand">The opening hand is excluded from the below statistics to prevent mulligan choices from influencing them.</div>');
+			handExplanation.css("grid-row-end", "span " + (handSize - 1));
+			handExplanation.appendTo(libraryDiv);
+
+			let headerDiv = $('<div class="library_stat" tooltip-bottom tooltip-content="The number of lands in the library at or before this point.">Lands</div>');
+			headerDiv.css("grid-area", (handSize) + " / 2");
+			headerDiv.appendTo(libraryDiv);
+			headerDiv = $('<div class="library_stat" tooltip-bottom tooltip-content="The average number of lands expected in the library at or before this point.">Expected</div>');
+			headerDiv.css("grid-area", (handSize) + " / 3");
+			headerDiv.appendTo(libraryDiv);
+			headerDiv = $('<div class="library_stat" tooltip-bottom tooltip-content="The expected percentage of games where the actual number of lands is equal or less than this one. Extreme values, low or high, should be as rare as they are extreme.">Percentile</div>');
+			headerDiv.css("grid-area", (handSize) + " / 4");
+			headerDiv.appendTo(libraryDiv);
+			headerDiv = $('<div class="library_stat" tooltip-bottom tooltip-content="The expected percentage of games where the actual number of lands exactly matches this one.">Chance</div>');
+			headerDiv.css("grid-area", (handSize) + " / 5");
+			headerDiv.appendTo(libraryDiv);
+
+			game.libraryLands.forEach((count, index) => {
+				let landsDiv = $('<div class="library_stat">' + count + '</div>');
+				landsDiv.css("grid-area", (handSize + index + 1) + " / 2");
+				landsDiv.appendTo(libraryDiv);
+				let expected = ((index + 1) * game.landsInLibrary / game.librarySize).toFixed(2);
+				let expectedDiv = $('<div class="library_stat">' + expected + '</div>');
+				expectedDiv.css("grid-area", (handSize + index + 1) + " / 3");
+				expectedDiv.appendTo(libraryDiv);
+				let percentile = hypergeometricRange(0, count, game.librarySize, index + 1, game.landsInLibrary);
+				let percentileDiv = $('<div class="library_stat">' + (percentile * 100).toFixed(2) + '%</div>');
+				percentileDiv.css("grid-area", (handSize + index + 1) + " / 4");
+				percentileDiv.appendTo(libraryDiv);
+				let chance = hypergeometric(count, game.librarySize, index + 1, game.landsInLibrary);
+				let chanceDiv = $('<div class="library_stat">' + (chance * 100).toFixed(2) + '%</div>');
+				chanceDiv.css("grid-area", (handSize + index + 1) + " / 5");
+				chanceDiv.appendTo(libraryDiv);
+			});
+
+			$("#ux_1").append(libraryDiv);
+		});
+	}
+
 	$(".openLog").click(function() {
 		shell.openItem(path.join(actionLogDir, id+'.txt'));
 	});

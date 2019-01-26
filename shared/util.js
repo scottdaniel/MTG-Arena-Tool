@@ -65,41 +65,45 @@ function addCardTile(grpId, indent, quantity, element) {
 		}
 		element.append(cont);
 		var card = cardsDb.get(grpId);
-		var div = $('<div id="t'+grpId+indent+'" style="min-width: calc(100% - '+ww+'px) !important;" class="card_tile '+get_frame_class(card.frame)+'"></div>');
+		var div = $('<div id="t'+grpId+indent+'" style="min-width: calc(100% - '+ww+'px) !important;" class="card_tile '+get_frame_class(card ? card.frame : [])+'"></div>');
 		cont.append(div);
 
 		// Glow hover
 		var glow = $('<div id="t'+grpId+indent+'" style="min-width: calc(100% - '+ww+'px) !important; left: calc(0px - 100% + '+ll+'px) !important" class="card_tile_glow"></div>');
 		cont.append(glow);
 
-		addCardHover(glow, card);
-		glow.on('mouseenter', function() {
-			var domid = $(this).attr('id');
-			$('#'+domid).css('margin-top', '0px');
-		});
+		if (card) {
+			addCardHover(glow, card);
+			glow.on('mouseenter', function() {
+				var domid = $(this).attr('id');
+				$('#'+domid).css('margin-top', '0px');
+			});
 
-		glow.on('click', function() {
-			if (card.dfc == 'SplitHalf')	{
-				card = cardsDb.get(card.dfcId);
-			}
-			//let newname = card.name.split(' ').join('-');
-			shell.openExternal('https://scryfall.com/card/'+get_set_scryfall(card.set)+'/'+card.cid+'/'+card.name);
-		});
+			glow.on('click', function() {
+				if (card.dfc == 'SplitHalf') {
+					card = cardsDb.get(card.dfcId);
+				}
+				//let newname = card.name.split(' ').join('-');
+				shell.openExternal('https://scryfall.com/card/'+get_set_scryfall(card.set)+'/'+card.cid+'/'+card.name);
+			});
 
-		glow.on('mouseleave', function() {
-			var domid = $(this).attr('id');
-			//$('.main_hover').css("opacity", 0);
-			$('#'+domid).css('margin-top', '3px');
-			//$('.loader').css("opacity", 0);
-		});
+			glow.on('mouseleave', function() {
+				var domid = $(this).attr('id');
+				//$('.main_hover').css("opacity", 0);
+				$('#'+domid).css('margin-top', '3px');
+				//$('.loader').css("opacity", 0);
+			});
+		}
 
 		//
 		var fl = $('<div class="flex_item"></div>');
-		fl.append('<div class="card_tile_name">'+card.name+'</div>');
+		fl.append('<div class="card_tile_name">' + (card ? card.name : "Unknown") + '</div>');
 		div.append(fl);
 
 		fl = $('<div class="flex_item" style="line-height: 26px;"></div>"');
 		div.append(fl);
+
+		if (!card) return cont;
 
 		var prevc = true;
 		card.cost.forEach(function(cost) {
