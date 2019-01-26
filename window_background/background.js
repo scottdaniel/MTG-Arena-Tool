@@ -125,10 +125,12 @@ var originalDeck = {};
 var currentDeck = {};
 var currentDeckUpdated = {};
 var currentMatchId = null;
+var currentMatchBestOfNumber = 0;
 var currentMatchTime = 0;
 var currentEventId = null;
 var duringMatch = false;
 var matchBeginTime = 0;
+var matchGameStats = [];
 var matchCompletedOnGameNumber = 0;
 var gameNumberCompleted = 0;
 
@@ -175,6 +177,12 @@ var opponentLife = 20;
 
 var zones = {};
 var gameObjs = {};
+
+var gameStage = "";
+var initialLibraryInstanceIds = [];
+var idChanges = {};
+var instanceToCardIdMap = {};
+
 var history = {};
 var drafts = {};
 var events = {};
@@ -1214,10 +1222,26 @@ function updateCustomDecks() {
 function resetGameState() {
 	zones = {};
 	gameObjs = {};
+	initialLibraryInstanceIds = [];
+	idChanges = {};
+	instanceToCardIdMap = {};
 	attackersDetected = [];
 	zoneTransfers = [];
 	playerLife = 20;
 	opponentLife = 20;
+}
+
+//
+function checkForStartingLibrary() {
+	if (gameStage != "GameStage_Start") return;
+	let hand = zones["ZoneType_Hand" + playerSeat].objectInstanceIds || [];
+	let library = zones["ZoneType_Library" + playerSeat].objectInstanceIds || [];
+	// Check that a post-mulligan scry hasn't been done
+	if (library.length == 0 || library[library.length-1] < library[0]) return;
+	if (hand.length + library.length == deck_count(originalDeck)) {
+		if (hand.length >= 2 && hand[0] == hand[1] + 1) hand.reverse();
+		initialLibraryInstanceIds = [...hand, ...library];
+	}
 }
 
 //
@@ -1244,8 +1268,10 @@ function createMatch(arg) {
 	oppWin = 0;
 	priorityTimers = [0,0,0,0,0];
 	lastPriorityChangeTime = matchBeginTime;
+	matchGameStats = [];
 	matchCompletedOnGameNumber = 0;
 	gameNumberCompleted = 0;
+	gameStage = "";
 
 	ipc_send("ipc_log", "vs "+oppName);
 	ipc_send("set_timer", matchBeginTime, windowOverlay);
@@ -1549,6 +1575,9 @@ function saveMatch(matchId) {
 	match.playerDeck = originalDeck;
 	match.oppDeck = getOppDeck();
 	match.date = new Date();
+	match.bestOf = currentMatchBestOfNumber;
+
+	match.gameStats = matchGameStats;
 
 	console.log("Save match:", match);
 	var matches_index = store.get('matches_index');

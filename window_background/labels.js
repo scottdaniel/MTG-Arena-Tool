@@ -15,6 +15,93 @@ function onLabelOutLogInfo(entry, json) {
 					oppWin += 1;
 			}
 			currentMatchTime += time;
+
+			let game = {};
+			game.shuffledOrder = initialLibraryInstanceIds.map(instance => {
+				while (!instanceToCardIdMap[instance] && idChanges[instance]) {
+					instance = idChanges[instance];
+				}
+				return instanceToCardIdMap[instance];
+			});
+			game.handsDrawn = payload.mulliganedHands.map(hand => hand.map(card => card.grpId));
+			game.handsDrawn.push(game.shuffledOrder.slice(0, 7 - game.handsDrawn.length));
+
+			if (gameNumberCompleted > 1) {
+				let deckDiff = {};
+				currentDeck.mainDeck.forEach(card => {
+					deckDiff[card.id] = card.quantity;
+				});
+				originalDeck.mainDeck.forEach(card => {
+					deckDiff[card.id] = (deckDiff[card.id] || 0) - card.quantity;
+				});
+				matchGameStats.forEach((stats, i) => {
+					if (i !== 0) {
+						let prevChanges = stats.sideboardChanges;
+						prevChanges.added.forEach(id => deckDiff[id] = (deckDiff[id] || 0) - 1);
+						prevChanges.removed.forEach(id => deckDiff[id] = (deckDiff[id] || 0) + 1);
+					}
+				});
+
+				let sideboardChanges = {
+					"added": [],
+					"removed": []
+				};
+				Object.keys(deckDiff).forEach(id => {
+					let quantity = deckDiff[id];
+					for (let i = 0; i < quantity; i++) {
+						sideboardChanges.added.push(id);
+					}
+					for (let i = 0; i > quantity; i--) {
+						sideboardChanges.removed.push(id);
+					}
+				});
+
+				game.sideboardChanges = sideboardChanges;
+			}
+
+			game.handLands = game.handsDrawn.map(hand => hand.filter(card => cardsDb.get(card).type.includes("Land")).length);
+			let handSize = 8 - game.handsDrawn.length;
+			let deckSize = 0;
+			let landsInDeck = 0;
+			let multiCardPositions = { "2": {}, "3": {}, "4": {} };
+			let cardCounts = {};
+			currentDeck.mainDeck.forEach(card => {
+				cardCounts[card.id] = card.quantity;
+				deckSize += card.quantity;
+				if (cardsDb.get(card.id).type.includes("Land")) {
+					landsInDeck += card.quantity;
+				}
+				if (!cardsDb.get(card.id).type.includes("Basic") && card.quantity >= 2 && card.quantity <= 4) {
+					multiCardPositions[card.quantity][card.id] = [];
+				}
+			});
+			let librarySize = deckSize - handSize;
+			let landsInLibrary = landsInDeck - game.handLands[game.handLands.length-1];
+			let landsSoFar = 0;
+			let libraryLands = [];
+			game.shuffledOrder.some((cardId, i) => {
+				if (cardId === undefined) return true;
+				let cardCount = cardCounts[cardId];
+				if (!cardsDb.get(cardId).type.includes("Basic") && cardCount >= 2 && cardCount <= 4) {
+					multiCardPositions[cardCount][cardId].push(i+1);
+				}
+				if (i >= handSize) {
+					if (cardsDb.get(cardId).type.includes("Land")) {
+						landsSoFar++;
+					}
+					libraryLands.push(landsSoFar);
+				}
+			});
+
+			game.deckSize = deckSize;
+			game.landsInDeck = landsInDeck;
+			game.multiCardPositions = multiCardPositions;
+			game.librarySize = librarySize;
+			game.landsInLibrary = landsInLibrary;
+			game.libraryLands = libraryLands;
+
+			matchGameStats[gameNumberCompleted-1] = game;
+
 			saveMatch(mid);
 		}
 	}
@@ -71,8 +158,16 @@ function onLabelGreToClient(entry, json) {
 		if (msg.type == "GREMessageType_GameStateMessage") {
 			if (msg.gameStateMessage.gameInfo) {
 				let gameInfo = msg.gameStateMessage.gameInfo;
-				if (gameInfo.stage && gameInfo.stage == "GameStage_Start") {
-					resetGameState();
+				if (gameInfo.stage && gameInfo.stage != gameStage) {
+					gameStage = gameInfo.stage;
+					if (gameStage == "GameStage_Start") {
+						resetGameState();
+					}
+				}
+				if (gameInfo.matchWinCondition) {
+					if (gameInfo.matchWinCondition == "MatchWinCondition_SingleElimination") currentMatchBestOfNumber = 1;
+					else if (gameInfo.matchWinCondition == "MatchWinCondition_Best2of3") currentMatchBestOfNumber = 3;
+					else currentMatchBestOfNumber = undefined;
 				}
 			}
 
@@ -85,6 +180,7 @@ function onLabelGreToClient(entry, json) {
 				if (msg.gameStateMessage.zones != undefined) {
 					msg.gameStateMessage.zones.forEach(function(zone) {
 						zones[zone.zoneId] = zone;
+						zones[zone.type + (zone.ownerSeatId || "")] = zone;
 					});
 				}
 			}
@@ -182,6 +278,10 @@ function onLabelGreToClient(entry, json) {
 										//console.log("AnnotationType_ObjectIdChanged", aff, _orig, _new, gameObjs[_orig], gameObjs);
 										gameObjs[_new] = JSON.parse(JSON.stringify(gameObjs[_orig]));
 										gameObjs[_orig] = undefined;
+									}
+
+									if (_orig != undefined && _new != undefined) {
+										idChanges[_orig] = _new;
 									}
 								}
 
@@ -301,6 +401,7 @@ function onLabelGreToClient(entry, json) {
 					//ipc_send("ipc_log", "Zones updated");
 					msg.gameStateMessage.zones.forEach(function(zone) {
 						zones[zone.zoneId] = zone;
+						zones[zone.type + (zone.ownerSeatId || "")] = zone;
 						if (zone.objectInstanceIds != undefined) {
 							zone.objectInstanceIds.forEach(function(objId) {
 								if (gameObjs[objId] != undefined) {
@@ -315,6 +416,7 @@ function onLabelGreToClient(entry, json) {
 				// Update the game objects
 				if (msg.gameStateMessage.gameObjects != undefined) {
 					msg.gameStateMessage.gameObjects.forEach(function(obj) {
+						instanceToCardIdMap[obj.instanceId] = obj.grpId;
 						let name = cardsDb.get(obj.grpId).name;
 						if (name) {
 							obj.name = name;
@@ -369,8 +471,8 @@ function onLabelGreToClient(entry, json) {
 					});
 				}
 			}
+			checkForStartingLibrary();
 		}
-		//
 	});
 	tryZoneTransfers();
 
