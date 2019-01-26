@@ -8,6 +8,9 @@ const windowBackground = 0;
 const windowRenderer = 1;
 const windowOverlay = 2;
 
+const math = require('mathjs');
+math.config({precision: 2000});
+
 const Database = require('../shared/database.js');
 const cardsDb = new Database();
 
@@ -1270,4 +1273,33 @@ function createDivision(classNames, innerHTML) {
 		div.innerHTML = innerHTML;
 	}
 	return div;
+}
+
+//
+function hypergeometric(exact, population, sample, hitsInPop, returnBig = false) {
+	return hypergeometricRange(exact, exact, population, sample, hitsInPop, returnBig);
+}
+
+//
+function hypergeometricRange(lowerBound, upperBound, population, sample, hitsInPop, returnBig = false) {
+	if (lowerBound > upperBound || lowerBound > hitsInPop) {
+		return returnBig ? math.bignumber(0) : 0;
+	}
+
+	let _population = math.bignumber(population);
+	let _sample = math.bignumber(sample);
+	let _hitsInPop = math.bignumber(hitsInPop);
+	let matchingCombos = math.bignumber(0);
+	// Can't have more non-hits in the sample than exist in the population
+	for (let i = math.max(lowerBound, sample - (population - hitsInPop)); i <= upperBound; i++) {
+		let _hitsInSample = math.bignumber(i);
+		let _hitCombos = math.combinations(_hitsInPop, _hitsInSample);
+		console.log("Pop: " + population + " lands: " + hitsInPop + " Sample: " + sample + " i: " + i);
+		let _missCombos = math.combinations(math.max(0, math.subtract(_population, _hitsInPop)), math.max(0, math.subtract(_sample, _hitsInSample)));
+		matchingCombos = math.add(matchingCombos, math.multiply(_hitCombos, _missCombos));
+	}
+
+	let totalCombos = math.combinations(_population, _sample);
+	let probability = math.divide(matchingCombos, totalCombos);
+	return returnBig ? probability : math.number(probability);
 }

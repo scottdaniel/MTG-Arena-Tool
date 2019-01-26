@@ -28,8 +28,6 @@ global
 	onLabelInEventGetSeasonAndRankDetail
 */
 var electron = require('electron');
-const math = require('mathjs');
-math.config({precision: 2000});
 
 const {app, net, clipboard} = require('electron');
 const path  = require('path');
@@ -1691,24 +1689,4 @@ function parseWotcTime(str) {
 		return new Date();
 	}
 
-}
-
-//
-function hypergeometric(arg0, arg1, arg2, arg3) {
-	if (arg0 > arg3) {
-		return 0;
-	}
-
-	let _x, _N, _n, _k;
-
-	_x = math.bignumber(arg0);// Number of successes in sample (x) <=
-	_N = math.bignumber(arg1);// Population size
-	_n = math.bignumber(arg2);// Sample size
-	_k = math.bignumber(arg3);// Number of successes in population
-
-	let _a = math.combinations(_k, _x)
-	let _b = math.combinations(math.max(0, math.subtract(_N,_k)), math.max(0, math.subtract(_n,_x)));
-	let _c = math.combinations(_N, _n);
-
-	return math.number(math.divide(math.multiply(_a, _b) , _c));
 }
