@@ -347,7 +347,7 @@ span.top_nav_item_text {
     color: #FAE5D2;
     background-position-y: 64px;
     background-repeat: no-repeat;
-    background-image: url(file:///C:/Users/Manuh/Desktop/MTG%20Arena%20Tool/MTG-Arena-Tool/window_main/../images/nav_hover.png);
+    background-image: url(../images/nav_hover.png);
     -webkit-transition: all .2s ease-in-out;
     border-bottom: solid 1px rgba(210, 231, 250, 0);
     opacity: 0.5;
@@ -356,7 +356,7 @@ span.top_nav_item_text {
     width: auto;
     position: relative;
     display: inline-grid;
-} 
+}
 
 .top_nav_item:hover {
     background-position-y: 4px;
@@ -2097,7 +2097,6 @@ a:hover {
     width: 30px;
     height: 30px;
     background: url(../images/removed.png) no-repeat center;
-}
 }
 
 .change_title {
