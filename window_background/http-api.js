@@ -37,6 +37,7 @@ function httpBasic() {
 		if (store.get("settings").send_data == false && _headers.method != 'auth' && _headers.method != 'delete_data' && _headers.method != 'get_database' && _headers.method != 'get_status' && debugLog == false) {
 			callback({message: "Settings dont allow sending data! > "+_headers.method});
 			removeFromHttp(_headers.reqId);
+			return;
 		}
 		
 		_headers.token = tokenAuth;
@@ -69,7 +70,7 @@ function httpBasic() {
 		var post_data = qs.stringify(_headers);
 		options.headers = { 'Content-Type': 'application/x-www-form-urlencoded', 'Content-Length': post_data.length};
 
-		var results = ''; 
+		var results = '';
 		var req = http.request(options, function(res) {
 			res.on('data', function (chunk) {
 				results = results + chunk;
