@@ -131,6 +131,8 @@ var currentMatchTime = 0;
 var currentEventId = null;
 var duringMatch = false;
 var matchBeginTime = 0;
+var matchCompletedOnGameNumber = 0;
+var gameNumberCompleted = 0;
 
 var arenaVersion = '';
 var playerUsername = '';
@@ -1211,15 +1213,20 @@ function updateCustomDecks() {
 }
 
 //
-function createMatch(arg) {
-	actionLog(-99, new Date(), "");
-	var obj = store.get('overlayBounds');
-
+function resetGameState() {
 	zones = {};
 	gameObjs = {};
 	attackersDetected = [];
 	zoneTransfers = [];
-	
+	playerLife = 20;
+	opponentLife = 20;
+}
+
+//
+function createMatch(arg) {
+	actionLog(-99, new Date(), "");
+	var obj = store.get('overlayBounds');
+
 	oppDeck = {mainDeck: [], sideboard: []};
 
 	if (!firstPass && store.get("settings").show_overlay == true) {
@@ -1229,18 +1236,18 @@ function createMatch(arg) {
 		ipc_send("overlay_show", 1);
 		ipc_send("overlay_set_bounds", obj);
 	}
-	playerLife = 20;
-	opponentLife = 20;
 	oppName = arg.opponentScreenName;
 	oppRank = arg.opponentRankingClass;
 	oppTier = arg.opponentRankingTier;
 	currentEventId = arg.eventId;
-	currentMatchId = null;
+	currentMatchId = arg.matchId;
 	currentMatchTime = 0;
 	playerWin = 0;
 	oppWin = 0;
 	priorityTimers = [0,0,0,0,0];
 	lastPriorityChangeTime = matchBeginTime;
+	matchCompletedOnGameNumber = 0;
+	gameNumberCompleted = 0;
 
 	ipc_send("ipc_log", "vs "+oppName);
 	ipc_send("set_timer", matchBeginTime, windowOverlay);
@@ -1516,8 +1523,8 @@ function saveCourse(json) {
 }
 
 //
-function saveMatch(upload = true) {
-	if (currentMatchTime == 0) {
+function saveMatch(matchId) {
+	if (currentMatchTime == 0 || currentMatchId != matchId) {
 		return;
 	}
 	var match = {};
@@ -1565,7 +1572,7 @@ function saveMatch(upload = true) {
 
 	history[currentMatchId] = match;
 	history[currentMatchId].type = "match";
-	if (upload) {
+	if (matchCompletedOnGameNumber == gameNumberCompleted) {
 		httpApi.httpSetMatch(match);
 	}
 	requestHistorySend(0);
@@ -1694,10 +1701,10 @@ function hypergeometric(arg0, arg1, arg2, arg3) {
 
 	let _x, _N, _n, _k;
 
-	_x = math.bignumber(arg0);// Number of successes in sample (x) <= 
+	_x = math.bignumber(arg0);// Number of successes in sample (x) <=
 	_N = math.bignumber(arg1);// Population size
 	_n = math.bignumber(arg2);// Sample size
-	_k = math.bignumber(arg3);// Number of successes in population  
+	_k = math.bignumber(arg3);// Number of successes in population
 
 	let _a = math.combinations(_k, _x)
 	let _b = math.combinations(math.max(0, math.subtract(_N,_k)), math.max(0, math.subtract(_n,_x)));

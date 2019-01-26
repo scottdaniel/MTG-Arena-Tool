@@ -3,17 +3,19 @@
 function onLabelOutLogInfo(entry, json) {
 	if (!json) return;
 	if (json.params.messageName == 'DuelScene.GameStop') {
-		var mid = json.params.payloadObject.matchId;
-		var time = json.params.payloadObject.secondsCount;
+		var payload = json.params.payloadObject;
+		var mid = payload.matchId;
+		var time = payload.secondsCount;
 		if (mid == currentMatchId) {
+			gameNumberCompleted = payload.gameNumber;
 			if (playerWin == 0 && oppWin == 0) {
-				if (json.params.payloadObject.winningTeamId == playerSeat)
+				if (payload.winningTeamId == playerSeat)
 					playerWin += 1;
 				else
 					oppWin += 1;
 			}
 			currentMatchTime += time;
-			saveMatch(false);
+			saveMatch(mid);
 		}
 	}
 }
@@ -67,6 +69,13 @@ function onLabelGreToClient(entry, json) {
 		// - The entire board state (full)
 		// - binary (we dont check that one)
 		if (msg.type == "GREMessageType_GameStateMessage") {
+			if (msg.gameStateMessage.gameInfo) {
+				let gameInfo = msg.gameStateMessage.gameInfo;
+				if (gameInfo.stage && gameInfo.stage == "GameStage_Start") {
+					resetGameState();
+				}
+			}
+
 			if (msg.gameStateMessage.type == "GameStateType_Full") {
 				// For the full board state we only update the zones
 				// We DO NOT update gameObjs array here, this is because sometimes cards become invisible for us
@@ -141,7 +150,8 @@ function onLabelGreToClient(entry, json) {
 							ipc_send("overlay_close", 1);
 						}
 
-						saveMatch();
+						matchCompletedOnGameNumber = msg.gameStateMessage.gameInfo.gameNumber;
+						saveMatch(msg.gameStateMessage.gameInfo.matchID);
 					}
 				}
 
@@ -748,7 +758,6 @@ function onLabelMatchGameRoomStateChangedEvent(entry, json) {
 	let eventId = "";
 
 	if (json.gameRoomConfig) {
-		currentMatchId = json.gameRoomConfig.matchId;
 		eventId = json.gameRoomConfig.eventId;
 		duringMatch = true;
 	}
@@ -789,8 +798,6 @@ function onLabelMatchGameRoomStateChangedEvent(entry, json) {
 		if (!store.get('settings.show_overlay_always')) {
 			ipc_send("overlay_close", 1);
 		}
-		//ipc_send("renderer_show", 1);
-		//saveMatch();
 	}
 
 	if (json.players) {
