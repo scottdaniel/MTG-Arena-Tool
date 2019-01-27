@@ -1837,24 +1837,16 @@ function open_match(id) {
 				drawCardList(handDiv, hand);
 				handDiv.appendTo(handsDiv);
 				if (game.bestOf == 1 && i == 0) {
-					let landSpan = $('<div style="margin: auto; text-align: center;" tooltip-top tooltip-content='
+					let landDiv = $('<div style="margin: auto; text-align: center;" tooltip-top tooltip-content='
 						+ '"This hand was drawn with weighted odds that Wizards of the Coast has not disclosed because it is the first hand in a best-of-one match. '
 						+ 'It should be more likely to have a close to average number of lands, but only they could calculate the exact odds.">Land Percentile: Unknown</div>');
-					landSpan.appendTo(handDiv);
+					landDiv.appendTo(handDiv);
 				} else {
-					let chance = math.bignumber(0);
-					let percentile = math.bignumber(0);
-					let average = math.bignumber(0);
-					for (let i = 0; i < hand.length; i++) {
-						chance = hypergeometric(i, game.deckSize, hand.length, game.landsInDeck, true);
-						percentile = math.add(percentile, chance);
-						average = math.add(average, math.multiply(percentile, chance));
-					}
-					let actualPercentile = (hypergeometricRange(0, game.handLands[i], game.deckSize, hand.length, game.landsInDeck) * 100).toFixed(2);
-					let landSpan = $('<div style="margin: auto; text-align: center;" tooltip-top tooltip-content='
-						+ '"The probability of a random hand of the same size having the same number of lands or fewer. '
-						+ 'For this deck and hand size, this should average about ' + (math.number(average) * 100).toFixed(2) + '%.">Land Percentile: ' + actualPercentile + '%</div>');
-					landSpan.appendTo(handDiv);
+					let likelihood = hypergeometricSignificance(game.handLands[i], game.deckSize, hand.length, game.landsInDeck);
+					let landDiv = $('<div style="margin: auto; text-align: center;" tooltip-top tooltip-content='
+						+ '"The probability of a random hand of the same size having a number of lands at least as far from average as this one, '
+						+ 'calculated as if the distribution were continuous. Over a large number of games, this should average about 50%.">Land Likelihood: ' + (likelihood * 100).toFixed(2) + '%</div>');
+					landDiv.appendTo(handDiv);
 				}
 			});
 
@@ -1881,10 +1873,10 @@ function open_match(id) {
 			headerDiv = $('<div class="library_stat" tooltip-bottom tooltip-content="The average number of lands expected in the library at or before this point.">Expected</div>');
 			headerDiv.css("grid-area", (handSize) + " / 3");
 			headerDiv.appendTo(libraryDiv);
-			headerDiv = $('<div class="library_stat" tooltip-bottom tooltip-content="The expected percentage of games where the actual number of lands is equal or less than this one. Extreme values, low or high, should be as rare as they are extreme.">Percentile</div>');
+			headerDiv = $('<div class="library_stat" tooltip-bottom tooltip-content="The probability of the number of lands being at least this far from average, calculated as if the distribution were continuous. For details see footnote. Over a large number of games, this should average about 50%.">Likelihood</div>');
 			headerDiv.css("grid-area", (handSize) + " / 4");
 			headerDiv.appendTo(libraryDiv);
-			headerDiv = $('<div class="library_stat" tooltip-bottom tooltip-content="The expected percentage of games where the actual number of lands exactly matches this one.">Chance</div>');
+			headerDiv = $('<div class="library_stat" tooltip-bottom tooltip-content="The expected percentage of games where the actual number of lands is equal or less than this one. This is easier to calculate and more widely recognized but harder to assess the meaning of.">Percentile</div>');
 			headerDiv.css("grid-area", (handSize) + " / 5");
 			headerDiv.appendTo(libraryDiv);
 
@@ -1896,15 +1888,33 @@ function open_match(id) {
 				let expectedDiv = $('<div class="library_stat">' + expected + '</div>');
 				expectedDiv.css("grid-area", (handSize + index + 1) + " / 3");
 				expectedDiv.appendTo(libraryDiv);
+				let likelihood = hypergeometricSignificance(count, game.librarySize, index + 1, game.landsInLibrary);
+				let likelihoodDiv = $('<div class="library_stat">' + (likelihood * 100).toFixed(2) + '%</div>');
+				likelihoodDiv.css("grid-area", (handSize + index + 1) + " / 4");
+				likelihoodDiv.appendTo(libraryDiv);
 				let percentile = hypergeometricRange(0, count, game.librarySize, index + 1, game.landsInLibrary);
 				let percentileDiv = $('<div class="library_stat">' + (percentile * 100).toFixed(2) + '%</div>');
-				percentileDiv.css("grid-area", (handSize + index + 1) + " / 4");
+				percentileDiv.css("grid-area", (handSize + index + 1) + " / 5");
 				percentileDiv.appendTo(libraryDiv);
-				let chance = hypergeometric(count, game.librarySize, index + 1, game.landsInLibrary);
-				let chanceDiv = $('<div class="library_stat">' + (chance * 100).toFixed(2) + '%</div>');
-				chanceDiv.css("grid-area", (handSize + index + 1) + " / 5");
-				chanceDiv.appendTo(libraryDiv);
 			});
+
+			let footnoteLabel = $('<div id="library_footnote_label" class="library_footnote" tooltip-bottom '
+				+ 'tooltip-content="Click to show footnote" onclick="toggleVisibility(\'library_footnote_label\', \'library_footnote\')">Footnote on Likelihood</div>');
+			footnoteLabel.css("grid-row", game.shuffledOrder.length + 1);
+			footnoteLabel.appendTo(libraryDiv);
+			let footnote = $('<div id="library_footnote" class="library_footnote hidden" onclick="toggleVisibility(\'library_footnote_label\', \'library_footnote\')">'
+				+ '<p>The Likelihood column calculations are designed to enable assessment of fairness at a glance, in a way '
+				+ 'that is related to percentile but differs in important ways. In short, it treats the count of lands as if '
+				+ 'it were actually a bucket covering a continuous range, and calculates the cumulative probability of the '
+				+ 'continuous value being at least as far from the median as a randomly selected value within the range covered '
+				+ 'by the actual count. Importantly, this guarantees that the theoretical average will always be exactly 50%.</p>'
+				+ '<p>For values that are not the median, the result is halfway between the value\'s own percentile and the '
+				+ 'next one up or down. For the median itself, the covered range is split and weighted for how much of it is '
+				+ 'on each side of the 50th percentile. In both cases, the result\'s meaning is the same for each direction '
+				+ 'from the 50th percentile, and scaled up by a factor of 2 to keep the possible range at 0% to 100%. '
+				+ 'For precise details, see the source code on github.</p></div>');
+			footnote.css("grid-row", game.shuffledOrder.length + 1);
+			footnote.appendTo(libraryDiv);
 
 			$("#ux_1").append(libraryDiv);
 		});
@@ -1937,6 +1947,18 @@ function open_match(id) {
 		$('.moving_ux').animate({'left': '0px'}, 250, 'easeInOutCubic'); 
 	});
 
+}
+
+//
+function toggleVisibility(...ids) {
+	ids.forEach(id => {
+		let el = document.getElementById(id);
+		if (el.classList.contains("hidden")) {
+			el.classList.remove("hidden");
+		} else {
+			el.classList.add("hidden");
+		}
+	})
 }
 
 //
