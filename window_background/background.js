@@ -488,12 +488,12 @@ ipc.on('request_course', function (event, arg) {
 	httpApi.httpGetCourse(arg);
 });
 
-ipc.on('request_tou_list', function () {
+ipc.on('request_home', function () {
 	if (playerUsername == '') {
 		ipc_send("offline", 1);
 	}
 	else {
-		httpApi.httpTournamentList();
+		httpApi.httpHomeGet();
 	}
 });
 

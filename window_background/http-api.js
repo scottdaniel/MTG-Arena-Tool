@@ -140,8 +140,8 @@ function httpBasic() {
 						if (_headers.method == 'share_draft') {
 							ipc_send("set_draft_link", parsedResult.url);
 						}
-						if (_headers.method == 'tou_list') {
-							ipc_send("set_tou_list", parsedResult.result);
+						if (_headers.method == 'home_get') {
+							ipc_send("set_home", parsedResult);
 						}
 						if (_headers.method == 'tou_get') {
 							ipc_send("tou_set", parsedResult.result);
@@ -344,10 +344,10 @@ function httpDraftShareLink(did, exp) {
 	httpAsync.push({'reqId': _id, 'method': 'share_draft', 'method_path': '/get_share_draft.php', 'id': did, 'expire': exp});
 }
 
-function httpTournamentList() {
+function httpHomeGet() {
 	heartbeatClear();
 	var _id = makeId(6);
-	httpAsync.push({'reqId': _id, 'method': 'tou_list', 'method_path': '/tournament_list.php'});
+	httpAsync.push({'reqId': _id, 'method': 'home_get', 'method_path': '/get_home.php'});
 }
 
 function httpTournamentGet(tid) {
@@ -402,8 +402,8 @@ module.exports = {
 	httpDeleteData,
 	httpGetDatabase,
 	htttpGetStatus,
+	httpHomeGet,
 	httpDraftShareLink,
-	httpTournamentList,
 	httpTournamentGet,
 	httpTournamentJoin,
 	httpTournamentDrop,

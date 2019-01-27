@@ -26,9 +26,9 @@ global
 const electron 	= require('electron');
 const remote 	= require('electron').remote;
 
-const open_tournaments_tab 		= require('./tournaments').open_tournaments_tab;
-const open_tournament 			= require('./tournaments').open_tournament;
-const set_tou_state 			= require('./tournaments').set_tou_state;
+const open_home_tab 			= require('./home').open_home_tab;
+const open_tournament 			= require('./home').open_tournament;
+const set_tou_state 			= require('./home').set_tou_state;
 const open_deck 				= require('./deck_details').open_deck
 const open_decks_tab 			= require('./decks').open_decks_tab;
 const open_history_tab			= require('./history').open_history_tab;
@@ -60,7 +60,7 @@ let cards = {};
 let cardsNew = {};
 let settings = null;
 let updateState =  {state: -1, available: false, progress: 0, speed: 0};
-let sidebarActive = 0;//-1
+let sidebarActive = -1
 let filterEvent = 'All';
 
 let draftPosition = 1;
@@ -152,7 +152,7 @@ ipc.on('auth', function (event, arg) {
 ipc.on('set_discord_tag', (event, arg) => {
 	discordTag = arg;
 	if (sidebarActive == -1) {
-		ipc_send('request_tou_list', true);
+		ipc_send('request_home', true);
 	}
 });
 
@@ -398,10 +398,11 @@ ipc.on('set_status', function (event, arg) {
 });
 
 //
-ipc.on('set_tou_list', function (event, arg) {
+ipc.on('set_home', function (event, arg) {
 	document.body.style.cursor = "auto";
 	if (sidebarActive == -1) {
-		open_tournaments_tab(arg);
+		console.log(arg);
+		open_home_tab(arg);
 	}
 });
 
@@ -536,8 +537,8 @@ ipc.on('initialize', function () {
 	$('.top_username_id').html(userName.slice(-6));
 
 	$(".top_rank").css("background-position", (rankOffset*-48)+"px 0px").attr("title", rankTitle);
-	sidebarActive = 0;//-1;
-	//ipc_send('request_tou_list', true);
+	sidebarActive = -1;
+	ipc_send('request_home', true);
 	$('.top_nav').removeClass('hidden');
 	$('.overflow_ux').removeClass('hidden');
 	$('.message_center').css('display', 'none');
@@ -797,11 +798,11 @@ $(document).ready(function() {
 					$("#ux_0").html('<div class="loading_bar ux_loading"><div class="loading_color loading_w"></div><div class="loading_color loading_u"></div><div class="loading_color loading_b"></div><div class="loading_color loading_r"></div><div class="loading_color loading_g"></div></div>');
 
 					if (discordTag == null) {
-						open_tournaments_tab(null, true);
+						open_home_tab(null, true);
 					}
 					else {
 						document.body.style.cursor = "progress";
-						ipc_send('request_tou_list', true);
+						ipc_send('request_home', true);
 					}
 				}
 			}

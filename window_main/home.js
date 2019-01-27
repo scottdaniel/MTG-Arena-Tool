@@ -29,7 +29,7 @@ let listInterval = [];
 let touStates = {};
 
 // Should separate these two into smaller functions
-function open_tournaments_tab(arg, opentab = true) {
+function open_home_tab(arg, opentab = true) {
 	let mainDiv = document.getElementById("ux_0");
 	mainDiv.classList.remove("flex_item");
 	mainDiv.innerHTML = '';
@@ -48,8 +48,8 @@ function open_tournaments_tab(arg, opentab = true) {
 
 		return false;
 	}
-	if (arg != null) {
-		tournaments_list = arg;
+	if (arg !== null) {
+		tournaments_list = arg.tournaments;
 		if (!opentab)	return
 	}
 	
@@ -65,7 +65,7 @@ function open_tournaments_tab(arg, opentab = true) {
 	fl.style.width = "fit-content";
 	mainDiv.appendChild(fl);
 
-	let title = createDivision(["tournament_title"], "Tournaments List:");
+	let title = createDivision(["tournament_title"], "Tournaments:");
 	mainDiv.appendChild(title);
 
 	let cont = createDivision(["tournament_list_cont"]);
@@ -744,7 +744,7 @@ function moveCard(_cardTile) {
 }
 
 module.exports = {
-    open_tournaments_tab: open_tournaments_tab,
+    open_home_tab: open_home_tab,
     open_tournament: open_tournament,
     set_tou_state: set_tou_state
 }
