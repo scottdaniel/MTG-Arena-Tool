@@ -3,17 +3,112 @@
 function onLabelOutLogInfo(entry, json) {
 	if (!json) return;
 	if (json.params.messageName == 'DuelScene.GameStop') {
-		var mid = json.params.payloadObject.matchId;
-		var time = json.params.payloadObject.secondsCount;
+		var payload = json.params.payloadObject;
+		var mid = payload.matchId;
+		var time = payload.secondsCount;
 		if (mid == currentMatchId) {
+			gameNumberCompleted = payload.gameNumber;
 			if (playerWin == 0 && oppWin == 0) {
-				if (json.params.payloadObject.winningTeamId == playerSeat)
+				if (payload.winningTeamId == playerSeat)
 					playerWin += 1;
 				else
 					oppWin += 1;
 			}
 			currentMatchTime += time;
-			saveMatch(false);
+
+			let game = {};
+			game.shuffledOrder = [];
+			for (let i = 0; i < initialLibraryInstanceIds.length; i++) {
+				let instance = initialLibraryInstanceIds[i];
+                while (!instanceToCardIdMap[instance] && idChanges[instance]) {
+                    instance = idChanges[instance];
+                }
+                let cardId = instanceToCardIdMap[instance];
+                if (cardId === undefined) {
+                	break;
+				} else {
+                	game.shuffledOrder.push(cardId);
+				}
+			}
+			game.handsDrawn = payload.mulliganedHands.map(hand => hand.map(card => card.grpId));
+			game.handsDrawn.push(game.shuffledOrder.slice(0, 7 - game.handsDrawn.length));
+
+			if (gameNumberCompleted > 1) {
+				let deckDiff = {};
+				currentDeck.mainDeck.forEach(card => {
+					deckDiff[card.id] = card.quantity;
+				});
+				originalDeck.mainDeck.forEach(card => {
+					deckDiff[card.id] = (deckDiff[card.id] || 0) - card.quantity;
+				});
+				matchGameStats.forEach((stats, i) => {
+					if (i !== 0) {
+						let prevChanges = stats.sideboardChanges;
+						prevChanges.added.forEach(id => deckDiff[id] = (deckDiff[id] || 0) - 1);
+						prevChanges.removed.forEach(id => deckDiff[id] = (deckDiff[id] || 0) + 1);
+					}
+				});
+
+				let sideboardChanges = {
+					"added": [],
+					"removed": []
+				};
+				Object.keys(deckDiff).forEach(id => {
+					let quantity = deckDiff[id];
+					for (let i = 0; i < quantity; i++) {
+						sideboardChanges.added.push(id);
+					}
+					for (let i = 0; i > quantity; i--) {
+						sideboardChanges.removed.push(id);
+					}
+				});
+
+				game.sideboardChanges = sideboardChanges;
+			}
+
+			game.handLands = game.handsDrawn.map(hand => hand.filter(card => cardsDb.get(card).type.includes("Land")).length);
+			let handSize = 8 - game.handsDrawn.length;
+			let deckSize = 0;
+			let landsInDeck = 0;
+			let multiCardPositions = { "2": {}, "3": {}, "4": {} };
+			let cardCounts = {};
+			currentDeck.mainDeck.forEach(card => {
+				cardCounts[card.id] = card.quantity;
+				deckSize += card.quantity;
+				if (cardsDb.get(card.id).type.includes("Land")) {
+					landsInDeck += card.quantity;
+				}
+				if (!cardsDb.get(card.id).type.includes("Basic") && card.quantity >= 2 && card.quantity <= 4) {
+					multiCardPositions[card.quantity][card.id] = [];
+				}
+			});
+			let librarySize = deckSize - handSize;
+			let landsInLibrary = landsInDeck - game.handLands[game.handLands.length-1];
+			let landsSoFar = 0;
+			let libraryLands = [];
+			game.shuffledOrder.forEach((cardId, i) => {
+				let cardCount = cardCounts[cardId];
+				if (!cardsDb.get(cardId).type.includes("Basic") && cardCount >= 2 && cardCount <= 4) {
+					multiCardPositions[cardCount][cardId].push(i+1);
+				}
+				if (i >= handSize) {
+					if (cardsDb.get(cardId).type.includes("Land")) {
+						landsSoFar++;
+					}
+					libraryLands.push(landsSoFar);
+				}
+			});
+
+			game.deckSize = deckSize;
+			game.landsInDeck = landsInDeck;
+			game.multiCardPositions = multiCardPositions;
+			game.librarySize = librarySize;
+			game.landsInLibrary = landsInLibrary;
+			game.libraryLands = libraryLands;
+
+			matchGameStats[gameNumberCompleted-1] = game;
+
+			saveMatch(mid);
 		}
 	}
 }
@@ -67,6 +162,21 @@ function onLabelGreToClient(entry, json) {
 		// - The entire board state (full)
 		// - binary (we dont check that one)
 		if (msg.type == "GREMessageType_GameStateMessage") {
+			if (msg.gameStateMessage.gameInfo) {
+				let gameInfo = msg.gameStateMessage.gameInfo;
+				if (gameInfo.stage && gameInfo.stage != gameStage) {
+					gameStage = gameInfo.stage;
+					if (gameStage == "GameStage_Start") {
+						resetGameState();
+					}
+				}
+				if (gameInfo.matchWinCondition) {
+					if (gameInfo.matchWinCondition == "MatchWinCondition_SingleElimination") currentMatchBestOfNumber = 1;
+					else if (gameInfo.matchWinCondition == "MatchWinCondition_Best2of3") currentMatchBestOfNumber = 3;
+					else currentMatchBestOfNumber = undefined;
+				}
+			}
+
 			if (msg.gameStateMessage.type == "GameStateType_Full") {
 				// For the full board state we only update the zones
 				// We DO NOT update gameObjs array here, this is because sometimes cards become invisible for us
@@ -76,6 +186,7 @@ function onLabelGreToClient(entry, json) {
 				if (msg.gameStateMessage.zones != undefined) {
 					msg.gameStateMessage.zones.forEach(function(zone) {
 						zones[zone.zoneId] = zone;
+						zones[zone.type + (zone.ownerSeatId || "")] = zone;
 					});
 				}
 			}
@@ -141,7 +252,8 @@ function onLabelGreToClient(entry, json) {
 							ipc_send("overlay_close", 1);
 						}
 
-						saveMatch();
+						matchCompletedOnGameNumber = msg.gameStateMessage.gameInfo.gameNumber;
+						saveMatch(msg.gameStateMessage.gameInfo.matchID);
 					}
 				}
 
@@ -172,6 +284,10 @@ function onLabelGreToClient(entry, json) {
 										//console.log("AnnotationType_ObjectIdChanged", aff, _orig, _new, gameObjs[_orig], gameObjs);
 										gameObjs[_new] = JSON.parse(JSON.stringify(gameObjs[_orig]));
 										gameObjs[_orig] = undefined;
+									}
+
+									if (_orig != undefined && _new != undefined) {
+										idChanges[_orig] = _new;
 									}
 								}
 
@@ -291,6 +407,7 @@ function onLabelGreToClient(entry, json) {
 					//ipc_send("ipc_log", "Zones updated");
 					msg.gameStateMessage.zones.forEach(function(zone) {
 						zones[zone.zoneId] = zone;
+						zones[zone.type + (zone.ownerSeatId || "")] = zone;
 						if (zone.objectInstanceIds != undefined) {
 							zone.objectInstanceIds.forEach(function(objId) {
 								if (gameObjs[objId] != undefined) {
@@ -305,6 +422,7 @@ function onLabelGreToClient(entry, json) {
 				// Update the game objects
 				if (msg.gameStateMessage.gameObjects != undefined) {
 					msg.gameStateMessage.gameObjects.forEach(function(obj) {
+						instanceToCardIdMap[obj.instanceId] = obj.grpId;
 						let name = cardsDb.get(obj.grpId).name;
 						if (name) {
 							obj.name = name;
@@ -359,8 +477,8 @@ function onLabelGreToClient(entry, json) {
 					});
 				}
 			}
+			checkForStartingLibrary();
 		}
-		//
 	});
 	tryZoneTransfers();
 
@@ -372,55 +490,47 @@ function onLabelGreToClient(entry, json) {
 
 function onLabelClientToMatchServiceMessageTypeClientToGREMessage(entry, json) {
 	if (!json) return;
-	if (!json.payload)	return
-	if (!json.payload.type)	return
+	if (!json.Payload) return;
+	if (!json.Payload.SubmitDeckResp) return;
 
 	// Get sideboard changes
-	if (json.payload.type == "ClientMessageType_SubmitDeckResp") {
-
-		let tempMain = {};
-		let tempSide = {};
-		json.payload.submitDeckResp.deck.deckCards.forEach( function (grpId) {
-			if (tempMain[grpId] == undefined) {
-				tempMain[grpId] = 1
+	let tempMain = {};
+	let tempSide = {};
+	json.Payload.SubmitDeckResp.Deck.DeckCards.forEach(function (grpId) {
+		if (tempMain[grpId] == undefined) {
+			tempMain[grpId] = 1
+		}
+		else {
+			tempMain[grpId] += 1;
+		}
+	});
+	if (json.Payload.SubmitDeckResp.Deck.SideboardCards !== undefined) {
+		json.Payload.SubmitDeckResp.Deck.SideboardCards.forEach(function (grpId) {
+			if (tempSide[grpId] == undefined) {
+				tempSide[grpId] = 1
 			}
 			else {
-				tempMain[grpId] += 1;
+				tempSide[grpId] += 1;
 			}
 		});
-		if (json.payload.submitDeckResp.deck.sideboardCards !== undefined) {
-			json.payload.submitDeckResp.deck.sideboardCards.forEach( function (grpId) {
-				if (tempSide[grpId] == undefined) {
-					tempSide[grpId] = 1
-				}
-				else {
-					tempSide[grpId] += 1;
-				}
-			});
-		}
-
-		var newDeck = {}
-		newDeck.mainDeck = [];
-		Object.keys(tempMain).forEach(function(key) {
-			var c = {"id": key, "quantity": tempMain[key]};
-			newDeck.mainDeck.push(c);
-		});
-
-		newDeck.sideboard = [];
-		if (json.payload.submitDeckResp.deck.sideboardCards !== undefined) {
-			Object.keys(tempSide).forEach(function(key) {
-				var c = {"id": key, "quantity": tempSide[key]};
-				newDeck.sideboard.push(c);
-			});
-		}
-
-		//get_deck_sideboarded(currentDeck, newDeck)
-		//select_deck(newDeck);
-		currentDeck = newDeck;
-		ipc_send("set_deck", currentDeck, windowOverlay);
-		//console.log(JSON.stringify(currentDeck));
-		//console.log(currentDeck);
 	}
+
+	var newDeck = {};
+	newDeck.mainDeck = [];
+	Object.keys(tempMain).forEach(function (key) {
+		var c = {"id": key, "quantity": tempMain[key]};
+		newDeck.mainDeck.push(c);
+	});
+
+	newDeck.sideboard = [];
+	if (json.Payload.SubmitDeckResp.Deck.SideboardCards !== undefined) {
+		Object.keys(tempSide).forEach(function (key) {
+			var c = {"id": key, "quantity": tempSide[key]};
+			newDeck.sideboard.push(c);
+		});
+	}
+	currentDeck = newDeck;
+	ipc_send("set_deck", currentDeck, windowOverlay);
 }
 
 function onLabelInEventGetPlayerCourse(entry, json) {
@@ -748,7 +858,6 @@ function onLabelMatchGameRoomStateChangedEvent(entry, json) {
 	let eventId = "";
 
 	if (json.gameRoomConfig) {
-		currentMatchId = json.gameRoomConfig.matchId;
 		eventId = json.gameRoomConfig.eventId;
 		duringMatch = true;
 	}
@@ -789,8 +898,6 @@ function onLabelMatchGameRoomStateChangedEvent(entry, json) {
 		if (!store.get('settings.show_overlay_always')) {
 			ipc_send("overlay_close", 1);
 		}
-		//ipc_send("renderer_show", 1);
-		//saveMatch();
 	}
 
 	if (json.players) {

@@ -28,8 +28,6 @@ global
 	onLabelInEventGetSeasonAndRankDetail
 */
 var electron = require('electron');
-const math = require('mathjs');
-math.config({precision: 2000});
 
 const {app, net, clipboard} = require('electron');
 const path  = require('path');
@@ -127,10 +125,14 @@ var originalDeck = {};
 var currentDeck = {};
 var currentDeckUpdated = {};
 var currentMatchId = null;
+var currentMatchBestOfNumber = 0;
 var currentMatchTime = 0;
 var currentEventId = null;
 var duringMatch = false;
 var matchBeginTime = 0;
+var matchGameStats = [];
+var matchCompletedOnGameNumber = 0;
+var gameNumberCompleted = 0;
 
 var arenaVersion = '';
 var playerUsername = '';
@@ -175,6 +177,12 @@ var opponentLife = 20;
 
 var zones = {};
 var gameObjs = {};
+
+var gameStage = "";
+var initialLibraryInstanceIds = [];
+var idChanges = {};
+var instanceToCardIdMap = {};
+
 var history = {};
 var drafts = {};
 var events = {};
@@ -1211,15 +1219,36 @@ function updateCustomDecks() {
 }
 
 //
+function resetGameState() {
+	zones = {};
+	gameObjs = {};
+	initialLibraryInstanceIds = [];
+	idChanges = {};
+	instanceToCardIdMap = {};
+	attackersDetected = [];
+	zoneTransfers = [];
+	playerLife = 20;
+	opponentLife = 20;
+}
+
+//
+function checkForStartingLibrary() {
+	if (gameStage != "GameStage_Start") return;
+	let hand = zones["ZoneType_Hand" + playerSeat].objectInstanceIds || [];
+	let library = zones["ZoneType_Library" + playerSeat].objectInstanceIds || [];
+	// Check that a post-mulligan scry hasn't been done
+	if (library.length == 0 || library[library.length-1] < library[0]) return;
+	if (hand.length + library.length == deck_count(originalDeck)) {
+		if (hand.length >= 2 && hand[0] == hand[1] + 1) hand.reverse();
+		initialLibraryInstanceIds = [...hand, ...library];
+	}
+}
+
+//
 function createMatch(arg) {
 	actionLog(-99, new Date(), "");
 	var obj = store.get('overlayBounds');
 
-	zones = {};
-	gameObjs = {};
-	attackersDetected = [];
-	zoneTransfers = [];
-	
 	oppDeck = {mainDeck: [], sideboard: []};
 
 	if (!firstPass && store.get("settings").show_overlay == true) {
@@ -1229,18 +1258,20 @@ function createMatch(arg) {
 		ipc_send("overlay_show", 1);
 		ipc_send("overlay_set_bounds", obj);
 	}
-	playerLife = 20;
-	opponentLife = 20;
 	oppName = arg.opponentScreenName;
 	oppRank = arg.opponentRankingClass;
 	oppTier = arg.opponentRankingTier;
 	currentEventId = arg.eventId;
-	currentMatchId = null;
+	currentMatchId = arg.matchId;
 	currentMatchTime = 0;
 	playerWin = 0;
 	oppWin = 0;
 	priorityTimers = [0,0,0,0,0];
 	lastPriorityChangeTime = matchBeginTime;
+	matchGameStats = [];
+	matchCompletedOnGameNumber = 0;
+	gameNumberCompleted = 0;
+	gameStage = "";
 
 	ipc_send("ipc_log", "vs "+oppName);
 	ipc_send("set_timer", matchBeginTime, windowOverlay);
@@ -1516,8 +1547,8 @@ function saveCourse(json) {
 }
 
 //
-function saveMatch(upload = true) {
-	if (currentMatchTime == 0) {
+function saveMatch(matchId) {
+	if (currentMatchTime == 0 || currentMatchId != matchId) {
 		return;
 	}
 	var match = {};
@@ -1544,6 +1575,9 @@ function saveMatch(upload = true) {
 	match.playerDeck = originalDeck;
 	match.oppDeck = getOppDeck();
 	match.date = new Date();
+	match.bestOf = currentMatchBestOfNumber;
+
+	match.gameStats = matchGameStats;
 
 	console.log("Save match:", match);
 	var matches_index = store.get('matches_index');
@@ -1565,7 +1599,7 @@ function saveMatch(upload = true) {
 
 	history[currentMatchId] = match;
 	history[currentMatchId].type = "match";
-	if (upload) {
+	if (matchCompletedOnGameNumber == gameNumberCompleted) {
 		httpApi.httpSetMatch(match);
 	}
 	requestHistorySend(0);
@@ -1684,24 +1718,4 @@ function parseWotcTime(str) {
 		return new Date();
 	}
 
-}
-
-//
-function hypergeometric(arg0, arg1, arg2, arg3) {
-	if (arg0 > arg3) {
-		return 0;
-	}
-
-	let _x, _N, _n, _k;
-
-	_x = math.bignumber(arg0);// Number of successes in sample (x) <= 
-	_N = math.bignumber(arg1);// Population size
-	_n = math.bignumber(arg2);// Sample size
-	_k = math.bignumber(arg3);// Number of successes in population  
-
-	let _a = math.combinations(_k, _x)
-	let _b = math.combinations(math.max(0, math.subtract(_N,_k)), math.max(0, math.subtract(_n,_x)));
-	let _c = math.combinations(_N, _n);
-
-	return math.number(math.divide(math.multiply(_a, _b) , _c));
 }
