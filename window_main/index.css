@@ -2638,8 +2638,16 @@ a:hover {
     background: url(../images/swap.png) no-repeat center;
 }
 
+.line_light {
+    background-color: rgba(145, 121, 97, 0.4);
+}
+
 .line_dark {
     background-color: rgba(145, 121, 97, 0.2);
+}
+
+.line_bottom_border {
+    border-bottom: 1px solid #FAE5D2;
 }
 
 .tou_stand_name {
@@ -2760,7 +2768,7 @@ a:hover {
     display: grid;
     grid-template-columns: 4fr repeat(4, 1fr);
     width: calc(100% - 60px);
-    margin: 16px 0px;
+    margin: 16px 0;
 }
 
 .library_card {
@@ -2776,16 +2784,20 @@ a:hover {
     align-items: center;
     justify-content: center;
     text-align: center;
-    /*border: 1px solid;*/
+    background-color: rgba(145, 121, 97, 0.2);
 }
 
-.library_stat {
+.library_header {
+    border-bottom: 1px solid;
+    background-color: rgba(145, 121, 97, 0.2);
+}
+
+.library_stat, .library_header {
     color: #FAE5D2;
     display: flex;
     align-items: center;
     justify-content: center;
     text-align: center;
-    /*border: 1px solid;*/
 }
 
 .library_footnote {

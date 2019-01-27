@@ -1860,9 +1860,14 @@ function open_match(id) {
 			addCardSeparator("Game " + (gameIndex + 1) + " Shuffled Order", $("#ux_1"));
 			let libraryDiv = $('<div class="library_list"></div>');
 			let unique = makeId(4);
+			let handSize = 8 - game.handsDrawn.length;
 
 			game.shuffledOrder.forEach((cardId, libraryIndex) => {
-				let cardDiv = $('<div class="library_card"></div>');
+				let rowShade = libraryIndex === handSize - 1 ? 'line_dark line_bottom_border'
+					: libraryIndex < handSize - 1 ? 'line_dark'
+					: (libraryIndex - handSize) % 2 === 0 ? 'line_light'
+					: 'line_dark';
+				let cardDiv = $(`<div class="library_card ${rowShade}"></div>`);
 				addCardTile(cardId, unique + libraryIndex, "#" + (libraryIndex + 1), cardDiv)
 				cardDiv.appendTo(libraryDiv);
 			});
@@ -1873,38 +1878,38 @@ function open_match(id) {
 				cardDiv.appendTo(libraryDiv);
 			}
 
-			let handSize = 8 - game.handsDrawn.length;
 			let handExplanation = $('<div class="library_hand">The opening hand is excluded from the below statistics to prevent mulligan choices from influencing them.</div>');
 			handExplanation.css("grid-row-end", "span " + (handSize - 1));
 			handExplanation.appendTo(libraryDiv);
 
-			let headerDiv = $('<div class="library_stat" tooltip-bottom tooltip-content="The number of lands in the library at or before this point.">Lands</div>');
+			let headerDiv = $('<div class="library_header" tooltip-bottom tooltip-content="The number of lands in the library at or before this point.">Lands</div>');
 			headerDiv.css("grid-area", (handSize) + " / 2");
 			headerDiv.appendTo(libraryDiv);
-			headerDiv = $('<div class="library_stat" tooltip-bottom tooltip-content="The average number of lands expected in the library at or before this point.">Expected</div>');
+			headerDiv = $('<div class="library_header" tooltip-bottom tooltip-content="The average number of lands expected in the library at or before this point.">Expected</div>');
 			headerDiv.css("grid-area", (handSize) + " / 3");
 			headerDiv.appendTo(libraryDiv);
-			headerDiv = $('<div class="library_stat" tooltip-bottom tooltip-content="The probability of the number of lands being at least this far from average, calculated as if the distribution were continuous. For details see footnote. Over a large number of games, this should average about 50%.">Likelihood</div>');
+			headerDiv = $('<div class="library_header" tooltip-bottom tooltip-content="The probability of the number of lands being at least this far from average, calculated as if the distribution were continuous. For details see footnote. Over a large number of games, this should average about 50%.">Likelihood</div>');
 			headerDiv.css("grid-area", (handSize) + " / 4");
 			headerDiv.appendTo(libraryDiv);
-			headerDiv = $('<div class="library_stat" tooltip-bottom tooltip-content="The expected percentage of games where the actual number of lands is equal or less than this one. This is easier to calculate and more widely recognized but harder to assess the meaning of.">Percentile</div>');
+			headerDiv = $('<div class="library_header" tooltip-bottom tooltip-content="The expected percentage of games where the actual number of lands is equal or less than this one. This is easier to calculate and more widely recognized but harder to assess the meaning of.">Percentile</div>');
 			headerDiv.css("grid-area", (handSize) + " / 5");
 			headerDiv.appendTo(libraryDiv);
 
 			game.libraryLands.forEach((count, index) => {
-				let landsDiv = $('<div class="library_stat">' + count + '</div>');
+				let rowShade = (index % 2 === 0) ? 'line_light' : 'line_dark';
+				let landsDiv = $(`<div class="library_stat ${rowShade}">${count}</div>`);
 				landsDiv.css("grid-area", (handSize + index + 1) + " / 2");
 				landsDiv.appendTo(libraryDiv);
 				let expected = ((index + 1) * game.landsInLibrary / game.librarySize).toFixed(2);
-				let expectedDiv = $('<div class="library_stat">' + expected + '</div>');
+				let expectedDiv = $(`<div class="library_stat ${rowShade}">${expected}</div>`);
 				expectedDiv.css("grid-area", (handSize + index + 1) + " / 3");
 				expectedDiv.appendTo(libraryDiv);
 				let likelihood = hypergeometricSignificance(count, game.librarySize, index + 1, game.landsInLibrary);
-				let likelihoodDiv = $('<div class="library_stat">' + (likelihood * 100).toFixed(2) + '%</div>');
+				let likelihoodDiv = $(`<div class="library_stat ${rowShade}">${(likelihood * 100).toFixed(2)}</div>`);
 				likelihoodDiv.css("grid-area", (handSize + index + 1) + " / 4");
 				likelihoodDiv.appendTo(libraryDiv);
 				let percentile = hypergeometricRange(0, count, game.librarySize, index + 1, game.landsInLibrary);
-				let percentileDiv = $('<div class="library_stat">' + (percentile * 100).toFixed(2) + '%</div>');
+				let percentileDiv = $(`<div class="library_stat ${rowShade}">${(percentile * 100).toFixed(2)}</div>`);
 				percentileDiv.css("grid-area", (handSize + index + 1) + " / 5");
 				percentileDiv.appendTo(libraryDiv);
 			});
