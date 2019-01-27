@@ -1909,11 +1909,13 @@ function open_match(id) {
 				percentileDiv.appendTo(libraryDiv);
 			});
 
-			let footnoteLabel = $('<div id="library_footnote_label" class="library_footnote" tooltip-bottom '
-				+ 'tooltip-content="Click to show footnote" onclick="toggleVisibility(\'library_footnote_label\', \'library_footnote\')">Footnote on Likelihood</div>');
+			let footnoteLabel = $('<div id="library_footnote_label' + gameIndex + '" class="library_footnote" tooltip-bottom '
+				+ 'tooltip-content="Click to show footnote" onclick="toggleVisibility(\'library_footnote_label' + gameIndex
+				+ '\', \'library_footnote' + gameIndex + '\')">Footnote on Likelihood</div>');
 			footnoteLabel.css("grid-row", game.shuffledOrder.length + 1);
 			footnoteLabel.appendTo(libraryDiv);
-			let footnote = $('<div id="library_footnote" class="library_footnote hidden" onclick="toggleVisibility(\'library_footnote_label\', \'library_footnote\')">'
+			let footnote = $('<div id="library_footnote' + gameIndex + '" class="library_footnote hidden" '
+				+ 'onclick="toggleVisibility(\'library_footnote_label' + gameIndex + '\', \'library_footnote' + gameIndex + '\')">'
 				+ '<p>The Likelihood column calculations are designed to enable assessment of fairness at a glance, in a way '
 				+ 'that is related to percentile but differs in important ways. In short, it treats the count of lands as if '
 				+ 'it were actually a bucket covering a continuous range, and calculates the cumulative probability of the '
