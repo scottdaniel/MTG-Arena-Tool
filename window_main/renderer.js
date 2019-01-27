@@ -1892,7 +1892,7 @@ function open_match(id) {
 			headerDiv = $('<div class="library_header" tooltip-bottom tooltip-content="The probability of the number of lands being at least this far from average, calculated as if the distribution were continuous. For details see footnote. Over a large number of games, this should average about 50%.">Likelihood</div>');
 			headerDiv.css("grid-area", (handSize) + " / 4");
 			headerDiv.appendTo(libraryDiv);
-			headerDiv = $('<div class="library_header" tooltip-bottom tooltip-content="The expected percentage of games where the actual number of lands is equal or less than this one. This is easier to calculate and more widely recognized but harder to assess the meaning of.">Percentile</div>');
+			headerDiv = $('<div class="library_header" tooltip-bottomright tooltip-content="The expected percentage of games where the actual number of lands is equal or less than this one. This is easier to calculate and more widely recognized but harder to assess the meaning of.">Percentile</div>');
 			headerDiv.css("grid-area", (handSize) + " / 5");
 			headerDiv.appendTo(libraryDiv);
 

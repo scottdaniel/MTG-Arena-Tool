@@ -2717,13 +2717,13 @@ a:hover {
     display: flex;
 }
 
-[tooltip-top], [tooltip-bottom] {
+[tooltip-top], [tooltip-bottom], [tooltip-bottomright] {
     position: relative;
     color: #FAE5D2;
     text-decoration: underline dotted;
 }
 
-[tooltip-top]::before, [tooltip-bottom]::before {
+[tooltip-top]::before, [tooltip-bottomright]::before, [tooltip-bottom]::before {
     visibility: hidden;
     content: attr(tooltip-content);
     position: absolute;
@@ -2738,6 +2738,11 @@ a:hover {
     z-index: 100000;
 }
 
+[tooltip-bottomright]::before {
+    top: calc(100% + 10px);
+    left: 0% !important;
+}
+
 [tooltip-top]::before {
     bottom: calc(100% + 10px);
 }
@@ -2746,7 +2751,7 @@ a:hover {
     top: calc(100% + 10px);
 }
 
-[tooltip-top]::after, [tooltip-bottom]::after {
+[tooltip-top]::after, [tooltip-bottom]::after, [tooltip-bottomright]::after {
     visibility: hidden;
     content: "";
     position: absolute;
@@ -2769,7 +2774,7 @@ a:hover {
     border-color: transparent transparent black transparent;
 }
 
-[tooltip-top]:hover::before, [tooltip-top]:hover::after, [tooltip-bottom]:hover::before, [tooltip-bottom]:hover::after {
+[tooltip-top]:hover::before, [tooltip-top]:hover::after, [tooltip-bottom]:hover::before, [tooltip-bottomright]:hover::before, [tooltip-bottom]:hover::after {
     visibility: visible;
     opacity: 1;
 }
