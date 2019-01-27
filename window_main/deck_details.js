@@ -44,23 +44,19 @@ function deckManaCurve(deck) {
     let numbers = $('<div class="mana_curve_numbers"></div>');
     manaCounts.forEach((cost, i) => {
         let total = cost[0];
-
-        let gradient = '';
         let manaTotal = cost.reduce(add, 0) - total;
-        let _start = 0;
-        let _end = 0;
+
+        let curve_column = $(`<div style="height: ${total/curveMax*100}%;" class="mana_curve_column"><div class="mana_curve_number">${total > 0 ? total : ''}</div></div>`);
         orderedManaColors.forEach((mc, ind) => {
             if (ind < 5 && cost[ind+1] > 0) {
-                _end = Math.round(cost[ind+1] / manaTotal * 100);
-
-                if (gradient !== '')    gradient += ',';
-                gradient += mc+' '+_start+'%, '+mc+' '+_end+'%';
-
-                _start = _end;
-            }
+                let h = Math.round(cost[ind+1] / manaTotal * 100);
+                let col = $(`<div style="height: ${h}%; background-color: ${mc};" class="mana_curve_column_color"></div>`);
+                col.appendTo(curve_column);
+            } 
         });
 
-        curve.append($(`<div class="mana_curve_column" style="height: ${total/curveMax*100}%; background-image: linear-gradient(${gradient})">${(total > 0 ? total : '')}</div>`))
+        curve_column.appendTo(curve);
+
         numbers.append($(`<div class="mana_curve_column_number"><div style="margin: 0 auto !important" class="mana_s16 mana_${i}"></div></div>`))
     })
 

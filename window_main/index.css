@@ -899,18 +899,27 @@ a:hover {
     border-bottom: 2px solid rgba(250, 229, 210, 0.8);
     width: 100%;
 }
+
 .mana_curve_column {
+    color: #fae5d2;
+    justify-content: space-around;
+    width: -webkit-fill-available;
+    flex-direction: column;
+    margin: 0px 2px;
+    display: flex;
+    flex-direction: column;
+    background-color: rgba(250, 229, 210, 0.8);
+}
+
+.mana_curve_number {
+    opacity: 1;
+    position: relative;
+    height: 0px;
+    top: calc(50% - 8px);
     text-align: center;
     font-size: 16px;
     text-shadow: 3px 3px 3px #000000ad;
     font-family: Beleren;
-    color: #fae5d2;
-    justify-content: space-around;
-    width: 1000px;
-    flex-direction: column;
-    margin: 0px 2px;
-    display: flex;
-    background-color: rgba(250, 229, 210, 0.8);
 }
 
 .mana_curve_numbers {
