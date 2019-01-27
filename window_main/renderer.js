@@ -1861,10 +1861,10 @@ function open_match(id) {
 				addCardTile(cardId, unique + libraryIndex, "#" + (libraryIndex + 1), cardDiv)
 				cardDiv.appendTo(libraryDiv);
 			});
-			let unknownCards = game.librarySize - game.shuffledOrder.length;
+			let unknownCards = game.deckSize - game.shuffledOrder.length;
 			if (unknownCards > 0) {
 				let cardDiv = $('<div class="library_card"></div>');
-				addCardTile(null, unique + game.librarySize, unknownCards + "x", cardDiv)
+				addCardTile(null, unique + game.deckSize, unknownCards + "x", cardDiv)
 				cardDiv.appendTo(libraryDiv);
 			}
 
