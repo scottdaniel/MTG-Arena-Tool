@@ -110,20 +110,25 @@ function addCardTile(grpId, indent, quantity, element) {
 
 		if (renderer == 0) {
 			if (card.type.indexOf("Basic Land") == -1) {
-				if (grpId == 67306 && quantity > 4) {
-					quantity = 4;
-				}
+				quantity = get_wc_missing(grpId, quantity);
+
+				//if (grpId == 67306 && quantity > 4) {
+				//	quantity = 4;
+				//}
 
 				let xoff = (rarities.indexOf(card.rarity)) * -24;
 
-				if (cards[grpId] == undefined) {
+				//if (cards[grpId] == undefined) {
+				if (quantity > 0) {
 					let yoff = quantity * -24;
-					cont.append(`<div style="background-position: ${xoff}px ${yoff}px; left: calc(0px - 100% + ${(ww-14)}px);" class="not_owned_sprite" title="${quantity} missing"></div>`);
+					cont.append(`<div style="background-position: ${xoff}px ${yoff}px; left: calc(0px - 100% + ${(ww-14)}px);" class="not_owned_sprite" title="${quantity} missing"></div>`);					
 				}
+				/*}
 				else if (quantity > cards[grpId]) {
 					let yoff = (quantity - cards[grpId]) * -24;
 					cont.append(`<div style="background-position: ${xoff}px ${yoff}px; left: calc(0px - 100% + ${(ww-14)}px);" class="not_owned_sprite" title="${(quantity-cards[grpId])} missing"></div>`);
 				}
+				*/
 			}
 		}
 
@@ -773,25 +778,38 @@ function get_rank_class(ranking) {
 }
 
 //
+function get_wc_missing(grpid, quantity) {
+	let card = cardsDb.get(grpid);
+
+	if (grpid == 67306 && quantity > 4) {
+		quantity = 4;
+	}
+
+	let arr = card.reprints;
+	if (!arr)	arr = [grpid];
+	else		arr.push(grpid);
+
+	let have = 0;
+	arr.forEach((id) => {
+		let n = cards[id];
+		if (n !== undefined) {
+			have += n;
+		}
+	});
+
+	return Math.max(0, quantity - have);
+}
+
+//
 function get_deck_missing(deck) {
 	var missing = {rare: 0, common: 0, uncommon: 0, mythic: 0};
 
 	deck.mainDeck.forEach(function(card) {
 		var grpid = card.id;
 		var quantity = card.quantity;
-		var add = 0;
 		var rarity = cardsDb.get(grpid).rarity;
 
-		if (grpid == 67306 && quantity > 4) {
-			quantity = 4;
-		}
-
-		if (cards[grpid] == undefined) {
-			add = quantity;
-		}
-		else if (quantity > cards[grpid]) {
-			add = quantity - cards[grpid];
-		}
+		let add = get_wc_missing(grpid, quantity);
 
 		if (rarity == 'common')		{missing.common += add;}
 		if (rarity == 'uncommon')	{missing.uncommon += add;}
@@ -802,19 +820,9 @@ function get_deck_missing(deck) {
 	deck.sideboard.forEach(function(card) {
 		var grpid = card.id;
 		var quantity = card.quantity;
-		var add = 0;
 		var rarity = cardsDb.get(grpid).rarity;
 
-		if (grpid == 67306 && quantity > 4) {
-			quantity = 4;
-		}
-
-		if (cards[grpid] == undefined) {
-			add = quantity;
-		}
-		else if (quantity > cards[grpid]) {
-			add = quantity - cards[grpid];
-		}
+		let add = get_wc_missing(grpid, quantity);
 
 		if (rarity == 'common')		{missing.common += add;}
 		if (rarity == 'uncommon')	{missing.uncommon += add;}
