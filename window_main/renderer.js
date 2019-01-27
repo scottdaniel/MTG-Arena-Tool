@@ -1861,6 +1861,12 @@ function open_match(id) {
 				addCardTile(cardId, unique + libraryIndex, "#" + (libraryIndex + 1), cardDiv)
 				cardDiv.appendTo(libraryDiv);
 			});
+			let unknownCards = game.librarySize - game.shuffledOrder.length;
+			if (unknownCards > 0) {
+				let cardDiv = $('<div class="library_card"></div>');
+				addCardTile(null, unique + game.librarySize, unknownCards + "x", cardDiv)
+				cardDiv.appendTo(libraryDiv);
+			}
 
 			let handSize = 8 - game.handsDrawn.length;
 			let handExplanation = $('<div class="library_hand">The opening hand is excluded from the below statistics to prevent mulligan choices from influencing them.</div>');

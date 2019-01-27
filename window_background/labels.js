@@ -17,12 +17,19 @@ function onLabelOutLogInfo(entry, json) {
 			currentMatchTime += time;
 
 			let game = {};
-			game.shuffledOrder = initialLibraryInstanceIds.map(instance => {
-				while (!instanceToCardIdMap[instance] && idChanges[instance]) {
-					instance = idChanges[instance];
+			game.shuffledOrder = [];
+			for (let i = 0; i < initialLibraryInstanceIds.length; i++) {
+				let instance = initialLibraryInstanceIds[i];
+                while (!instanceToCardIdMap[instance] && idChanges[instance]) {
+                    instance = idChanges[instance];
+                }
+                let cardId = instanceToCardIdMap[instance];
+                if (cardId === undefined) {
+                	break;
+				} else {
+                	game.shuffledOrder.push(cardId);
 				}
-				return instanceToCardIdMap[instance];
-			});
+			}
 			game.handsDrawn = payload.mulliganedHands.map(hand => hand.map(card => card.grpId));
 			game.handsDrawn.push(game.shuffledOrder.slice(0, 7 - game.handsDrawn.length));
 
@@ -79,8 +86,7 @@ function onLabelOutLogInfo(entry, json) {
 			let landsInLibrary = landsInDeck - game.handLands[game.handLands.length-1];
 			let landsSoFar = 0;
 			let libraryLands = [];
-			game.shuffledOrder.some((cardId, i) => {
-				if (cardId === undefined) return true;
+			game.shuffledOrder.forEach((cardId, i) => {
 				let cardCount = cardCounts[cardId];
 				if (!cardsDb.get(cardId).type.includes("Basic") && cardCount >= 2 && cardCount <= 4) {
 					multiCardPositions[cardCount][cardId].push(i+1);
