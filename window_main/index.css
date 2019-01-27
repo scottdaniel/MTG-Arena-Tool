@@ -2760,6 +2760,7 @@ a:hover {
     display: grid;
     grid-template-columns: 4fr repeat(4, 1fr);
     width: calc(100% - 60px);
+    margin: 16px 0px;
 }
 
 .library_card {
@@ -2775,7 +2776,7 @@ a:hover {
     align-items: center;
     justify-content: center;
     text-align: center;
-    border: 1px solid;
+    /*border: 1px solid;*/
 }
 
 .library_stat {
@@ -2784,7 +2785,7 @@ a:hover {
     align-items: center;
     justify-content: center;
     text-align: center;
-    border: 1px solid;
+    /*border: 1px solid;*/
 }
 
 .library_footnote {

@@ -1809,16 +1809,21 @@ function open_match(id) {
 		match.gameStats.forEach((game, gameIndex) => {
 			if (game.sideboardChanges) {
 				addCardSeparator("Game " + (gameIndex + 1) + " Sideboard Changes", $("#ux_1"));
-
 				let sideboardDiv = $('<div class="card_lists_list"></div>');
 				let additionsDiv = $('<div class="cardlist"></div>');
-				addCardSeparator("Sideboarded In", additionsDiv);
-				drawCardList(additionsDiv, game.sideboardChanges.added);
-				additionsDiv.appendTo(sideboardDiv);
-				let removalsDiv = $('<div class="cardlist"></div>');
-				addCardSeparator("Sideboarded Out", removalsDiv);
-				drawCardList(removalsDiv, game.sideboardChanges.removed);
-				removalsDiv.appendTo(sideboardDiv);
+				if (game.sideboardChanges.added.length == 0 && game.sideboardChanges.removed.length == 0) {
+					addCardSeparator("No changes", additionsDiv);
+					additionsDiv.appendTo(sideboardDiv);
+				}
+				else {
+					addCardSeparator("Sideboarded In", additionsDiv);
+					drawCardList(additionsDiv, game.sideboardChanges.added);
+					additionsDiv.appendTo(sideboardDiv);
+					let removalsDiv = $('<div class="cardlist"></div>');
+					addCardSeparator("Sideboarded Out", removalsDiv);
+					drawCardList(removalsDiv, game.sideboardChanges.removed);
+					removalsDiv.appendTo(sideboardDiv);
+				}
 
 				$("#ux_1").append(sideboardDiv);
 			}
