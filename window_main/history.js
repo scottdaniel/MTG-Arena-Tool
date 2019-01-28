@@ -402,7 +402,7 @@ function getNextRank(currentRank) {
 	var rankIndex = RANKS.indexOf(currentRank);
 	if (rankIndex < RANKS.length - 1) {
 		return RANKS[rankIndex + 1];
-	} else {s
+	} else {
 		return undefined;
 	}
 }
