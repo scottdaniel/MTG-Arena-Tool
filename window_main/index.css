@@ -2727,6 +2727,7 @@ a:hover {
 [tooltip-top]::before, [tooltip-bottomright]::before, [tooltip-bottom]::before {
     visibility: hidden;
     content: attr(tooltip-content);
+    font-family: var(--main-font-name);
     position: absolute;
     left: 50%;
     width: 200px;

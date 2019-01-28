@@ -228,7 +228,7 @@ function open_home_tab(arg, opentab = true) {
 		cell.style.gridArea = `${index+2} / 6 / auto / auto`;
 		cont.appendChild(cell);
 
-		cell = createDivision([ld], (wc.change > 0 ? '+' : '-') + wc.change);
+		cell = createDivision([ld], (wc.change > 0 ? '+' : '') + wc.change);
 		if (wc.change == 0)	cell.innerHTML = '-';
 		cell.style.gridArea = `${index+2} / 7 / auto / auto`;
 		cont.appendChild(cell);
