@@ -33,243 +33,259 @@ const ipc = electron.ipcMain;
 var mainLoaded = false;
 var backLoaded = false;
 
-app.on('ready', () => {
-	mainWindow  = createMainWindow();
-	overlay  = createOverlay();
-	background  = createBackgroundWindow();
+//commandLine, workingDirectory
+const singleLock = app.requestSingleInstanceLock();
 
-	globalShortcut.register('Alt+Shift+D', () => {
-		if (!background.isVisible())
-			background.show();
-		else
-			background.hide();
-		background.toggleDevTools();
-		overlay.toggleDevTools();
-		mainWindow.toggleDevTools();
-	})  
-
-	mainWindow.webContents.once('dom-ready', () => {
-		mainLoaded = true;
-		if (backLoaded == true) {
-			showWindow();
-			background.webContents.send("set_renderer_state", 1);
-		}
-	});
-
-	background.webContents.once('dom-ready', () => {
-		backLoaded = true;
-		if (mainLoaded == true) {
-			showWindow();
-			background.webContents.send("set_renderer_state", 1);
-		}
-	});
-
-	autoUpdater.checkForUpdatesAndNotify();
-
-	ipc.on('ipc_switch', function (event, method, from, arg, to) {
-		if (debugIPC && method != "log_read") {
-			if (debugIPC == 2 && method != "set_status" && method != "set_db" && method != "set_cards" && method != "set_decks" && method != "background_set_history_data") {
-				console.log("IPC ", method+": "+JSON.stringify(arg));
-			}
-			else {
-				console.log("IPC ", method, "From:", from, "To:", to);
-			}
-		}
-		switch (method) {
-			case 'ipc_log':
-				console.log("IPC LOG: ", arg);
-				break;
-
-			case 'ipc_error':
-				console.log("IPC ERROR: ", arg);
-				background.webContents.send("error", arg);
-				break;
-
-			case 'set_settings':
-				//console.log("set settings: ", arg);
-				saveSettings(arg);
-				mainWindow.webContents.send("set_settings", arg);
-				overlay.webContents.send("set_settings", arg);
-				break;
-
-			case 'set_db':
-				mainWindow.webContents.send("set_db", arg);
-				overlay.webContents.send("set_db", arg);
-				break;
-
-			case 'popup':
-				mainWindow.webContents.send("popup", arg.text, arg.time);
-				break;
-
-			case 'background_set_history':
-				mainWindow.webContents.send("set_history", arg);
-				break;
-
-			case 'background_set_history_data':
-				mainWindow.webContents.send("set_history_data", arg);
-				break;
-
-			case 'renderer_window_minimize':
-				mainWindow.minimize();
-				break;
-
-			case 'set_rank':
-				mainWindow.webContents.send("set_rank", arg.rank, arg.str);
-				break;
-
-			case 'set_cards':
-				mainWindow.webContents.send("set_cards", arg.cards, arg.new);
-				overlay.webContents.send("set_cards", arg.cards);
-				break;
-
-			case 'save_settings':
-				saveSettings(arg);
-				background.webContents.send("save_settings", arg);
-				overlay.webContents.send("set_settings", arg);
-				break;
-
-			case 'renderer_update_install':
-				if (updateState == 3) {
-					autoUpdater.quitAndInstall();
-				}
-				background.webContents.send("update_install", 1);
-				break;
-
-			case 'set_opponent_rank':
-				overlay.webContents.send("set_opponent_rank", arg.rank, arg.str);
-				break;
-
-			// to main js / window handling
-
-			case 'show_background':
-				background.show();
-				break;
-
-			case 'renderer_show':
+if (!singleLock) {
+	app.quit();
+} else {
+	app.on('second-instance', () => {
+		if (mainWindow.isVisible()) {
+			if (mainWindow.isMinimized()) {
 				showWindow();
-				break;
+			}
+		} else {
+			showWindow();
+		}
+	})
 
-			case 'renderer_hide':
-				hideWindow();
-				break;
+	app.on('ready', () => {
+		mainWindow  = createMainWindow();
+		overlay  = createOverlay();
+		background  = createBackgroundWindow();
 
-			case 'renderer_window_close':
-				if (closeToTray) {
-					hideWindow();
+		globalShortcut.register('Alt+Shift+D', () => {
+			if (!background.isVisible())
+				background.show();
+			else
+				background.hide();
+			background.toggleDevTools();
+			overlay.toggleDevTools();
+			mainWindow.toggleDevTools();
+		})  
+
+		mainWindow.webContents.once('dom-ready', () => {
+			mainLoaded = true;
+			if (backLoaded == true) {
+				showWindow();
+				background.webContents.send("set_renderer_state", 1);
+			}
+		});
+
+		background.webContents.once('dom-ready', () => {
+			backLoaded = true;
+			if (mainLoaded == true) {
+				showWindow();
+				background.webContents.send("set_renderer_state", 1);
+			}
+		});
+
+		autoUpdater.checkForUpdatesAndNotify();
+
+		ipc.on('ipc_switch', function (event, method, from, arg, to) {
+			if (debugIPC && method != "log_read") {
+				if (debugIPC == 2 && method != "set_status" && method != "set_db" && method != "set_cards" && method != "set_decks" && method != "background_set_history_data") {
+					console.log("IPC ", method+": "+JSON.stringify(arg));
 				}
 				else {
-					quit();
+					console.log("IPC ", method, "From:", from, "To:", to);
 				}
-				break;
+			}
+			switch (method) {
+				case 'ipc_log':
+					console.log("IPC LOG: ", arg);
+					break;
 
-			case 'set_close_to_tray':
-				closeToTray = arg;
-				break;
+				case 'ipc_error':
+					console.log("IPC ERROR: ", arg);
+					background.webContents.send("error", arg);
+					break;
 
-			case 'overlay_show':
-				if (!overlay.isVisible()) {
-					overlay.show();
-				}
-				break;
+				case 'set_settings':
+					//console.log("set settings: ", arg);
+					saveSettings(arg);
+					mainWindow.webContents.send("set_settings", arg);
+					overlay.webContents.send("set_settings", arg);
+					break;
 
-			case 'overlay_close':
-				overlay.hide();
-				break;
+				case 'set_db':
+					mainWindow.webContents.send("set_db", arg);
+					overlay.webContents.send("set_db", arg);
+					break;
 
-			case 'overlay_minimize':
-				overlay.minimize();
-				break;
+				case 'popup':
+					mainWindow.webContents.send("popup", arg.text, arg.time);
+					break;
 
+				case 'background_set_history':
+					mainWindow.webContents.send("set_history", arg);
+					break;
 
-			case 'renderer_set_bounds':
-				mainWindow.setBounds(arg);
-				break;
+				case 'background_set_history_data':
+					mainWindow.webContents.send("set_history_data", arg);
+					break;
 
-			case 'overlay_set_bounds':
-				overlay.setBounds(arg);
-				break;
+				case 'renderer_window_minimize':
+					mainWindow.minimize();
+					break;
 
-			case 'overlay_set_ontop':
-				overlay.setAlwaysOnTop(arg, 'floating');
-				break;
+				case 'set_rank':
+					mainWindow.webContents.send("set_rank", arg.rank, arg.str);
+					break;
 
-			case 'save_overlay_pos':
-				saveOverlayPos();
-				break;
+				case 'set_cards':
+					mainWindow.webContents.send("set_cards", arg.cards, arg.new);
+					overlay.webContents.send("set_cards", arg.cards);
+					break;
 
-			case 'force_open_settings':
-				mainWindow.webContents.send("force_open_settings", true);
-				showWindow();
-				break;
+				case 'save_settings':
+					saveSettings(arg);
+					background.webContents.send("save_settings", arg);
+					overlay.webContents.send("set_settings", arg);
+					break;
 
-			case 'set_clipboard':
-				clipboard.writeText(arg);
-				break;
-
-			case 'reset_overlay_pos':
-				overlay.setPosition(0, 0);
-				break;
-
-			case 'export_txt':
-				dialog.showSaveDialog({
-					filters: [{
-						name: 'txt',
-						extensions: ['txt']
-					}],
-					defaultPath: '~/'+arg.name+'.txt'
-				}, function(file_path) {
-					if (file_path) {
-						fs.writeFile(file_path, arg.str, function(err) {
-							if (err) {
-								dialog.showErrorBox('Error', err);
-								return;
-							}
-						});
+				case 'renderer_update_install':
+					if (updateState == 3) {
+						autoUpdater.quitAndInstall();
 					}
-				});
-				break;
+					background.webContents.send("update_install", 1);
+					break;
 
-			case 'export_csvtxt':
-				dialog.showSaveDialog({
-					filters: [{
-						name: 'csv',
-						extensions: ['csv']
-					},{
-						name: 'txt',
-						extensions: ['txt']
-					}],
-					defaultPath: '~/'+arg.name+'.csv'
-				}, function(file_path) {
-					if (file_path) {
-						fs.writeFile(file_path, arg.str, function(err) {
-							if (err) {
-								dialog.showErrorBox('Error', err);
-								return;
-							}
-						});
+				case 'set_opponent_rank':
+					overlay.webContents.send("set_opponent_rank", arg.rank, arg.str);
+					break;
+
+				// to main js / window handling
+
+				case 'show_background':
+					background.show();
+					break;
+
+				case 'renderer_show':
+					showWindow();
+					break;
+
+				case 'renderer_hide':
+					hideWindow();
+					break;
+
+				case 'renderer_window_close':
+					if (closeToTray) {
+						hideWindow();
 					}
-				});
-				break;
+					else {
+						quit();
+					}
+					break;
 
-			default:
-				if (to == 0)	background.webContents.send(method, arg);
-				if (to == 1)	mainWindow.webContents.send(method, arg);
-				if (to == 2)	overlay.webContents.send(method, arg);
-				break;
-		}
+				case 'set_close_to_tray':
+					closeToTray = arg;
+					break;
+
+				case 'overlay_show':
+					if (!overlay.isVisible()) {
+						overlay.show();
+					}
+					break;
+
+				case 'overlay_close':
+					overlay.hide();
+					break;
+
+				case 'overlay_minimize':
+					overlay.minimize();
+					break;
+
+
+				case 'renderer_set_bounds':
+					mainWindow.setBounds(arg);
+					break;
+
+				case 'overlay_set_bounds':
+					overlay.setBounds(arg);
+					break;
+
+				case 'overlay_set_ontop':
+					overlay.setAlwaysOnTop(arg, 'floating');
+					break;
+
+				case 'save_overlay_pos':
+					saveOverlayPos();
+					break;
+
+				case 'force_open_settings':
+					mainWindow.webContents.send("force_open_settings", true);
+					showWindow();
+					break;
+
+				case 'set_clipboard':
+					clipboard.writeText(arg);
+					break;
+
+				case 'reset_overlay_pos':
+					overlay.setPosition(0, 0);
+					break;
+
+				case 'export_txt':
+					dialog.showSaveDialog({
+						filters: [{
+							name: 'txt',
+							extensions: ['txt']
+						}],
+						defaultPath: '~/'+arg.name+'.txt'
+					}, function(file_path) {
+						if (file_path) {
+							fs.writeFile(file_path, arg.str, function(err) {
+								if (err) {
+									dialog.showErrorBox('Error', err);
+									return;
+								}
+							});
+						}
+					});
+					break;
+
+				case 'export_csvtxt':
+					dialog.showSaveDialog({
+						filters: [{
+							name: 'csv',
+							extensions: ['csv']
+						},{
+							name: 'txt',
+							extensions: ['txt']
+						}],
+						defaultPath: '~/'+arg.name+'.csv'
+					}, function(file_path) {
+						if (file_path) {
+							fs.writeFile(file_path, arg.str, function(err) {
+								if (err) {
+									dialog.showErrorBox('Error', err);
+									return;
+								}
+							});
+						}
+					});
+					break;
+
+				default:
+					if (to == 0)	background.webContents.send(method, arg);
+					if (to == 1)	mainWindow.webContents.send(method, arg);
+					if (to == 2)	overlay.webContents.send(method, arg);
+					break;
+			}
+		});
+
+		//
+		ipc.on('set_draft_cards', function(event, pack, picks, packn, pickn) {
+			overlay.webContents.send("set_draft_cards", pack, picks, packn, pickn);
+		});
+
+		//
+		ipc.on('set_turn', function(event, playerSeat, turnPhase, turnStep, turnNumber, turnActive, turnPriority, turnDecision) {
+			overlay.webContents.send("set_turn", playerSeat, turnPhase, turnStep, turnNumber, turnActive, turnPriority, turnDecision);
+		});
 	});
-
-	//
-	ipc.on('set_draft_cards', function(event, pack, picks, packn, pickn) {
-		overlay.webContents.send("set_draft_cards", pack, picks, packn, pickn);
-	});
-
-	//
-	ipc.on('set_turn', function(event, playerSeat, turnPhase, turnStep, turnNumber, turnActive, turnPriority, turnDecision) {
-		overlay.webContents.send("set_turn", playerSeat, turnPhase, turnStep, turnNumber, turnActive, turnPriority, turnDecision);
-	});
-});
-
+}
 
 function saveSettings(settings) {
 	app.setLoginItemSettings({
@@ -499,21 +515,6 @@ function recreateOverlay() {
 			background.webContents.send("reload_overlay");
 		});
 	}
-}
-
-//commandLine, workingDirectory
-var shouldQuit = app.makeSingleInstance(function() {
-	if (mainWindow.isVisible()) {
-		if (mainWindow.isMinimized()) {
-			showWindow();
-		}
-	} else {
-		showWindow();
-	}
-});
-
-if (shouldQuit) {
-	app.quit();
 }
 
 app.on('window-all-closed', () => {
