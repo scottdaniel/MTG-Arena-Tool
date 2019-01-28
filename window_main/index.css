@@ -2361,7 +2361,8 @@ a:hover {
 }
 
 .tournament_list_cont {
-    margin: 16px;
+    max-width: 800px;
+    margin: 16px auto;
     overflow: auto;
 }
 
@@ -2826,4 +2827,37 @@ a:hover {
     overflow-x: auto;
     overflow-y: visible;
     justify-content: center;
+}
+
+.top_wildcards_cont {
+    width: calc(100% - 64px);
+    max-width: 600px;
+    margin: 16px auto;
+    text-align: center;
+    display: grid;
+    line-height: 24px;
+    font-size: 14px;
+    grid-template-columns: 32px 48px 48px auto 32px 32px 32px;
+    color: #fae5d2;
+}
+
+.top_wildcards_set_icon {
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: center;
+    height: 24px;
+}
+
+.arrow_up {
+    background-repeat: no-repeat;
+    background-position: center;
+    background-image: url(../images/up_green.png);
+    height: 24px;
+}
+
+.arrow_down {
+    background-repeat: no-repeat;
+    background-position: center;
+    background-image: url(../images/down_red.png);
+    height: 24px;
 }

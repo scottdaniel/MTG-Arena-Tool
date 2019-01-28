@@ -34,123 +34,118 @@ function open_home_tab(arg, opentab = true) {
 	mainDiv.classList.remove("flex_item");
 	mainDiv.innerHTML = '';
 
-	if (discordTag == null) {
-		let label = $('<div class="auth_label">Authorize to proceed:</div>');
-		let but = $('<div class="discord_but"></div>');
+	let d = createDivision(["list_fill"]);
+	mainDiv.appendChild(d);
+	let title = createDivision(["card_tile_separator"], "Tournaments");
+	mainDiv.appendChild(title);
+	let cont = createDivision(["tournament_list_cont"]);
 
-		but.click(() => {
-			let url = 'https://discordapp.com/api/oauth2/authorize?client_id=531626302004789280&redirect_uri=http%3A%2F%2Fmtgatool.com%2Fdiscord%2F&response_type=code&scope=identify%20email&state='+authToken;
-			shell.openExternal(url);
-		});
-
-		label.appendTo(mainDiv);
-		but.appendTo(mainDiv);
-
-		return false;
-	}
 	if (arg !== null) {
 		tournaments_list = arg.tournaments;
 		if (!opentab)	return
 	}
 	
-	let d = createDivision(["list_fill"]);
-	mainDiv.appendChild(d);
+	if (discordTag == null) {
+		let but = $('<div class="discord_but"></div>');
+		but.click(() => {
+			let url = 'https://discordapp.com/api/oauth2/authorize?client_id=531626302004789280&redirect_uri=http%3A%2F%2Fmtgatool.com%2Fdiscord%2F&response_type=code&scope=identify%20email&state='+authToken;
+			shell.openExternal(url);
+		});
 
-	let dname = discordTag.split("#")[0];
-	let fl = createDivision(
-		["flex_item"],
-		`<div class="discord_icon"></div><div class="top_username">${dname}</div><div class="discord_message">Your discord tag will be visible to your opponents.</div>`
-	);
-	fl.style.margin = "auto";
-	fl.style.width = "fit-content";
-	mainDiv.appendChild(fl);
+		but.appendTo(cont);
+	}
+	else {
 
-	let title = createDivision(["tournament_title"], "Tournaments:");
-	mainDiv.appendChild(title);
+		let dname = discordTag.split("#")[0];
+		let fl = createDivision(
+			["flex_item"],
+			`<div class="discord_icon"></div><div class="top_username">${dname}</div><div class="discord_message">Your discord tag will be visible to your opponents.</div>`
+		);
+		fl.style.margin = "auto";
+		fl.style.width = "fit-content";
+		mainDiv.appendChild(fl);
 
-	let cont = createDivision(["tournament_list_cont"]);
+		listInterval.forEach((_id) => {
+			clearInterval(_id);
+		});
+		listInterval = [];
+		tournaments_list.forEach(function(tou, index) {
+			//console.log(tou);
+			let div = createDivision(["tou_container"]);
+			div.id = tou._id;
 
-	listInterval.forEach((_id) => {
-		clearInterval(_id);
-	});
-	listInterval = [];
-	tournaments_list.forEach(function(tou, index) {
-		//console.log(tou);
+			let stat = createDivision(["top_status"]);
+			if (tou.state == -1)		stat.classList.add("status_red");
+			else if (tou.state == 4)	stat.classList.add("status_black");
+			else						stat.classList.add("status_green");
 
-		let div = createDivision(["tou_container"]);
-		div.id = tou._id;
+			let sd = tou.signupDuration;
+			let rd = tou.roundDuration;
+			//let now = timestamp();
 
-		let stat = createDivision(["top_status"]);
-		if (tou.state == -1)		stat.classList.add("status_red");
-		else if (tou.state == 4)	stat.classList.add("status_black");
-		else						stat.classList.add("status_green");
+			let roundsStart = tou.starts + (sd * 60*60);
+			let roundEnd = tou.starts + (sd * 60*60) + ((tou.currentRound+1) * (60*60) * rd);
 
-		let sd = tou.signupDuration;
-		let rd = tou.roundDuration;
-		//let now = timestamp();
+			let state = "-";
+			let stateb = "-";
+			if (tou.state == -1) {
+				state = '';
+				listInterval.push(
+					window.setInterval(() => {
+						let now = timestamp();
+						$('.list_state_'+index).html("Registration begins in "+(toHHMMSS(now - tou.starts)));
+					}, 250)
+				);
+			}
+			if (tou.state == 0) {
+				state = "Registration in progress.";
+				stateb = '';
+				listInterval.push(
+					window.setInterval(() => {
+						let now = timestamp();
+						$('.list_stateb_'+index).html(toHHMMSS(roundsStart-now)+" left");
+					}, 250)
+				);
+			}
+			if (tou.state == 1) {
+				state = "Round "+(tou.currentRound+1)+"/"+tou.maxRounds+" in progress.";
+				stateb = "";
+				listInterval.push(
+					window.setInterval(() => {
+						let now = timestamp();
+						$('.list_stateb_'+index).html(toHHMMSS(roundEnd-now)+" left");
+					}, 250)
+				);
+			}
+			if (tou.state == 3) {
+				state = "Top "+(tou.top)+" in progress.";
+				stateb = "-";
+			}
+			if (tou.state == 4) {
+				state = "Tournament finish.";
+				stateb = "Winner: "+tou.winner.slice(0, -6);
+			}
 
-		let roundsStart = tou.starts + (sd * 60*60);
-		let roundEnd = tou.starts + (sd * 60*60) + ((tou.currentRound+1) * (60*60) * rd);
+			let nam = createDivision(["tou_name"], tou.name);
 
-		let state = "-";
-		let stateb = "-";
-		if (tou.state == -1) {
-			state = '';
-			listInterval.push(
-				window.setInterval(() => {
-					let now = timestamp();
-					$('.list_state_'+index).html("Registration begins in "+(toHHMMSS(now - tou.starts)));
-				}, 250)
-			);
-		}
-		if (tou.state == 0) {
-			state = "Registration in progress.";
-			stateb = '';
-			listInterval.push(
-				window.setInterval(() => {
-					let now = timestamp();
-					$('.list_stateb_'+index).html(toHHMMSS(roundsStart-now)+" left");
-				}, 250)
-			);
-		}
-		if (tou.state == 1) {
-			state = "Round "+(tou.currentRound+1)+"/"+tou.maxRounds+" in progress.";
-			stateb = "";
-			listInterval.push(
-				window.setInterval(() => {
-					let now = timestamp();
-					$('.list_stateb_'+index).html(toHHMMSS(roundEnd-now)+" left");
-				}, 250)
-			);
-		}
-		if (tou.state == 3) {
-			state = "Top "+(tou.top)+" in progress.";
-			stateb = "-";
-		}
-		if (tou.state == 4) {
-			state = "Tournament finish.";
-			stateb = "Winner: "+tou.winner.slice(0, -6);
-		}
+			let fo = createDivision(["tou_cell"], tou.format);
 
-		let nam = createDivision(["tou_name"], tou.name);
+			let st = createDivision(["tou_state", "list_state_"+index], state);
 
-		let fo = createDivision(["tou_cell"], tou.format);
+			let stb = createDivision(["tou_cell"], tou.players.length+" players.");
 
-		let st = createDivision(["tou_state", "list_state_"+index], state);
+			let pln = createDivision(["tou_cell", "list_stateb_"+index], stateb);
+			pln.style.width = "200px";
 
-		let stb = createDivision(["tou_cell"], tou.players.length+" players.");
-
-		let pln = createDivision(["tou_cell", "list_stateb_"+index], stateb);
-		pln.style.width = "200px";
-
-		div.appendChild(stat);
-		div.appendChild(nam);
-		div.appendChild(fo);
-		div.appendChild(st);
-		div.appendChild(stb);
-		div.appendChild(pln);
-		cont.appendChild(div);
-	});
+			div.appendChild(stat);
+			div.appendChild(nam);
+			div.appendChild(fo);
+			div.appendChild(st);
+			div.appendChild(stb);
+			div.appendChild(pln);
+			cont.appendChild(div);
+		});
+	}
 
 	mainDiv.appendChild(cont);
 
@@ -161,6 +156,85 @@ function open_home_tab(arg, opentab = true) {
 			ipc_send("tou_get", ti);
 		});
 	});
+
+	d = createDivision(["list_fill"]);
+	mainDiv.appendChild(d);
+	title = createDivision(["card_tile_separator"], "Top Wildcards redeemed");
+	title.setAttribute("tooltip-content", "In the last 15 days.");
+	title.setAttribute("tooltip-bottom", "");
+	mainDiv.appendChild(title);
+	cont = createDivision(["top_wildcards_cont"]);
+
+
+	let cell;
+
+	cell = createDivision(["line_dark", "line_bottom_border"], "Top");
+	cell.style.gridArea = `1 / 1 / auto / 3`;
+	cont.appendChild(cell);
+
+	cell = createDivision(["line_dark", "line_bottom_border"]);
+	cell.style.gridArea = `1 / 3 / auto / 4`;
+	cont.appendChild(cell);
+
+	cell = createDivision(["line_dark", "line_bottom_border"], "Name");
+	cell.style.gridArea = `1 / 4 / auto / 5`;
+	cont.appendChild(cell);
+
+	cell = createDivision(["line_dark", "line_bottom_border"], "Ammount");
+	cell.style.gridArea = `1 / 5 / auto / 6`;
+	cont.appendChild(cell);
+
+	cell = createDivision(["line_dark", "line_bottom_border"]);
+	cell.style.gridArea = `1 / 6 / auto / 8`;
+	cont.appendChild(cell);
+	
+	arg.wildcards.forEach((wc, index) => {
+		let card = cardsDb.get(wc.grpId);
+		let ld = (index % 2) ? "line_dark" : "line_light";
+
+		cell = createDivision([ld], index+1);
+		cell.style.gridArea = `${index+2} / 1 / auto / auto`;
+		cell.style.textAlign = 'center';
+		cont.appendChild(cell);
+
+		cell = createDivision(["top_wildcards_set_icon", ld]);
+		cell.style.backgroundImage = `url(../images/sets/${setsList[card.set].code}.png)`;
+		cell.title = card.set;
+		cell.style.gridArea = `${index+2} / 2 / auto / auto`;
+		cont.appendChild(cell);
+
+		cell = createDivision(["top_wildcards_set_icon", ld]);
+		cell.style.backgroundImage = `url(../images/wc_${wc.rarity}.png)`;
+		cell.title = wc.rarity;
+		cell.style.gridArea = `${index+2} / 3 / auto / auto`;
+		cont.appendChild(cell);
+
+		cell = createDivision([ld], card.name);
+		cell.style.gridArea = `${index+2} / 4 / auto / auto`;
+		cell.style.textDecoration = 'underline dotted';
+		cont.appendChild(cell);
+		addCardHover(cell, card);
+
+		cell = createDivision([ld], wc.quantity);
+		cell.style.gridArea = `${index+2} / 5 / auto / auto`;
+		cont.appendChild(cell);
+
+		if (wc.change == 0) {
+			cell = createDivision([ld]);
+		}
+		else {
+			cell = createDivision([(wc.change < 0 ? 'arrow_down' : 'arrow_up'), ld]);
+		}
+		cell.style.gridArea = `${index+2} / 6 / auto / auto`;
+		cont.appendChild(cell);
+
+		cell = createDivision([ld], (wc.change > 0 ? '+' : '-') + wc.change);
+		if (wc.change == 0)	cell.innerHTML = '-';
+		cell.style.gridArea = `${index+2} / 7 / auto / auto`;
+		cont.appendChild(cell);
+	});
+
+	mainDiv.appendChild(cont);
 }
 
 let stateClockInterval = null;

@@ -196,7 +196,11 @@ function selectAdd(div, callback) {
 function addCardHover(div, _card) {
 	if (!_card || !_card.images) return;
 
-	div.on('mouseenter', function() {
+	if (div instanceof jQuery) {
+		div = div[0];
+	}
+
+	div.addEventListener("mouseover", () => {
 		$('.main_hover').css("opacity", 1);
 		let dfc = '';
 		if (_card.dfc == 'DFC_Back')  dfc = 'a';
@@ -228,7 +232,7 @@ function addCardHover(div, _card) {
 		});
 	});
 
-	div.on('mouseleave', function() {
+	div.addEventListener("mouseleave", () => {
 		$('.main_hover').css("opacity", 0);
 		$('.main_hover_dfc').css("opacity", 0);
 		$('.loader').css("opacity", 0);
