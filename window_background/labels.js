@@ -8,12 +8,6 @@ function onLabelOutLogInfo(entry, json) {
 		var time = payload.secondsCount;
 		if (mid == currentMatchId) {
 			gameNumberCompleted = payload.gameNumber;
-			if (playerWin == 0 && oppWin == 0) {
-				if (payload.winningTeamId == playerSeat)
-					playerWin += 1;
-				else
-					oppWin += 1;
-			}
 			currentMatchTime += time;
 
 			let game = {};
@@ -222,38 +216,65 @@ function onLabelGreToClient(entry, json) {
 				}
 
 				if (msg.gameStateMessage.gameInfo != undefined) {
-					//if (msg.gameStateMessage.gameInfo.matchState == "MatchState_GameComplete") {
-					if (msg.gameStateMessage.gameInfo.stage == "GameStage_GameOver") {
-						//console.log("msg.gameStateMessage.gameInfo", msg.gameStateMessage.gameInfo);
-						let results = msg.gameStateMessage.gameInfo.results;
-						playerWin = 0;
-						oppWin = 0;
-						results.forEach(function(res) {
-							if (res.scope == "MatchScope_Game") {
-								actionLog(-1, new Date(), getNameBySeat(res.winningTeamId)+' Wins!');
-								if (res.winningTeamId == playerSeat) {
-									playerWin += 1;
-								}   
-								if (res.winningTeamId == oppSeat) {
-									oppWin += 1;
-								}
-							}
-							
-							//console.log("playerWin", playerWin, "oppWin", oppWin);
-							if (res.scope == "MatchScope_Match") {
-								duringMatch = false;
-							}
-						});
-					}
-					if (msg.gameStateMessage.gameInfo.matchState == "MatchState_MatchComplete") {
-						ipc_send("save_overlay_pos", 1);
-						clear_deck();
-						if (!store.get('settings.show_overlay_always')) {
-							ipc_send("overlay_close", 1);
-						}
+					let gameInfo = msg.gameStateMessage.gameInfo;
 
-						matchCompletedOnGameNumber = msg.gameStateMessage.gameInfo.gameNumber;
-						saveMatch(msg.gameStateMessage.gameInfo.matchID);
+					if (gameInfo.stage == "GameStage_GameOver") {
+						//console.log("gameInfo", gameInfo);
+						if (gameInfo.matchState == "MatchState_GameComplete") {
+							playerWin = 0;
+							draws = 0;
+							oppWin = 0;
+							// game end
+							let results = gameInfo.results;
+							results.forEach(function(res, index) {
+								//console.log(res, index);
+								if (res.scope == "MatchScope_Game") {
+									if (res.result == "ResultType_Draw") {
+										if (index == gameInfo.gameNumber-1) {
+											actionLog(-1, new Date(), 'The game is a draw!');
+										}
+										draws += 1;
+									}
+									else {
+										let loser = 0;
+										if (index == gameInfo.gameNumber-1) {
+											actionLog(-1, new Date(), getNameBySeat(res.winningTeamId)+' wins!');
+										}
+										if (res.winningTeamId == playerSeat) {
+											loser = oppSeat;
+											playerWin += 1;
+										}   
+										if (res.winningTeamId == oppSeat) {
+											loser = playerSeat;
+											oppWin += 1;
+										}
+
+										if (res.reason == "ResultReason_Concede") {
+											actionLog(-1, new Date(), getNameBySeat(loser)+' conceded.');
+										}
+										if (res.reason == "ResultReason_Timeout") {
+											actionLog(-1, new Date(), getNameBySeat(loser)+' timed out.');
+										}
+										if (res.reason == "ResultReason_Loop") {
+											actionLog(-1, new Date(), 'Game ended in a loop.');
+										}
+									}
+								}
+							});
+						}
+						if (gameInfo.matchState == "MatchState_MatchComplete") {
+							// match end
+							duringMatch = false;
+
+							ipc_send("save_overlay_pos", 1);
+							clear_deck();
+							if (!store.get('settings.show_overlay_always')) {
+								ipc_send("overlay_close", 1);
+							}
+
+							matchCompletedOnGameNumber = gameInfo.gameNumber;
+							saveMatch(gameInfo.matchID);
+						}
 					}
 				}
 
@@ -878,14 +899,20 @@ function onLabelMatchGameRoomStateChangedEvent(entry, json) {
 	}
 	if (json.stateType == "MatchGameRoomStateType_MatchCompleted") {
 		playerWin = 0;
+		draws = 0;
 		oppWin = 0;
 		json.finalMatchResult.resultList.forEach(function(res) {
 			if (res.scope == "MatchScope_Game") {
-				if (res.winningTeamId == playerSeat) {
-					playerWin += 1;
+				if (res.result == "ResultType_Draw") {
+					draws += 1;
 				}
-				if (res.winningTeamId == oppSeat) {
-					oppWin += 1;
+				else {
+					if (res.winningTeamId == playerSeat) {
+						playerWin += 1;
+					}   
+					if (res.winningTeamId == oppSeat) {
+						oppWin += 1;
+					}
 				}
 			}
 			if (res.scope == "MatchScope_Match") {
@@ -898,6 +925,8 @@ function onLabelMatchGameRoomStateChangedEvent(entry, json) {
 		if (!store.get('settings.show_overlay_always')) {
 			ipc_send("overlay_close", 1);
 		}
+		matchCompletedOnGameNumber = json.finalMatchResult.resultList.length - 1;
+        saveMatch(json.finalMatchResult.matchId);
 	}
 
 	if (json.players) {

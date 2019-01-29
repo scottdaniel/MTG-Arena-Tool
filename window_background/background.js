@@ -155,6 +155,7 @@ var PlayerLimitedMatchesDrawn = 0;
 var playerId = null;
 var playerSeat = null;
 var playerWin = 0;
+var draws = 0;
 var season_starts = null;
 var season_ends = null;
 
@@ -1265,6 +1266,7 @@ function createMatch(arg) {
 	currentMatchId = arg.matchId;
 	currentMatchTime = 0;
 	playerWin = 0;
+	draws = 0;
 	oppWin = 0;
 	priorityTimers = [0,0,0,0,0];
 	lastPriorityChangeTime = matchBeginTime;
@@ -1309,6 +1311,7 @@ function createDraft() {
 	oppTier = -1;
 	currentMatchId = null;
 	playerWin = 0;
+	draws = 0;
 	oppWin = 0;
 
 	ipc_send("set_draft", true, windowOverlay);
@@ -1570,7 +1573,7 @@ function saveMatch(matchId) {
 		seat: playerSeat, 
 		win: playerWin
 	}
-
+	match.draws = draws;
 	match.eventId = currentEventId;
 	match.playerDeck = originalDeck;
 	match.oppDeck = getOppDeck();
