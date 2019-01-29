@@ -145,6 +145,7 @@ ipc.on('auth', function (event, arg) {
 		loggedIn = true;
 	}
 	else {
+		canLogin = true;
 		pop(arg.error, -1);
 	}
 });
