@@ -27,6 +27,7 @@ let tou = null;
 let listInterval = [];
 
 let touStates = {};
+let topWildcards = null;
 
 // Should separate these two into smaller functions
 function open_home_tab(arg, opentab = true) {
@@ -42,6 +43,7 @@ function open_home_tab(arg, opentab = true) {
 
 	if (arg !== null) {
 		tournaments_list = arg.tournaments;
+		topWildcards = arg.wildcards;
 		if (!opentab)	return
 	}
 	
@@ -157,84 +159,84 @@ function open_home_tab(arg, opentab = true) {
 		});
 	});
 
-	d = createDivision(["list_fill"]);
-	mainDiv.appendChild(d);
-	title = createDivision(["card_tile_separator"], "Top Wildcards redeemed");
-	title.setAttribute("tooltip-content", "In the last 15 days.");
-	title.setAttribute("tooltip-bottom", "");
-	mainDiv.appendChild(title);
-	cont = createDivision(["top_wildcards_cont"]);
+	if (topWildcards) {
+		d = createDivision(["list_fill"]);
+		mainDiv.appendChild(d);
+		title = createDivision(["card_tile_separator"], "Top Wildcards redeemed");
+		title.setAttribute("tooltip-content", "In the last 15 days.");
+		title.setAttribute("tooltip-bottom", "");
+		mainDiv.appendChild(title);
+		cont = createDivision(["top_wildcards_cont"]);
 
+		let cell;
+		cell = createDivision(["line_dark", "line_bottom_border"], "Top");
+		cell.style.gridArea = `1 / 1 / auto / 3`;
+		cont.appendChild(cell);
 
-	let cell;
+		cell = createDivision(["line_dark", "line_bottom_border"]);
+		cell.style.gridArea = `1 / 3 / auto / 4`;
+		cont.appendChild(cell);
 
-	cell = createDivision(["line_dark", "line_bottom_border"], "Top");
-	cell.style.gridArea = `1 / 1 / auto / 3`;
-	cont.appendChild(cell);
+		cell = createDivision(["line_dark", "line_bottom_border"], "Name");
+		cell.style.gridArea = `1 / 4 / auto / 5`;
+		cont.appendChild(cell);
 
-	cell = createDivision(["line_dark", "line_bottom_border"]);
-	cell.style.gridArea = `1 / 3 / auto / 4`;
-	cont.appendChild(cell);
+		cell = createDivision(["line_dark", "line_bottom_border"], "Ammount");
+		cell.style.gridArea = `1 / 5 / auto / 6`;
+		cont.appendChild(cell);
 
-	cell = createDivision(["line_dark", "line_bottom_border"], "Name");
-	cell.style.gridArea = `1 / 4 / auto / 5`;
-	cont.appendChild(cell);
-
-	cell = createDivision(["line_dark", "line_bottom_border"], "Ammount");
-	cell.style.gridArea = `1 / 5 / auto / 6`;
-	cont.appendChild(cell);
-
-	cell = createDivision(["line_dark", "line_bottom_border"]);
-	cell.style.gridArea = `1 / 6 / auto / 8`;
-	cont.appendChild(cell);
+		cell = createDivision(["line_dark", "line_bottom_border"]);
+		cell.style.gridArea = `1 / 6 / auto / 8`;
+		cont.appendChild(cell);
 	
-	arg.wildcards.forEach((wc, index) => {
-		let card = cardsDb.get(wc.grpId);
-		let ld = (index % 2) ? "line_dark" : "line_light";
+		topWildcards.forEach((wc, index) => {
+			let card = cardsDb.get(wc.grpId);
+			let ld = (index % 2) ? "line_dark" : "line_light";
 
-		cell = createDivision([ld], index+1);
-		cell.style.gridArea = `${index+2} / 1 / auto / auto`;
-		cell.style.textAlign = 'center';
-		cont.appendChild(cell);
+			cell = createDivision([ld], index+1);
+			cell.style.gridArea = `${index+2} / 1 / auto / auto`;
+			cell.style.textAlign = 'center';
+			cont.appendChild(cell);
 
-		cell = createDivision(["top_wildcards_set_icon", ld]);
-		cell.style.backgroundImage = `url(../images/sets/${setsList[card.set].code}.png)`;
-		cell.title = card.set;
-		cell.style.gridArea = `${index+2} / 2 / auto / auto`;
-		cont.appendChild(cell);
+			cell = createDivision(["top_wildcards_set_icon", ld]);
+			cell.style.backgroundImage = `url(../images/sets/${setsList[card.set].code}.png)`;
+			cell.title = card.set;
+			cell.style.gridArea = `${index+2} / 2 / auto / auto`;
+			cont.appendChild(cell);
 
-		cell = createDivision(["top_wildcards_set_icon", ld]);
-		cell.style.backgroundImage = `url(../images/wc_${wc.rarity}.png)`;
-		cell.title = wc.rarity;
-		cell.style.gridArea = `${index+2} / 3 / auto / auto`;
-		cont.appendChild(cell);
+			cell = createDivision(["top_wildcards_set_icon", ld]);
+			cell.style.backgroundImage = `url(../images/wc_${wc.rarity}.png)`;
+			cell.title = wc.rarity;
+			cell.style.gridArea = `${index+2} / 3 / auto / auto`;
+			cont.appendChild(cell);
 
-		cell = createDivision([ld], card.name);
-		cell.style.gridArea = `${index+2} / 4 / auto / auto`;
-		cell.style.textDecoration = 'underline dotted';
-		cont.appendChild(cell);
-		addCardHover(cell, card);
+			cell = createDivision([ld], card.name);
+			cell.style.gridArea = `${index+2} / 4 / auto / auto`;
+			cell.style.textDecoration = 'underline dotted';
+			cont.appendChild(cell);
+			addCardHover(cell, card);
 
-		cell = createDivision([ld], wc.quantity);
-		cell.style.gridArea = `${index+2} / 5 / auto / auto`;
-		cont.appendChild(cell);
+			cell = createDivision([ld], wc.quantity);
+			cell.style.gridArea = `${index+2} / 5 / auto / auto`;
+			cont.appendChild(cell);
 
-		if (wc.change == 0) {
-			cell = createDivision([ld]);
-		}
-		else {
-			cell = createDivision([(wc.change < 0 ? 'arrow_down' : 'arrow_up'), ld]);
-		}
-		cell.style.gridArea = `${index+2} / 6 / auto / auto`;
-		cont.appendChild(cell);
+			if (wc.change == 0) {
+				cell = createDivision([ld]);
+			}
+			else {
+				cell = createDivision([(wc.change < 0 ? 'arrow_down' : 'arrow_up'), ld]);
+			}
+			cell.style.gridArea = `${index+2} / 6 / auto / auto`;
+			cont.appendChild(cell);
 
-		cell = createDivision([ld], (wc.change > 0 ? '+' : '') + wc.change);
-		if (wc.change == 0)	cell.innerHTML = '-';
-		cell.style.gridArea = `${index+2} / 7 / auto / auto`;
-		cont.appendChild(cell);
-	});
+			cell = createDivision([ld], (wc.change > 0 ? '+' : '') + wc.change);
+			if (wc.change == 0)	cell.innerHTML = '-';
+			cell.style.gridArea = `${index+2} / 7 / auto / auto`;
+			cont.appendChild(cell);
+		});
 
-	mainDiv.appendChild(cont);
+		mainDiv.appendChild(cont);
+	}
 }
 
 let stateClockInterval = null;
