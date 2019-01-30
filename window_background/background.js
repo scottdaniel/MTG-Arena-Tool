@@ -1181,7 +1181,7 @@ function changePriority(previous, current, time) {
 
 	lastPriorityChangeTime = time;
 	priorityTimers[0] = lastPriorityChangeTime;
-	console.log(priorityTimers);
+	//console.log(priorityTimers);
 	//console.log("since match begin:", time - matchBeginTime);
 	ipc_send('set_priority_timer', priorityTimers, windowOverlay);
 }

@@ -304,7 +304,7 @@ function onLabelGreToClient(entry, json) {
 									else if (gameObjs[_orig] != undefined) {
 										//console.log("AnnotationType_ObjectIdChanged", aff, _orig, _new, gameObjs[_orig], gameObjs);
 										gameObjs[_new] = JSON.parse(JSON.stringify(gameObjs[_orig]));
-										gameObjs[_orig] = undefined;
+										//gameObjs[_orig] = undefined;
 									}
 
 									if (_orig != undefined && _new != undefined) {
