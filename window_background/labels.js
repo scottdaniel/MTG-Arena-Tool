@@ -69,11 +69,14 @@ function onLabelOutLogInfo(entry, json) {
 			currentDeck.mainDeck.forEach(card => {
 				cardCounts[card.id] = card.quantity;
 				deckSize += card.quantity;
-				if (cardsDb.get(card.id).type.includes("Land")) {
-					landsInDeck += card.quantity;
-				}
-				if (!cardsDb.get(card.id).type.includes("Basic") && card.quantity >= 2 && card.quantity <= 4) {
-					multiCardPositions[card.quantity][card.id] = [];
+				let cardObj = cardsDb.get(card.id);
+				if (cardObj) {
+					if (cardObj.type.includes("Land")) {
+						landsInDeck += card.quantity;
+					}
+					if (!cardObj.type.includes("Basic") && card.quantity >= 2 && card.quantity <= 4) {
+						multiCardPositions[card.quantity][card.id] = [];
+					}
 				}
 			});
 			let librarySize = deckSize - handSize;
@@ -82,14 +85,17 @@ function onLabelOutLogInfo(entry, json) {
 			let libraryLands = [];
 			game.shuffledOrder.forEach((cardId, i) => {
 				let cardCount = cardCounts[cardId];
-				if (!cardsDb.get(cardId).type.includes("Basic") && cardCount >= 2 && cardCount <= 4) {
-					multiCardPositions[cardCount][cardId].push(i+1);
-				}
-				if (i >= handSize) {
-					if (cardsDb.get(cardId).type.includes("Land")) {
-						landsSoFar++;
+				let card = cardsDb.get(cardId);
+				if (card) {
+					if (!card.type.includes("Basic") && cardCount >= 2 && cardCount <= 4) {
+						multiCardPositions[cardCount][cardId].push(i+1);
 					}
-					libraryLands.push(landsSoFar);
+					if (i >= handSize) {
+						if (card.type.includes("Land")) {
+							landsSoFar++;
+						}
+						libraryLands.push(landsSoFar);
+					}
 				}
 			});
 
