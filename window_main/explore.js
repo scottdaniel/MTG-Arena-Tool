@@ -77,6 +77,7 @@ function open_explore_tab(arg, loadMore) {
 			eventFilters = [];
 			eventFilters.push('All');
 			eventFilters.push('Ranked Ladder');
+			eventFilters.push('Traditional Ranked Ladder');
 
 			dateNow = new Date();
 			dateNow = dateNow.getTime()/1000;

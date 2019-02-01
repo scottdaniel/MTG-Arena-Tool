@@ -156,8 +156,6 @@ var playerId = null;
 var playerSeat = null;
 var playerWin = 0;
 var draws = 0;
-var season_starts = null;
-var season_ends = null;
 
 var oppName = null;
 var oppRank = null;
@@ -405,8 +403,9 @@ const RANKED_DRAFT_EVENT_CODES = [
 	"QuickDraft_GRN_20181221"
 ];
 // code and time when ranked draft _started_
-const UNRANKED_RANKED_CHANGE_CODE = "QuickDraft_DOM_12072018";
-const UNRANKED_RANKED_CHANGE_DATE =  new Date("2018-12-14T16:00:00.000Z");
+var UNRANKED_RANKED_CHANGE_CODE = "QuickDraft_DOM_12072018";
+var season_starts = new Date("2019-01-31T17:05:00Z");
+var season_ends = null;
 
 // Calculates winrates for history tabs (set to last 10 dys as default)
 function calculateRankWins() {
@@ -436,35 +435,37 @@ function calculateRankWins() {
 
 	};
 
+	let ss = new Date(season_starts);
+	let se = new Date(season_ends);
+
 	for (var i = 0; i < history.matches.length; i++) {
 		let match_id = history.matches[i];
 		let match = history[match_id];
 
 		if (match == undefined) continue;
-		if (match.type != "match") continue;
+		if (match.type !== "match") continue;
 		if (match.opponent == undefined) continue;
 
-		if (match.date < season_starts) continue;
-		if (match.date > season_ends) continue;
+		let md = new Date(match.date);
+
+		if (md < ss) continue;
+		if (md > se) continue;
 
 		let struct;
-		if (match.eventId == "Ladder") {
+		if (match.eventId == "Ladder" || match.eventId == "Traditional_Ladder") {
 			struct = rankwinrates.constructed;
-		} else if (RANKED_DRAFT_EVENT_CODES.includes(match.eventId)
-			|| (match.eventId === UNRANKED_RANKED_CHANGE_CODE && match.date >= UNRANKED_RANKED_CHANGE_DATE)) {
+		} else if (RANKED_DRAFT_EVENT_CODES.includes(match.eventId)) {
 			struct = rankwinrates.limited;
 		} else {
 			continue;
 		}
 
-		struct = struct[match.opponent.rank.toLowerCase()];
+		struct = struct[match.player.rank.toLowerCase()];
 
 		if (struct) {
-			struct.t += 1;
-			if (match.opponent.win > match.player.win)
-				struct.l += 1;
-			else 
-				struct.w += 1;
+			struct.t += match.opponent.win + match.player.win;
+			struct.l += match.opponent.win;
+			struct.w += match.player.win;
 		}
 	}
 
@@ -482,6 +483,9 @@ ipc.on('request_explore', function (event, arg) {
 		}
 		else if (arg == "Ranked Ladder" ) {
 			httpApi.httpGetTopLadderDecks();
+		}
+		else if (arg == "Traditional Ranked Ladder" ) {
+			httpApi.httpGetTopLadderTraditionalDecks();
 		}
 		else {
 			httpApi.httpGetTopDecks(arg, cards);

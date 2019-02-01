@@ -50,6 +50,9 @@ function httpBasic() {
 		else if (_headers.method == 'get_ladder_decks') {
 			options = { protocol: 'https:', port: 443, hostname: serverAddress, path: '/top_ladder.json', method: 'GET'};
 		}
+		else if (_headers.method == 'get_ladder_traditional_decks') {
+			options = { protocol: 'https:', port: 443, hostname: serverAddress, path: '/top_ladder_traditional.json', method: 'GET'};
+		}
 		else if (_headers.method == 'get_status') {
 			http = require('https');
 			options = { protocol: 'https:', port: 443, hostname: 'magicthegatheringarena.statuspage.io', path: '/index.json', method: 'GET'};
@@ -92,6 +95,9 @@ function httpBasic() {
 					}
 					if (_headers.method == 'get_ladder_decks') {
 						ipc_send("set_ladder_decks", parsedResult);
+					}
+					if (_headers.method == 'get_ladder_traditional_decks') {
+						ipc_send("set_ladder_traditional_decks", parsedResult);
 					}
 					if (parsedResult.ok) {
 						if (_headers.method == 'auth') {
@@ -286,6 +292,11 @@ function httpGetTopLadderDecks() {
 	httpAsync.push({'reqId': _id, 'method': 'get_ladder_decks', 'method_path': '/top_ladder.json'});
 }
 
+function httpGetTopLadderTraditionalDecks() {
+	heartbeatClear();
+	var _id = makeId(6);
+	httpAsync.push({'reqId': _id, 'method': 'get_ladder_traditional_decks', 'method_path': '/top_ladder_traditional.json'});
+}
 function httpGetCourse(courseId) {
 	heartbeatClear();
 	var _id = makeId(6);
@@ -395,6 +406,7 @@ module.exports = {
 	httpSetPlayer,
 	httpGetTopDecks,
 	httpGetTopLadderDecks,
+	httpGetTopLadderTraditionalDecks,
 	httpGetCourse,
 	httpSetMatch,
 	httpSetDraft,

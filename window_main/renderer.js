@@ -418,6 +418,15 @@ ipc.on('set_explore', function (event, arg) {
 
 //
 ipc.on('set_ladder_decks', function (event, arg) {
+	set_ladder_decks(arg);
+});
+
+//
+ipc.on('set_ladder_traditional_decks', function (event, arg) {
+	set_ladder_decks(arg);
+});
+
+function set_ladder_decks(arg) {
 	if (sidebarActive == 3) {
 		set_explore_mode(1);
 
@@ -429,7 +438,7 @@ ipc.on('set_ladder_decks', function (event, arg) {
 
 		open_explore_tab(arg.decks, 0);
 	}
-});
+}
 
 //
 ipc.on('open_course_deck', function (event, arg) {
