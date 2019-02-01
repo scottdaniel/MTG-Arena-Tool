@@ -381,6 +381,8 @@ function ladderLoadMore(loadMore, ownedWildcards) {
 		});
 
 		$('.'+index).on('click', function() {
+			_deck.mainDeck  = removeDuplicates(_deck.mainDeck);
+			_deck.sideboard = removeDuplicates(_deck.sideboard);
 			open_deck(_deck, 1);
 			$('.moving_ux').animate({'left': '-100%'}, 250, 'easeInOutCubic'); 
 		});

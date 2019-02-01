@@ -20,7 +20,8 @@ global
 	compare_cards,
 	windowBackground,
 	windowRenderer,
-	deck_count_types
+	deck_count_types,
+	removeDuplicates
 */
 
 const electron 	= require('electron');
@@ -449,6 +450,8 @@ ipc.on('open_course_deck', function (event, arg) {
 	arg.sideboard.sort(compare_cards);
 	console.log(arg);
 
+	arg.mainDeck  = removeDuplicates(arg.mainDeck);
+	arg.sideboard = removeDuplicates(arg.sideboard);
 	open_deck(arg, 1);
 });
 
