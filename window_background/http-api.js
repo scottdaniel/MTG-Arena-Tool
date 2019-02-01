@@ -85,7 +85,14 @@ function httpBasic() {
 					console.log("RECV << "+index, _headers.method, results.slice(0, 500));
 				}
 				try {
-					var parsedResult = JSON.parse(results);
+					var parsedResult = null;
+					try {		
+						parsedResult = JSON.parse(results);
+					}
+					catch (e) {
+						//
+					}
+
 					if (_headers.method == 'get_status') {
 						delete parsedResult.page; delete parsedResult.incidents;
 						parsedResult.components.forEach(function(ob) {
@@ -99,10 +106,11 @@ function httpBasic() {
 					if (_headers.method == 'get_ladder_traditional_decks') {
 						ipc_send("set_ladder_traditional_decks", parsedResult);
 					}
-					if (parsedResult.ok) {
+					if (parsedResult && parsedResult.ok) {
 						if (_headers.method == 'auth') {
 							tokenAuth = parsedResult.token;
 
+							ipc_send("auth", parsedResult);
 							ipc_send('set_discord_tag', parsedResult.discord_tag);
 							//ipc_send("auth", parsedResult.arenaids);
 							if (rememberMe) {
@@ -110,7 +118,6 @@ function httpBasic() {
 								rstore.set("email", playerUsername);
 							}
 
-							ipc_send("auth", parsedResult);
 							loadPlayerConfig(playerId);
 
 							window.setInterval(() => {
@@ -178,7 +185,7 @@ function httpBasic() {
 						})
 						//ipc_send("popup", {"text": parsedResult.state, "time": 10000});
 					}
-					else if (parsedResult.ok == false && parsedResult.error != undefined) {
+					else if (parsedResult && parsedResult.ok == false && parsedResult.error != undefined) {
 						if (_headers.method == 'share_draft') {
 							ipc_send("popup", {"text": parsedResult.error, "time": 3000});
 						}
@@ -193,8 +200,8 @@ function httpBasic() {
 						}
 						// errors here 
 					}
-					if (_headers.method == 'auth') {
-						ipc_send("auth", parsedResult);
+					else if (!parsedResult && _headers.method == 'auth') {
+						ipc_send("auth", {});
 					}
 				} catch (e) {
 					console.error(e.message);
