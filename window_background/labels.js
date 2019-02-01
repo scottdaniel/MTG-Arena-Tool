@@ -595,6 +595,23 @@ function onLabelInEventGetCombinedRankInfo(entry, json) {
 	updateRank();
 }
 
+function onLabelRankUpdated(entry, json) {
+	if (!json)	return;
+
+	if (json.rankUpdateType == "Constructed") {
+		playerConstructedRank = json.newClass;
+		playerConstructedTier = json.newLevel;
+		playerConstructedStep = json.newStep;
+	}
+	else {
+		playerLimitedRank = json.newClass;
+		playerLimitedTier = json.newLevel;
+		playerLimitedStep = json.newStep;
+	}
+
+	updateRank();
+}
+
 function onLabelInDeckGetDeckLists(entry, json) {
 	if (!json)	return;
 

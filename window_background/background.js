@@ -822,6 +822,12 @@ function onLogEntryFound(entry) {
 				}
 			break;
 
+			case "Rank.Updated": {
+				json = entry.json();
+				onLabelRankUpdated(entry, json);
+			}
+			break;
+
 			case "Event.GetPlayerCourses":
 				if (entry.arrow == "<==") {
 					json = entry.json();
