@@ -397,13 +397,10 @@ function requestHistorySend(state) {
 	}
 }
 
-const RANKED_DRAFT_EVENT_CODES = [
-	"QuickDraft_M19_20190118",
-	"QuickDraft_RIX_20190104",
-	"QuickDraft_GRN_20181221"
+var ranked_events = [
+	"QuickDraft_M19_20190118"
 ];
-// code and time when ranked draft _started_
-var UNRANKED_RANKED_CHANGE_CODE = "QuickDraft_DOM_12072018";
+
 var season_starts = new Date("2019-01-31T17:05:00Z");
 var season_ends = null;
 
@@ -454,7 +451,7 @@ function calculateRankWins() {
 		let struct;
 		if (match.eventId == "Ladder" || match.eventId == "Traditional_Ladder") {
 			struct = rankwinrates.constructed;
-		} else if (RANKED_DRAFT_EVENT_CODES.includes(match.eventId)) {
+		} else if (ranked_events.includes(match.eventId)) {
 			struct = rankwinrates.limited;
 		} else {
 			continue;

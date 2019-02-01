@@ -163,6 +163,7 @@ function httpBasic() {
 							delete parsedResult.ok;
 							setsList = parsedResult.sets;
 							eventsList = parsedResult.events;
+							ranked_events = parsedResult.ranked_events;
 							ipc_send("set_db", parsedResult);
 							cardsDb.set(parsedResult);
 							ipc_send("popup", {"text": "Metadata: Ok", "time": 1000});

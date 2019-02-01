@@ -154,6 +154,8 @@ function recreateClock() {
 ipc.on('set_db', function (event, arg) {
 	setsList = arg.sets;
 	delete arg.sets;
+	delete arg.events;
+	delete arg.ranked_events;
 	cardsDb.set(arg);
 });
 

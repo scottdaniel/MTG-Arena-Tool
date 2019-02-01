@@ -188,6 +188,7 @@ ipc.on('set_db', function (event, arg) {
 	eventsList = arg.events;
 	delete arg.sets;
 	delete arg.events;
+	delete arg.ranked_events;
 	canLogin = true;
 	cardsDb.set(arg);
 
