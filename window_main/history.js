@@ -97,7 +97,7 @@ function open_history_tab(loadMore) {
 
 		let wrTotal = 1 / (wins+losses) * wins;
 		let colClass = getWinrateClass(wrTotal);
-		d = createDivision(["list_deck_winrate"], `${wins} : ${losses} (<span class="${colClass}_bright">${Math.round(wrTotal*100)}%</span>)`);
+		d = createDivision(["list_deck_winrate"], `${wins}:${losses} (<span class="${colClass}_bright">${Math.round(wrTotal*100)}%</span>)`);
 
 		history_top_winrate.appendChild(d);
 
