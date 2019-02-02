@@ -1063,13 +1063,21 @@ function get_deck_lands_ammount(deck) {
 
 //
 function get_deck_export(deck) {
-	var str = "";
+	let str = "";
+	deck.mainDeck = removeDuplicates(deck.mainDeck);
 	deck.mainDeck.forEach(function(card) {
-		var grpid = card.id;
-		var card_name = cardsDb.get(grpid).name;
-		var card_set = cardsDb.get(grpid).set;
-		var card_cn = cardsDb.get(grpid).cid;
-		var card_q = card.quantity;
+		let grpid = card.id;
+		let cardObj = cardsDb.get(grpid);
+
+		if (cardObj.set == "Mythic Edition") {
+			grpid = cardObj.reprints[0];
+			cardObj = cardsDb.get(grpid);
+		}
+
+		let card_name = cardObj.name;
+		let card_set = cardObj.set;
+		let card_cn = cardObj.cid;
+		let card_q = card.quantity;
 		if (card_q == 9999)	card_q = 1;
 		
 		try {
@@ -1083,12 +1091,20 @@ function get_deck_export(deck) {
 
 	str += "\r\n";
 
+	deck.sideboard = removeDuplicates(deck.sideboard);
 	deck.sideboard.forEach(function(card) {
-		var grpid = card.id;
-		var card_name = cardsDb.get(grpid).name;
-		var card_set = cardsDb.get(grpid).set;
-		var card_cn = cardsDb.get(grpid).cid;
-		var card_q = card.quantity;
+		let grpid = card.id;
+		let cardObj = cardsDb.get(grpid);
+
+		if (cardObj.set == "Mythic Edition") {
+			grpid = cardObj.reprints[0];
+			cardObj = cardsDb.get(grpid);
+		}
+
+		let card_name = cardObj.name;
+		let card_set = cardObj.set;
+		let card_cn = cardObj.cid;
+		let card_q = card.quantity;
 		if (card_q == 9999)	card_q = 1;
 		
 
@@ -1108,17 +1124,19 @@ function get_deck_export(deck) {
 //
 function get_deck_export_txt(deck) {
 	var str = "";
+	deck.mainDeck = removeDuplicates(deck.mainDeck);
 	deck.mainDeck.forEach(function(card) {
 		var grpid = card.id;
 		var card_name = cardsDb.get(grpid).name;
 		//var card_set = cardsDb.get(grpid).set;
 		//var card_cn = cardsDb.get(grpid).cid;
-		
+
 		str += (card.quantity == 9999 ? 1 : card.quantity)+" "+card_name+"\r\n";
 	});
 
 	str += "\r\n";
 
+	deck.sideboard = removeDuplicates(deck.sideboard);
 	deck.sideboard.forEach(function(card) {
 		var grpid = card.id;
 		var card_name = cardsDb.get(grpid).name;
