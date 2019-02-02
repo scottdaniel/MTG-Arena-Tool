@@ -14,14 +14,14 @@ function onLabelOutLogInfo(entry, json) {
 			game.shuffledOrder = [];
 			for (let i = 0; i < initialLibraryInstanceIds.length; i++) {
 				let instance = initialLibraryInstanceIds[i];
-                while (!instanceToCardIdMap[instance] && idChanges[instance]) {
-                    instance = idChanges[instance];
-                }
-                let cardId = instanceToCardIdMap[instance];
-                if (cardId === undefined) {
-                	break;
+				while ((!instanceToCardIdMap[instance] || !cardsDb.get(instanceToCardIdMap[instance])) && idChanges[instance]) {
+					instance = idChanges[instance];
+				}
+				let cardId = instanceToCardIdMap[instance];
+				if (cardsDb.get(cardId)) {
+					game.shuffledOrder.push(cardId);
 				} else {
-                	game.shuffledOrder.push(cardId);
+					break;
 				}
 			}
 			game.handsDrawn = payload.mulliganedHands.map(hand => hand.map(card => card.grpId));
@@ -945,7 +945,7 @@ function onLabelMatchGameRoomStateChangedEvent(entry, json) {
 			ipc_send("overlay_close", 1);
 		}
 		matchCompletedOnGameNumber = json.finalMatchResult.resultList.length - 1;
-        saveMatch(json.finalMatchResult.matchId);
+		saveMatch(json.finalMatchResult.matchId);
 	}
 
 	if (json.players) {
