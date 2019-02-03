@@ -291,13 +291,13 @@ function httpGetTopDecks(query, collection) {
 	heartbeatClear();
 	var _id = makeId(6);
 	collection = JSON.stringify(collection);
-	httpAsync.push({'reqId': _id, 'method': 'get_top_decks', 'method_path': '/get_courses_list.php', 'query': query, 'collection': collection});
+	httpAsync.unshift({'reqId': _id, 'method': 'get_top_decks', 'method_path': '/get_courses_list.php', 'query': query, 'collection': collection});
 }
 
 function httpGetTopLadderDecks() {
 	heartbeatClear();
 	var _id = makeId(6);
-	httpAsync.push({'reqId': _id, 'method': 'get_ladder_decks', 'method_path': '/top_ladder.json'});
+	httpAsync.unshift({'reqId': _id, 'method': 'get_ladder_decks', 'method_path': '/top_ladder.json'});
 }
 
 function httpGetTopLadderTraditionalDecks() {
@@ -308,7 +308,7 @@ function httpGetTopLadderTraditionalDecks() {
 function httpGetCourse(courseId) {
 	heartbeatClear();
 	var _id = makeId(6);
-	httpAsync.push({'reqId': _id, 'method': 'get_course', 'method_path': '/get_course.php', 'courseid': courseId});
+	httpAsync.unshift({'reqId': _id, 'method': 'get_course', 'method_path': '/get_course.php', 'courseid': courseId});
 }
 
 function httpSetMatch(match) {
@@ -367,33 +367,33 @@ function httpDraftShareLink(did, exp) {
 function httpHomeGet() {
 	heartbeatClear();
 	var _id = makeId(6);
-	httpAsync.push({'reqId': _id, 'method': 'home_get', 'method_path': '/get_home.php'});
+	httpAsync.unshift({'reqId': _id, 'method': 'home_get', 'method_path': '/get_home.php'});
 }
 
 function httpTournamentGet(tid) {
 	heartbeatClear();
 	var _id = makeId(6);
-	httpAsync.push({'reqId': _id, 'method': 'tou_get', 'method_path': '/tournament_get.php', 'id': tid});
+	httpAsync.unshift({'reqId': _id, 'method': 'tou_get', 'method_path': '/tournament_get.php', 'id': tid});
 }
 
 function httpTournamentJoin(tid, _deck) {
 	heartbeatClear();
 	let _id = makeId(6);
 	let deck = JSON.stringify(decks[_deck]);
-	httpAsync.push({'reqId': _id, 'method': 'tou_join', 'method_path': '/tournament_join.php', 'id': tid, 'deck': deck});
+	httpAsync.unshift({'reqId': _id, 'method': 'tou_join', 'method_path': '/tournament_join.php', 'id': tid, 'deck': deck});
 }
 
 function httpTournamentDrop(tid) {
 	heartbeatClear();
 	var _id = makeId(6);
-	httpAsync.push({'reqId': _id, 'method': 'tou_drop', 'method_path': '/tournament_drop.php', 'id': tid});
+	httpAsync.unshift({'reqId': _id, 'method': 'tou_drop', 'method_path': '/tournament_drop.php', 'id': tid});
 }
 
 function httpTournamentCheck(deck, opp, setCheck) {
 	heartbeatClear();
 	var _id = makeId(6);
 	deck = JSON.stringify(deck);
-	httpAsync.push({'reqId': _id, 'method': 'tou_check', 'method_path': '/check_match.php', 'deck': deck, 'opp': opp, 'setcheck': setCheck});
+	httpAsync.unshift({'reqId': _id, 'method': 'tou_check', 'method_path': '/check_match.php', 'deck': deck, 'opp': opp, 'setcheck': setCheck});
 }
 
 function httpHeartbeat() {
