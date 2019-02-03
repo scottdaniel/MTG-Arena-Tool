@@ -761,7 +761,11 @@ if (settingsLogUri) {
 console.log(logUri);
 const ArenaLogWatcher = require('./arena-log-watcher');
 
+let logReadStart = null;
+let logReadEnd = null;
+
 function startWatchingLog() {
+	logReadStart = new Date();
     return ArenaLogWatcher.start({
         path: logUri,
         chunkSize: 268435440,
@@ -770,6 +774,8 @@ function startWatchingLog() {
         onFinish: finishLoading
     });
 }
+
+let skipMatch = false;
 
 function onLogEntryFound(entry) {
 	if (debugLog) {
@@ -1292,6 +1298,10 @@ function createMatch(arg) {
 	}
 
 	ipc_send('set_priority_timer', priorityTimers, windowOverlay);
+
+	if (history[currentMatchId]) {
+		//skipMatch = true;
+	}
 }
 
 //
@@ -1702,6 +1712,9 @@ function finishLoading() {
 			httpApi.httpSetPlayer(playerName, playerConstructedRank, playerConstructedTier, playerLimitedRank, playerLimitedTier);
 		}
 		ipc_send("popup", {"text": `Reading log: 100%`, "time": 1000});
+		logReadEnd = new Date();
+		let logReadElapsed = (logReadEnd - logReadStart) / 1000;
+		ipc_send('ipc_log', `Log read in ${logReadElapsed}s`);
 	}
 }
 

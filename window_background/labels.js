@@ -2,6 +2,8 @@
 
 function onLabelOutLogInfo(entry, json) {
 	if (!json) return;
+	if (skipMatch)	return;
+
 	if (json.params.messageName == 'DuelScene.GameStop') {
 		var payload = json.params.payloadObject;
 		var mid = payload.matchId;
@@ -111,6 +113,7 @@ function onLabelOutLogInfo(entry, json) {
 
 function onLabelGreToClient(entry, json) {
 	if (!json)	return;
+	if (skipMatch)	return;
 	logTime = parseWotcTime(entry.timestamp);
 
 	json = json.greToClientEvent.greToClientMessages;
@@ -513,6 +516,7 @@ function onLabelGreToClient(entry, json) {
 
 function onLabelClientToMatchServiceMessageTypeClientToGREMessage(entry, json) {
 	if (!json) return;
+	if (skipMatch)	return;
 	if (!json.Payload) return;
 	if (!json.Payload.SubmitDeckResp) return;
 
@@ -935,6 +939,7 @@ function onLabelMatchGameRoomStateChangedEvent(entry, json) {
 				}
 			}
 			if (res.scope == "MatchScope_Match") {
+				skipMatch = false;
 				duringMatch = false;
 			}
 		});
