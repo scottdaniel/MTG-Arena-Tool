@@ -1515,6 +1515,12 @@ function saveEconomy(json) {
 	if (ctx.indexOf("Event.GrantCardPool") !== -1) {
 		json.context = "Event Card Pool";
 	}
+	if (ctx.indexOf("Event.Season.Constructed.Payout") !== -1) {
+		json.context = "Constructed Season Rewards";
+	}
+	if (ctx.indexOf("Event.Season.Limited.Payout") !== -1) {
+		json.context = "Limited Season Rewards";
+	}
 
 	var economy_index = store.get('economy_index');
 
