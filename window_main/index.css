@@ -2258,6 +2258,12 @@ a:hover {
     display: none;
 }
 
+.settings_note {
+    color: rgba(250, 229, 210, 1);
+    font-size: 14px;
+    margin: 0px 64px 20px 16px !important;
+}
+
 .deck_visual_stats {
     padding: 0 !important;
     margin: 32px !important;

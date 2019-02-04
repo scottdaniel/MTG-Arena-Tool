@@ -692,6 +692,10 @@ function loadPlayerConfig(playerId) {
 	ipc_send("set_tags_colors", tags_colors);
 	ipc_send("overlay_set_bounds", obj);
 
+	ipc_send("set_cards", {cards: entireConfig.cards.cards, new: {}});
+
+	sendEconomy();
+
 	loadSettings();
 	requestHistorySend(0);
 
@@ -705,12 +709,15 @@ function updateSettings(_settings, relay) {
 	//console.log(_settings);
 	//const exeName = path.basename(process.execPath);
 
-	if (_settings.overlay_top   == undefined) _settings.overlay_top   = true;
-	if (_settings.overlay_title == undefined) _settings.overlay_title = true;
-	if (_settings.overlay_deck  == undefined) _settings.overlay_deck  = true;
-	if (_settings.overlay_clock == undefined) _settings.overlay_clock = true;
-	if (_settings.overlay_ontop == undefined) _settings.overlay_ontop = true;
-	if (_settings.overlay_scale == undefined) _settings.overlay_scale = 100;
+	if (_settings.overlay_top    == undefined) _settings.overlay_top    = true;
+	if (_settings.overlay_title  == undefined) _settings.overlay_title  = true;
+	if (_settings.overlay_deck   == undefined) _settings.overlay_deck   = true;
+	if (_settings.overlay_clock  == undefined) _settings.overlay_clock  = true;
+	if (_settings.overlay_ontop  == undefined) _settings.overlay_ontop  = true;
+	if (_settings.overlay_scale  == undefined) _settings.overlay_scale  = 100;
+	if (_settings.skip_firstpass == undefined) _settings.skip_firstpass = false;
+
+	skipFirstPass = _settings.skip_firstpass;
 
 	ipc_send("overlay_set_ontop", _settings.overlay_ontop);
 
@@ -785,6 +792,7 @@ function startWatchingLog() {
 }
 
 let skipMatch = false;
+let skipFirstPass = false;
 
 function onLogEntryFound(entry) {
 	if (debugLog) {
@@ -805,142 +813,144 @@ function onLogEntryFound(entry) {
 		if (firstPass) {
 			updateLoading(entry);
 		}
-		switch (entry.label) {
-			case "Log.Info":
-				if (entry.arrow == "==>") {
+		if ((firstPass && !skipFirstPass) || (!firstPass) ) {
+			switch (entry.label) {
+				case "Log.Info":
+					if (entry.arrow == "==>") {
+						json = entry.json();
+						onLabelOutLogInfo(entry, json);
+					}
+				break;
+
+				case "GreToClientEvent":
 					json = entry.json();
-					onLabelOutLogInfo(entry, json);
-				}
-			break;
+					onLabelGreToClient(entry, json);
+				break;
 
-			case "GreToClientEvent":
-				json = entry.json();
-				onLabelGreToClient(entry, json);
-			break;
-
-			case "ClientToMatchServiceMessageType_ClientToGREMessage":
-				json = entry.json();
-				onLabelClientToMatchServiceMessageTypeClientToGREMessage(entry, json);
-			break;
-
-			case "Event.GetPlayerCourse":
-				if (entry.arrow == "<==") {
+				case "ClientToMatchServiceMessageType_ClientToGREMessage":
 					json = entry.json();
-					onLabelInEventGetPlayerCourse(entry, json);
-				}
-			break;
+					onLabelClientToMatchServiceMessageTypeClientToGREMessage(entry, json);
+				break;
 
-			case "Event.GetCombinedRankInfo":
-				if (entry.arrow == "<==") {
+				case "Event.GetPlayerCourse":
+					if (entry.arrow == "<==") {
+						json = entry.json();
+						onLabelInEventGetPlayerCourse(entry, json);
+					}
+				break;
+
+				case "Event.GetCombinedRankInfo":
+					if (entry.arrow == "<==") {
+						json = entry.json();
+						onLabelInEventGetCombinedRankInfo(entry, json);
+					}
+				break;
+
+				case "Rank.Updated": {
 					json = entry.json();
-					onLabelInEventGetCombinedRankInfo(entry, json);
+					onLabelRankUpdated(entry, json);
 				}
-			break;
+				break;
 
-			case "Rank.Updated": {
-				json = entry.json();
-				onLabelRankUpdated(entry, json);
+				case "Event.GetPlayerCourses":
+					if (entry.arrow == "<==") {
+						json = entry.json();
+						onLabelInEventGetPlayerCourses(entry, json);
+					}
+				break;
+				
+				case "Deck.GetDeckLists":
+					if (entry.arrow == "<==") {
+						json = entry.json();
+						onLabelInDeckGetDeckLists(entry, json);
+					}
+				break;
+
+				case "Deck.UpdateDeck":
+					if (entry.arrow == "<==") {
+						json = entry.json();
+						onLabelInDeckUpdateDeck(entry, json);
+					}
+				break;
+
+				case "Inventory.Updated":
+					json = entry.json();
+					onLabelInventoryUpdated(entry, json);
+				break;
+
+				case "PlayerInventory.GetPlayerInventory":
+					if (entry.arrow == "<==") {
+						json = entry.json();
+						onLabelInPlayerInventoryGetPlayerInventory(entry, json);
+					}
+				break;
+
+				case "PlayerInventory.GetPlayerCardsV3":
+					if (entry.arrow == "<==") {
+						json = entry.json();
+						onLabelInPlayerInventoryGetPlayerCardsV3(entry, json);
+					}
+				break;
+
+				case "Event.DeckSubmit":
+					if (entry.arrow == "<==") {
+						json = entry.json();
+						onLabelInEventDeckSubmit(entry, json);
+					}
+				break;
+
+				case "Event.MatchCreated":
+					json = entry.json();
+					onLabelEventMatchCreated(entry, json);
+				break;
+
+				case "DirectGame.Challenge":
+					if (entry.arrow == "==>") {
+						json = entry.json();
+						onLabelOutDirectGameChallenge(entry, json);
+					}
+				break;
+
+				case "Draft.DraftStatus":
+					if (entry.arrow == "<==") {
+						json = entry.json();
+						onLabelInDraftDraftStatus(entry, json);
+					}
+				break;
+
+				case "Draft.MakePick":
+					if (entry.arrow == "<==") {
+						json = entry.json();
+						onLabelInDraftMakePick(entry, json);
+					}
+					else {
+						json = entry.json();
+						onLabelOutDraftMakePick(entry, json);
+					}
+				break;
+
+				case "Event.CompleteDraft":
+					if (entry.arrow == "<==") {
+						json = entry.json();
+						onLabelInEventCompleteDraft(entry, json);
+					}
+				break;
+
+				case "MatchGameRoomStateChangedEvent":
+					json = entry.json();
+					onLabelMatchGameRoomStateChangedEvent(entry, json);
+				break;
+
+				case "Event.GetSeasonAndRankDetail":
+					if (entry.arrow == "<==") {
+						json = entry.json();
+						onLabelInEventGetSeasonAndRankDetail(entry, json);
+					}
+				break;
+
+				default:
+				break;
 			}
-			break;
-
-			case "Event.GetPlayerCourses":
-				if (entry.arrow == "<==") {
-					json = entry.json();
-					onLabelInEventGetPlayerCourses(entry, json);
-				}
-			break;
-			
-			case "Deck.GetDeckLists":
-				if (entry.arrow == "<==") {
-					json = entry.json();
-					onLabelInDeckGetDeckLists(entry, json);
-				}
-			break;
-
-			case "Deck.UpdateDeck":
-				if (entry.arrow == "<==") {
-					json = entry.json();
-					onLabelInDeckUpdateDeck(entry, json);
-				}
-			break;
-
-			case "Inventory.Updated":
-				json = entry.json();
-				onLabelInventoryUpdated(entry, json);
-			break;
-
-			case "PlayerInventory.GetPlayerInventory":
-				if (entry.arrow == "<==") {
-					json = entry.json();
-					onLabelInPlayerInventoryGetPlayerInventory(entry, json);
-				}
-			break;
-
-			case "PlayerInventory.GetPlayerCardsV3":
-				if (entry.arrow == "<==") {
-					json = entry.json();
-					onLabelInPlayerInventoryGetPlayerCardsV3(entry, json);
-				}
-			break;
-
-			case "Event.DeckSubmit":
-				if (entry.arrow == "<==") {
-					json = entry.json();
-					onLabelInEventDeckSubmit(entry, json);
-				}
-			break;
-
-			case "Event.MatchCreated":
-				json = entry.json();
-				onLabelEventMatchCreated(entry, json);
-			break;
-
-			case "DirectGame.Challenge":
-				if (entry.arrow == "==>") {
-					json = entry.json();
-					onLabelOutDirectGameChallenge(entry, json);
-				}
-			break;
-
-			case "Draft.DraftStatus":
-				if (entry.arrow == "<==") {
-					json = entry.json();
-					onLabelInDraftDraftStatus(entry, json);
-				}
-			break;
-
-			case "Draft.MakePick":
-				if (entry.arrow == "<==") {
-					json = entry.json();
-					onLabelInDraftMakePick(entry, json);
-				}
-				else {
-					json = entry.json();
-					onLabelOutDraftMakePick(entry, json);
-				}
-			break;
-
-			case "Event.CompleteDraft":
-				if (entry.arrow == "<==") {
-					json = entry.json();
-					onLabelInEventCompleteDraft(entry, json);
-				}
-			break;
-
-			case "MatchGameRoomStateChangedEvent":
-				json = entry.json();
-				onLabelMatchGameRoomStateChangedEvent(entry, json);
-			break;
-
-			case "Event.GetSeasonAndRankDetail":
-				if (entry.arrow == "<==") {
-					json = entry.json();
-					onLabelInEventGetSeasonAndRankDetail(entry, json);
-				}
-			break;
-
-			default:
-			break;
 		}
 	}
 }
@@ -1025,6 +1035,7 @@ function processLogUser(rawString) {
 		strCheck = '"PlayerScreenName":"';
 		if (value.indexOf(strCheck) > -1) {
 			playerName = dataChop(value, strCheck, '"');
+			ipc_send("set_username", playerName);
 			ipc_send("init_login", playerName);
 			ipc_send("ipc_log", 'Arena screen name: '+playerName);
 		}

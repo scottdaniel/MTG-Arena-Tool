@@ -48,10 +48,15 @@ function start({ path, chunkSize, onLogEntry, onError, onFinish }) {
 			position = 0;
 		}
 		while (position < size) {
-			const buffer = await readChunk(path, position, Math.min(size - position, chunkSize));
-			const text = stringDecoder.write(buffer);
-			logDecoder.append(text, entry => onLogEntry({ ...entry, size }));
-			position += buffer.length;
+			if (!skipFirstPass) {
+				const buffer = await readChunk(path, position, Math.min(size - position, chunkSize));
+				const text = stringDecoder.write(buffer);
+				logDecoder.append(text, entry => onLogEntry({ ...entry, size }));
+				position += buffer.length;
+			}
+			else {
+				position = size;
+			}
 		}
 		onFinish();
 	}

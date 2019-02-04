@@ -2040,6 +2040,11 @@ function open_settings(openSection) {
 	section.append('<div class="settings_title">Behaviour</div>');
 	
 	add_checkbox(section, 'Launch on startup', 'settings_startup', settings.startup);
+	add_checkbox(section, 'Read log on login', 'settings_readlogonlogin', !settings.skip_firstpass);
+    section.append(`
+    	<div class="settings_note">
+    	<i>Reading the log on startup can take a while, disabling this will make mtgatool load instantly, but you may have have to play with Arena to load some data, like Rank, wildcards and decklists. <b>This feature makes mtgatool read games when it was closed.</b></i>
+    	</div>`);
 	add_checkbox(section, 'Close main window on match found', 'settings_closeonmatch', settings.close_on_match);
 	add_checkbox(section, 'Close to tray', 'settings_closetotray', settings.close_to_tray);
 	add_checkbox(section, 'Sound when priority changes', 'settings_soundpriority', settings.sound_priority);
@@ -2052,7 +2057,9 @@ function open_settings(openSection) {
     export_input.appendTo(icd);
     icd.appendTo(label);
 
-    section.append('<label style="color: rgba(250, 229, 210, 0.75); font-size: 14px; margin-left: 16px;"><i>Possible variables: $Name, $Count, $SetName, $SetCode, $Collector, $Rarity, $Type, $Cmc</i></label>');
+    section.append(`<div class="settings_note">
+    	<i>Possible variables: $Name, $Count, $SetName, $SetCode, $Collector, $Rarity, $Type, $Cmc</i>
+    	</div>`);
     
 
 	section = $('<div class="settings_section ss2"></div>');
@@ -2448,6 +2455,7 @@ function eraseData() {
 //
 function updateSettings() {
 	var startup = document.getElementById("settings_startup").checked;
+	var readonlogin = document.getElementById("settings_readlogonlogin").checked;
 	var showOverlay = document.getElementById("settings_showoverlay").checked;
 	var showOverlayAlways = document.getElementById("settings_showoverlayalways").checked;
 	var soundPriority = document.getElementById("settings_soundpriority").checked;
@@ -2474,7 +2482,6 @@ function updateSettings() {
 	var overlaySideboard = document.getElementById("settings_overlay_sideboard").checked;
 
     var exportFormat = document.getElementById("settings_export_format").value;
-
 	settings = {
 		sound_priority: soundPriority,
 		show_overlay: showOverlay,
@@ -2497,7 +2504,8 @@ function updateSettings() {
         anon_explore: anonExplore,
         back_color: backColor,
         back_url: backUrl,
-        export_format: exportFormat
+        export_format: exportFormat,
+        skip_firstpass: !readonlogin
 	};
 	cardSize = 100+(cardSizePos*10);
 	ipc_send('save_settings', settings);
