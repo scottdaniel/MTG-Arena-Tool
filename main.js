@@ -226,6 +226,10 @@ if (!singleLock) {
 					overlay.setPosition(0, 0);
 					break;
 
+				case 'updates_check':
+					autoUpdater.checkForUpdatesAndNotify();
+					break;
+
 				case 'export_txt':
 					dialog.showSaveDialog({
 						filters: [{

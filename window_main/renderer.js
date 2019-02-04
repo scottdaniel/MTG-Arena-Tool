@@ -2180,6 +2180,8 @@ function open_settings(openSection) {
 	}
 	if (updateState.state == -1) {
 		about.append('<div class="message_updates green">Client is up to date.</div>');
+		button = $('<div class="button_simple centered update_link_about">Check for updates</div>');
+		button.appendTo(about);
 	}
 	if (updateState.state == -2) {
 		about.append('<div class="message_updates red">Error updating.</div>');
@@ -2252,6 +2254,9 @@ function open_settings(openSection) {
 		remote.app.exit(0);
 	});
 
+	$(".update_link_about").click(function() {
+		ipc_send('updates_check', true);
+	});
 
 	$(".settings_nav").click(function () {
 		if (!$(this).hasClass("nav_selected")) {
