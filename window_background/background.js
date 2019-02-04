@@ -551,6 +551,15 @@ ipc.on('set_deck_mode', function (event, state) {
 	update_deck(true);
 });
 
+let odds_sample_size = 1;
+ipc.on('set_odds_samplesize', function (event, state) {
+	odds_sample_size = state;
+	forceDeckUpdate();
+	update_deck(true);
+});
+
+
+
 ipc.on('get_deck_changes', function (event, arg) {
 	get_deck_changes(arg);
 });
@@ -1448,16 +1457,16 @@ function forceDeckUpdate() {
 				else if (c.type.includes("Sorcery", 0))		 	typeSor += card.quantity;
 				else if (c.type.includes("Planeswalker", 0))	typePla += card.quantity;
 			}
-			card.chance = Math.round(hypergeometric(1, cardsleft, 1, card.quantity)*100);
+			card.chance = Math.round(hypergeometric(1, cardsleft, odds_sample_size, card.quantity)*100);
 		});
 
-		currentDeckUpdated.chanceCre = Math.round(hypergeometric(1, cardsleft, 1, typeCre) * 1000)/10;
-		currentDeckUpdated.chanceIns = Math.round(hypergeometric(1, cardsleft, 1, typeIns) * 1000)/10;
-		currentDeckUpdated.chanceSor = Math.round(hypergeometric(1, cardsleft, 1, typeSor) * 1000)/10;
-		currentDeckUpdated.chancePla = Math.round(hypergeometric(1, cardsleft, 1, typePla) * 1000)/10;
-		currentDeckUpdated.chanceArt = Math.round(hypergeometric(1, cardsleft, 1, typeArt) * 1000)/10;
-		currentDeckUpdated.chanceEnc = Math.round(hypergeometric(1, cardsleft, 1, typeEnc) * 1000)/10;
-		currentDeckUpdated.chanceLan = Math.round(hypergeometric(1, cardsleft, 1, typeLan) * 1000)/10;
+		currentDeckUpdated.chanceCre = Math.round(hypergeometric(1, cardsleft, odds_sample_size, typeCre) * 1000)/10;
+		currentDeckUpdated.chanceIns = Math.round(hypergeometric(1, cardsleft, odds_sample_size, typeIns) * 1000)/10;
+		currentDeckUpdated.chanceSor = Math.round(hypergeometric(1, cardsleft, odds_sample_size, typeSor) * 1000)/10;
+		currentDeckUpdated.chancePla = Math.round(hypergeometric(1, cardsleft, odds_sample_size, typePla) * 1000)/10;
+		currentDeckUpdated.chanceArt = Math.round(hypergeometric(1, cardsleft, odds_sample_size, typeArt) * 1000)/10;
+		currentDeckUpdated.chanceEnc = Math.round(hypergeometric(1, cardsleft, odds_sample_size, typeEnc) * 1000)/10;
+		currentDeckUpdated.chanceLan = Math.round(hypergeometric(1, cardsleft, odds_sample_size, typeLan) * 1000)/10;
 		currentDeckUpdated.deckSize  = decksize;
 		currentDeckUpdated.cardsLeft = cardsleft;
 	}

@@ -38,6 +38,8 @@ let turnPriority = 0;
 let soundPriority = false;
 let overlayAlpha = 1;
 let overlayAlphaBack = 1;
+let oddsSampleSize = 1;
+let cardsLeft = 60; 
 
 let showSideboard = false;
 let actionLog = [];
@@ -366,6 +368,7 @@ ipc.on('set_deck', function (event, arg) {
 		var prevIndex = 0;
 
 		if (arg.cardsLeft && (deckMode == 0 || deckMode == 2)) {
+			cardsLeft = arg.cardsLeft;
 			deckListDiv.append('<div class="chance_title">'+arg.cardsLeft+' cards left</div>');
 		}
 		else {
@@ -404,6 +407,14 @@ ipc.on('set_deck', function (event, arg) {
 		}
 
 		if (deckMode == 2) {
+			deckListDiv.append(`
+	            <div class="overlay_samplesize_container">
+	                <div class="odds_prev click-on"></div>
+	                <div class="odds_number">Sample size: ${oddsSampleSize}</div>
+	                <div class="odds_next click-on"></div>
+	            </div>
+           `);
+
 			deckListDiv.append('<div class="chance_title"></div>');// Add some space
 			deckListDiv.append('<div class="chance_title">Creature: '	+	(arg.chanceCre != undefined ? arg.chanceCre : '0')+'%</div>');
 			deckListDiv.append('<div class="chance_title">Instant: '	+	(arg.chanceIns != undefined ? arg.chanceIns : '0')+'%</div>');
@@ -412,6 +423,23 @@ ipc.on('set_deck', function (event, arg) {
 			deckListDiv.append('<div class="chance_title">Enchantment: '	+	(arg.chanceEnc != undefined ? arg.chanceEnc : '0')+'%</div>');
 			deckListDiv.append('<div class="chance_title">Planeswalker: '	+	(arg.chancePla != undefined ? arg.chancePla : '0')+'%</div>');
 			deckListDiv.append('<div class="chance_title">Land: '		+	(arg.chanceLan != undefined ? arg.chanceLan : '0')+'%</div>');
+
+			//
+			$(".odds_prev").click(function () {
+				oddsSampleSize -= 1;
+				if (oddsSampleSize < 1) {
+					oddsSampleSize = cardsLeft-1;
+				}
+				ipc_send('set_odds_samplesize', oddsSampleSize);
+			});
+			//
+			$(".odds_next").click(function () {
+				oddsSampleSize += 1;
+				if (oddsSampleSize > cardsLeft-1) {
+					oddsSampleSize = 1;
+				}
+				ipc_send('set_odds_samplesize', oddsSampleSize);
+			});
 		}
 	}
 });

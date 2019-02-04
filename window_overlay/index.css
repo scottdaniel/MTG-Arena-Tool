@@ -156,7 +156,7 @@ body {pointer-events: none}
     color: #bdd6ff;
 }
 
-.clock_prev, .draft_prev, .deck_prev {
+.clock_prev, .draft_prev, .deck_prev, .odds_prev {
     -webkit-app-region:no-drag;
     position: absolute;
     cursor: pointer;
@@ -170,7 +170,7 @@ body {pointer-events: none}
     -webkit-transition: all .2s ease-in;
 }
 
-.clock_next, .draft_next, .deck_next {
+.clock_next, .draft_next, .deck_next, .odds_next {
     -webkit-app-region:no-drag;
     cursor: pointer;
     position: absolute;
@@ -184,8 +184,28 @@ body {pointer-events: none}
     -webkit-transition: all .2s ease-in;
 }
 
-.clock_prev:hover, .clock_next:hover, .draft_prev:hover, .draft_next:hover, .deck_prev:hover, .deck_next:hover {
+.clock_prev:hover, .clock_next:hover, .draft_prev:hover, .draft_next:hover, .deck_prev:hover, .deck_next:hover, .odds_prev:hover, .odds_next:hover {
     opacity: 1;
+}
+
+.overlay_samplesize_container {
+    margin-top: 16px;
+    position: relative;
+    height: 32px;
+    flex-direction: column;
+    display: flex;
+    width: 100%;
+}
+
+.odds_number {
+    width: 100%;
+    margin-top: auto;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.odds_prev, .odds_next {
+    height: 44px;
 }
 
 .overlay_card_quantity {
