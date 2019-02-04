@@ -510,10 +510,8 @@ function onLabelGreToClient(entry, json) {
 
 	var str = JSON.stringify(currentDeck);
 	currentDeckUpdated = JSON.parse(str);
-	if (firstPass && !debugLog) {
-		forceDeckUpdate();
-		update_deck(false);
-	}
+	forceDeckUpdate();
+	update_deck(false);
 }
 
 function onLabelClientToMatchServiceMessageTypeClientToGREMessage(entry, json) {

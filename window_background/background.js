@@ -554,7 +554,7 @@ ipc.on('set_deck_mode', function (event, state) {
 let odds_sample_size = 1;
 ipc.on('set_odds_samplesize', function (event, state) {
 	odds_sample_size = state;
-	forceDeckUpdate();
+	forceDeckUpdate(false);
 	update_deck(true);
 });
 
@@ -1403,7 +1403,7 @@ function update_deck(force) {
 }
 
 //
-function forceDeckUpdate() {
+function forceDeckUpdate(removeUsed = true) {
 	var decksize = 0;
 	var cardsleft = 0;
 	var typeCre = 0;
@@ -1426,35 +1426,37 @@ function forceDeckUpdate() {
 			cardsleft += card.quantity;
 		});
 	}
-	Object.keys(gameObjs).forEach(function(key) {
-		if (gameObjs[key] != undefined) {
-			if (zones[gameObjs[key].zoneId]) {
-				if (zones[gameObjs[key].zoneId].type != "ZoneType_Limbo" && zones[gameObjs[key].zoneId].type != "ZoneType_Library") {
-					if (gameObjs[key].ownerSeatId == playerSeat && gameObjs[key].type != "GameObjectType_Token" && gameObjs[key].type != "GameObjectType_Ability") {
-						/*
-						// DEBUG
-						if (gameObjs[key].grpId != 3) {
-							decksize += 1;
-							cardsleft += 1;
-							currentDeckUpdated.mainDeck.push({id: gameObjs[key].grpId, quantity: gameObjs[key].zoneId})
-						}
-						*/
-						
-						cardsleft -= 1;
-						if (currentDeckUpdated.mainDeck != undefined) {
-							currentDeckUpdated.mainDeck.forEach(function(card) {
-								if (card.id == gameObjs[key].grpId) {
-									//console.log(gameObjs[key].instanceId, cardsDb.get(gameObjs[key].grpId).name, zones[gameObjs[key].zoneId].type);
-									card.quantity -= 1;
-								}
-								if (card.quantity < 0)	card.quantity = 0;
-							});
+	if (removeUsed) {
+		Object.keys(gameObjs).forEach(function(key) {
+			if (gameObjs[key] != undefined) {
+				if (zones[gameObjs[key].zoneId]) {
+					if (zones[gameObjs[key].zoneId].type != "ZoneType_Limbo" && zones[gameObjs[key].zoneId].type != "ZoneType_Library") {
+						if (gameObjs[key].ownerSeatId == playerSeat && gameObjs[key].type != "GameObjectType_Token" && gameObjs[key].type != "GameObjectType_Ability") {
+							/*
+							// DEBUG
+							if (gameObjs[key].grpId != 3) {
+								decksize += 1;
+								cardsleft += 1;
+								currentDeckUpdated.mainDeck.push({id: gameObjs[key].grpId, quantity: gameObjs[key].zoneId})
+							}
+							*/
+							
+							cardsleft -= 1;
+							if (currentDeckUpdated.mainDeck != undefined) {
+								currentDeckUpdated.mainDeck.forEach(function(card) {
+									if (card.id == gameObjs[key].grpId) {
+										//console.log(gameObjs[key].instanceId, cardsDb.get(gameObjs[key].grpId).name, zones[gameObjs[key].zoneId].type);
+										card.quantity -= 1;
+									}
+									if (card.quantity < 0)	card.quantity = 0;
+								});
+							}
 						}
 					}
 				}
 			}
-		}
-	});
+		});
+	}
 
 	if ((debugLog || !firstPass) && currentDeckUpdated.mainDeck != undefined) {
 		currentDeckUpdated.mainDeck.forEach(function(card) {
