@@ -203,7 +203,12 @@ function open_decks_tab() {
 					d.style.opacity = 0.6;
 
 					colClass = getWinrateClass(wr.lastEdit);
-					d.innerHTML = `Since last edit: <span class="${colClass}_bright">${Math.round(wr.lastEdit*100)}%</span>`;
+					if (wr.lastEdit == 0) {
+						d.innerHTML = `Since last edit: -</span>`;
+					}
+					else {
+						d.innerHTML = `Since last edit: <span class="${colClass}_bright">${Math.round(wr.lastEdit*100)}%</span>`;
+					}
 					flr.appendChild(d);
 
 					wrTotalWins += wr.wins;
