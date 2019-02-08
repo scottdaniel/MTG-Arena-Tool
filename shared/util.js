@@ -805,6 +805,9 @@ function get_wc_missing(grpid, quantity) {
 	if (grpid == 67306 && quantity > 4) {
 		quantity = 4;
 	}
+	if (grpid == 69172 && quantity > 4) {
+		quantity = 4;
+	}
 
 	let arr = card.reprints;
 	if (!arr)	arr = [grpid];
