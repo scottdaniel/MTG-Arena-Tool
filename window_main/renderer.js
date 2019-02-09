@@ -45,6 +45,7 @@ var orderedCardTypes = ['cre', 'lan', 'ins', 'sor', 'enc', 'art', 'pla'];
 var orderedCardTypesDesc = ['Creatures', 'Lands', 'Instants', 'Sorceries', 'Enchantments', 'Artifacts', 'Planeswalkers'];
 var orderedCardRarities = ['common', 'uncommon', 'rare', 'mythic'];
 var orderedColorCodes = ['w', 'u', 'b', 'r', 'g', 'c'];
+var orderedColorCodesCommon = ['w', 'u', 'b', 'r', 'g'];
 var orderedManaColors = ['#E7CA8E', '#AABEDF', '#A18E87', '#DD8263', '#B7C89E', '#E3E3E3'];
 var rarityBooster = {common: 3, uncommon: 3, rare: 6, mythic: 13};
 
@@ -63,6 +64,7 @@ let settings = null;
 let updateState =  {state: -1, available: false, progress: 0, speed: 0};
 let sidebarActive = -1
 let filterEvent = 'All';
+let filterSort = "By Winrate";
 
 let draftPosition = 1;
 let overlayAlpha = 1;
@@ -412,7 +414,6 @@ ipc.on('set_home', function (event, arg) {
 //
 ipc.on('set_explore', function (event, arg) {
 	if (sidebarActive == 3) {
-		arg.sort(compare_explore);
 		set_explore_mode(0);
 		open_explore_tab(arg, 0);
 	}
@@ -2691,15 +2692,6 @@ function compare_courses(a, b) {
 	b = Date.parse(b.date);
 	if (a < b)	return 1;
 	if (a > b)	return -1;
-	return 0;
-}
-
-function compare_explore(a, b) {
-	var awlrate = a.wins-a.losses;
-	var bwlrate = b.wins-b.losses;
-
-	if (awlrate > bwlrate)	return -1;
-	if (awlrate < bwlrate)	return 1;
 	return 0;
 }
 

@@ -291,7 +291,7 @@ function httpGetTopDecks(query, collection) {
 	heartbeatClear();
 	var _id = makeId(6);
 	collection = JSON.stringify(collection);
-	httpAsync.unshift({'reqId': _id, 'method': 'get_top_decks', 'method_path': '/get_courses_list.php', 'query': query, 'collection': collection});
+	httpAsync.unshift({'reqId': _id, 'method': 'get_top_decks', 'method_path': '/get_courses_list_short.php', 'query': query, 'collection': collection});
 }
 
 function httpGetTopLadderDecks() {

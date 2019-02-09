@@ -858,6 +858,39 @@ function get_deck_missing(deck) {
 }
 
 //
+function get_deck_missing_short(deck) {
+	var missing = {r: 0, c: 0, u: 0, m: 0};
+
+	deck.mainDeck.forEach(function(card) {
+		var grpid = card.id;
+		var quantity = card.quantity;
+		var rarity = cardsDb.get(grpid).rarity;
+
+		let add = get_wc_missing(grpid, quantity);
+
+		if (rarity == 'common')		{missing.c += add;}
+		if (rarity == 'uncommon')	{missing.u += add;}
+		if (rarity == 'rare')		{missing.r += add;}
+		if (rarity == 'mythic')		{missing.m += add;}
+	});
+
+	deck.sideboard.forEach(function(card) {
+		var grpid = card.id;
+		var quantity = card.quantity;
+		var rarity = cardsDb.get(grpid).rarity;
+
+		let add = get_wc_missing(grpid, quantity);
+
+		if (rarity == 'common')		{missing.c += add;}
+		if (rarity == 'uncommon')	{missing.u += add;}
+		if (rarity == 'rare')		{missing.r += add;}
+		if (rarity == 'mythic')		{missing.m += add;}
+	});
+	
+	return missing;
+}
+
+//
 function get_deck_uniquestring(deck, side = true) {
 	if (!deck)	return '';
 	deck.mainDeck.sort(compare_cards);
