@@ -143,6 +143,7 @@ function open_explore_tab(arg, loadMore) {
 		select.appendTo(input);
 		selectAdd(select, updateSort);
 		select.next('div.select-styled').text(filterSort);
+		select.parent().css("width", "140px");
 		input.appendTo(icd);
 
 		var manas = $('<div class="mana_filters_explore"></div>');
