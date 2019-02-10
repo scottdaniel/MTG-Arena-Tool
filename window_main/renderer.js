@@ -725,8 +725,10 @@ function force_open_about() {
 }
 
 let top_compact = false;
-$(document).ready(function() {
-	$(window).on('resize', () => {
+let resizeTimer;
+window.addEventListener('resize', (event) => {
+	clearTimeout(resizeTimer);
+	resizeTimer = setTimeout(() => {
 		if ($('.top_nav_icons').width() < 500) {
 			if (!top_compact) {
 				$('span.top_nav_item_text').css("opacity", 0);
@@ -745,8 +747,10 @@ $(document).ready(function() {
 				top_compact = false;
 			}
 		}
-	});
+	}, 100);
+});
 
+$(document).ready(function() {
 	//document.getElementById("rememberme").checked = false;
 	$(".signup_link").click(function() {
 		shell.openExternal('https://mtgatool.com/signup/');

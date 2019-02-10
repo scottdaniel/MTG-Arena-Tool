@@ -346,6 +346,7 @@ span.top_nav_item_text {
     text-align: center;
     color: #FAE5D2;
     background-position-y: 64px;
+    background-size: 100% 100%;
     background-repeat: no-repeat;
     background-image: url(../images/nav_hover.png);
     -webkit-transition: all .2s ease-in-out;
