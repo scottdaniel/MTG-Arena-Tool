@@ -90,7 +90,6 @@ function colorPieChart(colorCounts, title) {
 }
 
 function deckWinrateCurve(deck) {
-
     // getDeckWinrate returns
     // {total: winrate, wins: wins, losses: loss, lastEdit: winrateLastEdit, colors: colorsWinrates};
     // or 0 if there is no data
@@ -111,7 +110,7 @@ function deckWinrateCurve(deck) {
     let numbers = $('<div class="mana_curve_costs"></div>');
 
     colorsWinrates.forEach(cwr => {
-        if (cwr.wins + cwr.losses > 1) {
+        if ((colorsWinrates.length < 15) || (cwr.wins + cwr.losses > 1 && colorsWinrates.length > 15)) {
             curve.append($(`<div class="mana_curve_column back_green" style="height: ${(cwr.wins/curveMax*100)}%"></div>`));
             curve.append($(`<div class="mana_curve_column back_red" style="height: ${(cwr.losses/curveMax*100)}%"></div>`));
 
