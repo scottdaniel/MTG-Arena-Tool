@@ -7,13 +7,14 @@ An MTG Arena deck tracker and collection manager.
 - In-game overlay
 	- Cards left in library
 	- Actions log
-	- Odds of drawing next
+	- Odds of drawing
 	- Full deck with sideboard
 	- Draft helper
-	- Elapsed time / current time clock
+	- Clock (chess clock, total elapsed time, current time, priority marker)
 - History of games played
 	- Cards your opponents played
 	- View games action logs
+	- Sideboard / mulligan
 	- Export decklists
 - Collection browser
 	- Filter cards by set
@@ -29,7 +30,7 @@ An MTG Arena deck tracker and collection manager.
 	- Mana curve
 	- Winrate vs color combinations
 	- Visual view
-	- Deck export (to mtga, to .txt)
+	- Deck export (to mtga, txt, csv)
 - Draft tracker
 	- In-draft overlay
 	- Assistant (shows best picks)
@@ -39,7 +40,7 @@ An MTG Arena deck tracker and collection manager.
 	- Filter by event
 	- Filter by owned
 	- See wildcards and boosters needed
-	- Sorted by wins/losses
+	- Sort by winrate, boosters required
 
 ### Compiling / Run from source
 MTG Arena Tool is developed using Electron JS, To get started simply clone this repo and install:
