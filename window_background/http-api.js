@@ -202,6 +202,7 @@ function httpBasic() {
 					}
 					else if (!parsedResult && _headers.method == 'auth') {
 						ipc_send("auth", {});
+						ipc_send("popup", {"text": "Something went wrong, please try again", "time": 5000});
 					}
 				} catch (e) {
 					console.error(e.message);
