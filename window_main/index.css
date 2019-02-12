@@ -1032,7 +1032,7 @@ a:hover {
     font-family:  var(--sub-font-name);
     text-indent: 48px;
     color: #FAE5D2;
-    width: 96px;
+    min-width: 120px;
     line-height: 29px;
     height: 24px;
     text-align: right;
@@ -2867,4 +2867,9 @@ a:hover {
     background-position: center;
     background-image: url(../images/down_red.png);
     height: 24px;
+}
+
+.text_centered {
+    width: fit-content;
+    margin: 4px auto;
 }

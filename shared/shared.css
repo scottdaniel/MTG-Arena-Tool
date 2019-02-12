@@ -718,6 +718,8 @@ span {
 
 .card_tile_separator {
     color: rgba(250, 229, 210, 1);
+    max-width: 800px;
+    margin: auto;
     height: 32px;
     vertical-align: middle;
     line-height: 32px;
