@@ -35,17 +35,30 @@ function open_home_tab(arg, opentab = true) {
 	mainDiv.classList.remove("flex_item");
 	mainDiv.innerHTML = '';
 
+	if (arg !== null) {
+		tournaments_list = arg.tournaments;
+		topWildcards = arg.wildcards;
+		usersActive = arg.users_active;
+		if (!opentab)	return
+	}
+
+	if (usersActive) {
+		let d = createDivision(["list_fill"]);
+		mainDiv.appendChild(d);
+		let title = createDivision(["card_tile_separator"], "General");
+		mainDiv.appendChild(title);
+		let users = createDivision(["text_centered"], "Users active: "+usersActive);
+		users.setAttribute("tooltip-content", "In the last 24 hours.");
+		users.setAttribute("tooltip-bottom", "");
+		users.style.textAlign = "center";
+		mainDiv.appendChild(users);
+	}
+
 	let d = createDivision(["list_fill"]);
 	mainDiv.appendChild(d);
 	let title = createDivision(["card_tile_separator"], "Tournaments");
 	mainDiv.appendChild(title);
 	let cont = createDivision(["tournament_list_cont"]);
-
-	if (arg !== null) {
-		tournaments_list = arg.tournaments;
-		topWildcards = arg.wildcards;
-		if (!opentab)	return
-	}
 	
 	if (discordTag == null) {
 		let but = $('<div class="discord_but"></div>');
