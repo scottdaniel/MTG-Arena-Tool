@@ -1272,6 +1272,8 @@ function checkForStartingLibrary() {
 	let library = zones["ZoneType_Library" + playerSeat].objectInstanceIds || [];
 	// Check that a post-mulligan scry hasn't been done
 	if (library.length == 0 || library[library.length-1] < library[0]) return;
+
+	if (!originalDeck.mainDeck) return
 	if (hand.length + library.length == deck_count(originalDeck)) {
 		if (hand.length >= 2 && hand[0] == hand[1] + 1) hand.reverse();
 		initialLibraryInstanceIds = [...hand, ...library];
