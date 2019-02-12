@@ -64,7 +64,7 @@ function httpBasic() {
 			options = { protocol: 'https:', port: 443, hostname: serverAddress, path: '/api.php', method: 'POST'};
 		}
 
-		if (debugNet) {
+		if (debugNet && _headers.method !== 'heartbeat') {
 			console.log("SEND >> "+index+", "+_headers.method, _headers, options);
 			ipc_send("ipc_log", "SEND >> "+index+", "+_headers.method+", "+_headers.reqId+", "+_headers.token);
 		}
@@ -80,9 +80,11 @@ function httpBasic() {
 			}); 
 			res.on('end', function () {
 				if (debugNet) {
-					ipc_send("ipc_log", "RECV << "+index+", "+_headers.method+", "+_headers.reqId+", "+_headers.token);
-					ipc_send("ipc_log", "RECV << "+index+", "+_headers.method+", "+results.slice(0, 100));
-					console.log("RECV << "+index, _headers.method, results.slice(0, 500));
+					if (_headers.method !== 'heartbeat') {
+						ipc_send("ipc_log", "RECV << "+index+", "+_headers.method+", "+_headers.reqId+", "+_headers.token);
+						ipc_send("ipc_log", "RECV << "+index+", "+_headers.method+", "+results.slice(0, 100));
+						console.log("RECV << "+index, _headers.method, results.slice(0, 500));
+					}
 				}
 				try {
 					var parsedResult = null;
@@ -122,20 +124,19 @@ function httpBasic() {
 
 							window.setInterval(() => {
 								httpHeartbeat();
-							}, 5000);
+							}, 10000);
 
 						}
 						if (_headers.method == 'heartbeat') {
 							parsedResult.notifications.forEach((str) => {
-								console.log("typeof:", typeof str);
+								console.log("heartbeat message:", str);
 								if (typeof str == "string") {
-									console.log("Notification string:", str);
+									//console.log("Notification string:", str);
 									let notif = new Notification('MTG Arena Tool', {
 										body: str
 									})									
 								}
 								else if (typeof str == "object") {
-									console.log("Notification object:", str);
 									if (str.task) {
 										ipc_send(str.task, str.value);
 									}
@@ -214,7 +215,6 @@ function httpBasic() {
 				//
 				}
 				
-
 				removeFromHttp(_headers.reqId);
 				if (debugNet) {
 					var str = ""; httpAsync.forEach( function(h) { str += h.reqId+", "; });
