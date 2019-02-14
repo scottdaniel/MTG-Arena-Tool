@@ -25,7 +25,8 @@ global
 	onLabelOutDraftMakePick,
 	onLabelInEventCompleteDraft,
 	onLabelMatchGameRoomStateChangedEvent,
-	onLabelInEventGetSeasonAndRankDetail
+	onLabelInEventGetSeasonAndRankDetail,
+	onLabelGetPlayerInventoryGetRewardSchedule
 */
 var electron = require('electron');
 
@@ -995,6 +996,13 @@ function onLogEntryFound(entry) {
 					if (entry.arrow == "<==") {
 						json = entry.json();
 						onLabelInEventGetSeasonAndRankDetail(entry, json);
+					}
+				break;
+
+				case "PlayerInventory.GetRewardSchedule":
+					if (entry.arrow == "<==") {
+						json = entry.json();
+						onLabelGetPlayerInventoryGetRewardSchedule(entry, json);
 					}
 				break;
 
