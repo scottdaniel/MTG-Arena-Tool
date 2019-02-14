@@ -1026,13 +1026,13 @@ function processLogUser(rawString) {
 		//ipc_send("ipc_log", "Async: ("+index+")");
 
 		// Get player Id
-		let strCheck = '"PlayerId":"';
+		let strCheck = '"playerId": "';
 		if (value.indexOf(strCheck) > -1) {
 			playerId = dataChop(value, strCheck, '"');
 		}
 
 		// Get User name
-		strCheck = '"PlayerScreenName":"';
+		strCheck = '"screenName": "';
 		if (value.indexOf(strCheck) > -1) {
 			playerName = dataChop(value, strCheck, '"');
 			ipc_send("set_username", playerName);
