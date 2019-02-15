@@ -1389,7 +1389,7 @@ function drawDeckVisual(_div, _stats, deck) {
 					let d = $('<div style="width: '+sz+'px !important;" class="deck_visual_card"></div>');
 					let img = $('<img style="width: '+sz+'px !important;" class="deck_visual_card_img"></img>');
 
-					img.attr("src", "https://img.scryfall.com/cards"+card.images[cardQuality]);
+					img.attr("src", get_card_image(card));
 					img.appendTo(d);
 					d.appendTo(tileNow);
 
@@ -1436,7 +1436,7 @@ function drawDeckVisual(_div, _stats, deck) {
 							d = $('<div style="margin-left: 60px; width: '+sz+'px !important;" class="deck_visual_card_side"></div>');
 						}
 						let img = $('<img style="width: '+sz+'px !important;" class="deck_visual_card_img"></img>');
-						img.attr("src", "https://img.scryfall.com/cards"+card.images[cardQuality]);
+						img.attr("src", get_card_image(card));
 						img.appendTo(d);
 						d.appendTo(tileNow);
 
@@ -1675,7 +1675,7 @@ function open_draft(id, tileGrpid, set) {
 			img.addClass('draft_card_picked');
         }
         var card = cardsDb.get(grpId);
-        img.attr("src", "https://img.scryfall.com/cards"+card.images[cardQuality]);
+        img.attr("src", get_card_image(card));
 
 		img.appendTo(d);
         var r = $('<div style="" class="draft_card_rating">'+draftRanks[card.rank]+'</div>');
@@ -2149,7 +2149,7 @@ function open_settings(openSection) {
 	var img = $('<img style="width: '+cardSize+'px; !important" class="inventory_card_settings_img"></img>');
 	
 	var card = cardsDb.get(67518);
-	img.attr("src", "https://img.scryfall.com/cards"+card.images[cardQuality]);
+	img.attr("src", get_card_image(card));
 	img.appendTo(d);
 
 	d.appendTo(slider);

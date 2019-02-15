@@ -500,7 +500,7 @@ function open_economy_tab(loadMore) {
 					img.classList.add("inventory_card_img");
 					img.classList.add("inventory_card_aetherized");
 					img.style.width = "39px";
-					img.src = "https://img.scryfall.com/cards"+card.images[cardQuality];
+					img.src = get_card_image(card);
 
 					d.appendChild(img);
 					flr.appendChild(d);
@@ -531,7 +531,7 @@ function open_economy_tab(loadMore) {
 				var img = document.createElement("img");
 				img.classList.add("inventory_card_img");
 				img.style.width = "39px";
-				img.src = "https://img.scryfall.com/cards"+card.images[cardQuality];
+				img.src = get_card_image(card);
 
 				d.appendChild(img);
 				flr.appendChild(d);

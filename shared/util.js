@@ -215,7 +215,7 @@ function addCardHover(div, _card) {
 			$('.loader_dfc').css("opacity", 1);
 			var dfcCard = cardsDb.get(_card.dfcId);
 
-			$('.main_hover_dfc').attr("src", "https://img.scryfall.com/cards"+dfcCard.images["normal"]);
+			$('.main_hover_dfc').attr("src", get_card_image(dfcCard));
 			$('.main_hover_dfc').on('load', function(){
 				$('.loader_dfc').css("opacity", 0);
 			});
@@ -225,7 +225,7 @@ function addCardHover(div, _card) {
 			$('.loader_dfc').hide();
 		}
 
-		$('.main_hover').attr("src", "https://img.scryfall.com/cards"+_card.images["normal"]);
+		$('.main_hover').attr("src", get_card_image(_card));
 
 		$('.main_hover').on('load', function(){
 			$('.loader').css("opacity", 0);
@@ -238,6 +238,20 @@ function addCardHover(div, _card) {
 		$('.loader').css("opacity", 0);
 		$('.loader_dfc').css("opacity", 0);
 	});
+}
+
+//
+function get_card_image(cardObj) {
+	if (typeof cardObj !== "object") {
+		cardObj = cardsDb.get(cardObj);
+	}
+
+	if (cardObj.name == "Totally Lost") {
+		return "../images/notfound.png";
+	}
+	else {
+		return "https://img.scryfall.com/cards"+cardObj.images[cardQuality];
+	}
 }
 
 //

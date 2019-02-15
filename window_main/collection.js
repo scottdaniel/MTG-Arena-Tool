@@ -615,7 +615,7 @@ function printCards() {
 			}
 
 			var img = $('<img style="width: '+cardSize+'px !important;" class="inventory_card_img"></img>');
-			img.attr("src", "https://img.scryfall.com/cards"+card.images[cardQuality]);
+			img.attr("src", get_card_image(card));
 			img.appendTo(d);
 
 			addCardHover(img, card);
