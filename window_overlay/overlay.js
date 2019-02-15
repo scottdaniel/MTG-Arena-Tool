@@ -41,6 +41,8 @@ let overlayAlphaBack = 1;
 let oddsSampleSize = 1;
 let cardsLeft = 60; 
 
+let cardQuality = "normal";
+
 let showSideboard = false;
 let actionLog = [];
 
@@ -218,6 +220,10 @@ ipc.on('set_settings', function (event, settings) {
 		});
 		$(document.body).css('background-color', 'rgba(0,0,0,0)');
 	}
+
+    if (settings.cards_quality != undefined) {
+        cardQuality = settings.cards_quality;
+    }
 
 	showSideboard = settings.overlay_sideboard;
 	soundPriority = settings.sound_priority;
