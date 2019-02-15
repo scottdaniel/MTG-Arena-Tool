@@ -92,7 +92,7 @@ function open_decks_tab() {
 				tile.classList.add('deck_tile');
 
 				try {
-					tile.style.backgroundImage = "url("+get_card_image(card)+")";
+					tile.style.backgroundImage = "url(https://img.scryfall.com/cards"+cardsDb.get(tileGrpid).images["art_crop"]+")";
 				}
 				catch (e) {
 					console.error(e);
