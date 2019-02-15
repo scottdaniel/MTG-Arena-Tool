@@ -195,6 +195,7 @@ function httpBasic() {
 								tokenAuth = undefined;
 								rstore.set("email", "");
 								rstore.set("token", "");
+								ipc_send("auth", {});
 								ipc_send("clear_pwd", 1);
 								ipc_send("set_remember", false);
 							}
