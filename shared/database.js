@@ -7,24 +7,6 @@ const json = require('./database.json');
 class Database {
 	constructor() {
 		this.cards = json;
-		this.fblthp = {
-			"name":"Totally Lost",
-			"set":"gtc",
-			"images":{"small":"","normal":"","large":"","art_crop":""},
-			"type":"",
-			"cost":[],
-			"cmc":0,
-			"rarity":"common",
-			"cid":"54",
-			"frame":[1],
-			"artist":"David Palumbo",
-			"dfc":"None",
-			"collectible":false,
-			"craftable":false,
-			"dfcId":0,
-			"rank":5,
-			"reprints":false
-		}
 	}
 
 	set(arg) {
@@ -41,7 +23,7 @@ class Database {
 		let ret = this.cards[grpId];
 		if (ret == undefined) {
 			//console.error("card not found: "+grpId);
-			return this.fblthp;
+			return false;
 		}
 		return ret;
 	}

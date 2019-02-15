@@ -246,7 +246,7 @@ function get_card_image(cardObj) {
 		cardObj = cardsDb.get(cardObj);
 	}
 
-	if (cardObj.name == "Totally Lost") {
+	if (!cardObj) {
 		return "../images/notfound.png";
 	}
 	else {
