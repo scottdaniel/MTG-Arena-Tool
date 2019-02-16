@@ -124,7 +124,7 @@ function open_history_tab(loadMore) {
 		);
 		historyTopWinrate.appendChild(winrateContainer);
 
-		let matchTimeContainer = createDivision(["list_match_time"], toMMSS(totalMatchTime));
+		let matchTimeContainer = createDivision(["list_match_time", "list_match_time_top"], toMMSS(totalMatchTime));
 		historyTopWinrate.appendChild(matchTimeContainer);
 
 		historyTop.appendChild(historyTopWinrate);
