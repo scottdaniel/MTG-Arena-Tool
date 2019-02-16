@@ -517,47 +517,55 @@ function onLabelGreToClient(entry, json) {
 function onLabelClientToMatchServiceMessageTypeClientToGREMessage(entry, json) {
 	if (!json) return;
 	if (skipMatch)	return;
-	if (!json.Payload) return;
-	if (!json.Payload.SubmitDeckResp) return;
+	if (!json.payload) return;
 
-	// Get sideboard changes
-	let tempMain = {};
-	let tempSide = {};
-	json.Payload.SubmitDeckResp.Deck.DeckCards.forEach(function (grpId) {
-		if (tempMain[grpId] == undefined) {
-			tempMain[grpId] = 1
-		}
-		else {
-			tempMain[grpId] += 1;
-		}
-	});
-	if (json.Payload.SubmitDeckResp.Deck.SideboardCards !== undefined) {
-		json.Payload.SubmitDeckResp.Deck.SideboardCards.forEach(function (grpId) {
-			if (tempSide[grpId] == undefined) {
-				tempSide[grpId] = 1
+	if (typeof json.payload == "string") {
+		json.payload = decodePayload(json);
+	}
+
+	if (json.payload.submitdeckresp) {
+		// Get sideboard changes
+		let deckResp = json.payload.submitdeckresp;
+		console.log("SubmitDeckResp", deckResp);
+		
+		let tempMain = {};
+		let tempSide = {};
+		deckResp.deck.deckcardsList.forEach(function (grpId) {
+			if (tempMain[grpId] == undefined) {
+				tempMain[grpId] = 1
 			}
 			else {
-				tempSide[grpId] += 1;
+				tempMain[grpId] += 1;
 			}
 		});
-	}
+		if (deckResp.deck.sideboardcardsList !== undefined) {
+			deckResp.deck.sideboardcardsList.forEach(function (grpId) {
+				if (tempSide[grpId] == undefined) {
+					tempSide[grpId] = 1
+				}
+				else {
+					tempSide[grpId] += 1;
+				}
+			});
+		}
 
-	var newDeck = {};
-	newDeck.mainDeck = [];
-	Object.keys(tempMain).forEach(function (key) {
-		var c = {"id": key, "quantity": tempMain[key]};
-		newDeck.mainDeck.push(c);
-	});
-
-	newDeck.sideboard = [];
-	if (json.Payload.SubmitDeckResp.Deck.SideboardCards !== undefined) {
-		Object.keys(tempSide).forEach(function (key) {
-			var c = {"id": key, "quantity": tempSide[key]};
-			newDeck.sideboard.push(c);
+		var newDeck = {};
+		newDeck.mainDeck = [];
+		Object.keys(tempMain).forEach(function (key) {
+			var c = {"id": key, "quantity": tempMain[key]};
+			newDeck.mainDeck.push(c);
 		});
+
+		newDeck.sideboard = [];
+		if (deckResp.deck.sideboardcardsList !== undefined) {
+			Object.keys(tempSide).forEach(function (key) {
+				var c = {"id": key, "quantity": tempSide[key]};
+				newDeck.sideboard.push(c);
+			});
+		}
+		currentDeck = newDeck;
+		ipc_send("set_deck", currentDeck, windowOverlay);
 	}
-	currentDeck = newDeck;
-	ipc_send("set_deck", currentDeck, windowOverlay);
 }
 
 function onLabelInEventGetPlayerCourse(entry, json) {

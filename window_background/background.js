@@ -1058,6 +1058,39 @@ function processLogUser(rawString) {
 	}
 }
 
+function decodePayload(json) {
+	const messages = require('./messages_pb');
+
+	const msgType = json.clientToMatchServiceMessageType.split('_')[1],
+	binaryMsg = new Buffer(json.payload, 'base64');
+
+	try {
+		let msgDeserialiser;
+		if (msgType === 'ClientToGREMessage' || msgType === 'ClientToGREUIMessage') {
+			msgDeserialiser = messages.ClientToGREMessage;
+		} else if (msgType === 'ClientToMatchDoorConnectRequest') {
+			msgDeserialiser = messages.ClientToMatchDoorConnectRequest;
+		} else if (msgType === 'AuthenticateRequest') {
+			msgDeserialiser = messages.AuthenticateRequest;
+		} else if (msgType === 'CreateMatchGameRoomRequest') {
+			msgDeserialiser = messages.CreateMatchGameRoomRequest;
+		} else if (msgType === 'EchoRequest') {
+			msgDeserialiser = messages.EchoRequest;
+		} else {
+			console.warn(`${msgType} - unknown message type`);
+			return;
+		}
+		const msg = msgDeserialiser.deserializeBinary(binaryMsg);
+		//console.log(json.msgType);
+		//console.log(msg.toObject());
+		return msg.toObject();
+	} catch (e) {
+		console.log(e.message);
+	}
+
+	return;
+}
+
 // Cuts the string "data" between first ocurrences of the two selected words "startStr" and "endStr";
 function dataChop(data, startStr, endStr) {
 	var start = data.indexOf(startStr)+startStr.length;
