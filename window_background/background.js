@@ -36,6 +36,8 @@ const fs	= require("fs");
 const sha1	= require('js-sha1');
 const ipc	= electron.ipcRenderer;
 
+const transform = require('lodash.transform');
+
 const httpApi = require('./http-api');
 
 const rememberCfg = {
@@ -1804,4 +1806,14 @@ function parseWotcTime(str) {
 		return new Date();
 	}
 
+}
+
+function normaliseFields(iterator) {
+	if (typeof iterator == "object") {
+		return transform(iterator, function(result, value, key) {
+			let nkey = typeof key == "string" ? key.replace(/List$/, '').toLowerCase() : key;
+			result[nkey] = normaliseFields(value);
+		});
+	}
+	return iterator;
 }

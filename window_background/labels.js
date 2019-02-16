@@ -517,20 +517,22 @@ function onLabelGreToClient(entry, json) {
 function onLabelClientToMatchServiceMessageTypeClientToGREMessage(entry, json) {
 	if (!json) return;
 	if (skipMatch)	return;
+	if (json.Payload) { json.payload = json.Payload; }
 	if (!json.payload) return;
 
 	if (typeof json.payload == "string") {
 		json.payload = decodePayload(json);
+		json.payload = normaliseFields(json.payload);
 	}
 
 	if (json.payload.submitdeckresp) {
 		// Get sideboard changes
 		let deckResp = json.payload.submitdeckresp;
-		console.log("SubmitDeckResp", deckResp);
-		
+		//console.log("deckResp", deckResp);
+
 		let tempMain = {};
 		let tempSide = {};
-		deckResp.deck.deckcardsList.forEach(function (grpId) {
+		deckResp.deck.deckcards.forEach(function (grpId) {
 			if (tempMain[grpId] == undefined) {
 				tempMain[grpId] = 1
 			}
@@ -538,8 +540,8 @@ function onLabelClientToMatchServiceMessageTypeClientToGREMessage(entry, json) {
 				tempMain[grpId] += 1;
 			}
 		});
-		if (deckResp.deck.sideboardcardsList !== undefined) {
-			deckResp.deck.sideboardcardsList.forEach(function (grpId) {
+		if (deckResp.deck.sideboardcards !== undefined) {
+			deckResp.deck.sideboardcards.forEach(function (grpId) {
 				if (tempSide[grpId] == undefined) {
 					tempSide[grpId] = 1
 				}
@@ -557,7 +559,7 @@ function onLabelClientToMatchServiceMessageTypeClientToGREMessage(entry, json) {
 		});
 
 		newDeck.sideboard = [];
-		if (deckResp.deck.sideboardcardsList !== undefined) {
+		if (deckResp.deck.sideboardcards !== undefined) {
 			Object.keys(tempSide).forEach(function (key) {
 				var c = {"id": key, "quantity": tempSide[key]};
 				newDeck.sideboard.push(c);
