@@ -528,6 +528,9 @@ span.top_nav_item_text {
     color: rgba(250, 229, 210, 0.5);
 }
 
+.list_match_time_top {
+    margin-right: 18px;
+}
 
 .list_match_result_win {
 font-family:  var(--main-font-name);

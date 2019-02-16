@@ -1302,15 +1302,25 @@ function timestamp() {
 	return Math.floor(Date.now() / 1000);
 }
 
-//
+// Converts an integer number of seconds into a string of either:
+// HH:MM:SS or MM:SS depending on if the duration 
+// is longer than an hour
 function toMMSS(sec_num) {
 	var hours   = Math.floor(sec_num / 3600);
 	var minutes = Math.floor((sec_num - (hours * 3600)) / 60);
 	var seconds = sec_num - (hours * 3600) - (minutes * 60);
 
-	if (minutes < 10) {minutes = "0"+minutes;}
-	if (seconds < 10) {seconds = "0"+seconds;}
-	return minutes+':'+seconds;
+	if (minutes < 10) {
+		minutes = "0" + minutes;
+	}
+	if (seconds < 10) {
+		seconds = "0" + seconds;
+	}
+	if (hours > 0) {
+		return hours + ':' + minutes + ':' + seconds;
+	} else {
+		return minutes + ':' + seconds;
+	}
 }
 
 //

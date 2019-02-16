@@ -64,13 +64,24 @@ function open_history_tab(loadMore) {
 		wrap_l.appendChild(d);
 	}
 
-	mainDiv = document.getElementById("history_column");
+	var historyColumn = document.getElementById("history_column");
+
+	// container hierarchy which this next section of code deals with is:
+	// .history_column
+	// 	 .history_top
+	//     .history_top_filter
+	//     .history_top_winrate
+	//       .list_deck_winrate
+	//       .list_match_time
+
 
 	// Event ID filter
 	if (loadHistory == 0) {
 		let events_list = [];
 		let wins = 0;
 		let losses = 0;
+		let totalMatchTime = 0;
+
 		filteredSampleSize = 0;
 		matchesHistory.matches.forEach((matchId) => {
 			let match = matchesHistory[matchId];
@@ -82,29 +93,44 @@ function open_history_tab(loadMore) {
 					if (filterEvent == 'All' || match.eventId == filterEvent) {
 						wins += match.player.win;
 						losses += match.opponent.win;
+
+						// some of the data is wierd. Games which last years or have no data.
+						if (match.duration !== undefined && match.duration < 3600) {
+							totalMatchTime += match.duration;
+						}
 						filteredSampleSize++;
 					}
 				}
 			}
 		});
-		if (filteredSampleSize == 0)	filteredSampleSize = matchesHistory.matches.length;
+		if (filteredSampleSize == 0) {
+			filteredSampleSize = matchesHistory.matches.length;
+		}
 
-		div = createDivision(["history_top"]);
 
-		let history_top_filter = createDivision(["history_top_filter"]);
+		let historyTop = createDivision(["history_top"]);
 
-		let history_top_winrate = createDivision(["history_top_winrate"]);
+		let historyTopFilter = createDivision(["history_top_filter"]);
+		historyTop.appendChild(historyTopFilter);
+
+
+		let historyTopWinrate = createDivision(["history_top_winrate"]);
 
 		let wrTotal = 1 / (wins+losses) * wins;
 		let colClass = getWinrateClass(wrTotal);
-		d = createDivision(["list_deck_winrate"], `${wins}:${losses} (<span class="${colClass}_bright">${Math.round(wrTotal*100)}%</span>)`);
+		let winrateContainer = createDivision(
+			["list_deck_winrate"],
+			`${wins}:${losses} (<span class="${colClass}_bright">${Math.round(wrTotal*100)}%</span>)`
+		);
+		historyTopWinrate.appendChild(winrateContainer);
 
-		history_top_winrate.appendChild(d);
+		let matchTimeContainer = createDivision(["list_match_time", "list_match_time_top"], toMMSS(totalMatchTime));
+		historyTopWinrate.appendChild(matchTimeContainer);
 
-		div.appendChild(history_top_filter);
-		div.appendChild(history_top_winrate);
+		historyTop.appendChild(historyTopWinrate);
 
-		var select = $('<select id="query_select"></select>');
+
+		let select = $('<select id="query_select"></select>');
 		if (filterEvent != "All") {
 			select.append('<option value="All">All</option>');
 		}
@@ -113,8 +139,8 @@ function open_history_tab(loadMore) {
 				select.append('<option value="'+evId+'">'+getReadableEvent(evId)+'</option>');
 			}
 		});
-		history_top_filter.appendChild(select[0]);
-		mainDiv.appendChild(div);
+		historyTopFilter.appendChild(select[0]);
+		historyColumn.appendChild(historyTop);
 		selectAdd(select, filterHistory);
 		select.next('div.select-styled').text(getReadableEvent(filterEvent));
 	}
@@ -254,7 +280,7 @@ function open_history_tab(loadMore) {
 		div.appendChild(flr);
 		div.appendChild(fldel);
 
-		mainDiv.appendChild(div);
+		historyColumn.appendChild(div);
 
 		if (match.type == "draft") {
 			addShare(match);
