@@ -1678,6 +1678,9 @@ function saveMatch(matchId) {
 
 	match.gameStats = matchGameStats;
 
+	// Convert string "2.2.19" into number for easy comparison, 1 byte per part, allowing for versions up to 255.255.255
+	match.toolVersion = electron.remote.app.getVersion().split('.').reduce((acc, cur) => (+acc) * 256 + (+cur));
+
 	console.log("Save match:", match);
 	var matches_index = store.get('matches_index');
 
