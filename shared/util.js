@@ -201,6 +201,7 @@ function addCardHover(div, _card) {
 	}
 
 	div.addEventListener("mouseover", () => {
+		$('.loader').css("opacity", 1);
 		$('.main_hover').css("opacity", 1);
 		let dfc = '';
 		if (_card.dfc == 'DFC_Back')  dfc = 'a';
@@ -211,6 +212,7 @@ function addCardHover(div, _card) {
 		if (dfc != '' && _card.dfc != 'SplitHalf' && renderer == 0) {
 			$('.main_hover_dfc').show();
 			$('.loader_dfc').show();
+			$('.loader_dfc').css("opacity", 1);
 			$('.main_hover_dfc').css("opacity", 1);
 			$('.loader_dfc').css("opacity", 1);
 			var dfcCard = cardsDb.get(_card.dfcId);
