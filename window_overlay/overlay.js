@@ -304,6 +304,8 @@ ipc.on('set_deck', function (event, arg) {
 		}
 		changedMode = true;
 
+		$(".overlay_archetype").remove();
+
 		$(".overlay_deck_container").show();
 		$(".overlay_draft_container").hide();
 
@@ -349,7 +351,9 @@ ipc.on('set_deck', function (event, arg) {
 
 		if (arg.name !== null) {
 			if (deckMode == 3) {
+				$('<div class="overlay_archetype"></div>').insertAfter('.overlay_deckname');
 				$(".overlay_deckname").html("Played by "+arg.name.slice(0, -6));
+				$(".overlay_archetype").html(arg.archetype);
 			}
 			else {
 				$(".overlay_deckname").html(arg.name);

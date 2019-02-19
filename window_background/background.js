@@ -1609,10 +1609,10 @@ function getOppDeck() {
 
 	//
 	let format = event_to_format[currentEventId];
-	oppDeck.archetype = undefined;
+	oppDeck.archetype = "-";
 	if (format) {
 		let possible = deck_archetypes[format];
-		bestMatch = -1;
+		bestMatch = "-";
 		bestMatchRate = 0;
 		possible.forEach((arch) => {
 			let total = 0;

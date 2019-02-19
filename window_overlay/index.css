@@ -27,6 +27,15 @@ body {pointer-events: none}
     color: #FAE5D2;
 }
 
+.overlay_archetype {
+    font-size: 14px;
+    opacity: 1;
+    -webkit-app-region: drag;
+    padding: 4px 0 0 0;
+    text-align: center;
+    color: #FAE5D2;
+}
+
 .overlay_deckcolors {
     -webkit-app-region:drag;
     height: 24px;
