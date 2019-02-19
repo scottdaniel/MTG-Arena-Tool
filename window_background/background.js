@@ -212,6 +212,8 @@ var deck_changes_index = [];
 var deck_changes = {};
 var decks_tags = {};
 var tags_colors = {};
+var deck_archetypes = {};
+var event_to_format = {};
 
 let formats = {
 	Standard: 'Standard',
@@ -353,18 +355,29 @@ ipc.on('delete_match', function (event, arg) {
 		store.set('draft_index', drafts.matches);
 		store.delete(arg);
 	}
-	//console.log("Delete ", arg);
 });
 
 //
-ipc.on('request_events', function () {
+ipc.on('request_events', () => {
 	ipc_send("set_events", JSON.stringify(events));
 });
 
 //
-ipc.on('request_history', function (event, state) {
+ipc.on('request_history', (event, state) => {
 	requestHistorySend(state);
 });
+
+//
+ipc.on('set_deck_archetypes', (event, arg) => {
+	deck_archetypes = arg;
+});
+
+//
+ipc.on('set_event_to_format', (event, arg) => {
+	event_to_format = arg;
+});
+
+
 
 window.onerror = (msg, url, line, col, err) => {
 	var error = {
@@ -1593,6 +1606,35 @@ function getOppDeck() {
 			}
 		}
 	}); 
+
+	//
+	let format = event_to_format[currentEventId];
+	oppDeck.archetype = undefined;
+	if (format) {
+		let possible = deck_archetypes[format];
+		bestMatch = -1;
+		bestMatchRate = 0;
+		possible.forEach((arch) => {
+			let total = 0;
+			let found = 0;
+			oppDeck.mainDeck.forEach((oppCard) => {
+				let oName = cardsDb.get(oppCard.id).name;
+				total += 1;
+				arch.cards.forEach((card) => {
+					let cName = cardsDb.get(card.id).name;
+					if (cName == oName)	{
+						found += 1;
+					}
+				});
+			});
+			let rate = 100 / total * found;
+			if (rate > bestMatchRate) {
+				bestMatchRate = rate;
+				bestMatch = arch.tag;
+			}
+		});
+		oppDeck.archetype = bestMatch;
+	}
 	
 	return oppDeck;
 }
@@ -1702,6 +1744,10 @@ function saveMatch(matchId) {
 	match.eventId = currentEventId;
 	match.playerDeck = originalDeck;
 	match.oppDeck = getOppDeck();
+	if (match.oppDeck.archetype) {
+		match.tags = [ match.oppDeck.archetype ];
+	}
+
 	match.date = new Date();
 	match.bestOf = currentMatchBestOfNumber;
 

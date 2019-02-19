@@ -407,6 +407,8 @@ ipc.on('set_status', function (event, arg) {
 ipc.on('set_home', function (event, arg) {
 	document.body.style.cursor = "auto";
 	deck_tags = arg.tags;
+	ipc_send("set_event_to_format", arg.events);
+	ipc_send("set_deck_archetypes", arg.tags);
 	if (sidebarActive == -1) {
 		console.log(arg);
 		open_home_tab(arg);
