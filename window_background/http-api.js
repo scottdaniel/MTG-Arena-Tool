@@ -405,9 +405,15 @@ function httpHeartbeat() {
 }
 
 function httpSetMythicRank(opp, rank) {
-	heartbeatClear();
 	var _id = makeId(6);
 	httpAsync.push({'reqId': _id, 'method': 'mythicrank', 'method_path': '/send_mythic_rank.php', 'opp': opp, 'rank': rank});
+}
+
+function httpSetDeckTag(tag, cards, format) {
+	var _id = makeId(6);
+	cards.forEach((card) => { card.quantity = 1; });
+	cards = JSON.stringify(cards);
+	httpAsync.push({'reqId': _id, 'method': 'set_deck_tag', 'method_path': '/send_deck_tag.php', 'tag': tag, 'cards': cards, 'format': format});
 }
 
 module.exports = {
@@ -431,5 +437,6 @@ module.exports = {
 	httpTournamentJoin,
 	httpTournamentDrop,
 	httpTournamentCheck,
-	httpSetMythicRank
+	httpSetMythicRank,
+	httpSetDeckTag
 };

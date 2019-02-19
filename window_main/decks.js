@@ -289,9 +289,7 @@ function filterDecks(filter) {
 
 function createTag(tag, div, showClose = true) {
 	let tagCol = getTagColor(tag);
-	var t = document.createElement("div");
-	t.classList.add('deck_tag');
-	t.innerHTML = (tag == null ? 'Add': tag);
+	let t = createDivision(['deck_tag'], (tag == null ? 'Add': tag));
 	t.style.backgroundColor = tagCol;
 
 	if (tag) {
@@ -352,8 +350,7 @@ function createTag(tag, div, showClose = true) {
 	}
 
 	if (showClose) {
-		let tc = document.createElement("div");
-		tc.classList.add('deck_tag_close');
+		let tc = createDivision(['deck_tag_close']);
 		t.appendChild(tc);
 
 		$(tc).on('click', function(e) {

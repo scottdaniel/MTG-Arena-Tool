@@ -559,6 +559,35 @@ ipc.on('add_tag', function (event, arg) {
 	store.set("decks_tags", decks_tags);
 });
 
+ipc.on('delete_history_tag', function (event, arg) {
+	let match = history[arg.match];
+
+	if (match.tags) {
+		match.tags.forEach((tag, index) => {
+			if (tag == arg.name) {
+				match.tags.splice(index, 1);
+			}
+		});
+	}
+
+	store.set(arg.match, match);
+});
+
+ipc.on('add_history_tag', function (event, arg) {
+	let match = history[arg.match];
+
+	if (match.tags) {
+		match.tags.push(arg.name);
+	}
+	else {
+		match.tags = [arg.name];
+	}
+
+	httpApi.httpSetDeckTag(arg.name, match.oppDeck.mainDeck, match.eventId);
+	store.set(arg.match, match);
+});
+
+
 ipc.on('set_deck_mode', function (event, state) {
 	overlayDeckMode = state;
 	update_deck(true);

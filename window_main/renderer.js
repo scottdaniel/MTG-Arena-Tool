@@ -95,6 +95,7 @@ let economyHistory = [];
 let season_starts = new Date();
 let season_ends = new Date();
 
+let deck_tags = {};
 let tags_colors = {};
 let authToken = null;
 let discordTag = null;
@@ -405,6 +406,7 @@ ipc.on('set_status', function (event, arg) {
 //
 ipc.on('set_home', function (event, arg) {
 	document.body.style.cursor = "auto";
+	deck_tags = arg.tags;
 	if (sidebarActive == -1) {
 		console.log(arg);
 		open_home_tab(arg);

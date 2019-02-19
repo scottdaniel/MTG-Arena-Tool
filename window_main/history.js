@@ -236,6 +236,24 @@ function open_history_tab(loadMore) {
 				fcb.appendChild(m);
 			});
 
+			let tags_div = createDivision(["history_tags"]);
+			fcb.appendChild(tags_div);
+
+			if (match.tags) {
+				match.tags.forEach((tag) => {
+					let t = createTag(tag, tags_div);
+					jQuery.data(t, "match", match_id);
+				});
+				if (match.tags.length == 0) {
+					let t = createTag(null, tags_div, false);
+					jQuery.data(t, "match", match_id);
+				}
+			}
+			else {
+				let t = createTag(null, tags_div, false);
+				jQuery.data(t, "match", match_id);
+			}
+
 			d = createDivision([(match.player.win > match.opponent.win ? "list_match_result_win" : "list_match_result_loss")], `${match.player.win}:${match.opponent.win}`);
 			flr.appendChild(d);
 		}
@@ -413,7 +431,137 @@ function renderRanksStats(container) {
 		viewingLimitSeason = !viewingLimitSeason;
 		renderRanksStats(container);
 	});
+}
+
+function createTag(tag, div, showClose = true) {
+	let tagCol = getTagColor(tag);
+	let t = createDivision(['deck_tag'], (tag == null ? 'Set archetype': tag));
+	t.style.backgroundColor = tagCol;
+
+	if (tag) {
+		$(t).on('click', function(e) {
+			var colorPick = $(t);
+			colorPick.spectrum({
+				showInitial: true,
+				showAlpha: false,
+				showButtons: false
+			});
+			colorPick.spectrum("set", tagCol);
+			colorPick.spectrum("show");
+
+			colorPick.on('move.spectrum', function(e, color) {
+				let tag = $(this).text();
+				let col = color.toRgbString();
+				ipc_send("edit_tag", {tag: tag, color: col});
+				tags_colors[tag] = col;
+
+				$('.deck_tag').each((index, obj) => {
+					let tag = $(obj).text();
+					$(obj).css("background-color", tags_colors[tag])
+				});
+			});
+
+			colorPick.on('hide.spectrum', () => {
+				colorPick.spectrum("destroy");
+			});
+			e.stopPropagation();
+		});
+
+	}
+	else {
+		$(t).on('click', function(e) {
+			if ($(this).html() == "Set archetype") {
+				t.innerHTML = '';
+				let input = $('<input size="1" onFocus="this.select()" class="deck_tag_input"></input>');
+				$(t).prepend(input);
+
+				input[0].focus();
+				input[0].select();
+				input.keydown(function(e) {
+					setTimeout(() => {
+						input.css("width", $(this).val().length*8);
+					}, 10);
+					if (e.keyCode == 13) {
+						let val = $(this).val();
+						let matchid = jQuery.data($(this).parent()[0], "match");
+						let masterdiv = $(this).parent().parent()[0];
+						addTag(matchid, val, masterdiv);
+						
+						$(this).parent().remove();
+					}
+				});
+			}
+			e.stopPropagation();
+		});
+	}
+
+	if (showClose) {
+		let tc = createDivision(['deck_tag_close']);
+		t.appendChild(tc);
+
+		$(tc).on('click', function(e) {
+			e.stopPropagation();
+			let matchid = jQuery.data($(this).parent()[0], "match");
+			let val = $(this).parent().text();
+
+			deleteTag(matchid, val);
+
+			$(this).css("width", "0px");
+			$(this).css("margin", "0px");
+			$(this).parent().css("opacity", 0);
+			$(this).parent().css("font-size", 0);
+			$(this).parent().css("margin-right", "0px");
+			$(this).parent().css("color", $(this).css("background-color"));
+
+			let t = createTag(null, $(this).parent().parent()[0], false);
+			jQuery.data(t, "match", matchid);
+		});
+	}
+	else {
+		t.style.paddingRight = "12px";
+	}
+	div.appendChild(t);
+	return t;
 } 
+
+function addTag(matchid, tag, div) {
+	let match = matchesHistory[matchid];
+	if (match.tags) {
+		if (match.tags.indexOf(tag) == -1) {
+			match.tags.push(tag);
+		}
+	}
+	else {
+		match.tags = [tag];
+	}
+
+	let obj = {match: matchid, name: tag};
+	ipc_send("add_history_tag", obj);
+
+	let t = createTag(tag, div);
+	jQuery.data(t, "match", matchid);
+}
+
+function deleteTag(matchid, tag) {
+	let match = matchesHistory[matchid];
+
+	if (match.tags) {
+		let ind = match.tags.indexOf(tag);
+		if (ind !== -1) {
+			match.tags.splice(ind, 1);
+		}
+	}
+
+	let obj = {match: matchid, name: tag};
+	ipc_send("delete_history_tag", obj);
+}
+
+function getTagColor(tag) {
+	let tc = tags_colors[tag];
+	if (tc)	return tc;
+
+	return "#FAE5D2";
+}
 
 function filterHistory(filter) {
 	filterEvent = filter;

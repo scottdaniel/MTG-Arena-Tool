@@ -753,6 +753,11 @@ a:hover {
     justify-content: space-between;
 }
 
+.history_tags {
+    display: flex;
+    margin: 1px -10px 0px 8px;
+}
+
 .list_deck_name {
     -webkit-user-select:none;
     align-self: center;
