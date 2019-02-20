@@ -337,7 +337,7 @@ span.top_nav_item_text {
 .top_nav_item {
     max-width: 100px;
     min-width: 48px;
-    height: 64px;
+    /*height: 64px;*/
     cursor: pointer;
     font-family: "belerenbold";
     font-size: 16px;
