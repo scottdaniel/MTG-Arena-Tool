@@ -246,7 +246,7 @@ function open_history_tab(loadMore) {
 			let tags = [];
 			if (t && deck_tags[t]) {
 				deck_tags[t].forEach((val) => {
-					tags.push(val.tag);
+					tags.push({tag: val.tag, q: val.average});
 				});
 			}
 			if (match.tags) {
