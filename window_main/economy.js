@@ -566,7 +566,7 @@ function open_economy_tab(loadMore) {
 
 	$(this).off();
 	$("#ux_0").on('scroll', function() {
-		if($(this).scrollTop() + $(this).innerHeight() >= $(this)[0].scrollHeight) {
+		if (Math.round($(this).scrollTop() + $(this).innerHeight()) >= $(this)[0].scrollHeight) {
 			open_economy_tab(20);
 		}
 	})
