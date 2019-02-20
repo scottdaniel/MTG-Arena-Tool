@@ -86,7 +86,7 @@ function fsWatch(path, onChanged, interval) {
 }
 
 async function readChunk(path, position, length) {
-	const buffer = new Buffer(length);
+	const buffer = Buffer.alloc(length);
 	const fd = await fsAsync.open(path, 'r');
 	try {
 		await fsAsync.read(fd, buffer, 0, length, position);

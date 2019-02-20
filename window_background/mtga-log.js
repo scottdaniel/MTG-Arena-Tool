@@ -39,7 +39,7 @@ async function stat(path) {
 async function readSegment(path, start, length) {
   const fd = await fsPromises.open(path, "r");
   try {
-    const buffer = new Buffer(length);
+    const buffer = Buffer.alloc(length);
     const { bytesRead } = await fsPromises.read(fd, buffer, 0, length, start);
     return buffer.toString("utf-8", 0, bytesRead);
   } finally {
