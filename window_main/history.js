@@ -242,7 +242,7 @@ function open_history_tab(loadMore) {
 			fcb.appendChild(tags_div);
 
 			// set archetype
-			let t = event_to_format[match.eventId];
+			let t = eventsToFormat[match.eventId];
 			let tags = [];
 			if (t && deck_tags[t]) {
 				deck_tags[t].forEach((val) => {

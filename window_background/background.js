@@ -213,7 +213,6 @@ var deck_changes = {};
 var decks_tags = {};
 var tags_colors = {};
 var deck_archetypes = {};
-var event_to_format = {};
 
 let formats = {
 	Standard: 'Standard',
@@ -371,13 +370,6 @@ ipc.on('request_history', (event, state) => {
 ipc.on('set_deck_archetypes', (event, arg) => {
 	deck_archetypes = arg;
 });
-
-//
-ipc.on('set_event_to_format', (event, arg) => {
-	event_to_format = arg;
-});
-
-
 
 window.onerror = (msg, url, line, col, err) => {
 	var error = {
@@ -1583,7 +1575,7 @@ function getOppDeck() {
 	//var oppDeck = {mainDeck: [], sideboard : []};
 	var doAdd = true;
 	oppDeck.name = oppName;
-	console.log("Deck "+oppName);
+	//console.log("Deck "+oppName);
 	Object.keys(gameObjs).forEach(function(key) {
 		if (gameObjs[key] != undefined) {
 			if (zones[gameObjs[key].zoneId].type != "ZoneType_Limbo") {
@@ -1608,7 +1600,7 @@ function getOppDeck() {
 	}); 
 
 	//
-	let format = event_to_format[currentEventId];
+	let format = eventsToFormat[currentEventId];
 	oppDeck.archetype = "-";
 	if (format) {
 		let possible = deck_archetypes[format];

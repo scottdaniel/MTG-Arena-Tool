@@ -19,6 +19,7 @@ const enums = {"CounterType":{"1":"+1\/+1","2":"-1\/-1","3":"Poison","4":"Wind",
 //
 var setsList = cardsDb.get("sets");
 var eventsList = cardsDb.get("events");
+var eventsToFormat = cardsDb.get("events_format");
 var renderer = 0;
 var rarities = ["common", "uncommon", "rare", "mythic"];
 

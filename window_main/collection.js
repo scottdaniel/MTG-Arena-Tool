@@ -401,7 +401,9 @@ function printCards() {
 		list = cardsDb.getAll();
 		delete list.abilities;
 		delete list.events;
+		delete list.events_format;
 		delete list.sets;
+		delete list.ranked_events;
 		delete list.ok;
 	}
 	else {

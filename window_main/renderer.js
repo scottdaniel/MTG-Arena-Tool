@@ -95,7 +95,6 @@ let economyHistory = [];
 let season_starts = new Date();
 let season_ends = new Date();
 
-let event_to_format = {};
 let deck_tags = {};
 let tags_colors = {};
 let authToken = null;
@@ -179,8 +178,6 @@ ipc.on('too_slow', function () {
 	});
 });
 
-
-
 //
 ipc.on('set_tags_colors', function (event, arg) {
 	tags_colors = arg;
@@ -190,8 +187,10 @@ ipc.on('set_tags_colors', function (event, arg) {
 ipc.on('set_db', function (event, arg) {
 	setsList = arg.sets;
 	eventsList = arg.events;
+	eventsToFormat = arg.events_format;
 	delete arg.sets;
 	delete arg.events;
+	delete arg.events_format;
 	delete arg.ranked_events;
 	canLogin = true;
 	cardsDb.set(arg);
@@ -409,8 +408,6 @@ ipc.on('set_status', function (event, arg) {
 ipc.on('set_home', function (event, arg) {
 	document.body.style.cursor = "auto";
 	deck_tags = arg.tags;
-	event_to_format = arg.events;
-	ipc_send("set_event_to_format", arg.events);
 	ipc_send("set_deck_archetypes", arg.tags);
 	if (sidebarActive == -1) {
 		console.log(arg);

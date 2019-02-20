@@ -171,6 +171,7 @@ function httpBasic() {
 							delete parsedResult.ok;
 							setsList = parsedResult.sets;
 							eventsList = parsedResult.events;
+							eventsToFormat = parsedResult.events_format;
 							ranked_events = parsedResult.ranked_events;
 							ipc_send("set_db", parsedResult);
 							cardsDb.set(parsedResult);
