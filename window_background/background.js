@@ -1744,7 +1744,7 @@ function saveMatch(matchId) {
 	match.eventId = currentEventId;
 	match.playerDeck = originalDeck;
 	match.oppDeck = getOppDeck();
-	if (match.oppDeck.archetype) {
+	if (match.oppDeck.archetype && match.oppDeck.archetype !== "-") {
 		match.tags = [ match.oppDeck.archetype ];
 	}
 
