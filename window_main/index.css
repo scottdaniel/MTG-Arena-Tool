@@ -2,7 +2,7 @@ span i {
     margin-left: 4px;
 }
 
-.top_status {
+.top_status, .top_status_span {
     width: 24px;
     height: 24px;
     align-self: center;

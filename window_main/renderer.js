@@ -347,37 +347,38 @@ ipc.on('set_status', function (event, arg) {
 	sp.css('margin-bottom', '4px');
 	$('.top_status_pop').append(sp);
 	arg.components.forEach(function(comp) {
-		var div = $('<div class="status_item"></div>');
-		var st = $('<div class="top_status"></div>');
+		let div = $('<div class="status_item"></div>');
+		let st = $('<div class="top_status_span"></div>');
 		div.append('<span>'+comp.name+':</span>');
-		var sp = $('<span></span>');
+		let sp = $('<span></span>');
+
 		if (comp.status == 'operational') {
 			st.addClass('status_green');
 			sp.html('Operational');
 		}
 		else if (comp.status == 'degraded_performance') {
 			st.addClass('status_yellow');
-			if (mainStatus > 1) mainStatus = 1;
+			if (mainStatus < 1) mainStatus = 1;
 			sp.html('Degraded performance');
 		}
 		else if (comp.status == 'major_outage') {
 			st.addClass('status_red');
-			if (mainStatus > 2) mainStatus = 2;
+			if (mainStatus < 2) mainStatus = 2;
 			sp.html('Major outage');
 		}
 		else if (comp.status == 'partial_outage') {
 			st.addClass('status_yellow');
-			if (mainStatus > 1) mainStatus = 1;
+			if (mainStatus < 1) mainStatus = 1;
 			sp.html('Partial outage');
 		}
 		else if (comp.status == 'under_maintenance') {
 			st.addClass('status_yellow');
-			if (mainStatus > 1) mainStatus = 1;
+			if (mainStatus < 1) mainStatus = 1;
 			sp.html('Under maintenance');
 		}
 		else {
 			st.addClass('status_yellow');
-			if (mainStatus > 1) mainStatus = 1;
+			if (mainStatus < 1) mainStatus = 1;
 			sp.html(comp.status);
 		}
 		sp.css('margin-left', 'auto');
