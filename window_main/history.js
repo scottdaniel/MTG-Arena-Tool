@@ -37,6 +37,8 @@ let filterEvent = 'All';
 let filteredSampleSize = 0;
 let viewingLimitSeason = false;
 
+const autocomplete = require('../shared/autocomplete.js');
+
 function open_history_tab(loadMore) {
 	var mainDiv = document.getElementById("ux_0");
 	var div, d;
@@ -239,19 +241,30 @@ function open_history_tab(loadMore) {
 			let tags_div = createDivision(["history_tags"]);
 			fcb.appendChild(tags_div);
 
+			// set archetype
+			let t = event_to_format[match.eventId];
+			let tags = [];
+			if (t && deck_tags[t]) {
+				deck_tags[t].forEach((val) => {
+					tags.push(val.tag);
+				});
+			}
 			if (match.tags) {
 				match.tags.forEach((tag) => {
-					let t = createTag(tag, tags_div);
+					let t = createTag(tag, tags_div, true);
 					jQuery.data(t, "match", match_id);
+					jQuery.data(t, "autocomplete", tags);
 				});
 				if (match.tags.length == 0) {
 					let t = createTag(null, tags_div, false);
 					jQuery.data(t, "match", match_id);
+					jQuery.data(t, "autocomplete", tags);
 				}
 			}
 			else {
 				let t = createTag(null, tags_div, false);
 				jQuery.data(t, "match", match_id);
+				jQuery.data(t, "autocomplete", tags);
 			}
 
 			d = createDivision([(match.player.win > match.opponent.win ? "list_match_result_win" : "list_match_result_loss")], `${match.player.win}:${match.opponent.win}`);
@@ -435,7 +448,8 @@ function renderRanksStats(container) {
 
 function createTag(tag, div, showClose = true) {
 	let tagCol = getTagColor(tag);
-	let t = createDivision(['deck_tag'], (tag == null ? 'Set archetype': tag));
+	let iid = makeId(6);
+	let t = createDivision(['deck_tag', iid], (tag == null ? 'Set archetype': tag));
 	t.style.backgroundColor = tagCol;
 
 	if (tag) {
@@ -472,22 +486,31 @@ function createTag(tag, div, showClose = true) {
 		$(t).on('click', function(e) {
 			if ($(this).html() == "Set archetype") {
 				t.innerHTML = '';
-				let input = $('<input size="1" onFocus="this.select()" class="deck_tag_input"></input>');
-				$(t).prepend(input);
+				let input = $(`<input style="min-width: 120px;" id="${iid}" size="1" autocomplete="off" type="text" onFocus="this.select()" class="deck_tag_input"></input>`);
+				let ac = $('<div class="autocomplete"></div>');
+				input.appendTo(ac);
+				$(t).prepend(ac);
 
 				input[0].focus();
 				input[0].select();
+
+				let options = jQuery.data($(this)[0], "autocomplete");
+				autocomplete(input[0], options, () => {
+					input[0].focus();
+					input[0].select();
+					input[0].dispatchEvent(new KeyboardEvent('keydown', { keyCode: 13 }));
+				});
 				input.keydown(function(e) {
 					setTimeout(() => {
 						input.css("width", $(this).val().length*8);
 					}, 10);
 					if (e.keyCode == 13) {
 						let val = $(this).val();
-						let matchid = jQuery.data($(this).parent()[0], "match");
-						let masterdiv = $(this).parent().parent()[0];
+						let matchid = jQuery.data($(this).parent().parent()[0], "match");
+						let masterdiv = $(this).parent().parent().parent()[0];
 						addTag(matchid, val, masterdiv);
 						
-						$(this).parent().remove();
+						$(this).parent().parent().remove();
 					}
 				});
 			}
@@ -502,6 +525,7 @@ function createTag(tag, div, showClose = true) {
 		$(tc).on('click', function(e) {
 			e.stopPropagation();
 			let matchid = jQuery.data($(this).parent()[0], "match");
+			let options = jQuery.data($(this).parent()[0], "autocomplete");
 			let val = $(this).parent().text();
 
 			deleteTag(matchid, val);
@@ -513,14 +537,20 @@ function createTag(tag, div, showClose = true) {
 			$(this).parent().css("margin-right", "0px");
 			$(this).parent().css("color", $(this).css("background-color"));
 
+			setTimeout((e) => {
+				$(this).remove();
+			}, 200);
+
 			let t = createTag(null, $(this).parent().parent()[0], false);
 			jQuery.data(t, "match", matchid);
+			jQuery.data(t, "autocomplete", options);
 		});
 	}
 	else {
 		t.style.paddingRight = "12px";
 	}
 	div.appendChild(t);
+	
 	return t;
 } 
 
@@ -750,3 +780,5 @@ function compare_matches(a, b) {
 
 
 module.exports = {open_history_tab: open_history_tab};
+
+

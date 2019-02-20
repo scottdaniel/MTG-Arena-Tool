@@ -95,6 +95,7 @@ let economyHistory = [];
 let season_starts = new Date();
 let season_ends = new Date();
 
+let event_to_format = {};
 let deck_tags = {};
 let tags_colors = {};
 let authToken = null;
@@ -407,6 +408,7 @@ ipc.on('set_status', function (event, arg) {
 ipc.on('set_home', function (event, arg) {
 	document.body.style.cursor = "auto";
 	deck_tags = arg.tags;
+	event_to_format = arg.events;
 	ipc_send("set_event_to_format", arg.events);
 	ipc_send("set_deck_archetypes", arg.tags);
 	if (sidebarActive == -1) {

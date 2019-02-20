@@ -443,7 +443,7 @@ span.top_nav_item_text {
 }
 
 .list_match {
-    overflow: hidden;
+    /*overflow: hidden;*/
     cursor: pointer;
     padding-left: 16px;
     height: 64px;
@@ -880,7 +880,7 @@ a:hover {
     cursor: pointer;
     font-size: 13px;
     opacity: 1;
-    overflow: hidden;
+    /*overflow: hidden;*/
     margin-right: 12px;
     margin-bottom: 4px;
     height: 20px;
@@ -2880,4 +2880,11 @@ a:hover {
 .text_centered {
     width: fit-content;
     margin: 4px auto;
-}
+}}
+
+
+/*
+
+
+
+    */
