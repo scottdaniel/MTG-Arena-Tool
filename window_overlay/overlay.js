@@ -202,8 +202,7 @@ ipc.on('set_settings', function (event, settings) {
 	overlayAlpha = settings.overlay_alpha;
 	overlayAlphaBack = settings.overlay_alpha_back;
 	change_background(settings.back_url);
-
-	console.log(settings.overlay_scale);
+	
 	webFrame.setZoomFactor(settings.overlay_scale/100);
 
 	$('.overlay_container').css('opacity', overlayAlpha);
@@ -574,6 +573,7 @@ function hoverCard(grpId) {
 }
 
 function change_background(arg) {
+	if (!arg)	return;
 	if (arg == "default" || arg == "") {
 		$('.overlay_bg_image').css("background-image", "");
     }
