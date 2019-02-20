@@ -322,7 +322,7 @@ function open_history_tab(loadMore) {
 
 	$(this).off();
 	$("#history_column").on('scroll', function() {
-		if($(this).scrollTop() + $(this).innerHeight() >= $(this)[0].scrollHeight) {
+		if (Math.round($(this).scrollTop() + $(this).innerHeight()) >= $(this)[0].scrollHeight) {
 			open_history_tab(20);
 		}
 	})
