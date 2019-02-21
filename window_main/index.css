@@ -903,6 +903,18 @@ a:hover {
     -webkit-transition: all .2s ease-in-out;
 }
 
+.mana_curve_tag {
+    margin: 8px auto;
+    writing-mode: tb-rl;
+    width: 20px;
+    padding: 12px 0px;
+    border-radius: 10px;
+    font-size: 13px;
+    color: black;
+    font-family: var(--sub-font-name);
+    transform: rotate(180deg);
+}
+
 .deck_tag_close:hover {
     opacity: 1;
 }

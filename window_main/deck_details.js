@@ -89,7 +89,7 @@ function colorPieChart(colorCounts, title) {
     return chart;
 }
 
-function deckWinrateCurve(deck) {
+function deckWinrateCurves(deck) {
     // getDeckWinrate returns
     // {total: winrate, wins: wins, losses: loss, lastEdit: winrateLastEdit, colors: colorsWinrates};
     // or 0 if there is no data
@@ -99,12 +99,41 @@ function deckWinrateCurve(deck) {
         console.log('no deck winrate data');
         return;
     }
+    let container = $('<div>');
 
-    let colorsWinrates = deckWinrates.colors
+    // Archetypes
+    let tagsWinrates = deckWinrates.tags;
+    let curveMaxTags = Math.max(...tagsWinrates.map(cwr => Math.max(cwr.wins || 0, cwr.losses || 0)));
+    console.log('tags curve', curveMaxTags, tagsWinrates);
 
+    let curveTags = $('<div class="mana_curve"></div>');
+    let numbersTags = $('<div class="mana_curve_costs"></div>');
+
+    tagsWinrates.forEach(cwr => {
+        curveTags.append($(`<div class="mana_curve_column back_green" style="height: ${(cwr.wins/curveMaxTags*100)}%"></div>`));
+        curveTags.append($(`<div class="mana_curve_column back_red" style="height: ${(cwr.losses/curveMaxTags*100)}%"></div>`));
+
+        let curveNumber = $(`<div class="mana_curve_column_number">
+            ${cwr.wins}/${cwr.losses}
+            <div style="margin: 0 auto !important" class=""></div>
+        </div>`);
+
+        let colors = cwr.colors;
+        curveNumber.append($(`<div class="mana_curve_tag" style="background-color: ${getTagColor(cwr.tag)};">${cwr.tag}</div>`));
+        colors.forEach(function(color) {
+            curveNumber.append($(`<div style="margin: 0 auto !important" class="mana_s16 mana_${mana[color]}"></div>`));
+        })
+        numbersTags.append(curveNumber);
+    });
+
+    container.append(curveTags, numbersTags);
+
+
+    // Colors
+    let colorsWinrates = deckWinrates.colors;
     //$('<span>w/l vs Color combinations</span>').appendTo(stats);
     let curveMax = Math.max(...colorsWinrates.map(cwr => Math.max(cwr.wins || 0, cwr.losses || 0)));
-    console.log('curveMax', curveMax);
+    console.log('colors curve', curveMax, colorsWinrates);
 
     let curve = $('<div class="mana_curve"></div>');
     let numbers = $('<div class="mana_curve_costs"></div>');
@@ -126,7 +155,8 @@ function deckWinrateCurve(deck) {
             numbers.append(curveNumber);
         }
     });
-    let container = $('<div>').append(curve, numbers);
+
+    container.append(curve, numbers);
     return container;
 }
 
@@ -170,7 +200,7 @@ function deckStatsSection(deck, deck_type) {
 
 
     if (deck_type == 0 || deck_type == 2) {
-        let winrateCurveSection = deckWinrateCurve(deck);
+        let winrateCurveSection = deckWinrateCurves(deck);
         if (winrateCurveSection) {
             winrateCurveSection.appendTo(stats);
         }

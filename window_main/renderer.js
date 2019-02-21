@@ -178,6 +178,13 @@ ipc.on('too_slow', function () {
 	});
 });
 
+function getTagColor(tag) {
+	let tc = tags_colors[tag];
+	if (tc)	return tc;
+
+	return "#FAE5D2";
+}
+
 //
 ipc.on('set_tags_colors', function (event, arg) {
 	tags_colors = arg;
@@ -2541,6 +2548,7 @@ function getDeckWinrate(deckid, lastEdit) {
 	var winsLastEdit = 0;
 	var lossLastEdit = 0;
 	var colorsWinrates = [];
+	var tagsWinrates = [];
 
 	if (matchesHistory == undefined) {
 		return 0;
@@ -2553,7 +2561,7 @@ function getDeckWinrate(deckid, lastEdit) {
 				if (match.playerDeck.id == deckid) {
 					var oppDeckColors = get_deck_colors(match.oppDeck);
 					if (oppDeckColors.length > 0) {
-						var added = -1;
+						let added = -1;
 
 						colorsWinrates.forEach(function(wr, index) {
 							if (compare_colors(wr.colors, oppDeckColors)) {
@@ -2572,7 +2580,7 @@ function getDeckWinrate(deckid, lastEdit) {
 
 							wins++;
 						}
-						else {
+						if (match.player.win < match.opponent.win) {
 							if (index > -1) {
 								colorsWinrates[added].losses++;
 							}
@@ -2586,6 +2594,29 @@ function getDeckWinrate(deckid, lastEdit) {
 							else {
 								lossLastEdit++;
 							}
+						}
+					}
+
+					if (match.tags !== undefined && match.tags.length > 0) {
+						let tag = match.tags[0];
+						let added = -1;
+
+						tagsWinrates.forEach(function(wr, index) {
+							if (wr.tag == tag) {
+								added = index;
+							}
+						});
+
+						if (added == -1) {
+							added = tagsWinrates.push({tag: tag, wins: 0, losses:0}) - 1;
+						}
+
+						tagsWinrates[added].colors = oppDeckColors;
+						if (match.player.win > match.opponent.win) {
+							tagsWinrates[added].wins += 1;
+						}
+						if (match.player.win < match.opponent.win) {
+							tagsWinrates[added].losses += 1;
 						}
 					}
 				}
@@ -2603,8 +2634,9 @@ function getDeckWinrate(deckid, lastEdit) {
 
 	//colorsWinrates.sort(compare_color_winrates);
 	colorsWinrates.sort(compare_winrates);
+	tagsWinrates.sort(compare_winrates);
 
-	return {total: winrate, wins: wins, losses: loss, lastEdit: winrateLastEdit, colors: colorsWinrates};
+	return {total: winrate, wins: wins, losses: loss, lastEdit: winrateLastEdit, colors: colorsWinrates, tags: tagsWinrates};
 }
 
 function compare_winrates(a, b) {

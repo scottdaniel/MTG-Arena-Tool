@@ -586,13 +586,6 @@ function deleteTag(matchid, tag) {
 	ipc_send("delete_history_tag", obj);
 }
 
-function getTagColor(tag) {
-	let tc = tags_colors[tag];
-	if (tc)	return tc;
-
-	return "#FAE5D2";
-}
-
 function filterHistory(filter) {
 	filterEvent = filter;
 	open_history_tab(0);
