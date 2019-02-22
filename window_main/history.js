@@ -189,15 +189,16 @@ function open_history_tab(loadMore) {
 
 		var tileGrpid, tile;
 		if (match.type == "match") {
+			let t;
 			tileGrpid = match.playerDeck.deckTileId;
 			try {
-				let t = cardsDb.get(tileGrpid).images["art_crop"];
+				t = cardsDb.get(tileGrpid).images["art_crop"];
 			}
 			catch (e) {
 				tileGrpid = 67003;
 			}
 
-			tile = createDivision([match.id+"t", "deck_tile"]);
+			tile = createDivision([match.id + t, "deck_tile"]);
 
 			try {
 				tile.style.backgroundImage = "url(https://img.scryfall.com/cards"+cardsDb.get(tileGrpid).images["art_crop"]+")";
@@ -242,7 +243,7 @@ function open_history_tab(loadMore) {
 			fcb.appendChild(tags_div);
 
 			// set archetype
-			let t = eventsToFormat[match.eventId];
+			t = eventsToFormat[match.eventId];
 			let tags = [];
 			if (t && deck_tags[t]) {
 				deck_tags[t].forEach((val) => {
