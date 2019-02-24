@@ -415,9 +415,13 @@ ipc.on('set_status', function (event, arg) {
 ipc.on('set_home', function (event, arg) {
 	document.body.style.cursor = "auto";
 	deck_tags = arg.tags;
+
+	Object.keys(deck_tags).forEach(function(format) {
+		deck_tags[format].sort(compare_archetypes);
+	});
 	ipc_send("set_deck_archetypes", arg.tags);
 	if (sidebarActive == -1) {
-		console.log(arg);
+		console.log("Home", arg);
 		open_home_tab(arg);
 	}
 });

@@ -506,6 +506,14 @@ function compare_draft_cards(a, b) {
 	return 0;
 }
 
+//
+function compare_archetypes(a, b) {
+	if (a.average > b.average)
+		return -1;
+	if (a.average < b.average)
+		return 1;
+	return 0;
+}
 
 //
 function get_set_scryfall(set) {
