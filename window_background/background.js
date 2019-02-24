@@ -380,6 +380,7 @@ window.onerror = (msg, url, line, col, err) => {
 	}
 	error.id = sha1(error.msg + playerId);
 	httpApi.httpSendError(error);
+	ipc_send("ipc_log", "Background Error:"+error.join(' - '));
 }
 
 process.on('uncaughtException', function(err){
@@ -392,12 +393,14 @@ process.on('uncaughtException', function(err){
 	console.log("ERROR: ", error);
 	error.id = sha1(error.msg + playerId);
 	httpApi.httpSendError(error);
+	ipc_send("ipc_log", `Background ${error.stack}: ${error.join(' - ')}`);
 })
 
 //
 ipc.on('error', function (event, err) {
 	err.id = sha1(err.msg + playerId);
 	httpApi.httpSendError(err);
+	ipc_send("ipc_log", "Background error:"+err.join(' - '));
 });
 
 //
