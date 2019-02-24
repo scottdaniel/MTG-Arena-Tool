@@ -218,7 +218,7 @@ function httpBasic() {
 				}
 				
 				removeFromHttp(_headers.reqId);
-				if (debugNet) {
+				if (debugNet && _headers.method !== 'heartbeat') {
 					var str = ""; httpAsync.forEach( function(h) { str += h.reqId+", "; });
 					ipc_send("ipc_log", "httpAsync: "+str);
 				}
