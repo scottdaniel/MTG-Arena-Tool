@@ -1606,7 +1606,7 @@ function getOppDeck() {
 	let format = eventsToFormat[currentEventId];
 	oppDeck.archetype = "-";
 	if (format && deck_archetypes[format]) {
-		format.sort(compare_archetypes);
+		deck_archetypes[format].sort(compare_archetypes);
 
 		let possible = deck_archetypes[format];
 		bestMatch = "-";
