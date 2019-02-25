@@ -8,6 +8,15 @@ const windowBackground = 0;
 const windowRenderer = 1;
 const windowOverlay = 2;
 
+
+
+// Colour indices
+const WHITE = 1;
+const BLUE = 2;
+const BLACK = 3;
+const RED = 4;
+const GREEN = 5;
+
 const math = require('mathjs');
 math.config({precision: 2000});
 
@@ -703,40 +712,60 @@ function get_collection_export() {
 	return list;
 }
 
+// When passed a `deck` object sets `deck.colors` to a sorted array
+// of deck colour indices and returns the array.
 //
+// FIXME: Consider renaming to `set_deck_colors` or removing side 
+//        effects. `get*` functions should not have side effects.
+// FIXME: Rename to camelCase to match javsascript function naming.
+
 function get_deck_colors(deck) {
-	deck.colors = [];
+	var colorIndices = [];
 	try {
-		deck.mainDeck.forEach(function(card) {
-			var grpid = card.id;
-			if (card.quantity > 0) {
-				var cdb = cardsDb.get(grpid);
-				if (cdb) {
-					//var card_name = cdb.name;
-					var card_cost = cdb.cost;
-					if (cdb.type.indexOf("Land") !== -1 && cdb.frame.length < 3) {
-						if (cdb.frame.includes(1) && !deck.colors.includes(1))	deck.colors.push(1);
-						if (cdb.frame.includes(2) && !deck.colors.includes(2))	deck.colors.push(2);
-						if (cdb.frame.includes(3) && !deck.colors.includes(3))	deck.colors.push(3);
-						if (cdb.frame.includes(4) && !deck.colors.includes(4))	deck.colors.push(4);
-						if (cdb.frame.includes(5) && !deck.colors.includes(5))	deck.colors.push(5);
-					}
-					card_cost.forEach(function(c) {
-						if (c.indexOf('w') !== -1 && !deck.colors.includes(1))	deck.colors.push(1);
-						if (c.indexOf('u') !== -1 && !deck.colors.includes(2))	deck.colors.push(2);
-						if (c.indexOf('b') !== -1 && !deck.colors.includes(3))	deck.colors.push(3);
-						if (c.indexOf('r') !== -1 && !deck.colors.includes(4))	deck.colors.push(4);
-						if (c.indexOf('g') !== -1 && !deck.colors.includes(5))	deck.colors.push(5);
-					});
-				}
+		deck.mainDeck.forEach(card => {
+			if (card.quantity < 1) {
+				return;
 			}
+
+			let cardData = cardsDb.get(card.id);
+
+			if (!cardData) {
+				return;
+			}
+
+			let isLand = cardData.type.indexOf("Land") !== -1;
+			let frame = cardData.frame;
+			if (isLand && frame.length < 3) {
+				colorIndices.concat(frame);
+			}
+
+			cardData.cost.forEach(cost => {
+				if (cost === 'w') {
+					colorIndices.push(WHITE);
+				} else if (cost === 'u') {
+					colorIndices.push(BLUE);
+				} else if (cost === 'b') {
+					colorIndices.push(BLACK);
+				} else if (cost === 'r') {
+					colorIndices.push(RED);
+				} else if (cost === 'g') {
+					colorIndices.push(GREEN);
+				}
+			});
 		});
-		deck.colors.sort(function(a, b){return a - b});
-		return deck.colors;
+
+		colorIndices = Array.from(new Set(colorIndices));
+		colorIndices.sort((a, b) => {
+			return a - b;
+		});
+	} catch (e) {
+		// FIXME: Errors shouldn't be caught silently. If this is an 
+		//        expected error then there should be a test to catch only that error.
+		colorIndices = [];
 	}
-	catch (e) {
-		return [];
-	}
+	
+	deck.colors = colorIndices;
+	return colorIndices;
 }
 
 //
