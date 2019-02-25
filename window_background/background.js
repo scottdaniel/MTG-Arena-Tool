@@ -1371,6 +1371,8 @@ function createMatch(arg) {
 	actionLog(-99, new Date(), "");
 	var obj = store.get('overlayBounds');
 
+	zones = {};
+	gameObjs = {};
 	oppDeck = {mainDeck: [], sideboard: []};
 
 	if (!firstPass && store.get("settings").show_overlay == true) {
@@ -1614,13 +1616,13 @@ function getOppDeck() {
 		possible.forEach((arch) => {
 			let total = 0;
 			let found = 0;
-			oppDeck.mainDeck.forEach((oppCard) => {
-				let oName = cardsDb.get(oppCard.id).name;
-				total += 1;
-				arch.cards.forEach((card) => {
-					let cName = cardsDb.get(card.id).name;
+			arch.cards.forEach((card) => {
+				let cName = cardsDb.get(card.id).name;
+				total += card.quantity;
+				oppDeck.mainDeck.forEach((oppCard) => {
+					let oName = cardsDb.get(oppCard.id).name;
 					if (cName == oName)	{
-						found += 1;
+						found += card.quantity;
 					}
 				});
 			});
@@ -1760,7 +1762,9 @@ function saveMatch(matchId) {
 		matches_index.push(currentMatchId);
 	}
 	else {
-		match.date = store.get(currentMatchId).date;
+		let cm = store.get(currentMatchId);
+		match.date = cm.date;
+		match.tags = cm.tags;
 	}
 
 	// add locally
@@ -1776,7 +1780,7 @@ function saveMatch(matchId) {
 	if (matchCompletedOnGameNumber == gameNumberCompleted) {
 		httpApi.httpSetMatch(match);
 	}
-	requestHistorySend(0);
+	requestHistorySend(1);
 	ipc_send("set_timer", 0, windowOverlay);
 	ipc_send("popup", {"text": "Match saved!", "time": 3000});
 }
