@@ -740,19 +740,15 @@ function get_deck_colors(deck) {
 			}
 
 			cardData.cost.forEach(cost => {
-				if (cost.indexOf('w') !== -1) {
+				if (cost === 'w') {
 					colorIndices.push(WHITE);
-				}
-				if (cost.indexOf('u') !== -1) {
+				} else if (cost === 'u') {
 					colorIndices.push(BLUE);
-				}
-				if (cost.indexOf('b') !== -1) {
+				} else if (cost === 'b') {
 					colorIndices.push(BLACK);
-				}
-				if (cost.indexOf('r') !== -1) {
+				} else if (cost === 'r') {
 					colorIndices.push(RED);
-				}
-				if (cost.indexOf('g') !== -1) {
+				} else if (cost === 'g') {
 					colorIndices.push(GREEN);
 				}
 			});
