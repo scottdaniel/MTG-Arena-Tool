@@ -198,7 +198,7 @@ function open_history_tab(loadMore) {
 				tileGrpid = 67003;
 			}
 
-			tile = createDivision([match.id + t, "deck_tile"]);
+			tile = createDivision([match.id + "t", "deck_tile"]);
 
 			try {
 				tile.style.backgroundImage = "url(https://img.scryfall.com/cards"+cardsDb.get(tileGrpid).images["art_crop"]+")";
