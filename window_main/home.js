@@ -29,6 +29,8 @@ let listInterval = [];
 let touStates = {};
 let topWildcards = null;
 
+let homeInterval = null;
+
 // Should separate these two into smaller functions
 function open_home_tab(arg, opentab = true) {
 	let mainDiv = document.getElementById("ux_0");
@@ -51,7 +53,28 @@ function open_home_tab(arg, opentab = true) {
 		users.setAttribute("tooltip-content", "In the last 24 hours.");
 		users.setAttribute("tooltip-bottom", "");
 		users.style.textAlign = "center";
+
+		let daily = createDivision(["text_centered", "white", "daily_left"], "Daily rewards end: -");
+		daily.style.textAlign = "center";
+
+		let weekly = createDivision(["text_centered", "white", "weekly_left"], "Weekly rewards end: -");
+		weekly.style.textAlign = "center";
+
+		if (homeInterval !== null) clearInterval(homeInterval);
+
+		homeInterval = window.setInterval(() => {
+			let dd = new Date(rewards_daily_ends);
+			let timeleft = (dd.getTime() / 1000) - timestamp();
+			$('.daily_left').html("Daily rewards end: "+toDDHHMMSS(timeleft));
+
+			dd = new Date(rewards_weekly_ends);
+			timeleft = (dd.getTime() / 1000) - timestamp();
+			$('.weekly_left').html("Weekly rewards end: "+toDDHHMMSS(timeleft));
+		}, 250);
+
 		mainDiv.appendChild(users);
+		mainDiv.appendChild(daily);
+		mainDiv.appendChild(weekly);
 	}
 
 	let d = createDivision(["list_fill"]);

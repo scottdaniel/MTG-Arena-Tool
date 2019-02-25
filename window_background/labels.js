@@ -1002,3 +1002,10 @@ function onLabelInEventGetSeasonAndRankDetail(entry, json) {
 	ipc_send("set_season", {starts: season_starts, ends: season_ends});
 	updateRank();
 }
+
+
+function onLabelGetPlayerInventoryGetRewardSchedule(entry, json) {
+	if (!json)	return;
+	
+	ipc_send("set_reward_resets", {daily: json.dailyReset, weekly: json.weeklyReset});
+}

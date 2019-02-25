@@ -94,6 +94,8 @@ let economyHistory = [];
 
 let season_starts = new Date();
 let season_ends = new Date();
+let rewards_daily_ends = new Date();
+let rewards_weekly_ends = new Date();
 
 let deck_tags = {};
 let tags_colors = {};
@@ -244,6 +246,10 @@ ipc.on('set_season', function (event, arg) {
 	season_ends = arg.ends;
 });
 
+ipc.on('set_reward_resets', function (event, arg) {
+	rewards_daily_ends = new Date(arg.daily);
+	rewards_weekly_ends = new Date(arg.weekly);
+});
 
 //
 ipc.on('set_decks', function (event, arg) {

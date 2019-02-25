@@ -1335,6 +1335,25 @@ function toMMSS(sec_num) {
 }
 
 //
+function toDDHHMMSS(sec_num) {
+	let dd = Math.floor(sec_num / 86400);
+	let hh = Math.floor((sec_num - (dd * 86400)) / 3600);
+	let mm = Math.floor((sec_num - (dd * 86400) - (hh * 3600)) / 60);
+	let ss = sec_num - (dd * 86400) - (hh * 3600) - (mm * 60);
+
+	let days	= dd + (dd > 1 ? " days" : " day");
+	let hours	= hh + (hh > 1 ? " hours" : " hour");
+	let minutes	= mm + (mm > 1 ? " minutes" : " minute");
+	let seconds	= ss + (ss > 1 ? " seconds" : " second");
+
+	return `${dd > 0 ? days+", " : ""}
+${hh > 0 ? hours+", " : ""}
+${minutes}, 
+${seconds}`;
+
+}
+
+//
 function toHHMMSS(sec_num) {
 	var hours   = Math.floor(sec_num / 3600);
 	var minutes = Math.floor((sec_num - (hours * 3600)) / 60);
