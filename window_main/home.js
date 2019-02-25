@@ -65,11 +65,11 @@ function open_home_tab(arg, opentab = true) {
 		homeInterval = window.setInterval(() => {
 			let dd = new Date(rewards_daily_ends);
 			let timeleft = (dd.getTime() / 1000) - timestamp();
-			$('.daily_left').html("Daily rewards end: "+toHHMMSS(timeleft));
+			$('.daily_left').html("Daily rewards end: "+toDDHHMMSS(timeleft));
 
 			dd = new Date(rewards_weekly_ends);
 			timeleft = (dd.getTime() / 1000) - timestamp();
-			$('.weekly_left').html("Weekly rewards end: "+toHHMMSS(timeleft));
+			$('.weekly_left').html("Weekly rewards end: "+toDDHHMMSS(timeleft));
 		}, 250);
 
 		mainDiv.appendChild(users);
