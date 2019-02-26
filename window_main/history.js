@@ -148,7 +148,15 @@ function open_history_tab(loadMore) {
 	}
 	
 	//console.log("Load more: ", loadHistory, loadMore, loadHistory+loadMore);
+	// loadMore = The ammount of items we want to load
+	// loadHistory = The starting point to load
+	// loadEnd = The ending point
+	// actuallyLoaded = The number of items that were actually loaded
+	//   some items are skipped due to being invalid to what we want to load or having broken data
+	//let dd = createDivision(["list_fill"]);
+	//historyColumn.appendChild(dd);
 	var actuallyLoaded = loadHistory;
+
 	for (var loadEnd = loadHistory + loadMore; actuallyLoaded < loadEnd && loadHistory <= matchesHistory.matches.length && actuallyLoaded < filteredSampleSize; loadHistory++) {
 		var match_id = matchesHistory.matches[loadHistory];
 		var match = matchesHistory[match_id];
@@ -337,7 +345,7 @@ function open_history_tab(loadMore) {
 		}
 	);
 
-	loadHistory = loadEnd;
+	//loadHistory = loadEnd;
 }
 
 function formatPercent(percent, precision) {
