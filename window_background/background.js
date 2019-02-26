@@ -1788,7 +1788,7 @@ function saveMatch(matchId) {
 	if (matchCompletedOnGameNumber == gameNumberCompleted) {
 		httpApi.httpSetMatch(match);
 	}
-	requestHistorySend(1);
+	requestHistorySend(0);
 	ipc_send("set_timer", 0, windowOverlay);
 	ipc_send("popup", {"text": "Match saved!", "time": 3000});
 }
