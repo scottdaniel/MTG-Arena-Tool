@@ -147,7 +147,7 @@ function open_history_tab(loadMore) {
 		select.next('div.select-styled').text(getReadableEvent(filterEvent));
 	}
 	
-	//console.log("Load more: ", loadHistory, loadMore, loadHistory+loadMore);
+	//console.log("loadHistory: ", loadHistory, "loadMore: ", loadMore, "matches.length: ", matchesHistory.matches.length, "filteredSampleSize: ", filteredSampleSize);
 	// loadMore = The ammount of items we want to load
 	// loadHistory = The starting point to load
 	// loadEnd = The ending point
@@ -156,8 +156,8 @@ function open_history_tab(loadMore) {
 	//let dd = createDivision(["list_fill"]);
 	//historyColumn.appendChild(dd);
 	var actuallyLoaded = loadHistory;
-
-	for (var loadEnd = loadHistory + loadMore; actuallyLoaded < loadEnd && loadHistory <= matchesHistory.matches.length && actuallyLoaded < filteredSampleSize; loadHistory++) {
+	var begin = loadHistory;
+	for (var loadEnd = loadHistory + loadMore; actuallyLoaded < loadEnd && loadHistory <= matchesHistory.matches.length && (actuallyLoaded-begin) < filteredSampleSize; loadHistory++) {
 		var match_id = matchesHistory.matches[loadHistory];
 		var match = matchesHistory[match_id];
 
@@ -216,7 +216,9 @@ function open_history_tab(loadMore) {
 			}
 			fltl.appendChild(tile);
 
-			d = createDivision(["list_deck_name"], match.playerDeck.name);
+			// This is pretty useful to debug scrolling
+			//d = createDivision(["list_deck_name"], actuallyLoaded+" ("+loadHistory+") - "+match.playerDeck.name);
+			d = createDivision(["list_deck_name"], actuallyLoaded+" ("+loadHistory+") - "+match.playerDeck.name);
 			flt.appendChild(d);
 
 			d = createDivision(["list_deck_name_it"], getReadableEvent(match.eventId));
@@ -345,7 +347,7 @@ function open_history_tab(loadMore) {
 		}
 	);
 
-	//loadHistory = loadEnd;
+	//loadHistory = actuallyLoaded;
 }
 
 function formatPercent(percent, precision) {
