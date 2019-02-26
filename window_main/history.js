@@ -218,7 +218,7 @@ function open_history_tab(loadMore) {
 
 			// This is pretty useful to debug scrolling
 			//d = createDivision(["list_deck_name"], actuallyLoaded+" ("+loadHistory+") - "+match.playerDeck.name);
-			d = createDivision(["list_deck_name"], actuallyLoaded+" ("+loadHistory+") - "+match.playerDeck.name);
+			d = createDivision(["list_deck_name"], match.playerDeck.name);
 			flt.appendChild(d);
 
 			d = createDivision(["list_deck_name_it"], getReadableEvent(match.eventId));
