@@ -50,7 +50,7 @@ let currentDeck = null;
 let cards = {};
 let mana = {0: "", 1: "white", 2: "blue", 3: "black", 4: "red", 5: "green", 6: "colorless", 7: "", 8: "x"};
 
-const Howler = require('howler');
+const Howl = require('howler');
 let sound = new Howl({
 	src: ['../sounds/blip.mp3']
 });
