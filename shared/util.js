@@ -736,7 +736,7 @@ function get_deck_colors(deck) {
 			let isLand = cardData.type.indexOf("Land") !== -1;
 			let frame = cardData.frame;
 			if (isLand && frame.length < 3) {
-				colorIndices.concat(frame);
+				colorIndices = colorIndices.concat(frame);
 			}
 
 			cardData.cost.forEach(cost => {
