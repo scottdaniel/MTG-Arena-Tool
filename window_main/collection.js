@@ -115,8 +115,23 @@ function open_collection_tab() {
 	icd.appendTo(flex);
 	flex.appendTo(filters);
 
-	var sets = $('<div class="sets_container"></div>');
+	let orderedSets = [];
 	for (let set in setsList) {
+		orderedSets.push(set);
+	}
+
+	orderedSets.sort((a, b) => {
+		if (setsList[a].release < setsList[b].release) {
+			return -1;
+		}
+		if (setsList[a].release > setsList[b].release) {
+			return 1;
+		}
+		return 0;
+	});
+
+	var sets = $('<div class="sets_container"></div>');
+	orderedSets.forEach((set) => {
 		let setbutton = $('<div class="set_filter set_filter_on" style="background-image: url(../images/sets/'+setsList[set].code+'.png)" title="'+set+'"></div>');
 		setbutton.appendTo(sets);
 		setbutton.click(function() {
@@ -132,7 +147,7 @@ function open_collection_tab() {
 				}
 			}
 		});
-	}
+	});
 	sets.appendTo(filters);
 
 	var manas = $('<div class="sets_container"></div>');
