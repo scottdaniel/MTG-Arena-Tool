@@ -113,14 +113,7 @@ function updateClock() {
 		$(".clock_elapsed").html(hh+":"+mm+":"+ss);
 	}
 	else if (clockMode == 2) {
-		var d = new Date();
-		hh = d.getHours();
-		mm = d.getMinutes();
-		ss = d.getSeconds();
-		hh = ('0' + hh).slice(-2);
-		mm = ('0' + mm).slice(-2);
-		ss = ('0' + ss).slice(-2);
-		$(".clock_elapsed").html(hh+":"+mm+":"+ss);
+		$(".clock_elapsed").html(new Date().toLocaleTimeString());
 	}
 }
 
