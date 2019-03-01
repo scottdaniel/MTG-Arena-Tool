@@ -36,7 +36,7 @@ const open_history_tab			= require('./history').open_history_tab;
 const open_explore_tab			= require('./explore').open_explore_tab;
 const update_explore_filters	= require('./explore').update_explore_filters;
 const set_explore_mode			= require('./explore').set_explore_mode;
-const open_collection_tab		= require('./collection').open_collection_tab;
+const openCollectionTab			= require('./collection').openCollectionTab;
 const openEventsTab				= require('./events').openEventsTab;
 const expandEvent				= require('./events').expandEvent;
 

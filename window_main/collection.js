@@ -23,7 +23,7 @@ let filteredSets = [];
 let filteredMana = [];
 
 //
-function open_collection_tab() {
+function openCollectionTab() {
 	$("#ux_0").html('');
 	$("#ux_1").html('');
 	$("#ux_0").removeClass("flex_item");
@@ -175,17 +175,17 @@ function open_collection_tab() {
 	let main_but_cont = $('<div class="main_buttons_container"></div>');
 
 	var cont = $('<div class="buttons_container"></div>');
-	add_checkbox_search(cont, '<div class="icon_search_unowned"></div>Show unowned', 'query_unown', false);
-	add_checkbox_search(cont, '<div class="icon_search_new"></div>Newly acquired only', 'query_new', false);
-	add_checkbox_search(cont, '<div class="icon_search_multi"></div>Require multicolored', 'query_multicolor', false);
-	add_checkbox_search(cont, 'Exclude unselected colors', 'query_exclude', false);
+	addCheckboxSearch(cont, '<div class="icon_search_unowned"></div>Show unowned', 'query_unown', false);
+	addCheckboxSearch(cont, '<div class="icon_search_new"></div>Newly acquired only', 'query_new', false);
+	addCheckboxSearch(cont, '<div class="icon_search_multi"></div>Require multicolored', 'query_multicolor', false);
+	addCheckboxSearch(cont, 'Exclude unselected colors', 'query_exclude', false);
 	cont.appendTo(main_but_cont);
 
 	cont = $('<div class="buttons_container"></div>');
-	add_checkbox_search(cont, '<div class="wc_common wc_search_icon"></div>Common', 'query_common', true);
-	add_checkbox_search(cont, '<div class="wc_uncommon wc_search_icon"></div>Uncommon', 'query_uncommon', true);
-	add_checkbox_search(cont, '<div class="wc_rare wc_search_icon"></div>Rare', 'query_rare', true);
-	add_checkbox_search(cont, '<div class="wc_mythic wc_search_icon"></div>Mythic Rare', 'query_mythic', true);
+	addCheckboxSearch(cont, '<div class="wc_common wc_search_icon"></div>Common', 'query_common', true);
+	addCheckboxSearch(cont, '<div class="wc_uncommon wc_search_icon"></div>Uncommon', 'query_uncommon', true);
+	addCheckboxSearch(cont, '<div class="wc_rare wc_search_icon"></div>Rare', 'query_rare', true);
+	addCheckboxSearch(cont, '<div class="wc_mythic wc_search_icon"></div>Mythic Rare', 'query_mythic', true);
 	cont.appendTo(main_but_cont);
 	
 	cont = $('<div class="buttons_container"></div>');
@@ -197,9 +197,9 @@ function open_collection_tab() {
 	input.appendTo(icd);
 	icd.appendTo(cont);
 
-	add_checkbox_search(cont, 'Higher than', 'query_cmchigher', false, true);
-	add_checkbox_search(cont, 'Equal to', 'query_cmcequal', true);
-	add_checkbox_search(cont, 'Lower than', 'query_cmclower', false, true);
+	addCheckboxSearch(cont, 'Higher than', 'query_cmchigher', false, true);
+	addCheckboxSearch(cont, 'Equal to', 'query_cmcequal', true);
+	addCheckboxSearch(cont, 'Lower than', 'query_cmclower', false, true);
 	
 	cont.appendTo(main_but_cont);
 	main_but_cont.appendTo(filters);
@@ -236,7 +236,7 @@ function open_collection_tab() {
 }
 
 //
-function add_checkbox_search(div, label, iid, def, toggle = false) {
+function addCheckboxSearch(div, label, iid, def, toggle = false) {
 	label = $('<label class="check_container hover_label">'+label+'</label>');
 	var check_new = $('<input type="checkbox" id="'+iid+'" />');
 	check_new.appendTo(label);
@@ -703,5 +703,5 @@ function setCollectionPage(page) {
 /* eslint-enable */
 
 module.exports = {
-	open_collection_tab: open_collection_tab
+	openCollectionTab: openCollectionTab
 }
