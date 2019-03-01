@@ -19,8 +19,7 @@
 	"scripts": {
 		"start": "electron .",
 		"postinstall": "install-app-deps",
-		"dist": "build --x64 -w",
-		"test": "jest"
+		"dist": "build --x64 -w"
 	},
 	"dependencies": {
 		"async": "^2.6.1",
@@ -28,18 +27,17 @@
 		"conf": "^2.2.0",
 		"electron-debug": "^1.5.0",
 		"electron-transparency-mouse-fix": "^1.0.0-beta",
-		"electron-updater": "^4.0.7",
+		"electron-updater": "^4.0.8",
 		"google-protobuf": "^3.6.1",
 		"howler": "^2.1.1",
 		"js-sha1": "^0.6.0",
 		"lodash.transform": "^4.6.0",
-		"mathjs": "^5.4.2",
+		"mathjs": "^5.5.0",
 		"qs": "^6.6.0",
 		"queue": "^4.5.1"
 	},
 	"devDependencies": {
 		"electron": "^3.0.14",
-		"electron-builder": "^20.38.5",
-		"jest": "^23.6.0"
+		"electron-builder": "^20.38.5"
 	}
 }
