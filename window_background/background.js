@@ -1626,11 +1626,11 @@ function getOppDeck() {
 			let found = 0;
 			arch.cards.forEach((card) => {
 				let cName = cardsDb.get(card.id).name;
-				total += card.quantity;
+				total += 1;//card.quantity;
 				oppDeck.mainDeck.forEach((oppCard) => {
 					let oName = cardsDb.get(oppCard.id).name;
 					if (cName == oName)	{
-						found += card.quantity;
+						found += 1;//card.quantity;
 					}
 				});
 			});
