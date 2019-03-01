@@ -110,20 +110,22 @@ function deckWinrateCurves(deck) {
     let numbersTags = $('<div class="mana_curve_costs"></div>');
 
     tagsWinrates.forEach(cwr => {
-        curveTags.append($(`<div class="mana_curve_column back_green" style="height: ${(cwr.wins/curveMaxTags*100)}%"></div>`));
-        curveTags.append($(`<div class="mana_curve_column back_red" style="height: ${(cwr.losses/curveMaxTags*100)}%"></div>`));
+        if ((tagsWinrates.length < 15) || (cwr.wins + cwr.losses > 1 && tagsWinrates.length > 15)) {
+            curveTags.append($(`<div class="mana_curve_column back_green" style="height: ${(cwr.wins/curveMaxTags*100)}%"></div>`));
+            curveTags.append($(`<div class="mana_curve_column back_red" style="height: ${(cwr.losses/curveMaxTags*100)}%"></div>`));
 
-        let curveNumber = $(`<div class="mana_curve_column_number">
-            ${cwr.wins}/${cwr.losses}
-            <div style="margin: 0 auto !important" class=""></div>
-        </div>`);
+            let curveNumber = $(`<div class="mana_curve_column_number">
+                ${cwr.wins}/${cwr.losses}
+                <div style="margin: 0 auto !important" class=""></div>
+            </div>`);
 
-        let colors = cwr.colors;
-        curveNumber.append($(`<div class="mana_curve_tag" style="background-color: ${getTagColor(cwr.tag)};">${cwr.tag}</div>`));
-        colors.forEach(function(color) {
-            curveNumber.append($(`<div style="margin: 0 auto !important" class="mana_s16 mana_${mana[color]}"></div>`));
-        })
-        numbersTags.append(curveNumber);
+            let colors = cwr.colors;
+            curveNumber.append($(`<div class="mana_curve_tag" style="background-color: ${getTagColor(cwr.tag)};">${cwr.tag}</div>`));
+            colors.forEach(function(color) {
+                curveNumber.append($(`<div style="margin: 0 auto !important" class="mana_s16 mana_${mana[color]}"></div>`));
+            })
+            numbersTags.append(curveNumber);
+        }
     });
 
     container.append(curveTags, numbersTags);
