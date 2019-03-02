@@ -38,6 +38,7 @@ const sha1	= require('js-sha1');
 const ipc	= electron.ipcRenderer;
 
 const transform = require('lodash.transform');
+const cloneDeep = require('lodash.clonedeep');
 
 const httpApi = require('./http-api');
 
@@ -109,7 +110,6 @@ var settingsStore = new Store({
 	defaults: settingsCfg
 });
 
-
 const debugLog = false;
 const debugNet = true;
 var debugLogSpeed = 0.1;
@@ -121,6 +121,49 @@ if (!fs.existsSync(actionLogDir)){
 
 var firstPass = true;
 var tokenAuth = undefined;
+
+var playerDataDefault = {
+	name: null,
+	arenaId: '',
+	arenaVersion: '',
+	rank: {
+		constructed: {
+			rank: '',
+			tier: 0,
+			steps: 0
+		},
+		limited: {
+			rank: '',
+			tier: 0,
+			steps: 0
+		}
+	}
+};
+
+var currentMatchDefault = {
+	eventId: '',
+	matchId: '',
+	priority: 0,
+	game: 0,
+	results: {},
+	zones: {},
+	gameObjs: {},
+	player: {
+		seat: 0,
+		deck: {mainDeck: [], sideboard: []},
+		life: 20,
+		turn: 0
+
+	},
+	opponent: {
+		seat: 0,
+		deck: {mainDeck: [], sideboard: []},
+		life: 20,
+		turn: 0
+	}
+};
+
+var playerData = cloneDeep(playerDataDefault);
 
 var renderer_state = 0;
 var oppDeck = {mainDeck: [], sideboard: []};
@@ -139,7 +182,6 @@ var gameNumberCompleted = 0;
 
 var arenaVersion = '';
 var playerUsername = '';
-var playerName = null;
 var playerConstructedRank = null;
 var playerConstructedTier = null;
 var playerConstructedSteps = 4;
@@ -189,9 +231,14 @@ var history = {};
 var drafts = {};
 var events = {};
 var economy = {};
-var decks = {};
 var staticDecks = [];
-//var coursesToSubmit = {};
+
+var decks = {};
+var deck_changes_index = [];
+var deck_changes = {};
+var decks_tags = {};
+var tags_colors = {};
+var deck_archetypes = {};
 
 var gold = 0;
 var gems = 0;
@@ -206,14 +253,9 @@ var currentDraft = undefined;
 var currentDraftPack = undefined;
 var draftSet = "";
 var draftId = undefined;
+
 var overlayDeckMode = 0;
 var lastDeckUpdate = new Date();
-
-var deck_changes_index = [];
-var deck_changes = {};
-var decks_tags = {};
-var tags_colors = {};
-var deck_archetypes = {};
 
 let formats = {
 	Standard: 'Standard',
@@ -854,10 +896,10 @@ function onLogEntryFound(entry) {
 	}
 	let json;
 	if (entry.type == "connection") {
-		playerId = entry.socket.PlayerId;
-		arenaVersion = entry.socket.ClientVersion;
-		playerName = entry.socket.PlayerScreenName;
-		ipc_send("set_username", playerName);
+		playerData.arenaId = entry.socket.PlayerId;
+		playerData.arenaVersion = entry.socket.ClientVersion;
+		playerData.name = entry.socket.PlayerScreenName;
+		ipc_send("set_username", playerData.name);
 	}
 	else {
 		//console.log("Entry:", entry.label, entry, entry.json());
@@ -1092,10 +1134,10 @@ function processLogUser(rawString) {
 		// Get User name
 		strCheck = '"screenName": "';
 		if (value.indexOf(strCheck) > -1) {
-			playerName = dataChop(value, strCheck, '"');
-			ipc_send("set_username", playerName);
-			ipc_send("init_login", playerName);
-			ipc_send("ipc_log", 'Arena screen name: '+playerName);
+			playerData.name = dataChop(value, strCheck, '"');
+			ipc_send("set_username", playerData.name);
+			ipc_send("init_login", playerData.name);
+			ipc_send("ipc_log", 'Arena screen name: '+playerData.name);
 		}
 
 		// Get Client Version
@@ -1111,7 +1153,7 @@ function processLogUser(rawString) {
 		*/
 	});
 
-	if (firstPass && playerName == null) {
+	if (firstPass && playerData.name == null) {
 		ipc_send("popup", {"text": "output_log contains no player data", "time": 0});
 	}
 }
@@ -1868,8 +1910,8 @@ function finishLoading() {
 		obj = store.get('windowBounds');
 		ipc_send("renderer_set_bounds", obj);
 
-		if (playerName != null) {
-			httpApi.httpSetPlayer(playerName, playerConstructedRank, playerConstructedTier, playerLimitedRank, playerLimitedTier);
+		if (playerData.name != null) {
+			httpApi.httpSetPlayer(playerData.name, playerConstructedRank, playerConstructedTier, playerLimitedRank, playerLimitedTier);
 		}
 		ipc_send("popup", {"text": `Reading log: 100%`, "time": 1000});
 		logReadEnd = new Date();
