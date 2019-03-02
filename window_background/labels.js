@@ -1006,6 +1006,9 @@ function onLabelInEventGetSeasonAndRankDetail(entry, json) {
 
 function onLabelGetPlayerInventoryGetRewardSchedule(entry, json) {
 	if (!json)	return;
-	
+
+	if (!json.dailyReset.endsWith("Z")) json.dailyReset = json.dailyReset+"Z";
+	if (!json.weeklyReset.endsWith("Z")) json.weeklyReset = json.weeklyReset+"Z";
+
 	ipc_send("set_reward_resets", {daily: json.dailyReset, weekly: json.weeklyReset});
 }
