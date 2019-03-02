@@ -874,7 +874,7 @@ $(document).ready(function() {
 			}
 			if ($(this).hasClass("it5")) {
 				sidebarActive = 5;
-				open_collection_tab();
+				openCollectionTab();
 			}
 			if ($(this).hasClass("it6")) {
 				sidebarActive = 6;
