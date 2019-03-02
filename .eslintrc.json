@@ -13,6 +13,8 @@
   "rules": {
     "allowEmptyCatch": true,
     "no-cond-assign": 0,
-    "no-console": "off"
+    "no-console": "off",
+    "complexity": ["warn", 20],
+    "max-statements": ["warn", 100]
   }
 }
