@@ -1,5 +1,6 @@
 {
-  "extends": "eslint:recommended",
+  "extends": ["eslint:recommended", "plugin:prettier/recommended"],
+  "plugins": ["prettier"],
   "parserOptions": {
     "sourceType": "module",
     "ecmaVersion": 9
@@ -11,6 +12,7 @@
     "jquery": true
   },
   "rules": {
+    "prettier/prettier": "error",
     "allowEmptyCatch": true,
     "no-cond-assign": 0,
     "no-console": "off",
