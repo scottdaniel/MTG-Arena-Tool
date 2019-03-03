@@ -122,24 +122,6 @@ if (!fs.existsSync(actionLogDir)){
 var firstPass = true;
 var tokenAuth = undefined;
 
-var playerDataDefault = {
-	name: null,
-	arenaId: '',
-	arenaVersion: '',
-	rank: {
-		constructed: {
-			rank: '',
-			tier: 0,
-			steps: 0
-		},
-		limited: {
-			rank: '',
-			tier: 0,
-			steps: 0
-		}
-	}
-};
-
 var currentMatchDefault = {
 	eventId: '',
 	matchId: '',
@@ -423,7 +405,7 @@ window.onerror = (msg, url, line, col, err) => {
 	}
 	error.id = sha1(error.msg + playerId);
 	httpApi.httpSendError(error);
-	ipc_send("ipc_log", "Background Error:"+error.join(' - '));
+	ipc_send("ipc_log", "Background Error:"+error);
 }
 
 process.on('uncaughtException', function(err){
@@ -443,7 +425,7 @@ process.on('uncaughtException', function(err){
 ipc.on('error', function (event, err) {
 	err.id = sha1(err.msg + playerId);
 	httpApi.httpSendError(err);
-	ipc_send("ipc_log", "Background error:"+err.join(' - '));
+	ipc_send("ipc_log", "Background error:"+err);
 });
 
 //
@@ -478,9 +460,13 @@ function calculateRankWins() {
 			platinum: {w:0, l:0, t:0, r:"Platinum"},
 			diamond: {w:0, l:0, t:0, r:"Diamond"},
 			mythic: {w:0, l:0, t:0, r:"Mythic"},
-			step: playerConstructedStep,
-			steps: playerConstructedSteps,
-			total: {w:PlayerConstructedMatchesWon, l:PlayerConstructedMatchesLost, t:PlayerConstructedMatchesWon+PlayerConstructedMatchesLost}
+			step: playerData.rank.constructed.step,
+			steps: playerData.rank.constructed.steps,
+			total: {
+        w : playerData.rank.constructed.won,
+        l : playerData.rank.constructed.lost,
+        t : playerData.rank.constructed.won + playerData.rank.constructed.lost
+      }
 		},
 		limited: {
 			bronze: {w:0, l:0, t:0, r:"Bronze"},
@@ -489,9 +475,13 @@ function calculateRankWins() {
 			platinum: {w:0, l:0, t:0, r:"Platinum"},
 			diamond: {w:0, l:0, t:0, r:"Diamond"},
 			mythic: {w:0, l:0, t:0, r:"Mythic"},
-			step: playerLimitedStep,
-			steps: playerLimitedSteps,
-			total: {w:PlayerLimitedMatchesWon, l:PlayerLimitedMatchesLost, t:PlayerLimitedMatchesWon+PlayerLimitedMatchesLost}
+      step: playerData.rank.limited.step,
+      steps: playerData.rank.limited.steps,
+      total: {
+        w : playerData.rank.limited.won,
+        l : playerData.rank.limited.lost,
+        t : playerData.rank.limited.won + playerData.rank.limited.lost
+      }
 		},
 
 	};
@@ -899,7 +889,7 @@ function onLogEntryFound(entry) {
 		playerData.arenaId = entry.socket.PlayerId;
 		playerData.arenaVersion = entry.socket.ClientVersion;
 		playerData.name = entry.socket.PlayerScreenName;
-		ipc_send("set_username", playerData.name);
+		ipc_send("set_player_data", playerData);
 	}
 	else {
 		//console.log("Entry:", entry.label, entry, entry.json());
@@ -1135,8 +1125,8 @@ function processLogUser(rawString) {
 		strCheck = '"screenName": "';
 		if (value.indexOf(strCheck) > -1) {
 			playerData.name = dataChop(value, strCheck, '"');
-			ipc_send("set_username", playerData.name);
-			ipc_send("init_login", playerData.name);
+      ipc_send("set_player_data", playerData);
+			ipc_send("init_login", true);
 			ipc_send("ipc_log", 'Arena screen name: '+playerData.name);
 		}
 
@@ -1356,7 +1346,7 @@ function changePriority(previous, current, time) {
 function getNameBySeat(seat) {
 	try {
 		if (seat == playerSeat) {
-			return playerName.slice(0, -6);
+			return playerData.name.slice(0, -6);
 		}
 		else {
 			return oppName.slice(0, -6);
@@ -1782,9 +1772,9 @@ function saveMatch(matchId) {
 		win: oppWin
 	}
 	match.player = {
-		name: playerName,
-		rank: playerConstructedRank,
-		tier: playerConstructedTier,
+		name: playerData.name,
+    rank: playerData.rank.constructed.rank,
+    tier: playerData.rank.constructed.tier,
 		userid: playerId,
 		seat: playerSeat, 
 		win: playerWin
@@ -1843,7 +1833,7 @@ function saveDraft() {
 		draft.id = draftId;
 		draft.date = new Date();
 		draft.set = draftSet; 
-		draft.owner = playerName; 
+		draft.owner = playerData.name; 
 
 		console.log("Save draft:", draft);
 
@@ -1883,12 +1873,7 @@ function updateLoading(entry) {
 
 //
 function updateRank() {
-	let rank;
-	rank = get_rank_index(playerConstructedRank, playerConstructedTier);
-	ipc_send("set_constructed_rank", {rankName: playerConstructedRank, rankTier: playerConstructedTier, rank: rank, rankStep: playerConstructedStep, steps: playerConstructedSteps, str: playerConstructedRank+" "+playerConstructedTier});
-
-	rank = get_rank_index(playerLimitedRank, playerLimitedTier);
-	ipc_send("set_limited_rank", {rankName: playerLimitedRank, rankTier: playerLimitedTier, rank: rank, rankStep: playerLimitedStep, steps: playerLimitedSteps, str: playerLimitedRank+" "+playerLimitedTier});
+  ipc_send("set_player_data", playerData);
 }
 
 ///
@@ -1911,7 +1896,7 @@ function finishLoading() {
 		ipc_send("renderer_set_bounds", obj);
 
 		if (playerData.name != null) {
-			httpApi.httpSetPlayer(playerData.name, playerConstructedRank, playerConstructedTier, playerLimitedRank, playerLimitedTier);
+			httpApi.httpSetPlayer(playerData.name, playerData.rank.constructed.rank, playerData.rank.constructed.tier, playerData.rank.limited.rank, playerData.rank.limited.tier);
 		}
 		ipc_send("popup", {"text": `Reading log: 100%`, "time": 1000});
 		logReadEnd = new Date();

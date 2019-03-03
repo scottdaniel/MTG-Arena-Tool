@@ -82,15 +82,7 @@ let loggedIn = false;
 let canLogin = false;
 let offlineMode = false;
 
-let rankOffset = 0;
-let rankTitle = "";
-let userName = ""
-let rankConstructed = 'Bronze';
-let rankConstructedStep = 1;
-let rankConstructedTier = 4;
-let rankLimited = 'Bronze';
-let rankLimitedStep = 1;
-let rankLimitedTier = 4;
+let playerData = playerDataDefault;
 
 let economyHistory = [];
 
@@ -210,35 +202,21 @@ ipc.on('set_db', function (event, arg) {
 });
 
 //
-ipc.on('set_username', function (event, arg) {
-	userName = arg;
-	if (sidebarActive != -99) {
-		$('.top_username').html(userName.slice(0, -6));
-		$('.top_username_id').html(userName.slice(-6));
-	}
-});
+ipc.on('set_player_data', (event, _data) => {
+	playerData = _data;
 
-//
-ipc.on('set_constructed_rank', function (event, _rank) {
-	rankConstructed = _rank.rankName;
-	rankConstructedStep = _rank.rankStep;
-	rankConstructedTier = _rank.rankTier;
-	rankOffset = _rank.rank;
-	rankTitle = _rank.str;
 	if (sidebarActive != -99) {
-		$(".top_constructed_rank").css("background-position", (rankOffset*-48)+"px 0px").attr("title", rankTitle);
-	}
-});
+		$('.top_username').html(playerData.name.slice(0, -6));
+		$('.top_username_id').html(playerData.name.slice(-6));
 
-//
-ipc.on('set_limited_rank', function (event, _rank) {
-	rankLimited = _rank.rankName;
-	rankLimitedStep = _rank.rankStep;
-	rankLimitedTier = _rank.rankTier;
-	rankOffset = _rank.rank;
-	rankTitle = _rank.str;
-	if (sidebarActive != -99) {
-		$(".top_limited_rank").css("background-position", (rankOffset*-48)+"px 0px").attr("title", rankTitle);
+		let rankOffset;
+		let constructed = playerData.rank.constructed;
+		rankOffset = get_rank_index(constructed.rank, constructed.tier);
+		$(".top_constructed_rank").css("background-position", (rankOffset*-48)+"px 0px").attr("title", constructed.rank+' '+constructed.tier);
+
+		let limited = playerData.rank.limited;
+		rankOffset = get_rank_index(limited.rank, limited.tier);
+		$(".top_limited_rank").css("background-position", (rankOffset*-48)+"px 0px").attr("title", limited.rank+' '+limited.tier);
 	}
 });
 
@@ -571,10 +549,9 @@ function rememberMe() {
 
 //
 ipc.on('initialize', function () {
-	$('.top_username').html(userName.slice(0, -6));
-	$('.top_username_id').html(userName.slice(-6));
+	$('.top_username').html(playerData.name.slice(0, -6));
+	$('.top_username_id').html(playerData.name.slice(-6));
 
-	$(".top_rank").css("background-position", (rankOffset*-48)+"px 0px").attr("title", rankTitle);
 	sidebarActive = -1;
 	ipc_send('request_home', true);
 	$('.top_nav').removeClass('hidden');

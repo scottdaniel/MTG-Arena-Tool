@@ -8,8 +8,6 @@ const windowBackground = 0;
 const windowRenderer = 1;
 const windowOverlay = 2;
 
-
-
 // Colour indices
 const WHITE = 1;
 const BLUE = 2;
@@ -46,6 +44,32 @@ draftRanks[3] = "D+";
 draftRanks[2] = "D";
 draftRanks[1] = "D-";
 draftRanks[0] = "F";
+
+var playerDataDefault = {
+	name: null,
+	arenaId: '',
+	arenaVersion: '',
+	rank: {
+		constructed: {
+			rank: '',
+			tier: 0,
+			step: 0,
+      steps: 4,
+      won: 0,
+      lost: 0,
+      drawn: 0
+		},
+		limited: {
+			rank: '',
+			tier: 0,
+			step: 0,
+      steps: 4,
+      won: 0,
+      lost: 0,
+      drawn: 0
+		}
+	}
+};
 
 //
 function addCardTile(grpId, indent, quantity, element) {

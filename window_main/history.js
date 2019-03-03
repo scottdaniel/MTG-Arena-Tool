@@ -368,8 +368,7 @@ function renderRanksStats(container) {
 			getStepsUntilNextRank
 			createButton
 			formatPercent
-			rankLimited
-			rankConstructed
+			playerData
 	*/
 	container.innerHTML = '';
 
@@ -442,7 +441,7 @@ function renderRanksStats(container) {
 	container.appendChild(title);
 
 
-	let currentRank = viewingLimitSeason ? rankLimited : rankConstructed;
+	let currentRank = viewingLimitSeason ? playerData.rank.limited.rank : playerData.rank.constructed.rank;
 	let expected = getStepsUntilNextRank(viewingLimitSeason, lastWinrate);
 
 	title = createDivision(
@@ -616,14 +615,11 @@ function getNextRank(currentRank) {
 }
 
 function getStepsUntilNextRank(mode, winrate) {
-	let cr = rankLimited;
-	let cs = rankLimitedStep
-	let ct = rankLimitedTier;
-	if (!mode) {
-		cr = rankConstructed;
-		cs = rankConstructedStep;
-		ct = rankConstructedTier;
-	}
+	let rr = mode ? playerData.rank.limited : playerData.rank.constructed;
+	
+	let cr = rr.rank;
+	let cs = rr.step;
+	let ct = rr.tier;
 
 	let st = 1;
 	let stw = 1;

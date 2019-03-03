@@ -9,6 +9,7 @@ global
 	rstore,
 	loadPlayerConfig,
 	cardsDb,
+	playerData,
 	ipc_send,
 	debugNet,
 	playerUsername,
@@ -269,7 +270,7 @@ function httpAuth(user, pass) {
 	heartbeatClear();
 	var _id = makeId(6);
 	playerUsername = user;
-	httpAsync.push({'reqId': _id, 'method': 'auth', 'method_path': '/login.php', 'email': user, 'password': pass, 'playerid': playerId, 'playername': playerName, 'mtgaversion': arenaVersion, 'version': window.electron.remote.app.getVersion()});
+	httpAsync.push({'reqId': _id, 'method': 'auth', 'method_path': '/login.php', 'email': user, 'password': pass, 'playerid': playerData.arenaId, 'playername': playerData.name, 'mtgaversion': playerData.arenaVersion, 'version': window.electron.remote.app.getVersion()});
 }
 
 function httpSubmitCourse(course) {

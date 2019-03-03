@@ -592,19 +592,21 @@ function onLabelInEventGetPlayerCourse(entry, json) {
 function onLabelInEventGetCombinedRankInfo(entry, json) {
 	if (!json)	return;
 
-	playerConstructedRank = json.constructedClass;
-	playerConstructedTier = json.constructedLevel;
-	playerConstructedStep = json.constructedStep;
-	playerLimitedRank = json.limitedClass;
-	playerLimitedTier = json.limitedLevel;
-	playerLimitedStep = json.limitedStep;
+	playerData.rank.constructed.rank  = json.constructedClass;
+	playerData.rank.constructed.tier  = json.constructedLevel;
+	playerData.rank.constructed.step  = json.constructedStep;
 
-	PlayerConstructedMatchesWon = json.constructedMatchesWon;
-	PlayerConstructedMatchesLost = json.constructedMatchesLost;
-	PlayerConstructedMatchesDrawn = json.constructedMatchesDrawn;
-	PlayerLimitedMatchesWon = json.limitedMatchesWon;
-	PlayerLimitedMatchesLost = json.limitedMatchesLost;
-	PlayerLimitedMatchesDrawn = json.limitedMatchesDrawn;
+	playerData.rank.limited.rank  = json.limitedClass;
+	playerData.rank.limited.tier  = json.limitedLevel;
+	playerData.rank.limited.step  = json.limitedStep;
+
+	playerData.rank.constructed.won   = json.constructedMatchesWon;
+	playerData.rank.constructed.lost  = json.constructedMatchesLost;
+	playerData.rank.constructed.drawn = json.constructedMatchesDrawn;
+
+	playerData.rank.limited.won   = json.limitedMatchesWon;
+	playerData.rank.limited.lost  = json.limitedMatchesLost;
+	playerData.rank.limited.drawn = json.limitedMatchesDrawn;
 
 	updateRank();
 }
@@ -613,14 +615,14 @@ function onLabelRankUpdated(entry, json) {
 	if (!json)	return;
 
 	if (json.rankUpdateType == "Constructed") {
-		playerConstructedRank = json.newClass;
-		playerConstructedTier = json.newLevel;
-		playerConstructedStep = json.newStep;
+		playerData.rank.constructed.rank = json.newClass;
+		playerData.rank.constructed.tier = json.newLevel;
+		playerData.rank.constructed.step = json.newStep;
 	}
 	else {
-		playerLimitedRank = json.newClass;
-		playerLimitedTier = json.newLevel;
-		playerLimitedStep = json.newStep;
+		playerData.rank.limited.rank = json.newClass;
+		playerData.rank.limited.tier = json.newLevel;
+		playerData.rank.limited.step = json.newStep;
 	}
 
 	updateRank();
