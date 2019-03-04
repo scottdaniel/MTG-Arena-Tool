@@ -27,6 +27,10 @@
 			"target": "NSIS",
 			"icon": "icon.ico"
 		},
+		"mac": {
+			"target": "pkg",
+			"icon": "icon.ico"
+		},
 		"linux": {
 			"target": "deb",
 			"icon": "icon.ico"
@@ -35,7 +39,7 @@
 	"scripts": {
 		"start": "electron .",
 		"postinstall": "install-app-deps",
-		"dist": "build --x64 -w"
+		"dist": "build --x64"
 	},
 	"dependencies": {
 		"async": "^2.6.1",
