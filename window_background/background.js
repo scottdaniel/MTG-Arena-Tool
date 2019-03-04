@@ -10,6 +10,8 @@ global
   hypergeometric,
   onLabelOutLogInfo,
   onLabelGreToClient,
+  eventsToFormat,
+  compare_archetypes,
   onLabelClientToMatchServiceMessageTypeClientToGREMessage,
   onLabelInEventGetPlayerCourse,
   onLabelInEventGetCombinedRankInfo,
@@ -144,7 +146,7 @@ var currentMatchDefault = {
   playerCards: {},
   oppCards: {},
   player: {
-    seat: 0,
+    seat: 1,
     deck: { mainDeck: [], sideboard: [] },
     life: 20,
     turn: 0,
@@ -154,7 +156,7 @@ var currentMatchDefault = {
     tier: 1
   },
   opponent: {
-    seat: 0,
+    seat: 2,
     deck: { mainDeck: [], sideboard: [] },
     life: 20,
     turn: 0,
@@ -163,6 +165,14 @@ var currentMatchDefault = {
     rank: "",
     tier: 1
   }
+};
+
+var currentDraftDefault = {
+  eventId: "",
+  draftId: "",
+  set: "",
+  owner: "",
+  picks: {}
 };
 
 var playerData = cloneDeep(playerDataDefault);
@@ -276,7 +286,7 @@ ipc.on("login", function(event, arg) {
     httpApi.httpAuth(arg.username, arg.password);
   } else if (arg.username == "" && arg.password == "") {
     ipc_send("auth", { ok: true, user: -1 });
-    loadPlayerConfig(playerId);
+    loadPlayerConfig(playerData.arenaId);
     playerData.userName = "";
   } else {
     playerData.userName = arg.username;
@@ -375,7 +385,7 @@ window.onerror = (msg, url, line, col, err) => {
     line: line,
     col: col
   };
-  error.id = sha1(error.msg + playerId);
+  error.id = sha1(error.msg + playerData.arenaId);
   httpApi.httpSendError(error);
   ipc_send("ipc_log", "Background Error:" + error);
 };
@@ -388,14 +398,14 @@ process.on("uncaughtException", function(err) {
     col: 0
   };
   console.log("ERROR: ", error);
-  error.id = sha1(error.msg + playerId);
+  error.id = sha1(error.msg + playerData.arenaId);
   httpApi.httpSendError(error);
   ipc_send("ipc_log", `Background ${error.stack}: ${error.join(" - ")}`);
 });
 
 //
 ipc.on("error", function(event, err) {
-  err.id = sha1(err.msg + playerId);
+  err.id = sha1(err.msg + playerData.arenaId);
   httpApi.httpSendError(err);
   ipc_send("ipc_log", "Background error:" + err);
 });
@@ -1069,7 +1079,7 @@ async function logLoop() {
   // We are looping only to get user data (processLogUser)
   processLogUser(logSegment);
 
-  if (playerId) {
+  if (playerData.arenaId) {
     clearInterval(logLoopInterval);
   }
   prevLogSize = size;
@@ -1086,7 +1096,7 @@ function processLogUser(rawString) {
     // Get player Id
     let strCheck = '"playerId": "';
     if (value.indexOf(strCheck) > -1) {
-      playerId = dataChop(value, strCheck, '"');
+      playerData.arenaId = dataChop(value, strCheck, '"');
     }
 
     // Get User name
@@ -1586,7 +1596,7 @@ function forceDeckUpdate(removeUsed = true) {
     });
   }
   if (removeUsed) {
-    Object.keys(gameObjs).forEach(function(key) {
+    Object.keys(currentMatch.gameObjs).forEach(function(key) {
       if (currentMatch.gameObjs[key] != undefined) {
         if (currentMatch.zones[currentMatch.gameObjs[key].zoneId]) {
           if (
