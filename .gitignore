@@ -6,3 +6,4 @@ main.sublime-project
 *.sublime-project
 *.sublime-settings
 .vscode
+.DS_Store
