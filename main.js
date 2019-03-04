@@ -465,9 +465,7 @@ function showWindow() {
 }
 
 function quit() {
-	if (process.platform !== "darwin") {
-		app.quit();
-	}
+	app.quit();
 }
 
 function saveWindowPos() {
