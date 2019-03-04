@@ -202,7 +202,7 @@ function httpBasic() {
                 //ipc_send("auth", parsedResult.arenaids);
                 if (rememberMe) {
                   rstore.set("token", tokenAuth);
-                  rstore.set("email", playerData.username);
+                  rstore.set("email", playerData.userName);
                 }
 
                 loadPlayerConfig(playerData.arenaId);
@@ -372,7 +372,7 @@ function heartbeatClear() {
 function httpAuth(user, pass) {
   heartbeatClear();
   var _id = makeId(6);
-  playerData.username = user;
+  playerData.userName = user;
   httpAsync.push({
     reqId: _id,
     method: "auth",

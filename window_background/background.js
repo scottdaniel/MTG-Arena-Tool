@@ -114,7 +114,7 @@ var settingsStore = new Store({
   defaults: settingsCfg
 });
 
-const debugLog = true;
+const debugLog = false;
 const debugNet = true;
 var debugLogSpeed = 0.1;
 
@@ -504,7 +504,7 @@ function calculateRankWins() {
 }
 
 ipc.on("request_explore", function(event, arg) {
-  if (playerData.username == "") {
+  if (playerData.userName == "") {
     ipc_send("offline", 1);
   } else {
     let cards = store.get("cards.cards");
@@ -529,7 +529,7 @@ ipc.on("request_course", function(event, arg) {
 });
 
 ipc.on("request_home", function() {
-  if (playerData.username == "") {
+  if (playerData.userName == "") {
     ipc_send("offline", 1);
   } else {
     httpApi.httpHomeGet();
@@ -631,7 +631,7 @@ function sendEconomy() {
 /*
 function rememberLogin(bool) {
   if (bool) {
-    rstore.set("email", playerData.username);
+    rstore.set("email", playerData.userName);
     rstore.set("token", tokenAuth);
   }
   else {
@@ -1457,7 +1457,7 @@ function createMatch(arg) {
 
   currentMatch.beginTime = matchBeginTime;
 
-  lastPriorityChangeTime = matchBeginTime;
+  currentMatch.lastPriorityChangeTime = matchBeginTime;
   matchGameStats = [];
   matchCompletedOnGameNumber = 0;
   gameNumberCompleted = 0;

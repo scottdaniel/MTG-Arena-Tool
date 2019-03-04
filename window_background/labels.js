@@ -1083,7 +1083,7 @@ function onLabelMatchGameRoomStateChangedEvent(entry, json) {
 
   if (json.stateType == "MatchGameRoomStateType_Playing") {
     json.gameRoomConfig.reservedPlayers.forEach(player => {
-      if (player.userId == playerData.playerId) {
+      if (player.userId == playerData.arenaId) {
         currentMatch.player.seat = player.systemSeatId;
       } else {
         currentMatch.opponent.name = player.playerName;
@@ -1128,7 +1128,7 @@ function onLabelMatchGameRoomStateChangedEvent(entry, json) {
 
   if (json.players) {
     json.players.forEach(function(player) {
-      if (player.userId == playerData.playerId) {
+      if (player.userId == playerData.arenaId) {
         currentMatch.player.seat = player.systemSeatId;
       } else {
         oppId = player.userId;
