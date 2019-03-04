@@ -114,7 +114,7 @@ var settingsStore = new Store({
   defaults: settingsCfg
 });
 
-const debugLog = false;
+const debugLog = true;
 const debugNet = true;
 var debugLogSpeed = 0.1;
 
@@ -171,9 +171,16 @@ var currentDraftDefault = {
   eventId: "",
   draftId: "",
   set: "",
-  owner: "",
-  picks: {}
+  owner: ""
 };
+
+var currentDraft = null;
+/*
+var currentDraft = undefined;
+var currentDraftPack = undefined;
+var draftSet = "";
+var draftId = undefined;
+*/
 
 var playerData = cloneDeep(playerDataDefault);
 var currentMatch = null;
@@ -214,11 +221,6 @@ var wcCommon = 0;
 var wcUncommon = 0;
 var wcRare = 0;
 var wcMythic = 0;
-
-var currentDraft = undefined;
-var currentDraftPack = undefined;
-var draftSet = "";
-var draftId = undefined;
 
 var overlayDeckMode = 0;
 var lastDeckUpdate = new Date();
@@ -1178,13 +1180,7 @@ function dataChop(data, startStr, endStr) {
 }
 
 function setDraftCards(json) {
-  ipc.send(
-    "set_draft_cards",
-    json.draftPack,
-    json.pickedCards,
-    json.packNumber + 1,
-    json.pickNumber
-  );
+  ipc.send("set_draft_cards", currentDraft);
 }
 
 function actionLogGenerateLink(grpId) {
@@ -1493,8 +1489,8 @@ function createDraft() {
   actionLog(-99, new Date(), "");
   var obj = store.get("overlayBounds");
 
-  zones = {};
-  gameObjs = {};
+  currentDraft = cloneDeep(currentDraftDefault);
+  currentMatch = cloneDeep(currentMatchDefault);
 
   if (!firstPass && store.get("settings").show_overlay == true) {
     if (store.get("settings").close_on_match) {
@@ -1505,25 +1501,9 @@ function createDraft() {
     ipc_send("overlay_set_bounds", obj);
   }
 
-  currentDraft = {};
-
-  oppName = "";
-  oppRank = "";
-  oppTier = -1;
-  currentMatchId = null;
-  playerWin = 0;
-  draws = 0;
-  oppWin = 0;
-
   ipc_send("set_draft", true, windowOverlay);
   ipc_send("set_timer", -1, windowOverlay);
-  ipc_send("set_opponent", oppName, windowOverlay);
-  ipc_send(
-    "set_opponent_rank",
-    get_rank_index(oppRank, oppTier),
-    oppRank + " " + oppTier,
-    windowOverlay
-  );
+  ipc_send("set_opponent", "", windowOverlay);
 }
 
 //
@@ -1933,38 +1913,37 @@ function saveMatch(matchId) {
 
 //
 function saveDraft() {
-  if (draftId != undefined) {
-    draftId = draftId + "-draft";
-    var draft = currentDraft;
-    draft.id = draftId;
-    draft.date = new Date();
-    draft.set = draftSet;
-    draft.owner = playerData.name;
+  if (currentDraft.draftId != undefined) {
+    currentDraft.draftId = currentDraft.draftId + "-draft";
 
-    console.log("Save draft:", draft);
+    currentDraft.id = currentDraft.draftId;
+    currentDraft.date = new Date();
+    currentDraft.owner = playerData.name;
+
+    console.log("Save draft:", currentDraft);
 
     var draft_index = store.get("draft_index");
     // add to config
-    if (!draft_index.includes(draftId)) {
-      draft_index.push(draftId);
+    if (!draft_index.includes(currentDraft.draftId)) {
+      draft_index.push(currentDraft.draftId);
     } else {
-      draft.date = store.get(draftId).date;
+      currentDraft.date = store.get(currentDraft.draftId).date;
     }
 
     // add locally
-    if (!history.matches.includes(draftId)) {
-      history.matches.push(draftId);
+    if (!history.matches.includes(currentDraft.draftId)) {
+      history.matches.push(currentDraft.draftId);
     }
 
     store.set("draft_index", draft_index);
-    store.set(draftId, draft);
-    history[draftId] = draft;
-    history[draftId].type = "draft";
-    httpApi.httpSetDraft(draft);
+    store.set(currentDraft.draftId, currentDraft);
+    history[currentDraft.draftId] = currentDraft;
+    history[currentDraft.draftId].type = "draft";
+    httpApi.httpSetDraft(currentDraft);
     requestHistorySend(0);
     ipc_send("popup", { text: "Draft saved!", time: 3000 });
   } else {
-    console.log("Couldnt save draft with undefined ID:", draft);
+    console.log("Couldnt save draft with undefined ID:", currentDraft);
   }
 }
 

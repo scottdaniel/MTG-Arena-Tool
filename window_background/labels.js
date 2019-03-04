@@ -1012,8 +1012,11 @@ function onLabelInDraftDraftStatus(entry, json) {
   ) {
     createDraft();
   }
-  setDraftCards(json);
-  currentDraftPack = json.draftPack.slice(0);
+  currentDraft.packNumber = json.packNumber;
+  currentDraft.pickNumber = json.pickNumber;
+  currentDraft.pickedCards = json.pickedCards;
+  currentDraft.currentPack = json.draftPack.slice(0);
+  setDraftCards(currentDraft);
 }
 
 function onLabelInDraftMakePick(entry, json) {
@@ -1023,7 +1026,7 @@ function onLabelInDraftMakePick(entry, json) {
     for (let set in setsList) {
       let setCode = setsList[set]["code"];
       if (json.eventName.indexOf(setCode) !== -1) {
-        draftSet = set;
+        currentDraft.set = set;
       }
     }
   }
@@ -1032,8 +1035,11 @@ function onLabelInDraftMakePick(entry, json) {
     if (currentDraft == undefined) {
       createDraft();
     }
-    setDraftCards(json);
-    currentDraftPack = json.draftPack.slice(0);
+    currentDraft.packNumber = json.packNumber;
+    currentDraft.pickNumber = json.pickNumber;
+    currentDraft.pickedCards = json.pickedCards;
+    currentDraft.currentPack = json.draftPack.slice(0);
+    setDraftCards(currentDraft);
   }
 }
 
@@ -1042,7 +1048,7 @@ function onLabelOutDraftMakePick(entry, json) {
   // store pick in recording
   var value = {};
   value.pick = json.params.cardId;
-  value.pack = currentDraftPack;
+  value.pack = currentDraft.currentPack;
   var key = "pack_" + json.params.packNumber + "pick_" + json.params.pickNumber;
   currentDraft[key] = value;
   debugLogSpeed = 200;
@@ -1057,7 +1063,7 @@ function onLabelInEventCompleteDraft(entry, json) {
   }
   //ipc_send("renderer_show", 1);
 
-  draftId = json.Id;
+  currentDraft.draftId = json.Id;
   console.log("Complete draft", json);
   saveDraft();
 }
