@@ -596,7 +596,7 @@ ipc.on("add_history_tag", function(event, arg) {
     match.tags = [arg.name];
   }
 
-  httpApi.httpSetDeckTag(arg.name, match.opponent.deck.mainDeck, match.eventId);
+  httpApi.httpSetDeckTag(arg.name, match.oppDeck.mainDeck, match.eventId);
   store.set(arg.match, match);
 });
 
