@@ -1,1 +1,1 @@
-module.exports = require('./arena-log-decoder');
+module.exports = require("./arena-log-decoder");

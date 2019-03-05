@@ -23,344 +23,370 @@ globals
 	getWinrateClass,
 	createDivision
 */
-const RANKS = [
-	"Bronze",
-	"Silver",
-	"Gold",
-	"Platinum",
-	"Diamond",
-	"Mythic"
-];
+const RANKS = ["Bronze", "Silver", "Gold", "Platinum", "Diamond", "Mythic"];
 
 let loadHistory = 0;
-let filterEvent = 'All';
+let filterEvent = "All";
 let filteredSampleSize = 0;
 let viewingLimitSeason = false;
 
-const autocomplete = require('../shared/autocomplete.js');
+const autocomplete = require("../shared/autocomplete.js");
 
 function open_history_tab(loadMore) {
-	var mainDiv = document.getElementById("ux_0");
-	var div, d;
-	mainDiv.classList.add("flex_item");
-	if (loadMore <= 0) {
-		loadMore = 25;
-		sort_history();		
-		mainDiv.innerHTML = '';
-		loadHistory = 0;
+  var mainDiv = document.getElementById("ux_0");
+  var div, d;
+  mainDiv.classList.add("flex_item");
+  if (loadMore <= 0) {
+    loadMore = 25;
+    sort_history();
+    mainDiv.innerHTML = "";
+    loadHistory = 0;
 
-		let wrap_r = createDivision(["wrapper_column", "sidebar_column_l"]);
+    let wrap_r = createDivision(["wrapper_column", "sidebar_column_l"]);
 
-		div = createDivision(["ranks_history"]);
+    div = createDivision(["ranks_history"]);
 
-		renderRanksStats(div);
+    renderRanksStats(div);
 
-		let wrap_l = createDivision(["wrapper_column"]);
-		wrap_l.setAttribute("id", "history_column");
+    let wrap_l = createDivision(["wrapper_column"]);
+    wrap_l.setAttribute("id", "history_column");
 
-		d = createDivision(["list_fill"]);
+    d = createDivision(["list_fill"]);
 
-		wrap_r.appendChild(div);
-		mainDiv.appendChild(wrap_l);
-		mainDiv.appendChild(wrap_r);
-		wrap_l.appendChild(d);
-	}
+    wrap_r.appendChild(div);
+    mainDiv.appendChild(wrap_l);
+    mainDiv.appendChild(wrap_r);
+    wrap_l.appendChild(d);
+  }
 
-	var historyColumn = document.getElementById("history_column");
+  var historyColumn = document.getElementById("history_column");
 
-	// container hierarchy which this next section of code deals with is:
-	// .history_column
-	// 	 .history_top
-	//     .history_top_filter
-	//     .history_top_winrate
-	//       .list_deck_winrate
-	//       .list_match_time
+  // container hierarchy which this next section of code deals with is:
+  // .history_column
+  // 	 .history_top
+  //     .history_top_filter
+  //     .history_top_winrate
+  //       .list_deck_winrate
+  //       .list_match_time
 
+  // Event ID filter
+  if (loadHistory == 0) {
+    let events_list = [];
+    let wins = 0;
+    let losses = 0;
+    let totalMatchTime = 0;
 
-	// Event ID filter
-	if (loadHistory == 0) {
-		let events_list = [];
-		let wins = 0;
-		let losses = 0;
-		let totalMatchTime = 0;
+    filteredSampleSize = 0;
+    matchesHistory.matches.forEach(matchId => {
+      let match = matchesHistory[matchId];
+      if (match) {
+        if (match.eventId) {
+          if (events_list.indexOf(match.eventId) == -1) {
+            events_list.push(match.eventId);
+          }
+          if (filterEvent == "All" || match.eventId == filterEvent) {
+            wins += match.player.win;
+            losses += match.opponent.win;
 
-		filteredSampleSize = 0;
-		matchesHistory.matches.forEach((matchId) => {
-			let match = matchesHistory[matchId];
-			if (match) {
-				if (match.eventId) {
-					if (events_list.indexOf(match.eventId) == -1) {
-						events_list.push(match.eventId);
-					}
-					if (filterEvent == 'All' || match.eventId == filterEvent) {
-						wins += match.player.win;
-						losses += match.opponent.win;
+            // some of the data is wierd. Games which last years or have no data.
+            if (match.duration !== undefined && match.duration < 3600) {
+              totalMatchTime += match.duration;
+            }
+            filteredSampleSize++;
+          }
+        }
+      }
+    });
+    if (filteredSampleSize == 0) {
+      filteredSampleSize = matchesHistory.matches.length;
+    }
 
-						// some of the data is wierd. Games which last years or have no data.
-						if (match.duration !== undefined && match.duration < 3600) {
-							totalMatchTime += match.duration;
-						}
-						filteredSampleSize++;
-					}
-				}
-			}
-		});
-		if (filteredSampleSize == 0) {
-			filteredSampleSize = matchesHistory.matches.length;
-		}
+    let historyTop = createDivision(["history_top"]);
 
+    let historyTopFilter = createDivision(["history_top_filter"]);
+    historyTop.appendChild(historyTopFilter);
 
-		let historyTop = createDivision(["history_top"]);
+    let historyTopWinrate = createDivision(["history_top_winrate"]);
 
-		let historyTopFilter = createDivision(["history_top_filter"]);
-		historyTop.appendChild(historyTopFilter);
+    let wrTotal = (1 / (wins + losses)) * wins;
+    let colClass = getWinrateClass(wrTotal);
+    let winrateContainer = createDivision(
+      ["list_deck_winrate"],
+      `${wins}:${losses} (<span class="${colClass}_bright">${Math.round(
+        wrTotal * 100
+      )}%</span>)`
+    );
+    historyTopWinrate.appendChild(winrateContainer);
 
+    let matchTimeContainer = createDivision(
+      ["list_match_time", "list_match_time_top"],
+      toMMSS(totalMatchTime)
+    );
+    historyTopWinrate.appendChild(matchTimeContainer);
 
-		let historyTopWinrate = createDivision(["history_top_winrate"]);
+    historyTop.appendChild(historyTopWinrate);
 
-		let wrTotal = 1 / (wins+losses) * wins;
-		let colClass = getWinrateClass(wrTotal);
-		let winrateContainer = createDivision(
-			["list_deck_winrate"],
-			`${wins}:${losses} (<span class="${colClass}_bright">${Math.round(wrTotal*100)}%</span>)`
-		);
-		historyTopWinrate.appendChild(winrateContainer);
+    let select = $('<select id="query_select"></select>');
+    if (filterEvent != "All") {
+      select.append('<option value="All">All</option>');
+    }
+    events_list.forEach(evId => {
+      if (evId !== filterEvent) {
+        select.append(
+          '<option value="' + evId + '">' + getReadableEvent(evId) + "</option>"
+        );
+      }
+    });
+    historyTopFilter.appendChild(select[0]);
+    historyColumn.appendChild(historyTop);
+    selectAdd(select, filterHistory);
+    select.next("div.select-styled").text(getReadableEvent(filterEvent));
+  }
 
-		let matchTimeContainer = createDivision(["list_match_time", "list_match_time_top"], toMMSS(totalMatchTime));
-		historyTopWinrate.appendChild(matchTimeContainer);
+  //console.log("loadHistory: ", loadHistory, "loadMore: ", loadMore, "matches.length: ", matchesHistory.matches.length, "filteredSampleSize: ", filteredSampleSize);
+  // loadMore = The ammount of items we want to load
+  // loadHistory = The starting point to load
+  // loadEnd = The ending point
+  // actuallyLoaded = The number of items that were actually loaded
+  //   some items are skipped due to being invalid to what we want to load or having broken data
+  //let dd = createDivision(["list_fill"]);
+  //historyColumn.appendChild(dd);
+  var actuallyLoaded = loadHistory;
+  var begin = loadHistory;
+  for (
+    var loadEnd = loadHistory + loadMore;
+    actuallyLoaded < loadEnd &&
+    loadHistory <= matchesHistory.matches.length &&
+    actuallyLoaded - begin < filteredSampleSize;
+    loadHistory++
+  ) {
+    var match_id = matchesHistory.matches[loadHistory];
+    var match = matchesHistory[match_id];
 
-		historyTop.appendChild(historyTopWinrate);
+    //console.log("match: ", match_id, match);
+    if (match == undefined) continue;
+    if (match.type == "match") {
+      if (match.opponent == undefined) continue;
+      if (match.opponent.userid.indexOf("Familiar") !== -1) continue;
+    }
+    if (match.type == "Event") continue;
+    if (filterEvent !== "All" && filterEvent !== match.eventId) continue;
 
+    actuallyLoaded++;
+    //console.log("Load match: ", match_id, match);
+    //console.log("Match: ", loadHistory, match.type, match);
 
-		let select = $('<select id="query_select"></select>');
-		if (filterEvent != "All") {
-			select.append('<option value="All">All</option>');
-		}
-		events_list.forEach((evId) => {
-			if (evId !== filterEvent) {
-				select.append('<option value="'+evId+'">'+getReadableEvent(evId)+'</option>');
-			}
-		});
-		historyTopFilter.appendChild(select[0]);
-		historyColumn.appendChild(historyTop);
-		selectAdd(select, filterHistory);
-		select.next('div.select-styled').text(getReadableEvent(filterEvent));
-	}
-	
-	//console.log("loadHistory: ", loadHistory, "loadMore: ", loadMore, "matches.length: ", matchesHistory.matches.length, "filteredSampleSize: ", filteredSampleSize);
-	// loadMore = The ammount of items we want to load
-	// loadHistory = The starting point to load
-	// loadEnd = The ending point
-	// actuallyLoaded = The number of items that were actually loaded
-	//   some items are skipped due to being invalid to what we want to load or having broken data
-	//let dd = createDivision(["list_fill"]);
-	//historyColumn.appendChild(dd);
-	var actuallyLoaded = loadHistory;
-	var begin = loadHistory;
-	for (var loadEnd = loadHistory + loadMore; actuallyLoaded < loadEnd && loadHistory <= matchesHistory.matches.length && (actuallyLoaded-begin) < filteredSampleSize; loadHistory++) {
-		var match_id = matchesHistory.matches[loadHistory];
-		var match = matchesHistory[match_id];
+    let div = createDivision([match.id, "list_match"]);
+    let fltl = createDivision(["flex_item"]);
+    let fll = createDivision(["flex_item"]);
+    fll.style.flexDirection = "column";
+    let flt = createDivision(["flex_top"]);
+    let flb = createDivision(["flex_bottom"]);
+    fll.appendChild(flt);
+    fll.appendChild(flb);
+    let fct = createDivision(["flex_top"]);
 
-		//console.log("match: ", match_id, match);
-		if (match == undefined) continue;
-		if (match.type == "match") {
-			if (match.opponent == undefined) continue;
-			if (match.opponent.userid.indexOf("Familiar") !== -1) continue;
-		}
-		if (match.type == "Event")	continue;
-		if (filterEvent !== 'All' && filterEvent !== match.eventId)		continue;
+    let flc = createDivision(["flex_item"]);
+    flc.style.flexDirection = "column";
+    flc.style.flexGrow = 2;
+    flc.appendChild(fct);
 
-		actuallyLoaded++;
-		//console.log("Load match: ", match_id, match);
-		//console.log("Match: ", loadHistory, match.type, match);
-		
-		let div = createDivision([match.id, "list_match"]);
-		let fltl = createDivision(["flex_item"]);
-		let fll = createDivision(["flex_item"]);
-		fll.style.flexDirection = "column";
-		let flt = createDivision(["flex_top"]);
-		let flb = createDivision(["flex_bottom"]);
-		fll.appendChild(flt);
-		fll.appendChild(flb);
-		let fct = createDivision(["flex_top"]);
+    let fcb = createDivision(["flex_bottom"]);
+    fcb.style.marginRight = "14px";
+    flc.appendChild(fcb);
 
-		let flc = createDivision(["flex_item"]);
-		flc.style.flexDirection = "column";
-		flc.style.flexGrow = 2;
-		flc.appendChild(fct);
+    let flr = createDivision(["rightmost", "flex_item"]);
 
-		let fcb = createDivision(["flex_bottom"]);
-		fcb.style.marginRight = "14px";
-		flc.appendChild(fcb);
+    var tileGrpid, tile;
+    if (match.type == "match") {
+      let t;
+      tileGrpid = match.playerDeck.deckTileId;
+      try {
+        t = cardsDb.get(tileGrpid).images["art_crop"];
+      } catch (e) {
+        tileGrpid = 67003;
+      }
 
-		let flr = createDivision(["rightmost", "flex_item"]);
+      tile = createDivision([match.id + "t", "deck_tile"]);
 
-		var tileGrpid, tile;
-		if (match.type == "match") {
-			let t;
-			tileGrpid = match.playerDeck.deckTileId;
-			try {
-				t = cardsDb.get(tileGrpid).images["art_crop"];
-			}
-			catch (e) {
-				tileGrpid = 67003;
-			}
+      try {
+        tile.style.backgroundImage =
+          "url(https://img.scryfall.com/cards" +
+          cardsDb.get(tileGrpid).images["art_crop"] +
+          ")";
+      } catch (e) {
+        console.error(e, tileGrpid);
+      }
+      fltl.appendChild(tile);
 
-			tile = createDivision([match.id + "t", "deck_tile"]);
+      // This is pretty useful to debug scrolling
+      //d = createDivision(["list_deck_name"], actuallyLoaded+" ("+loadHistory+") - "+match.playerDeck.name);
+      d = createDivision(["list_deck_name"], match.playerDeck.name);
+      flt.appendChild(d);
 
-			try {
-				tile.style.backgroundImage = "url(https://img.scryfall.com/cards"+cardsDb.get(tileGrpid).images["art_crop"]+")";
-			}
-			catch (e) {
-				console.error(e, tileGrpid);
-			}
-			fltl.appendChild(tile);
+      d = createDivision(
+        ["list_deck_name_it"],
+        getReadableEvent(match.eventId)
+      );
+      flt.appendChild(d);
 
-			// This is pretty useful to debug scrolling
-			//d = createDivision(["list_deck_name"], actuallyLoaded+" ("+loadHistory+") - "+match.playerDeck.name);
-			d = createDivision(["list_deck_name"], match.playerDeck.name);
-			flt.appendChild(d);
+      match.playerDeck.colors.forEach(function(color) {
+        var m = createDivision(["mana_s20", "mana_" + mana[color]]);
+        flb.appendChild(m);
+      });
 
-			d = createDivision(["list_deck_name_it"], getReadableEvent(match.eventId));
-			flt.appendChild(d);
+      if (match.opponent.name == null) {
+        match.opponent.name = "-";
+      }
+      d = createDivision(
+        ["list_match_title"],
+        "vs " + match.opponent.name.slice(0, -6)
+      );
+      fct.appendChild(d);
 
-			match.playerDeck.colors.forEach(function(color) {
-				var m = createDivision(["mana_s20", "mana_"+mana[color]]);
-				flb.appendChild(m);
-			});
+      var or = createDivision(["ranks_16"]);
+      or.style.backgroundPosition =
+        get_rank_index_16(match.opponent.rank) * -16 + "px 0px";
+      or.title = match.opponent.rank + " " + match.opponent.tier;
+      fct.appendChild(or);
 
-			if (match.opponent.name == null) {
-				match.opponent.name = "-";
-			}
-			d = createDivision(["list_match_title"], "vs "+match.opponent.name.slice(0, -6));
-			fct.appendChild(d);
+      d = createDivision(
+        ["list_match_time"],
+        timeSince(new Date(match.date)) + " ago - " + toMMSS(match.duration)
+      );
+      fcb.appendChild(d);
 
-			var or = createDivision(["ranks_16"]);
-			or.style.backgroundPosition = (get_rank_index_16(match.opponent.rank)*-16)+"px 0px";
-			or.title = match.opponent.rank+" "+match.opponent.tier;
-			fct.appendChild(or);
+      var cc = get_deck_colors(match.oppDeck);
+      cc.forEach(function(color) {
+        var m = createDivision(["mana_s20", "mana_" + mana[color]]);
+        fcb.appendChild(m);
+      });
 
-			d = createDivision(["list_match_time"], timeSince(new Date(match.date))+' ago - '+toMMSS(match.duration));
-			fcb.appendChild(d);
+      let tags_div = createDivision(["history_tags"]);
+      fcb.appendChild(tags_div);
 
-			var cc = get_deck_colors(match.oppDeck);
-			cc.forEach(function(color) {
-				var m = createDivision(["mana_s20", "mana_"+mana[color]]);
-				fcb.appendChild(m);
-			});
+      // set archetype
+      t = eventsToFormat[match.eventId];
+      let tags = [];
+      if (t && deck_tags[t]) {
+        deck_tags[t].forEach(val => {
+          tags.push({ tag: val.tag, q: val.average });
+        });
+      }
+      if (match.tags) {
+        match.tags.forEach(tag => {
+          let t = createTag(tag, tags_div, true);
+          jQuery.data(t, "match", match_id);
+          jQuery.data(t, "autocomplete", tags);
+        });
+        if (match.tags.length == 0) {
+          let t = createTag(null, tags_div, false);
+          jQuery.data(t, "match", match_id);
+          jQuery.data(t, "autocomplete", tags);
+        }
+      } else {
+        let t = createTag(null, tags_div, false);
+        jQuery.data(t, "match", match_id);
+        jQuery.data(t, "autocomplete", tags);
+      }
 
-			let tags_div = createDivision(["history_tags"]);
-			fcb.appendChild(tags_div);
+      d = createDivision(
+        [
+          match.player.win > match.opponent.win
+            ? "list_match_result_win"
+            : "list_match_result_loss"
+        ],
+        `${match.player.win}:${match.opponent.win}`
+      );
+      flr.appendChild(d);
+    } else if (match.type == "draft") {
+      console.log("Draft: ", match);
+      try {
+        tileGrpid = setsList[match.set].tile;
+      } catch (e) {
+        tileGrpid = 67003;
+      }
 
-			// set archetype
-			t = eventsToFormat[match.eventId];
-			let tags = [];
-			if (t && deck_tags[t]) {
-				deck_tags[t].forEach((val) => {
-					tags.push({tag: val.tag, q: val.average});
-				});
-			}
-			if (match.tags) {
-				match.tags.forEach((tag) => {
-					let t = createTag(tag, tags_div, true);
-					jQuery.data(t, "match", match_id);
-					jQuery.data(t, "autocomplete", tags);
-				});
-				if (match.tags.length == 0) {
-					let t = createTag(null, tags_div, false);
-					jQuery.data(t, "match", match_id);
-					jQuery.data(t, "autocomplete", tags);
-				}
-			}
-			else {
-				let t = createTag(null, tags_div, false);
-				jQuery.data(t, "match", match_id);
-				jQuery.data(t, "autocomplete", tags);
-			}
+      tile = createDivision([match.id + "t", "deck_tile"]);
 
-			d = createDivision([(match.player.win > match.opponent.win ? "list_match_result_win" : "list_match_result_loss")], `${match.player.win}:${match.opponent.win}`);
-			flr.appendChild(d);
-		}
-		else if (match.type == "draft") {
-			console.log("Draft: ", match);
-			try {
-				tileGrpid = setsList[match.set].tile;
-			}
-			catch (e) {
-				tileGrpid = 67003;
-			}
+      try {
+        tile.style.backgroundImage =
+          "url(https://img.scryfall.com/cards" +
+          cardsDb.get(tileGrpid).images["art_crop"] +
+          ")";
+      } catch (e) {
+        console.error(e);
+      }
+      fltl.appendChild(tile);
 
-			tile = createDivision([match.id+"t", "deck_tile"]);
+      d = createDivision(["list_deck_name"], match.set + " draft");
+      flt.appendChild(d);
 
-			try {
-				tile.style.backgroundImage = "url(https://img.scryfall.com/cards"+cardsDb.get(tileGrpid).images["art_crop"]+")";
-			}
-			catch (e) {
-				console.error(e);
-			}
-			fltl.appendChild(tile);
+      d = createDivision(
+        ["list_match_time"],
+        timeSince(new Date(match.date)) + " ago."
+      );
+      fcb.appendChild(d);
 
-			d = createDivision(["list_deck_name"], match.set+" draft");
-			flt.appendChild(d);
+      d = createDivision(["list_match_replay"], "See replay");
+      fct.appendChild(d);
 
-			d = createDivision(["list_match_time"], timeSince(new Date(match.date))+" ago.");
-			fcb.appendChild(d);
+      d = createDivision(["list_draft_share", match.id + "dr"]);
+      flr.appendChild(d);
+    }
 
-			d = createDivision(["list_match_replay"], "See replay");
-			fct.appendChild(d);
+    var fldel = createDivision(["flex_item", match.id + "_del", "delete_item"]);
 
-			d = createDivision(["list_draft_share", match.id+'dr']);
-			flr.appendChild(d);
+    div.appendChild(fltl);
+    div.appendChild(fll);
+    div.appendChild(flc);
+    div.appendChild(flr);
+    div.appendChild(fldel);
 
-		}
+    historyColumn.appendChild(div);
 
-		var fldel = createDivision(["flex_item", match.id+"_del", "delete_item"]);
+    if (match.type == "draft") {
+      addShare(match);
+    }
+    deleteMatch(match);
+    addHover(match, tileGrpid);
+  }
 
-		div.appendChild(fltl);
-		div.appendChild(fll);
-		div.appendChild(flc);
-		div.appendChild(flr);
-		div.appendChild(fldel);
+  $(this).off();
+  $("#history_column").on("scroll", function() {
+    if (
+      Math.round($(this).scrollTop() + $(this).innerHeight()) >=
+      $(this)[0].scrollHeight
+    ) {
+      open_history_tab(20);
+    }
+  });
 
-		historyColumn.appendChild(div);
+  $(".delete_item").hover(
+    function() {
+      // in
+      $(this).css("width", "32px");
+    },
+    function() {
+      // out
+      $(this).css("width", "4px");
+    }
+  );
 
-		if (match.type == "draft") {
-			addShare(match);
-		}
-		deleteMatch(match);
-		addHover(match, tileGrpid);
-	}
-
-	$(this).off();
-	$("#history_column").on('scroll', function() {
-		if (Math.round($(this).scrollTop() + $(this).innerHeight()) >= $(this)[0].scrollHeight) {
-			open_history_tab(20);
-		}
-	})
-
-	$('.delete_item').hover(function() {
-			// in
-			$(this).css('width', '32px');
-		}, function() {
-			// out
-			$(this).css('width', '4px');
-		}
-	);
-
-	//loadHistory = actuallyLoaded;
+  //loadHistory = actuallyLoaded;
 }
 
 function formatPercent(percent, precision) {
-	// Utility function: converts a number to rounded percent
-	// converts number to percent
-	// 0.333333 -> 33%
-	// 20 -> 2000%
-	precision = precision || 0;
-	return (100 * percent).toFixed(precision);
+  // Utility function: converts a number to rounded percent
+  // converts number to percent
+  // 0.333333 -> 33%
+  // 20 -> 2000%
+  precision = precision || 0;
+  return (100 * percent).toFixed(precision);
 }
 
 function renderRanksStats(container) {
-	/*
+  /*
 		globals used:
 			viewingLimitSeason
 			matchesHistory
@@ -371,418 +397,478 @@ function renderRanksStats(container) {
 			rankLimited
 			rankConstructed
 	*/
-	container.innerHTML = '';
+  container.innerHTML = "";
 
-	let seasonName = !viewingLimitSeason ? 'constructed' : 'limited';
-	let switchSeasonName = viewingLimitSeason ? 'constructed' : 'limited';
+  let seasonName = !viewingLimitSeason ? "constructed" : "limited";
+  let switchSeasonName = viewingLimitSeason ? "constructed" : "limited";
 
-	let seasonToggleButton = createDivision(
-		["button_simple", "button_thin", "season_toggle"],
-		`Show ${switchSeasonName}`
-	);
-	seasonToggleButton.style.marginTop = "32px !important;";
-	
-	container.appendChild(seasonToggleButton);
+  let seasonToggleButton = createDivision(
+    ["button_simple", "button_thin", "season_toggle"],
+    `Show ${switchSeasonName}`
+  );
+  seasonToggleButton.style.marginTop = "32px !important;";
 
-	var title = createDivision(
-		["ranks_history_title"],
-		`Current ${seasonName} season:`);
-	container.appendChild(title);
+  container.appendChild(seasonToggleButton);
 
-	// Add ranks matchup history here
-	let rc = matchesHistory.rankwinrates[seasonName];
-	var lastWinrate; // used later
+  var title = createDivision(
+    ["ranks_history_title"],
+    `Current ${seasonName} season:`
+  );
+  container.appendChild(title);
 
-	Object.values(rc).forEach(object => {
-		// object is either rank win/loss data OR metadata
-		// See function calculateRankWins() in background.js
-		var rankName = object.r;
-		var totalGames = object.t;
-		var wonGames = object.w;
-		var lostGames = object.l;
+  // Add ranks matchup history here
+  let rc = matchesHistory.rankwinrates[seasonName];
+  var lastWinrate; // used later
 
-		if (!rankName || totalGames <= 0) {
-			// this is a not winrate object OR
-			// we have no data for this rank so don't display it
-			return; 
-		}
+  Object.values(rc).forEach(object => {
+    // object is either rank win/loss data OR metadata
+    // See function calculateRankWins() in background.js
+    var rankName = object.r;
+    var totalGames = object.t;
+    var wonGames = object.w;
+    var lostGames = object.l;
 
-		var rowContainer = createDivision(["flex_item"]);
-		//rowContainer.style.flexDirection = "column";
-		rowContainer.style.justifyContent = "center";
+    if (!rankName || totalGames <= 0) {
+      // this is a not winrate object OR
+      // we have no data for this rank so don't display it
+      return;
+    }
 
-		var versusPrefix = createDivision(["ranks_history_title"], "Vs.");
-		rowContainer.appendChild(versusPrefix);
+    var rowContainer = createDivision(["flex_item"]);
+    //rowContainer.style.flexDirection = "column";
+    rowContainer.style.justifyContent = "center";
 
-		var rankBadge = createDivision(["ranks_history_badge"]);
-		rankBadge.title = rankName;
-		rankBadge.style.backgroundPosition = `${get_rank_index(rankName, 1) * -48}px 0px`;
-		rowContainer.appendChild(rankBadge);
+    var versusPrefix = createDivision(["ranks_history_title"], "Vs.");
+    rowContainer.appendChild(versusPrefix);
 
-		var rankSpecificWinrate = createDivision(
-			["ranks_history_title"], 
-			`${wonGames}:${lostGames} (${formatPercent(wonGames / totalGames)}%)`);
-	
-		// let sampleSize = `Sample size: ${totalGames}`;
-		// rankSpecificWinrate.title = sampleSize;
+    var rankBadge = createDivision(["ranks_history_badge"]);
+    rankBadge.title = rankName;
+    rankBadge.style.backgroundPosition = `${get_rank_index(rankName, 1) *
+      -48}px 0px`;
+    rowContainer.appendChild(rankBadge);
 
-		rowContainer.appendChild(rankSpecificWinrate);
+    var rankSpecificWinrate = createDivision(
+      ["ranks_history_title"],
+      `${wonGames}:${lostGames} (${formatPercent(wonGames / totalGames)}%)`
+    );
 
-		container.appendChild(rowContainer);
+    // let sampleSize = `Sample size: ${totalGames}`;
+    // rankSpecificWinrate.title = sampleSize;
 
-		lastWinrate = wonGames / totalGames;
-	});
+    rowContainer.appendChild(rankSpecificWinrate);
 
-	let totalWon = rc.total.w;
-	let totalLost = rc.total.l;
-	let totalWinrate = totalWon / rc.total.t;
-	title = createDivision(["ranks_history_title"], `Total: ${totalWon}:${totalLost} (${formatPercent(totalWinrate)}%)`);
-	// let sampleSize = `Sample size: ${rc.total.t}`;
-	// title.title = sampleSize;
-	container.appendChild(title);
+    container.appendChild(rowContainer);
 
+    lastWinrate = wonGames / totalGames;
+  });
 
-	let currentRank = viewingLimitSeason ? rankLimited : rankConstructed;
-	let expected = getStepsUntilNextRank(viewingLimitSeason, lastWinrate);
+  let totalWon = rc.total.w;
+  let totalLost = rc.total.l;
+  let totalWinrate = totalWon / rc.total.t;
+  title = createDivision(
+    ["ranks_history_title"],
+    `Total: ${totalWon}:${totalLost} (${formatPercent(totalWinrate)}%)`
+  );
+  // let sampleSize = `Sample size: ${rc.total.t}`;
+  // title.title = sampleSize;
+  container.appendChild(title);
 
-	title = createDivision(
-		["ranks_history_title"], 
-		`Games until ${getNextRank(currentRank)}: ${expected}`);
-	title.title = `Using ${formatPercent(lastWinrate)}% winrate`;
-	container.appendChild(title);
+  let currentRank = viewingLimitSeason ? rankLimited : rankConstructed;
+  let expected = getStepsUntilNextRank(viewingLimitSeason, lastWinrate);
 
-	seasonToggleButton.addEventListener('click', (event) => {
-		viewingLimitSeason = !viewingLimitSeason;
-		renderRanksStats(container);
-	});
+  title = createDivision(
+    ["ranks_history_title"],
+    `Games until ${getNextRank(currentRank)}: ${expected}`
+  );
+  title.title = `Using ${formatPercent(lastWinrate)}% winrate`;
+  container.appendChild(title);
+
+  seasonToggleButton.addEventListener("click", event => {
+    viewingLimitSeason = !viewingLimitSeason;
+    renderRanksStats(container);
+  });
 }
 
 function createTag(tag, div, showClose = true) {
-	let tagCol = getTagColor(tag);
-	let iid = makeId(6);
-	let t = createDivision(['deck_tag', iid], (tag == null ? 'Set archetype': tag));
-	t.style.backgroundColor = tagCol;
+  let tagCol = getTagColor(tag);
+  let iid = makeId(6);
+  let t = createDivision(
+    ["deck_tag", iid],
+    tag == null ? "Set archetype" : tag
+  );
+  t.style.backgroundColor = tagCol;
 
-	if (tag) {
-		$(t).on('click', function(e) {
-			var colorPick = $(t);
-			colorPick.spectrum({
-				showInitial: true,
-				showAlpha: false,
-				showButtons: false
-			});
-			colorPick.spectrum("set", tagCol);
-			colorPick.spectrum("show");
+  if (tag) {
+    $(t).on("click", function(e) {
+      var colorPick = $(t);
+      colorPick.spectrum({
+        showInitial: true,
+        showAlpha: false,
+        showButtons: false
+      });
+      colorPick.spectrum("set", tagCol);
+      colorPick.spectrum("show");
 
-			colorPick.on('move.spectrum', function(e, color) {
-				let tag = $(this).text();
-				let col = color.toRgbString();
-				ipc_send("edit_tag", {tag: tag, color: col});
-				tags_colors[tag] = col;
+      colorPick.on("move.spectrum", function(e, color) {
+        let tag = $(this).text();
+        let col = color.toRgbString();
+        ipc_send("edit_tag", { tag: tag, color: col });
+        tags_colors[tag] = col;
 
-				$('.deck_tag').each((index, obj) => {
-					let tag = $(obj).text();
-					$(obj).css("background-color", tags_colors[tag])
-				});
-			});
+        $(".deck_tag").each((index, obj) => {
+          let tag = $(obj).text();
+          $(obj).css("background-color", tags_colors[tag]);
+        });
+      });
 
-			colorPick.on('hide.spectrum', () => {
-				colorPick.spectrum("destroy");
-			});
-			e.stopPropagation();
-		});
+      colorPick.on("hide.spectrum", () => {
+        colorPick.spectrum("destroy");
+      });
+      e.stopPropagation();
+    });
+  } else {
+    $(t).on("click", function(e) {
+      if ($(this).html() == "Set archetype") {
+        t.innerHTML = "";
+        let input = $(
+          `<input style="min-width: 120px;" id="${iid}" size="1" autocomplete="off" type="text" onFocus="this.select()" class="deck_tag_input"></input>`
+        );
+        let ac = $('<div class="autocomplete"></div>');
+        input.appendTo(ac);
+        $(t).prepend(ac);
 
-	}
-	else {
-		$(t).on('click', function(e) {
-			if ($(this).html() == "Set archetype") {
-				t.innerHTML = '';
-				let input = $(`<input style="min-width: 120px;" id="${iid}" size="1" autocomplete="off" type="text" onFocus="this.select()" class="deck_tag_input"></input>`);
-				let ac = $('<div class="autocomplete"></div>');
-				input.appendTo(ac);
-				$(t).prepend(ac);
+        input[0].focus();
+        input[0].select();
 
-				input[0].focus();
-				input[0].select();
+        let options = jQuery.data($(this)[0], "autocomplete");
+        autocomplete(input[0], options, () => {
+          input[0].focus();
+          input[0].select();
+          input[0].dispatchEvent(new KeyboardEvent("keydown", { keyCode: 13 }));
+        });
+        input.keydown(function(e) {
+          setTimeout(() => {
+            input.css("width", $(this).val().length * 8);
+          }, 10);
+          if (e.keyCode == 13) {
+            let val = $(this).val();
+            let matchid = jQuery.data(
+              $(this)
+                .parent()
+                .parent()[0],
+              "match"
+            );
+            let masterdiv = $(this)
+              .parent()
+              .parent()
+              .parent()[0];
+            addTag(matchid, val, masterdiv);
 
-				let options = jQuery.data($(this)[0], "autocomplete");
-				autocomplete(input[0], options, () => {
-					input[0].focus();
-					input[0].select();
-					input[0].dispatchEvent(new KeyboardEvent('keydown', { keyCode: 13 }));
-				});
-				input.keydown(function(e) {
-					setTimeout(() => {
-						input.css("width", $(this).val().length*8);
-					}, 10);
-					if (e.keyCode == 13) {
-						let val = $(this).val();
-						let matchid = jQuery.data($(this).parent().parent()[0], "match");
-						let masterdiv = $(this).parent().parent().parent()[0];
-						addTag(matchid, val, masterdiv);
-						
-						$(this).parent().parent().remove();
-					}
-				});
-			}
-			e.stopPropagation();
-		});
-	}
+            $(this)
+              .parent()
+              .parent()
+              .remove();
+          }
+        });
+      }
+      e.stopPropagation();
+    });
+  }
 
-	if (showClose) {
-		let tc = createDivision(['deck_tag_close']);
-		t.appendChild(tc);
+  if (showClose) {
+    let tc = createDivision(["deck_tag_close"]);
+    t.appendChild(tc);
 
-		$(tc).on('click', function(e) {
-			e.stopPropagation();
-			let matchid = jQuery.data($(this).parent()[0], "match");
-			let options = jQuery.data($(this).parent()[0], "autocomplete");
-			let val = $(this).parent().text();
+    $(tc).on("click", function(e) {
+      e.stopPropagation();
+      let matchid = jQuery.data($(this).parent()[0], "match");
+      let options = jQuery.data($(this).parent()[0], "autocomplete");
+      let val = $(this)
+        .parent()
+        .text();
 
-			deleteTag(matchid, val);
+      deleteTag(matchid, val);
 
-			$(this).css("width", "0px");
-			$(this).css("margin", "0px");
-			$(this).parent().css("opacity", 0);
-			$(this).parent().css("font-size", 0);
-			$(this).parent().css("margin-right", "0px");
-			$(this).parent().css("color", $(this).css("background-color"));
+      $(this).css("width", "0px");
+      $(this).css("margin", "0px");
+      $(this)
+        .parent()
+        .css("opacity", 0);
+      $(this)
+        .parent()
+        .css("font-size", 0);
+      $(this)
+        .parent()
+        .css("margin-right", "0px");
+      $(this)
+        .parent()
+        .css("color", $(this).css("background-color"));
 
-			setTimeout((e) => {
-				$(this).remove();
-			}, 200);
+      setTimeout(e => {
+        $(this).remove();
+      }, 200);
 
-			let t = createTag(null, $(this).parent().parent()[0], false);
-			jQuery.data(t, "match", matchid);
-			jQuery.data(t, "autocomplete", options);
-		});
-	}
-	else {
-		t.style.paddingRight = "12px";
-	}
-	div.appendChild(t);
-	
-	return t;
-} 
+      let t = createTag(
+        null,
+        $(this)
+          .parent()
+          .parent()[0],
+        false
+      );
+      jQuery.data(t, "match", matchid);
+      jQuery.data(t, "autocomplete", options);
+    });
+  } else {
+    t.style.paddingRight = "12px";
+  }
+  div.appendChild(t);
+
+  return t;
+}
 
 function addTag(matchid, tag, div) {
-	let match = matchesHistory[matchid];
-	if (match.tags) {
-		if (match.tags.indexOf(tag) == -1) {
-			match.tags.push(tag);
-		}
-	}
-	else {
-		match.tags = [tag];
-	}
+  let match = matchesHistory[matchid];
+  if (match.tags) {
+    if (match.tags.indexOf(tag) == -1) {
+      match.tags.push(tag);
+    }
+  } else {
+    match.tags = [tag];
+  }
 
-	let obj = {match: matchid, name: tag};
-	ipc_send("add_history_tag", obj);
+  let obj = { match: matchid, name: tag };
+  ipc_send("add_history_tag", obj);
 
-	let t = createTag(tag, div);
-	jQuery.data(t, "match", matchid);
+  let t = createTag(tag, div);
+  jQuery.data(t, "match", matchid);
 }
 
 function deleteTag(matchid, tag) {
-	let match = matchesHistory[matchid];
+  let match = matchesHistory[matchid];
 
-	if (match.tags) {
-		let ind = match.tags.indexOf(tag);
-		if (ind !== -1) {
-			match.tags.splice(ind, 1);
-		}
-	}
+  if (match.tags) {
+    let ind = match.tags.indexOf(tag);
+    if (ind !== -1) {
+      match.tags.splice(ind, 1);
+    }
+  }
 
-	let obj = {match: matchid, name: tag};
-	ipc_send("delete_history_tag", obj);
+  let obj = { match: matchid, name: tag };
+  ipc_send("delete_history_tag", obj);
 }
 
 function filterHistory(filter) {
-	filterEvent = filter;
-	open_history_tab(0);
+  filterEvent = filter;
+  open_history_tab(0);
 }
 
-
 function getNextRank(currentRank) {
-	/*
+  /*
 		Globals used: RANKS
 	*/
-	var rankIndex = RANKS.indexOf(currentRank);
-	if (rankIndex < RANKS.length - 1) {
-		return RANKS[rankIndex + 1];
-	} else {
-		return undefined;
-	}
+  var rankIndex = RANKS.indexOf(currentRank);
+  if (rankIndex < RANKS.length - 1) {
+    return RANKS[rankIndex + 1];
+  } else {
+    return undefined;
+  }
 }
 
 function getStepsUntilNextRank(mode, winrate) {
-	let cr = rankLimited;
-	let cs = rankLimitedStep
-	let ct = rankLimitedTier;
-	if (!mode) {
-		cr = rankConstructed;
-		cs = rankConstructedStep;
-		ct = rankConstructedTier;
-	}
+  let cr = rankLimited;
+  let cs = rankLimitedStep;
+  let ct = rankLimitedTier;
+  if (!mode) {
+    cr = rankConstructed;
+    cs = rankConstructedStep;
+    ct = rankConstructedTier;
+  }
 
-	let st = 1;
-	let stw = 1;
-	let stl = 0;
-	if (cr == "Bronze")		{st = 4; stw = 2; stl = 0;}
-	if (cr == "Silver")		{st = 5; stw = 2; stl = 1;}
-	if (cr == "Gold")		{st = 6; stw = 1; stl = 1;}
-	if (cr == "Platinum")	{st = 7; stw = 1; stl = 1;}
-	if (cr == "Diamond")	{st = 1; stw = 1; stl = 1;}
+  let st = 1;
+  let stw = 1;
+  let stl = 0;
+  if (cr == "Bronze") {
+    st = 4;
+    stw = 2;
+    stl = 0;
+  }
+  if (cr == "Silver") {
+    st = 5;
+    stw = 2;
+    stl = 1;
+  }
+  if (cr == "Gold") {
+    st = 6;
+    stw = 1;
+    stl = 1;
+  }
+  if (cr == "Platinum") {
+    st = 7;
+    stw = 1;
+    stl = 1;
+  }
+  if (cr == "Diamond") {
+    st = 1;
+    stw = 1;
+    stl = 1;
+  }
 
-	let stepsNeeded = (st * ct) - cs;
+  let stepsNeeded = st * ct - cs;
 
-	if (winrate <= 0.5)	return "&#x221e";
-	let expected = 0;
-	let n = 0;
-	console.log("stepsNeeded", stepsNeeded);
-	while (expected <= stepsNeeded) {
-		expected = ((n * winrate) * stw) - (n * (1 - winrate) * stl);
-		//console.log("stepsNeeded:", stepsNeeded, "expected:", expected, "N:", n);
-		n++;
-	}
+  if (winrate <= 0.5) return "&#x221e";
+  let expected = 0;
+  let n = 0;
+  console.log("stepsNeeded", stepsNeeded);
+  while (expected <= stepsNeeded) {
+    expected = n * winrate * stw - n * (1 - winrate) * stl;
+    //console.log("stepsNeeded:", stepsNeeded, "expected:", expected, "N:", n);
+    n++;
+  }
 
-	return '~'+n;
+  return "~" + n;
 }
 
 function addShare(_match) {
-	$('.'+_match.id+'dr').on('click', function(e) {
-		currentId = _match.id;
-		e.stopPropagation();
-		$('.dialog_wrapper').css('opacity', 1);
-		$('.dialog_wrapper').css('pointer-events', 'all');
-		$('.dialog_wrapper').show();
-		$('.dialog').css('width', '500px');
-		$('.dialog').css('height', '200px');
-		$('.dialog').css('top', 'calc(50% - 100px)');
+  $("." + _match.id + "dr").on("click", function(e) {
+    currentId = _match.id;
+    e.stopPropagation();
+    $(".dialog_wrapper").css("opacity", 1);
+    $(".dialog_wrapper").css("pointer-events", "all");
+    $(".dialog_wrapper").show();
+    $(".dialog").css("width", "500px");
+    $(".dialog").css("height", "200px");
+    $(".dialog").css("top", "calc(50% - 100px)");
 
-		$('.dialog_wrapper').on('click', function() {
-			console.log('.dialog_wrapper on click')
-			//e.stopPropagation();
-			$('.dialog_wrapper').css('opacity', 0);
-			$('.dialog_wrapper').css('pointer-events', 'none');
-			setTimeout(function() {
-				$('.dialog_wrapper').hide();
-				$('.dialog').css('width', '400px');
-				$('.dialog').css('height', '160px');
-				$('.dialog').css('top', 'calc(50% - 80px)');
-			}, 250);
-		});
+    $(".dialog_wrapper").on("click", function() {
+      console.log(".dialog_wrapper on click");
+      //e.stopPropagation();
+      $(".dialog_wrapper").css("opacity", 0);
+      $(".dialog_wrapper").css("pointer-events", "none");
+      setTimeout(function() {
+        $(".dialog_wrapper").hide();
+        $(".dialog").css("width", "400px");
+        $(".dialog").css("height", "160px");
+        $(".dialog").css("top", "calc(50% - 80px)");
+      }, 250);
+    });
 
-		$('.dialog').on('click', function(e) {
-			e.stopPropagation();
-			console.log('.dialog on click')
-		});
+    $(".dialog").on("click", function(e) {
+      e.stopPropagation();
+      console.log(".dialog on click");
+    });
 
-		var dialog = $('.dialog');
-		dialog.html('');
-		var cont = $('<div class="dialog_container"></div>');
+    var dialog = $(".dialog");
+    dialog.html("");
+    var cont = $('<div class="dialog_container"></div>');
 
-		cont.append('<div class="share_title">Link For sharing:</div>');
-		var icd = $('<div class="share_input_container"></div>');
-		var but = $('<div class="button_simple">Copy</div>');
-		var sin = $('<input id="share_input" onClick="this.setSelectionRange(0, this.value.length)" autofocus autocomplete="off" value="" />');
+    cont.append('<div class="share_title">Link For sharing:</div>');
+    var icd = $('<div class="share_input_container"></div>');
+    var but = $('<div class="button_simple">Copy</div>');
+    var sin = $(
+      '<input id="share_input" onClick="this.setSelectionRange(0, this.value.length)" autofocus autocomplete="off" value="" />'
+    );
 
-		sin.appendTo(icd);
-		but.appendTo(icd);
-		icd.appendTo(cont);
+    sin.appendTo(icd);
+    but.appendTo(icd);
+    icd.appendTo(cont);
 
-		cont.append('<div class="share_subtitle"><i>Expires in: </i></div>');
-		cont.appendTo(dialog);
+    cont.append('<div class="share_subtitle"><i>Expires in: </i></div>');
+    cont.appendTo(dialog);
 
-		var select = $('<select id="expire_select"></select>');
-		var sortby = ['One day', 'One week', 'One month', 'Never'];
-		for (var i=0; i < sortby.length; i++) {
-			select.append('<option value="'+sortby[i]+'">'+sortby[i]+'</option>');
-		}
-		select.appendTo(cont);
-		selectAdd(select, draftShareLink);
+    var select = $('<select id="expire_select"></select>');
+    var sortby = ["One day", "One week", "One month", "Never"];
+    for (var i = 0; i < sortby.length; i++) {
+      select.append(
+        '<option value="' + sortby[i] + '">' + sortby[i] + "</option>"
+      );
+    }
+    select.appendTo(cont);
+    selectAdd(select, draftShareLink);
 
-		but.click(function () {
-			ipc_send('set_clipboard', document.getElementById("share_input").value);
-		});
-	});
+    but.click(function() {
+      ipc_send("set_clipboard", document.getElementById("share_input").value);
+    });
+  });
 }
 
 function draftShareLink() {
-	var shareExpire = document.getElementById("expire_select").value;
-	var expire = 0;
-	switch (shareExpire) {
-		case 'One day': 	expire = 0; break;
-		case 'One week': 	expire = 1; break;
-		case 'One month': 	expire = 2; break;
-		case 'Never': 		expire = -1; break;
-		default: 			expire = 0; break;
-
-	}
-	var obj = {
-		expire: expire,
-		id: currentId
-	}
-	ipc_send('request_draft_link', obj);
+  var shareExpire = document.getElementById("expire_select").value;
+  var expire = 0;
+  switch (shareExpire) {
+    case "One day":
+      expire = 0;
+      break;
+    case "One week":
+      expire = 1;
+      break;
+    case "One month":
+      expire = 2;
+      break;
+    case "Never":
+      expire = -1;
+      break;
+    default:
+      expire = 0;
+      break;
+  }
+  var obj = {
+    expire: expire,
+    id: currentId
+  };
+  ipc_send("request_draft_link", obj);
 }
 
 function deleteMatch(_match) {
-	$('.'+_match.id+'_del').on('click', function(e) {
-		currentId = _match.id;
-		e.stopPropagation();
-		ipc_send('delete_match', currentId);
-		$('.'+currentId).css('height', "0px");
-	});
+  $("." + _match.id + "_del").on("click", function(e) {
+    currentId = _match.id;
+    e.stopPropagation();
+    ipc_send("delete_match", currentId);
+    $("." + currentId).css("height", "0px");
+  });
 }
 
 function sort_history() {
-	matchesHistory.matches.sort(compare_matches); 
+  matchesHistory.matches.sort(compare_matches);
 
-	matchesHistory.matches.forEach(function(mid) {
-		var match = matchesHistory[mid];
+  matchesHistory.matches.forEach(function(mid) {
+    var match = matchesHistory[mid];
 
-		if (mid != null && match != undefined) {
-			if (match.type != "draft" && match.type != "Event") {
-				try {
-					if (match.playerDeck.mainDeck == undefined) {
-						match.playerDeck = JSON.parse('{"deckTileId":67003,"description":null,"format":"Standard","colors":[],"id":"00000000-0000-0000-0000-000000000000","isValid":false,"lastUpdated":"2018-05-31T00:06:29.7456958","lockedForEdit":false,"lockedForUse":false,"mainDeck":[],"name":"Undefined","resourceId":"00000000-0000-0000-0000-000000000000","sideboard":[]}');
-					}
-					else {
-						match.playerDeck.colors = get_deck_colors(match.playerDeck);
-					}
-					match.playerDeck.mainDeck.sort(compare_cards);
-					match.oppDeck.colors = get_deck_colors(match.oppDeck);
-					match.oppDeck.mainDeck.sort(compare_cards);
-				} catch (e) {
-					console.log(e, match);
-				}
-			}
-		}
-	});
+    if (mid != null && match != undefined) {
+      if (match.type != "draft" && match.type != "Event") {
+        try {
+          if (match.playerDeck.mainDeck == undefined) {
+            match.playerDeck = JSON.parse(
+              '{"deckTileId":67003,"description":null,"format":"Standard","colors":[],"id":"00000000-0000-0000-0000-000000000000","isValid":false,"lastUpdated":"2018-05-31T00:06:29.7456958","lockedForEdit":false,"lockedForUse":false,"mainDeck":[],"name":"Undefined","resourceId":"00000000-0000-0000-0000-000000000000","sideboard":[]}'
+            );
+          } else {
+            match.playerDeck.colors = get_deck_colors(match.playerDeck);
+          }
+          match.playerDeck.mainDeck.sort(compare_cards);
+          match.oppDeck.colors = get_deck_colors(match.oppDeck);
+          match.oppDeck.mainDeck.sort(compare_cards);
+        } catch (e) {
+          console.log(e, match);
+        }
+      }
+    }
+  });
 }
 
 function compare_matches(a, b) {
-	if (a == undefined)
-		return -1;
-	if (b == undefined)
-		return 1;
+  if (a == undefined) return -1;
+  if (b == undefined) return 1;
 
-	a = matchesHistory[a];
-	b = matchesHistory[b];
+  a = matchesHistory[a];
+  b = matchesHistory[b];
 
-	if (a == undefined)
-		return -1;
-	if (b == undefined)
-		return 1;
+  if (a == undefined) return -1;
+  if (b == undefined) return 1;
 
-	a = Date.parse(a.date);
-	b = Date.parse(b.date);
-	if (a < b)	return 1;
-	if (a > b)	return -1;
-	return 0;
+  a = Date.parse(a.date);
+  b = Date.parse(b.date);
+  if (a < b) return 1;
+  if (a > b) return -1;
+  return 0;
 }
 
-
-module.exports = {open_history_tab: open_history_tab};
-
-
+module.exports = { open_history_tab: open_history_tab };
