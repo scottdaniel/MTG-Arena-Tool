@@ -36,6 +36,7 @@ let playerSeat = 0;
 let oppName = "";
 let turnPriority = 0;
 let soundPriority = false;
+let soundPriorityVolume = 1;
 let overlayAlpha = 1;
 let overlayAlphaBack = 1;
 let oddsSampleSize = 1;
@@ -59,11 +60,6 @@ let mana = {
   7: "",
   8: "x"
 };
-
-const Howler = require("howler");
-let sound = new Howl({
-  src: ["../sounds/blip.mp3"]
-});
 
 const TransparencyMouseFix = require("electron-transparency-mouse-fix");
 const fix = new TransparencyMouseFix({
@@ -235,6 +231,7 @@ ipc.on("set_settings", function(event, settings) {
 
   showSideboard = settings.overlay_sideboard;
   soundPriority = settings.sound_priority;
+  soundPriorityVolume = settings.sound_priority_volume;
   $(".top").css("display", "");
   $(".overlay_deckname").css("display", "");
   $(".overlay_deckcolors").css("display", "");
@@ -541,6 +538,10 @@ ipc.on("set_turn", function(
 ) {
   playerSeat = _we;
   if (turnPriority != _priority && _priority == _we && soundPriority) {
+    //		playBlip();
+    let { Howl, Howler } = require("howler");
+    let sound = new Howl({ src: ["../sounds/blip.mp3"] });
+    Howler.volume(soundPriorityVolume);
     sound.play();
   }
   //turnPhase = _phase;

@@ -1970,6 +1970,17 @@ function open_settings(openSection) {
     settings.sound_priority
   );
 
+  var sliderSoundVolume = $('<div class="slidecontainer_settings"></div>');
+  sliderSoundVolume.appendTo(section);
+  var sliderSoundVolumeLabel = $("<label>Volume: </label>");
+  sliderSoundVolumeLabel.appendTo(sliderSoundVolume);
+  var sliderSoundVolumeInput = $(
+    '<input type="range" min="0" max="1" step=".001" value="' +
+      settings.sound_priority_volume +
+      '" class="slider sliderSoundVolume" id="settings_soundpriorityvolume">'
+  );
+  sliderSoundVolumeInput.appendTo(sliderSoundVolume);
+
   var label = $('<label class="but_container_label">Export Format:</label>');
   label.appendTo(section);
   var icd = $('<div class="input_container"></div>');
@@ -2423,6 +2434,16 @@ function open_settings(openSection) {
     overlayScale = parseInt(this.value);
     updateSettings();
   });
+
+  $(".sliderSoundVolume").off();
+
+  $(".sliderSoundVolume").on("click mouseup", function() {
+    let { Howl, Howler } = require("howler");
+    let sound = new Howl({ src: ["../sounds/blip.mp3"] });
+    updateSettings();
+    Howler.volume(settings.sound_priority_volume);
+    sound.play();
+  });
 }
 
 function alphaFromTransparency(transparency) {
@@ -2524,6 +2545,10 @@ function updateSettings() {
     .checked;
   var soundPriority = document.getElementById("settings_soundpriority").checked;
 
+  var soundPriorityVolume = document.getElementById(
+    "settings_soundpriorityvolume"
+  ).value;
+
   var backColor = $(".color_picker")
     .spectrum("get")
     .toRgbString();
@@ -2549,6 +2574,7 @@ function updateSettings() {
   var exportFormat = document.getElementById("settings_export_format").value;
   settings = {
     sound_priority: soundPriority,
+    sound_priority_volume: soundPriorityVolume,
     show_overlay: showOverlay,
     show_overlay_always: showOverlayAlways,
     startup: startup,
