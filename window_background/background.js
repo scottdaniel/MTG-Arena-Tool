@@ -1446,6 +1446,8 @@ function createMatch(arg) {
   }
 
   let str = JSON.stringify(currentDeck);
+
+  currentMatch.player.originalDeck = originalDeck;
   currentMatch.player.deck = JSON.parse(str);
   currentMatch.playerCards = JSON.parse(str);
 
@@ -1532,7 +1534,7 @@ function update_deck(force) {
       ipc_send("set_deck", currentMatch.playerCards, windowOverlay);
     }
     if (overlayDeckMode == 1) {
-      ipc_send("set_deck", originalDeck, windowOverlay);
+      ipc_send("set_deck", currentMatch.player.deck, windowOverlay);
     }
     if (overlayDeckMode == 2) {
       ipc_send("set_deck", currentMatch.playerCards, windowOverlay);
@@ -1675,7 +1677,7 @@ function getOppDeck() {
   //var oppDeck = {mainDeck: [], sideboard : []};
   var doAdd = true;
   currentMatch.opponent.deck = { mainDeck: [], sideboard: [] };
-  //oppDeck.name = currentMatch.opponent.name;
+  currentMatch.opponent.deck.name = currentMatch.opponent.name;
   //console.log("Deck "+currentMatch.opponent.name;);
   Object.keys(currentMatch.gameObjs).forEach(function(key) {
     if (currentMatch.gameObjs[key] != undefined) {
@@ -1865,7 +1867,7 @@ function saveMatch(matchId) {
   };
   match.draws = dr;
   match.eventId = currentMatch.eventId;
-  match.playerDeck = currentMatch.player.deck;
+  match.playerDeck = currentMatch.player.originalDeck;
   match.oppDeck = getOppDeck();
   if (match.oppDeck.archetype && match.oppDeck.archetype !== "-") {
     match.tags = [match.oppDeck.archetype];

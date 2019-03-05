@@ -42,7 +42,7 @@ function onLabelOutLogInfo(entry, json) {
         currentMatch.player.deck.mainDeck.forEach(card => {
           deckDiff[card.id] = card.quantity;
         });
-        originalDeck.mainDeck.forEach(card => {
+        currentMatch.player.originalDeck.mainDeck.forEach(card => {
           deckDiff[card.id] = (deckDiff[card.id] || 0) - card.quantity;
         });
         matchGameStats.forEach((stats, i) => {
