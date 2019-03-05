@@ -561,10 +561,16 @@ ipc.on("set_turn", function(
   }
 });
 
-function setDraft(packN = -1, pickN = -1) {
-  if (packN == -1 || pickN == -1) {
+let packN;
+let pickN;
+
+function setDraft(_packN = -1, _pickN = -1) {
+  if (_packN == -1 || _pickN == -1) {
     packN = currentDraft.packNumber;
     pickN = currentDraft.pickNumber;
+  } else {
+    packN = _packN;
+    pickN = _pickN;
   }
   $(".overlay_decklist").html("");
   $(".overlay_deckcolors").html("");
@@ -587,8 +593,12 @@ function setDraft(packN = -1, pickN = -1) {
   } else if (draftMode == 1) {
     let key = "pack_" + packN + "pick_" + pickN;
     let draftPack = currentDraft[key];
+    let pick = "";
     if (!draftPack) {
       draftPack = currentDraft.currentPack;
+    } else {
+      pick = draftPack.pick;
+      draftPack = draftPack.pack;
     }
 
     console.log("Key", key, currentDraft);
@@ -610,6 +620,9 @@ function setDraft(packN = -1, pickN = -1) {
 
       var od = $(".overlay_decklist");
       var cont = $('<div class="overlay_card_quantity"></div>');
+      if (grpId == pick) {
+        cont.css("background-color", "rgba(250, 229, 210, 0.66)");
+      }
 
       for (let i = 0; i < 4; i++) {
         if (i < cards[grpId]) {
@@ -624,7 +637,10 @@ function setDraft(packN = -1, pickN = -1) {
       }
 
       cont.appendTo(od);
-      addCardTile(grpId, "a", draftRanks[rank], od);
+      let tile = addCardTile(grpId, "a", draftRanks[rank], od);
+      if (grpId == pick) {
+        tile.css("background-color", "rgba(250, 229, 210, 0.66)");
+      }
     });
   }
 }
@@ -706,21 +722,43 @@ $(document).ready(function() {
 
   //
   $(".draft_prev").click(function() {
-    changedMode = true;
-    draftMode -= 1;
-    if (draftMode < 0) {
-      draftMode = 1;
+    //changedMode = true;
+    //draftMode -= 1;
+    //if (draftMode < 0) {
+    //  draftMode = 1;
+    //}
+    pickN -= 1;
+    if (pickN < 0) {
+      pickN = 13;
+      packN -= 1;
     }
-    setDraft();
+    if (packN < 0) {
+      pickN = currentDraft.pickNumber;
+      packN = currentDraft.packNumber;
+    }
+
+    setDraft(packN, pickN);
   });
   //
   $(".draft_next").click(function() {
-    changedMode = true;
-    draftMode += 1;
-    if (draftMode > 1) {
-      draftMode = 0;
+    //changedMode = true;
+    //draftMode += 1;
+    //if (draftMode > 1) {
+    //  draftMode = 0;
+    //}
+    pickN += 1;
+    //let key = "pack_" + packN + "pick_" + pickN;
+
+    if (pickN > currentDraft.pickNumber && packN == currentDraft.packNumber) {
+      pickN = 0;
+      packN = 0;
     }
-    setDraft();
+
+    if (pickN == currentDraft.pickNumber && packN == currentDraft.packNumber) {
+      setDraft();
+    } else {
+      setDraft(packN, pickN);
+    }
   });
 
   //
