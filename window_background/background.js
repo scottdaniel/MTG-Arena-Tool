@@ -139,7 +139,7 @@ var currentMatchDefault = {
   game: 0,
   priorityTimers: [0, 0, 0, 0, 0],
   lastPriorityChangeTime: 0,
-  results: {},
+  results: [],
   zones: {},
   gameObjs: {},
   turn: {},
