@@ -1132,7 +1132,7 @@ function decodePayload(json) {
   const messages = require("./messages_pb");
 
   const msgType = json.clientToMatchServiceMessageType.split("_")[1],
-    binaryMsg = new Buffer(json.payload, "base64");
+    binaryMsg = new Buffer.from(json.payload, "base64");
 
   try {
     let msgDeserialiser;
