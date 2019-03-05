@@ -394,99 +394,92 @@ function renderRanksStats(container) {
 			getStepsUntilNextRank
 			createButton
 			formatPercent
-			rankLimited
-			rankConstructed
+			playerData
 	*/
-  container.innerHTML = "";
+	container.innerHTML = '';
 
-  let seasonName = !viewingLimitSeason ? "constructed" : "limited";
-  let switchSeasonName = viewingLimitSeason ? "constructed" : "limited";
+	let seasonName = !viewingLimitSeason ? 'constructed' : 'limited';
+	let switchSeasonName = viewingLimitSeason ? 'constructed' : 'limited';
 
-  let seasonToggleButton = createDivision(
-    ["button_simple", "button_thin", "season_toggle"],
-    `Show ${switchSeasonName}`
-  );
-  seasonToggleButton.style.marginTop = "32px !important;";
+	let seasonToggleButton = createDivision(
+		["button_simple", "button_thin", "season_toggle"],
+		`Show ${switchSeasonName}`
+	);
+	seasonToggleButton.style.marginTop = "32px !important;";
+	
+	container.appendChild(seasonToggleButton);
 
-  container.appendChild(seasonToggleButton);
+	var title = createDivision(
+		["ranks_history_title"],
+		`Current ${seasonName} season:`);
+	container.appendChild(title);
 
-  var title = createDivision(
-    ["ranks_history_title"],
-    `Current ${seasonName} season:`
-  );
-  container.appendChild(title);
+	// Add ranks matchup history here
+	let rc = matchesHistory.rankwinrates[seasonName];
+	var lastWinrate; // used later
 
-  // Add ranks matchup history here
-  let rc = matchesHistory.rankwinrates[seasonName];
-  var lastWinrate; // used later
+	Object.values(rc).forEach(object => {
+		// object is either rank win/loss data OR metadata
+		// See function calculateRankWins() in background.js
+		var rankName = object.r;
+		var totalGames = object.t;
+		var wonGames = object.w;
+		var lostGames = object.l;
 
-  Object.values(rc).forEach(object => {
-    // object is either rank win/loss data OR metadata
-    // See function calculateRankWins() in background.js
-    var rankName = object.r;
-    var totalGames = object.t;
-    var wonGames = object.w;
-    var lostGames = object.l;
+		if (!rankName || totalGames <= 0) {
+			// this is a not winrate object OR
+			// we have no data for this rank so don't display it
+			return; 
+		}
 
-    if (!rankName || totalGames <= 0) {
-      // this is a not winrate object OR
-      // we have no data for this rank so don't display it
-      return;
-    }
+		var rowContainer = createDivision(["flex_item"]);
+		//rowContainer.style.flexDirection = "column";
+		rowContainer.style.justifyContent = "center";
 
-    var rowContainer = createDivision(["flex_item"]);
-    //rowContainer.style.flexDirection = "column";
-    rowContainer.style.justifyContent = "center";
+		var versusPrefix = createDivision(["ranks_history_title"], "Vs.");
+		rowContainer.appendChild(versusPrefix);
 
-    var versusPrefix = createDivision(["ranks_history_title"], "Vs.");
-    rowContainer.appendChild(versusPrefix);
+		var rankBadge = createDivision(["ranks_history_badge"]);
+		rankBadge.title = rankName;
+		rankBadge.style.backgroundPosition = `${get_rank_index(rankName, 1) * -48}px 0px`;
+		rowContainer.appendChild(rankBadge);
 
-    var rankBadge = createDivision(["ranks_history_badge"]);
-    rankBadge.title = rankName;
-    rankBadge.style.backgroundPosition = `${get_rank_index(rankName, 1) *
-      -48}px 0px`;
-    rowContainer.appendChild(rankBadge);
+		var rankSpecificWinrate = createDivision(
+			["ranks_history_title"], 
+			`${wonGames}:${lostGames} (${formatPercent(wonGames / totalGames)}%)`);
+	
+		// let sampleSize = `Sample size: ${totalGames}`;
+		// rankSpecificWinrate.title = sampleSize;
 
-    var rankSpecificWinrate = createDivision(
-      ["ranks_history_title"],
-      `${wonGames}:${lostGames} (${formatPercent(wonGames / totalGames)}%)`
-    );
+		rowContainer.appendChild(rankSpecificWinrate);
 
-    // let sampleSize = `Sample size: ${totalGames}`;
-    // rankSpecificWinrate.title = sampleSize;
+		container.appendChild(rowContainer);
 
-    rowContainer.appendChild(rankSpecificWinrate);
+		lastWinrate = wonGames / totalGames;
+	});
 
-    container.appendChild(rowContainer);
+	let totalWon = rc.total.w;
+	let totalLost = rc.total.l;
+	let totalWinrate = totalWon / rc.total.t;
+	title = createDivision(["ranks_history_title"], `Total: ${totalWon}:${totalLost} (${formatPercent(totalWinrate)}%)`);
+	// let sampleSize = `Sample size: ${rc.total.t}`;
+	// title.title = sampleSize;
+	container.appendChild(title);
 
-    lastWinrate = wonGames / totalGames;
-  });
 
-  let totalWon = rc.total.w;
-  let totalLost = rc.total.l;
-  let totalWinrate = totalWon / rc.total.t;
-  title = createDivision(
-    ["ranks_history_title"],
-    `Total: ${totalWon}:${totalLost} (${formatPercent(totalWinrate)}%)`
-  );
-  // let sampleSize = `Sample size: ${rc.total.t}`;
-  // title.title = sampleSize;
-  container.appendChild(title);
+	let currentRank = viewingLimitSeason ? playerData.rank.limited.rank : playerData.rank.constructed.rank;
+	let expected = getStepsUntilNextRank(viewingLimitSeason, lastWinrate);
 
-  let currentRank = viewingLimitSeason ? rankLimited : rankConstructed;
-  let expected = getStepsUntilNextRank(viewingLimitSeason, lastWinrate);
+	title = createDivision(
+		["ranks_history_title"], 
+		`Games until ${getNextRank(currentRank)}: ${expected}`);
+	title.title = `Using ${formatPercent(lastWinrate)}% winrate`;
+	container.appendChild(title);
 
-  title = createDivision(
-    ["ranks_history_title"],
-    `Games until ${getNextRank(currentRank)}: ${expected}`
-  );
-  title.title = `Using ${formatPercent(lastWinrate)}% winrate`;
-  container.appendChild(title);
-
-  seasonToggleButton.addEventListener("click", event => {
-    viewingLimitSeason = !viewingLimitSeason;
-    renderRanksStats(container);
-  });
+	seasonToggleButton.addEventListener('click', (event) => {
+		viewingLimitSeason = !viewingLimitSeason;
+		renderRanksStats(container);
+	});
 }
 
 function createTag(tag, div, showClose = true) {
@@ -675,57 +668,34 @@ function getNextRank(currentRank) {
 }
 
 function getStepsUntilNextRank(mode, winrate) {
-  let cr = rankLimited;
-  let cs = rankLimitedStep;
-  let ct = rankLimitedTier;
-  if (!mode) {
-    cr = rankConstructed;
-    cs = rankConstructedStep;
-    ct = rankConstructedTier;
-  }
+	let rr = mode ? playerData.rank.limited : playerData.rank.constructed;
+	
+	let cr = rr.rank;
+	let cs = rr.step;
+	let ct = rr.tier;
 
-  let st = 1;
-  let stw = 1;
-  let stl = 0;
-  if (cr == "Bronze") {
-    st = 4;
-    stw = 2;
-    stl = 0;
-  }
-  if (cr == "Silver") {
-    st = 5;
-    stw = 2;
-    stl = 1;
-  }
-  if (cr == "Gold") {
-    st = 6;
-    stw = 1;
-    stl = 1;
-  }
-  if (cr == "Platinum") {
-    st = 7;
-    stw = 1;
-    stl = 1;
-  }
-  if (cr == "Diamond") {
-    st = 1;
-    stw = 1;
-    stl = 1;
-  }
+	let st = 1;
+	let stw = 1;
+	let stl = 0;
+	if (cr == "Bronze")		{st = 4; stw = 2; stl = 0;}
+	if (cr == "Silver")		{st = 5; stw = 2; stl = 1;}
+	if (cr == "Gold")		{st = 6; stw = 1; stl = 1;}
+	if (cr == "Platinum")	{st = 7; stw = 1; stl = 1;}
+	if (cr == "Diamond")	{st = 1; stw = 1; stl = 1;}
 
-  let stepsNeeded = st * ct - cs;
+	let stepsNeeded = (st * ct) - cs;
 
-  if (winrate <= 0.5) return "&#x221e";
-  let expected = 0;
-  let n = 0;
-  console.log("stepsNeeded", stepsNeeded);
-  while (expected <= stepsNeeded) {
-    expected = n * winrate * stw - n * (1 - winrate) * stl;
-    //console.log("stepsNeeded:", stepsNeeded, "expected:", expected, "N:", n);
-    n++;
-  }
+	if (winrate <= 0.5)	return "&#x221e";
+	let expected = 0;
+	let n = 0;
+	console.log("stepsNeeded", stepsNeeded);
+	while (expected <= stepsNeeded) {
+		expected = ((n * winrate) * stw) - (n * (1 - winrate) * stl);
+		//console.log("stepsNeeded:", stepsNeeded, "expected:", expected, "N:", n);
+		n++;
+	}
 
-  return "~" + n;
+	return '~'+n;
 }
 
 function addShare(_match) {

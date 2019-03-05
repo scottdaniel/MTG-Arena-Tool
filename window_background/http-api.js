@@ -1,20 +1,19 @@
 /*
 global
-	async,
-	qs,
-	tokenAuth,
-	playerId,
-	decks,
-	rememberMe,
-	rstore,
-	loadPlayerConfig,
-	cardsDb,
-	ipc_send,
-	debugNet,
-	playerUsername,
-	store,
-	makeId,
-	debugLog
+  async,
+  qs,
+  tokenAuth,
+  decks,
+  rememberMe,
+  rstore,
+  loadPlayerConfig,
+  cardsDb,
+  playerData,
+  ipc_send,
+  debugNet,
+  store,
+  makeId,
+  debugLog
 */
 const async = require("async");
 const qs = require("qs");
@@ -27,7 +26,6 @@ htttpGetStatus();
 
 const serverAddress = "mtgatool.com";
 
-//
 function httpBasic() {
   var httpAsyncNew = httpAsync.slice(0);
   //var str = ""; httpAsync.forEach( function(h) {str += h.reqId+", "; }); console.log("httpAsync: ", str);
@@ -204,10 +202,10 @@ function httpBasic() {
                 //ipc_send("auth", parsedResult.arenaids);
                 if (rememberMe) {
                   rstore.set("token", tokenAuth);
-                  rstore.set("email", playerUsername);
+                  rstore.set("email", playerData.userName);
                 }
 
-                loadPlayerConfig(playerId);
+                loadPlayerConfig(playerData.arenaId);
 
                 window.setInterval(() => {
                   httpHeartbeat();
@@ -263,10 +261,16 @@ function httpBasic() {
                 ranked_events = parsedResult.ranked_events;
                 ipc_send("set_db", parsedResult);
                 cardsDb.set(parsedResult);
-                ipc_send("popup", { text: "Metadata: Ok", time: 1000 });
+                ipc_send("popup", {
+                  text: "Metadata: Ok",
+                  time: 1000
+                });
               }
             } else if (_headers.method == "tou_join") {
-              ipc_send("popup", { text: parsedResult.error, time: 10000 });
+              ipc_send("popup", {
+                text: parsedResult.error,
+                time: 10000
+              });
             } else if (_headers.method == "tou_check") {
               let notif = new Notification("MTG Arena Tool", {
                 body: parsedResult.state
@@ -278,7 +282,10 @@ function httpBasic() {
               parsedResult.error != undefined
             ) {
               if (_headers.method == "share_draft") {
-                ipc_send("popup", { text: parsedResult.error, time: 3000 });
+                ipc_send("popup", {
+                  text: parsedResult.error,
+                  time: 3000
+                });
               }
               if (_headers.method == "auth") {
                 if (parsedResult.error == "Invalid credentials.") {
@@ -365,16 +372,16 @@ function heartbeatClear() {
 function httpAuth(user, pass) {
   heartbeatClear();
   var _id = makeId(6);
-  playerUsername = user;
+  playerData.userName = user;
   httpAsync.push({
     reqId: _id,
     method: "auth",
     method_path: "/login.php",
     email: user,
     password: pass,
-    playerid: playerId,
-    playername: playerName,
-    mtgaversion: arenaVersion,
+    playerid: playerData.arenaId,
+    playername: playerData.name,
+    mtgaversion: playerData.arenaVersion,
     version: window.electron.remote.app.getVersion()
   });
 }

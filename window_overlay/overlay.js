@@ -1,17 +1,17 @@
 /*
 global
-	windowBackground,
-	windowOverlay,
-	get_deck_colors,
-	get_deck_uniquestring,
-	removeDuplicates,
-	compare_chances,
-	compare_cards,
-	get_ids_colors,
-	compare_draft_cards,
-	addCardTile,
-	draftRanks,
-	cardsDb
+  windowBackground,
+  windowOverlay,
+  get_deck_colors,
+  get_deck_uniquestring,
+  removeDuplicates,
+  compare_chances,
+  compare_cards,
+  get_ids_colors,
+  compare_draft_cards,
+  addCardTile,
+  draftRanks,
+  cardsDb
 */
 const electron = require("electron");
 const { webFrame, remote } = require("electron");
@@ -155,6 +155,10 @@ function recreateClock() {
     }
   }
 
+  if (overlayMode == 1) {
+    $(".clock_turn").html("");
+  }
+
   updateClock();
 }
 
@@ -173,7 +177,7 @@ ipc.on("set_db", function(event, arg) {
 //
 ipc.on("set_timer", function(event, arg) {
   if (arg == -1) {
-    overlayMode = 1;
+    //overlayMode = 1;
     matchBeginTime = Date.now();
   } else if (arg !== 0) {
     //matchBeginTime = arg == 0 ? 0 : Date.parse(arg);
@@ -200,11 +204,11 @@ ipc.on("action_log", function(event, arg) {
 ipc.on("set_settings", function(event, settings) {
   // Alpha does some weird things..
   /*
-	let alpha = settings.overlay_alpha;
-	$('body').css("background-color", "rgba(0,0,0,"+alpha+")");
-	$('.overlay_wrapper:before').css("opacity", 0.4*alpha);
-	$('.overlay_wrapper').css("opacity", alpha);
-	*/
+  let alpha = settings.overlay_alpha;
+  $('body').css("background-color", "rgba(0,0,0,"+alpha+")");
+  $('.overlay_wrapper:before').css("opacity", 0.4*alpha);
+  $('.overlay_wrapper').css("opacity", alpha);
+  */
   overlayAlpha = settings.overlay_alpha;
   overlayAlphaBack = settings.overlay_alpha_back;
   change_background(settings.back_url);
@@ -298,6 +302,11 @@ ipc.on("set_cards", function(event, _cards) {
 let changedMode = true;
 //
 ipc.on("set_deck", function(event, arg) {
+  if (overlayMode == 1) {
+    $(".overlay_draft_container").hide();
+    $(".overlay_deck_container").show();
+  }
+  overlayMode = 0;
   var doscroll = false;
   if (
     $(".overlay_decklist")[0].scrollHeight - $(".overlay_decklist").height() ==
@@ -436,11 +445,11 @@ ipc.on("set_deck", function(event, arg) {
 
     if (deckMode == 2) {
       deckListDiv.append(`
-	            <div class="overlay_samplesize_container">
-	                <div class="odds_prev click-on"></div>
-	                <div class="odds_number">Sample size: ${oddsSampleSize}</div>
-	                <div class="odds_next click-on"></div>
-	            </div>
+              <div class="overlay_samplesize_container">
+                  <div class="odds_prev click-on"></div>
+                  <div class="odds_number">Sample size: ${oddsSampleSize}</div>
+                  <div class="odds_next click-on"></div>
+              </div>
            `);
 
       deckListDiv.append('<div class="chance_title"></div>'); // Add some space
@@ -500,14 +509,23 @@ ipc.on("set_deck", function(event, arg) {
   }
 });
 
-var draftPack, draftPick, packN, pickN;
+var currentDraft;
 //
-ipc.on("set_draft_cards", function(event, pack, picks, packn, pickn) {
-  draftPack = pack;
-  draftPick = picks;
-  packN = packn;
-  pickN = pickn;
-  setDraft();
+ipc.on("set_draft_cards", function(event, draft) {
+  if (overlayMode == 0) {
+    overlayMode = 1;
+    clockMode = 1;
+    recreateClock();
+    $(".overlay_draft_container").show();
+    $(".overlay_deck_container").hide();
+  }
+  matchBeginTime = Date.now();
+  currentDraft = draft;
+  //draftPack = pack;
+  //draftPick = picks;
+  //packN = packn;
+  //pickN = pickn;
+  setDraft(currentDraft.packNumber, currentDraft.pickNumber);
 });
 
 //
@@ -543,25 +561,47 @@ ipc.on("set_turn", function(
   }
 });
 
-function setDraft() {
+let packN;
+let pickN;
+
+function setDraft(_packN = -1, _pickN = -1) {
+  if (_packN == -1 || _pickN == -1) {
+    packN = currentDraft.packNumber;
+    pickN = currentDraft.pickNumber;
+  } else {
+    packN = _packN;
+    pickN = _pickN;
+  }
   $(".overlay_decklist").html("");
   $(".overlay_deckcolors").html("");
-  $(".overlay_deckname").html("Pack " + packN + " - Pick " + pickN);
+  $(".overlay_deckname").html("Pack " + (packN + 1) + " - Pick " + pickN);
+
   let colors;
   if (draftMode == 0) {
-    colors = get_ids_colors(draftPick);
+    colors = get_ids_colors(currentDraft.pickedCards);
     colors.forEach(function(color) {
       $(".overlay_deckcolors").append(
         '<div class="mana_s20 mana_' + mana[color] + '"></div>'
       );
     });
 
-    draftPick.sort(compare_draft_cards);
+    currentDraft.pickedCards.sort(compare_draft_cards);
 
-    draftPick.forEach(function(grpId) {
+    currentDraft.pickedCards.forEach(function(grpId) {
       addCardTile(grpId, "a", 1, $(".overlay_decklist"));
     });
   } else if (draftMode == 1) {
+    let key = "pack_" + packN + "pick_" + pickN;
+    let draftPack = currentDraft[key];
+    let pick = "";
+    if (!draftPack) {
+      draftPack = currentDraft.currentPack;
+    } else {
+      pick = draftPack.pick;
+      draftPack = draftPack.pack;
+    }
+
+    console.log("Key", key, currentDraft);
     colors = get_ids_colors(draftPack);
     colors.forEach(function(color) {
       $(".overlay_deckcolors").append(
@@ -580,6 +620,9 @@ function setDraft() {
 
       var od = $(".overlay_decklist");
       var cont = $('<div class="overlay_card_quantity"></div>');
+      if (grpId == pick) {
+        cont.css("background-color", "rgba(250, 229, 210, 0.66)");
+      }
 
       for (let i = 0; i < 4; i++) {
         if (i < cards[grpId]) {
@@ -594,7 +637,10 @@ function setDraft() {
       }
 
       cont.appendTo(od);
-      addCardTile(grpId, "a", draftRanks[rank], od);
+      let tile = addCardTile(grpId, "a", draftRanks[rank], od);
+      if (grpId == pick) {
+        tile.css("background-color", "rgba(250, 229, 210, 0.66)");
+      }
     });
   }
 }
@@ -620,9 +666,9 @@ function hoverCard(grpId) {
     $(".overlay_hover").css("opacity", 0);
   } else {
     //let dfc = '';
-    //if (cardsDb.get(grpId).dfc == 'DFC_Back')	dfc = 'a';
-    //if (cardsDb.get(grpId).dfc == 'DFC_Front')	dfc = 'b';
-    //if (cardsDb.get(grpId).dfc == 'SplitHalf')	dfc = 'a';
+    //if (cardsDb.get(grpId).dfc == 'DFC_Back') dfc = 'a';
+    //if (cardsDb.get(grpId).dfc == 'DFC_Front')  dfc = 'b';
+    //if (cardsDb.get(grpId).dfc == 'SplitHalf')  dfc = 'a';
     $(".overlay_hover").css("opacity", 1);
     $(".overlay_hover").attr(
       "src",
@@ -655,6 +701,7 @@ function change_background(arg) {
 }
 
 $(document).ready(function() {
+  $(".overlay_draft_container").hide();
   recreateClock();
   //
   $(".clock_prev").click(function() {
@@ -672,24 +719,48 @@ $(document).ready(function() {
     }
     recreateClock();
   });
+
   //
   $(".draft_prev").click(function() {
-    changedMode = true;
-    draftMode -= 1;
-    if (draftMode < 0) {
-      draftMode = 1;
+    //changedMode = true;
+    //draftMode -= 1;
+    //if (draftMode < 0) {
+    //  draftMode = 1;
+    //}
+    pickN -= 1;
+    if (pickN < 0) {
+      pickN = 13;
+      packN -= 1;
     }
-    setDraft();
+    if (packN < 0) {
+      pickN = currentDraft.pickNumber;
+      packN = currentDraft.packNumber;
+    }
+
+    setDraft(packN, pickN);
   });
   //
   $(".draft_next").click(function() {
-    changedMode = true;
-    draftMode += 1;
-    if (draftMode > 1) {
-      draftMode = 0;
+    //changedMode = true;
+    //draftMode += 1;
+    //if (draftMode > 1) {
+    //  draftMode = 0;
+    //}
+    pickN += 1;
+    //let key = "pack_" + packN + "pick_" + pickN;
+
+    if (pickN > currentDraft.pickNumber && packN == currentDraft.packNumber) {
+      pickN = 0;
+      packN = 0;
     }
-    setDraft();
+
+    if (pickN == currentDraft.pickNumber && packN == currentDraft.packNumber) {
+      setDraft();
+    } else {
+      setDraft(packN, pickN);
+    }
   });
+
   //
   $(".deck_prev").click(function() {
     changedMode = true;

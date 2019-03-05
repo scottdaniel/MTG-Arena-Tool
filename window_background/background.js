@@ -1,32 +1,36 @@
 /*
 global
-	cardsDb,
-	stripTags,
-	windowBackground,
-	windowRenderer,
-	windowOverlay,
-	get_rank_index,
-	onLabelOutLogInfo,
-	onLabelGreToClient,
-	onLabelClientToMatchServiceMessageTypeClientToGREMessage,
-	onLabelInEventGetPlayerCourse,
-	onLabelInEventGetCombinedRankInfo,
-	onLabelInDeckGetDeckLists,
-	onLabelInEventGetPlayerCourses,
-	onLabelInDeckUpdateDeck,
-	onLabelInventoryUpdated,
-	onLabelInPlayerInventoryGetPlayerInventory,
-	onLabelInPlayerInventoryGetPlayerCardsV3,
-	onLabelInEventDeckSubmit,
-	onLabelEventMatchCreated,
-	onLabelOutDirectGameChallenge,
-	onLabelInDraftDraftStatus,
-	onLabelInDraftMakePick,
-	onLabelOutDraftMakePick,
-	onLabelInEventCompleteDraft,
-	onLabelMatchGameRoomStateChangedEvent,
-	onLabelInEventGetSeasonAndRankDetail,
-	onLabelGetPlayerInventoryGetRewardSchedule
+  cardsDb,
+  stripTags,
+  windowBackground,
+  windowRenderer,
+  windowOverlay,
+  get_rank_index,
+  playerDataDefault,
+  hypergeometric,
+  onLabelOutLogInfo,
+  onLabelGreToClient,
+  eventsToFormat,
+  compare_archetypes,
+  onLabelClientToMatchServiceMessageTypeClientToGREMessage,
+  onLabelInEventGetPlayerCourse,
+  onLabelInEventGetCombinedRankInfo,
+  onLabelInDeckGetDeckLists,
+  onLabelInEventGetPlayerCourses,
+  onLabelInDeckUpdateDeck,
+  onLabelInventoryUpdated,
+  onLabelInPlayerInventoryGetPlayerInventory,
+  onLabelInPlayerInventoryGetPlayerCardsV3,
+  onLabelInEventDeckSubmit,
+  onLabelEventMatchCreated,
+  onLabelOutDirectGameChallenge,
+  onLabelInDraftDraftStatus,
+  onLabelInDraftMakePick,
+  onLabelOutDraftMakePick,
+  onLabelInEventCompleteDraft,
+  onLabelMatchGameRoomStateChangedEvent,
+  onLabelInEventGetSeasonAndRankDetail,
+  onLabelGetPlayerInventoryGetRewardSchedule
 */
 var electron = require("electron");
 
@@ -38,6 +42,7 @@ const sha1 = require("js-sha1");
 const ipc = electron.ipcRenderer;
 
 const transform = require("lodash.transform");
+const cloneDeep = require("lodash.clonedeep");
 
 const httpApi = require("./http-api");
 
@@ -124,63 +129,71 @@ if (!fs.existsSync(actionLogDir)) {
 var firstPass = true;
 var tokenAuth = undefined;
 
+var currentMatchDefault = {
+  eventId: "",
+  matchId: "",
+  beginTime: 0,
+  matchTime: 0,
+  currentPriority: 0,
+  bestOf: 1,
+  game: 0,
+  priorityTimers: [0, 0, 0, 0, 0],
+  lastPriorityChangeTime: 0,
+  results: {},
+  zones: {},
+  gameObjs: {},
+  turn: {},
+  playerCards: {},
+  oppCards: {},
+  player: {
+    seat: 1,
+    deck: { mainDeck: [], sideboard: [] },
+    life: 20,
+    turn: 0,
+    name: "",
+    id: "",
+    rank: "",
+    tier: 1
+  },
+  opponent: {
+    seat: 2,
+    deck: { mainDeck: [], sideboard: [] },
+    life: 20,
+    turn: 0,
+    name: "",
+    id: "",
+    rank: "",
+    tier: 1
+  }
+};
+
+var currentDraftDefault = {
+  eventId: "",
+  draftId: "",
+  set: "",
+  owner: ""
+};
+
+var currentDraft = null;
+/*
+var currentDraft = undefined;
+var currentDraftPack = undefined;
+var draftSet = "";
+var draftId = undefined;
+*/
+
+var playerData = cloneDeep(playerDataDefault);
+var currentMatch = null;
+
 var renderer_state = 0;
-var oppDeck = { mainDeck: [], sideboard: [] };
 var originalDeck = {};
-var currentDeck = {};
-var currentDeckUpdated = {};
-var currentMatchId = null;
-var currentMatchBestOfNumber = 0;
-var currentMatchTime = 0;
-var currentEventId = null;
+
+var currentDeck = null;
 var duringMatch = false;
 var matchBeginTime = 0;
 var matchGameStats = [];
 var matchCompletedOnGameNumber = 0;
 var gameNumberCompleted = 0;
-
-var arenaVersion = "";
-var playerUsername = "";
-var playerName = null;
-var playerConstructedRank = null;
-var playerConstructedTier = null;
-var playerConstructedSteps = 4;
-var playerConstructedStep = 0;
-var playerLimitedRank = null;
-var playerLimitedTier = null;
-var playerLimitedSteps = 4;
-var playerLimitedStep = 0;
-var PlayerConstructedMatchesWon = 0;
-var PlayerConstructedMatchesLost = 0;
-var PlayerConstructedMatchesDrawn = 0;
-var PlayerLimitedMatchesWon = 0;
-var PlayerLimitedMatchesLost = 0;
-var PlayerLimitedMatchesDrawn = 0;
-
-var playerId = null;
-var playerSeat = null;
-var playerWin = 0;
-var draws = 0;
-
-var oppName = null;
-var oppRank = null;
-var oppTier = null;
-var oppId = null;
-var oppSeat = null;
-var oppWin = 0;
-
-var prevTurn = -1;
-var turnPhase = "";
-var turnStep = "";
-var turnNumber = 0;
-var turnActive = 0;
-var turnPriority = 0;
-var turnDecision = 0;
-var playerLife = 20;
-var opponentLife = 20;
-
-var zones = {};
-var gameObjs = {};
 
 var gameStage = "";
 var initialLibraryInstanceIds = [];
@@ -191,9 +204,14 @@ var history = {};
 var drafts = {};
 var events = {};
 var economy = {};
-var decks = {};
 var staticDecks = [];
-//var coursesToSubmit = {};
+
+var decks = {};
+var deck_changes_index = [];
+var deck_changes = {};
+var decks_tags = {};
+var tags_colors = {};
+var deck_archetypes = {};
 
 var gold = 0;
 var gems = 0;
@@ -204,18 +222,8 @@ var wcUncommon = 0;
 var wcRare = 0;
 var wcMythic = 0;
 
-var currentDraft = undefined;
-var currentDraftPack = undefined;
-var draftSet = "";
-var draftId = undefined;
 var overlayDeckMode = 0;
 var lastDeckUpdate = new Date();
-
-var deck_changes_index = [];
-var deck_changes = {};
-var decks_tags = {};
-var tags_colors = {};
-var deck_archetypes = {};
 
 let formats = {
   Standard: "Standard",
@@ -276,14 +284,14 @@ ipc.on("set_renderer_state", function(event, arg) {
 ipc.on("login", function(event, arg) {
   if (arg.password == "********") {
     tokenAuth = rstore.get("token");
-    playerUsername = arg.username;
+    playerData.userName = arg.username;
     httpApi.httpAuth(arg.username, arg.password);
   } else if (arg.username == "" && arg.password == "") {
     ipc_send("auth", { ok: true, user: -1 });
-    loadPlayerConfig(playerId);
-    playerUsername = "";
+    loadPlayerConfig(playerData.arenaId);
+    playerData.userName = "";
   } else {
-    playerUsername = arg.username;
+    playerData.userName = arg.username;
     tokenAuth = "";
     httpApi.httpAuth(arg.username, arg.password);
   }
@@ -379,9 +387,9 @@ window.onerror = (msg, url, line, col, err) => {
     line: line,
     col: col
   };
-  error.id = sha1(error.msg + playerId);
+  error.id = sha1(error.msg + playerData.arenaId);
   httpApi.httpSendError(error);
-  ipc_send("ipc_log", "Background Error:" + error.join(" - "));
+  ipc_send("ipc_log", "Background Error:" + error);
 };
 
 process.on("uncaughtException", function(err) {
@@ -392,16 +400,16 @@ process.on("uncaughtException", function(err) {
     col: 0
   };
   console.log("ERROR: ", error);
-  error.id = sha1(error.msg + playerId);
+  error.id = sha1(error.msg + playerData.arenaId);
   httpApi.httpSendError(error);
   ipc_send("ipc_log", `Background ${error.stack}: ${error.join(" - ")}`);
 });
 
 //
 ipc.on("error", function(event, err) {
-  err.id = sha1(err.msg + playerId);
+  err.id = sha1(err.msg + playerData.arenaId);
   httpApi.httpSendError(err);
-  ipc_send("ipc_log", "Background error:" + err.join(" - "));
+  ipc_send("ipc_log", "Background error:" + err);
 });
 
 //
@@ -433,12 +441,12 @@ function calculateRankWins() {
       platinum: { w: 0, l: 0, t: 0, r: "Platinum" },
       diamond: { w: 0, l: 0, t: 0, r: "Diamond" },
       mythic: { w: 0, l: 0, t: 0, r: "Mythic" },
-      step: playerConstructedStep,
-      steps: playerConstructedSteps,
+      step: playerData.rank.constructed.step,
+      steps: playerData.rank.constructed.steps,
       total: {
-        w: PlayerConstructedMatchesWon,
-        l: PlayerConstructedMatchesLost,
-        t: PlayerConstructedMatchesWon + PlayerConstructedMatchesLost
+        w: playerData.rank.constructed.won,
+        l: playerData.rank.constructed.lost,
+        t: playerData.rank.constructed.won + playerData.rank.constructed.lost
       }
     },
     limited: {
@@ -448,12 +456,12 @@ function calculateRankWins() {
       platinum: { w: 0, l: 0, t: 0, r: "Platinum" },
       diamond: { w: 0, l: 0, t: 0, r: "Diamond" },
       mythic: { w: 0, l: 0, t: 0, r: "Mythic" },
-      step: playerLimitedStep,
-      steps: playerLimitedSteps,
+      step: playerData.rank.limited.step,
+      steps: playerData.rank.limited.steps,
       total: {
-        w: PlayerLimitedMatchesWon,
-        l: PlayerLimitedMatchesLost,
-        t: PlayerLimitedMatchesWon + PlayerLimitedMatchesLost
+        w: playerData.rank.limited.won,
+        l: playerData.rank.limited.lost,
+        t: playerData.rank.limited.won + playerData.rank.limited.lost
       }
     }
   };
@@ -496,7 +504,7 @@ function calculateRankWins() {
 }
 
 ipc.on("request_explore", function(event, arg) {
-  if (playerUsername == "") {
+  if (playerData.userName == "") {
     ipc_send("offline", 1);
   } else {
     let cards = store.get("cards.cards");
@@ -521,7 +529,7 @@ ipc.on("request_course", function(event, arg) {
 });
 
 ipc.on("request_home", function() {
-  if (playerUsername == "") {
+  if (playerData.userName == "") {
     ipc_send("offline", 1);
   } else {
     httpApi.httpHomeGet();
@@ -588,7 +596,7 @@ ipc.on("add_history_tag", function(event, arg) {
     match.tags = [arg.name];
   }
 
-  httpApi.httpSetDeckTag(arg.name, match.oppDeck.mainDeck, match.eventId);
+  httpApi.httpSetDeckTag(arg.name, match.opponent.deck.mainDeck, match.eventId);
   store.set(arg.match, match);
 });
 
@@ -622,14 +630,14 @@ function sendEconomy() {
 }
 /*
 function rememberLogin(bool) {
-	if (bool) {
-		rstore.set("email", playerUsername);
-		rstore.set("token", tokenAuth);
-	}
-	else {
-		rstore.set("email", "");
-		rstore.set("token", "");
-	}
+  if (bool) {
+    rstore.set("email", playerData.userName);
+    rstore.set("token", tokenAuth);
+  }
+  else {
+    rstore.set("email", "");
+    rstore.set("token", "");
+  }
 }
 */
 
@@ -859,10 +867,10 @@ function onLogEntryFound(entry) {
   }
   let json;
   if (entry.type == "connection") {
-    playerId = entry.socket.PlayerId;
-    arenaVersion = entry.socket.ClientVersion;
-    playerName = entry.socket.PlayerScreenName;
-    ipc_send("set_username", playerName);
+    playerData.arenaId = entry.socket.PlayerId;
+    playerData.arenaVersion = entry.socket.ClientVersion;
+    playerData.name = entry.socket.PlayerScreenName;
+    ipc_send("set_player_data", playerData);
   } else {
     //console.log("Entry:", entry.label, entry, entry.json());
     if (firstPass) {
@@ -1073,7 +1081,7 @@ async function logLoop() {
   // We are looping only to get user data (processLogUser)
   processLogUser(logSegment);
 
-  if (playerId) {
+  if (playerData.arenaId) {
     clearInterval(logLoopInterval);
   }
   prevLogSize = size;
@@ -1090,32 +1098,32 @@ function processLogUser(rawString) {
     // Get player Id
     let strCheck = '"playerId": "';
     if (value.indexOf(strCheck) > -1) {
-      playerId = dataChop(value, strCheck, '"');
+      playerData.arenaId = dataChop(value, strCheck, '"');
     }
 
     // Get User name
     strCheck = '"screenName": "';
     if (value.indexOf(strCheck) > -1) {
-      playerName = dataChop(value, strCheck, '"');
-      ipc_send("set_username", playerName);
-      ipc_send("init_login", playerName);
-      ipc_send("ipc_log", "Arena screen name: " + playerName);
+      playerData.name = dataChop(value, strCheck, '"');
+      ipc_send("set_player_data", playerData);
+      ipc_send("init_login", true);
+      ipc_send("ipc_log", "Arena screen name: " + playerData.name);
     }
 
     // Get Client Version
     strCheck = '"ClientVersion":"';
     if (value.indexOf(strCheck) > -1) {
-      arenaVersion = dataChop(value, strCheck, '"');
-      ipc_send("ipc_log", "Arena version: " + arenaVersion);
+      playerData.arenaVersion = dataChop(value, strCheck, '"');
+      ipc_send("ipc_log", "Arena version: " + playerData.arenaVersion);
     }
     /*
-		if (firstPass) {
-			ipc_send("popup", {"text": "Reading: "+Math.round(100/splitString.length*index)+"%", "time": 1000});
-		}
-		*/
+    if (firstPass) {
+      ipc_send("popup", {"text": "Reading: "+Math.round(100/splitString.length*index)+"%", "time": 1000});
+    }
+    */
   });
 
-  if (firstPass && playerName == null) {
+  if (firstPass && playerData.name == null) {
     ipc_send("popup", { text: "output_log contains no player data", time: 0 });
   }
 }
@@ -1124,7 +1132,7 @@ function decodePayload(json) {
   const messages = require("./messages_pb");
 
   const msgType = json.clientToMatchServiceMessageType.split("_")[1],
-    binaryMsg = new Buffer.from(json.payload, "base64");
+    binaryMsg = new Buffer(json.payload, "base64");
 
   try {
     let msgDeserialiser;
@@ -1172,13 +1180,7 @@ function dataChop(data, startStr, endStr) {
 }
 
 function setDraftCards(json) {
-  ipc.send(
-    "set_draft_cards",
-    json.draftPack,
-    json.pickedCards,
-    json.packNumber + 1,
-    json.pickNumber
-  );
+  ipc.send("set_draft_cards", currentDraft);
 }
 
 function actionLogGenerateLink(grpId) {
@@ -1203,7 +1205,7 @@ function actionLog(seat, time, str, grpId = 0) {
 
     try {
       fs.writeFileSync(
-        path.join(actionLogDir, currentMatchId + ".txt"),
+        path.join(actionLogDir, currentMatch.matchId + ".txt"),
         currentActionLog,
         "utf-8"
       );
@@ -1237,12 +1239,12 @@ function tryZoneTransfers() {
 
     var owner = -1;
     try {
-      owner = gameObjs[obj.affectorId].controllerSeatId;
+      owner = currentMatch.gameObjs[obj.affectorId].controllerSeatId;
     } catch (e) {
       try {
-        owner = gameObjs[obj.aff].controllerSeatId;
+        owner = currentMatch.gameObjs[obj.aff].controllerSeatId;
       } catch (e) {
-        owner = oppSeat;
+        owner = currentMatch.opponent.seat;
       }
     }
 
@@ -1260,8 +1262,8 @@ function tryZoneTransfers() {
 
     // If the transfer is already in the gameObjs array..
     try {
-      cname = gameObjs[obj.aff].name;
-      grpid = gameObjs[obj.aff].grpId;
+      cname = currentMatch.gameObjs[obj.aff].name;
+      grpid = currentMatch.gameObjs[obj.aff].grpId;
     } catch (e) {
       removeFromList = false;
     }
@@ -1289,7 +1291,7 @@ function tryZoneTransfers() {
           getNameBySeat(owner) + " played " + actionLogGenerateLink(grpid)
         );
       } else if (_cat == "Countered") {
-        affectorGrpid = gameObjs[obj.affectorId].grpId;
+        affectorGrpid = currentMatch.gameObjs[obj.affectorId].grpId;
         if (affectorGrpid == undefined) {
           removeFromList = false;
         } else {
@@ -1302,7 +1304,7 @@ function tryZoneTransfers() {
           );
         }
       } else if (_cat == "Destroy") {
-        affectorGrpid = gameObjs[obj.affectorId].grpId;
+        affectorGrpid = currentMatch.gameObjs[obj.affectorId].grpId;
         if (affectorGrpid == undefined) {
           removeFromList = false;
         } else {
@@ -1321,11 +1323,13 @@ function tryZoneTransfers() {
         actionLog(
           owner,
           obj.time,
-          actionLogGenerateLink(grpid) + " moved to " + zones[_dest].type
+          actionLogGenerateLink(grpid) +
+            " moved to " +
+            currentMatch.zones[_dest].type
         );
       }
-      gameObjs[obj.aff].zoneId = _dest;
-      gameObjs[obj.aff].zoneName = zones[_dest].type;
+      currentMatch.gameObjs[obj.aff].zoneId = _dest;
+      currentMatch.gameObjs[obj.aff].zoneName = currentMatch.zones[_dest].type;
     } catch (e) {
       removeFromList = false;
     }
@@ -1339,26 +1343,27 @@ function tryZoneTransfers() {
   }
 }
 
-let priorityTimers = [0, 0, 0];
-let lastPriorityChangeTime = 0;
 //
 function changePriority(previous, current, time) {
-  priorityTimers[previous] += time - lastPriorityChangeTime;
+  currentMatch.priorityTimers[previous] +=
+    time - currentMatch.lastPriorityChangeTime;
 
-  lastPriorityChangeTime = time;
-  priorityTimers[0] = lastPriorityChangeTime;
+  currentMatch.lastPriorityChangeTime = time;
+  currentMatch.priorityTimers[0] = currentMatch.lastPriorityChangeTime;
+
+  currentMatch.currentPriority = current;
   //console.log(priorityTimers);
   //console.log("since match begin:", time - matchBeginTime);
-  ipc_send("set_priority_timer", priorityTimers, windowOverlay);
+  ipc_send("set_priority_timer", currentMatch.priorityTimers, windowOverlay);
 }
 
 // Get player name by seat in the game
 function getNameBySeat(seat) {
   try {
-    if (seat == playerSeat) {
-      return playerName.slice(0, -6);
+    if (seat == currentMatch.player.seat) {
+      return playerData.name.slice(0, -6);
     } else {
-      return oppName.slice(0, -6);
+      return currentMatch.opponent.name.slice(0, -6);
     }
   } catch (e) {
     return "???";
@@ -1398,11 +1403,23 @@ function resetGameState() {
 //
 function checkForStartingLibrary() {
   if (gameStage != "GameStage_Start") return;
-  if (!zones["ZoneType_Hand" + playerSeat].objectInstanceIds) return;
-  if (!zones["ZoneType_Library" + playerSeat].objectInstanceIds) return;
+  if (
+    !currentMatch.zones["ZoneType_Hand" + currentMatch.player.seat]
+      .objectInstanceIds
+  )
+    return;
+  if (
+    !currentMatch.zones["ZoneType_Library" + currentMatch.player.seat]
+      .objectInstanceIds
+  )
+    return;
 
-  let hand = zones["ZoneType_Hand" + playerSeat].objectInstanceIds || [];
-  let library = zones["ZoneType_Library" + playerSeat].objectInstanceIds || [];
+  let hand =
+    currentMatch.zones["ZoneType_Hand" + currentMatch.player.seat]
+      .objectInstanceIds || [];
+  let library =
+    currentMatch.zones["ZoneType_Library" + currentMatch.player.seat]
+      .objectInstanceIds || [];
   // Check that a post-mulligan scry hasn't been done
   if (library.length == 0 || library[library.length - 1] < library[0]) return;
 
@@ -1418,9 +1435,7 @@ function createMatch(arg) {
   actionLog(-99, new Date(), "");
   var obj = store.get("overlayBounds");
 
-  zones = {};
-  gameObjs = {};
-  oppDeck = { mainDeck: [], sideboard: [] };
+  currentMatch = cloneDeep(currentMatchDefault);
 
   if (!firstPass && store.get("settings").show_overlay == true) {
     if (store.get("settings").close_on_match) {
@@ -1429,39 +1444,44 @@ function createMatch(arg) {
     ipc_send("overlay_show", 1);
     ipc_send("overlay_set_bounds", obj);
   }
-  oppName = arg.opponentScreenName;
-  oppRank = arg.opponentRankingClass;
-  oppTier = arg.opponentRankingTier;
-  currentEventId = arg.eventId;
-  currentMatchId = arg.matchId;
-  currentMatchTime = 0;
-  playerWin = 0;
-  draws = 0;
-  oppWin = 0;
-  priorityTimers = [0, 0, 0, 0, 0];
-  lastPriorityChangeTime = matchBeginTime;
+
+  let str = JSON.stringify(currentDeck);
+
+  currentMatch.player.originalDeck = originalDeck;
+  currentMatch.player.deck = JSON.parse(str);
+  currentMatch.playerCards = JSON.parse(str);
+
+  currentMatch.opponent.name = arg.opponentScreenName;
+  currentMatch.opponent.rank = arg.opponentRankingClass;
+  currentMatch.opponent.tier = arg.opponentRankingTier;
+  currentMatch.eventId = arg.eventId;
+  currentMatch.matchId = arg.matchId;
+
+  currentMatch.beginTime = matchBeginTime;
+
+  currentMatch.lastPriorityChangeTime = matchBeginTime;
   matchGameStats = [];
   matchCompletedOnGameNumber = 0;
   gameNumberCompleted = 0;
   gameStage = "";
 
-  ipc_send("ipc_log", "vs " + oppName);
-  ipc_send("set_timer", matchBeginTime, windowOverlay);
-  ipc_send("set_opponent", oppName, windowOverlay);
+  ipc_send("ipc_log", "vs " + currentMatch.opponent.name);
+  ipc_send("set_timer", currentMatch.beginTime, windowOverlay);
+  ipc_send("set_opponent", currentMatch.opponent.name, windowOverlay);
   ipc_send(
     "set_opponent_rank",
-    get_rank_index(oppRank, oppTier),
-    oppRank + " " + oppTier,
+    get_rank_index(currentMatch.opponent.rank, currentMatch.opponent.tier),
+    currentMatch.opponent.rank + " " + currentMatch.opponent.tier,
     windowOverlay
   );
 
-  if (currentEventId == "DirectGame") {
-    httpApi.httpTournamentCheck(currentDeck, oppName, true);
+  if (currentMatch.eventId == "DirectGame") {
+    httpApi.httpTournamentCheck(currentDeck, currentMatch.opponent.name, true);
   }
 
-  ipc_send("set_priority_timer", priorityTimers, windowOverlay);
+  ipc_send("set_priority_timer", currentMatch.priorityTimers, windowOverlay);
 
-  if (history[currentMatchId]) {
+  if (history[currentMatch.matchId]) {
     //skipMatch = true;
   }
 }
@@ -1471,8 +1491,8 @@ function createDraft() {
   actionLog(-99, new Date(), "");
   var obj = store.get("overlayBounds");
 
-  zones = {};
-  gameObjs = {};
+  currentDraft = cloneDeep(currentDraftDefault);
+  currentMatch = cloneDeep(currentMatchDefault);
 
   if (!firstPass && store.get("settings").show_overlay == true) {
     if (store.get("settings").close_on_match) {
@@ -1483,25 +1503,9 @@ function createDraft() {
     ipc_send("overlay_set_bounds", obj);
   }
 
-  currentDraft = {};
-
-  oppName = "";
-  oppRank = "";
-  oppTier = -1;
-  currentMatchId = null;
-  playerWin = 0;
-  draws = 0;
-  oppWin = 0;
-
   ipc_send("set_draft", true, windowOverlay);
   ipc_send("set_timer", -1, windowOverlay);
-  ipc_send("set_opponent", oppName, windowOverlay);
-  ipc_send(
-    "set_opponent_rank",
-    get_rank_index(oppRank, oppTier),
-    oppRank + " " + oppTier,
-    windowOverlay
-  );
+  ipc_send("set_opponent", "", windowOverlay);
 }
 
 //
@@ -1512,8 +1516,6 @@ function select_deck(arg) {
     currentDeck = arg;
   }
   originalDeck = currentDeck;
-  var str = JSON.stringify(currentDeck);
-  currentDeckUpdated = JSON.parse(str);
   //console.log(currentDeck, arg);
   ipc_send("set_deck", currentDeck, windowOverlay);
 }
@@ -1529,20 +1531,20 @@ function update_deck(force) {
   var nd = new Date();
   if (nd - lastDeckUpdate > 1000 || debugLog || !firstPass || force) {
     if (overlayDeckMode == 0) {
-      ipc_send("set_deck", currentDeckUpdated, windowOverlay);
+      ipc_send("set_deck", currentMatch.playerCards, windowOverlay);
     }
     if (overlayDeckMode == 1) {
-      ipc_send("set_deck", originalDeck, windowOverlay);
+      ipc_send("set_deck", currentMatch.player.deck, windowOverlay);
     }
     if (overlayDeckMode == 2) {
-      ipc_send("set_deck", currentDeckUpdated, windowOverlay);
+      ipc_send("set_deck", currentMatch.playerCards, windowOverlay);
     }
     if (overlayDeckMode == 3) {
-      var currentOppDeck = getOppDeck();
+      let currentOppDeck = getOppDeck();
       ipc_send("set_deck", currentOppDeck, windowOverlay);
     }
     if (overlayDeckMode == 4) {
-      ipc_send("set_deck", currentDeckUpdated, windowOverlay);
+      ipc_send("set_deck", currentMatch.playerCards, windowOverlay);
     }
     lastDeckUpdate = nd;
   }
@@ -1559,46 +1561,52 @@ function forceDeckUpdate(removeUsed = true) {
   var typeArt = 0;
   var typeEnc = 0;
   var typeLan = 0;
-  if ((debugLog || !firstPass) && currentDeckUpdated.mainDeck != undefined) {
+  if (
+    (debugLog || !firstPass) &&
+    currentMatch.playerCards.mainDeck != undefined
+  ) {
     /*
-		// DEBUG
-		currentDeckUpdated.mainDeck = [];
-		decksize = 0;
-		cardsleft = 0;
-		*/
-    currentDeckUpdated.mainDeck.forEach(function(card) {
+    // DEBUG
+    currentMatch.playerCards.mainDeck = [];
+    decksize = 0;
+    cardsleft = 0;
+    */
+    currentMatch.playerCards.mainDeck.forEach(function(card) {
       card.total = card.quantity;
       decksize += card.quantity;
       cardsleft += card.quantity;
     });
   }
   if (removeUsed) {
-    Object.keys(gameObjs).forEach(function(key) {
-      if (gameObjs[key] != undefined) {
-        if (zones[gameObjs[key].zoneId]) {
+    Object.keys(currentMatch.gameObjs).forEach(function(key) {
+      if (currentMatch.gameObjs[key] != undefined) {
+        if (currentMatch.zones[currentMatch.gameObjs[key].zoneId]) {
           if (
-            zones[gameObjs[key].zoneId].type != "ZoneType_Limbo" &&
-            zones[gameObjs[key].zoneId].type != "ZoneType_Library"
+            currentMatch.zones[currentMatch.gameObjs[key].zoneId].type !=
+              "ZoneType_Limbo" &&
+            currentMatch.zones[currentMatch.gameObjs[key].zoneId].type !=
+              "ZoneType_Library"
           ) {
             if (
-              gameObjs[key].ownerSeatId == playerSeat &&
-              gameObjs[key].type != "GameObjectType_Token" &&
-              gameObjs[key].type != "GameObjectType_Ability"
+              currentMatch.gameObjs[key].ownerSeatId ==
+                currentMatch.player.seat &&
+              currentMatch.gameObjs[key].type != "GameObjectType_Token" &&
+              currentMatch.gameObjs[key].type != "GameObjectType_Ability"
             ) {
               /*
-							// DEBUG
-							if (gameObjs[key].grpId != 3) {
-								decksize += 1;
-								cardsleft += 1;
-								currentDeckUpdated.mainDeck.push({id: gameObjs[key].grpId, quantity: gameObjs[key].zoneId})
-							}
-							*/
+              // DEBUG
+              if (currentMatch.gameObjs[key].grpId != 3) {
+                decksize += 1;
+                cardsleft += 1;
+                currentMatch.playerCards.mainDeck.push({id: currentMatch.gameObjs[key].grpId, quantity: currentMatch.gameObjs[key].zoneId})
+              }
+              */
 
               cardsleft -= 1;
-              if (currentDeckUpdated.mainDeck != undefined) {
-                currentDeckUpdated.mainDeck.forEach(function(card) {
-                  if (card.id == gameObjs[key].grpId) {
-                    //console.log(gameObjs[key].instanceId, cardsDb.get(gameObjs[key].grpId).name, zones[gameObjs[key].zoneId].type);
+              if (currentMatch.playerCards.mainDeck != undefined) {
+                currentMatch.playerCards.mainDeck.forEach(function(card) {
+                  if (card.id == currentMatch.gameObjs[key].grpId) {
+                    //console.log(currentMatch.gameObjs[key].instanceId, cardsDb.get(currentMatch.gameObjs[key].grpId).name, currentMatch.zones[currentMatch.gameObjs[key].zoneId].type);
                     card.quantity -= 1;
                   }
                   if (card.quantity < 0) card.quantity = 0;
@@ -1611,8 +1619,11 @@ function forceDeckUpdate(removeUsed = true) {
     });
   }
 
-  if ((debugLog || !firstPass) && currentDeckUpdated.mainDeck != undefined) {
-    currentDeckUpdated.mainDeck.forEach(function(card) {
+  if (
+    (debugLog || !firstPass) &&
+    currentMatch.playerCards.mainDeck != undefined
+  ) {
+    currentMatch.playerCards.mainDeck.forEach(function(card) {
       var c = cardsDb.get(card.id);
       if (c) {
         if (c.type.includes("Land", 0)) typeLan += card.quantity;
@@ -1628,36 +1639,36 @@ function forceDeckUpdate(removeUsed = true) {
       );
     });
 
-    currentDeckUpdated.chanceCre =
+    currentMatch.playerCards.chanceCre =
       Math.round(
         hypergeometric(1, cardsleft, odds_sample_size, typeCre) * 1000
       ) / 10;
-    currentDeckUpdated.chanceIns =
+    currentMatch.playerCards.chanceIns =
       Math.round(
         hypergeometric(1, cardsleft, odds_sample_size, typeIns) * 1000
       ) / 10;
-    currentDeckUpdated.chanceSor =
+    currentMatch.playerCards.chanceSor =
       Math.round(
         hypergeometric(1, cardsleft, odds_sample_size, typeSor) * 1000
       ) / 10;
-    currentDeckUpdated.chancePla =
+    currentMatch.playerCards.chancePla =
       Math.round(
         hypergeometric(1, cardsleft, odds_sample_size, typePla) * 1000
       ) / 10;
-    currentDeckUpdated.chanceArt =
+    currentMatch.playerCards.chanceArt =
       Math.round(
         hypergeometric(1, cardsleft, odds_sample_size, typeArt) * 1000
       ) / 10;
-    currentDeckUpdated.chanceEnc =
+    currentMatch.playerCards.chanceEnc =
       Math.round(
         hypergeometric(1, cardsleft, odds_sample_size, typeEnc) * 1000
       ) / 10;
-    currentDeckUpdated.chanceLan =
+    currentMatch.playerCards.chanceLan =
       Math.round(
         hypergeometric(1, cardsleft, odds_sample_size, typeLan) * 1000
       ) / 10;
-    currentDeckUpdated.deckSize = decksize;
-    currentDeckUpdated.cardsLeft = cardsleft;
+    currentMatch.playerCards.deckSize = decksize;
+    currentMatch.playerCards.cardsLeft = cardsleft;
   }
 }
 
@@ -1665,30 +1676,35 @@ function forceDeckUpdate(removeUsed = true) {
 function getOppDeck() {
   //var oppDeck = {mainDeck: [], sideboard : []};
   var doAdd = true;
-  oppDeck.name = oppName;
-  //console.log("Deck "+oppName);
-  Object.keys(gameObjs).forEach(function(key) {
-    if (gameObjs[key] != undefined) {
-      if (zones[gameObjs[key].zoneId].type != "ZoneType_Limbo") {
-        //console.log(cardsDb.get(gameObjs[key].grpId), cardsDb.get(gameObjs[key].grpId).name, zones[gameObjs[key].zoneId].type, gameObjs[key]);
+  currentMatch.opponent.deck = { mainDeck: [], sideboard: [] };
+  currentMatch.opponent.deck.name = currentMatch.opponent.name;
+  //console.log("Deck "+currentMatch.opponent.name;);
+  Object.keys(currentMatch.gameObjs).forEach(function(key) {
+    if (currentMatch.gameObjs[key] != undefined) {
+      if (
+        currentMatch.zones[currentMatch.gameObjs[key].zoneId].type !=
+        "ZoneType_Limbo"
+      ) {
+        //console.log(cardsDb.get(currentMatch.gameObjs[key].grpId), cardsDb.get(currentMatch.gameObjs[key].grpId).name, currentMatch.zones[currentMatch.gameObjs[key].zoneId].type, currentMatch.gameObjs[key]);
         if (
-          gameObjs[key].ownerSeatId == oppSeat &&
-          gameObjs[key].type != "GameObjectType_SplitLeft" &&
-          gameObjs[key].type != "GameObjectType_SplitRight" &&
-          gameObjs[key].type != "GameObjectType_Token" &&
-          gameObjs[key].type != "GameObjectType_Ability"
+          currentMatch.gameObjs[key].ownerSeatId ==
+            currentMatch.opponent.seat &&
+          currentMatch.gameObjs[key].type != "GameObjectType_SplitLeft" &&
+          currentMatch.gameObjs[key].type != "GameObjectType_SplitRight" &&
+          currentMatch.gameObjs[key].type != "GameObjectType_Token" &&
+          currentMatch.gameObjs[key].type != "GameObjectType_Ability"
         ) {
           doAdd = true;
-          oppDeck.mainDeck.forEach(function(card) {
-            if (card.id == gameObjs[key].grpId) {
+          currentMatch.opponent.deck.mainDeck.forEach(function(card) {
+            if (card.id == currentMatch.gameObjs[key].grpId) {
               doAdd = false;
               //card.quantity += 1;
             }
           });
           if (doAdd) {
-            if (cardsDb.get(gameObjs[key].grpId) != false) {
-              oppDeck.mainDeck.push({
-                id: gameObjs[key].grpId,
+            if (cardsDb.get(currentMatch.gameObjs[key].grpId) != false) {
+              currentMatch.opponent.deck.mainDeck.push({
+                id: currentMatch.gameObjs[key].grpId,
                 quantity: 9999
               });
             }
@@ -1699,8 +1715,8 @@ function getOppDeck() {
   });
 
   //
-  let format = eventsToFormat[currentEventId];
-  oppDeck.archetype = "-";
+  let format = eventsToFormat[currentMatch.eventId];
+  currentMatch.opponent.deck.archetype = "-";
   if (format && deck_archetypes[format]) {
     deck_archetypes[format].sort(compare_archetypes);
 
@@ -1713,7 +1729,7 @@ function getOppDeck() {
       arch.cards.forEach(card => {
         let cName = cardsDb.get(card.id).name;
         total += 1; //card.quantity;
-        oppDeck.mainDeck.forEach(oppCard => {
+        currentMatch.opponent.deck.mainDeck.forEach(oppCard => {
           let oName = cardsDb.get(oppCard.id).name;
           if (cName == oName) {
             found += 1; //card.quantity;
@@ -1726,10 +1742,10 @@ function getOppDeck() {
         bestMatch = arch.tag;
       }
     });
-    oppDeck.archetype = bestMatch;
+    currentMatch.opponent.deck.archetype = bestMatch;
   }
 
-  return oppDeck;
+  return currentMatch.opponent.deck;
 }
 
 //
@@ -1810,38 +1826,55 @@ function saveCourse(json) {
 
 //
 function saveMatch(matchId) {
-  if (currentMatchTime == 0 || currentMatchId != matchId) {
+  if (currentMatch.matchTime == 0 || currentMatch.matchId != matchId) {
     return;
   }
+
+  let pw = 0;
+  let ow = 0;
+  let dr = 0;
+  currentMatch.results.forEach(function(res) {
+    if (res.scope == "MatchScope_Game") {
+      if (res.result == "ResultType_Draw") {
+        dr += 1;
+      } else if (res.winningTeamId == currentMatch.player.seat) {
+        pw += 1;
+      }
+      if (res.winningTeamId == currentMatch.opponent.seat) {
+        ow += 1;
+      }
+    }
+  });
+
   var match = {};
-  match.id = currentMatchId;
-  match.duration = currentMatchTime;
+  match.id = currentMatch.matchId;
+  match.duration = currentMatch.matchTime;
   match.opponent = {
-    name: oppName,
-    rank: oppRank,
-    tier: oppTier,
-    userid: oppId,
-    seat: oppSeat,
-    win: oppWin
+    name: currentMatch.opponent.name,
+    rank: currentMatch.opponent.rank,
+    tier: currentMatch.opponent.tier,
+    userid: currentMatch.opponent.id,
+    seat: currentMatch.opponent.seat,
+    win: ow
   };
   match.player = {
-    name: playerName,
-    rank: playerConstructedRank,
-    tier: playerConstructedTier,
-    userid: playerId,
-    seat: playerSeat,
-    win: playerWin
+    name: currentMatch.player.name,
+    rank: playerData.rank.constructed.rank,
+    tier: playerData.rank.constructed.tier,
+    userid: currentMatch.player.id,
+    seat: currentMatch.player.seat,
+    win: pw
   };
-  match.draws = draws;
-  match.eventId = currentEventId;
-  match.playerDeck = originalDeck;
+  match.draws = dr;
+  match.eventId = currentMatch.eventId;
+  match.playerDeck = currentMatch.player.originalDeck;
   match.oppDeck = getOppDeck();
   if (match.oppDeck.archetype && match.oppDeck.archetype !== "-") {
     match.tags = [match.oppDeck.archetype];
   }
 
   match.date = new Date();
-  match.bestOf = currentMatchBestOfNumber;
+  match.bestOf = currentMatch.bestOf;
 
   match.gameStats = matchGameStats;
 
@@ -1854,24 +1887,24 @@ function saveMatch(matchId) {
   console.log("Save match:", match);
   var matches_index = store.get("matches_index");
 
-  if (!matches_index.includes(currentMatchId)) {
-    matches_index.push(currentMatchId);
+  if (!matches_index.includes(currentMatch.matchId)) {
+    matches_index.push(currentMatch.matchId);
   } else {
-    let cm = store.get(currentMatchId);
+    let cm = store.get(currentMatch.matchId);
     match.date = cm.date;
     match.tags = cm.tags;
   }
 
   // add locally
-  if (!history.matches.includes(currentMatchId)) {
-    history.matches.push(currentMatchId);
+  if (!history.matches.includes(currentMatch.matchId)) {
+    history.matches.push(currentMatch.matchId);
   }
 
   store.set("matches_index", matches_index);
-  store.set(currentMatchId, match);
+  store.set(currentMatch.matchId, match);
 
-  history[currentMatchId] = match;
-  history[currentMatchId].type = "match";
+  history[currentMatch.matchId] = match;
+  history[currentMatch.matchId].type = "match";
   if (matchCompletedOnGameNumber == gameNumberCompleted) {
     httpApi.httpSetMatch(match);
   }
@@ -1882,38 +1915,37 @@ function saveMatch(matchId) {
 
 //
 function saveDraft() {
-  if (draftId != undefined) {
-    draftId = draftId + "-draft";
-    var draft = currentDraft;
-    draft.id = draftId;
-    draft.date = new Date();
-    draft.set = draftSet;
-    draft.owner = playerName;
+  if (currentDraft.draftId != undefined) {
+    currentDraft.draftId = currentDraft.draftId + "-draft";
 
-    console.log("Save draft:", draft);
+    currentDraft.id = currentDraft.draftId;
+    currentDraft.date = new Date();
+    currentDraft.owner = playerData.name;
+
+    console.log("Save draft:", currentDraft);
 
     var draft_index = store.get("draft_index");
     // add to config
-    if (!draft_index.includes(draftId)) {
-      draft_index.push(draftId);
+    if (!draft_index.includes(currentDraft.draftId)) {
+      draft_index.push(currentDraft.draftId);
     } else {
-      draft.date = store.get(draftId).date;
+      currentDraft.date = store.get(currentDraft.draftId).date;
     }
 
     // add locally
-    if (!history.matches.includes(draftId)) {
-      history.matches.push(draftId);
+    if (!history.matches.includes(currentDraft.draftId)) {
+      history.matches.push(currentDraft.draftId);
     }
 
     store.set("draft_index", draft_index);
-    store.set(draftId, draft);
-    history[draftId] = draft;
-    history[draftId].type = "draft";
-    httpApi.httpSetDraft(draft);
+    store.set(currentDraft.draftId, currentDraft);
+    history[currentDraft.draftId] = currentDraft;
+    history[currentDraft.draftId].type = "draft";
+    httpApi.httpSetDraft(currentDraft);
     requestHistorySend(0);
     ipc_send("popup", { text: "Draft saved!", time: 3000 });
   } else {
-    console.log("Couldnt save draft with undefined ID:", draft);
+    console.log("Couldnt save draft with undefined ID:", currentDraft);
   }
 }
 
@@ -1929,26 +1961,7 @@ function updateLoading(entry) {
 
 //
 function updateRank() {
-  let rank;
-  rank = get_rank_index(playerConstructedRank, playerConstructedTier);
-  ipc_send("set_constructed_rank", {
-    rankName: playerConstructedRank,
-    rankTier: playerConstructedTier,
-    rank: rank,
-    rankStep: playerConstructedStep,
-    steps: playerConstructedSteps,
-    str: playerConstructedRank + " " + playerConstructedTier
-  });
-
-  rank = get_rank_index(playerLimitedRank, playerLimitedTier);
-  ipc_send("set_limited_rank", {
-    rankName: playerLimitedRank,
-    rankTier: playerLimitedTier,
-    rank: rank,
-    rankStep: playerLimitedStep,
-    steps: playerLimitedSteps,
-    str: playerLimitedRank + " " + playerLimitedTier
-  });
+  ipc_send("set_player_data", playerData);
 }
 
 ///
@@ -1970,13 +1983,13 @@ function finishLoading() {
     obj = store.get("windowBounds");
     ipc_send("renderer_set_bounds", obj);
 
-    if (playerName != null) {
+    if (playerData.name != null) {
       httpApi.httpSetPlayer(
-        playerName,
-        playerConstructedRank,
-        playerConstructedTier,
-        playerLimitedRank,
-        playerLimitedTier
+        playerData.name,
+        playerData.rank.constructed.rank,
+        playerData.rank.constructed.tier,
+        playerData.rank.limited.rank,
+        playerData.rank.limited.tier
       );
     }
     ipc_send("popup", { text: `Reading log: 100%`, time: 1000 });
