@@ -1721,24 +1721,22 @@ function getOppDeck() {
     deck_archetypes[format].sort(compare_archetypes);
 
     let possible = deck_archetypes[format];
-    bestMatch = "-";
-    bestMatchRate = 0;
+    let bestMatch = "-";
+    let bestMatchRate = 0;
     possible.forEach(arch => {
-      let total = 0;
       let found = 0;
       arch.cards.forEach(card => {
         let cName = cardsDb.get(card.id).name;
-        total += 1; //card.quantity;
+
         currentMatch.opponent.deck.mainDeck.forEach(oppCard => {
           let oName = cardsDb.get(oppCard.id).name;
           if (cName == oName) {
-            found += 1; //card.quantity;
+            found += card.quantity / arch.average;
           }
         });
       });
-      let rate = (100 / total) * found;
-      if (rate > bestMatchRate) {
-        bestMatchRate = rate;
+      if (found > bestMatchRate) {
+        bestMatchRate = found;
         bestMatch = arch.tag;
       }
     });
