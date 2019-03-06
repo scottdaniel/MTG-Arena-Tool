@@ -1972,7 +1972,7 @@ function open_settings(openSection) {
 
   var sliderSoundVolume = $('<div class="slidecontainer_settings"></div>');
   sliderSoundVolume.appendTo(section);
-  var sliderSoundVolumeLabel = $("<label>Volume: </label>");
+  var sliderSoundVolumeLabel = $(`<label style="width: 400px;">Volume: ${Math.round(settings.sound_priority_volume*100)}%</label>`);
   sliderSoundVolumeLabel.appendTo(sliderSoundVolume);
   var sliderSoundVolumeInput = $(
     '<input type="range" min="0" max="1" step=".001" value="' +
@@ -2438,6 +2438,7 @@ function open_settings(openSection) {
   $(".sliderSoundVolume").off();
 
   $(".sliderSoundVolume").on("click mouseup", function() {
+    sliderSoundVolumeLabel.html(`Volume: ${Math.round(settings.sound_priority_volume*100)}%`);
     let { Howl, Howler } = require("howler");
     let sound = new Howl({ src: ["../sounds/blip.mp3"] });
     updateSettings();
