@@ -1857,25 +1857,35 @@ a:hover {
     width: 100%;
     border-radius: 16px;
     height: 12px;
-    background: rgba(255, 255, 255, 0.6);
+    background: rgba(145, 121, 97, 0.5);
     outline: none;
     opacity: 1;
-    -webkit-transition: .2s;
-    transition: background .2s;
+    transition: all 0.2s cubic-bezier(0.35, 0.12, 0.5, 1.0);
 }
 
 .slider:hover {
-    background: rgba(255, 255, 255, 0.8);
+    background: rgba(145, 121, 97, 0.66);
 }
 
 .slider::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    width: 24px;
-    height: 24px;
+    width: 22px;
+    height: 22px;
     border-radius: 12px;
-    background: rgba(183, 200, 158, 1);
+    background: rgba(145, 121, 97, 1);
     cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.35, 0.12, 0.5, 1.0);
+}
+
+.slider::-webkit-slider-thumb:hover {
+    background: #fae5d2;
+    box-shadow: 0 0 0px 4px rgba(250, 229, 210, 0.2);
+}
+
+.slider::-webkit-slider-thumb:active {
+    background: #fae5d2;
+    box-shadow: 0 0 0px 10px rgba(250, 229, 210, 0.4);
 }
 
 .draft_nav_container {
