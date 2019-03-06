@@ -353,7 +353,6 @@ function onLabelGreToClient(entry, json) {
                 ipc_send("overlay_close", 1);
               }
 
-              currentMatch.matchId = gameInfo.matchID;
               currentMatch.game = gameInfo.gameNumber; // probably wrong
               matchCompletedOnGameNumber = gameInfo.gameNumber;
               saveMatch(gameInfo.matchID);
