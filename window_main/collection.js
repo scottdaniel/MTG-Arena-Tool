@@ -377,12 +377,12 @@ function printStats() {
   }
 
   // Complete collection sats
-  renderSetStats(stats.complete, "pw", "Complete collection").appendTo(
+  renderSetStats(stats.complete, "PW", "Complete collection").appendTo(
     mainstats
   );
 
   // Singleton collection sats
-  renderSetStats(stats.singles, "pw", "Singles").appendTo(mainstats);
+  renderSetStats(stats.singles, "PW", "Singles").appendTo(mainstats);
 
   const substats = $('<div class="main_stats sub_stats"></div>');
 
