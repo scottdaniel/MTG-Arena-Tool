@@ -1,7 +1,5 @@
 /*
 global
-  async,
-  qs,
   tokenAuth,
   decks,
   rememberMe,
@@ -25,6 +23,51 @@ httpGetDatabase();
 htttpGetStatus();
 
 const serverAddress = "mtgatool.com";
+
+function beginSSE() {
+  var source = new EventSource(
+    "https://" + serverAddress + "/api/poll.php?token=" + tokenAuth
+  );
+  source.onmessage = function(e) {
+    ipc_send("ipc_log", ">> " + e.data);
+
+    let parsed = undefined;
+    try {
+      parsed = JSON.parse(e.data);
+    } catch (e) {
+      //
+    }
+
+    console.log("> ", parsed);
+
+    if (parsed) {
+      parsed.notifications.forEach(str => {
+        console.log("heartbeat message:", str);
+        if (typeof str == "string") {
+          //console.log("Notification string:", str);
+          new Notification("MTG Arena Tool", {
+            body: str
+          });
+        } else if (typeof str == "object") {
+          if (str.task) {
+            ipc_send(str.task, str.value);
+          }
+        }
+      });
+    }
+  };
+
+  source.onopen = function(e) {
+    console.log(">> Connection was opened", e);
+  };
+
+  source.onerror = function(e) {
+    if (e.eventPhase == 2) {
+      //EventSource.CLOSED
+      console.log(">> Connection was closed", e);
+    }
+  };
+}
 
 function httpBasic() {
   var httpAsyncNew = httpAsync.slice(0);
@@ -206,25 +249,7 @@ function httpBasic() {
                 }
 
                 loadPlayerConfig(playerData.arenaId);
-
-                window.setInterval(() => {
-                  httpHeartbeat();
-                }, 10000);
-              }
-              if (_headers.method == "heartbeat") {
-                parsedResult.notifications.forEach(str => {
-                  console.log("heartbeat message:", str);
-                  if (typeof str == "string") {
-                    //console.log("Notification string:", str);
-                    let notif = new Notification("MTG Arena Tool", {
-                      body: str
-                    });
-                  } else if (typeof str == "object") {
-                    if (str.task) {
-                      ipc_send(str.task, str.value);
-                    }
-                  }
-                });
+                beginSSE();
               }
               if (
                 _headers.method == "tou_join" ||
@@ -361,22 +386,13 @@ function removeFromHttp(req) {
   });
 }
 
-function heartbeatClear() {
-  httpAsync.forEach(function(h, i) {
-    if (h.method == "heartbeat") {
-      httpAsync.splice(i, 1);
-    }
-  });
-}
-
 function httpAuth(user, pass) {
-  heartbeatClear();
   var _id = makeId(6);
   playerData.userName = user;
   httpAsync.push({
     reqId: _id,
     method: "auth",
-    method_path: "/login.php",
+    method_path: "/api/login.php",
     email: user,
     password: pass,
     playerid: playerData.arenaId,
@@ -387,7 +403,6 @@ function httpAuth(user, pass) {
 }
 
 function httpSubmitCourse(course) {
-  heartbeatClear();
   var _id = makeId(6);
   if (store.get("settings").anon_explore == true) {
     course.PlayerId = "000000000000000";
@@ -397,43 +412,39 @@ function httpSubmitCourse(course) {
   httpAsync.push({
     reqId: _id,
     method: "submit_course",
-    method_path: "/send_course.php",
+    method_path: "/api/send_course.php",
     course: course
   });
 }
 
 function httpSetPlayer() {
-  //heartbeatClear();
   // useless I think
   //var _id = makeId(6);
   //httpAsync.push({'reqId': _id, 'method': 'set_player', 'name': name, 'rank': rank, 'tier': tier});
 }
 
 function httpGetTopDecks(query, collection) {
-  heartbeatClear();
   var _id = makeId(6);
   collection = JSON.stringify(collection);
   httpAsync.unshift({
     reqId: _id,
     method: "get_top_decks",
-    method_path: "/get_courses_list_short.php",
+    method_path: "/api/get_courses_list.php",
     query: query,
     collection: collection
   });
 }
 
 function httpGetTopLadderDecks() {
-  heartbeatClear();
   var _id = makeId(6);
   httpAsync.unshift({
     reqId: _id,
     method: "get_ladder_decks",
-    method_path: "/top_ladder.json"
+    method_path: "/api/top_ladder.json"
   });
 }
 
 function httpGetTopLadderTraditionalDecks() {
-  heartbeatClear();
   var _id = makeId(6);
   httpAsync.push({
     reqId: _id,
@@ -442,165 +453,141 @@ function httpGetTopLadderTraditionalDecks() {
   });
 }
 function httpGetCourse(courseId) {
-  heartbeatClear();
   var _id = makeId(6);
   httpAsync.unshift({
     reqId: _id,
     method: "get_course",
-    method_path: "/get_course.php",
+    method_path: "/api/get_course.php",
     courseid: courseId
   });
 }
 
 function httpSetMatch(match) {
-  heartbeatClear();
   var _id = makeId(6);
   match = JSON.stringify(match);
   httpAsync.push({
     reqId: _id,
     method: "set_match",
-    method_path: "/send_match.php",
+    method_path: "/api/send_match.php",
     match: match
   });
 }
 
 function httpSetDraft(draft) {
-  heartbeatClear();
   var _id = makeId(6);
   draft = JSON.stringify(draft);
   httpAsync.push({
     reqId: _id,
     method: "set_draft",
-    method_path: "/send_draft.php",
+    method_path: "/api/send_draft.php",
     draft: draft
   });
 }
 
 function httpSetEconomy(change) {
-  heartbeatClear();
   var _id = makeId(6);
   change = JSON.stringify(change);
   httpAsync.push({
     reqId: _id,
     method: "set_economy",
-    method_path: "/send_economy.php",
+    method_path: "/api/send_economy.php",
     change: change
   });
 }
 
 function httpSendError(error) {
-  heartbeatClear();
   var _id = makeId(6);
   error = JSON.stringify(error);
   httpAsync.push({
     reqId: _id,
     method: "send_error",
-    method_path: "/send_error.php",
+    method_path: "/api/send_error.php",
     error: error
   });
 }
 
 function httpDeleteData() {
-  heartbeatClear();
   var _id = makeId(6);
   httpAsync.push({
     reqId: _id,
     method: "delete_data",
-    method_path: "/delete_data.php"
+    method_path: "/api/delete_data.php"
   });
 }
 
 function httpGetDatabase() {
-  heartbeatClear();
   var _id = makeId(6);
   ipc_send("popup", { text: "Downloading metadata", time: 0 });
   httpAsync.push({ reqId: _id, method: "get_database" });
 }
 
 function htttpGetStatus() {
-  heartbeatClear();
   var _id = makeId(6);
   httpAsync.push({ reqId: _id, method: "get_status" });
 }
 
 function httpDraftShareLink(did, exp) {
-  heartbeatClear();
   var _id = makeId(6);
   httpAsync.push({
     reqId: _id,
     method: "share_draft",
-    method_path: "/get_share_draft.php",
+    method_path: "/api/get_share_draft.php",
     id: did,
     expire: exp
   });
 }
 
 function httpHomeGet() {
-  heartbeatClear();
   var _id = makeId(6);
   httpAsync.unshift({
     reqId: _id,
     method: "home_get",
-    method_path: "/get_home.php"
+    method_path: "/api/get_home.php"
   });
 }
 
 function httpTournamentGet(tid) {
-  heartbeatClear();
   var _id = makeId(6);
   httpAsync.unshift({
     reqId: _id,
     method: "tou_get",
-    method_path: "/tournament_get.php",
+    method_path: "/api/tournament_get.php",
     id: tid
   });
 }
 
 function httpTournamentJoin(tid, _deck) {
-  heartbeatClear();
   let _id = makeId(6);
   let deck = JSON.stringify(decks[_deck]);
   httpAsync.unshift({
     reqId: _id,
     method: "tou_join",
-    method_path: "/tournament_join.php",
+    method_path: "/api/tournament_join.php",
     id: tid,
     deck: deck
   });
 }
 
 function httpTournamentDrop(tid) {
-  heartbeatClear();
   var _id = makeId(6);
   httpAsync.unshift({
     reqId: _id,
     method: "tou_drop",
-    method_path: "/tournament_drop.php",
+    method_path: "/api/tournament_drop.php",
     id: tid
   });
 }
 
 function httpTournamentCheck(deck, opp, setCheck) {
-  heartbeatClear();
   var _id = makeId(6);
   deck = JSON.stringify(deck);
   httpAsync.unshift({
     reqId: _id,
     method: "tou_check",
-    method_path: "/check_match.php",
+    method_path: "/api/check_match.php",
     deck: deck,
     opp: opp,
     setcheck: setCheck
-  });
-}
-
-function httpHeartbeat() {
-  heartbeatClear();
-  var _id = makeId(6);
-  httpAsync.push({
-    reqId: _id,
-    method: "heartbeat",
-    method_path: "/heartbeat.php"
   });
 }
 
@@ -609,7 +596,7 @@ function httpSetMythicRank(opp, rank) {
   httpAsync.push({
     reqId: _id,
     method: "mythicrank",
-    method_path: "/send_mythic_rank.php",
+    method_path: "/api/send_mythic_rank.php",
     opp: opp,
     rank: rank
   });
@@ -624,7 +611,7 @@ function httpSetDeckTag(tag, cards, format) {
   httpAsync.push({
     reqId: _id,
     method: "set_deck_tag",
-    method_path: "/send_deck_tag.php",
+    method_path: "/api/send_deck_tag.php",
     tag: tag,
     cards: cards,
     format: format
