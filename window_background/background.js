@@ -62,6 +62,7 @@ const defaultCfg = {
   settings: {
     overlay_sideboard: false,
     sound_priority: false,
+    sound_priority_volume: 1,
     cards_quality: "small",
     show_overlay: true,
     show_overlay_always: false,
@@ -782,6 +783,8 @@ function updateSettings(_settings, relay) {
   if (_settings.overlay_ontop == undefined) _settings.overlay_ontop = true;
   if (_settings.overlay_scale == undefined) _settings.overlay_scale = 100;
   if (_settings.skip_firstpass == undefined) _settings.skip_firstpass = false;
+  if (_settings.sound_priority_volume == undefined)
+    _settings.sound_priority_volume = 1;
 
   skipFirstPass = _settings.skip_firstpass;
 
