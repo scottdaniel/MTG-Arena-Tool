@@ -305,8 +305,7 @@ function createMatchRow(match) {
   );
 
   var or = createDivision(["ranks_16"]);
-  or.style.backgroundPosition = `${get_rank_index_16(match.opponent.rank) *
-    -16} px 0px`;
+  or.style.backgroundPosition = `${get_rank_index_16(match.opponent.rank) * -16}px 0px`;
   or.title = match.opponent.rank + " " + match.opponent.tier;
   flexCenterTop.appendChild(or);
 
