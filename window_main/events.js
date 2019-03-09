@@ -1,4 +1,23 @@
-//
+/*
+globals
+  ipc_send,
+  matchesHistory,
+  cardsDb,
+  mana,
+  get_rank_index_16,
+  timeSince,
+  toMMSS,
+  get_deck_colors,
+  addHover,
+  compare_cards,
+  getReadableEvent,
+  createDivision,
+  eventsHistory,
+  compare_courses,
+  loadEvents,
+  currentId
+*/
+
 function openEventsTab(loadMore) {
   var mainDiv = document.getElementById("ux_0");
   if (loadMore <= 0) {
@@ -23,121 +42,17 @@ function openEventsTab(loadMore) {
     var course_id = eventsHistory.courses[loadEvents];
     var course = eventsHistory[course_id];
 
-    if (course == undefined) continue;
-    if (course.CourseDeck == undefined) continue;
-
-    var div = createDivision([course.id, "list_match"]);
-
-    var fltl = createDivision(["flex_item"]);
-
-    var fll = createDivision(["flex_item"]);
-    fll.style.flexDirection = "column";
-
-    var flt = createDivision(["flex_top"]);
-    fll.appendChild(flt);
-
-    var flb = createDivision(["flex_bottom"]);
-    fll.appendChild(flb);
-
-    var flc = createDivision(["flex_item"]);
-    flc.style.flexDirection = "column";
-    flc.style.flexGrow = 2;
-
-    var fct = createDivision(["flex_top"]);
-    flc.appendChild(fct);
-
-    var fcb = createDivision(["flex_bottom"]);
-    fcb.style.marginRight = "14px";
-    flc.appendChild(fcb);
-
-    var flr = createDivision(["flex_item"]);
-
-    var tileGrpid = course.CourseDeck.deckTileId;
-    try {
-      cardsDb.get(tileGrpid).set;
-    } catch (e) {
-      tileGrpid = 67003;
+    if (course == undefined || course.CourseDeck == undefined) {
+      continue;
     }
 
-    var tile = createDivision([course.id + "t", "deck_tile"]);
-
-    try {
-      tile.style.backgroundImage =
-        "url(https://img.scryfall.com/cards" +
-        cardsDb.get(tileGrpid).images["art_crop"] +
-        ")";
-    } catch (e) {
-      console.error(e, tileGrpid);
-    }
-    fltl.appendChild(tile);
-
-    d = createDivision(
-      ["list_deck_name"],
-      getReadableEvent(course.InternalEventName)
-    );
-    flt.appendChild(d);
-
-    course.CourseDeck.colors.forEach(function(color) {
-      var m = createDivision(["mana_s20", "mana_" + mana[color]]);
-      flb.appendChild(m);
-    });
-
-    if (
-      course.CurrentEventState == "DoneWithMatches" ||
-      course.CurrentEventState == 2
-    ) {
-      var d = createDivision(["list_event_phase"], "Completed");
-    } else {
-      var d = createDivision(["list_event_phase_red"], "In progress");
-    }
-    fct.appendChild(d);
-
-    d = createDivision(
-      ["list_match_time"],
-      timeSince(new Date(course.date)) + " ago."
-    );
-    fcb.appendChild(d);
-
-    var wlGate = course.ModuleInstanceData.WinLossGate;
-
-    if (wlGate == undefined) {
-      d = createDivision(["list_match_result_win"], "0:0");
-      flr.appendChild(d);
-    } else {
-      if (wlGate.MaxWins == wlGate.CurrentWins) {
-        d = createDivision(
-          ["list_match_result_win"],
-          wlGate.CurrentWins + ":" + wlGate.CurrentLosses
-        );
-        flr.appendChild(d);
-      } else {
-        d = createDivision(
-          ["list_match_result_loss"],
-          wlGate.CurrentWins + ":" + wlGate.CurrentLosses
-        );
-        flr.appendChild(d);
-      }
-    }
-
+    var eventRow = createEventRow(course);
     var divExp = createDivision([course.id + "exp", "list_event_expand"]);
 
-    var fldel = createDivision([
-      "flex_item",
-      course.id + "_del",
-      "delete_item"
-    ]);
-    fldel.style.marginRight = "10px";
-
-    div.appendChild(fltl);
-    div.appendChild(fll);
-    div.appendChild(flc);
-    div.appendChild(flr);
-    div.appendChild(fldel);
-
-    mainDiv.appendChild(div);
+    mainDiv.appendChild(eventRow);
     mainDiv.appendChild(divExp);
 
-    deleteCourse(course);
+    attachDeleteCourseButton(course);
     addHover(course, divExp);
   }
 
@@ -165,18 +80,263 @@ function openEventsTab(loadMore) {
   loadEvents = loadEnd;
 }
 
-//
-function deleteCourse(_course) {
-  $("." + _course.id + "_del").on("click", function(e) {
-    currentId = _course.id;
+function createEventRow(course) {
+  // create the DOM structure
+
+  var eventContainer = createDivision([course.id, "list_match"]);
+
+  var flexTopLeft = createDivision(["flex_item"]);
+
+  var flexLeft = createDivision(["flex_item"]);
+  flexLeft.style.flexDirection = "column";
+
+  var flexTop = createDivision(["flex_top"]);
+  flexLeft.appendChild(flexTop);
+
+  var flexBottom = createDivision(["flex_bottom"]);
+  flexLeft.appendChild(flexBottom);
+
+  var flexCenter = createDivision(["flex_item"]);
+  flexCenter.style.flexDirection = "column";
+  flexCenter.style.flexGrow = 2;
+
+  var flexCenterTop = createDivision(["flex_top"]);
+  flexCenter.appendChild(flexCenterTop);
+
+  var flexCenterBottom = createDivision(["flex_bottom"]);
+  flexCenterBottom.style.marginRight = "14px";
+  flexCenter.appendChild(flexCenterBottom);
+
+  var flexRight = createDivision(["flex_item"]);
+
+  var flexDeleteEvent = createDivision([
+    "flex_item",
+    course.id + "_del",
+    "delete_item"
+  ]);
+
+  flexDeleteEvent.style.marginRight = "10px";
+
+  eventContainer.appendChild(flexTopLeft);
+  eventContainer.appendChild(flexLeft);
+  eventContainer.appendChild(flexCenter);
+  eventContainer.appendChild(flexRight);
+  eventContainer.appendChild(flexDeleteEvent);
+
+  var tileGrpid = course.CourseDeck.deckTileId;
+  try {
+    cardsDb.get(tileGrpid).set;
+  } catch (e) {
+    tileGrpid = 67003;
+  }
+
+  var tile = createDivision([course.id + "t", "deck_tile"]);
+
+  try {
+    tile.style.backgroundImage =
+      "url(https://img.scryfall.com/cards" +
+      cardsDb.get(tileGrpid).images["art_crop"] +
+      ")";
+  } catch (e) {
+    console.error(e, tileGrpid);
+  }
+  flexTopLeft.appendChild(tile);
+
+  flexTop.appendChild(
+    createDivision(
+      ["list_deck_name"],
+      getReadableEvent(course.InternalEventName)
+    )
+  );
+
+  course.CourseDeck.colors.forEach(color => {
+    flexBottom.appendChild(createDivision(["mana_s20", `mana_${mana[color]}`]));
+  });
+
+  var eventState = course.CurrentEventState;
+  if (eventState == "DoneWithMatches" || eventState == 2) {
+    flexCenterTop.appendChild(
+      createDivision(["list_event_phase"], "Completed")
+    );
+  } else {
+    flexCenterTop.appendChild(
+      createDivision(["list_event_phase_red"], "In progress")
+    );
+  }
+
+  var duration = 0;
+
+  var wlGate = course.ModuleInstanceData.WinLossGate;
+  var matchesList = wlGate ? wlGate.ProcessedMatchIds : undefined;
+  if (matchesList) {
+    var matches = matchesList
+      .map(index => matchesHistory[index])
+      .filter(match => match !== undefined && match.type === "match")
+
+    var duration = matches.reduce((acc, match) => acc + match.duration , 0);
+  }
+
+  flexCenterBottom.appendChild(
+    createDivision(
+      ["list_match_time"],
+      timeSince(new Date(course.date)) + " ago - " + toMMSS(duration)
+    )
+  );
+
+  var winLossText = "0:0";
+  var winLossClass = "list_match_result_win";
+
+  if (wlGate !== undefined) {
+    winLossText = wlGate.CurrentWins + ":" + wlGate.CurrentLosses;
+    if (wlGate.MaxWins !== wlGate.CurrentWins) {
+      winLossClass = "list_match_result_loss";
+    }
+  }
+
+  flexRight.appendChild(createDivision([winLossClass], winLossText));
+
+  return eventContainer;
+}
+
+function attachDeleteCourseButton(course) {
+  $(`.${course.id}_del`).on("click", function(e) {
+    // This is a global. It's used in other parts of the code.
+    currentId = course.id;
     e.stopPropagation();
     ipc_send("delete_course", currentId);
     $("." + currentId).css("height", "0px");
   });
 }
 
+// Given the data of a match will return a data row to be
+// inserted into one of the screens.
+
+// DOM should be consistent across all screens. Use CSS to style the row and hide elements.
 //
-function expandEvent(_course, expandDiv) {
+// Used by events.js and potentially other screens.
+function createMatchRow(match) {
+  //  if (match.opponent == undefined) continue;
+  //  if (match.opponent.userid.indexOf("Familiar") !== -1) continue;
+  match.playerDeck.mainDeck.sort(compare_cards);
+  match.oppDeck.mainDeck.sort(compare_cards);
+
+  // Create the DOM structure
+  // rowContainer
+  //   flexTopLeft
+  //   flexLeft
+  //     flexTop
+  //     flexBottom
+  //   flexCenter
+  //     flexCenterTop
+  //     flexCenterBottom
+  //   flexRight
+
+  var rowContainer = createDivision([match.id, "list_match"]);
+
+  var flexTopLeft = createDivision(["flex_item"]);
+
+  var flexLeft = createDivision(["flex_item"]);
+  flexLeft.style.flexDirection = "column";
+
+  var flexTop = createDivision(["flex_top"]);
+  flexLeft.appendChild(flexTop);
+
+  var flexBottom = createDivision(["flex_bottom"]);
+  flexLeft.appendChild(flexBottom);
+
+  var flexCenter = createDivision(["flex_item"]);
+  flexCenter.style.flexDirection = "column";
+  flexCenter.style.flexGrow = 2;
+
+  var flexCenterTop = createDivision(["flex_top"]);
+  flexCenter.appendChild(flexCenterTop);
+
+  var flexCenterBottom = createDivision(["flex_bottom"]);
+  flexCenterBottom.style.marginRight = "14px";
+  flexCenter.appendChild(flexCenterBottom);
+
+  var flexRight = createDivision(["flex_item"]);
+
+  rowContainer.appendChild(flexTopLeft);
+  rowContainer.appendChild(flexLeft);
+  rowContainer.appendChild(flexCenter);
+  rowContainer.appendChild(flexRight);
+
+  // Insert contents of flexTopLeft
+
+  var tileGrpid = match.playerDeck.deckTileId;
+  try {
+    cardsDb.get(tileGrpid).images["art_crop"];
+  } catch (e) {
+    tileGrpid = 67003;
+  }
+
+  var tile = createDivision([match.id + "t", "deck_tile"]);
+  try {
+    let backgroundFile = cardsDb.get(tileGrpid).images["art_crop"];
+    tile.style.backgroundImage = `url(https://img.scryfall.com/cards${backgroundFile})`;
+  } catch (e) {
+    timeSince(new Date(match.date)) + " ago - " + toMMSS(match.duration);
+    console.error(e);
+  }
+  flexTopLeft.appendChild(tile);
+
+  // Insert contents of flexTop
+  flexTop.appendChild(
+    createDivision(["list_deck_name"], match.playerDeck.name)
+  );
+
+  // Insert contents of flexBottom
+  match.playerDeck.colors.forEach(function(color) {
+    var m = createDivision(["mana_s20", "mana_" + mana[color]]);
+    flexBottom.appendChild(m);
+  });
+
+  // Insert contents of flexCenterTop
+  if (match.opponent.name == null) {
+    match.opponent.name = "-";
+  }
+
+  flexCenterTop.appendChild(
+    createDivision(
+      ["list_match_title"],
+      "vs " + match.opponent.name.slice(0, -6)
+    )
+  );
+
+  var or = createDivision(["ranks_16"]);
+  or.style.backgroundPosition = `${get_rank_index_16(match.opponent.rank) * -16}px 0px`;
+  or.title = match.opponent.rank + " " + match.opponent.tier;
+  flexCenterTop.appendChild(or);
+
+  // insert contents of flexCenterBottom
+  flexCenterBottom.appendChild(
+    createDivision(
+      ["list_match_time"],
+      timeSince(new Date(match.date)) + " ago - " + toMMSS(match.duration)
+    )
+  );
+
+  get_deck_colors(match.oppDeck).forEach(function(color) {
+    var m = createDivision(["mana_s20", "mana_" + mana[color]]);
+    flexCenterBottom.appendChild(m);
+  });
+
+  // insert contents of flexRight
+
+  var resultClass = `list_match_result_${
+    match.player.win > match.opponent.win ? "win" : "loss"
+  }`;
+  flexRight.appendChild(
+    createDivision([resultClass], match.player.win + ":" + match.opponent.win)
+  );
+
+  return rowContainer;
+}
+
+// This code is executed when an event row is clicked and adds
+// rows below the event for every match in that event.
+function expandEvent(course, expandDiv) {
   if (expandDiv.hasAttribute("style")) {
     expandDiv.removeAttribute("style");
     setTimeout(function() {
@@ -185,133 +345,26 @@ function expandEvent(_course, expandDiv) {
     return;
   }
 
-  var matchesList = _course.ModuleInstanceData.WinLossGate.ProcessedMatchIds;
+  var matchesList = course.ModuleInstanceData.WinLossGate.ProcessedMatchIds;
   expandDiv.innerHTML = "";
-  //console.log(matchesList);
-  var newHeight = 0;
-  if (matchesList != undefined) {
-    matchesList.forEach(function(_mid) {
-      var match = matchesHistory[_mid];
 
-      //console.log(_mid);
-      //console.log(match);
-      if (match != undefined) {
-        if (match.type == "match") {
-          //	if (match.opponent == undefined) continue;
-          //	if (match.opponent.userid.indexOf("Familiar") !== -1) continue;
-          match.playerDeck.mainDeck.sort(compare_cards);
-          match.oppDeck.mainDeck.sort(compare_cards);
-
-          var div = createDivision([match.id, "list_match"]);
-
-          var fltl = createDivision(["flex_item"]);
-
-          var fll = createDivision(["flex_item"]);
-          fll.style.flexDirection = "column";
-
-          var flt = createDivision(["flex_top"]);
-          fll.appendChild(flt);
-
-          var flb = createDivision(["flex_bottom"]);
-          fll.appendChild(flb);
-
-          var flc = createDivision(["flex_item"]);
-          flc.style.flexDirection = "column";
-          flc.style.flexGrow = 2;
-
-          var fct = createDivision(["flex_top"]);
-          flc.appendChild(fct);
-
-          var fcb = createDivision(["flex_bottom"]);
-          fcb.style.marginRight = "14px";
-          flc.appendChild(fcb);
-
-          var flr = createDivision(["flex_item"]);
-
-          var tileGrpid = match.playerDeck.deckTileId;
-          try {
-            cardsDb.get(tileGrpid).images["art_crop"];
-          } catch (e) {
-            tileGrpid = 67003;
-          }
-
-          var tile = createDivision([match.id + "t", "deck_tile"]);
-
-          try {
-            tile.style.backgroundImage =
-              "url(https://img.scryfall.com/cards" +
-              cardsDb.get(tileGrpid).images["art_crop"] +
-              ")";
-          } catch (e) {
-            timeSince(new Date(match.date)) +
-              " ago - " +
-              toMMSS(match.duration);
-            console.error(e);
-          }
-          //fltl.appendChild(tile);
-
-          var d = createDivision(["list_deck_name"], match.playerDeck.name);
-          flt.appendChild(d);
-
-          match.playerDeck.colors.forEach(function(color) {
-            var m = createDivision(["mana_s20", "mana_" + mana[color]]);
-            flb.appendChild(m);
-          });
-
-          if (match.opponent.name == null) {
-            match.opponent.name = "-";
-          }
-          d = createDivision(
-            ["list_match_title"],
-            "vs " + match.opponent.name.slice(0, -6)
-          );
-          fct.appendChild(d);
-
-          var or = createDivision(["ranks_16"]);
-          or.style.backgroundPosition =
-            get_rank_index_16(match.opponent.rank) * -16 + "px 0px";
-          or.title = match.opponent.rank + " " + match.opponent.tier;
-          fct.appendChild(or);
-
-          d = createDivision(
-            ["list_match_time"],
-            timeSince(new Date(match.date)) + " ago - " + toMMSS(match.duration)
-          );
-          fcb.appendChild(d);
-
-          var cc = get_deck_colors(match.oppDeck);
-          cc.forEach(function(color) {
-            var m = createDivision(["mana_s20", "mana_" + mana[color]]);
-            fcb.appendChild(m);
-          });
-
-          if (match.player.win > match.opponent.win) {
-            d = createDivision(
-              ["list_match_result_win"],
-              match.player.win + ":" + match.opponent.win
-            );
-            flr.appendChild(d);
-          } else {
-            d = createDivision(
-              ["list_match_result_loss"],
-              match.player.win + ":" + match.opponent.win
-            );
-            flr.appendChild(d);
-          }
-
-          div.appendChild(fltl);
-          div.appendChild(fll);
-          div.appendChild(flc);
-          div.appendChild(flr);
-
-          expandDiv.appendChild(div);
-          newHeight += 64;
-          addHover(match, expandDiv);
-        }
-      }
-    });
+  if (!matchesList) {
+    return;
   }
-  expandDiv.style.height = newHeight + 16 + "px";
+
+  var matchRows = matchesList
+    .map(index => matchesHistory[index])
+    .filter(match => match !== undefined && match.type === "match")
+    .map(match => {
+      let row = createMatchRow(match);
+      expandDiv.appendChild(row);
+      addHover(match, expandDiv);
+      return row;
+    });
+
+  var newHeight = matchRows.length * 64 + 16;
+
+  expandDiv.style.height = `${newHeight}px`;
 }
 
 module.exports = {
