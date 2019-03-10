@@ -22,8 +22,25 @@ let sortingAlgorithm = "Set";
 let filteredSets = [];
 let filteredMana = [];
 
+let orderedSets;
+
 //
 function openCollectionTab() {
+  orderedSets = [];
+  for (let set in setsList) {
+    orderedSets.push(set);
+  }
+
+  orderedSets.sort((a, b) => {
+    if (setsList[a].release < setsList[b].release) {
+      return -1;
+    }
+    if (setsList[a].release > setsList[b].release) {
+      return 1;
+    }
+    return 0;
+  });
+
   $("#ux_0").html("");
   $("#ux_1").html("");
   $("#ux_0").removeClass("flex_item");
@@ -120,21 +137,6 @@ function openCollectionTab() {
   typeInput.appendTo(icd);
   icd.appendTo(flex);
   flex.appendTo(filters);
-
-  let orderedSets = [];
-  for (let set in setsList) {
-    orderedSets.push(set);
-  }
-
-  orderedSets.sort((a, b) => {
-    if (setsList[a].release < setsList[b].release) {
-      return -1;
-    }
-    if (setsList[a].release > setsList[b].release) {
-      return 1;
-    }
-    return 0;
-  });
 
   var sets = $('<div class="sets_container"></div>');
   orderedSets.forEach(set => {
@@ -372,9 +374,9 @@ function printStats() {
   $("<label>Sets Completion</label>").appendTo(mainstats);
 
   // each set stats
-  for (let set in setsList) {
+  orderedSets.forEach(set => {
     renderSetStats(stats[set], setsList[set].code, set).appendTo(mainstats);
-  }
+  });
 
   // Complete collection sats
   renderSetStats(stats.complete, "PW", "Complete collection").appendTo(
