@@ -488,6 +488,19 @@ label {
     background-image: url(../images/icon_back_light.png);
 }
 
+.hover_card_quantity {
+    display: flex;
+    position: relative;
+    left: 210px;
+    top: -32px;
+    width: 180px;
+    height: 32px;
+    justify-content: center;
+    align-items: center;
+    border-radius: 12px 12px 0px 0px;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
 .main_hover_container {
     pointer-events: none;
     display: flex;
