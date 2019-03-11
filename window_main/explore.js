@@ -672,8 +672,8 @@ function sortByPlayer(a, b) {
   if (!b) return -1;
   if (!a) return 1;
 
-  if (a.player < b.player) return -1;
-  if (a.player > b.player) return 1;
+  if (a.player.toLowerCase() < b.player.toLowerCase()) return -1;
+  if (a.player.toLowerCase() > b.player.toLowerCase()) return 1;
   return 0;
 }
 
