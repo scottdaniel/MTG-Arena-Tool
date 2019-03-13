@@ -1042,7 +1042,13 @@ async function attemptLogLoop() {
 async function logLoop() {
   //console.log("logLoop() start");
   //ipc_send("ipc_log", "logLoop() start");
-  if (!(await mtgaLog.exists(logUri))) {
+  if (fs.existsSync(logUri)) {
+    if (fs.lstatSync(logUri).isDirectory()) {
+      ipc_send("no_log", logUri);
+      ipc_send("popup", { text: "No log file found. Please include the file name too.", time: 1000 });
+      return;
+    }
+  } else {
     ipc_send("no_log", logUri);
     ipc_send("popup", { text: "No log file found.", time: 1000 });
     return;
