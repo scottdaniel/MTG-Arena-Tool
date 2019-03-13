@@ -2214,6 +2214,10 @@ a:hover {
     border-color: transparent transparent #FAE5D2 transparent
 }
 
+.select-styled.active + .select-options {
+    display: block;
+}
+
 .select-options {
     display: none;
     position: absolute;
