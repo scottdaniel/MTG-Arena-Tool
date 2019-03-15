@@ -7,7 +7,7 @@ global
   windowOverlay,
   get_rank_index,
   playerDataDefault,
-  hypergeometric,
+  hypergeometricRange,
   onLabelOutLogInfo,
   onLabelGreToClient,
   eventsToFormat,
@@ -1644,37 +1644,37 @@ function forceDeckUpdate(removeUsed = true) {
         else if (c.type.includes("Planeswalker", 0)) typePla += card.quantity;
       }
       card.chance = Math.round(
-        hypergeometric(1, cardsleft, odds_sample_size, card.quantity) * 100
+        hypergeometricRange(1, Math.min(odds_sample_size, card.quantity), cardsleft, odds_sample_size, card.quantity) * 100
       );
     });
 
     currentMatch.playerCards.chanceCre =
       Math.round(
-        hypergeometric(1, cardsleft, odds_sample_size, typeCre) * 1000
+        hypergeometricRange(1, Math.min(odds_sample_size, typeCre), cardsleft, odds_sample_size, typeCre) * 1000
       ) / 10;
     currentMatch.playerCards.chanceIns =
       Math.round(
-        hypergeometric(1, cardsleft, odds_sample_size, typeIns) * 1000
+        hypergeometricRange(1, Math.min(odds_sample_size, typeIns), cardsleft, odds_sample_size, typeIns) * 1000
       ) / 10;
     currentMatch.playerCards.chanceSor =
       Math.round(
-        hypergeometric(1, cardsleft, odds_sample_size, typeSor) * 1000
+        hypergeometricRange(1, Math.min(odds_sample_size, typeSor), cardsleft, odds_sample_size, typeSor) * 1000
       ) / 10;
     currentMatch.playerCards.chancePla =
       Math.round(
-        hypergeometric(1, cardsleft, odds_sample_size, typePla) * 1000
+        hypergeometricRange(1, Math.min(odds_sample_size, typePla), cardsleft, odds_sample_size, typePla) * 1000
       ) / 10;
     currentMatch.playerCards.chanceArt =
       Math.round(
-        hypergeometric(1, cardsleft, odds_sample_size, typeArt) * 1000
+        hypergeometricRange(1, Math.min(odds_sample_size, typeArt), cardsleft, odds_sample_size, typeArt) * 1000
       ) / 10;
     currentMatch.playerCards.chanceEnc =
       Math.round(
-        hypergeometric(1, cardsleft, odds_sample_size, typeEnc) * 1000
+        hypergeometricRange(1, Math.min(odds_sample_size, typeEnc), cardsleft, odds_sample_size, typeEnc) * 1000
       ) / 10;
     currentMatch.playerCards.chanceLan =
       Math.round(
-        hypergeometric(1, cardsleft, odds_sample_size, typeLan) * 1000
+        hypergeometricRange(1, Math.min(odds_sample_size, typeLan), cardsleft, odds_sample_size, typeLan) * 1000
       ) / 10;
     currentMatch.playerCards.deckSize = decksize;
     currentMatch.playerCards.cardsLeft = cardsleft;
