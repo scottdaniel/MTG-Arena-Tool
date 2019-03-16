@@ -491,6 +491,7 @@ label {
 .hover_card_quantity {
     display: flex;
     position: relative;
+    opacity: 1;
     left: 210px;
     top: -32px;
     width: 180px;
@@ -499,6 +500,7 @@ label {
     align-items: center;
     border-radius: 12px 12px 0px 0px;
     background-color: rgba(0, 0, 0, 0.5);
+    -webkit-transition: all .2s ease-in;
 }
 
 .main_hover_container {

@@ -655,113 +655,140 @@ var playerDataDefault = {
   }
 };
 
-//
+// Mostly an alias to document.querySelectorAll but
+// allows second argument to specify an alternative parent
+// Also returns an array.
+// Usage:
+// queryElements(".classname").forEach(el => do_something(el))
+// queryElements("#elementId")
+// queryElements("#elementId", otherElement)
+function queryElements(selectors, parentNode = document) {
+  return [...parentNode.querySelectorAll(selectors)];
+}
+
+// useful alias
+window.$$ = queryElements;
+
+// several utility functions to replace useful jQuery methods
+function show(element, mode) {
+  if (!mode) {
+    mode = "block";
+  }
+  element.style.display = mode;
+  return element;
+}
+
+function hide(element) {
+  element.style.display = "none";
+  return element;
+}
+
+function wrap(element, wrapper) {
+  element.parentNode.insertBefore(wrapper, element);
+  wrapper.appendChild(element);
+  return element;
+}
+
 function addCardTile(grpId, indent, quantity, element) {
+  // if element is a jquery object convert to bare DOM element
+  // TODO: Remove this once jQuery is removed.
+  if (element instanceof jQuery) {
+    element = element[0];
+  }
+
   if (quantity !== 0) {
-    var cont = $('<div class="card_tile_container click-on"></div>');
-    jQuery.data(cont[0], "grpId", grpId);
-    jQuery.data(cont[0], "id", indent);
-    jQuery.data(cont[0], "quantity", quantity);
+    var cont = createDivision(["card_tile_container", "click-on"]);
+
+    cont.dataset["grpId"] = grpId;
+    cont.dataset["id"] = indent;
+    cont.dataset["quantity"] = quantity;
 
     var ww, ll;
     if (!isNumber(quantity)) {
       ww = 64;
       ll = 48;
       let col = get_rank_class(quantity);
-      cont.append(
-        `<div class="card_tile_odds ${col}"><span>${quantity}</span></div>`
+      cont.appendChild(
+        createDivision(["card_tile_odds", col], `<span>${quantity}</span>`)
       );
     } else if (quantity == 9999) {
       quantity = 1;
       ww = 32;
       ll = 17;
-      cont.append(
-        '<div style="color: rgba(255, 255, 255, 0); min-width: 0px; width: 0px;" class="card_tile_quantity"><span>' +
-          quantity +
-          "</span></div>"
+
+      var quantityDiv = createDivision(
+        ["card_tile_quantity"],
+        `<span>${quantity}</span>`
       );
+      quantityDiv.style.cssText =
+        "color: rgba(255, 255, 255, 0); min-width: 0px; width: 0px;";
+      cont.appendChild(quantityDiv);
     } else {
       ww = 64;
       ll = 49;
-      cont.append(
-        '<div class="card_tile_quantity"><span>' + quantity + "</span></div>"
+      var quantityDiv = createDivision(
+        ["card_tile_quantity"],
+        `<span>${quantity}</span>`
       );
+      cont.appendChild(quantityDiv);
     }
-    element.append(cont);
+    element.appendChild(cont);
     var card = cardsDb.get(grpId);
-    var div = $(
-      '<div id="t' +
-        grpId +
-        indent +
-        '" style="min-width: calc(100% - ' +
-        ww +
-        'px) !important;" class="card_tile ' +
-        get_frame_class(card ? card.frame : []) +
-        '"></div>'
-    );
-    cont.append(div);
+    var cardTile = createDivision([
+      "card_tile",
+      get_frame_class(card ? card.frame : [])
+    ]);
+    cardTile.id = `t${grpId + indent}`;
+    cardTile.style.cssText = `min-width: calc(100% - ${ww}px);`;
+    // cardTile.style.minWidth = `calc(100% - ${ww}px)`;
+    cont.appendChild(cardTile);
 
     // Glow hover
-    var glow = $(
-      '<div id="t' +
-        grpId +
-        indent +
-        '" style="min-width: calc(100% - ' +
-        ww +
-        "px) !important; left: calc(0px - 100% + " +
-        ll +
-        'px) !important" class="card_tile_glow"></div>'
-    );
-    cont.append(glow);
+    var glow = createDivision(["card_tile_glow"]);
+    glow.id = `t${grpId + indent}`;
+    glow.style.cssText = `min-width: calc(100% - ${ww}px); left: calc(0px - 100% + ${ll}px)`;
+    cont.appendChild(glow);
 
     if (card) {
       addCardHover(glow, card);
-      glow.on("mouseenter", function() {
-        var domid = $(this).attr("id");
-        $("#" + domid).css("margin-top", "0px");
+      glow.addEventListener("mouseenter", evt => {
+        cardTile.style.marginTop = "0";
+      });
+      glow.addEventListener("mouseleave", evt => {
+        cardTile.style.marginTop = "3px";
       });
 
-      glow.on("click", function() {
+      glow.addEventListener("click", evt => {
         if (card.dfc == "SplitHalf") {
           card = cardsDb.get(card.dfcId);
         }
-        //let newname = card.name.split(' ').join('-');
         shell.openExternal(
-          "https://scryfall.com/card/" +
-            get_set_scryfall(card.set) +
-            "/" +
-            card.cid +
-            "/" +
-            card.name
+          `https://scryfall.com/card/${get_set_scryfall(card.set)}/${
+            card.cid
+          }/${card.name}`
         );
-      });
-
-      glow.on("mouseleave", function() {
-        var domid = $(this).attr("id");
-        //$('.main_hover').css("opacity", 0);
-        $("#" + domid).css("margin-top", "3px");
-        //$('.loader').css("opacity", 0);
       });
     }
 
     //
-    var fl = $('<div class="flex_item"></div>');
-    fl.append(
-      '<div class="card_tile_name">' + (card ? card.name : "Unknown") + "</div>"
+    var fl = createDivision(["flex_item"]);
+    fl.appendChild(
+      createDivision(["card_tile_name"], card ? card.name : "Unknown")
     );
-    div.append(fl);
+    cardTile.appendChild(fl);
 
-    fl = $('<div class="flex_item" style="line-height: 26px;"></div>"');
-    div.append(fl);
+    var fl2 = createDivision(["flex_item"]);
+    fl2.style.lineHeight = "26px";
+    cardTile.appendChild(fl2);
 
     if (!card) return cont;
 
     var prevc = true;
     card.cost.forEach(function(cost) {
       if (/^(x|\d)+$/.test(cost) && prevc == false) {
-        fl.append("//");
+        fl2.innerHTML += "//";
       }
-      fl.append('<div class="mana_s16 flex_end mana_' + cost + '"></div>');
+      fl2.appendChild(createDivision(["mana_s16", "flex_end", `mana_${cost}`]));
 
       prevc = /^\d+$/.test(cost);
     });
@@ -779,10 +806,12 @@ function addCardTile(grpId, indent, quantity, element) {
         //if (cards[grpId] == undefined) {
         if (quantity > 0) {
           let yoff = quantity * -24;
-          cont.append(
-            `<div style="background-position: ${xoff}px ${yoff}px; left: calc(0px - 100% + ${ww -
-              14}px);" class="not_owned_sprite" title="${quantity} missing"></div>`
-          );
+
+          var asasdf = createDivision(["not_owned_sprite"]);
+          asasdf.style.cssText = `background-position: ${xoff}px ${yoff}px; left: calc(0px - 100% + ${ww -
+            14}px);`;
+          asasdf.title = "${quantity} missing";
+          cont.appendChild(asasdf);
         }
         /*}
         else if (quantity > cards[grpId]) {
@@ -798,142 +827,148 @@ function addCardTile(grpId, indent, quantity, element) {
   return false;
 }
 
-//
-function selectAdd(div, callback) {
-  div.each(function() {
-    var $this = $(this),
-      numberOfOptions = $(this).children("option").length;
+// When given a <select> element will convert to
+// list format to allow more style options
+function selectAdd(selectElement, callback) {
+  if (selectElement instanceof jQuery) {
+    selectElement = selectElement[0];
+  }
 
-    $this.addClass("select-hidden");
-    $this.wrap('<div class="select"></div>');
-    $this.after('<div class="select-styled"></div>');
+  selectElement.classList.add("select-hidden");
 
-    var $styledSelect = $this.next("div.select-styled");
-    $styledSelect.text(
-      $this
-        .children("option")
-        .eq(0)
-        .text()
-    );
+  // dom structure is
+  // container
+  //   selectElement
+  //   styledSelect
+  //   list
 
-    var $list = $("<ul />", {
-      class: "select-options"
-    }).insertAfter($styledSelect);
+  var container = createDivision(["select"]);
+  wrap(selectElement, container);
 
-    for (var i = 0; i < numberOfOptions; i++) {
-      $("<li />", {
-        text: $this
-          .children("option")
-          .eq(i)
-          .text(),
-        rel: $this
-          .children("option")
-          .eq(i)
-          .val()
-      }).appendTo($list);
+  var styledSelect = createDivision(
+    ["select-styled"],
+    selectElement.options[0].textContent
+  );
+  container.appendChild(styledSelect);
+
+  var list = document.createElement("ul");
+  list.className = "select-options";
+  container.appendChild(list);
+
+  // insert list entries
+  [...selectElement.options].forEach(option => {
+    var li = document.createElement("li");
+    li.innerHTML = option.textContent;
+    li.rel = option.value;
+    list.appendChild(li);
+  });
+
+  // Open and close the dropdown
+  styledSelect.addEventListener("click", evt => {
+    evt.stopPropagation();
+
+    // toggle current select
+    if (styledSelect.classList.contains("active")) {
+      styledSelect.classList.remove("active");
+    } else {
+      styledSelect.classList.add("active");
     }
 
-    var $listItems = $list.children("li");
+    // disable other selects on the page
+    $$("div.select-styled")
+      .filter(select => select !== styledSelect)
+      .forEach(select => select.remove("active"));
+  });
 
-    $styledSelect.click(function(e) {
-      e.stopPropagation();
-      $("div.select-styled.active")
-        .not(this)
-        .each(function() {
-          $(this)
-            .removeClass("active")
-            .next("ul.select-options")
-            .hide();
-        });
-      $(this)
-        .toggleClass("active")
-        .next("ul.select-options")
-        .toggle();
-    });
+  // var listItems = list.childNodes;
+  list.addEventListener("click", evt => {
+    evt.stopPropagation();
+    var option = evt.target;
+    console.log("option", option, evt);
 
-    $listItems.click(function(e) {
-      e.stopPropagation();
-      $styledSelect.text($(this).text()).removeClass("active");
-      $this.val($(this).attr("rel"));
-      $list.hide();
-      callback($this.val());
-    });
+    styledSelect.innerHTML = option.textContent;
+    styledSelect.classList.remove("active");
 
-    $(document).click(function() {
-      $styledSelect.removeClass("active");
-      $list.hide();
-    });
+    selectElement.value = option.rel;
+
+    callback(selectElement.value);
+  });
+
+  // hide the select if the document is clicked.
+  document.addEventListener("click", evt => {
+    styledSelect.classList.remove("active");
   });
 }
 
-//
-function addCardHover(div, _card) {
-  if (!_card || !_card.images) return;
+// Attaches a hover event to any DOM element.
+// Howver over the element with the mouse pops up
+// card info for `card`
+function addCardHover(element, card) {
+  if (!card || !card.images) return;
 
-  if (div instanceof jQuery) {
-    div = div[0];
+  if (element instanceof jQuery) {
+    element = element[0];
   }
 
-  div.addEventListener("mouseover", () => {
-    $(".loader").css("opacity", 1);
-    $(".main_hover").css("opacity", 1);
-    let dfc = "";
-    if (_card.dfc == "DFC_Back") dfc = "a";
-    if (_card.dfc == "DFC_Front") dfc = "b";
-    if (_card.dfc == "SplitHalf") dfc = "a";
+  element.addEventListener("mouseover", evt => {
+    $$(".loader, .main_hover").forEach(element => (element.style.opacity = 1));
 
     // Split cards are readable both halves, no problem
-    if (dfc != "" && _card.dfc != "SplitHalf" && renderer == 0) {
-      $(".main_hover_dfc").show();
-      $(".loader_dfc").show();
-      $(".loader_dfc").css("opacity", 1);
-      $(".main_hover_dfc").css("opacity", 1);
-      $(".loader_dfc").css("opacity", 1);
-      var dfcCard = cardsDb.get(_card.dfcId);
+    if (card.dfc != "None" && card.dfc != "SplitHalf" && renderer == 0) {
+      $$(".loader_dfc, .main_hover_dfc").forEach(el => {
+        show(el);
+        el.style.opacity = 1;
+      });
 
-      $(".main_hover_dfc").attr("src", get_card_image(dfcCard));
-      $(".main_hover_dfc").on("load", function() {
-        $(".loader_dfc").css("opacity", 0);
+      var dfcCard = cardsDb.get(card.dfcId);
+      var dfcCardImage = get_card_image(dfcCard);
+
+      var dfcImageElement = $$(".main_hover_dfc")[0];
+      dfcImageElement.src = dfcCardImage;
+      dfcImageElement.addEventListener("load", evt => {
+        $$(".loader_dfc").forEach(el => (el.style.opacity = 0));
       });
     } else {
-      $(".main_hover_dfc").hide();
-      $(".loader_dfc").hide();
+      $$(".main_hover_dfc, .loader_dfc").forEach(hide);
     }
 
-    $(".main_hover").attr("src", get_card_image(_card));
-
-    $(".main_hover").on("load", function() {
-      $(".loader").css("opacity", 0);
-      if (renderer == 0) {
-        let hoverCardQuantity = $('.hover_card_quantity');
-        hoverCardQuantity.html("");
-        hoverCardQuantity.css("opacity", 1);
-        for (let i = 0; i < 4; i++) {
-          if (cardsNew[_card.id] != undefined && i < cardsNew[_card.id]) {
-            $(
-              '<div class="inventory_card_quantity_orange"></div>'
-            ).appendTo(hoverCardQuantity);
-          } else if (i < cards[_card.id]) {
-            $(
-              '<div class="inventory_card_quantity_green"></div>'
-            ).appendTo(hoverCardQuantity);
-          } else {
-            $(
-              '<div class="inventory_card_quantity_gray"></div>'
-            ).appendTo(hoverCardQuantity);
-          }
-        }
-      }
+    var mainImageElement = $$(".main_hover")[0];
+    mainImageElement.src = get_card_image(card);
+    mainImageElement.addEventListener("load", evt => {
+      $$(".loader").forEach(el => (el.style.opacity = 0));
     });
+    
+    // show card quantity
+    if (renderer == 0) {
+      attachOwnerhipStars(card, $$(".hover_card_quantity")[0]);
+    }
   });
 
-  div.addEventListener("mouseleave", () => {
-    $('.hover_card_quantity').css("opacity", 0);
-    $(".main_hover").css("opacity", 0);
-    $(".main_hover_dfc").css("opacity", 0);
-    $(".loader").css("opacity", 0);
-    $(".loader_dfc").css("opacity", 0);
+  element.addEventListener("mouseleave", () => {
+    $$(
+      ".hover_card_quantity, .main_hover, .main_hover_dfc, .loader, .loader_dfc"
+    ).forEach(element => (element.style.opacity = 0));
   });
+}
+
+function attachOwnerhipStars(card, starContainer) {
+  starContainer.innerHTML = "";
+  starContainer.style.opacity = 1;
+
+  for (let i = 0; i < 4; i++) {
+    let color = "gray";
+
+    if (cardsNew[card.id] != undefined && i < cardsNew[card.id]) {
+      color = "orange";
+    } else if (i < cards[card.id]) {
+      color = "green";
+    } else {
+      color = "gray";
+    }
+    starContainer.appendChild(
+      createDivision([`inventory_card_quantity_${color}`])
+    );
+  }
 }
 
 //
@@ -977,6 +1012,10 @@ function get_rank_index_16(_rank) {
 
 //
 function addCardSeparator(i, element, number = 0) {
+  if (element instanceof jQuery) {
+    element = element[0];
+  }
+
   var str = "";
   switch (i) {
     case 1:
@@ -1015,8 +1054,7 @@ function addCardSeparator(i, element, number = 0) {
     str += ` (${number})`;
   }
 
-  var cont = $(`<div class="card_tile_separator">${str}</div>`);
-  element.append(cont);
+  element.appendChild(createDivision(["card_tile_separator"], str));
 }
 
 //
