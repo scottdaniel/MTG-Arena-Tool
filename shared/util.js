@@ -936,11 +936,12 @@ function addCardHover(element, card) {
     mainImageElement.src = get_card_image(card);
     mainImageElement.addEventListener("load", evt => {
       $$(".loader").forEach(el => (el.style.opacity = 0));
-      // show card quantity
-      if (renderer == 0) {
-        attachOwnerhipStars(card, $$(".hover_card_quantity")[0]);
-      }
     });
+    
+    // show card quantity
+    if (renderer == 0) {
+      attachOwnerhipStars(card, $$(".hover_card_quantity")[0]);
+    }
   });
 
   element.addEventListener("mouseleave", () => {
