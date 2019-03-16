@@ -662,10 +662,7 @@ var playerDataDefault = {
 // queryElements(".classname").forEach(el => do_something(el))
 // queryElements("#elementId")
 // queryElements("#elementId", otherElement)
-function queryElements(selectors, parentNode) {
-  if (!parentNode) {
-    parentNode = document;
-  }
+function queryElements(selectors, parentNode = document) {
   return [...parentNode.querySelectorAll(selectors)];
 }
 
