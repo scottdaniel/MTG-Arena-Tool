@@ -1,21 +1,21 @@
 /*
 globals
-	filterEvent,
-	getReadableEvent,
-	selectAdd,
-	cardsDb,
-	mana,
-	orderedColorCodesCommon,
-	timeSince,
-	ipc_send,
-	getEventId,
-	explore,
-	ladder,
-	add_checkbox,
-	economyHistory,
-	get_deck_missing,
-	getWinrateClass,
-	get_rank_index_16
+  filterEvent,
+  getReadableEvent,
+  selectAdd,
+  cardsDb,
+  mana,
+  orderedColorCodesCommon,
+  timeSince,
+  ipc_send,
+  getEventId,
+  explore,
+  ladder,
+  add_checkbox,
+  economyHistory,
+  get_deck_missing,
+  getWinrateClass,
+  get_rank_index_16
 */
 
 let loadExplore = 0;
@@ -38,6 +38,7 @@ function updateExplore() {
   filterEvent = getEventId(
     document.getElementById("query_select_filter").value
   );
+  console.log("updateExplore", filterEvent);
   ipc_send("request_explore", filterEvent);
 }
 
@@ -278,12 +279,14 @@ function ladderLoadMore(loadMore) {
     }
 
     if (filteredMana.length > 0) {
-      let filterOut = false;
-      filteredMana.forEach(i => {
-        if (!_deck.colors.includes(i)) {
-          filterOut = true;
-        }
-      });
+      let filterOut = true;
+      if (
+        _deck.colors.every(i => filteredMana.includes(i)) &&
+        filteredMana.every(i => _deck.colors.includes(i))
+      ) {
+        filterOut = false;
+      }
+      console.log("filterOut", filterOut, _deck.colors, filteredMana);
 
       if (filterOut) continue;
     }
@@ -477,13 +480,16 @@ function exploreLoadMore(loadMore) {
     if (_deck.colors == undefined) {
       _deck.colors = [];
     }
+
     if (filteredMana.length > 0) {
-      let filterOut = false;
-      filteredMana.forEach(i => {
-        if (!_deck.colors.includes(i)) {
-          filterOut = true;
-        }
-      });
+      let filterOut = true;
+      if (
+        _deck.colors.every(i => filteredMana.includes(i)) &&
+        filteredMana.every(i => _deck.colors.includes(i))
+      ) {
+        filterOut = false;
+      }
+      console.log("filterOut", filterOut, _deck.colors, filteredMana);
 
       if (filterOut) continue;
     }
