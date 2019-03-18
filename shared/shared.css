@@ -518,8 +518,8 @@ label {
 .loader, .loader_dfc {
     pointer-events: none;
     align-self: right;
-    max-width: 240px;
-    max-height: 340px;
+    width: 240px;
+    height: 340px;
     opacity: 0;
     display: block;
     margin-right: 24px;
@@ -531,8 +531,8 @@ label {
 .main_hover, .main_hover_dfc {
     pointer-events: none;
     align-self: right;
-    max-width: 240px;
-    max-height: 340px;
+    width: 240px;
+    height: 340px;
     opacity: 1;
     display: block;
     margin-right: 24px;
