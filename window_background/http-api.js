@@ -204,7 +204,7 @@ function httpBasic() {
               console.log(
                 "RECV << " + index,
                 _headers.method,
-                results.slice(0, 500)
+                _headers.method == "auth" ? results : results.slice(0, 500)
               );
             }
           }
@@ -247,8 +247,21 @@ function httpBasic() {
                   rstore.set("token", tokenAuth);
                   rstore.set("email", playerData.userName);
                 }
+                playerData.patreon = parsedResult.patreon;
 
-                loadPlayerConfig(playerData.arenaId);
+                let serverData = {
+                  matches: [],
+                  courses: [],
+                  drafts: [],
+                  economy: []
+                };
+                if (playerData.patreon) {
+                  serverData.matches = parsedResult.matches;
+                  serverData.courses = parsedResult.courses;
+                  serverData.drafts = parsedResult.drafts;
+                  serverData.economy = parsedResult.economy;
+                }
+                loadPlayerConfig(playerData.arenaId, serverData);
                 beginSSE();
               }
               if (
@@ -274,6 +287,9 @@ function httpBasic() {
               }
               if (_headers.method == "tou_check") {
                 //ipc_send("tou_set_game", parsedResult.result);
+              }
+              if (_headers.method == "get_sync") {
+                syncUserData(parsedResult.data);
               }
 
               if (_headers.method == "get_database") {
@@ -618,6 +634,17 @@ function httpSetDeckTag(tag, cards, format) {
   });
 }
 
+function httpSyncRequest(data) {
+  var _id = makeId(6);
+  data = JSON.stringify(data);
+  httpAsync.push({
+    reqId: _id,
+    method: "get_sync",
+    method_path: "/api/get_sync.php",
+    data: data
+  });
+}
+
 module.exports = {
   httpAuth,
   httpSubmitCourse,
@@ -640,5 +667,6 @@ module.exports = {
   httpTournamentDrop,
   httpTournamentCheck,
   httpSetMythicRank,
-  httpSetDeckTag
+  httpSetDeckTag,
+  httpSyncRequest
 };

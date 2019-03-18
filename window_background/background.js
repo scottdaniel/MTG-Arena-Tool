@@ -643,7 +643,7 @@ function rememberLogin(bool) {
 */
 
 // Loads this player's configuration file
-function loadPlayerConfig(playerId) {
+function loadPlayerConfig(playerId, serverData = undefined) {
   ipc_send("ipc_log", "Load player ID: " + playerId);
   store = new Store({
     configName: playerId,
@@ -741,6 +741,25 @@ function loadPlayerConfig(playerId) {
     }
   }
 
+  if (serverData) {
+    let requestSync = {};
+    requestSync.courses = serverData.courses.filter(_id => !entireConfig[_id]);
+    requestSync.matches = serverData.matches.filter(_id => !entireConfig[_id]);
+    requestSync.drafts = serverData.drafts.filter(_id => !entireConfig[_id]);
+    requestSync.economy = serverData.economy.filter(_id => !entireConfig[_id]);
+    console.log("requestSync", requestSync);
+
+    if (
+      requestSync.courses.length +
+        requestSync.matches.length +
+        requestSync.drafts.length +
+        requestSync.economy.length >
+      0
+    ) {
+      httpApi.httpSyncRequest(requestSync);
+    }
+  }
+
   // Remove duplicates, sorry :(
   let length = history.matches.length;
   history.matches = history.matches.sort().filter(function(item, pos, ary) {
@@ -769,6 +788,63 @@ function loadPlayerConfig(playerId) {
 
   watchingLog = true;
   stopWatchingLog = startWatchingLog();
+}
+
+function syncUserData(data) {
+  // Sync Events
+  var courses_index = store.get("courses_index");
+  data.courses.forEach(doc => {
+    doc.id = doc._id;
+    delete doc._id;
+    if (!courses_index.includes(doc.id)) {
+      courses_index.push(doc.id);
+      store.set(doc.id, doc);
+      events[doc.id] = doc;
+    }
+  });
+  store.set("courses_index", courses_index);
+
+  // Sync Matches
+  var matches_index = store.get("matches_index");
+  data.matches.forEach(doc => {
+    doc.id = doc._id;
+    delete doc._id;
+    if (!matches_index.includes(doc.id)) {
+      matches_index.push(doc.id);
+      store.set(doc.id, doc);
+      history[doc.id] = doc;
+    }
+  });
+  requestHistorySend(0);
+  store.set("matches_index", matches_index);
+
+  // Sync Economy
+  var economy_index = store.get("economy_index");
+  data.economy.forEach(doc => {
+    doc.id = doc._id;
+    delete doc._id;
+    if (!economy_index.includes(doc.id)) {
+      economy_index.push(doc.id);
+      store.set(doc.id, doc);
+      economy[doc.id] = doc;
+      economy.changes = economy_index;
+    }
+  });
+  store.set("economy_index", economy_index);
+
+  // Sync Drafts
+  var draft_index = store.get("draft_index");
+  data.drafts.forEach(doc => {
+    doc.id = doc._id;
+    delete doc._id;
+    if (!draft_index.includes(doc.id)) {
+      draft_index.push(doc.id);
+      store.set(doc.id, doc);
+
+      history[doc.id] = doc;
+    }
+  });
+  store.set("draft_index", draft_index);
 }
 
 // Updates the settings variables , sends to overlay if 'relay' is set
@@ -1045,7 +1121,10 @@ async function logLoop() {
   if (fs.existsSync(logUri)) {
     if (fs.lstatSync(logUri).isDirectory()) {
       ipc_send("no_log", logUri);
-      ipc_send("popup", { text: "No log file found. Please include the file name too.", time: 1000 });
+      ipc_send("popup", {
+        text: "No log file found. Please include the file name too.",
+        time: 1000
+      });
       return;
     }
   } else {
@@ -1644,37 +1723,85 @@ function forceDeckUpdate(removeUsed = true) {
         else if (c.type.includes("Planeswalker", 0)) typePla += card.quantity;
       }
       card.chance = Math.round(
-        hypergeometricRange(1, Math.min(odds_sample_size, card.quantity), cardsleft, odds_sample_size, card.quantity) * 100
+        hypergeometricRange(
+          1,
+          Math.min(odds_sample_size, card.quantity),
+          cardsleft,
+          odds_sample_size,
+          card.quantity
+        ) * 100
       );
     });
 
     currentMatch.playerCards.chanceCre =
       Math.round(
-        hypergeometricRange(1, Math.min(odds_sample_size, typeCre), cardsleft, odds_sample_size, typeCre) * 1000
+        hypergeometricRange(
+          1,
+          Math.min(odds_sample_size, typeCre),
+          cardsleft,
+          odds_sample_size,
+          typeCre
+        ) * 1000
       ) / 10;
     currentMatch.playerCards.chanceIns =
       Math.round(
-        hypergeometricRange(1, Math.min(odds_sample_size, typeIns), cardsleft, odds_sample_size, typeIns) * 1000
+        hypergeometricRange(
+          1,
+          Math.min(odds_sample_size, typeIns),
+          cardsleft,
+          odds_sample_size,
+          typeIns
+        ) * 1000
       ) / 10;
     currentMatch.playerCards.chanceSor =
       Math.round(
-        hypergeometricRange(1, Math.min(odds_sample_size, typeSor), cardsleft, odds_sample_size, typeSor) * 1000
+        hypergeometricRange(
+          1,
+          Math.min(odds_sample_size, typeSor),
+          cardsleft,
+          odds_sample_size,
+          typeSor
+        ) * 1000
       ) / 10;
     currentMatch.playerCards.chancePla =
       Math.round(
-        hypergeometricRange(1, Math.min(odds_sample_size, typePla), cardsleft, odds_sample_size, typePla) * 1000
+        hypergeometricRange(
+          1,
+          Math.min(odds_sample_size, typePla),
+          cardsleft,
+          odds_sample_size,
+          typePla
+        ) * 1000
       ) / 10;
     currentMatch.playerCards.chanceArt =
       Math.round(
-        hypergeometricRange(1, Math.min(odds_sample_size, typeArt), cardsleft, odds_sample_size, typeArt) * 1000
+        hypergeometricRange(
+          1,
+          Math.min(odds_sample_size, typeArt),
+          cardsleft,
+          odds_sample_size,
+          typeArt
+        ) * 1000
       ) / 10;
     currentMatch.playerCards.chanceEnc =
       Math.round(
-        hypergeometricRange(1, Math.min(odds_sample_size, typeEnc), cardsleft, odds_sample_size, typeEnc) * 1000
+        hypergeometricRange(
+          1,
+          Math.min(odds_sample_size, typeEnc),
+          cardsleft,
+          odds_sample_size,
+          typeEnc
+        ) * 1000
       ) / 10;
     currentMatch.playerCards.chanceLan =
       Math.round(
-        hypergeometricRange(1, Math.min(odds_sample_size, typeLan), cardsleft, odds_sample_size, typeLan) * 1000
+        hypergeometricRange(
+          1,
+          Math.min(odds_sample_size, typeLan),
+          cardsleft,
+          odds_sample_size,
+          typeLan
+        ) * 1000
       ) / 10;
     currentMatch.playerCards.deckSize = decksize;
     currentMatch.playerCards.cardsLeft = cardsleft;
