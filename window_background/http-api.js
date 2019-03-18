@@ -11,7 +11,8 @@ global
   debugNet,
   store,
   makeId,
-  debugLog
+  debugLog,
+  syncUserData
 */
 const async = require("async");
 const qs = require("qs");
@@ -50,7 +51,11 @@ function beginSSE() {
           });
         } else if (typeof str == "object") {
           if (str.task) {
-            ipc_send(str.task, str.value);
+            if (str.task == "sync") {
+              syncUserData(str.value);
+            } else {
+              ipc_send(str.task, str.value);
+            }
           }
         }
       });
