@@ -463,7 +463,7 @@ function httpGetTopLadderDecks() {
   httpAsync.unshift({
     reqId: _id,
     method: "get_ladder_decks",
-    method_path: "/api/top_ladder.json"
+    method_path: "/top_ladder.json"
   });
 }
 
