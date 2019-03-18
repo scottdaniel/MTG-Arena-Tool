@@ -243,6 +243,17 @@ span i {
     background-position: 0px 0px;
 }
 
+.top_patreon {
+    -webkit-app-region: no-drag;
+    align-self: center;
+    margin-left: 8px;
+    width: 40px;
+    height: 40px;
+    background: url(../images/patreon_badges.png);
+    background-position: 0px 0px;
+    background-size: cover;
+}
+
 .rank {
     -webkit-app-region: no-drag;
     align-self: center;

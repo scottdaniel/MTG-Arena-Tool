@@ -253,6 +253,7 @@ function httpBasic() {
                   rstore.set("email", playerData.userName);
                 }
                 playerData.patreon = parsedResult.patreon;
+                playerData.patreon_tier = parsedResult.patreon_tier;
 
                 let serverData = {
                   matches: [],
@@ -266,6 +267,7 @@ function httpBasic() {
                   serverData.drafts = parsedResult.drafts;
                   serverData.economy = parsedResult.economy;
                 }
+                ipc_send("set_player_data", playerData);
                 loadPlayerConfig(playerData.arenaId, serverData);
                 beginSSE();
               }

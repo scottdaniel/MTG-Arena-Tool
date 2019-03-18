@@ -633,6 +633,8 @@ var playerDataDefault = {
   userName: null,
   arenaId: "",
   arenaVersion: "",
+  patreon: false,
+  platreon_tier: 0,
   rank: {
     constructed: {
       rank: "",

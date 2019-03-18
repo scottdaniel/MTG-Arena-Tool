@@ -1,27 +1,28 @@
 /*
 global
-	setsList,
-	cardsDb,
-	makeId,
-	timeSince,
-	addCardHover,
-	addCardSeparator,
-	addCardTile,
-	getReadableEvent,
-	get_deck_colors,
-	get_deck_types_ammount,
-	get_deck_export,
-	get_deck_export_txt,
-	get_rank_index_16,
-	get_rank_index,
-	draftRanks
-	get_card_type_sort,
-	compare_colors,
-	compare_cards,
-	windowBackground,
-	windowRenderer,
-	deck_count_types,
-	removeDuplicates
+  setsList,
+  cardsDb,
+  makeId,
+  timeSince,
+  addCardHover,
+  addCardSeparator,
+  addCardTile,
+  getReadableEvent,
+  get_deck_colors,
+  get_deck_types_ammount,
+  get_deck_export,
+  get_deck_export_txt,
+  get_rank_index_16,
+  get_rank_index,
+  draftRanks
+  get_card_type_sort,
+  compare_colors,
+  compare_cards,
+  windowBackground,
+  windowRenderer,
+  deck_count_types,
+  removeDuplicates,
+  $$
 */
 
 const electron = require("electron");
@@ -234,22 +235,43 @@ ipc.on("set_db", function(event, arg) {
 });
 
 //
-ipc.on('set_player_data', (event, _data) => {
-	playerData = _data;
+ipc.on("set_player_data", (event, _data) => {
+  playerData = _data;
 
-	if (sidebarActive != -99) {
-		$('.top_username').html(playerData.name.slice(0, -6));
-		$('.top_username_id').html(playerData.name.slice(-6));
+  if (sidebarActive != -99) {
+    $(".top_username").html(playerData.name.slice(0, -6));
+    $(".top_username_id").html(playerData.name.slice(-6));
 
-		let rankOffset;
-		let constructed = playerData.rank.constructed;
-		rankOffset = get_rank_index(constructed.rank, constructed.tier);
-		$(".top_constructed_rank").css("background-position", (rankOffset*-48)+"px 0px").attr("title", constructed.rank+' '+constructed.tier);
+    let rankOffset;
+    let constructed = playerData.rank.constructed;
+    rankOffset = get_rank_index(constructed.rank, constructed.tier);
+    let constructedRankIcon = $$(".top_constructed_rank")[0];
+    constructedRankIcon.style.backgroundPosition = rankOffset * -48 + "px 0px";
+    constructedRankIcon.setAttribute("title", constructed.rank + " " + constructed.tier);
 
-		let limited = playerData.rank.limited;
-		rankOffset = get_rank_index(limited.rank, limited.tier);
-		$(".top_limited_rank").css("background-position", (rankOffset*-48)+"px 0px").attr("title", limited.rank+' '+limited.tier);
-	}
+    let limited = playerData.rank.limited;
+    rankOffset = get_rank_index(limited.rank, limited.tier);
+    let limitedRankIcon = $$(".top_limited_rank")[0];
+    limitedRankIcon.style.backgroundPosition = rankOffset * -48 + "px 0px";
+    limitedRankIcon.setAttribute("title", limited.rank + " " + limited.tier);
+
+    let patreonIcon = $$(".top_patreon")[0];
+    if (playerData.patreon) {
+      let xoff = -40 * playerData.patreon_tier;
+      let title = "Patreon Basic Tier";
+
+      if (playerData.patreon_tier == 1) title = "Patreon Standard Tier";
+      if (playerData.patreon_tier == 2) title = "Patreon Modern Tier";
+      if (playerData.patreon_tier == 3) title = "Patreon Legacy Tier";
+      if (playerData.patreon_tier == 4) title = "Patreon Vintage Tier";
+
+      patreonIcon.style.backgroundPosition = xoff + "px 0px";
+      patreonIcon.setAttribute("title", title);
+      patreonIcon.style.display = "block";
+    } else {
+      patreonIcon.style.display = "none";
+    }
+  }
 });
 
 //
@@ -572,16 +594,16 @@ function rememberMe() {
 }
 
 //
-ipc.on('initialize', function () {
-	$('.top_username').html(playerData.name.slice(0, -6));
-	$('.top_username_id').html(playerData.name.slice(-6));
+ipc.on("initialize", function() {
+  $(".top_username").html(playerData.name.slice(0, -6));
+  $(".top_username_id").html(playerData.name.slice(-6));
 
-	sidebarActive = -1;
-	ipc_send('request_home', true);
-	$('.top_nav').removeClass('hidden');
-	$('.overflow_ux').removeClass('hidden');
-	$('.message_center').css('display', 'none');
-	$('.init_loading').hide();
+  sidebarActive = -1;
+  ipc_send("request_home", true);
+  $(".top_nav").removeClass("hidden");
+  $(".overflow_ux").removeClass("hidden");
+  $(".message_center").css("display", "none");
+  $(".init_loading").hide();
 });
 
 //
@@ -1019,37 +1041,37 @@ function drawDeckVisual(_div, _stats, deck) {
   var types = get_deck_types_ammount(deck);
   var typesdiv = $('<div class="types_container"></div>');
   $(
-    '<div class="type_icon_cont"><div title="Creatures" 		class="type_icon type_cre"></div><span>' +
+    '<div class="type_icon_cont"><div title="Creatures"     class="type_icon type_cre"></div><span>' +
       types.cre +
       "</span></div>"
   ).appendTo(typesdiv);
   $(
-    '<div class="type_icon_cont"><div title="Lands" 			class="type_icon type_lan"></div><span>' +
+    '<div class="type_icon_cont"><div title="Lands"       class="type_icon type_lan"></div><span>' +
       types.lan +
       "</span></div>"
   ).appendTo(typesdiv);
   $(
-    '<div class="type_icon_cont"><div title="Instants" 		class="type_icon type_ins"></div><span>' +
+    '<div class="type_icon_cont"><div title="Instants"    class="type_icon type_ins"></div><span>' +
       types.ins +
       "</span></div>"
   ).appendTo(typesdiv);
   $(
-    '<div class="type_icon_cont"><div title="Sorceries" 		class="type_icon type_sor"></div><span>' +
+    '<div class="type_icon_cont"><div title="Sorceries"     class="type_icon type_sor"></div><span>' +
       types.sor +
       "</span></div>"
   ).appendTo(typesdiv);
   $(
-    '<div class="type_icon_cont"><div title="Enchantments" 	class="type_icon type_enc"></div><span>' +
+    '<div class="type_icon_cont"><div title="Enchantments"  class="type_icon type_enc"></div><span>' +
       types.enc +
       "</span></div>"
   ).appendTo(typesdiv);
   $(
-    '<div class="type_icon_cont"><div title="Artifacts" 		class="type_icon type_art"></div><span>' +
+    '<div class="type_icon_cont"><div title="Artifacts"     class="type_icon type_art"></div><span>' +
       types.art +
       "</span></div>"
   ).appendTo(typesdiv);
   $(
-    '<div class="type_icon_cont"><div title="Planeswalkers" 	class="type_icon type_pla"></div><span>' +
+    '<div class="type_icon_cont"><div title="Planeswalkers"   class="type_icon type_pla"></div><span>' +
       types.pla +
       "</span></div>"
   ).appendTo(typesdiv);
@@ -1948,9 +1970,9 @@ function open_settings(openSection) {
     !settings.skip_firstpass
   );
   section.append(`
-    	<div class="settings_note">
-    	<i>Reading the log on startup can take a while, disabling this will make mtgatool load instantly, but you may have have to play with Arena to load some data, like Rank, wildcards and decklists. <b>This feature makes mtgatool read games when it was closed.</b></i>
-    	</div>`);
+      <div class="settings_note">
+      <i>Reading the log on startup can take a while, disabling this will make mtgatool load instantly, but you may have have to play with Arena to load some data, like Rank, wildcards and decklists. <b>This feature makes mtgatool read games when it was closed.</b></i>
+      </div>`);
   add_checkbox(
     section,
     "Close main window on match found",
@@ -1972,7 +1994,11 @@ function open_settings(openSection) {
 
   var sliderSoundVolume = $('<div class="slidecontainer_settings"></div>');
   sliderSoundVolume.appendTo(section);
-  var sliderSoundVolumeLabel = $(`<label style="width: 400px;">Volume: ${Math.round(settings.sound_priority_volume*100)}%</label>`);
+  var sliderSoundVolumeLabel = $(
+    `<label style="width: 400px;">Volume: ${Math.round(
+      settings.sound_priority_volume * 100
+    )}%</label>`
+  );
   sliderSoundVolumeLabel.appendTo(sliderSoundVolume);
   var sliderSoundVolumeInput = $(
     '<input type="range" min="0" max="1" step=".001" value="' +
@@ -1993,8 +2019,8 @@ function open_settings(openSection) {
   icd.appendTo(label);
 
   section.append(`<div class="settings_note">
-    	<i>Possible variables: $Name, $Count, $SetName, $SetCode, $Collector, $Rarity, $Type, $Cmc</i>
-    	</div>`);
+      <i>Possible variables: $Name, $Count, $SetName, $SetCode, $Collector, $Rarity, $Type, $Cmc</i>
+      </div>`);
 
   section = $('<div class="settings_section ss2"></div>');
   section.appendTo(div);
@@ -2438,7 +2464,9 @@ function open_settings(openSection) {
   $(".sliderSoundVolume").off();
 
   $(".sliderSoundVolume").on("click mouseup", function() {
-    sliderSoundVolumeLabel.html(`Volume: ${Math.round(settings.sound_priority_volume*100)}%`);
+    sliderSoundVolumeLabel.html(
+      `Volume: ${Math.round(settings.sound_priority_volume * 100)}%`
+    );
     let { Howl, Howler } = require("howler");
     let sound = new Howl({ src: ["../sounds/blip.mp3"] });
     updateSettings();
