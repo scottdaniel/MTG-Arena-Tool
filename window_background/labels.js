@@ -6,7 +6,7 @@ function onLabelOutLogInfo(entry, json) {
 
   if (json.params.messageName == "DuelScene.GameStop") {
     var payload = json.params.payloadObject;
-    var mid = payload.matchId;
+    var mid = payload.matchId + "-" + playerData.arenaId;
     var time = payload.secondsCount;
     if (mid == currentMatch.matchId) {
       gameNumberCompleted = payload.gameNumber;
@@ -122,7 +122,7 @@ function onLabelOutLogInfo(entry, json) {
 
       matchGameStats[gameNumberCompleted - 1] = game;
 
-      saveMatch(mid);
+      saveMatch(mid + "-" + playerData.arenaId);
     }
   }
 }
@@ -355,7 +355,7 @@ function onLabelGreToClient(entry, json) {
 
               currentMatch.game = gameInfo.gameNumber; // probably wrong
               matchCompletedOnGameNumber = gameInfo.gameNumber;
-              saveMatch(gameInfo.matchID);
+              saveMatch(gameInfo.matchID + "-" + playerData.arenaId);
             }
           }
         }
@@ -1122,7 +1122,7 @@ function onLabelMatchGameRoomStateChangedEvent(entry, json) {
       ipc_send("overlay_close", 1);
     }
     matchCompletedOnGameNumber = json.finalMatchResult.resultList.length - 1;
-    saveMatch(json.finalMatchResult.matchId);
+    saveMatch(json.finalMatchResult.matchId + "-" + playerData.arenaId);
   }
 
   if (json.players) {

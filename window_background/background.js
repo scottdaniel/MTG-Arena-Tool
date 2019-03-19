@@ -1543,7 +1543,7 @@ function createMatch(arg) {
   currentMatch.opponent.rank = arg.opponentRankingClass;
   currentMatch.opponent.tier = arg.opponentRankingTier;
   currentMatch.eventId = arg.eventId;
-  currentMatch.matchId = arg.matchId;
+  currentMatch.matchId = arg.matchId + "-" + playerData.arenaId;
 
   currentMatch.beginTime = matchBeginTime;
 
@@ -1960,6 +1960,7 @@ function saveCourse(json) {
 
 //
 function saveMatch(matchId) {
+  console.log(currentMatch.matchId, matchId);
   if (currentMatch.matchTime == 0 || currentMatch.matchId != matchId) {
     return;
   }
