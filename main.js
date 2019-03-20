@@ -128,14 +128,6 @@ if (!singleLock) {
           mainWindow.webContents.send("popup", arg.text, arg.time);
           break;
 
-        case "background_set_history":
-          mainWindow.webContents.send("set_history", arg);
-          break;
-
-        case "background_set_history_data":
-          mainWindow.webContents.send("set_history_data", arg);
-          break;
-
         case "renderer_window_minimize":
           mainWindow.minimize();
           break;

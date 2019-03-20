@@ -420,10 +420,10 @@ function requestHistorySend(state) {
   }
   if (state == 1) {
     // Send the data and open history tab
-    ipc_send("background_set_history", JSON.stringify(history));
+    ipc_send("set_history", JSON.stringify(history));
   } else {
     /// Send only the data
-    ipc_send("background_set_history_data", JSON.stringify(history));
+    ipc_send("set_history_data", JSON.stringify(history));
   }
 }
 
