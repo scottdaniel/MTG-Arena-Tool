@@ -471,13 +471,13 @@ function renderRanksStats(container) {
   let currentRank = viewingLimitSeason
     ? playerData.rank.limited.rank
     : playerData.rank.constructed.rank;
-  let expected = getStepsUntilNextRank(viewingLimitSeason, lastWinrate);
+  let expected = getStepsUntilNextRank(viewingLimitSeason, totalWinrate);
 
   title = createDivision(
     ["ranks_history_title"],
     `Games until ${getNextRank(currentRank)}: ${expected}`
   );
-  title.title = `Using ${formatPercent(lastWinrate)}% winrate`;
+  title.title = `Using ${formatPercent(totalWinrate)}% winrate`;
   container.appendChild(title);
 
   seasonToggleButton.addEventListener("click", event => {
