@@ -635,6 +635,7 @@ var playerDataDefault = {
   arenaVersion: "",
   patreon: false,
   platreon_tier: 0,
+  decks_last_used: [],
   rank: {
     constructed: {
       rank: "",

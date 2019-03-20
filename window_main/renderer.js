@@ -275,6 +275,11 @@ ipc.on("set_player_data", (event, _data) => {
 });
 
 //
+ipc.on("set_decks_last_used", (event, arg) => {
+  playerData.decks_last_used = arg;
+});
+
+//
 ipc.on("set_season", function(event, arg) {
   season_starts = arg.starts;
   season_ends = arg.ends;
@@ -2791,11 +2796,20 @@ function sort_decks() {
 
 //
 function compare_decks(a, b) {
-  a = Date.parse(a.lastUpdated);
-  b = Date.parse(b.lastUpdated);
-  if (a < b) return 1;
-  if (a > b) return -1;
-  return 0;
+  a = playerData.decks_last_used.indexOf(a.id);
+  b = playerData.decks_last_used.indexOf(b.id);
+
+  if (a == -1 && b == -1) {
+    a = Date.parse(a.lastUpdated);
+    b = Date.parse(b.lastUpdated);
+    if (a < b) return 1;
+    if (a > b) return -1;
+    return 0;
+  } else {
+    if (a < b) return 1;
+    if (a > b) return -1;
+    return 0;
+  }
 }
 
 //

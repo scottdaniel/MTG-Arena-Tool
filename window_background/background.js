@@ -95,6 +95,7 @@ const defaultCfg = {
   gold_history: [],
   decks_index: [],
   decks_tags: {},
+  decks_last_used: [],
   tags_colors: {},
   decks: {},
   wildcards_history: []
@@ -859,6 +860,7 @@ function updateSettings(_settings, relay) {
   if (_settings.overlay_ontop == undefined) _settings.overlay_ontop = true;
   if (_settings.overlay_scale == undefined) _settings.overlay_scale = 100;
   if (_settings.skip_firstpass == undefined) _settings.skip_firstpass = false;
+  if (_settings.decks_last_used == undefined) _settings.decks_last_used = [];
   if (_settings.sound_priority_volume == undefined)
     _settings.sound_priority_volume = 1;
 
@@ -2028,6 +2030,19 @@ function saveMatch(matchId) {
     let cm = store.get(currentMatch.matchId);
     match.date = cm.date;
     match.tags = cm.tags;
+  }
+
+  // Add deck to last used array
+  if (match.playerDeck && match.playerDeck.id) {
+    let decks_last_used = store.get("decks_last_used");
+    let deckId = match.playerDeck.id;
+    if (decks_last_used.includes(deckId)) {
+      let pos = decks_last_used.indexOf(deckId);
+      decks_last_used.splice(pos, 1);
+    }
+    decks_last_used.push(deckId);
+    store.set("decks_last_used", decks_last_used);
+    ipc_send("set_decks_last_used", decks_last_used);
   }
 
   // add locally
