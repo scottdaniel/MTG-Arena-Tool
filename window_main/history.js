@@ -17,7 +17,8 @@ globals
   getWinrateClass,
   createDivision,
   playerData,
-  tags_colors
+  tags_colors,
+  $$
 */
 const RANKS = ["Bronze", "Silver", "Gold", "Platinum", "Diamond", "Mythic"];
 
@@ -349,25 +350,22 @@ function open_history_tab(loadMore) {
   }
 
   $(this).off();
-  $("#history_column").on("scroll", function() {
-    if (
-      Math.round($(this).scrollTop() + $(this).innerHeight()) >=
-      $(this)[0].scrollHeight
-    ) {
+
+  historyColumn.addEventListener("scroll", () => {
+    if (historyColumn.scrollTop + historyColumn.offsetHeight >= historyColumn.scrollHeight) {
       open_history_tab(20);
     }
   });
 
-  $(".delete_item").hover(
-    function() {
-      // in
-      $(this).css("width", "32px");
-    },
-    function() {
-      // out
-      $(this).css("width", "4px");
-    }
-  );
+  $$(".delete_item").forEach(item => {
+    item.addEventListener("mouseover", () => {
+      item.style.width = "32px";
+    });
+
+    item.addEventListener("mouseout", () => {
+      item.style.width = "4px";
+    });
+  });
 
   //loadHistory = actuallyLoaded;
 }
@@ -814,11 +812,12 @@ function draftShareLink() {
 
 function deleteMatch(_match) {
   $("." + _match.id + "_del").on("click", function(e) {
-    currentId = _match.id;
+    let currentId = _match.id;
     e.stopPropagation();
     ipc_send("delete_match", currentId);
-    $("." + currentId).css("height", "0px");
-    $("." + currentId).css("overflow", "hidden");
+    let deleteButton = $$("." + currentId)[0];
+    deleteButton.style.height = "0px";
+    deleteButton.style.overflow = "hidden";
   });
 }
 
