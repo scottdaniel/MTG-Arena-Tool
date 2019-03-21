@@ -656,6 +656,10 @@ function loadPlayerConfig(playerId, serverData = undefined) {
   var id, item;
   history.matches = entireConfig["matches_index"];
 
+  if (entireConfig["decks_last_used"]) {
+    playerData.decks_last_used = entireConfig["decks_last_used"];
+  }
+
   for (let i = 0; i < history.matches.length; i++) {
     ipc_send("popup", {
       text: "Reading history: " + i + " / " + history.matches.length,
@@ -2042,6 +2046,7 @@ function saveMatch(matchId) {
     }
     decks_last_used.push(deckId);
     store.set("decks_last_used", decks_last_used);
+    playerData.decks_last_used = decks_last_used;
     ipc_send("set_decks_last_used", decks_last_used);
   }
 

@@ -2799,7 +2799,7 @@ function compare_decks(a, b) {
   a = playerData.decks_last_used.indexOf(a.id);
   b = playerData.decks_last_used.indexOf(b.id);
 
-  if (a == -1 && b == -1) {
+  if (a == b) {
     a = Date.parse(a.lastUpdated);
     b = Date.parse(b.lastUpdated);
     if (a < b) return 1;
