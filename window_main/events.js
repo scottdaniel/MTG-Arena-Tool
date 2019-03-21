@@ -205,6 +205,7 @@ function attachDeleteCourseButton(course) {
     e.stopPropagation();
     ipc_send("delete_course", currentId);
     $("." + currentId).css("height", "0px");
+    $("." + currentId).css("overflow", "hidden");
   });
 }
 

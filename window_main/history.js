@@ -818,6 +818,7 @@ function deleteMatch(_match) {
     e.stopPropagation();
     ipc_send("delete_match", currentId);
     $("." + currentId).css("height", "0px");
+    $("." + currentId).css("overflow", "hidden");
   });
 }
 

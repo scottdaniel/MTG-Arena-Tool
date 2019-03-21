@@ -451,6 +451,7 @@ function deleteDeck(_deck) {
     e.stopPropagation();
     ipc_send("delete_deck", currentId);
     $("." + currentId).css("height", "0px");
+    $("." + currentId).css("overflow", "hidden");
   });
 }
 
