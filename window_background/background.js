@@ -818,10 +818,11 @@ function syncUserData(data) {
       matches_index.push(doc.id);
       store.set(doc.id, doc);
       history[doc.id] = doc;
+      history.matches.push(doc.id);
     }
   });
-  requestHistorySend(0);
   store.set("matches_index", matches_index);
+  requestHistorySend(0);
 
   // Sync Economy
   var economy_index = store.get("economy_index");
