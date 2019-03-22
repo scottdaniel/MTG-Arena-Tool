@@ -61,6 +61,8 @@ let mana = {
   8: "x"
 };
 
+const packSizes = { "Ravnica Allegiance": 14, "Guilds of Ravnica": 14 };
+
 const TransparencyMouseFix = require("electron-transparency-mouse-fix");
 const fix = new TransparencyMouseFix({
   fixPointerEvents: "auto"
@@ -724,11 +726,7 @@ $(document).ready(function() {
   //
   $(".draft_prev").click(function() {
     pickN -= 1;
-    let packSize =
-      currentDraft.set == "Ravnica Allegiance" ||
-      currentDraft.set == "Guilds of Ravnica"
-        ? 14
-        : 13;
+    let packSize = packSizes[currentDraft.set] || 13;
 
     if (pickN < 0) {
       pickN = packSize;
@@ -744,11 +742,7 @@ $(document).ready(function() {
   //
   $(".draft_next").click(function() {
     pickN += 1;
-    let packSize =
-      currentDraft.set == "Ravnica Allegiance" ||
-      currentDraft.set == "Guilds of Ravnica"
-        ? 14
-        : 13;
+    let packSize = packSizes[currentDraft.set] || 13;
 
     if (pickN > packSize) {
       pickN = 0;
