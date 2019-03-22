@@ -538,7 +538,7 @@ ipc.on("set_turn", function(
 ) {
   playerSeat = _we;
   if (turnPriority != _priority && _priority == _we && soundPriority) {
-    //		playBlip();
+    //    playBlip();
     let { Howl, Howler } = require("howler");
     let sound = new Howl({ src: ["../sounds/blip.mp3"] });
     Howler.volume(soundPriorityVolume);
@@ -575,7 +575,7 @@ function setDraft(_packN = -1, _pickN = -1) {
   }
   $(".overlay_decklist").html("");
   $(".overlay_deckcolors").html("");
-  $(".overlay_deckname").html("Pack " + (packN + 1) + " - Pick " + pickN);
+  $(".overlay_deckname").html("Pack " + (packN + 1) + " - Pick " + (pickN + 1));
 
   let colors;
   if (draftMode == 0) {
@@ -640,7 +640,7 @@ function setDraft(_packN = -1, _pickN = -1) {
       cont.appendTo(od);
       let tile = addCardTile(grpId, "a", draftRanks[rank], od);
       if (grpId == pick) {
-        tile.css("background-color", "rgba(250, 229, 210, 0.66)");
+        tile.style.backgroundColor = "rgba(250, 229, 210, 0.66)";
       }
     });
   }
@@ -723,14 +723,15 @@ $(document).ready(function() {
 
   //
   $(".draft_prev").click(function() {
-    //changedMode = true;
-    //draftMode -= 1;
-    //if (draftMode < 0) {
-    //  draftMode = 1;
-    //}
     pickN -= 1;
+    let packSize =
+      currentDraft.set == "Ravnica Allegiance" ||
+      currentDraft.set == "Guilds of Ravnica"
+        ? 14
+        : 13;
+
     if (pickN < 0) {
-      pickN = 13;
+      pickN = packSize;
       packN -= 1;
     }
     if (packN < 0) {
@@ -742,13 +743,17 @@ $(document).ready(function() {
   });
   //
   $(".draft_next").click(function() {
-    //changedMode = true;
-    //draftMode += 1;
-    //if (draftMode > 1) {
-    //  draftMode = 0;
-    //}
     pickN += 1;
-    //let key = "pack_" + packN + "pick_" + pickN;
+    let packSize =
+      currentDraft.set == "Ravnica Allegiance" ||
+      currentDraft.set == "Guilds of Ravnica"
+        ? 14
+        : 13;
+
+    if (pickN > packSize) {
+      pickN = 0;
+      packN += 1;
+    }
 
     if (pickN > currentDraft.pickNumber && packN == currentDraft.packNumber) {
       pickN = 0;
