@@ -80,6 +80,40 @@ function openEventsTab(loadMore) {
   loadEvents = loadEnd;
 }
 
+// converts a match index from a courses
+// object into a valid index into the
+// matchesHistory object
+function getMatchesHistoryIndex(matchIndex) {
+  if (matchesHistory.hasOwnProperty(matchIndex)) {
+    return matchIndex;
+  }
+
+  let newStyleMatchIndex = `${matchIndex}-${playerData.arenaId}`;
+  if (matchesHistory.hasOwnProperty(newStyleMatchIndex)) {
+    return newStyleMatchIndex;
+  }
+
+  // data appears corrupt
+  throw new Exception(
+    `Could not find valid match index for match index "${matchIndex}"!`
+  );
+}
+
+// Given a courses object returns all of the courses
+function getCourseMatches(course) {
+  let wlGate = course.ModuleInstanceData.WinLossGate;
+  let matchesList = wlGate ? wlGate.ProcessedMatchIds : undefined;
+  if (!matchesList) {
+    return [];
+  }
+
+  let matches = matchesList
+    .map(getMatchesHistoryIndex)
+    .map(index => matchesHistory[index])
+    .filter(match => match !== undefined && match.type === "match");
+  return matches;
+}
+
 function createEventRow(course) {
   // create the DOM structure
 
@@ -164,28 +198,20 @@ function createEventRow(course) {
     );
   }
 
-  var duration = 0;
-
-  var wlGate = course.ModuleInstanceData.WinLossGate;
-  var matchesList = wlGate ? wlGate.ProcessedMatchIds : undefined;
-  if (matchesList) {
-    var matches = matchesList
-      .map(index => matchesHistory[index])
-      .filter(match => match !== undefined && match.type === "match");
-
-    var duration = matches.reduce((acc, match) => acc + match.duration, 0);
-  }
+  var matches = getCourseMatches(course);
+  var totalDuration = matches.reduce((acc, match) => acc + match.duration, 0);
 
   flexCenterBottom.appendChild(
     createDivision(
       ["list_match_time"],
-      timeSince(new Date(course.date)) + " ago - " + toMMSS(duration)
+      timeSince(new Date(course.date)) + " ago - " + toMMSS(totalDuration)
     )
   );
 
   var winLossText = "0:0";
   var winLossClass = "list_match_result_win";
 
+  var wlGate = course.ModuleInstanceData.WinLossGate;
   if (wlGate !== undefined) {
     winLossText = wlGate.CurrentWins + ":" + wlGate.CurrentLosses;
     if (wlGate.MaxWins !== wlGate.CurrentWins) {
