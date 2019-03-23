@@ -99,7 +99,7 @@ function getMatchesHistoryIndex(matchIndex) {
   );
 }
 
-// Given a courses object returns all of the courses
+// Given a courses object returns all of the matches
 function getCourseMatches(course) {
   let wlGate = course.ModuleInstanceData.WinLossGate;
   let matchesList = wlGate ? wlGate.ProcessedMatchIds : undefined;
