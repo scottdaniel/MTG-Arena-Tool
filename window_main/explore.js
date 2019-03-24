@@ -378,6 +378,7 @@ function ladderLoadMore(loadMore) {
     flr.classList.add("flex_item");
     flr.style.flexDirection = "column";
     flr.style.justifyContent = "center";
+    flr.style.overflow = "hidden";
     flr.style.width = "40%";
 
     var flt = document.createElement("div");
