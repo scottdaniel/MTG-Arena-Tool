@@ -455,6 +455,8 @@ span.top_nav_item_text {
 
 .list_match {
     /*overflow: hidden;*/
+    white-space: nowrap;
+    overflow: hidden;
     cursor: pointer;
     padding-left: 16px;
     height: 64px;
@@ -528,6 +530,8 @@ span.top_nav_item_text {
 }
 
 .list_match_time {
+    white-space: nowrap;
+    overflow: hidden;
     width: auto;
     margin-right: 8px;
     margin-left: auto;
@@ -771,6 +775,7 @@ a:hover {
 
 .list_deck_name {
     -webkit-user-select:none;
+    white-space: nowrap;
     align-self: center;
     margin-left: 2px;
     color: #FAE5D2;
@@ -778,6 +783,7 @@ a:hover {
 
 .list_deck_name_it {
     -webkit-user-select: none;
+    white-space: nowrap;
     margin-left: 8px;
     margin-right: 16px;
     margin-top: 2px;
