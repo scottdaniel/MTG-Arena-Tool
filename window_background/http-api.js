@@ -431,6 +431,7 @@ function httpSubmitCourse(course) {
     course.PlayerId = "000000000000000";
     course.PlayerName = "Anonymous";
   }
+  course.playerRank = playerData.rank.limited.rank;
   course = JSON.stringify(course);
   httpAsync.push({
     reqId: _id,
