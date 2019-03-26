@@ -94,7 +94,7 @@ function getMatchesHistoryIndex(matchIndex) {
   }
 
   // data appears corrupt
-  throw new Exception(
+  throw new Error(
     `Could not find valid match index for match index "${matchIndex}"!`
   );
 }
