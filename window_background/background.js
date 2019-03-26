@@ -2000,10 +2000,10 @@ function saveMatch(matchId) {
     win: ow
   };
   match.player = {
-    name: currentMatch.player.name,
+    name: playerData.name,
     rank: playerData.rank.constructed.rank,
     tier: playerData.rank.constructed.tier,
-    userid: currentMatch.player.id,
+    userid: playerData.arenaId,
     seat: currentMatch.player.seat,
     win: pw
   };
