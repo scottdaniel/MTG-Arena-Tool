@@ -547,6 +547,7 @@ label {
     height: 18px;
     margin: 2px;
     border-radius: 100%;
+    background-repeat: no-repeat !important;
     box-shadow: rgba(0, 0, 0, 0.75) -2px 2px;
 }
 
@@ -555,6 +556,7 @@ label {
     pointer-events: none;
     min-width: 20px;
     height: 20px;
+    background-repeat: no-repeat !important;
     margin: 2px -1px 2px -1px;
 }
 
