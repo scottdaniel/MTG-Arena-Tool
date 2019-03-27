@@ -2010,6 +2010,7 @@ function saveMatch(matchId) {
   match.draws = dr;
   match.eventId = currentMatch.eventId;
   match.playerDeck = currentMatch.player.originalDeck;
+  match.playerDeck.colors = get_deck_colors(currentMatch.player.originalDeck);
   match.oppDeck = getOppDeck();
   if (match.oppDeck.archetype && match.oppDeck.archetype !== "-") {
     match.tags = [match.oppDeck.archetype];
