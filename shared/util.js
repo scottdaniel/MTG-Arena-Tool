@@ -830,6 +830,56 @@ function addCardTile(grpId, indent, quantity, element) {
   return false;
 }
 
+
+/**
+ * Creates a select box
+ * This is a "fixed" version of SelectAdd and should replace it.
+**/
+function createSelect(parent, options, current, callback, divClass) {
+  let selectContainer = createDivision(["select_container", divClass]);
+  selectContainer.id = divClass;
+  if (!options.includes(current)) current = options[0];
+  selectContainer.value = current;
+
+  let selectButton = createDivision(["select_button"], current);
+  let selectOptions = createDivision(["select_options_container"]);
+
+  selectContainer.appendChild(selectButton);
+  selectContainer.appendChild(selectOptions);
+
+  selectButton.addEventListener("click", () => {
+    if (!selectButton.classList.contains("active")) {
+      current = selectContainer.value;
+
+      selectButton.classList.add("active");
+      selectOptions.style.display = "block";
+      for (let i = 0; i < options.length; i++) {
+        if (options[i] !== current) {
+          let option = createDivision(["select_option"], options[i]);
+          selectOptions.appendChild(option);
+
+          option.addEventListener("click", () => {
+            selectButton.classList.remove("active");
+            selectButton.innerHTML = options[i];
+            selectContainer.value = options[i];
+            selectOptions.style.display = "none";
+            selectOptions.innerHTML = "";
+            callback(options[i]);
+          });
+        }
+      }
+    } else {
+      selectButton.classList.remove("active");
+      selectOptions.innerHTML = "";
+      selectOptions.style.display = "none";
+    }
+  });
+
+  parent.appendChild(selectContainer);
+
+  return selectContainer;
+}
+
 // When given a <select> element will convert to
 // list format to allow more style options
 function selectAdd(selectElement, callback) {
