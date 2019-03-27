@@ -774,6 +774,9 @@ function onLabelInDeckGetDeckLists(entry, json) {
       deck.tags.push(formats[deck.format]);
     }
 
+    deck.mainDeck = convert_from_v3_list(deck.mainDeck);
+    deck.sideboard = convert_from_v3_list(deck.sideboard);
+
     decks[deckId] = deck;
     if (decks["index"].indexOf(deckId) == -1) {
       decks["index"].push(deck.id);
@@ -821,6 +824,9 @@ function onLabelInDeckUpdateDeck(entry, json) {
         previousMain: _deck.mainDeck,
         previousSide: _deck.sideboard
       };
+
+     json.mainDeck = convert_from_v3_list(json.mainDeck);
+     json.sideboard = convert_from_v3_list(json.sideboard);
 
       // Check Mainboard
       _deck.mainDeck.forEach(function(card) {

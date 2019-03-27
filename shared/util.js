@@ -2150,6 +2150,15 @@ function get_deck_export_txt(deck) {
 }
 
 //
+function convert_from_v3_list(list) {
+    let ret = [];
+    for (var i=0; i < list.length; i+=2) {
+        ret.push({'id' : list[i], 'quantity' : list[i+1]});
+    }
+    return ret;
+}
+
+//
 function get_frame_class(frame) {
   if (frame.length == 0) {
     return "tile_c";
