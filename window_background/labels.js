@@ -72,6 +72,7 @@ function onLabelOutLogInfo(entry, json) {
         });
 
         game.sideboardChanges = sideboardChanges;
+        game.deck = JSON.parse(JSON.stringify(currentMatch.player.deck));
       }
 
       game.handLands = game.handsDrawn.map(
@@ -665,41 +666,30 @@ function onLabelClientToMatchServiceMessageTypeClientToGREMessage(entry, json) {
   if (json.payload.submitdeckresp) {
     // Get sideboard changes
     let deckResp = json.payload.submitdeckresp;
-    //console.log("deckResp", deckResp);
 
-    let tempMain = {};
-    let tempSide = {};
-    deckResp.deck.deckcards.forEach(function(grpId) {
-      if (tempMain[grpId] == undefined) {
-        tempMain[grpId] = 1;
+    let newDeck = { mainDeck: [], sideboard: [] };
+    let card = { id: 0, quantity: 0 };
+
+    deckResp.deck.deckcards.forEach(grpId => {
+      if (card.id === grpId) {
+        card.quantity++;
       } else {
-        tempMain[grpId] += 1;
+        card = { id: grpId, quantity: 1 };
+        newDeck.mainDeck.push(card);
       }
     });
     if (deckResp.deck.sideboardcards !== undefined) {
-      deckResp.deck.sideboardcards.forEach(function(grpId) {
-        if (tempSide[grpId] == undefined) {
-          tempSide[grpId] = 1;
+      card = { id: 0, quantity: 0 };
+      deckResp.deck.sideboardcards.forEach(grpId => {
+        if (card.id === grpId) {
+          card.quantity++;
         } else {
-          tempSide[grpId] += 1;
+          card = { id: grpId, quantity: 1 };
+          newDeck.sideboard.push(card);
         }
       });
     }
 
-    var newDeck = {};
-    newDeck.mainDeck = [];
-    Object.keys(tempMain).forEach(function(key) {
-      var c = { id: key, quantity: tempMain[key] };
-      newDeck.mainDeck.push(c);
-    });
-
-    newDeck.sideboard = [];
-    if (deckResp.deck.sideboardcards !== undefined) {
-      Object.keys(tempSide).forEach(function(key) {
-        var c = { id: key, quantity: tempSide[key] };
-        newDeck.sideboard.push(c);
-      });
-    }
     currentMatch.player.deck = newDeck;
     ipc_send("set_deck", currentMatch.player.deck, windowOverlay);
   }
