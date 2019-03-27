@@ -34,9 +34,9 @@ const set_tou_state = require("./home").set_tou_state;
 const open_deck = require("./deck_details").open_deck;
 const open_decks_tab = require("./decks").open_decks_tab;
 const open_history_tab = require("./history").open_history_tab;
-const open_explore_tab = require("./explore").open_explore_tab;
-const update_explore_filters = require("./explore").update_explore_filters;
-const set_explore_mode = require("./explore").set_explore_mode;
+const openExploreTab = require("./explore").openExploreTab;
+const setExploreDecks = require("./explore").setExploreDecks;
+const updateExploreCheckbox = require("./explore").updateExploreCheckbox;
 const openCollectionTab = require("./collection").openCollectionTab;
 const openEventsTab = require("./events").openEventsTab;
 const expandEvent = require("./events").expandEvent;
@@ -224,6 +224,7 @@ ipc.on("set_db", function(event, arg) {
   setsList = arg.sets;
   eventsList = arg.events;
   eventsToFormat = arg.events_format;
+  rankedEvents = arg.ranked_events;
   delete arg.sets;
   delete arg.events;
   delete arg.events_format;
@@ -465,10 +466,17 @@ ipc.on("set_home", function(event, arg) {
   }
 });
 
+
 //
+ipc.on("set_explore_decks", function(event, arg) {
+  if (sidebarActive == 3) {
+    setExploreDecks(arg);
+  }
+});
+
+/*//
 ipc.on("set_explore", function(event, arg) {
   if (sidebarActive == 3) {
-    set_explore_mode(0);
     open_explore_tab(arg, 0);
   }
 });
@@ -485,7 +493,6 @@ ipc.on("set_ladder_traditional_decks", function(event, arg) {
 
 function set_ladder_decks(arg) {
   if (sidebarActive == 3) {
-    set_explore_mode(1);
 
     arg.decks.forEach(function(deck) {
       deck.colors = [];
@@ -496,6 +503,7 @@ function set_ladder_decks(arg) {
     open_explore_tab(arg.decks, 0);
   }
 }
+*/
 
 //
 ipc.on("open_course_deck", function(event, arg) {
@@ -898,11 +906,13 @@ $(document).ready(function() {
       }
       if ($(this).hasClass("it3")) {
         sidebarActive = 3;
+        openExploreTab();
+        /*
         $("#ux_0").html(
           '<div class="loading_bar ux_loading"><div class="loading_color loading_w"></div><div class="loading_color loading_u"></div><div class="loading_color loading_b"></div><div class="loading_color loading_r"></div><div class="loading_color loading_g"></div></div>'
         );
         document.body.style.cursor = "progress";
-        ipc_send("request_explore", filterEvent);
+        */
       }
       if ($(this).hasClass("it4")) {
         sidebarActive = 4;

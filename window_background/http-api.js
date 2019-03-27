@@ -218,7 +218,10 @@ function httpBasic() {
             try {
               parsedResult = JSON.parse(results);
             } catch (e) {
-              //
+              ipc_send("popup", {
+                text: `Error parsing response. (${_headers.method})`,
+                time: 2000
+              });
             }
 
             if (_headers.method == "get_status") {
@@ -234,6 +237,9 @@ function httpBasic() {
                 delete ob.created_at;
               });
               ipc_send("set_status", parsedResult);
+            }
+            if (_headers.method == "get_explore") {
+              ipc_send("set_explore_decks", parsedResult);
             }
             if (_headers.method == "get_ladder_decks") {
               ipc_send("set_ladder_decks", parsedResult);
@@ -447,14 +453,25 @@ function httpSetPlayer() {
   //httpAsync.push({'reqId': _id, 'method': 'set_player', 'name': name, 'rank': rank, 'tier': tier});
 }
 
-function httpGetTopDecks(query, collection) {
+function httpGetExplore(query, collection) {
   var _id = makeId(6);
   collection = JSON.stringify(collection);
   httpAsync.unshift({
     reqId: _id,
-    method: "get_top_decks",
-    method_path: "/api/get_courses_list.php",
-    query: query,
+    method: "get_explore",
+    method_path: "/api/get_explore.php",
+    filter_wcc: query.filterWCC,
+    filter_wcu: query.filterWCU,
+    filter_wcr: query.filterWCR,
+    filter_wcm: query.filterWCM,
+    filter_owned: query.onlyOwned,
+    filter_type: query.filterType,
+    filter_event: query.filterEvent,
+    filter_sort: query.filterSort,
+    filter_sortdir: query.filterSortDir,
+    filter_mana: query.filteredMana,
+    filter_ranks: query.filteredranks,
+    filter_skip: query.filterSkip,
     collection: collection
   });
 }
@@ -476,6 +493,7 @@ function httpGetTopLadderTraditionalDecks() {
     method_path: "/top_ladder_traditional.json"
   });
 }
+
 function httpGetCourse(courseId) {
   var _id = makeId(6);
   httpAsync.unshift({
@@ -657,7 +675,7 @@ module.exports = {
   httpAuth,
   httpSubmitCourse,
   httpSetPlayer,
-  httpGetTopDecks,
+  httpGetExplore,
   httpGetTopLadderDecks,
   httpGetTopLadderTraditionalDecks,
   httpGetCourse,

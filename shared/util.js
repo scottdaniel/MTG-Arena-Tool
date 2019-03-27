@@ -610,6 +610,7 @@ const enums = {
 var setsList = cardsDb.get("sets");
 var eventsList = cardsDb.get("events");
 var eventsToFormat = cardsDb.get("events_format");
+var rankedEvents = cardsDb.get("ranked_events");
 var renderer = 0;
 var rarities = ["common", "uncommon", "rare", "mythic"];
 

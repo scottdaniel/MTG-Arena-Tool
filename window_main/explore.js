@@ -1,8 +1,9 @@
 /*
 globals
-  filterEvent,
+  eventsList,
+  rankedEvents,
   getReadableEvent,
-  selectAdd,
+  createSelect,
   cardsDb,
   mana,
   orderedColorCodesCommon,
@@ -13,15 +14,24 @@ globals
   ladder,
   add_checkbox,
   economyHistory,
-  get_deck_missing,
   getWinrateClass,
-  get_rank_index_16
+  get_rank_index_16,
+  createDivision,
+  $$
 */
 
+let filterWCC = 0;
+let filterWCU = 0;
+let filterWCR = 0;
+let filterWCM = 0;
 let loadExplore = 0;
-let eventFilters = null;
+let filterSkip = 0;
+let filterPage = 0;
+let filterEvent = "";
+let filterSort = "";
+let filterType = "";
+let filterSortDir = "";
 let onlyOwned = false;
-let exploreMode = 0;
 let filteredMana = [];
 let filteredranks = [];
 let ownedWildcards = { c: 0, u: 0, r: 0, m: 0 };
@@ -34,33 +44,8 @@ let rarityBooster = { c: 3, u: 3, r: 6, m: 13 };
 let raritySort = { c: "common", u: "uncommon", r: "rare", m: "mythic" };
 let raritySortReversed = { common: "c", uncommon: "u", rare: "r", mythic: "m" };
 
-function updateExplore() {
-  filterEvent = getEventId(
-    document.getElementById("query_select_filter").value
-  );
-  console.log("updateExplore", filterEvent);
-  ipc_send("request_explore", filterEvent);
-}
-
-function updateSort() {
-  filterSort = document.getElementById("query_select_sort").value;
-  open_explore_tab(null, 0);
-}
-
-function set_explore_mode(mode) {
-  exploreMode = mode;
-}
-
-function open_explore_tab(arg, loadMore) {
+function openExploreTab() {
   document.body.style.cursor = "auto";
-  if (arg != null) {
-    if (exploreMode == 1) {
-      ladder = arg;
-    } else {
-      console.log(arg);
-      explore = arg;
-    }
-  }
 
   var mainDiv = document.getElementById("ux_0");
   var dateNow, d;
@@ -72,128 +57,256 @@ function open_explore_tab(arg, loadMore) {
   };
 
   mainDiv.classList.remove("flex_item");
-  if (loadMore <= 0) {
-    loadExplore = 0;
-    loadMore = 20;
+  mainDiv.innerHTML = "";
 
-    mainDiv.innerHTML = "";
+  let divFill = document.createElement("div");
+  divFill.classList.add("list_fill");
+  mainDiv.appendChild(divFill);
 
-    if (filterSort == "By Winrate") sortFunction = sortByWinrate;
-    if (filterSort == "By Player") sortFunction = sortByPlayer;
-    if (filterSort == "By Boosters") sortFunction = sortByBoosters;
-    if (exploreMode == 1) {
-      ladder = add_booster_cost(ladder, exploreMode);
-      ladder.sort(sortFunction);
-    } else {
-      explore = add_booster_cost(explore, exploreMode);
-      explore.sort(sortFunction);
+  let exploreFiltersContainer = createDivision(["explore_buttons_container"]);
+  let exploreFiltersSelects = createDivision([
+    "explore_buttons_row",
+    "explore_buttons_top"
+  ]);
+  let exploreFiltersButtons = createDivision([
+    "explore_buttons_row",
+    "explore_buttons_middle"
+  ]);
+  let exploreFiltersInputs = createDivision([
+    "explore_buttons_row",
+    "explore_buttons_bottom"
+  ]);
+  exploreFiltersContainer.appendChild(exploreFiltersSelects);
+  exploreFiltersContainer.appendChild(exploreFiltersButtons);
+  exploreFiltersContainer.appendChild(exploreFiltersInputs);
+
+  mainDiv.appendChild(exploreFiltersContainer);
+
+  let exploreList = createDivision(["explore_list"]);
+  exploreList.id = "explore_list";
+  mainDiv.appendChild(exploreList);
+
+  drawFilters(exploreFiltersContainer);
+
+  d = document.createElement("div");
+  d.classList.add("list_fill");
+  mainDiv.appendChild(d);
+  d = document.createElement("div");
+  d.classList.add("list_fill");
+  mainDiv.appendChild(d);
+
+  $(this).off();
+  $("#ux_0").on("scroll", function() {
+    if (
+      Math.round($(this).scrollTop() + $(this).innerHeight()) >=
+      $(this)[0].scrollHeight
+    ) {
+      queryExplore(filterSkip);
     }
+  });
+}
 
-    d = document.createElement("div");
-    d.classList.add("list_fill");
-    mainDiv.appendChild(d); // goes down
+function drawFilters() {
+  let buttonsTop = $$(".explore_buttons_top")[0];
+  let buttonsMiddle = $$(".explore_buttons_middle")[0];
+  let buttonsBottom = $$(".explore_buttons_bottom")[0];
 
-    // Search box
-    var icd = $('<div class="explore_buttons_container"></div>');
+  onlyOwned = document.getElementById("settings_owned")
+    ? document.getElementById("settings_owned").checked
+    : false;
+  filterType = document.getElementById("explore_query_type")
+    ? document.getElementById("explore_query_type").value
+    : "Events";
+  filterEvent = document.getElementById("explore_query_event")
+    ? document.getElementById("explore_query_event").value
+    : "All";
+  filterSort = document.getElementById("explore_query_sort")
+    ? document.getElementById("explore_query_sort").value
+    : "By Winrate";
+  filterSortDir = document.getElementById("explore_query_sortdirection")
+    ? document.getElementById("explore_query_sortdirection").value
+    : "Descending";
+  filterWCC =
+    document.getElementById("explore_query_wc_c") !== null
+      ? document.getElementById("explore_query_wc_c").value
+      : "";
+  filterWCU =
+    document.getElementById("explore_query_wc_u") !== null
+      ? document.getElementById("explore_query_wc_u").value
+      : "";
+  filterWCR =
+    document.getElementById("explore_query_wc_r") !== null
+      ? document.getElementById("explore_query_wc_r").value
+      : "";
+  filterWCM =
+    document.getElementById("explore_query_wc_m") !== null
+      ? document.getElementById("explore_query_wc_m").value
+      : "";
 
-    // Event filter
-    var input = $(
-      '<div class="query_explore" style="margin-left: 16px;"></div>'
+  buttonsTop.innerHTML = "";
+  buttonsMiddle.innerHTML = "";
+  buttonsBottom.innerHTML = "";
+
+  /**
+   *  Type filter
+   **/
+  let typeFilter = ["Events", "Ranked Constructed", "Ranked Draft"];
+  let typeSelect = createSelect(
+    buttonsTop,
+    typeFilter,
+    filterType,
+    res => {
+      filterType = res;
+      drawFilters();
+    },
+    "explore_query_type"
+  );
+  typeSelect.style.width = "200px";
+
+  /**
+   *  Event filter
+   **/
+  let eventFilters = [];
+  if (filterType == "Events") {
+    eventFilters = Object.keys(eventsList)
+      .map(ev => eventsList[ev])
+      .filter(
+        item =>
+          item != "Direct Game" &&
+          item != "Ranked" &&
+          item != "Play" &&
+          item != "Traditional Play" &&
+          item != "Traditional Ranked"
+      );
+  } else if (filterType == "Ranked Draft") {
+    eventFilters = rankedEvents.map(ev => eventsList[ev]);
+  } else if (filterType == "Ranked Constructed") {
+    eventFilters.push("Ladder");
+    eventFilters.push("Traditional Ladder");
+  }
+  eventFilters.unshift("All");
+  eventFilters.sort(function(a, b) {
+    if (a < b) return -1;
+    if (a > b) return 1;
+    return 0;
+  });
+
+  createSelect(
+    buttonsTop,
+    eventFilters,
+    filterEvent,
+    res => (filterEvent = res),
+    "explore_query_event"
+  );
+
+  /**
+   *  Sort filter
+   **/
+  let sortLabel = document.createElement("label");
+  sortLabel.innerHTML = "Sort";
+  sortLabel.style.margin = "auto 4px auto 16px";
+  buttonsTop.appendChild(sortLabel);
+
+  let sortFilters = ["By Date", "By Wins", "By Player"];
+  let sortSelect = createSelect(
+    buttonsTop,
+    sortFilters,
+    filterSort,
+    res => (filterSort = res),
+    "explore_query_sort"
+  );
+  sortSelect.style.width = "130px";
+
+  /**
+   *  Sort direction
+   **/
+  let sortDirection = ["Descending", "Ascending"];
+  let sortDirSelect = createSelect(
+    buttonsTop,
+    sortDirection,
+    filterSortDir,
+    res => (filterSortDir = res),
+    "explore_query_sortdirection"
+  );
+  sortDirSelect.style.width = "130px";
+
+  /**
+   *  Only owned filter
+   **/
+  let lab = add_checkbox(
+    $(buttonsMiddle),
+    "Only owned",
+    "settings_owned",
+    onlyOwned,
+    "updateExploreCheckbox()"
+  );
+  lab.css("align-self", "center");
+  lab.css("margin-left", "0px");
+  lab.css("margin-right", "32px");
+
+  /**
+   * Wildcards filters
+   **/
+  let commonsInput = wildcardsInput("wc_common", "explore_query_wc_c");
+  let uncommonsInput = wildcardsInput("wc_uncommon", "explore_query_wc_u");
+  let raresInput = wildcardsInput("wc_rare", "explore_query_wc_r");
+  let mythicInput = wildcardsInput("wc_mythic", "explore_query_wc_m");
+
+  commonsInput.addEventListener(
+    "change",
+    event => (filterWCC = event.target.value)
+  );
+  uncommonsInput.addEventListener(
+    "change",
+    event => (filterWCU = event.target.value)
+  );
+  raresInput.addEventListener(
+    "change",
+    event => (filterWCR = event.target.value)
+  );
+  mythicInput.addEventListener(
+    "change",
+    event => (filterWCM = event.target.value)
+  );
+
+  buttonsMiddle.appendChild(commonsInput);
+  buttonsMiddle.appendChild(uncommonsInput);
+  buttonsMiddle.appendChild(raresInput);
+  buttonsMiddle.appendChild(mythicInput);
+
+  /**
+   *  Mana filter
+   **/
+  var manas = $('<div class="mana_filters_explore"></div>');
+  orderedColorCodesCommon.forEach(function(s, i) {
+    var mi = [1, 2, 3, 4, 5];
+    var mf = "";
+    if (!filteredMana.includes(mi[i])) {
+      mf = "mana_filter_on";
+    }
+    var manabutton = $(
+      `<div class="mana_filter ${mf}" style="background-image: url(../images/${s}20.png)"></div>`
     );
-    var select = $('<select id="query_select_filter"></select>');
-    if (eventFilters == null) {
-      eventFilters = [];
-      eventFilters.push("All");
-      eventFilters.push("Ranked Ladder");
-      eventFilters.push("Traditional Ranked Ladder");
-
-      dateNow = new Date();
-      dateNow = dateNow.getTime() / 1000;
-
-      for (var i = 0; i < explore.length; i++) {
-        var _deck = explore[i];
-
-        var ss = Math.floor(dateNow - _deck.date);
-        if (Math.floor(ss / 86400) > 10) {
-          explore.splice(i, 1);
-          i--;
-        } else {
-          let evId = getReadableEvent(_deck.event);
-          if (!eventFilters.includes(evId)) {
-            eventFilters.push(evId);
-          }
+    manabutton.appendTo(manas);
+    manabutton.click(function() {
+      if (manabutton.hasClass("mana_filter_on")) {
+        manabutton.removeClass("mana_filter_on");
+        filteredMana.push(mi[i]);
+      } else {
+        manabutton.addClass("mana_filter_on");
+        let n = filteredMana.indexOf(mi[i]);
+        if (n > -1) {
+          filteredMana.splice(n, 1);
         }
       }
-    }
-    eventFilters.sort(function(a, b) {
-      if (a < b) return -1;
-      if (a > b) return 1;
-      return 0;
     });
-    for (let i = 0; i < eventFilters.length; i++) {
-      if (eventFilters[i] !== getReadableEvent(filterEvent)) {
-        select.append(
-          '<option value="' +
-            eventFilters[i] +
-            '">' +
-            eventFilters[i] +
-            "</option>"
-        );
-      }
-    }
-    select.appendTo(input);
-    selectAdd(select, updateExplore);
-    select.next("div.select-styled").text(getReadableEvent(filterEvent));
-    input.appendTo(icd);
+  });
+  manas.appendTo(buttonsBottom);
 
-    // Sort filter
-    var input = $(
-      '<div class="query_explore" style="margin-left: 16px;"></div>'
-    );
-    var select = $('<select id="query_select_sort"></select>');
-    sortFilters = ["By Winrate", "By Player", "By Boosters"];
-    for (let i = 0; i < sortFilters.length; i++) {
-      select.append(
-        '<option value="' + sortFilters[i] + '">' + sortFilters[i] + "</option>"
-      );
-    }
-    select.appendTo(input);
-    selectAdd(select, updateSort);
-    select.next("div.select-styled").text(filterSort);
-    select.parent().css("width", "140px");
-    input.appendTo(icd);
-
-    var manas = $('<div class="mana_filters_explore"></div>');
-    orderedColorCodesCommon.forEach(function(s, i) {
-      var mi = [1, 2, 3, 4, 5];
-      var mf = "";
-      if (!filteredMana.includes(mi[i])) {
-        mf = "mana_filter_on";
-      }
-      var manabutton = $(
-        '<div class="mana_filter ' +
-          mf +
-          '" style="background-image: url(../images/' +
-          s +
-          '20.png)"></div>'
-      );
-      manabutton.appendTo(manas);
-      manabutton.click(function() {
-        if (manabutton.hasClass("mana_filter_on")) {
-          manabutton.removeClass("mana_filter_on");
-          filteredMana.push(mi[i]);
-        } else {
-          manabutton.addClass("mana_filter_on");
-          let n = filteredMana.indexOf(mi[i]);
-          if (n > -1) {
-            filteredMana.splice(n, 1);
-          }
-        }
-        update_explore_filters();
-      });
-    });
-    manas.appendTo(icd);
-
+  /**
+   *  Rank filter
+   **/
+  if (filterType !== "Events") {
     var ranks_filters = $('<div class="mana_filters_explore"></div>');
     ranks_list.forEach(function(rr, index) {
       var mf = "";
@@ -205,7 +318,7 @@ function open_explore_tab(arg, loadMore) {
           1) *
           -16}px 0px; background-image: url(../images/ranks_16.png)"></div>`
       );
-      //backgroundPosition = (get_rank_index_16(match.opponent.rank)*-16)+"px 0px";
+
       rankbutton.appendTo(ranks_filters);
       rankbutton.click(function() {
         if (rankbutton.hasClass("rank_filter_on")) {
@@ -218,428 +331,357 @@ function open_explore_tab(arg, loadMore) {
             filteredranks.splice(n, 1);
           }
         }
-        update_explore_filters();
       });
     });
-    ranks_filters.appendTo(icd);
-
-    let lab = add_checkbox(
-      $(icd),
-      "Only owned",
-      "settings_owned",
-      onlyOwned,
-      "update_explore_filters()"
-    );
-    lab.css("margin-top", "6px");
-
-    icd.appendTo($("#ux_0"));
-
-    d = document.createElement("div");
-    d.classList.add("list_fill");
-    mainDiv.appendChild(d);
-    d = document.createElement("div");
-    d.classList.add("list_fill");
-    mainDiv.appendChild(d);
+    ranks_filters.appendTo(buttonsBottom);
   }
 
-  //explore.forEach(function(_deck, index) {
-  if (exploreMode == 1) {
-    ladderLoadMore(loadMore);
-  } else {
-    exploreLoadMore(loadMore);
-  }
-
-  if (loadMore == 0 && loadExplore - actuallyLoaded < 20) {
-    open_explore_tab(null, 20);
-  }
-
-  $(this).off();
-  $("#ux_0").on("scroll", function() {
-    if (
-      Math.round($(this).scrollTop() + $(this).innerHeight()) >=
-      $(this)[0].scrollHeight
-    ) {
-      open_explore_tab(null, 20);
-    }
+  /**
+   * Search button.
+   **/
+  let searchButton = createDivision(["button_simple"], "Search");
+  searchButton.margin = "0px !important;";
+  buttonsBottom.appendChild(searchButton);
+  searchButton.addEventListener("click", () => {
+    queryExplore(0);
   });
 }
 
-function ladderLoadMore(loadMore) {
-  let mainDiv = document.getElementById("ux_0");
-  var actuallyLoaded = loadExplore;
-  console.log(ladder);
-  for (
-    var loadEnd = loadExplore + loadMore;
-    actuallyLoaded < loadEnd && loadExplore < ladder.length;
-    loadExplore++
-  ) {
-    let _deck = ladder[loadExplore];
-    if (_deck == undefined) {
-      continue;
-    }
+function wildcardsInput(_class, _id, _default) {
+  let inputContainer = createDivision([
+    "input_container_explore",
+    "auto_width"
+  ]);
 
-    if (filteredMana.length > 0) {
-      let filterOut = true;
-      if (
-        _deck.colors.every(i => filteredMana.includes(i)) &&
-        filteredMana.every(i => _deck.colors.includes(i))
-      ) {
-        filterOut = false;
-      }
-      console.log("filterOut", filterOut, _deck.colors, filteredMana);
+  let label = createDivision([_class, "wc_search_icon"]);
+  label.style.display = "table";
+  label.style.justifySelf = "center";
+  label.style.marginRight = "0px";
 
-      if (filterOut) continue;
-    }
+  inputContainer.appendChild(label);
 
-    if (filteredranks.length > 0) {
-      let filterOut = true;
-      filteredranks.forEach(rr => {
-        if (_deck.rank == rr) {
-          filterOut = false;
-        }
-      });
+  let input = document.createElement("input");
+  input.id = _id;
+  input.type = "number";
+  input.value = _default;
+  input.autocomplete = "off";
+  input.style.maxWidth = "40px";
+  input.style.alignSelf = "center";
 
-      if (filterOut) continue;
-    }
+  inputContainer.appendChild(input);
 
-    let index = "ladder_" + loadExplore;
-
-    var flcf = document.createElement("div");
-    flcf.classList.add("flex_item");
-    flcf.style.width = "20%";
-    flcf.style.justifyContent = "center";
-
-    let wc;
-    let n = 0;
-    for (var key in raritySort) {
-      if (_deck.wildcards.hasOwnProperty(key) && _deck.wildcards[key] > 0) {
-        wc = document.createElement("div");
-        wc.classList.add("wc_explore_cost");
-        wc.classList.add("wc_" + raritySort[key]);
-        wc.title = raritySort[key].capitalize() + " wldcards needed.";
-        wc.innerHTML = ownedWildcards[key] + "/" + _deck.wildcards[key];
-        flcf.appendChild(wc);
-        n++;
-      }
-    }
-
-    if (n == 0) {
-      wc = document.createElement("div");
-      wc.classList.add("wc_complete");
-      flcf.appendChild(wc);
-    } else if (onlyOwned) {
-      continue;
-    } else {
-      let bo = document.createElement("div");
-      bo.classList.add("bo_explore_cost");
-      bo.innerHTML = _deck.wildcards.boosters;
-      bo.title = "Boosters needed (estimated)";
-      flcf.appendChild(bo);
-    }
-
-    actuallyLoaded++;
-
-    if (_deck.colors == undefined) {
-      _deck.colors = [];
-    }
-    if (_deck.w == undefined) {
-      _deck.w = 0;
-      _deck.l = 0;
-    }
-
-    var tileGrpid = _deck.tile;
-    try {
-      let a = cardsDb.get(tileGrpid).images["art_crop"];
-    } catch (e) {
-      tileGrpid = 67003;
-    }
-
-    var tile = document.createElement("div");
-    tile.classList.add(index + "t");
-    tile.classList.add("deck_tile");
-    tile.style.backgroundImage =
-      "url(https://img.scryfall.com/cards" +
-      cardsDb.get(tileGrpid).images["art_crop"] +
-      ")";
-
-    var div = document.createElement("div");
-    div.classList.add(index);
-    div.classList.add("list_deck");
-
-    var fll = document.createElement("div");
-    fll.classList.add("flex_item");
-
-    var flc = document.createElement("div");
-    flc.classList.add("flex_item");
-    flc.style.flexDirection = "column";
-    flc.style.width = "40%";
-
-    var flr = document.createElement("div");
-    flr.classList.add("flex_item");
-    flr.style.flexDirection = "column";
-    flr.style.justifyContent = "center";
-    flr.style.overflow = "hidden";
-    flr.style.width = "40%";
-
-    var flt = document.createElement("div");
-    flt.classList.add("flex_top");
-
-    var flb = document.createElement("div");
-    flb.classList.add("flex_bottom");
-
-    let d;
-    d = document.createElement("div");
-    d.classList.add("list_deck_name");
-    d.innerHTML = _deck.name;
-    flt.appendChild(d);
-
-    d = document.createElement("div");
-    d.classList.add("list_deck_name_it");
-    d.innerHTML = "by " + _deck.player;
-    flt.appendChild(d);
-
-    _deck.colors.forEach(function(color) {
-      var d = document.createElement("div");
-      d.classList.add("mana_s20");
-      d.classList.add("mana_" + mana[color]);
-      flb.appendChild(d);
-    });
-
-    d = document.createElement("div");
-    d.classList.add("list_deck_record");
-    let colClass = getWinrateClass((1 / _deck.t) * _deck.w);
-    d.innerHTML = `${_deck.w}:${
-      _deck.l
-    } <span class="${colClass}_bright">(${Math.round(
-      (100 / _deck.t) * _deck.w
-    )}%)</span>`;
-    flr.appendChild(d);
-
-    let rcont = document.createElement("div");
-    rcont.style.marginLeft = "auto";
-    var pr = document.createElement("div");
-    pr.classList.add("ranks_16");
-    pr.style.marginTop = "4px";
-    pr.style.backgroundPosition =
-      get_rank_index_16(_deck.rank) * -16 + "px 0px";
-    pr.title = _deck.rank;
-
-    rcont.appendChild(pr);
-    flr.appendChild(rcont);
-
-    div.appendChild(fll);
-    fll.appendChild(tile);
-    div.appendChild(flc);
-    div.appendChild(flcf);
-    flc.appendChild(flt);
-    flc.appendChild(flb);
-    div.appendChild(flr);
-
-    mainDiv.appendChild(div);
-
-    $("." + index).on("mouseenter", function() {
-      $("." + index + "t").css("opacity", 1);
-      $("." + index + "t").css("width", "200px");
-    });
-
-    $("." + index).on("mouseleave", function() {
-      $("." + index + "t").css("opacity", 0.66);
-      $("." + index + "t").css("width", "128px");
-    });
-
-    $("." + index).on("click", function() {
-      _deck.mainDeck = removeDuplicates(_deck.mainDeck);
-      _deck.sideboard = removeDuplicates(_deck.sideboard);
-      open_deck(_deck, 1);
-      $(".moving_ux").animate({ left: "-100%" }, 250, "easeInOutCubic");
-    });
-  }
+  return inputContainer;
 }
 
-function exploreLoadMore(loadMore) {
-  let mainDiv = document.getElementById("ux_0");
-  var actuallyLoaded = loadExplore;
-  for (
-    var loadEnd = loadExplore + loadMore;
-    actuallyLoaded < loadEnd && loadExplore < explore.length;
-    loadExplore++
-  ) {
-    let _deck = explore[loadExplore];
-    if (_deck == undefined) {
-      continue;
-    }
-
-    let index = loadExplore;
-
-    let dateNow = new Date();
-    dateNow = dateNow.getTime() / 1000;
-    let _ss = Math.floor(dateNow - _deck.date);
-    if (Math.floor(_ss / 86400) > 10) {
-      continue;
-    }
-
-    if (_deck.colors == undefined) {
-      _deck.colors = [];
-    }
-
-    if (filteredMana.length > 0) {
-      let filterOut = true;
-      if (
-        _deck.colors.every(i => filteredMana.includes(i)) &&
-        filteredMana.every(i => _deck.colors.includes(i))
-      ) {
-        filterOut = false;
-      }
-      console.log("filterOut", filterOut, _deck.colors, filteredMana);
-
-      if (filterOut) continue;
-    }
-
-    var flcf = document.createElement("div");
-    flcf.classList.add("flex_item");
-    flcf.style.width = "20%";
-    flcf.style.justifyContent = "center";
-
-    let wc;
-    let n = 0;
-    let boosterCost = 0;
-    for (var key in raritySort) {
-      if (_deck.wildcards.hasOwnProperty(key) && _deck.wildcards[key] > 0) {
-        wc = document.createElement("div");
-        wc.classList.add("wc_explore_cost");
-        wc.classList.add("wc_" + raritySort[key]);
-        wc.title = raritySort[key].capitalize() + " wldcards needed.";
-        wc.innerHTML = ownedWildcards[key] + "/" + _deck.wildcards[key];
-        flcf.appendChild(wc);
-        n++;
-      }
-    }
-    if (n == 0) {
-      wc = document.createElement("div");
-      wc.classList.add("wc_complete");
-      flcf.appendChild(wc);
-    } else if (onlyOwned) {
-      continue;
-    } else {
-      let bo = document.createElement("div");
-      bo.classList.add("bo_explore_cost");
-      bo.innerHTML = _deck.wildcards.boosters;
-      bo.title = "Boosters needed (estimated)";
-      flcf.appendChild(bo);
-    }
-
-    actuallyLoaded++;
-
-    if (_deck.w == undefined) {
-      _deck.w = 0;
-      _deck.l = 0;
-    }
-
-    var tileGrpid = _deck.tile;
-    try {
-      let a = cardsDb.get(tileGrpid).images["art_crop"];
-    } catch (e) {
-      tileGrpid = 67003;
-    }
-
-    var tile = document.createElement("div");
-    tile.classList.add(index + "t");
-    tile.classList.add("deck_tile");
-    tile.style.backgroundImage =
-      "url(https://img.scryfall.com/cards" +
-      cardsDb.get(tileGrpid).images["art_crop"] +
-      ")";
-
-    var div = document.createElement("div");
-    div.classList.add(index);
-    div.classList.add("list_deck");
-
-    var fll = document.createElement("div");
-    fll.classList.add("flex_item");
-
-    var flc = document.createElement("div");
-    flc.classList.add("flex_item");
-    flc.style.flexDirection = "column";
-    flc.style.width = "40%";
-
-    var flr = document.createElement("div");
-    flr.classList.add("flex_item");
-    flr.style.flexDirection = "column";
-    flr.style.justifyContent = "center";
-    flr.style.width = "40%";
-
-    var flt = document.createElement("div");
-    flt.classList.add("flex_top");
-
-    var flb = document.createElement("div");
-    flb.classList.add("flex_bottom");
-
-    let d;
-    d = document.createElement("div");
-    d.classList.add("list_deck_name");
-    d.innerHTML = _deck.deckname;
-    flt.appendChild(d);
-
-    d = document.createElement("div");
-    d.classList.add("list_deck_name_it");
-    d.innerHTML = "by " + _deck.player;
-    flt.appendChild(d);
-
-    _deck.colors.forEach(function(color) {
-      var d = document.createElement("div");
-      d.classList.add("mana_s20");
-      d.classList.add("mana_" + mana[color]);
-      flb.appendChild(d);
-    });
-
-    d = document.createElement("div");
-    d.classList.add("list_deck_record");
-
-    let colClass = getWinrateClass((1 / (_deck.w + _deck.l)) * _deck.w);
-    d.innerHTML = `${_deck.w}:${
-      _deck.l
-    } <span class="${colClass}_bright">(${Math.round(
-      (100 / (_deck.w + _deck.l)) * _deck.w
-    )}%)</span>`;
-    flr.appendChild(d);
-
-    d = document.createElement("div");
-    d.classList.add("list_deck_right_it");
-    let ee = _deck.event;
-    d.innerHTML =
-      getReadableEvent(ee) + " - " + timeSince(new Date(_deck.date)) + " ago";
-    flr.appendChild(d);
-
-    div.appendChild(fll);
-    fll.appendChild(tile);
-    div.appendChild(flc);
-    div.appendChild(flcf);
-    flc.appendChild(flt);
-    flc.appendChild(flb);
-    div.appendChild(flr);
-
-    mainDiv.appendChild(div);
-
-    $("." + index).on("mouseenter", function() {
-      $("." + index + "t").css("opacity", 1);
-      $("." + index + "t").css("width", "200px");
-    });
-
-    $("." + index).on("mouseleave", function() {
-      $("." + index + "t").css("opacity", 0.66);
-      $("." + index + "t").css("width", "128px");
-    });
-
-    $("." + index).on("click", function() {
-      open_course_request(_deck._id);
-    });
-  }
-}
-
-function update_explore_filters() {
+function updateExploreCheckbox() {
   onlyOwned = document.getElementById("settings_owned").checked;
+}
 
-  open_explore_tab(null, 0);
+function queryExplore(skip) {
+  filterSkip = skip;
+  let sortDir = filterSortDir == "Descending" ? -1 : 1;
+
+  let filterEventId = Object.keys(eventsList).filter(
+    key => eventsList[key] == filterEvent
+  )[0];
+
+  if (filterEvent == "All") filterEventId = "";
+  if (filterEvent == "Ladder") filterEventId = "Ladder";
+  if (filterEvent == "Traditional Ladder") filterEventId = "Traditional_Ladder";
+
+  let query = {
+    filterWCC: filterWCC,
+    filterWCU: filterWCU,
+    filterWCR: filterWCR,
+    filterWCM: filterWCM,
+    filterEvent: filterEventId,
+    filterType: filterType,
+    filterSort: filterSort,
+    filterSortDir: sortDir,
+    onlyOwned: onlyOwned,
+    filteredMana: filteredMana,
+    filteredranks: filteredranks,
+    filterSkip: filterSkip
+  };
+
+  ipc_send("request_explore", query);
+}
+
+function setExploreDecks(data) {
+  console.log(data);
+  if (filterSkip == 0) {
+    document.getElementById("explore_list").innerHTML = "";
+  }
+  filterSkip += data.results_number;
+  if (data.results_type == "Ranked Constructed") {
+    data.result.forEach((deck, index) => {
+      deckLoad(deck, index);
+    });
+  } else {
+    data.result.forEach((course, index) => {
+      eventLoad(course, index);
+    });
+  }
+}
+
+function deckLoad(_deck, index) {
+  var mainDiv = document.getElementById("explore_list");
+  index = "ladder_" + index;
+
+  var flcf = createDivision(["flex_item"]);
+  flcf.style.width = "20%";
+  flcf.style.justifyContent = "center";
+
+  let wc;
+  let n = 0;
+  let boosterCost = 0;
+  for (var key in raritySort) {
+    if (_deck.wildcards.hasOwnProperty(key) && _deck.wildcards[key] > 0) {
+      wc = createDivision(["wc_explore_cost", "wc_" + raritySort[key]], _deck.wildcards[key]);
+      wc.title = raritySort[key].capitalize() + " wldcards needed.";
+      flcf.appendChild(wc);
+
+      boosterCost = Math.max(boosterCost, rarityBooster[key] * _deck.wildcards[key]);
+      n++;
+    }
+  }
+
+  if (n == 0) {
+    wc = createDivision(["wc_complete"]);
+    flcf.appendChild(wc);
+  } else {
+    let bo = createDivision(["bo_explore_cost"], boosterCost);
+    bo.title = "Boosters needed (estimated)";
+    flcf.appendChild(bo);
+  }
+
+  if (_deck.colors == undefined) {
+    _deck.colors = [];
+  }
+  if (_deck.w == undefined) {
+    _deck.w = 0;
+    _deck.l = 0;
+  }
+
+  var tileGrpid = _deck.tile;
+  try {
+    let a = cardsDb.get(tileGrpid).images["art_crop"];
+  } catch (e) {
+    tileGrpid = 67003;
+  }
+
+  var tile = createDivision([index + "t", "deck_tile"]);
+  tile.style.backgroundImage =
+    "url(https://img.scryfall.com/cards" +
+    cardsDb.get(tileGrpid).images["art_crop"] +
+    ")";
+
+  var div = createDivision([index, "list_deck"]);
+
+  var fll = createDivision(["flex_item"]);
+
+  var flc = createDivision(["flex_item"]);
+  flc.style.flexDirection = "column";
+  flc.style.width = "40%";
+
+  var flr = createDivision(["flex_item"]);
+  flr.style.flexDirection = "column";
+  flr.style.justifyContent = "center";
+  flr.style.overflow = "hidden";
+  flr.style.width = "40%";
+
+  var flt = createDivision(["flex_top"]);
+
+  var flb = createDivision(["flex_bottom"]);
+
+  let d;
+  d = createDivision(["list_deck_name"], _deck.name);
+  flt.appendChild(d);
+
+  d = createDivision(["list_deck_name_it"], "by " + _deck.player);
+  flt.appendChild(d);
+
+  _deck.colors.forEach(function(color) {
+    createDivision(["mana_s20", "mana_" + mana[color]]);
+    flb.appendChild(d);
+  });
+
+  let colClass = getWinrateClass((1 / _deck.t) * _deck.w);
+  d = createDivision(
+    ["list_deck_record"],
+    `${_deck.w}:${_deck.l} <span class="${colClass}_bright">(${Math.round(
+      (100 / _deck.t) * _deck.w
+    )}%)</span>`
+  );
+
+  flr.appendChild(d);
+
+  let rcont = createDivision(["flex_item"]);
+  rcont.style.marginLeft = "auto";
+
+  let eventName = createDivision(
+    ["list_deck_name_it"],
+    eventsList[_deck.event]
+  );
+
+  var playerRank = createDivision(["ranks_16"]);
+  playerRank.style.marginTop = "4px";
+  playerRank.style.backgroundPosition =
+    get_rank_index_16(_deck.rank) * -16 + "px 0px";
+  playerRank.title = _deck.rank;
+
+  rcont.appendChild(eventName);
+  rcont.appendChild(playerRank);
+  flr.appendChild(rcont);
+
+  div.appendChild(fll);
+  fll.appendChild(tile);
+  div.appendChild(flc);
+  div.appendChild(flcf);
+  flc.appendChild(flt);
+  flc.appendChild(flb);
+  div.appendChild(flr);
+
+  mainDiv.appendChild(div);
+
+  $("." + index).on("mouseenter", function() {
+    $("." + index + "t").css("opacity", 1);
+    $("." + index + "t").css("width", "200px");
+  });
+
+  $("." + index).on("mouseleave", function() {
+    $("." + index + "t").css("opacity", 0.66);
+    $("." + index + "t").css("width", "128px");
+  });
+
+  $("." + index).on("click", function() {
+    _deck.mainDeck = removeDuplicates(_deck.mainDeck);
+    _deck.sideboard = removeDuplicates(_deck.sideboard);
+    open_deck(_deck, 1);
+    $(".moving_ux").animate({ left: "-100%" }, 250, "easeInOutCubic");
+  });
+}
+
+function eventLoad(event, index) {
+  var mainDiv = document.getElementById("explore_list");
+  index = "events_" + index;
+
+  var flcf = createDivision(["flex_item"]);
+  flcf.style.width = "20%";
+  flcf.style.justifyContent = "center";
+
+  let wc;
+  let n = 0;
+  let boosterCost = 0;
+  for (var key in raritySort) {
+    if (event.wildcards.hasOwnProperty(key) && event.wildcards[key] > 0) {
+      wc = createDivision(
+        ["wc_explore_cost", "wc_" + raritySort[key]],
+        event.wildcards[key]
+      );
+      wc.title = raritySort[key].capitalize() + " wldcards needed.";
+      flcf.appendChild(wc);
+
+      boosterCost = Math.max(boosterCost, rarityBooster[key] * event.wildcards[key]);
+      n++;
+    }
+  }
+  if (n == 0) {
+    wc = createDivision(["wc_complete"]);
+    flcf.appendChild(wc);
+  } else {
+    let bo = createDivision(["bo_explore_cost"], boosterCost);
+    bo.title = "Boosters needed (estimated)";
+    flcf.appendChild(bo);
+  }
+
+  if (event.w == undefined) {
+    event.w = 0;
+    event.l = 0;
+  }
+
+  var tileGrpid = event.tile;
+  try {
+    let a = cardsDb.get(tileGrpid).images["art_crop"];
+  } catch (e) {
+    tileGrpid = 67003;
+  }
+
+  var tile = createDivision([index + "t", "deck_tile"]);
+  tile.style.backgroundImage =
+    "url(https://img.scryfall.com/cards" +
+    cardsDb.get(tileGrpid).images["art_crop"] +
+    ")";
+
+  var div = createDivision([index, "list_deck"]);
+
+  var fll = createDivision(["flex_item"]);
+
+  var flc = createDivision(["flex_item"]);
+  flc.style.flexDirection = "column";
+  flc.style.width = "40%";
+
+  var flr = createDivision(["flex_item"]);
+  flr.style.flexDirection = "column";
+  flr.style.justifyContent = "center";
+  flr.style.width = "40%";
+
+  var flt = createDivision(["flex_top"]);
+
+  var flb = createDivision(["flex_bottom"]);
+
+  let d;
+  d = createDivision(["list_deck_name"], event.deckname);
+  flt.appendChild(d);
+
+  d = createDivision(["list_deck_name_it"], "by " + event.player);
+  flt.appendChild(d);
+
+  event.colors.forEach(function(color) {
+    let d = createDivision(["mana_s20", "mana_" + mana[color]]);
+    flb.appendChild(d);
+  });
+
+  let colClass = getWinrateClass((1 / (event.w + event.l)) * event.w);
+  d = createDivision(
+    ["list_deck_record"],
+    `${event.w}:${event.l} <span class="${colClass}_bright">(${Math.round(
+      (100 / (event.w + event.l)) * event.w
+    )}%)</span>`
+  );
+
+  flr.appendChild(d);
+
+  let ee = event.event;
+  d = createDivision(
+    ["list_deck_right_it"],
+    getReadableEvent(ee) + " - " + timeSince(new Date(event.date)) + " ago"
+  );
+  flr.appendChild(d);
+
+  div.appendChild(fll);
+  fll.appendChild(tile);
+  div.appendChild(flc);
+  div.appendChild(flcf);
+  flc.appendChild(flt);
+  flc.appendChild(flb);
+  div.appendChild(flr);
+
+  mainDiv.appendChild(div);
+
+  $("." + index).on("mouseenter", function() {
+    $("." + index + "t").css("opacity", 1);
+    $("." + index + "t").css("width", "200px");
+  });
+
+  $("." + index).on("mouseleave", function() {
+    $("." + index + "t").css("opacity", 0.66);
+    $("." + index + "t").css("width", "128px");
+  });
+
+  $("." + index).on("click", function() {
+    open_course_request(event._id);
+  });
 }
 
 function open_course_request(courseId) {
@@ -694,7 +736,7 @@ function sortByBoosters(a, b) {
 }
 
 module.exports = {
-  open_explore_tab,
-  update_explore_filters,
-  set_explore_mode
+  openExploreTab,
+  setExploreDecks,
+  updateExploreCheckbox
 };

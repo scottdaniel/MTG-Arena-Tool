@@ -510,15 +510,7 @@ ipc.on("request_explore", function(event, arg) {
     ipc_send("offline", 1);
   } else {
     let cards = store.get("cards.cards");
-    if (arg == "all" || arg == "All") {
-      httpApi.httpGetTopDecks("", cards);
-    } else if (arg == "Ranked Ladder") {
-      httpApi.httpGetTopLadderDecks();
-    } else if (arg == "Traditional Ranked Ladder") {
-      httpApi.httpGetTopLadderTraditionalDecks();
-    } else {
-      httpApi.httpGetTopDecks(arg, cards);
-    }
+    httpApi.httpGetExplore(arg, cards);
   }
 });
 
