@@ -122,7 +122,7 @@ function onLabelOutLogInfo(entry, json) {
 
       matchGameStats[gameNumberCompleted - 1] = game;
 
-      saveMatch(mid + "-" + playerData.arenaId);
+      saveMatch(mid);
     }
   }
 }

@@ -635,7 +635,7 @@ var playerDataDefault = {
   arenaId: "",
   arenaVersion: "",
   patreon: false,
-  platreon_tier: 0,
+  patreon_tier: 0,
   decks_last_used: [],
   rank: {
     constructed: {

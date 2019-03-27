@@ -1056,37 +1056,37 @@ function drawDeckVisual(_div, _stats, deck) {
   var types = get_deck_types_ammount(deck);
   var typesdiv = $('<div class="types_container"></div>');
   $(
-    '<div class="type_icon_cont"><div title="Creatures"     class="type_icon type_cre"></div><span>' +
+    '<div class="type_icon_cont"><div title="Creatures" class="type_icon type_cre"></div><span>' +
       types.cre +
       "</span></div>"
   ).appendTo(typesdiv);
   $(
-    '<div class="type_icon_cont"><div title="Lands"       class="type_icon type_lan"></div><span>' +
+    '<div class="type_icon_cont"><div title="Lands" class="type_icon type_lan"></div><span>' +
       types.lan +
       "</span></div>"
   ).appendTo(typesdiv);
   $(
-    '<div class="type_icon_cont"><div title="Instants"    class="type_icon type_ins"></div><span>' +
+    '<div class="type_icon_cont"><div title="Instants" class="type_icon type_ins"></div><span>' +
       types.ins +
       "</span></div>"
   ).appendTo(typesdiv);
   $(
-    '<div class="type_icon_cont"><div title="Sorceries"     class="type_icon type_sor"></div><span>' +
+    '<div class="type_icon_cont"><div title="Sorceries" class="type_icon type_sor"></div><span>' +
       types.sor +
       "</span></div>"
   ).appendTo(typesdiv);
   $(
-    '<div class="type_icon_cont"><div title="Enchantments"  class="type_icon type_enc"></div><span>' +
+    '<div class="type_icon_cont"><div title="Enchantments" class="type_icon type_enc"></div><span>' +
       types.enc +
       "</span></div>"
   ).appendTo(typesdiv);
   $(
-    '<div class="type_icon_cont"><div title="Artifacts"     class="type_icon type_art"></div><span>' +
+    '<div class="type_icon_cont"><div title="Artifacts" class="type_icon type_art"></div><span>' +
       types.art +
       "</span></div>"
   ).appendTo(typesdiv);
   $(
-    '<div class="type_icon_cont"><div title="Planeswalkers"   class="type_icon type_pla"></div><span>' +
+    '<div class="type_icon_cont"><div title="Planeswalkers" class="type_icon type_pla"></div><span>' +
       types.pla +
       "</span></div>"
   ).appendTo(typesdiv);
