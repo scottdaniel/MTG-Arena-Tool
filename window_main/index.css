@@ -454,9 +454,7 @@ span.top_nav_item_text {
 }
 
 .list_match {
-    /*overflow: hidden;*/
     white-space: nowrap;
-    overflow: hidden;
     cursor: pointer;
     padding-left: 16px;
     height: 64px;
