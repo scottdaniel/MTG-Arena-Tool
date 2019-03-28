@@ -555,8 +555,8 @@ function deckLoad(_deck, index) {
   });
 
   $("." + index).on("click", function() {
-    _deck.mainDeck = removeDuplicates(_deck.mainDeck);
-    _deck.sideboard = removeDuplicates(_deck.sideboard);
+    _deck.mainDeck = removeDuplicates(_deck.mainDeck).sort(compare_cards);;
+    _deck.sideboard = removeDuplicates(_deck.sideboard).sort(compare_cards);;
     open_deck(_deck, 1);
     $(".moving_ux").animate({ left: "-100%" }, 250, "easeInOutCubic");
   });
