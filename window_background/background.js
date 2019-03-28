@@ -1009,7 +1009,7 @@ function onLogEntryFound(entry) {
             }
             break;
 
-          case "Deck.UpdateDeck":
+          case "Deck.UpdateDeckV3":
             if (entry.arrow == "<==") {
               json = entry.json();
               onLabelInDeckUpdateDeck(entry, json);
