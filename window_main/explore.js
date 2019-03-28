@@ -9,14 +9,14 @@ globals
   orderedColorCodesCommon,
   timeSince,
   ipc_send,
-  getEventId,
-  explore,
-  ladder,
+  showLoadingBars,
   add_checkbox,
   economyHistory,
   getWinrateClass,
   get_rank_index_16,
   createDivision,
+  removeDuplicates,
+  compare_cards,
   $$
 */
 
@@ -24,9 +24,7 @@ let filterWCC = 0;
 let filterWCU = 0;
 let filterWCR = 0;
 let filterWCM = 0;
-let loadExplore = 0;
 let filterSkip = 0;
-let filterPage = 0;
 let filterEvent = "";
 let filterSort = "";
 let filterType = "";
@@ -34,7 +32,7 @@ let filterSortDir = "";
 let onlyOwned = false;
 let filteredMana = [];
 let filteredranks = [];
-let ownedWildcards = { c: 0, u: 0, r: 0, m: 0 };
+//let ownedWildcards = { c: 0, u: 0, r: 0, m: 0 };
 
 let ranks_list = ["Bronze", "Silver", "Gold", "Platinum", "Diamond", "Mythic"];
 
@@ -42,7 +40,6 @@ const open_deck = require("./deck_details").open_deck;
 
 let rarityBooster = { c: 3, u: 3, r: 6, m: 13 };
 let raritySort = { c: "common", u: "uncommon", r: "rare", m: "mythic" };
-let raritySortReversed = { common: "c", uncommon: "u", rare: "r", mythic: "m" };
 
 function openExploreTab() {
   document.body.style.cursor = "auto";
@@ -96,11 +93,8 @@ function openExploreTab() {
   mainDiv.appendChild(d);
 
   $(this).off();
-  $("#ux_0").on("scroll", function() {
-    if (
-      Math.round($(this).scrollTop() + $(this).innerHeight()) >=
-      $(this)[0].scrollHeight
-    ) {
+  mainDiv.addEventListener("scroll", () => {
+    if (mainDiv.scrollTop + mainDiv.offsetHeight >= mainDiv.scrollHeight) {
       queryExplore(filterSkip);
     }
   });
@@ -438,11 +432,17 @@ function deckLoad(_deck, index) {
   let boosterCost = 0;
   for (var key in raritySort) {
     if (_deck.wildcards.hasOwnProperty(key) && _deck.wildcards[key] > 0) {
-      wc = createDivision(["wc_explore_cost", "wc_" + raritySort[key]], _deck.wildcards[key]);
+      wc = createDivision(
+        ["wc_explore_cost", "wc_" + raritySort[key]],
+        _deck.wildcards[key]
+      );
       wc.title = raritySort[key].capitalize() + " wldcards needed.";
       flcf.appendChild(wc);
 
-      boosterCost = Math.max(boosterCost, rarityBooster[key] * _deck.wildcards[key]);
+      boosterCost = Math.max(
+        boosterCost,
+        rarityBooster[key] * _deck.wildcards[key]
+      );
       n++;
     }
   }
@@ -583,7 +583,10 @@ function eventLoad(event, index) {
       wc.title = raritySort[key].capitalize() + " wldcards needed.";
       flcf.appendChild(wc);
 
-      boosterCost = Math.max(boosterCost, rarityBooster[key] * event.wildcards[key]);
+      boosterCost = Math.max(
+        boosterCost,
+        rarityBooster[key] * event.wildcards[key]
+      );
       n++;
     }
   }
@@ -688,53 +691,6 @@ function eventLoad(event, index) {
 function open_course_request(courseId) {
   showLoadingBars();
   ipc_send("request_course", courseId);
-}
-
-function add_booster_cost(list, mode) {
-  list.forEach(deck => {
-    if (mode == 1) {
-      deck.wildcards = get_deck_missing_short(deck);
-    }
-    deck.wildcards.boosters = 0;
-    for (var key in raritySort) {
-      if (deck.wildcards.hasOwnProperty(key)) {
-        bc = rarityBooster[key] * (deck.wildcards[key] - ownedWildcards[key]);
-        if (bc > deck.wildcards.boosters) deck.wildcards.boosters = bc;
-      }
-    }
-  });
-
-  return list;
-}
-
-function sortByWinrate(a, b) {
-  if (!b) return -1;
-  if (!a) return 1;
-
-  let awlrate = a.w / (a.w + a.l);
-  let bwlrate = b.w / (b.w + b.l);
-
-  if (awlrate > bwlrate) return -1;
-  if (awlrate < bwlrate) return 1;
-  return 0;
-}
-
-function sortByPlayer(a, b) {
-  if (!b) return -1;
-  if (!a) return 1;
-
-  if (a.player.toLowerCase() < b.player.toLowerCase()) return -1;
-  if (a.player.toLowerCase() > b.player.toLowerCase()) return 1;
-  return 0;
-}
-
-function sortByBoosters(a, b) {
-  if (!b.wildcards.boosters) return -1;
-  if (!a.wildcards.boosters) return 1;
-
-  if (a.wildcards.boosters < b.wildcards.boosters) return -1;
-  if (a.wildcards.boosters > b.wildcards.boosters) return 1;
-  return 0;
 }
 
 module.exports = {
