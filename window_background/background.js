@@ -14,14 +14,19 @@ global
   compare_archetypes,
   onLabelClientToMatchServiceMessageTypeClientToGREMessage,
   onLabelInEventGetPlayerCourse,
+  onLabelInEventGetPlayerCourseV2,
   onLabelInEventGetCombinedRankInfo,
   onLabelInDeckGetDeckLists,
+  onLabelInDeckGetDeckListsV3,
   onLabelInEventGetPlayerCourses,
+  onLabelInEventGetPlayerCoursesV2,
   onLabelInDeckUpdateDeck,
+  onLabelInDeckUpdateDeckV3,
   onLabelInventoryUpdated,
   onLabelInPlayerInventoryGetPlayerInventory,
   onLabelInPlayerInventoryGetPlayerCardsV3,
   onLabelInEventDeckSubmit,
+  onLabelInEventDeckSubmitV3,
   onLabelEventMatchCreated,
   onLabelOutDirectGameChallenge,
   onLabelInDraftDraftStatus,
@@ -981,6 +986,13 @@ function onLogEntryFound(entry) {
             }
             break;
 
+          case "Event.GetPlayerCourseV2":
+            if (entry.arrow == "<==") {
+              json = entry.json();
+              onLabelInEventGetPlayerCourseV2(entry, json);
+            }
+            break;
+
           case "Event.GetCombinedRankInfo":
             if (entry.arrow == "<==") {
               json = entry.json();
@@ -1002,17 +1014,38 @@ function onLogEntryFound(entry) {
             }
             break;
 
-          case "Deck.GetDeckListsV3":
+          case "Event.GetPlayerCoursesV2":
+            if (entry.arrow == "<==") {
+              json = entry.json();
+              onLabelInEventGetPlayerCoursesV2(entry, json);
+            }
+            break;
+
+          case "Deck.GetDeckLists":
             if (entry.arrow == "<==") {
               json = entry.json();
               onLabelInDeckGetDeckLists(entry, json);
             }
             break;
 
-          case "Deck.UpdateDeckV3":
+          case "Deck.GetDeckListsV3":
+            if (entry.arrow == "<==") {
+              json = entry.json();
+              onLabelInDeckGetDeckListsV3(entry, json);
+            }
+            break;
+
+          case "Deck.UpdateDeck":
             if (entry.arrow == "<==") {
               json = entry.json();
               onLabelInDeckUpdateDeck(entry, json);
+            }
+            break;
+
+          case "Deck.UpdateDeckV3":
+            if (entry.arrow == "<==") {
+              json = entry.json();
+              onLabelInDeckUpdateDeckV3(entry, json);
             }
             break;
 
@@ -1035,10 +1068,17 @@ function onLogEntryFound(entry) {
             }
             break;
 
-          case "Event.DeckSubmitV3":
+          case "Event.DeckSubmit":
             if (entry.arrow == "<==") {
               json = entry.json();
               onLabelInEventDeckSubmit(entry, json);
+            }
+            break;
+
+          case "Event.DeckSubmitV3":
+            if (entry.arrow == "<==") {
+              json = entry.json();
+              onLabelInEventDeckSubmitV3(entry, json);
             }
             break;
 
@@ -1607,10 +1647,6 @@ function select_deck(arg) {
   } else {
     currentDeck = arg;
   }
-
-  currentDeck.mainDeck = convert_from_v3_list(currentDeck.mainDeck);
-  currentDeck.sideboard = convert_from_v3_list(currentDeck.sideboard);
-
   originalDeck = currentDeck;
   //console.log(currentDeck, arg);
   ipc_send("set_deck", currentDeck, windowOverlay);
