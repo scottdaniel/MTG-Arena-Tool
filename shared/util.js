@@ -2150,12 +2150,17 @@ function get_deck_export_txt(deck) {
 }
 
 //
-function convert_from_v3_list(list) {
-    let ret = [];
-    for (var i=0; i < list.length; i+=2) {
-        ret.push({'id' : list[i], 'quantity' : list[i+1]});
+function convert_deck_from_v3(deck) {
+  return JSON.parse(JSON.stringify(deck), (key, value) => {
+    if (key === "mainDeck" || key === "sideboard") {
+      let ret = [];
+      for (let i = 0; i < value.length; i += 2) {
+          ret.push({ id : value[i], quantity : value[i + 1] });
+      }
+      return ret;
     }
-    return ret;
+    return value;
+  })
 }
 
 //

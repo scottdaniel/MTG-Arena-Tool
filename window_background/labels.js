@@ -714,6 +714,14 @@ function onLabelInEventGetPlayerCourse(entry, json) {
   }
 }
 
+function onLabelInEventGetPlayerCourseV2(entry, json) {
+  if (!json) return;
+  if (json.CourseDeck) {
+    json.CourseDeck = convert_deck_from_v3(json.CourseDeck);
+  }
+  onLabelInEventGetPlayerCourse(entry, json);
+}
+
 function onLabelInEventGetCombinedRankInfo(entry, json) {
   if (!json) return;
 
@@ -764,9 +772,6 @@ function onLabelInDeckGetDeckLists(entry, json) {
       deck.tags.push(formats[deck.format]);
     }
 
-    deck.mainDeck = convert_from_v3_list(deck.mainDeck);
-    deck.sideboard = convert_from_v3_list(deck.sideboard);
-
     decks[deckId] = deck;
     if (decks["index"].indexOf(deckId) == -1) {
       decks["index"].push(deck.id);
@@ -777,6 +782,11 @@ function onLabelInDeckGetDeckLists(entry, json) {
   updateCustomDecks();
   requestHistorySend(0);
   ipc_send("set_decks", JSON.stringify(decks));
+}
+
+function onLabelInDeckGetDeckListsV3(entry, json) {
+  if (!json) return;
+  onLabelInDeckGetDeckLists(entry, json.map(d => convert_deck_from_v3(d)));
 }
 
 function onLabelInEventGetPlayerCourses(entry, json) {
@@ -797,6 +807,16 @@ function onLabelInEventGetPlayerCourses(entry, json) {
   });
 }
 
+function onLabelInEventGetPlayerCoursesV2(entry, json) {
+  if (!json) return;
+  json.forEach(course => {
+    if (course.CourseDeck) {
+      course.CourseDeck = convert_deck_from_v3(course.CourseDeck);
+    }
+  });
+  onLabelInEventGetPlayerCourses(entry, json);
+}
+
 function onLabelInDeckUpdateDeck(entry, json) {
   if (!json) return;
   logTime = parseWotcTime(entry.timestamp);
@@ -814,9 +834,6 @@ function onLabelInDeckUpdateDeck(entry, json) {
         previousMain: _deck.mainDeck,
         previousSide: _deck.sideboard
       };
-
-     json.mainDeck = convert_from_v3_list(json.mainDeck);
-     json.sideboard = convert_from_v3_list(json.sideboard);
 
       // Check Mainboard
       _deck.mainDeck.forEach(function(card) {
@@ -876,6 +893,11 @@ function onLabelInDeckUpdateDeck(entry, json) {
       }
     }
   });
+}
+
+function onLabelInDeckUpdateDeckV3(entry, json) {
+  if (!json) return;
+  onLabelInDeckUpdateDeck(entry, convert_deck_from_v3(json));
 }
 
 function onLabelInventoryUpdated(entry, json) {
@@ -958,6 +980,11 @@ function onLabelInPlayerInventoryGetPlayerCardsV3(entry, json) {
 function onLabelInEventDeckSubmit(entry, json) {
   if (!json) return;
   select_deck(json);
+}
+
+function onLabelInEventDeckSubmitV3(entry, json) {
+  if (!json) return;
+  onLabelInEventDeckSubmit(entry, convert_deck_from_v3(json));
 }
 
 function onLabelEventMatchCreated(entry, json) {
