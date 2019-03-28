@@ -404,6 +404,7 @@ function queryExplore(skip) {
     filterSkip: filterSkip
   };
 
+  showLoadingBars();
   ipc_send("request_explore", query);
 }
 
@@ -685,6 +686,7 @@ function eventLoad(event, index) {
 }
 
 function open_course_request(courseId) {
+  showLoadingBars();
   ipc_send("request_course", courseId);
 }
 

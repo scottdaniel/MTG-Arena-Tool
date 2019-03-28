@@ -155,6 +155,19 @@ label {
     z-index: 50;
 }
 
+.loading_bar_main {
+    background-color: #B7C89E;
+    overflow: hidden;
+    width: calc(100% - 4px);
+    height: 4px;
+    position: absolute;
+    top: 91px;
+    animation-name: color;
+    animation-duration: 2s;
+    animation-iteration-count: infinite;
+    z-index: 50;
+}
+
 .ux_loading {
     position: absolute !important;
     width: 50% !important;
@@ -163,7 +176,7 @@ label {
 .loading_color {
     position: relative;
     width: 200%;
-    height: inherit;
+    height: 100%;
     animation-name: grow;
     animation-duration: 2s;
     animation-iteration-count: infinite;

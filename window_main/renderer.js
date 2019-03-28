@@ -454,6 +454,7 @@ ipc.on("set_status", function(event, arg) {
 //
 ipc.on("set_home", function(event, arg) {
   document.body.style.cursor = "auto";
+  hideLoadingBars();
   deck_tags = arg.tags;
 
   Object.keys(deck_tags).forEach(function(format) {
@@ -469,6 +470,7 @@ ipc.on("set_home", function(event, arg) {
 
 //
 ipc.on("set_explore_decks", function(event, arg) {
+  hideLoadingBars();
   if (sidebarActive == 3) {
     setExploreDecks(arg);
   }
@@ -517,6 +519,7 @@ ipc.on("open_course_deck", function(event, arg) {
   arg.mainDeck = removeDuplicates(arg.mainDeck);
   arg.sideboard = removeDuplicates(arg.sideboard);
   open_deck(arg, 1);
+  hideLoadingBars();
 });
 
 //
@@ -612,6 +615,7 @@ ipc.on("initialize", function() {
   $(".top_username_id").html(playerData.name.slice(-6));
 
   sidebarActive = -1;
+  showLoadingBars();
   ipc_send("request_home", true);
   $(".top_nav").removeClass("hidden");
   $(".overflow_ux").removeClass("hidden");
@@ -793,6 +797,7 @@ function force_open_about() {
 let top_compact = false;
 let resizeTimer;
 window.addEventListener("resize", event => {
+  hideLoadingBars();
   clearTimeout(resizeTimer);
   resizeTimer = setTimeout(() => {
     if ($(".top_nav_icons").width() < 500) {
@@ -878,10 +883,7 @@ $(document).ready(function() {
         if (offlineMode) {
           showOfflineSplash();
         } else {
-          $("#ux_0").html(
-            '<div class="loading_bar ux_loading"><div class="loading_color loading_w"></div><div class="loading_color loading_u"></div><div class="loading_color loading_b"></div><div class="loading_color loading_r"></div><div class="loading_color loading_g"></div></div>'
-          );
-
+          showLoadingBars();
           if (discordTag == null) {
             open_home_tab(null, true);
           } else {
@@ -907,12 +909,6 @@ $(document).ready(function() {
       if ($(this).hasClass("it3")) {
         sidebarActive = 3;
         openExploreTab();
-        /*
-        $("#ux_0").html(
-          '<div class="loading_bar ux_loading"><div class="loading_color loading_w"></div><div class="loading_color loading_u"></div><div class="loading_color loading_b"></div><div class="loading_color loading_r"></div><div class="loading_color loading_g"></div></div>'
-        );
-        document.body.style.cursor = "progress";
-        */
       }
       if ($(this).hasClass("it4")) {
         sidebarActive = 4;
@@ -932,8 +928,17 @@ $(document).ready(function() {
   });
 });
 
+function showLoadingBars() {
+  $$(".main_loading")[0].style.display = "block";
+}
+
+function hideLoadingBars() {
+  $$(".main_loading")[0].style.display = "none";
+}
+
 //
 ipc.on("set_draft_link", function(event, arg) {
+  hideLoadingBars();
   document.getElementById("share_input").value = arg;
 });
 

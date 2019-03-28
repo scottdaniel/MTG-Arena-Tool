@@ -18,6 +18,7 @@ globals
   createDivision,
   playerData,
   tags_colors,
+  showLoadingBars,
   $$
 */
 const RANKS = ["Bronze", "Silver", "Gold", "Platinum", "Diamond", "Mythic"];
@@ -808,6 +809,7 @@ function draftShareLink() {
     expire: expire,
     id: currentId
   };
+  showLoadingBars();
   ipc_send("request_draft_link", obj);
 }
 
