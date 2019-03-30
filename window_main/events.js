@@ -88,15 +88,7 @@ function getMatchesHistoryIndex(matchIndex) {
     return matchIndex;
   }
 
-  let newStyleMatchIndex = `${matchIndex}-${playerData.arenaId}`;
-  if (matchesHistory.hasOwnProperty(newStyleMatchIndex)) {
-    return newStyleMatchIndex;
-  }
-
-  // data appears corrupt
-  throw new Exception(
-    `Could not find valid match index for match index "${matchIndex}"!`
-  );
+  return `${matchIndex}-${playerData.arenaId}`;
 }
 
 // Given a courses object returns all of the matches

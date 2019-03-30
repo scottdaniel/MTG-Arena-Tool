@@ -2063,6 +2063,7 @@ function saveMatch(matchId) {
     .getVersion()
     .split(".")
     .reduce((acc, cur) => +acc * 256 + +cur);
+  match.toolRunFromSource = !electron.remote.app.isPackaged;
 
   console.log("Save match:", match);
   var matches_index = store.get("matches_index");
