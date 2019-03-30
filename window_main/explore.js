@@ -503,8 +503,8 @@ function deckLoad(_deck, index) {
   flt.appendChild(d);
 
   _deck.colors.forEach(function(color) {
-    createDivision(["mana_s20", "mana_" + mana[color]]);
-    flb.appendChild(d);
+    let manaIcon = createDivision(["mana_s20", "mana_" + mana[color]]);
+    flb.appendChild(manaIcon);
   });
 
   let colClass = getWinrateClass((1 / _deck.t) * _deck.w);
