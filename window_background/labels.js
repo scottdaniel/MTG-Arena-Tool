@@ -900,24 +900,21 @@ function onLabelInDeckUpdateDeckV3(entry, json) {
   onLabelInDeckUpdateDeck(entry, convert_deck_from_v3(json));
 }
 
-// Given a shallow object of numbers and lists return a 
+// Given a shallow object of numbers and lists return a
 // new object which doesn't contain 0s or empty lists.
 function minifiedDelta(delta) {
   let newDelta = {};
-  Object.keys(delta).forEach(
-    key => {
-      let val = delta[key];
-      if (val === 0 || ( Array.isArray(val) && !val.length)) {
-        return;
-      }
-      newDelta[key] = val;
+  Object.keys(delta).forEach(key => {
+    let val = delta[key];
+    if (val === 0 || (Array.isArray(val) && !val.length)) {
+      return;
     }
-  );
+    newDelta[key] = val;
+  });
   return newDelta;
 }
 
-
-// These should match the full text of the event 
+// These should match the full text of the event
 const economyTransactionContextsMap = {
   "Booster.Open": "Booster Open",
   "Event.GrantCardPool": "Event Card Pool",
@@ -928,11 +925,11 @@ const economyTransactionContextsMap = {
   "Quest.Completed": "Quest Completed",
   "Store.Fulfillment": "Store",
   "WildCard.Redeem": "Redeem Wildcard",
-  "Vault.Complete": "Vault Opening",
+  "Vault.Complete": "Vault Opening"
 };
 
 function getPrettyContext(context) {
-  if (context.startsWith('Event.Prize')) {
+  if (context.startsWith("Event.Prize")) {
     var eventCode = context.substring(12);
     return `Event Prize: ${eventCode}`;
   }
@@ -956,15 +953,15 @@ function onLabelInventoryUpdated(entry, transaction) {
   // Construct a unique ID
   let context = transaction.context;
   let milliseconds = transaction.date.getTime();
-  transaction.id = sha1( milliseconds + context);
+  transaction.id = sha1(milliseconds + context);
 
-  // For backwards compatability `.context` 
+  // For backwards compatability `.context`
   // refers to the pretty UI text but we should store the original.
 
-  // We keep a copy of the original context so eventually in the 
+  // We keep a copy of the original context so eventually in the
   // future we can fix this.
   transaction.originalContext = transaction.context;
-  transaction.context = getPrettyContext(transaction.context)
+  transaction.context = getPrettyContext(transaction.context);
 
   saveEconomyTransaction(transaction);
   return;

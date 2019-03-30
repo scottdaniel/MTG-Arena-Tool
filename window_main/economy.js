@@ -1,20 +1,20 @@
 /*
 global
-	$,
-	daysPast,
-	get_colation_set,
-	getEventId,
-	setsList,
-	addCardHover,
-	cardsDb,
-	shell,
-	get_set_scryfall,
-	collectionSortRarity,
-	addCardHover,
-	selectAdd,
-	economyHistory,
-	get_card_image,
-	createDivision
+  $,
+  daysPast,
+  get_colation_set,
+  getEventId,
+  setsList,
+  addCardHover,
+  cardsDb,
+  shell,
+  get_set_scryfall,
+  collectionSortRarity,
+  addCardHover,
+  selectAdd,
+  economyHistory,
+  get_card_image,
+  createDivision
 */
 
 var loadEconomy = 0;
@@ -155,7 +155,6 @@ function createDayHeader(change) {
 }
 
 function createChangeRow(change, economyId) {
-
   // The next ~200 lines of code will add elements to these two containers
   var flexBottom = createDivision(["flex_bottom"]);
   var flexRight = createDivision(["tiny_scroll", "list_economy_awarded"]);
@@ -449,7 +448,12 @@ function createChangeRow(change, economyId) {
   var flexTop = createDivision(["flex_top", "economy_sub"]);
   flexTop.style.lineHeight = "32px";
 
-  flexTop.appendChild(createDivision([], `<span title="${change.originalContext || ''}">${change.context}</span>`));
+  flexTop.appendChild(
+    createDivision(
+      [],
+      `<span title="${change.originalContext || ""}">${change.context}</span>`
+    )
+  );
 
   var niceDate = niceDateFormat(new Date(change.date));
   flexTop.appendChild(createDivision(["list_economy_time"], niceDate));
@@ -505,7 +509,6 @@ function createEconomyUI(mainDiv) {
   mainDiv.classList.remove("flex_item");
   mainDiv.innerHTML = "";
 
-
   let div = createDivision(["list_economy_top", "flex_item"]);
 
   //
@@ -513,15 +516,13 @@ function createEconomyUI(mainDiv) {
   selectdiv.style.margin = "auto 64px auto 0px";
 
   var select = $('<select id="query_select"></select>');
-  
+
   selectItems.sort();
 
   [...topSelectItems, ...selectItems]
     .filter(item => item !== filterEconomy)
     .forEach(item => {
-      select.append(
-        `<option value="${item}">${item}</option>`
-      );
+      select.append(`<option value="${item}">${item}</option>`);
     });
 
   select.appendTo(selectdiv);

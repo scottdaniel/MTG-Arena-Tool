@@ -46,8 +46,11 @@ const fs = require("fs");
 const sha1 = require("js-sha1");
 const ipc = electron.ipcRenderer;
 
-
-const {parseWotcTime,parseWotcTime2,normaliseFields} = require("./background-util");
+const {
+  parseWotcTime,
+  parseWotcTime2,
+  normaliseFields
+} = require("./background-util");
 
 const transform = require("lodash.transform");
 const cloneDeep = require("lodash.clonedeep");
@@ -979,7 +982,10 @@ function onLogEntryFound(entry) {
 
           case "ClientToMatchServiceMessageType_ClientToGREMessage":
             json = entry.json();
-            onLabelClientToMatchServiceMessageTypeClientToGREMessage(entry, json);
+            onLabelClientToMatchServiceMessageTypeClientToGREMessage(
+              entry,
+              json
+            );
             break;
 
           case "Event.GetPlayerCourse":

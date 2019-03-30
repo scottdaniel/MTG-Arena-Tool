@@ -1,7 +1,6 @@
-
 // Utility functions that belong only to background
 
-const parse = require('date-fns').parse;
+const parse = require("date-fns").parse;
 
 //
 function parseWotcTime(str) {
@@ -44,7 +43,7 @@ function parseWotcTime(str) {
 // throws an error if it fails
 function parseWotcTime2(dateStr) {
   // example input: 1/23/2019 8:42:41 PM
-  return parse(dateStr, 'M/d/yyyy h:mm:ss a..aaa', new Date());
+  return parse(dateStr, "M/d/yyyy h:mm:ss a..aaa", new Date());
 }
 
 function normaliseFields(iterator) {
