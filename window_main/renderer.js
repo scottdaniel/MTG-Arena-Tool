@@ -764,11 +764,9 @@ function pop(str, timeout) {
   }
 }
 
-/* eslint-disable */
 function installUpdate() {
   ipc_send("renderer_update_install", 1);
 }
-/* eslint-enable */
 
 function force_open_settings() {
   sidebarActive = 6;
@@ -866,6 +864,7 @@ $(document).ready(function() {
   //
   $(".top_nav_item").click(function() {
     $("#ux_0").off();
+    $("#ux_0")[0].removeEventListener("scroll", () => {}, false);
     $("#history_column").off();
     change_background("default");
     document.body.style.cursor = "auto";
