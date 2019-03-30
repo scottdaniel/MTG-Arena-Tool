@@ -2,6 +2,16 @@ span i {
     margin-left: 4px;
 }
 
+relative-time {
+  margin-right: 8px;
+  margin-left: 8px;
+  font-size: 16px;
+  font-family: var(--main-font-name-it);
+  white-space: nowrap;
+  font-weight: 300;
+  color: rgba(250, 229, 210, 0.5);
+}
+
 .top_status, .top_status_span {
     width: 24px;
     height: 24px;
@@ -541,6 +551,7 @@ span.top_nav_item_text {
     color: rgba(250, 229, 210, 0.5);
 }
 
+
 .list_match_time_top {
     margin-right: 18px;
 }
@@ -623,7 +634,7 @@ font-family:  var(--main-font-name);
     align-items: center;
     overflow: -webkit-paged-x;
     display: flex;
-    max-width: calc(100% - 200px);
+    max-width: calc(100% - 300px);
 }
 
 .list_event_expand {

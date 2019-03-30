@@ -2255,6 +2255,11 @@ function daysPast(_date) {
   );
 }
 
+function niceDateFormat(date) {
+  return `<relative-time datetime="${date.toISOString()}">${date.toString()}</relative-time>`;
+}
+
+
 //
 function replaceAll(str, find, replace) {
   return str.replace(new RegExp(find, "g"), replace);

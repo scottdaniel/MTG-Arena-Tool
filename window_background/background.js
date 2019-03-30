@@ -46,6 +46,9 @@ const fs = require("fs");
 const sha1 = require("js-sha1");
 const ipc = electron.ipcRenderer;
 
+
+const {parseWotcTime,parseWotcTime2,normaliseFields} = require("./background-util");
+
 const transform = require("lodash.transform");
 const cloneDeep = require("lodash.clonedeep");
 
@@ -1927,54 +1930,20 @@ function getOppDeck() {
 }
 
 //
-function saveEconomy(json) {
-  var ctx = json.context;
-  json.id = sha1(json.date.getTime() + ctx);
-  json.date = new Date();
+function saveEconomyTransaction(transaction) {
+  let id = transaction.id;
+  let economyIndex = store.get("economy_index");
 
-  if (ctx.indexOf("Quest.Completed") !== -1) {
-    json.context = "Quest Completed";
-  }
-  if (ctx.indexOf("Booster.Open") !== -1) {
-    json.context = "Booster Open";
-  }
-  if (ctx.indexOf("PlayerReward") !== -1) {
-    json.context = "Player Rewards";
-  }
-  if (ctx.indexOf("WildCard.Redeem") !== -1) {
-    json.context = "Redeem Wildcard";
-  }
-  if (ctx.indexOf("Store.Fulfillment") !== -1) {
-    json.context = "Store";
-  }
-  if (ctx.indexOf("Event.Prize") !== -1) {
-    json.context = "Event Prize";
-  }
-  if (ctx.indexOf("Event.PayEntry") !== -1) {
-    json.context = "Pay Event Entry";
-  }
-  if (ctx.indexOf("Event.GrantCardPool") !== -1) {
-    json.context = "Event Card Pool";
-  }
-  if (ctx.indexOf("Event.Season.Constructed.Payout") !== -1) {
-    json.context = "Constructed Season Rewards";
-  }
-  if (ctx.indexOf("Event.Season.Limited.Payout") !== -1) {
-    json.context = "Limited Season Rewards";
+  if (!economyIndex.includes(id)) {
+    economyIndex.push(id);
+    store.set("economy_index", economyIndex);
+    economy.changes = economyIndex;
   }
 
-  var economy_index = store.get("economy_index");
+  economy[id] = transaction;
+  store.set(id, transaction);
 
-  if (!economy_index.includes(json.id)) {
-    economy_index.push(json.id);
-  }
-
-  httpApi.httpSetEconomy(json);
-
-  economy[json.id] = json;
-  economy.changes = economy_index;
-  store.set("economy_index", economy_index);
-  store.set(json.id, json);
+  httpApi.httpSetEconomy(transaction);
 }
 
 //
@@ -2191,55 +2160,4 @@ function finishLoading() {
     let logReadElapsed = (logReadEnd - logReadStart) / 1000;
     ipc_send("ipc_log", `Log read in ${logReadElapsed}s`);
   }
-}
-
-// Utility functions that belong only to background
-
-//
-function parseWotcTime(str) {
-  try {
-    let datePart = str.split(" ")[0];
-    let timePart = str.split(" ")[1];
-    let midnight = str.split(" ")[2];
-
-    datePart = datePart.split("/");
-    timePart = timePart.split(":");
-
-    timePart.forEach(function(s, index) {
-      timePart[index] = parseInt(s);
-    });
-    datePart.forEach(function(s, index) {
-      datePart[index] = parseInt(s);
-    });
-
-    if (midnight == "PM" && timePart[0] != 12) {
-      timePart[0] += 12;
-    }
-    if (midnight == "AM" && timePart[0] == 12) {
-      timePart[0] = 0;
-    }
-
-    var date = new Date(
-      datePart[2],
-      datePart[0] - 1,
-      datePart[1],
-      timePart[0],
-      timePart[1],
-      timePart[2]
-    );
-    return date;
-  } catch (e) {
-    return new Date();
-  }
-}
-
-function normaliseFields(iterator) {
-  if (typeof iterator == "object") {
-    return transform(iterator, function(result, value, key) {
-      let nkey =
-        typeof key == "string" ? key.replace(/List$/, "").toLowerCase() : key;
-      result[nkey] = normaliseFields(value);
-    });
-  }
-  return iterator;
 }

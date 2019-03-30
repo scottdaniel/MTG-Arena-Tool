@@ -28,6 +28,8 @@ global
 const electron = require("electron");
 const remote = require("electron").remote;
 
+require('time-elements');
+
 const open_home_tab = require("./home").open_home_tab;
 const open_tournament = require("./home").open_tournament;
 const set_tou_state = require("./home").set_tou_state;
@@ -43,6 +45,7 @@ const expandEvent = require("./events").expandEvent;
 
 const open_economy_tab = require("./economy").open_economy_tab;
 const set_economy_history = require("./economy").set_economy_history;
+
 
 var orderedCardTypes = ["cre", "lan", "ins", "sor", "enc", "art", "pla"];
 var orderedCardTypesDesc = [
