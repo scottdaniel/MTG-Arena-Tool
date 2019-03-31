@@ -27,7 +27,7 @@ const serverAddress = "mtgatool.com";
 
 function beginSSE() {
   var source = new EventSource(
-    "https://" + serverAddress + "/api/poll.php?token=" + tokenAuth
+    "https://" + serverAddress + "/api/pull?token=" + tokenAuth
   );
   source.onmessage = function(e) {
     ipc_send("ipc_log", ">> " + e.data);
@@ -42,7 +42,7 @@ function beginSSE() {
     console.log("> ", parsed);
 
     if (parsed) {
-      parsed.notifications.forEach(str => {
+      parsed.forEach(str => {
         console.log("heartbeat message:", str);
         if (typeof str == "string") {
           //console.log("Notification string:", str);
