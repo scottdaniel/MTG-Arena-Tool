@@ -21,6 +21,7 @@ globals
   showLoadingBars,
   $$
 */
+
 const RANKS = ["Bronze", "Silver", "Gold", "Platinum", "Diamond", "Mythic"];
 
 let loadHistory = 0;
@@ -29,6 +30,18 @@ let filteredSampleSize = 0;
 let viewingLimitSeason = false;
 
 const autocomplete = require("../shared/autocomplete.js");
+
+function isDraftMatch(match) {
+  return match.eventId && match.eventId.includes("Draft");
+}
+
+function filterMatch(match) {
+  return (
+    filterEvent == "All" ||
+    match.eventId == filterEvent ||
+    (filterEvent == "All Draft Modes" && isDraftMatch(match))
+  );
+}
 
 function open_history_tab(loadMore) {
   var mainDiv = document.getElementById("ux_0");
@@ -69,32 +82,34 @@ function open_history_tab(loadMore) {
 
   // Event ID filter
   if (loadHistory == 0) {
-    let events_list = [];
+    let eventsList = [];
     let wins = 0;
     let losses = 0;
     let totalMatchTime = 0;
 
     filteredSampleSize = 0;
-    matchesHistory.matches.forEach(matchId => {
-      let match = matchesHistory[matchId];
-      if (match) {
-        if (match.eventId) {
-          if (events_list.indexOf(match.eventId) == -1) {
-            events_list.push(match.eventId);
-          }
-          if (filterEvent == "All" || match.eventId == filterEvent) {
-            wins += match.player.win;
-            losses += match.opponent.win;
+    let validMatches = matchesHistory.matches
+      .map(matchId => matchesHistory[matchId])
+      .filter(match => match !== undefined && match.eventId);
 
-            // some of the data is wierd. Games which last years or have no data.
-            if (match.duration !== undefined && match.duration < 3600) {
-              totalMatchTime += match.duration;
-            }
-            filteredSampleSize++;
-          }
-        }
+    // construct list of all events we have matches for
+    validMatches.forEach(match => {
+      if (!eventsList.includes(match.eventId)) {
+        eventsList.push(match.eventId);
       }
     });
+
+    // count matches which match the current filter
+    validMatches.filter(filterMatch).forEach(match => {
+      wins += match.player.win;
+      losses += match.opponent.win;
+      // some of the data is wierd. Games which last years or have no data.
+      if (match.duration !== undefined && match.duration < 3600) {
+        totalMatchTime += match.duration;
+      }
+      filteredSampleSize++;
+    });
+
     if (filteredSampleSize == 0) {
       filteredSampleSize = matchesHistory.matches.length;
     }
@@ -128,12 +143,18 @@ function open_history_tab(loadMore) {
     if (filterEvent != "All") {
       select.append('<option value="All">All</option>');
     }
-    events_list.forEach(evId => {
-      if (evId !== filterEvent) {
-        select.append(
-          '<option value="' + evId + '">' + getReadableEvent(evId) + "</option>"
-        );
+
+    if (filterEvent != "All Draft") {
+      select.append('<option value="All Draft Modes">All Draft Modes</option>');
+    }
+
+    eventsList.forEach(evId => {
+      if (evId === filterEvent) {
+        return;
       }
+      select.append(
+        '<option value="' + evId + '">' + getReadableEvent(evId) + "</option>"
+      );
     });
     historyTopFilter.appendChild(select[0]);
     historyColumn.appendChild(historyTop);
@@ -162,13 +183,26 @@ function open_history_tab(loadMore) {
     var match = matchesHistory[match_id];
 
     //console.log("match: ", match_id, match);
-    if (match == undefined) continue;
-    if (match.type == "match") {
-      if (match.opponent == undefined) continue;
-      if (match.opponent.userid.indexOf("Familiar") !== -1) continue;
+    if (match == undefined) {
+      continue;
     }
-    if (match.type == "Event") continue;
-    if (filterEvent !== "All" && filterEvent !== match.eventId) continue;
+
+    if (match.type == "match") {
+      if (match.opponent == undefined) {
+        continue;
+      }
+      if (match.opponent.userid.indexOf("Familiar") !== -1) {
+        continue;
+      }
+    }
+
+    if (match.type == "Event") {
+      continue;
+    }
+
+    if (!filterMatch(match)) {
+      continue;
+    }
 
     actuallyLoaded++;
     //console.log("Load match: ", match_id, match);
@@ -354,7 +388,10 @@ function open_history_tab(loadMore) {
   $(this).off();
 
   historyColumn.addEventListener("scroll", () => {
-    if (historyColumn.scrollTop + historyColumn.offsetHeight >= historyColumn.scrollHeight) {
+    if (
+      historyColumn.scrollTop + historyColumn.offsetHeight >=
+      historyColumn.scrollHeight
+    ) {
       open_history_tab(20);
     }
   });
