@@ -744,6 +744,13 @@ function onLabelInEventGetCombinedRankInfo(entry, json) {
   updateRank();
 }
 
+function onLabelInEventGetActiveEvents(entry, json) {
+  if (!json) return;
+
+  let activeEvents = json.map(event => event.InternalEventName);
+  ipc_send("set_active_events", JSON.stringify(activeEvents));
+}
+
 function onLabelRankUpdated(entry, json) {
   if (!json) return;
 

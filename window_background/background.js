@@ -27,6 +27,7 @@ global
   onLabelInPlayerInventoryGetPlayerCardsV3,
   onLabelInEventDeckSubmit,
   onLabelInEventDeckSubmitV3,
+  onLabelInEventGetActiveEvents,
   onLabelEventMatchCreated,
   onLabelOutDirectGameChallenge,
   onLabelInDraftDraftStatus,
@@ -1115,6 +1116,13 @@ function onLogEntryFound(entry) {
             if (entry.arrow == "<==") {
               json = entry.json();
               onLabelInEventCompleteDraft(entry, json);
+            }
+            break;
+
+          case "Event.GetActiveEventsV2":
+            if (entry.arrow == "<==") {
+              json = entry.json();
+              onLabelInEventGetActiveEvents(entry, json);
             }
             break;
 
