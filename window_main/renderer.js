@@ -106,6 +106,7 @@ let season_starts = new Date();
 let season_ends = new Date();
 let rewards_daily_ends = new Date();
 let rewards_weekly_ends = new Date();
+let activeEvents = [];
 
 let deck_tags = {};
 let tags_colors = {};
@@ -350,6 +351,18 @@ ipc.on("set_events", function(event, arg) {
   }
 
   openEventsTab(0);
+});
+
+//
+ipc.on("set_active_events", (event, arg) => {
+  if (arg != null) {
+    try {
+      activeEvents = JSON.parse(arg);
+    } catch (e) {
+      console.log("Error parsing JSON:", arg);
+      return false;
+    }
+  }
 });
 
 ipc.on("set_economy", function(event, arg) {
