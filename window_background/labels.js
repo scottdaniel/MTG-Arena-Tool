@@ -907,29 +907,71 @@ function onLabelInDeckUpdateDeckV3(entry, json) {
   onLabelInDeckUpdateDeck(entry, convert_deck_from_v3(json));
 }
 
-function onLabelInventoryUpdated(entry, json) {
-  if (!json) return;
-  json.date = parseWotcTime(entry.timestamp);
+// Given a shallow object of numbers and lists return a
+// new object which doesn't contain 0s or empty lists.
+function minifiedDelta(delta) {
+  let newDelta = {};
+  Object.keys(delta).forEach(key => {
+    let val = delta[key];
+    if (val === 0 || (Array.isArray(val) && !val.length)) {
+      return;
+    }
+    newDelta[key] = val;
+  });
+  return newDelta;
+}
 
-  if (json.delta.boosterDelta.length == 0) delete json.delta.boosterDelta;
-  if (json.delta.cardsAdded.length == 0) delete json.delta.cardsAdded;
-  if (json.delta.decksAdded.length == 0) delete json.delta.decksAdded;
-  if (json.delta.vanityItemsAdded.length == 0)
-    delete json.delta.vanityItemsAdded;
-  if (json.delta.vanityItemsRemoved.length == 0)
-    delete json.delta.vanityItemsRemoved;
+// These should match the full text of the event
+const economyTransactionContextsMap = {
+  "Booster.Open": "Booster Open",
+  "Event.GrantCardPool": "Event Card Pool",
+  "Event.PayEntry": "Pay Event Entry",
+  "Event.Season.Constructed.Payout": "Constructed Season Rewards",
+  "Event.Season.Limited.Payout": "Limited Season Rewards",
+  "PlayerReward.OnMatchCompletedDaily": "Player Rewards",
+  "Quest.Completed": "Quest Completed",
+  "Store.Fulfillment": "Store",
+  "WildCard.Redeem": "Redeem Wildcard",
+  "Vault.Complete": "Vault Opening"
+};
 
-  if (json.delta.gemsDelta == 0) delete json.delta.gemsDelta;
-  if (json.delta.draftTokensDelta == 0) delete json.delta.draftTokensDelta;
-  if (json.delta.goldDelta == 0) delete json.delta.goldDelta;
-  if (json.delta.sealedTokensDelta == 0) delete json.delta.sealedTokensDelta;
-  if (json.delta.vaultProgressDelta == 0) delete json.delta.vaultProgressDelta;
-  if (json.delta.wcCommonDelta == 0) delete json.delta.wcCommonDelta;
-  if (json.delta.wcMythicDelta == 0) delete json.delta.wcMythicDelta;
-  if (json.delta.wcRareDelta == 0) delete json.delta.wcRareDelta;
-  if (json.delta.wcUncommonDelta == 0) delete json.delta.wcUncommonDelta;
+function getPrettyContext(context) {
+  if (context.startsWith("Event.Prize")) {
+    var eventCode = context.substring(12);
+    return `Event Prize: ${eventCode}`;
+  }
 
-  saveEconomy(json);
+  var pretty = economyTransactionContextsMap[context];
+
+  // If there's no valid pretty context keep the code as is.
+  return pretty || context;
+}
+
+// Called for all "Inventory.Updated" labels
+function onLabelInventoryUpdated(entry, transaction) {
+  // if (!transaction) return;
+
+  // Add missing data
+  transaction.date = parseWotcTime2(entry.timestamp);
+
+  // Reduce the size for storage
+  transaction.delta = minifiedDelta(transaction.delta);
+
+  // Construct a unique ID
+  let context = transaction.context;
+  let milliseconds = transaction.date.getTime();
+  transaction.id = sha1(milliseconds + context);
+
+  // For backwards compatability `.context`
+  // refers to the pretty UI text but we should store the original.
+
+  // We keep a copy of the original context so eventually in the
+  // future we can fix this.
+  transaction.originalContext = transaction.context;
+  transaction.context = getPrettyContext(transaction.context);
+
+  saveEconomyTransaction(transaction);
+  return;
 }
 
 function onLabelInPlayerInventoryGetPlayerInventory(entry, json) {

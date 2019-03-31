@@ -1,20 +1,20 @@
 /*
 global
-	$,
-	daysPast,
-	get_colation_set,
-	getEventId,
-	setsList,
-	addCardHover,
-	cardsDb,
-	shell,
-	get_set_scryfall,
-	collectionSortRarity,
-	addCardHover,
-	selectAdd,
-	economyHistory,
-	get_card_image,
-	createDivision
+  $,
+  daysPast,
+  get_colation_set,
+  getEventId,
+  setsList,
+  addCardHover,
+  cardsDb,
+  shell,
+  get_set_scryfall,
+  collectionSortRarity,
+  addCardHover,
+  selectAdd,
+  economyHistory,
+  get_card_image,
+  createDivision
 */
 
 var loadEconomy = 0;
@@ -53,8 +53,8 @@ function openEconomyTab(loadMore) {
     loadEconomy < loadEnd;
     loadEconomy++
   ) {
-    let economy_id = economyHistory.changes[loadEconomy];
-    let change = economyHistory[economy_id];
+    let economyId = economyHistory.changes[loadEconomy];
+    let change = economyHistory[economyId];
 
     if (change == undefined) continue;
 
@@ -74,7 +74,7 @@ function openEconomyTab(loadMore) {
       mainDiv.appendChild(createDayHeader(change));
     }
 
-    var div = createChangeRow(change, economy_id);
+    var div = createChangeRow(change, economyId);
     mainDiv.appendChild(div);
 
     $(".list_economy_awarded").on("mousewheel", function(e) {
@@ -99,18 +99,19 @@ function openEconomyTab(loadMore) {
 
 function createDayHeader(change) {
   daysago = daysPast(change.date);
-  let dd = new Date(change.date);
   let div = createDivision(["economy_title", "flex_item"]);
 
-  let fll = createDivision(["flex_item"]);
-  fll.style.lineHeight = "64px";
+  let flexLeft = createDivision(["flex_item"]);
+  flexLeft.style.lineHeight = "64px";
 
-  if (daysago == 0) fll.innerHTML = "Today";
-  if (daysago == 1) fll.innerHTML = "Yesterday";
-  if (daysago > 1)
-    fll.innerHTML = daysago + " Days ago. (" + dd.toDateString() + ")";
+  if (daysago == 0) flexLeft.innerHTML = "Today";
+  if (daysago == 1) flexLeft.innerHTML = "Yesterday";
+  if (daysago > 1) {
+    let date = new Date(change.date);
+    flexLeft.innerHTML = niceDateFormat(date);
+  }
 
-  let flr = createDivision(["economy_day_stats", "flex_item"]);
+  let flexRight = createDivision(["economy_day_stats", "flex_item"]);
 
   let icgo = createDivision(["economy_gold_med"]);
   icgo.title = "Gold";
@@ -127,35 +128,36 @@ function createDayHeader(change) {
   tx.style.lineHeight = "64px";
   tx.classList.add("economy_sub");
 
-  flr.appendChild(icgo);
-  flr.appendChild(up);
+  flexRight.appendChild(icgo);
+  flexRight.appendChild(up);
   tx.innerHTML = dayList[daysago].goldEarned;
-  flr.appendChild(tx);
+  flexRight.appendChild(tx);
 
-  flr.appendChild(down);
+  flexRight.appendChild(down);
   let ntx = tx.cloneNode(true);
   ntx.innerHTML = dayList[daysago].goldSpent;
-  flr.appendChild(ntx);
+  flexRight.appendChild(ntx);
 
-  flr.appendChild(icge);
-  flr.appendChild(up.cloneNode(true));
+  flexRight.appendChild(icge);
+  flexRight.appendChild(up.cloneNode(true));
   ntx = tx.cloneNode(true);
   ntx.innerHTML = dayList[daysago].gemsEarned;
-  flr.appendChild(ntx);
+  flexRight.appendChild(ntx);
 
-  flr.appendChild(down.cloneNode(true));
+  flexRight.appendChild(down.cloneNode(true));
   ntx = tx.cloneNode(true);
   ntx.innerHTML = dayList[daysago].gemsSpent;
-  flr.appendChild(ntx);
+  flexRight.appendChild(ntx);
 
-  div.appendChild(fll);
-  div.appendChild(flr);
+  div.appendChild(flexLeft);
+  div.appendChild(flexRight);
   return div;
 }
 
-function createChangeRow(change, economy_id) {
-  var flb = createDivision(["flex_bottom"]);
-  var flr = createDivision(["tiny_scroll", "list_economy_awarded"]);
+function createChangeRow(change, economyId) {
+  // The next ~200 lines of code will add elements to these two containers
+  var flexBottom = createDivision(["flex_bottom"]);
+  var flexRight = createDivision(["tiny_scroll", "list_economy_awarded"]);
 
   let checkGemsPaid = false;
   let checkGoldPaid = false;
@@ -183,8 +185,8 @@ function createChangeRow(change, economy_id) {
 
       bon.innerHTML = "x" + Math.abs(booster.count);
 
-      flb.appendChild(bos);
-      flb.appendChild(bon);
+      flexBottom.appendChild(bos);
+      flexBottom.appendChild(bon);
     });
 
     checkWildcardsAdded = true;
@@ -203,7 +205,7 @@ function createChangeRow(change, economy_id) {
     bos = createDivision(["economy_ticket_med"]);
     bos.title = "Event Entry";
 
-    flr.appendChild(bos);
+    flexRight.appendChild(bos);
   } else if (change.context == "Redeem Wildcard") {
     var imgUri = "";
     if (change.delta.wcCommonDelta != undefined) imgUri = "wc_common";
@@ -214,7 +216,7 @@ function createChangeRow(change, economy_id) {
       bos = createDivision(["economy_wc"]);
       bos.style.backgroundImage = "url(../images/" + imgUri + ".png)";
 
-      flb.appendChild(bos);
+      flexBottom.appendChild(bos);
     }
 
     checkCardsAdded = true;
@@ -237,8 +239,8 @@ function createChangeRow(change, economy_id) {
     bon.classList.add("economy_sub");
     bon.innerHTML = Math.abs(change.delta.gemsDelta);
 
-    flb.appendChild(bos);
-    flb.appendChild(bon);
+    flexBottom.appendChild(bos);
+    flexBottom.appendChild(bon);
   }
 
   if (checkGoldPaid && change.delta.goldDelta != undefined) {
@@ -250,8 +252,8 @@ function createChangeRow(change, economy_id) {
     bon.classList.add("economy_sub");
     bon.innerHTML = Math.abs(change.delta.goldDelta);
 
-    flb.appendChild(bos);
-    flb.appendChild(bon);
+    flexBottom.appendChild(bos);
+    flexBottom.appendChild(bon);
   }
 
   if (checkGemsEarnt && change.delta.gemsDelta != undefined) {
@@ -263,8 +265,8 @@ function createChangeRow(change, economy_id) {
     bon.classList.add("economy_sub");
     bon.innerHTML = Math.abs(change.delta.gemsDelta);
 
-    flr.appendChild(bos);
-    flr.appendChild(bon);
+    flexRight.appendChild(bos);
+    flexRight.appendChild(bon);
   }
 
   if (checkGoldEarnt && change.delta.goldDelta != undefined) {
@@ -276,8 +278,8 @@ function createChangeRow(change, economy_id) {
     bon.classList.add("economy_sub");
     bon.innerHTML = Math.abs(change.delta.goldDelta);
 
-    flr.appendChild(bos);
-    flr.appendChild(bon);
+    flexRight.appendChild(bos);
+    flexRight.appendChild(bon);
   }
 
   if (checkBoosterAdded && change.delta.boosterDelta != undefined) {
@@ -294,8 +296,8 @@ function createChangeRow(change, economy_id) {
       bon.classList.add("economy_sub");
       bon.innerHTML = "x" + Math.abs(booster.count);
 
-      flr.appendChild(bos);
-      flr.appendChild(bon);
+      flexRight.appendChild(bos);
+      flexRight.appendChild(bon);
     });
   }
 
@@ -309,8 +311,8 @@ function createChangeRow(change, economy_id) {
       bon.style.lineHeight = "64px";
       bon.classList.add("economy_sub");
       bon.innerHTML = "x" + Math.abs(change.delta.wcCommonDelta);
-      flr.appendChild(bos);
-      flr.appendChild(bon);
+      flexRight.appendChild(bos);
+      flexRight.appendChild(bon);
     }
 
     if (change.delta.wcUncommonDelta != undefined) {
@@ -322,8 +324,8 @@ function createChangeRow(change, economy_id) {
       bon.style.lineHeight = "64px";
       bon.classList.add("economy_sub");
       bon.innerHTML = "x" + Math.abs(change.delta.wcUncommonDelta);
-      flr.appendChild(bos);
-      flr.appendChild(bon);
+      flexRight.appendChild(bos);
+      flexRight.appendChild(bon);
     }
 
     if (change.delta.wcRareDelta != undefined) {
@@ -335,8 +337,8 @@ function createChangeRow(change, economy_id) {
       bon.style.lineHeight = "64px";
       bon.classList.add("economy_sub");
       bon.innerHTML = "x" + Math.abs(change.delta.wcRareDelta);
-      flr.appendChild(bos);
-      flr.appendChild(bon);
+      flexRight.appendChild(bos);
+      flexRight.appendChild(bon);
     }
     if (change.delta.wcMythicDelta != undefined) {
       bos = createDivision(["economy_wc"]);
@@ -347,8 +349,8 @@ function createChangeRow(change, economy_id) {
       bon.style.lineHeight = "64px";
       bon.classList.add("economy_sub");
       bon.innerHTML = "x" + Math.abs(change.delta.wcMythicDelta);
-      flr.appendChild(bos);
-      flr.appendChild(bon);
+      flexRight.appendChild(bos);
+      flexRight.appendChild(bon);
     }
   }
 
@@ -377,7 +379,7 @@ function createChangeRow(change, economy_id) {
         img.src = get_card_image(card);
 
         d.appendChild(img);
-        flr.appendChild(d);
+        flexRight.appendChild(d);
 
         var imgDom = $(img);
         addCardHover(imgDom, card);
@@ -414,7 +416,7 @@ function createChangeRow(change, economy_id) {
       img.src = get_card_image(card);
 
       d.appendChild(img);
-      flr.appendChild(d);
+      flexRight.appendChild(d);
 
       var imgDom = $(img);
       addCardHover(imgDom, card);
@@ -437,26 +439,35 @@ function createChangeRow(change, economy_id) {
   }
 
   // DOM hierarchy is:
-  // div
-  //   fll
-  //      flt
-  //      flb
-  //   flr
+  // changeRow
+  //   flexLeft
+  //      flexTop
+  //      flexBottom
+  //   flexRight
 
-  var flt = createDivision(["flex_top", "economy_sub"]);
-  flt.style.lineHeight = "32px";
-  flt.innerHTML = change.context;
+  var flexTop = createDivision(["flex_top", "economy_sub"]);
+  flexTop.style.lineHeight = "32px";
 
-  var fll = createDivision(["flex_item"]);
-  fll.style.flexDirection = "column";
-  fll.appendChild(flt);
-  fll.appendChild(flb);
+  flexTop.appendChild(
+    createDivision(
+      [],
+      `<span title="${change.originalContext || ""}">${change.context}</span>`
+    )
+  );
 
-  var div = createDivision([economy_id, "list_economy"]);
-  div.appendChild(fll);
-  div.appendChild(flr);
+  var niceDate = niceDateFormat(new Date(change.date));
+  flexTop.appendChild(createDivision(["list_economy_time"], niceDate));
 
-  return div;
+  var flexLeft = createDivision(["flex_item"]);
+  flexLeft.style.flexDirection = "column";
+  flexLeft.appendChild(flexTop);
+  flexLeft.appendChild(flexBottom);
+
+  var changeRow = createDivision([economyId, "list_economy"]);
+  changeRow.appendChild(flexLeft);
+  changeRow.appendChild(flexRight);
+
+  return changeRow;
 }
 
 function createEconomyUI(mainDiv) {
@@ -465,10 +476,12 @@ function createEconomyUI(mainDiv) {
   dayList[0] = new economyDay();
   economyHistory.changes.sort(compare_economy);
 
-  var selectItems = ["All", "Day Summaries"];
+  var topSelectItems = ["All", "Day Summaries"];
+  var selectItems = [];
+
   for (var n = 0; n < economyHistory.changes.length; n++) {
-    let economy_id = economyHistory.changes[n];
-    let change = economyHistory[economy_id];
+    let economyId = economyHistory.changes[n];
+    let change = economyHistory[economyId];
 
     if (change == undefined) continue;
 
@@ -496,8 +509,6 @@ function createEconomyUI(mainDiv) {
   mainDiv.classList.remove("flex_item");
   mainDiv.innerHTML = "";
 
-  var d = createDivision(["list_fill"]);
-
   let div = createDivision(["list_economy_top", "flex_item"]);
 
   //
@@ -505,13 +516,15 @@ function createEconomyUI(mainDiv) {
   selectdiv.style.margin = "auto 64px auto 0px";
 
   var select = $('<select id="query_select"></select>');
-  for (var i = 0; i < selectItems.length; i++) {
-    if (selectItems[i] !== filterEconomy) {
-      select.append(
-        '<option value="' + selectItems[i] + '">' + selectItems[i] + "</option>"
-      );
-    }
-  }
+
+  selectItems.sort();
+
+  [...topSelectItems, ...selectItems]
+    .filter(item => item !== filterEconomy)
+    .forEach(item => {
+      select.append(`<option value="${item}">${item}</option>`);
+    });
+
   select.appendTo(selectdiv);
   div.appendChild(selectdiv);
   selectAdd(select, updateEconomy);
@@ -577,6 +590,8 @@ function createEconomyUI(mainDiv) {
   div.appendChild(ntx);
 
   mainDiv.appendChild(div);
+
+  var d = createDivision(["list_fill"]);
   mainDiv.appendChild(d);
 
   loadEconomy = 0;

@@ -831,11 +831,10 @@ function addCardTile(grpId, indent, quantity, element) {
   return false;
 }
 
-
 /**
  * Creates a select box
  * This is a "fixed" version of SelectAdd and should replace it.
-**/
+ **/
 function createSelect(parent, options, current, callback, divClass) {
   let selectContainer = createDivision(["select_container", divClass]);
   selectContainer.id = divClass;
@@ -991,7 +990,7 @@ function addCardHover(element, card) {
     mainImageElement.addEventListener("load", evt => {
       $$(".loader").forEach(el => (el.style.opacity = 0));
     });
-    
+
     // show card quantity
     if (renderer == 0) {
       attachOwnerhipStars(card, $$(".hover_card_quantity")[0]);
@@ -2155,12 +2154,12 @@ function convert_deck_from_v3(deck) {
     if (key === "mainDeck" || key === "sideboard") {
       let ret = [];
       for (let i = 0; i < value.length; i += 2) {
-          ret.push({ id : value[i], quantity : value[i + 1] });
+        ret.push({ id: value[i], quantity: value[i + 1] });
       }
       return ret;
     }
     return value;
-  })
+  });
 }
 
 //
@@ -2253,6 +2252,10 @@ function daysPast(_date) {
       (firstDate.getTime() - secondDate.getTime()) / (24 * 60 * 60 * 1000)
     )
   );
+}
+
+function niceDateFormat(date) {
+  return `<relative-time datetime="${date.toISOString()}">${date.toString()}</relative-time>`;
 }
 
 //
