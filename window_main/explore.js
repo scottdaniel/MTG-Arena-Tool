@@ -1,5 +1,6 @@
 /*
 globals
+  activeEvents,
   eventsList,
   rankedEvents,
   getReadableEvent,
@@ -163,15 +164,21 @@ function drawFilters() {
   let eventFilters = [];
   if (filterType == "Events") {
     eventFilters = Object.keys(eventsList)
+      .concat(activeEvents)
       .map(ev => eventsList[ev])
       .filter(
         item =>
+          item != undefined &&
+          item != "New Player Experience" &&
           item != "Direct Game" &&
           item != "Ranked" &&
           item != "Play" &&
           item != "Traditional Play" &&
-          item != "Traditional Ranked"
+          item != "Traditional Ranked" &&
+          !rankedEvents.map(ev => eventsList[ev]).includes(item)
       );
+
+    eventFilters = [...new Set(eventFilters)];
   } else if (filterType == "Ranked Draft") {
     eventFilters = rankedEvents.map(ev => eventsList[ev]);
   } else if (filterType == "Ranked Constructed") {
@@ -183,6 +190,14 @@ function drawFilters() {
     if (a < b) return -1;
     if (a > b) return 1;
     return 0;
+  });
+
+  let mappedActive = activeEvents.map(ev => eventsList[ev]);
+  eventFilters.forEach(item => {
+    if (mappedActive.includes(item)) {
+      eventFilters.splice(eventFilters.indexOf(item), 1);
+      eventFilters.unshift(item);
+    }
   });
 
   createSelect(
