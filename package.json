@@ -50,6 +50,7 @@
 		"electron-transparency-mouse-fix": "^1.0.0-beta",
 		"electron-updater": "^4.0.8",
 		"google-protobuf": "^3.6.1",
+		"gunzip-file": "^0.1.1",
 		"howler": "^2.1.1",
 		"js-sha1": "^0.6.0",
 		"lodash.clonedeep": "^4.5.0",
@@ -62,7 +63,7 @@
 	"devDependencies": {
 		"acorn": "^6.1.1",
 		"electron": "^3.0.14",
-		"electron-builder": "^20.38.5",
+		"electron-builder": "^20.39.0",
 		"eslint": "^5.15.0",
 		"eslint-config-prettier": "^4.1.0",
 		"eslint-plugin-prettier": "^3.0.1",
