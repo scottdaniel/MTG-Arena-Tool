@@ -57,6 +57,7 @@ const transform = require("lodash.transform");
 const cloneDeep = require("lodash.clonedeep");
 
 const httpApi = require("./http-api");
+const manifestParser = require("./manifest-parser");
 
 const rememberCfg = {
   email: "",
@@ -1260,10 +1261,12 @@ function processLogUser(rawString) {
     }
 
     // Get Client Version
-    strCheck = '"ClientVersion":"';
+    strCheck = '"clientVersion": "';
     if (value.indexOf(strCheck) > -1) {
       playerData.arenaVersion = dataChop(value, strCheck, '"');
       ipc_send("ipc_log", "Arena version: " + playerData.arenaVersion);
+      // We request manifest data here
+      //manifestParser.requestManifestData(playerData.arenaVersion);
     }
     /*
     if (firstPass) {
