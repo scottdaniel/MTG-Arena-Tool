@@ -441,9 +441,12 @@ function createChangeRow(change, economyId) {
   }
 
   if (checkSkinsAdded && change.delta.artSkinsAdded != undefined) {
-    change.delta.artSkinsAdded.forEach(function(artId) {
-      bos = createDivision(["economy_skin"]);
-      bos.title = "Skin";
+    change.delta.artSkinsAdded.forEach(obj => {
+      let card = cardsDb.getByArt(obj.artId);
+
+      bos = createDivision(["economy_skin_art"]);
+      bos.title = card.name + " Skin";
+      bos.style.backgroundImage = `url("${get_card_art(card)}")`;
 
       flexRight.appendChild(bos);
     });
