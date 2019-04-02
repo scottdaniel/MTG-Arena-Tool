@@ -704,14 +704,19 @@ function printCards() {
           'px !important;" class="inventory_card"></div>'
       );
 
+      //if (i < owned) color = "green";
+      //if () color = "orange";
+
+      let owned = cards[card.id];
+      let aquired = cardsNew[card.id];
       for (let i = 0; i < 4; i++) {
-        if (cardsNew[key] != undefined && i < cardsNew[key]) {
+        if (aquired && i >= owned - aquired && i < owned) {
           $(
             '<div style="width: ' +
               cardSize / 4 +
               'px;" class="inventory_card_quantity_orange"></div>'
           ).appendTo(d);
-        } else if (i < cards[key]) {
+        } else if (i < owned) {
           $(
             '<div style="width: ' +
               cardSize / 4 +

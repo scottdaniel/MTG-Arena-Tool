@@ -1008,16 +1008,14 @@ function attachOwnerhipStars(card, starContainer) {
   starContainer.innerHTML = "";
   starContainer.style.opacity = 1;
 
+  let owned = cards[card.id];
+  let aquired = cardsNew[card.id];
   for (let i = 0; i < 4; i++) {
     let color = "gray";
 
-    if (cardsNew[card.id] != undefined && i < cardsNew[card.id]) {
-      color = "orange";
-    } else if (i < cards[card.id]) {
-      color = "green";
-    } else {
-      color = "gray";
-    }
+    if (i < owned) color = "green";
+    if (aquired && i >= owned-aquired && i < owned) color = "orange";
+
     starContainer.appendChild(
       createDivision([`inventory_card_quantity_${color}`])
     );
