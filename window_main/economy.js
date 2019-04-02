@@ -167,6 +167,7 @@ function createChangeRow(change, economyId) {
   let checkWildcardsAdded = false;
   let checkGemsEarnt = false;
   let checkGoldEarnt = false;
+  let checkSkinsAdded = false;
 
   var bon, bos;
 
@@ -228,6 +229,7 @@ function createChangeRow(change, economyId) {
     checkCardsAdded = true;
     checkAetherized = true;
     checkWildcardsAdded = true;
+    checkSkinsAdded = true;
   }
 
   if (checkGemsPaid && change.delta.gemsDelta != undefined) {
@@ -435,6 +437,15 @@ function createChangeRow(change, economyId) {
             card.name
         );
       });
+    });
+  }
+
+  if (checkSkinsAdded && change.delta.artSkinsAdded != undefined) {
+    change.delta.artSkinsAdded.forEach(function(artId) {
+      bos = createDivision(["economy_skin"]);
+      bos.title = "Skin";
+
+      flexRight.appendChild(bos);
     });
   }
 

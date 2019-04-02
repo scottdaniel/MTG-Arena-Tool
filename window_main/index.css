@@ -1565,6 +1565,16 @@ a:hover {
     background-size: contain;
 }
 
+.economy_skin {
+    background-repeat: no-repeat;
+    margin: auto 4px;
+    margin-left: 16px;
+    width: 28px;
+    height: 28px;
+    background-image: url(../images/skin.png);
+    background-size: contain;
+}
+
 .mana_filter {
     align-self: center;
     opacity: 1;
