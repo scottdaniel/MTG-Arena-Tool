@@ -394,6 +394,42 @@ function createChangeRow(change, economyId) {
     }
   }
 
+  if (checkCardsAdded && change.delta.cardsAdded != undefined) {
+    change.delta.cardsAdded.sort(collectionSortRarity);
+    change.delta.cardsAdded.forEach(function(grpId) {
+      var card = cardsDb.get(grpId);
+
+      var d = createDivision(["inventory_card"]);
+      d.style.width = "39px";
+
+      var img = document.createElement("img");
+      img.classList.add("inventory_card_img");
+      img.style.width = "39px";
+      img.src = get_card_image(card);
+
+      d.appendChild(img);
+
+      flexRight.appendChild(d);
+      var imgDom = $(img);
+      addCardHover(imgDom, card);
+
+      imgDom.on("click", function() {
+        if (cardsDb.get(grpId).dfc == "SplitHalf") {
+          card = cardsDb.get(card.dfcId);
+        }
+        //let newname = card.name.split(' ').join('-');
+        shell.openExternal(
+          "https://scryfall.com/card/" +
+            get_set_scryfall(card.set) +
+            "/" +
+            card.cid +
+            "/" +
+            card.name
+        );
+      });
+    });
+  }
+
   if (checkAetherized && change.aetherizedCards != undefined) {
     change.aetherizedCards.forEach(function(obj) {
       var grpId = obj.grpId;
@@ -439,42 +475,6 @@ function createChangeRow(change, economyId) {
           );
         });
       }
-    });
-  }
-
-  if (checkCardsAdded && change.delta.cardsAdded != undefined) {
-    change.delta.cardsAdded.sort(collectionSortRarity);
-    change.delta.cardsAdded.forEach(function(grpId) {
-      var card = cardsDb.get(grpId);
-
-      var d = createDivision(["inventory_card"]);
-      d.style.width = "39px";
-
-      var img = document.createElement("img");
-      img.classList.add("inventory_card_img");
-      img.style.width = "39px";
-      img.src = get_card_image(card);
-
-      d.appendChild(img);
-
-      flexRight.appendChild(d);
-      var imgDom = $(img);
-      addCardHover(imgDom, card);
-
-      imgDom.on("click", function() {
-        if (cardsDb.get(grpId).dfc == "SplitHalf") {
-          card = cardsDb.get(card.dfcId);
-        }
-        //let newname = card.name.split(' ').join('-');
-        shell.openExternal(
-          "https://scryfall.com/card/" +
-            get_set_scryfall(card.set) +
-            "/" +
-            card.cid +
-            "/" +
-            card.name
-        );
-      });
     });
   }
 
