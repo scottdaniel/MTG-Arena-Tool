@@ -1038,6 +1038,19 @@ function get_card_image(cardObj) {
 }
 
 //
+function get_card_art(cardObj) {
+  if (typeof cardObj !== "object") {
+    cardObj = cardsDb.get(cardObj);
+  }
+
+  if (!cardObj) {
+    return "../images/notfound.png";
+  } else {
+    return "https://img.scryfall.com/cards" + cardObj.images.art_crop;
+  }
+}
+
+//
 function get_rank_index(_rank, _tier) {
   var ii = 0;
   if (_rank == "Unranked") ii = 0;
