@@ -3,7 +3,7 @@ global
   $,
   daysPast,
   get_colation_set,
-  getEventId,
+  getReadableEvent,
   setsList,
   addCardHover,
   cardsDb,
@@ -11,7 +11,7 @@ global
   get_set_scryfall,
   collectionSortRarity,
   addCardHover,
-  selectAdd,
+  createSelect,
   economyHistory,
   get_card_image,
   createDivision
@@ -29,6 +29,40 @@ class economyDay {
     this.goldSpent = goldSpent;
     this.gemsSpent = gemsSpent;
   }
+}
+
+// These should match the full text of the event
+const economyTransactionContextsMap = {
+  "Booster.Open": "Booster Open",
+  "Event.GrantCardPool": "Event Card Pool",
+  "Event.PayEntry": "Pay Event Entry",
+  "Event.Season.Constructed.Payout": "Constructed Season Rewards",
+  "Event.Season.Limited.Payout": "Limited Season Rewards",
+  "PlayerReward.OnMatchCompletedDaily": "Player Rewards",
+  "Quest.Completed": "Quest Completed",
+  "Store.Fulfillment": "Store",
+  "Store.Fulfillment.Chest": "Chest Redeem",
+  "Store.Fulfillment.Boosters": "Booster Redeem",
+  "WildCard.Redeem": "Redeem Wildcard",
+  "Vault.Complete": "Vault Opening",
+  "PlayerReward.OnMatchCompletedWeekly": "Weekly rewards"
+};
+
+function getPrettyContext(context, full = true) {
+  if (context.startsWith("Event.Prize")) {
+    var eventCode = context.substring(12);
+    return full ? `Event Prize: ${getReadableEvent(eventCode)}` : "Event Prize";
+  }
+
+  if (context.startsWith("Quest.Completed")) {
+    var questCode = context.substring(16);
+    return full ? `Quest Completed: ${questCode}` : "Quest Completed";
+  }
+
+  var pretty = economyTransactionContextsMap[context];
+
+  // If there's no valid pretty context keep the code as is.
+  return pretty || context;
 }
 
 // creates the economy tab.
@@ -171,7 +205,7 @@ function createChangeRow(change, economyId) {
 
   var bon, bos;
 
-  if (change.context == "Booster Open") {
+  if (change.contextPretty == "Booster Open") {
     change.delta.boosterDelta.forEach(function(booster) {
       var set = get_colation_set(booster.collationId);
 
@@ -193,13 +227,17 @@ function createChangeRow(change, economyId) {
     checkWildcardsAdded = true;
     checkCardsAdded = true;
     checkAetherized = true;
-  } else if (change.context == "Store") {
+  } else if (change.contextPretty == "Store") {
     checkGemsPaid = true;
     checkGoldPaid = true;
     checkBoosterAdded = true;
     checkCardsAdded = true;
     checkAetherized = true;
-  } else if (change.context == "Pay Event Entry") {
+  } else if (change.contextPretty == "Booster Redeem") {
+    checkGemsPaid = true;
+    checkGoldPaid = true;
+    checkBoosterAdded = true;
+  } else if (change.contextPretty == "Pay Event Entry") {
     checkGemsPaid = true;
     checkGoldPaid = true;
 
@@ -207,7 +245,7 @@ function createChangeRow(change, economyId) {
     bos.title = "Event Entry";
 
     flexRight.appendChild(bos);
-  } else if (change.context == "Redeem Wildcard") {
+  } else if (change.contextPretty == "Redeem Wildcard") {
     var imgUri = "";
     if (change.delta.wcCommonDelta != undefined) imgUri = "wc_common";
     if (change.delta.wcUncommonDelta != undefined) imgUri = "wc_uncommon";
@@ -418,8 +456,8 @@ function createChangeRow(change, economyId) {
       img.src = get_card_image(card);
 
       d.appendChild(img);
-      flexRight.appendChild(d);
 
+      flexRight.appendChild(d);
       var imgDom = $(img);
       addCardHover(imgDom, card);
 
@@ -499,6 +537,9 @@ function createEconomyUI(mainDiv) {
 
     if (change == undefined) continue;
 
+    let ctx = change.originalContext || change.context;
+    change.contextPretty = getPrettyContext(ctx);
+    change.context = getPrettyContext(ctx, false);
     if (!selectItems.includes(change.context)) {
       selectItems.push(change.context);
     }
@@ -528,21 +569,21 @@ function createEconomyUI(mainDiv) {
   //
   var selectdiv = createDivision();
   selectdiv.style.margin = "auto 64px auto 0px";
+  let options = [...topSelectItems, ...selectItems];
 
-  var select = $('<select id="query_select"></select>');
-
-  selectItems.sort();
-
-  [...topSelectItems, ...selectItems]
-    .filter(item => item !== filterEconomy)
-    .forEach(item => {
-      select.append(`<option value="${item}">${item}</option>`);
-    });
-
-  select.appendTo(selectdiv);
+  console.log("filterEconomy", filterEconomy);
+  let select = createSelect(
+    selectdiv,
+    options,
+    filterEconomy,
+    res => {
+      filterEconomy = res;
+      openEconomyTab(0);
+    },
+    "query_select"
+  );
+  //$$("#query_select.select_button")[0].innerHTML = filterEconomy;
   div.appendChild(selectdiv);
-  selectAdd(select, updateEconomy);
-  select.next("div.select-styled").text(filterEconomy);
 
   //
   let icwcc = createDivision(["economy_wc_med", "wc_common"]);
@@ -612,14 +653,8 @@ function createEconomyUI(mainDiv) {
   daysago = -1;
 }
 
-function updateEconomy() {
-  filterEconomy = getEventId(document.getElementById("query_select").value);
-  openEconomyTab(0);
-}
-
 // Compare two economy events OR the IDs of two economy events.
 // If two IDs are specified then events are retrieved from `economyHistory`
-
 function compare_economy(a, b) {
   /* global economyHistory */
   if (a == undefined) return -1;

@@ -921,32 +921,6 @@ function minifiedDelta(delta) {
   return newDelta;
 }
 
-// These should match the full text of the event
-const economyTransactionContextsMap = {
-  "Booster.Open": "Booster Open",
-  "Event.GrantCardPool": "Event Card Pool",
-  "Event.PayEntry": "Pay Event Entry",
-  "Event.Season.Constructed.Payout": "Constructed Season Rewards",
-  "Event.Season.Limited.Payout": "Limited Season Rewards",
-  "PlayerReward.OnMatchCompletedDaily": "Player Rewards",
-  "Quest.Completed": "Quest Completed",
-  "Store.Fulfillment": "Store",
-  "WildCard.Redeem": "Redeem Wildcard",
-  "Vault.Complete": "Vault Opening"
-};
-
-function getPrettyContext(context) {
-  if (context.startsWith("Event.Prize")) {
-    var eventCode = context.substring(12);
-    return `Event Prize: ${eventCode}`;
-  }
-
-  var pretty = economyTransactionContextsMap[context];
-
-  // If there's no valid pretty context keep the code as is.
-  return pretty || context;
-}
-
 // Called for all "Inventory.Updated" labels
 function onLabelInventoryUpdated(entry, transaction) {
   // if (!transaction) return;
@@ -962,13 +936,7 @@ function onLabelInventoryUpdated(entry, transaction) {
   let milliseconds = transaction.date.getTime();
   transaction.id = sha1(milliseconds + context);
 
-  // For backwards compatability `.context`
-  // refers to the pretty UI text but we should store the original.
-
-  // We keep a copy of the original context so eventually in the
-  // future we can fix this.
-  transaction.originalContext = transaction.context;
-  transaction.context = getPrettyContext(transaction.context);
+  // Do not modify the context from now on.
 
   saveEconomyTransaction(transaction);
   return;
