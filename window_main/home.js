@@ -484,7 +484,6 @@ function open_tournament(t) {
         let checks = $(`<div class="tou_checks"></div>`);
         generateChecks(
           tou.current_check,
-          tou.current_game,
           tou.current_seat
         ).appendTo(checks);
         checks.appendTo(mainDiv);
@@ -827,27 +826,16 @@ function set_tou_state(state) {
   }
 }
 
-function generateChecks(state, game, seat) {
+function generateChecks(state, seat) {
   let checks = $('<div class="tou_check_cont"></div>');
   state.forEach((c, index) => {
     let ch;
     let ss = index % 2;
-    if (Math.floor(index / 2) <= game) {
-      ch = $(
-        `<div title="${
-          ss == seat ? "You" : tou.current_opponent.slice(0, -6)
-        }" class="tou_check ${c ? "green_bright_bg" : "red_bright_bg"}"></div>`
-      );
-    } else {
-      ch = $(
-        `<div title="${
-          ss == seat ? "You" : tou.current_opponent.slice(0, -6)
-        }" class="tou_check black_bright_bg"></div>`
-      );
-    }
-    if (ss == 1) {
-      ch.css("margin-right", "16px");
-    }
+    ch = $(
+      `<div title="${
+        ss == seat ? "You" : tou.current_opponent.slice(0, -6)
+      }" class="tou_check ${c ? "green_bright_bg" : "red_bright_bg"}"></div>`
+    );
     ch.appendTo(checks);
   });
 
