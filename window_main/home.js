@@ -318,9 +318,9 @@ function open_tournament(t) {
   let joined = false;
   let record = "-";
   let stats;
-  if (tou.players.indexOf(userName) !== -1) {
+  if (tou.players.indexOf(playerData.name) !== -1) {
     joined = true;
-    stats = tou.playerStats[userName];
+    stats = tou.playerStats[playerData.name];
     record = stats.w + " - " + stats.d + " - " + stats.l;
   }
 
@@ -649,7 +649,7 @@ function open_tournament(t) {
           }
 
           let s = "";
-          if (match.p1 == userName)
+          if (match.p1 == playerData.name)
             s = 'style="color: rgba(183, 200, 158, 1);"';
           let p1 = $(
             `<div ${s} class="tou_match_p ${match.p1}pn">${match.p1.slice(
@@ -660,7 +660,7 @@ function open_tournament(t) {
             }</div></div>`
           );
           s = "";
-          if (match.p2 == userName)
+          if (match.p2 == playerData.name)
             s = 'style="color: rgba(183, 200, 158, 1);"';
           if (match.p2 == "BYE#00000")
             s = 'style="color: rgba(250, 229, 210, 0.65);"';
@@ -733,7 +733,7 @@ function open_tournament(t) {
       }
 
       let s = "";
-      if (pname == userName) s = 'style="color: rgba(183, 200, 158, 1);"';
+      if (pname == playerData.name) s = 'style="color: rgba(183, 200, 158, 1);"';
 
       let str = `
 			<div class="tou_stand_small">${index + 1}</div>
@@ -764,9 +764,6 @@ function open_tournament(t) {
       $('<div class="button_simple exportDeck">Export to Arena</div>').appendTo(
         tab_cont_c
       );
-      $('<div class="button_simple resetDeck">Reset</div>').appendTo(
-        tab_cont_c
-      );
       decklistCont.appendTo(tab_cont_c);
 
       tab_cont_c.appendTo(mainDiv);
@@ -777,18 +774,7 @@ function open_tournament(t) {
         let list = get_deck_export(currentDeck);
         ipc_send("set_clipboard", list);
       });
-
-      $(".resetDeck").click(() => {
-        currentDeck = $.extend(true, {}, originalDeck);
-        drawSideboardableDeck();
-      });
     }
-    /*
-		if (tou.current_opponent !== '' && tou.current_opponent !== 'bye') {
-			let tab_cont_d = $('<div class="tou_cont_d" style="height: 0px"></div>');
-			tab_cont_d.appendTo(mainDiv);
-		}
-		*/
 
     $(".tou_tab").click(function() {
       if (!$(this).hasClass("tou_tab_selected")) {
@@ -899,12 +885,6 @@ function drawSideboardableDeck() {
 
     if (card.quantity > 0) {
       let tile = addCardTile(grpId, unique + "a", card.quantity, mainboardDiv);
-      tile.children(".card_tile_glow").off("click");
-      jQuery.data(tile[0], "board", 0);
-      tile.click(function() {
-        moveCard($(this)[0]);
-        drawSideboardableDeck();
-      });
     }
   });
 
@@ -927,57 +907,13 @@ function drawSideboardableDeck() {
             card.quantity,
             sideboardDiv
           );
-          tile.children(".card_tile_glow").off("click");
-          jQuery.data(tile[0], "board", 1);
-          tile.click(function() {
-            moveCard($(this)[0]);
-            drawSideboardableDeck();
-          });
         }
       });
     }
   }
 
   _div.append(mainboardDiv);
-  _div.append($('<div class="swap_icon"></div>'));
   _div.append(sideboardDiv);
-}
-
-function moveCard(_cardTile) {
-  let grpId = jQuery.data(_cardTile, "grpId");
-  let board = jQuery.data(_cardTile, "board");
-
-  let moved = false;
-
-  let _from = currentDeck.mainDeck;
-  let _to = currentDeck.sideboard;
-  if (board == 1) {
-    _from = currentDeck.sideboard;
-    _to = currentDeck.mainDeck;
-  }
-
-  _from.forEach(function(card, index, object) {
-    if (!moved) {
-      if (grpId == card.id) {
-        card.quantity -= 1;
-        moved = true;
-      }
-      if (card.quantity == 0) {
-        object.splice(index, 1);
-      }
-    }
-  });
-  let added = false;
-  _to.forEach(function(card) {
-    if (grpId == card.id) {
-      card.quantity += 1;
-      added = true;
-    }
-  });
-  if (!added) {
-    let obj = { id: grpId, quantity: 1 };
-    _to.push(obj);
-  }
 }
 
 module.exports = {
