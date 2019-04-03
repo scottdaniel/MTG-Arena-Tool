@@ -56,6 +56,7 @@
 		"lodash.clonedeep": "^4.5.0",
 		"lodash.transform": "^4.6.0",
 		"mathjs": "^5.5.0",
+		"npm": "^6.9.0",
 		"qs": "^6.6.0",
 		"queue": "^4.5.1",
 		"time-elements": "^2.0.0"
