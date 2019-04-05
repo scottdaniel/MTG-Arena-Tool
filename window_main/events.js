@@ -201,17 +201,14 @@ function createEventRow(course) {
   );
 
   var winLossText = "0:0";
-  var winLossClass = "list_match_result_win";
-
+  var matchResultClass = "list_match_result";
   var wlGate = course.ModuleInstanceData.WinLossGate;
   if (wlGate !== undefined) {
     winLossText = wlGate.CurrentWins + ":" + wlGate.CurrentLosses;
-    if (wlGate.MaxWins !== wlGate.CurrentWins) {
-      winLossClass = "list_match_result_loss";
-    }
   }
+  var winLossClass = getEventWinLossClass(wlGate);
 
-  flexRight.appendChild(createDivision([winLossClass], winLossText));
+  flexRight.appendChild(createDivision([matchResultClass, winLossClass], winLossText));
 
   return eventContainer;
 }
@@ -344,9 +341,7 @@ function createMatchRow(match) {
 
   // insert contents of flexRight
 
-  var resultClass = `list_match_result_${
-    match.player.win > match.opponent.win ? "win" : "loss"
-  }`;
+  var resultClass = "list_match_result";
   flexRight.appendChild(
     createDivision([resultClass], match.player.win + ":" + match.opponent.win)
   );
