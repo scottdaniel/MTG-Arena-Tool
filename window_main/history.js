@@ -325,9 +325,8 @@ function open_history_tab(loadMore) {
 
       d = createDivision(
         [
-          match.player.win > match.opponent.win
-            ? "list_match_result_win"
-            : "list_match_result_loss"
+          "list_match_result",
+          match.player.win > match.opponent.win ? "green" : "red"
         ],
         `${match.player.win}:${match.opponent.win}`
       );

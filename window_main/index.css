@@ -556,20 +556,11 @@ span.top_nav_item_text {
     margin-right: 18px;
 }
 
-.list_match_result_win {
+.list_match_result {
 font-family:  var(--main-font-name);
     font-size: 20px;
     line-height: 64px;
     margin-right: 8px;
-    color: rgba(183, 200, 158, 1);
-}
-
-.list_match_result_loss {
-    line-height: 64px;
-    font-family:  var(--main-font-name);
-    font-size: 20px;
-    margin-right: 8px;
-    color: rgba(221, 130, 99, 1);
 }
 
 .list_match_result_score {
