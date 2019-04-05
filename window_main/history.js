@@ -389,7 +389,7 @@ function open_history_tab(loadMore) {
 
   historyColumn.addEventListener("scroll", () => {
     if (
-      historyColumn.scrollTop + historyColumn.offsetHeight >=
+      Math.round(historyColumn.scrollTop + historyColumn.offsetHeight) >=
       historyColumn.scrollHeight
     ) {
       open_history_tab(20);
