@@ -2675,6 +2675,14 @@ function getWinrateClass(wr) {
   return "white";
 }
 
+function getEventWinLossClass(wlGate) {
+  if (wlGate === undefined) return "white";
+  if (wlGate.MaxWins === wlGate.CurrentWins) return "blue";
+  if (wlGate.CurrentWins > wlGate.CurrentLosses) return "green";
+  if (wlGate.CurrentWins * 2 > wlGate.CurrentLosses) return "orange";
+  return "red";
+}
+
 //
 function getDeckWinrate(deckid, lastEdit) {
   var wins = 0;
