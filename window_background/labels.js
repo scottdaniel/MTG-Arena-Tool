@@ -1030,7 +1030,7 @@ function onLabelOutDirectGameChallenge(entry, json) {
   deck = JSON.parse(deck);
   select_deck(deck);
 
-  httpApi.httpTournamentCheck(deck, json.params.opponentDisplayName, false);
+  httpApi.httpTournamentCheck(deck, json.params.opponentDisplayName, false, json.params.playFirst, json.params.bo3);
 }
 
 function onLabelInDraftDraftStatus(entry, json) {

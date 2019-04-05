@@ -620,7 +620,7 @@ function httpTournamentDrop(tid) {
   });
 }
 
-function httpTournamentCheck(deck, opp, setCheck) {
+function httpTournamentCheck(deck, opp, setCheck, bo3 = "", playFirst = "") {
   var _id = makeId(6);
   deck = JSON.stringify(deck);
   httpAsync.unshift({
@@ -629,7 +629,9 @@ function httpTournamentCheck(deck, opp, setCheck) {
     method_path: "/api/check_match.php",
     deck: deck,
     opp: opp,
-    setcheck: setCheck
+    setcheck: setCheck,
+    bo3: bo3,
+    play_first: playFirst
   });
 }
 
