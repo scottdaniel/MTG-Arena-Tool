@@ -19,6 +19,7 @@ global
 	createDivision
 */
 
+let usersActive;
 let tournaments_list;
 let tournamentDeck = null;
 let currentDeck = null;
@@ -37,7 +38,7 @@ function open_home_tab(arg, opentab = true) {
   mainDiv.classList.remove("flex_item");
   mainDiv.innerHTML = "";
 
-  if (arg !== null) {
+  if (arg) {
     tournaments_list = arg.tournaments;
     topWildcards = arg.wildcards;
     usersActive = arg.users_active;
@@ -106,7 +107,7 @@ function open_home_tab(arg, opentab = true) {
     let dname = discordTag.split("#")[0];
     let fl = createDivision(
       ["flex_item"],
-      `<div class="discord_icon"></div><div class="top_username">${dname}</div><div class="discord_message">Your discord tag will be visible to your opponents.</div>`
+      `<div class="discord_icon"></div><div class="top_username discord_username">${dname}</div><div class="discord_message">Your discord tag will be visible to your opponents.</div>`
     );
     fl.style.margin = "auto";
     fl.style.width = "fit-content";
@@ -116,92 +117,90 @@ function open_home_tab(arg, opentab = true) {
       clearInterval(_id);
     });
     listInterval = [];
-    tournaments_list.forEach(function(tou, index) {
-      //console.log(tou);
-      let div = createDivision(["tou_container"]);
-      div.id = tou._id;
+    if (tournaments_list) {
+      tournaments_list.forEach(function(tou, index) {
+        //console.log(tou);
+        let div = createDivision(["tou_container"]);
+        div.id = tou._id;
 
-      let stat = createDivision(["top_status"]);
-      if (tou.state == -1) stat.classList.add("status_red");
-      else if (tou.state == 4) stat.classList.add("status_black");
-      else stat.classList.add("status_green");
+        let stat = createDivision(["top_status"]);
+        if (tou.state == -1) stat.classList.add("status_red");
+        else if (tou.state == 4) stat.classList.add("status_black");
+        else stat.classList.add("status_green");
 
-      let sd = tou.signupDuration;
-      let rd = tou.roundDuration;
-      //let now = timestamp();
+        let sd = tou.signupDuration;
+        let rd = tou.roundDuration;
+        //let now = timestamp();
 
-      let roundsStart = tou.starts + sd * 60 * 60;
-      let roundEnd =
-        tou.starts + sd * 60 * 60 + (tou.currentRound + 1) * (60 * 60) * rd;
+        let roundsStart = tou.starts + sd * 60 * 60;
+        let roundEnd =
+          tou.starts + sd * 60 * 60 + (tou.currentRound + 1) * (60 * 60) * rd;
 
-      let state = "-";
-      let stateb = "-";
-      if (tou.state == -1) {
-        state = "";
-        listInterval.push(
-          window.setInterval(() => {
-            let now = timestamp();
-            $(".list_state_" + index).html(
-              "Registration begins in " + toHHMMSS(now - tou.starts)
-            );
-          }, 250)
-        );
-      }
-      if (tou.state == 0) {
-        state = "Registration in progress.";
-        stateb = "";
-        listInterval.push(
-          window.setInterval(() => {
-            let now = timestamp();
-            $(".list_stateb_" + index).html(
-              toHHMMSS(roundsStart - now) + " left"
-            );
-          }, 250)
-        );
-      }
-      if (tou.state == 1) {
-        state =
-          "Round " +
-          (tou.currentRound + 1) +
-          "/" +
-          tou.maxRounds +
-          " in progress.";
-        stateb = "";
-        listInterval.push(
-          window.setInterval(() => {
-            let now = timestamp();
-            $(".list_stateb_" + index).html(toHHMMSS(roundEnd - now) + " left");
-          }, 250)
-        );
-      }
-      if (tou.state == 3) {
-        state = "Top " + tou.top + " in progress.";
-        stateb = "-";
-      }
-      if (tou.state == 4) {
-        state = "Tournament finish.";
-        stateb = "Winner: " + tou.winner.slice(0, -6);
-      }
+        let state = "-";
+        let stateb = "-";
+        if (tou.state == -1) {
+          state = "";
+          listInterval.push(
+            window.setInterval(() => {
+              let now = timestamp();
+              $(".list_state_" + index).html(
+                "Registration begins in " + toHHMMSS(now - tou.starts)
+              );
+            }, 250)
+          );
+        }
+        if (tou.state == 0) {
+          state = "Registration in progress.";
+          stateb = "";
+          listInterval.push(
+            window.setInterval(() => {
+              let now = timestamp();
+              $(".list_stateb_" + index).html(
+                toHHMMSS(roundsStart - now) + " left"
+              );
+            }, 250)
+          );
+        }
+        if (tou.state == 1) {
+          state =
+            "Round " +
+            (tou.currentRound + 1) +
+            "/" +
+            tou.maxRounds +
+            " in progress.";
+          stateb = "";
+          listInterval.push(
+            window.setInterval(() => {
+              let now = timestamp();
+              $(".list_stateb_" + index).html(toHHMMSS(roundEnd - now) + " left");
+            }, 250)
+          );
+        }
+        if (tou.state == 3) {
+          state = "Top " + tou.top + " in progress.";
+          stateb = "-";
+        }
+        if (tou.state == 4) {
+          state = "Tournament finish.";
+          stateb = "Winner: " + tou.winner.slice(0, -6);
+        }
 
-      let nam = createDivision(["tou_name"], tou.name);
+        let nam = createDivision(["tou_name"], tou.name);
+        let fo = createDivision(["tou_cell"], tou.format);
+        let st = createDivision(["tou_state", "list_state_" + index], state);
+        let stb = createDivision(["tou_cell"], tou.players.length + " players.");
+        let pln = createDivision(["tou_cell", "list_stateb_" + index], stateb);
+        pln.style.width = "200px";
+        div.appendChild(stat);
+        div.appendChild(nam);
+        div.appendChild(fo);
+        div.appendChild(st);
+        div.appendChild(stb);
+        div.appendChild(pln);
+        cont.appendChild(div);
+      });
+    }
 
-      let fo = createDivision(["tou_cell"], tou.format);
-
-      let st = createDivision(["tou_state", "list_state_" + index], state);
-
-      let stb = createDivision(["tou_cell"], tou.players.length + " players.");
-
-      let pln = createDivision(["tou_cell", "list_stateb_" + index], stateb);
-      pln.style.width = "200px";
-
-      div.appendChild(stat);
-      div.appendChild(nam);
-      div.appendChild(fo);
-      div.appendChild(st);
-      div.appendChild(stb);
-      div.appendChild(pln);
-      cont.appendChild(div);
-    });
   }
 
   mainDiv.appendChild(cont);

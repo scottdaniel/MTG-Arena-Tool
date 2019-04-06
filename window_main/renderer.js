@@ -185,7 +185,7 @@ ipc.on("auth", function(event, arg) {
 ipc.on("set_discord_tag", (event, arg) => {
   discordTag = arg;
   if (sidebarActive == -1) {
-    ipc_send("request_home", true);
+    open_home_tab(null, true);
   }
 });
 

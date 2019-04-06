@@ -252,7 +252,6 @@ function httpBasic() {
                 tokenAuth = parsedResult.token;
 
                 ipc_send("auth", parsedResult);
-                ipc_send("set_discord_tag", parsedResult.discord_tag);
                 //ipc_send("auth", parsedResult.arenaids);
                 if (rememberMe) {
                   rstore.set("token", tokenAuth);
@@ -275,6 +274,7 @@ function httpBasic() {
                 }
                 ipc_send("set_player_data", playerData);
                 loadPlayerConfig(playerData.arenaId, serverData);
+                ipc_send("set_discord_tag", parsedResult.discord_tag);
                 beginSSE();
               }
               if (
