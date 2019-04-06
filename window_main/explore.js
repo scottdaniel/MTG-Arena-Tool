@@ -95,7 +95,7 @@ function openExploreTab() {
 
   $(this).off();
   mainDiv.addEventListener("scroll", () => {
-    if (mainDiv.scrollTop + mainDiv.offsetHeight >= mainDiv.scrollHeight) {
+    if (Math.round(mainDiv.scrollTop + mainDiv.offsetHeight) >= mainDiv.scrollHeight) {
       queryExplore(filterSkip);
     }
   });
