@@ -313,12 +313,12 @@ function httpBasic() {
                 eventsList = parsedResult.events;
                 eventsToFormat = parsedResult.events_format;
                 ranked_events = parsedResult.ranked_events;
-                ipc_send("set_db", parsedResult);
                 cardsDb.set(parsedResult);
                 ipc_send("popup", {
                   text: "Metadata: Ok",
                   time: 1000
                 });
+                ipc_send("set_db", results);
               }
             } else if (_headers.method == "tou_join") {
               ipc_send("popup", {

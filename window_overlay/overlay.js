@@ -162,14 +162,21 @@ function recreateClock() {
 
 //
 ipc.on("set_db", function(event, arg) {
-  setsList = arg.sets;
-  eventsList = arg.events;
-  eventsToFormat = arg.events_format;
-  delete arg.sets;
-  delete arg.events;
-  delete arg.events_format;
-  delete arg.ranked_events;
-  cardsDb.set(arg);
+  try {
+    arg = JSON.parse(arg);
+    setsList = arg.sets;
+    eventsList = arg.events;
+    eventsToFormat = arg.events_format;
+    delete arg.sets;
+    delete arg.events;
+    delete arg.events_format;
+    delete arg.ranked_events;
+    cardsDb.set(arg);
+  } catch (e) {
+    pop("Error parsing metadata", null);
+    console.log("Error parsing metadata", e);
+    return false;
+  }
 });
 
 //

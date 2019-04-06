@@ -225,18 +225,24 @@ ipc.on("set_tags_colors", function(event, arg) {
 
 //
 ipc.on("set_db", function(event, arg) {
-  setsList = arg.sets;
-  eventsList = arg.events;
-  eventsToFormat = arg.events_format;
-  rankedEvents = arg.ranked_events;
-  delete arg.sets;
-  delete arg.events;
-  delete arg.events_format;
-  delete arg.ranked_events;
-  canLogin = true;
-  cardsDb.set(arg);
-
-  $(".button_simple_disabled").addClass("button_simple");
+  try {
+    arg = JSON.parse(arg);
+    setsList = arg.sets;
+    eventsList = arg.events;
+    eventsToFormat = arg.events_format;
+    rankedEvents = arg.ranked_events;
+    delete arg.sets;
+    delete arg.events;
+    delete arg.events_format;
+    delete arg.ranked_events;
+    canLogin = true;
+    cardsDb.set(arg);
+    $(".button_simple_disabled").addClass("button_simple");
+  } catch (e) {
+    pop("Error parsing metadata", null);
+    console.log("Error parsing metadata", e);
+    return false;
+  }
 });
 
 //
