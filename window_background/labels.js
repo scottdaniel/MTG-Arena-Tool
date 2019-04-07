@@ -932,6 +932,10 @@ function minifiedDelta(delta) {
 function onLabelInventoryUpdated(entry, transaction) {
   // if (!transaction) return;
 
+
+  // Store this in case there are any future date parsing issues
+  transaction.timestamp = entry.timestamp;
+
   // Add missing data
   transaction.date = parseWotcTime2(entry.timestamp);
 
