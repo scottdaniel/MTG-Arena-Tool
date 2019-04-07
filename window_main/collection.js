@@ -1,27 +1,31 @@
 /*
 global
-	get_collection_export,
-	get_collection_stats,
-	collectionSortSet,
-	collectionSortName,
-	collectionSortCmc,
-	collectionSortRarity,
-	cardsNew,
-	cardsDb,
-	cards,
-	setsList,
-	cardSize,
-	cardQuality,
-	addCardHover,
-	shell,
-	get_set_scryfall,
-	selectAdd
+  $$,
+  createDivision,
+  ipc_send,
+  change_background,
+  get_collection_export,
+  get_collection_stats,
+  collectionSortSet,
+  collectionSortName,
+  collectionSortCmc,
+  collectionSortRarity,
+  orderedColorCodesCommon,
+  cardsNew,
+  cardsDb,
+  cards,
+  setsList,
+  cardSize,
+  get_card_image,
+  addCardHover,
+  shell,
+  get_set_scryfall,
+  createSelect
 */
 let collectionPage = 0;
-let sortingAlgorithm = "Set";
+let sortingAlgorithm = "Sort by Set";
 let filteredSets = [];
 let filteredMana = [];
-
 let orderedSets;
 
 //
@@ -41,119 +45,144 @@ function openCollectionTab() {
     return 0;
   });
 
-  $("#ux_0").html("");
-  $("#ux_1").html("");
-  $("#ux_0").removeClass("flex_item");
-  var div = $('<div class="inventory"></div>');
+  document.getElementById("ux_1").innerHTML = "";
+  let mainDiv = document.getElementById("ux_0");
+  mainDiv.innerHTML = "";
+  mainDiv.classList.remove("flex_item");
 
-  var basicFilters = $('<div class="inventory_filters_basic"></div>');
-  var fll = $('<div class="inventory_flex_half"></div>');
-  var flr = $('<div class="inventory_flex_half"></div>');
+  let div = createDivision(["inventory"]);
 
-  var fllt = $('<div class="inventory_flex"></div>');
-  var fllb = $('<div class="inventory_flex"></div>');
-  var flrt = $('<div class="inventory_flex"></div>');
-  var flrb = $('<div class="inventory_flex"></div>');
+  let basicFilters = createDivision(["inventory_filters_basic"]);
 
-  var icd = $('<div class="input_container_inventory"></div>');
-  var label = $('<label style="display: table">Search</label>');
-  label.appendTo(icd);
-  var input = $('<input type="search" id="query_name" autocomplete="off" />');
-  input.appendTo(icd);
-  icd.appendTo(fllt);
+  let fll = createDivision(["inventory_flex_half"]);
+  let flr = createDivision(["inventory_flex_half"]);
 
-  input.keypress(function(e) {
-    if (e.which == 13) {
+  let fllt = createDivision(["inventory_flex"]);
+  let fllb = createDivision(["inventory_flex"]);
+  let flrt = createDivision(["inventory_flex"]);
+  let flrb = createDivision(["inventory_flex"]);
+
+  let icd = createDivision(["input_container_inventory"]);
+
+  let label = document.createElement("label");
+  label.style.display = "table";
+  label.innerHTML = "Search";
+  icd.appendChild(label);
+
+  let input = document.createElement("input");
+  input.id = "query_name";
+  input.autocomplete = "off";
+  input.type = "search";
+
+  icd.appendChild(input);
+  fllt.appendChild(icd);
+
+  input.addEventListener("keydown", function(e) {
+    if (e.keyCode == 13) {
       printCards();
     }
   });
 
-  var searchButton = $('<div class="button_simple button_thin">Search</div>');
-  searchButton.appendTo(flrt);
-  var advancedButton = $(
-    '<div class="button_simple button_thin">Advanced Filters</div>'
-  );
-  advancedButton.appendTo(flrt);
+  let searchButton = createDivision(["button_simple", "button_thin"], "Search");
+  flrt.appendChild(searchButton);
 
-  searchButton.click(() => {
+  let advancedButton = createDivision(
+    ["button_simple", "button_thin"],
+    "Advanced Filters"
+  );
+  flrt.appendChild(advancedButton);
+
+  searchButton.addEventListener("click", () => {
     printCards();
   });
 
-  advancedButton.click(() => {
+  advancedButton.addEventListener("click", () => {
     expandFilters();
   });
 
-  var select = $('<select id="query_select">' + sortingAlgorithm + "</select>");
-  var sortby = ["Set", "Name", "Rarity", "CMC"];
-  for (var i = 0; i < sortby.length; i++) {
-    select.append(
-      '<option value="' + sortby[i] + '">Sort by: ' + sortby[i] + "</option>"
-    );
-  }
-  select.appendTo(fllb);
-  selectAdd(select, sortCollection);
-
-  var exp = $('<div class="button_simple button_thin">Export Collection</div>');
-  exp.appendTo(fllb);
-  var reset = $('<div class="button_simple button_thin">Reset</div>');
-  reset.appendTo(flrb);
-  var stats = $(
-    '<div class="button_simple button_thin stats_button">Collection Stats</div>'
+  let sortby = ["Sort by Set", "Sort by Name", "Sort by Rarity", "Sort by CMC"];
+  createSelect(
+    fllb,
+    sortby,
+    sortingAlgorithm,
+    res => {
+      sortingAlgorithm = res;
+      printCards();
+    },
+    "query_select"
   );
-  stats.appendTo(flrb);
 
-  exp.click(() => {
+  let exp = createDivision(
+    ["button_simple", "button_thin"],
+    "Export Collection"
+  );
+  fllb.appendChild(exp);
+
+  let reset = createDivision(["button_simple", "button_thin"], "Reset");
+  flrb.appendChild(reset);
+
+  let stats = createDivision(
+    ["button_simple", "button_thin"],
+    "Collection Stats"
+  );
+  flrb.appendChild(stats);
+
+  exp.addEventListener("click", () => {
     exportCollection();
   });
 
-  reset.click(() => {
+  reset.addEventListener("click", () => {
     resetFilters();
   });
 
-  stats.click(() => {
+  stats.addEventListener("click", () => {
     printStats();
   });
 
-  fllt.appendTo(fll);
-  fllb.appendTo(fll);
-  flrt.appendTo(flr);
-  flrb.appendTo(flr);
-  fll.appendTo(basicFilters);
-  flr.appendTo(basicFilters);
+  fll.appendChild(fllt);
+  fll.appendChild(fllb);
+  flr.appendChild(flrt);
+  flr.appendChild(flrb);
+  basicFilters.appendChild(fll);
+  basicFilters.appendChild(flr);
 
   // "ADVANCED" FILTERS
-  var filters = $('<div class="inventory_filters"></div>');
+  let filters = createDivision(["inventory_filters"]);
 
-  let flex = $('<div class="inventory_flex_half"></div>');
+  let flex = createDivision(["inventory_flex_half"]);
 
-  icd = $(
-    '<div style="padding-bottom: 8px;" class="input_container_inventory"></div>'
-  );
-  label = $('<label style="display: table">Type line</label>');
-  label.appendTo(icd);
-  var typeInput = $(
-    '<input type="search" id="query_type" autocomplete="off" />'
-  );
-  typeInput.appendTo(icd);
-  icd.appendTo(flex);
-  flex.appendTo(filters);
+  icd = createDivision(["input_container_inventory"]);
+  icd.style.paddingBottom = "8px";
 
-  var sets = $('<div class="sets_container"></div>');
+  // Type line input
+  label = document.createElement("label");
+  label.style.display = "table";
+  label.innerHTML = "Type line";
+  icd.appendChild(label);
+
+  let typeInput = document.createElement("input");
+  typeInput.id = "query_type";
+  typeInput.autocomplete = "off";
+  typeInput.type = "search";
+
+  icd.appendChild(typeInput);
+  flex.appendChild(icd);
+  filters.appendChild(flex);
+
+  let sets = createDivision(["sets_container"]);
+
   orderedSets.forEach(set => {
-    let setbutton = $(
-      '<div class="set_filter set_filter_on" style="background-image: url(../images/sets/' +
-        setsList[set].code +
-        '.png)" title="' +
-        set +
-        '"></div>'
-    );
-    setbutton.appendTo(sets);
-    setbutton.click(function() {
-      if (setbutton.hasClass("set_filter_on")) {
-        setbutton.removeClass("set_filter_on");
+    let setbutton = createDivision(["set_filter", "set_filter_on"]);
+    setbutton.style.backgroundImage = `url(../images/sets/${
+      setsList[set].code
+    }.png)`;
+    setbutton.title = set;
+
+    sets.appendChild(setbutton);
+    setbutton.addEventListener("click", () => {
+      if (!setbutton.classList.toggle("set_filter_on")) {
         filteredSets.push(set);
       } else {
-        setbutton.addClass("set_filter_on");
         let n = filteredSets.indexOf(set);
         if (n > -1) {
           filteredSets.splice(n, 1);
@@ -161,24 +190,20 @@ function openCollectionTab() {
       }
     });
   });
-  sets.appendTo(filters);
+  filters.appendChild(sets);
 
-  var manas = $('<div class="sets_container"></div>');
-  var ms = ["w", "u", "b", "r", "g"];
+  let manas = createDivision(["sets_container"]);
+  let ms = ["w", "u", "b", "r", "g"];
   ms.forEach(function(s, i) {
-    var mi = [1, 2, 3, 4, 5];
-    var manabutton = $(
-      '<div class="mana_filter_search mana_filter_on" style="background-image: url(../images/' +
-        s +
-        '64.png)"></div>'
-    );
-    manabutton.appendTo(manas);
-    manabutton.click(function() {
-      if (manabutton.hasClass("mana_filter_on")) {
-        manabutton.removeClass("mana_filter_on");
+    let mi = [1, 2, 3, 4, 5];
+    let manabutton = createDivision(["mana_filter_search", "mana_filter_on"]);
+    manabutton.style.backgroundImage = `url(../images/${s}64.png)`;
+
+    manas.appendChild(manabutton);
+    manabutton.addEventListener("click", () => {
+      if (!manabutton.classList.toggle("mana_filter_on")) {
         filteredMana.push(mi[i]);
       } else {
-        manabutton.addClass("mana_filter_on");
         let n = filteredMana.indexOf(mi[i]);
         if (n > -1) {
           filteredMana.splice(n, 1);
@@ -186,11 +211,11 @@ function openCollectionTab() {
       }
     });
   });
-  manas.appendTo(filters);
+  filters.appendChild(manas);
 
-  let main_but_cont = $('<div class="main_buttons_container"></div>');
+  let main_but_cont = createDivision(["main_buttons_container"]);
+  let cont = createDivision(["buttons_container"]);
 
-  var cont = $('<div class="buttons_container"></div>');
   addCheckboxSearch(
     cont,
     '<div class="icon_search_unowned"></div>Show unowned',
@@ -210,9 +235,9 @@ function openCollectionTab() {
     false
   );
   addCheckboxSearch(cont, "Exclude unselected colors", "query_exclude", false);
-  cont.appendTo(main_but_cont);
+  main_but_cont.appendChild(cont);
 
-  cont = $('<div class="buttons_container"></div>');
+  cont = createDivision(["buttons_container"]);
   addCheckboxSearch(
     cont,
     '<div class="wc_common wc_search_icon"></div>Common',
@@ -237,82 +262,112 @@ function openCollectionTab() {
     "query_mythic",
     true
   );
-  cont.appendTo(main_but_cont);
+  main_but_cont.appendChild(cont);
 
-  cont = $('<div class="buttons_container"></div>');
+  cont = createDivision(["buttons_container"]);
+  icd = createDivision(["input_container_inventory", "auto_width"]);
 
-  icd = $('<div class="input_container_inventory auto_width"></div>');
-  label = $('<label style="display: table">CMC:</label>');
-  label.appendTo(icd);
-  input = $(
-    '<input style="max-width: 80px;" type="number" id="query_cmc" autocomplete="off" />'
+  label = document.createElement("label");
+  label.style.display = "table";
+  label.innerHTML = "CMC:";
+  icd.appendChild(label);
+
+  let inputCmc = document.createElement("input");
+  inputCmc.style.maxWidth = "80px";
+  inputCmc.id = "query_cmc";
+  inputCmc.autocomplete = "off";
+  inputCmc.type = "number";
+
+  icd.appendChild(inputCmc);
+  cont.appendChild(icd);
+
+  let checkboxCmcHigher = addCheckboxSearch(
+    cont,
+    "Higher than",
+    "query_cmchigher",
+    false,
+    true
   );
-  input.appendTo(icd);
-  icd.appendTo(cont);
-
-  addCheckboxSearch(cont, "Higher than", "query_cmchigher", false, true);
   addCheckboxSearch(cont, "Equal to", "query_cmcequal", true);
-  addCheckboxSearch(cont, "Lower than", "query_cmclower", false, true);
-
-  cont.appendTo(main_but_cont);
-  main_but_cont.appendTo(filters);
-
-  searchButton = $(
-    '<div style="margin: 24px auto !important;" class="button_simple button_thin">Search</div>'
+  let checkboxCmcLower = addCheckboxSearch(
+    cont,
+    "Lower than",
+    "query_cmclower",
+    false,
+    true
   );
-  searchButton.appendTo(filters);
 
-  searchButton.click(() => {
+  main_but_cont.appendChild(cont);
+  filters.appendChild(main_but_cont);
+
+  searchButton = createDivision(["button_simple", "button_thin"], "Search");
+  searchButton.style.margin = "24px auto";
+  filters.appendChild(searchButton);
+
+  searchButton.addEventListener("click", () => {
     printCards();
   });
 
-  $("#ux_0").append(basicFilters);
-  $("#ux_0").append(filters);
-  $("#ux_0").append(div);
+  mainDiv.appendChild(basicFilters);
+  mainDiv.appendChild(filters);
+  mainDiv.appendChild(div);
 
-  $("#query_cmclower").change(function() {
+  checkboxCmcLower.addEventListener("change", () => {
     if (document.getElementById("query_cmclower").checked == true) {
       document.getElementById("query_cmchigher").checked = false;
     }
   });
 
-  $("#query_cmchigher").change(function() {
+  checkboxCmcHigher.addEventListener("change", () => {
     if (document.getElementById("query_cmchigher").checked == true) {
       document.getElementById("query_cmclower").checked = false;
     }
   });
-
-  //let filterCmcLower 	= document.getElementById("query_cmclower");
-  //let filterCmcEqual 	= document.getElementById("query_cmcequal");
-  //let filterCmcHigher = document.getElementById("query_cmchigher");
 
   printCards();
 }
 
 //
 function addCheckboxSearch(div, label, iid, def, toggle = false) {
-  label = $('<label class="check_container hover_label">' + label + "</label>");
-  var check_new = $('<input type="checkbox" id="' + iid + '" />');
-  check_new.appendTo(label);
-  check_new.prop("checked", def);
+  let labelCheck = document.createElement("label");
+  labelCheck.classList.add("check_container");
+  labelCheck.classList.add("hover_label");
+  labelCheck.innerHTML = label;
 
-  var span = $('<span class="checkmark"></span>');
-  if (toggle) span.css("border-radius", "100%");
-  span.appendTo(label);
-  label.appendTo(div);
+  let inputCheck = document.createElement("input");
+  inputCheck.type = "checkbox";
+  inputCheck.id = iid;
+  inputCheck.innerHTML = label;
+  inputCheck.checked = def;
+
+  let spanCheck = document.createElement("span");
+  spanCheck.classList.add("checkmark");
+  if (toggle) spanCheck.style.borderRadius = "100%";
+
+  labelCheck.appendChild(inputCheck);
+  labelCheck.appendChild(spanCheck);
+  div.appendChild(labelCheck);
+
+  return inputCheck;
 }
 
 function expandFilters() {
-  var div = $(".inventory_filters");
-  if (div.css("opacity") == 1) {
-    div.css("height", "0px");
-    div.css("opacity", 0);
-    $(".inventory").show();
+  let mainDiv = document.getElementById("ux_0");
+  mainDiv.style.overflow = "hidden";
+  setTimeout(() => {
+    mainDiv.removeAttribute("style");
+  }, 1000);
+
+  let div = $$(".inventory_filters")[0];
+  if (div.style.opacity == 1) {
+    div.style.height = "0px";
+    div.style.opacity = 0;
+    $$(".inventory")[0].style.display = "flex";
   } else {
-    div.css("height", "calc(100% - 122px)");
-    div.css("opacity", 1);
+    div.style.height = "calc(100% - 122px)";
+    div.style.opacity = 1;
     setTimeout(function() {
-      $(".inventory").hide();
+      $$(".inventory")[0].style.display = "none";
     }, 200);
   }
 }
@@ -321,13 +376,13 @@ function resetFilters() {
   filteredSets = [];
   filteredMana = [];
 
-  $(".set_filter").each(function() {
-    $(this).removeClass("set_filter_on");
-    $(this).addClass("set_filter_on");
+  $$(".set_filter").forEach(div => {
+    div.classList.remove("set_filter_on");
+    div.classList.add("set_filter_on");
   });
-  $(".mana_filter").each(function() {
-    $(this).removeClass("mana_filter_on");
-    $(this).addClass("mana_filter_on");
+  $$(".mana_filter").forEach(div => {
+    div.classList.remove("mana_filter_on");
+    div.classList.add("mana_filter_on");
   });
 
   document.getElementById("query_name").value = "";
@@ -351,55 +406,60 @@ function resetFilters() {
 }
 
 //
-/* eslint-disable */
 function exportCollection() {
-  var list = get_collection_export();
+  let list = get_collection_export();
   ipc_send("export_csvtxt", { str: list, name: "collection" });
 }
 
 //
 function printStats() {
   $(".moving_ux").animate({ left: "-100%" }, 250, "easeInOutCubic");
-  $("#ux_1").html("");
+  let mainDiv = document.getElementById("ux_1");
+  mainDiv.innerHTML = "";
   const stats = get_collection_stats();
 
-  const top = $(
-    '<div class="decklist_top"><div class="button back"></div><div class="deck_name">Collection Statistics</div><div class="deck_top_colors"></div></div>'
-  );
+  let top = createDivision(["decklist_top"]);
+  top.appendChild(createDivision(["button", "back"]));
+  top.appendChild(createDivision(["deck_name"], "Collection Statistics"));
+  top.appendChild(createDivision(["deck_top_colors"]));
+
   change_background("", 67574);
 
-  const flex = $('<div class="flex_item"></div>');
-  const mainstats = $('<div class="main_stats"></div>');
+  const flex = createDivision(["flex_item"]);
+  const mainstats = createDivision(["main_stats"]);
 
-  $("<label>Sets Completion</label>").appendTo(mainstats);
+  let completionLabel = document.createElement("label");
+  completionLabel.innerHTML = "Sets Completion";
+  mainstats.appendChild(completionLabel);
 
   // each set stats
   orderedSets.forEach(set => {
-    renderSetStats(stats[set], setsList[set].code, set).appendTo(mainstats);
+    let rs = renderSetStats(stats[set], setsList[set].code, set);
+    mainstats.appendChild(rs);
   });
 
   // Complete collection sats
-  renderSetStats(stats.complete, "PW", "Complete collection").appendTo(
-    mainstats
-  );
+  let rs = renderSetStats(stats.complete, "PW", "Complete collection");
+  mainstats.appendChild(rs);
 
   // Singleton collection sats
-  renderSetStats(stats.singles, "PW", "Singles").appendTo(mainstats);
+  rs = renderSetStats(stats.singles, "PW", "Singles");
+  mainstats.appendChild(rs);
 
-  const substats = $('<div class="main_stats sub_stats"></div>');
+  const substats = createDivision(["main_stats", "sub_stats"]);
 
-  flex.append(mainstats);
-  flex.append(substats);
+  flex.appendChild(mainstats);
+  flex.appendChild(substats);
 
-  $("#ux_1").append(top);
-  $("#ux_1").append(flex);
+  mainDiv.appendChild(top);
+  mainDiv.appendChild(flex);
+
   //
-  $(".back").click(function() {
+  $$(".back")[0].addEventListener("click", () => {
     change_background("default");
     $(".moving_ux").animate({ left: "0px" }, 250, "easeInOutCubic");
   });
 }
-/* eslint-enable */
 
 //
 function renderSetStats(setStats, setIconCode, setName) {
@@ -409,20 +469,26 @@ function renderSetStats(setStats, setIconCode, setName) {
     setName
   );
 
-  setDiv.click(function() {
-    const substats = $(".sub_stats");
-    substats.html("");
-    $("<label>" + setName + " completion</label>").appendTo(substats);
+  setDiv.addEventListener("click", () => {
+    const substats = $$(".sub_stats")[0];
+    substats.innerHTML = "";
+
+    let label = document.createElement("label");
+    label.innerHTML = setName + " completion";
+    substats.appendChild(label);
+
     ["common", "uncommon", "rare", "mythic"].forEach(rarity => {
       const countStats = setStats[rarity];
       if (countStats.total > 0) {
         const capitalizedRarity =
           rarity[0].toUpperCase() + rarity.slice(1) + "s";
-        renderCompletionDiv(
-          countStats,
-          "wc_" + rarity + ".png",
-          capitalizedRarity
-        ).appendTo(substats);
+        substats.appendChild(
+          renderCompletionDiv(
+            countStats,
+            "wc_" + rarity + ".png",
+            capitalizedRarity
+          )
+        );
       }
     });
   });
@@ -432,25 +498,21 @@ function renderSetStats(setStats, setIconCode, setName) {
 
 //
 function renderCompletionDiv(countStats, image, title) {
-  const completionDiv = $('<div class="stats_set_completion"></div>');
-  $(
-    '<div class="stats_set_icon" style="background-image: url(../images/' +
-      image +
-      ')"><span>' +
-      title +
-      " <i>(" +
-      countStats.owned +
-      "/" +
-      countStats.total +
-      ", " +
-      Math.round(countStats.percentage) +
-      "%)</i></span></div>"
-  ).appendTo(completionDiv);
-  $(
-    '<div class="stats_set_bar" style="width: ' +
-      countStats.percentage +
-      '%"></div>'
-  ).appendTo(completionDiv);
+  const completionDiv = createDivision(["stats_set_completion"]);
+
+  let setIcon = createDivision(["stats_set_icon"]);
+  setIcon.style.backgroundImage = `url(../images/${image})`;
+
+  let setIconSpan = document.createElement("span");
+  setIconSpan.innerHTML = `${title} <i>(${countStats.owned}/${countStats.total}, ${Math.round(countStats.percentage)}%)</i>`;
+
+  setIcon.appendChild(setIconSpan);
+  completionDiv.appendChild(setIcon);
+
+  let setBar = createDivision(["stats_set_bar"]);
+  setBar.style.width = countStats.percentage + "%";
+
+  completionDiv.appendChild(setBar);
   return completionDiv;
 }
 
@@ -461,16 +523,19 @@ function sortCollection(alg) {
 
 //
 function printCards() {
-  var div = $(".inventory_filters");
-  div.css("height", "0px");
-  div.css("opacity", 0);
-  $(".inventory").show();
+  let mainDiv = document.getElementById("ux_0");
+  mainDiv.style.overflow = "hidden";
 
-  div = $(".inventory");
-  div.html("");
+  let div = $$(".inventory_filters")[0];
+  div.style.height = "0px";
+  div.style.opacity = 0;
+  $$(".inventory")[0].style.display = "flex";
 
-  var paging = $('<div class="paging_container"></div>');
-  div.append(paging);
+  div = $$(".inventory")[0];
+  div.innerHTML = "";
+
+  let paging = createDivision(["paging_container"]);
+  div.appendChild(paging);
 
   let filterName = document.getElementById("query_name").value.toLowerCase();
   let filterType = document.getElementById("query_type").value.toLowerCase();
@@ -489,8 +554,8 @@ function printCards() {
   let filterCmcEqual = document.getElementById("query_cmcequal").checked;
   let filterCmcHigher = document.getElementById("query_cmchigher").checked;
 
-  var totalCards = 0;
-  var list;
+  let totalCards = 0;
+  let list;
   if (filterUnown) {
     list = cardsDb.getAll();
     delete list.abilities;
@@ -503,23 +568,22 @@ function printCards() {
     list = cards;
   }
 
-  var keysSorted;
-  if (sortingAlgorithm == "Set")
+  let keysSorted;
+  if (sortingAlgorithm == "Sort by Set")
     keysSorted = Object.keys(list).sort(collectionSortSet);
-  if (sortingAlgorithm == "Name")
+  if (sortingAlgorithm == "Sort by Name")
     keysSorted = Object.keys(list).sort(collectionSortName);
-  if (sortingAlgorithm == "Rarity")
+  if (sortingAlgorithm == "Sort by Rarity")
     keysSorted = Object.keys(list).sort(collectionSortRarity);
-  if (sortingAlgorithm == "CMC")
+  if (sortingAlgorithm == "Sort by CMC")
     keysSorted = Object.keys(list).sort(collectionSortCmc);
 
-  for (n = 0; n < keysSorted.length; n++) {
+  for (let n = 0; n < keysSorted.length; n++) {
     let key = keysSorted[n];
+    let doDraw = true;
 
     let grpId = key;
     let card = cardsDb.get(grpId);
-    let doDraw = true;
-
     let name = card.name.toLowerCase();
     let type = card.type.toLowerCase();
     let rarity = card.rarity;
@@ -531,7 +595,7 @@ function printCards() {
     if (!card.collectible) continue;
 
     // Filter name
-    var arr;
+    let arr;
     arr = filterName.split(" ");
     arr.forEach(function(s) {
       if (name.indexOf(s) == -1) {
@@ -581,26 +645,11 @@ function printCards() {
       }
     }
 
-    switch (rarity) {
-      case "land":
-        if (!filterCommon.checked) doDraw = false;
-        break;
-      case "common":
-        if (!filterCommon.checked) doDraw = false;
-        break;
-      case "uncommon":
-        if (!filterUncommon.checked) doDraw = false;
-        break;
-      case "rare":
-        if (!filterRare.checked) doDraw = false;
-        break;
-      case "mythic":
-        if (!filterMythic.checked) doDraw = false;
-        break;
-      default:
-        doDraw = false;
-        break;
-    }
+    if (rarity == "land" && !filterCommon.checked) doDraw = false;
+    if (rarity == "common" && !filterCommon.checked) doDraw = false;
+    if (rarity == "uncommon" && !filterUncommon.checked) doDraw = false;
+    if (rarity == "rare" && !filterRare.checked) doDraw = false;
+    if (rarity == "mythic" && !filterMythic.checked) doDraw = false;
 
     if (filterExclude.checked && cost.length == 0) {
       doDraw = false;
@@ -608,50 +657,17 @@ function printCards() {
       let s = [];
       let generic = false;
       cost.forEach(function(m) {
-        if (m.indexOf("w") !== -1) {
-          if (filterExclude.checked && !filteredMana.includes(1)) {
-            doDraw = false;
+        orderedColorCodesCommon.forEach((code, index) => {
+          if (m.indexOf(code) !== -1) {
+            if (filterExclude.checked && !filteredMana.includes(index + 1)) {
+              doDraw = false;
+            }
+            s[index + 1] = 1;
           }
-          s[1] = 1;
-        }
-        if (m.indexOf("u") !== -1) {
-          if (filterExclude.checked && !filteredMana.includes(2)) {
-            doDraw = false;
-          }
-          s[2] = 1;
-        }
-        if (m.indexOf("b") !== -1) {
-          if (filterExclude.checked && !filteredMana.includes(3)) {
-            doDraw = false;
-          }
-          s[3] = 1;
-        }
-        if (m.indexOf("r") !== -1) {
-          if (filterExclude.checked && !filteredMana.includes(4)) {
-            doDraw = false;
-          }
-          s[4] = 1;
-        }
-        if (m.indexOf("g") !== -1) {
-          if (filterExclude.checked && !filteredMana.includes(5)) {
-            doDraw = false;
-          }
-          s[5] = 1;
-        }
+        });
         if (parseInt(m) > 0) {
           generic = true;
         }
-        /*
-				if (m.color < 6 && m.color > 0) {
-					s[m.color] = 1;
-					if (filterExclude.checked && !filteredMana.includes(m.color)) {
-						doDraw = false;
-					}
-				}
-				if (m.color > 6) {
-					generic = true;
-				}
-				*/
       });
       let ms = s.reduce((a, b) => a + b, 0);
       if (generic && ms == 0 && filterExclude.checked) {
@@ -684,122 +700,114 @@ function printCards() {
       doDraw = false;
     }
 
-    let dfc = "";
-    /*
-		if (card.dfc == 'DFC_Back')	 dfc = 'a';
-		if (card.dfc == 'DFC_Front') dfc = 'b';
-		if (card.dfc == 'SplitHalf') {
-			dfc = 'a';
-			if (card.dfcId != 0)	dfc = 'b';
-		}
-		if (dfc == 'b') {
-			doDraw = false;
-		}
-		*/
+    //let dfc = "";
 
     if (doDraw) {
-      var d = $(
-        '<div style="width: ' +
-          cardSize +
-          'px !important;" class="inventory_card"></div>'
-      );
-
-      //if (i < owned) color = "green";
-      //if () color = "orange";
+      let cardDiv = createDivision(["inventory_card"]);
+      cardDiv.style.width = cardSize + "px";
 
       let owned = cards[card.id];
       let aquired = cardsNew[card.id];
       for (let i = 0; i < 4; i++) {
         if (aquired && i >= owned - aquired && i < owned) {
-          $(
-            '<div style="width: ' +
-              cardSize / 4 +
-              'px;" class="inventory_card_quantity_orange"></div>'
-          ).appendTo(d);
+          let q = createDivision(["inventory_card_quantity_orange"]);
+          q.style.width = cardSize / 4 + "px";
+          cardDiv.appendChild(q);
         } else if (i < owned) {
-          $(
-            '<div style="width: ' +
-              cardSize / 4 +
-              'px;" class="inventory_card_quantity_green"></div>'
-          ).appendTo(d);
+          let q = createDivision(["inventory_card_quantity_green"]);
+          q.style.width = cardSize / 4 + "px";
+          cardDiv.appendChild(q);
         } else {
-          $(
-            '<div style="width: ' +
-              cardSize / 4 +
-              'px;" class="inventory_card_quantity_gray"></div>'
-          ).appendTo(d);
+          let q = createDivision(["inventory_card_quantity_gray"]);
+          q.style.width = cardSize / 4 + "px";
+          cardDiv.appendChild(q);
         }
       }
 
-      var img = $(
-        '<img style="width: ' +
-          cardSize +
-          'px !important;" class="inventory_card_img"></img>'
-      );
-      img.attr("src", get_card_image(card));
-      img.appendTo(d);
+      let img = document.createElement("img");
+      img.style.width = cardSize + "px";
+      img.classList.add("inventory_card_img");
+      img.src = get_card_image(card);
+
+      cardDiv.appendChild(img);
 
       addCardHover(img, card);
 
-      img.on("click", function() {
+      img.addEventListener("click", () => {
         if (cardsDb.get(grpId).dfc == "SplitHalf") {
           card = cardsDb.get(card.dfcId);
         }
         //let newname = card.name.split(' ').join('-');
         shell.openExternal(
-          "https://scryfall.com/card/" +
-            get_set_scryfall(card.set) +
-            "/" +
-            card.cid +
-            "/" +
-            card.name
+          `https://scryfall.com/card/${get_set_scryfall(card.set)}/${
+            card.cid
+          }/${card.name}`
         );
       });
 
-      d.appendTo(div);
+      div.appendChild(cardDiv);
     }
   }
 
-  var paging_bottom = $('<div class="paging_container"></div>');
-  div.append(paging_bottom);
-  var but;
+  let paging_bottom = createDivision(["paging_container"]);
+  div.appendChild(paging_bottom);
+  let but, butClone;
   if (collectionPage <= 0) {
-    but = $('<div class="paging_button_disabled"> < </div>');
+    but = createDivision(["paging_button_disabled"], " < ");
+    butClone = but.cloneNode(true);
   } else {
-    but = $('<div class="paging_button"> < </div>');
+    but = createDivision(["paging_button"], " < ");
 
-    but.click(() => {
+    but.addEventListener("click", () => {
       setCollectionPage(collectionPage - 1);
     });
-  }
-
-  paging.append(but);
-  paging_bottom.append(but.clone(true));
-
-  var totalPages = Math.ceil(totalCards / 100);
-  for (var n = 0; n < totalPages; n++) {
-    but = $('<div class="paging_button">' + n + "</div>");
-    if (collectionPage == n) {
-      but.addClass("paging_active");
-    }
-
-    but.click({ n: n }, e => {
-      setCollectionPage(e.data.n);
-    });
-
-    paging.append(but);
-    paging_bottom.append(but.clone(true));
-  }
-  if (collectionPage >= totalPages - 1) {
-    but = $('<div class="paging_button_disabled"> > </div>');
-  } else {
-    but = $('<div class="paging_button"> > </div>');
-    but.click(() => {
+    butClone = but.cloneNode(true);
+    butClone.addEventListener("click", () => {
       setCollectionPage(collectionPage + 1);
     });
   }
-  paging.append(but);
-  paging_bottom.append(but.clone(true));
+
+  paging.appendChild(but);
+  paging_bottom.appendChild(butClone);
+
+  let totalPages = Math.ceil(totalCards / 100);
+  for (let n = 0; n < totalPages; n++) {
+    but = createDivision(["paging_button"], n);
+    if (collectionPage == n) {
+      but.classList.add("paging_active");
+    }
+
+    let page = n;
+    but.addEventListener("click", () => {
+      setCollectionPage(page);
+    });
+    butClone = but.cloneNode(true);
+    butClone.addEventListener("click", () => {
+      setCollectionPage(page);
+    });
+
+    paging.append(but);
+    paging_bottom.append(butClone);
+  }
+  if (collectionPage >= totalPages - 1) {
+    but = createDivision(["paging_button_disabled"], " > ");
+    butClone = but.cloneNode(true);
+  } else {
+    but = createDivision(["paging_button"], " > ");
+    but.addEventListener("click", () => {
+      setCollectionPage(collectionPage + 1);
+    });
+    butClone = but.cloneNode(true);
+    butClone.addEventListener("click", () => {
+      setCollectionPage(collectionPage + 1);
+    });
+  }
+  paging.appendChild(but);
+  paging_bottom.appendChild(butClone);
+
+  setTimeout(() => {
+    mainDiv.removeAttribute("style");
+  }, 1000);
 }
 
 //

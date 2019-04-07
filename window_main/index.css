@@ -1136,9 +1136,8 @@ a:hover {
 }
 
 .inventory_filters {
-    margin: 0px 32px;
+    padding: 0px 32px;
     overflow: hidden;
-    width: calc(100% - 64px);
     height: 0px;
     background-color: rgba(0, 0, 0, 0.2);
     opacity: 0;
