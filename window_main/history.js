@@ -44,16 +44,14 @@ function isDraftMatch(match) {
 }
 
 function filterMatch(match) {
-  let passesEventFilter = (
+  let passesEventFilter =
     filterEvent == DEFAULT_FORMAT ||
     match.eventId == filterEvent ||
     (filterEvent == ALL_DRAFTS_FORMAT && isDraftMatch(match)) ||
-    (filterEvent == DRAFT_REPLAYS_FORMAT && match.type == "draft")
-  );
-  let passesDeckFilter = (
+    (filterEvent == DRAFT_REPLAYS_FORMAT && match.type == "draft");
+  let passesDeckFilter =
     filterDeck == DEFAULT_DECK ||
-    match.playerDeck && match.playerDeck.id == filterDeck
-  );
+    (match.playerDeck && match.playerDeck.id == filterDeck);
   return passesEventFilter && passesDeckFilter;
 }
 
@@ -114,9 +112,16 @@ function open_history_tab(loadMore) {
     });
 
     // count matches which match the current filter
+    let filteredDecks = [DEFAULT_DECK];
     validMatches.filter(filterMatch).forEach(match => {
       wins += match.player.win;
       losses += match.opponent.win;
+
+      let deckId = match.playerDeck.id;
+      if (filteredDecks.indexOf(deckId) == -1) {
+        filteredDecks.push(deckId);
+      }
+
       // some of the data is wierd. Games which last years or have no data.
       if (match.duration !== undefined && match.duration < 3600) {
         totalMatchTime += match.duration;
@@ -164,11 +169,14 @@ function open_history_tab(loadMore) {
     );
     formatSelect.style.margin = "12px auto auto auto";
 
-    let sortedDecks = [...decks];
-    sortedDecks.sort((a, b) => a.name.localeCompare(b.name));
+    //let sortedDecks = [...decks];
+    //sortedDecks.sort((a, b) => a.name.localeCompare(b.name));
+    filteredDecks.sort((a, b) =>
+      getReadableDeckName(a).localeCompare(getReadableDeckName(b))
+    );
     let deckSelect = createSelect(
       historyTopFilter,
-      [DEFAULT_DECK, ...sortedDecks.map(deck => deck.id)],
+      filteredDecks,
       filterDeck,
       filterHistoryByDeck,
       "history_query_deck",
