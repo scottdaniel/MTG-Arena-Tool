@@ -1136,6 +1136,18 @@ function getReadableEvent(arg) {
 }
 
 //
+function getReadableDeckName(deck_id) {
+  if (typeof decks === 'undefined') {
+    return deck_id;
+  }
+  matches = decks.filter(deck => deck.id == deck_id);
+  if (matches.length) {
+    return matches[0].name;
+  }
+  return deck_id;
+}
+
+//
 function getEventId(arg) {
   var ret = arg;
   Object.keys(eventsList).forEach(function(key) {
