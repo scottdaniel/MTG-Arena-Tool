@@ -84,6 +84,12 @@ function openExploreTab() {
   exploreList.id = "explore_list";
   mainDiv.appendChild(exploreList);
 
+  let welcomeMessage = createDivision(
+    ["text_centered", "white"],
+    'Choose filter options and click "Search" to begin.'
+  );
+  exploreList.appendChild(welcomeMessage);
+
   drawFilters(exploreFiltersContainer);
 
   d = document.createElement("div");
