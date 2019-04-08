@@ -17,7 +17,8 @@ global
     getDeckWinrate,
     economyHistory,
     cardsDb,
-    add
+    add,
+    getBoosterCountEstimate
 */
 
 // We need to store a sorted list of card types so we create the card counts in the same order.
@@ -296,12 +297,8 @@ function deckStatsSection(deck, deck_type) {
   let costSection = $(
     '<div class="wildcards_cost"><span>Wildcards you have/need</span></div>'
   );
-  let boosterCost = 0;
+  let boosterCost = getBoosterCountEstimate(missingWildcards);
   orderedCardRarities.forEach(cardRarity => {
-    let bp =
-      rarityBooster[cardRarity] *
-      (missingWildcards[cardRarity] - ownedWildcards[cardRarity]);
-    if (bp > boosterCost) boosterCost = bp;
     $(
       `<div title="${cardRarity}" class="wc_cost wc_${cardRarity}">${
         ownedWildcards[cardRarity] > 0 ? ownedWildcards[cardRarity] + " / " : ""
