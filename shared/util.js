@@ -1156,6 +1156,25 @@ function getReadableDeckName(deck_id) {
 }
 
 //
+function getReadableDeckNameWithCost(deck_id) {
+  if (typeof decks === 'undefined') {
+    return deck_id;
+  }
+  matches = decks.filter(deck => deck.id == deck_id);
+  console.log(matches);
+  if (matches.length) {
+    let colorsString = '';
+    if (matches[0].colors) {
+      matches[0].colors.forEach(color => {
+          colorsString += `<div class="mana_s16 mana_${orderedColorCodes[color-1]}"></div>`;
+      });
+    }
+    return `${matches[0].name}<div class="flex_item">${colorsString}</div>`;
+  }
+  return deck_id;
+}
+
+//
 function getEventId(arg) {
   var ret = arg;
   Object.keys(eventsList).forEach(function(key) {

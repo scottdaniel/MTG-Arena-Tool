@@ -16,12 +16,12 @@ globals
   compare_cards,
   getReadableEvent,
   getReadableDeckName,
+  getReadableDeckNameWithCost,
   getWinrateClass,
   createDivision,
   playerData,
   tags_colors,
   showLoadingBars,
-  decks,
   $$
 */
 
@@ -56,6 +56,7 @@ function filterMatch(match) {
 }
 
 function open_history_tab(loadMore) {
+  sort_decks();
   var mainDiv = document.getElementById("ux_0");
   var div, d;
   mainDiv.classList.add("flex_item");
@@ -180,8 +181,9 @@ function open_history_tab(loadMore) {
       filterDeck,
       filterHistoryByDeck,
       "history_query_deck",
-      getReadableDeckName
+      getReadableDeckNameWithCost
     );
+    deckSelect.style.width = "300px";
     deckSelect.style.margin = "12px 4px auto 16px";
 
     historyColumn.appendChild(historyTop);
