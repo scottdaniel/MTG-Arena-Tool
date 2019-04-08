@@ -1829,6 +1829,22 @@ function getCardsMissingCount(deck, grpid) {
 }
 
 //
+function getBoosterCountEstimate(wildcards) {
+  let boosterCost = 0;
+  let boosterEstimates = { common: 3, uncommon: 3, rare: 6, mythic: 13 };
+  for (let rarity in boosterEstimates) {
+    // accept either short or long form of keys in argument
+    let shortForm = rarity[0]; // grab first letter
+    let missing = wildcards[rarity] || wildcards[shortForm] || 0;
+    boosterCost = Math.max(
+        boosterCost,
+        boosterEstimates[rarity] * missing
+    );
+  }
+  return boosterCost;
+}
+
+//
 function get_deck_uniquestring(deck, side = true) {
   if (!deck) return "";
   deck.mainDeck.sort(compare_cards);
