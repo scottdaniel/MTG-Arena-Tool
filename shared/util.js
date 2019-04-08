@@ -1355,9 +1355,10 @@ function get_set_code(set) {
 
 //
 class CountStats {
-  constructor(owned = 0, total = 0) {
+  constructor(owned = 0, total = 0, wanted = 0) {
     this.owned = owned;
     this.total = total;
+    this.wanted = wanted;
   }
 
   get percentage() {
@@ -1389,6 +1390,7 @@ class SetStats {
     ].reduce((acc, c) => {
       acc.owned += c.owned;
       acc.total += c.total;
+      acc.wanted += c.wanted;
       return acc;
     });
   }
