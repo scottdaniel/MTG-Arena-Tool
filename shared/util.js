@@ -1810,6 +1810,15 @@ function get_deck_missing_short(deck) {
 }
 
 //
+function getCardsMissingCount(deck, grpid) {
+  let neededCount = 0;
+  let entireDeck = [...deck.mainDeck, ...deck.sideboard];
+  let matches = entireDeck.filter(card => card.id == grpid);
+  matches.forEach(card => neededCount += card.quantity);
+  return get_wc_missing(grpid, neededCount);
+}
+
+//
 function get_deck_uniquestring(deck, side = true) {
   if (!deck) return "";
   deck.mainDeck.sort(compare_cards);
