@@ -20,7 +20,8 @@ global
   addCardHover,
   shell,
   get_set_scryfall,
-  createSelect
+  createSelect,
+  getBoosterCountEstimate
 */
 let collectionPage = 0;
 let sortingAlgorithm = "Sort by Set";
@@ -477,6 +478,8 @@ function renderSetStats(setStats, setIconCode, setName) {
     label.innerHTML = setName + " completion";
     substats.appendChild(label);
 
+    let wanted = {};
+    let missing = {};
     ["common", "uncommon", "rare", "mythic"].forEach(rarity => {
       const countStats = setStats[rarity];
       if (countStats.total > 0) {
@@ -490,7 +493,29 @@ function renderSetStats(setStats, setIconCode, setName) {
           )
         );
       }
+      wanted[rarity] = countStats.wanted;
+      missing[rarity] = countStats.total - countStats.owned;
     });
+
+    let wantedDiv = createDivision(["stats_set_completion"]);
+    let wantedCost = getBoosterCountEstimate(wanted);
+    let wantedIcon = createDivision(["stats_set_icon", "bo_explore_cost"]);
+    wantedIcon.style.height = "30px";
+    let wantedSpan = document.createElement("span");
+    wantedSpan.innerHTML = `<i>~${wantedCost} estimated boosters for wanted cards.</i>`;
+    wantedIcon.appendChild(wantedSpan);
+    wantedDiv.appendChild(wantedIcon);
+    substats.appendChild(wantedDiv);
+
+    let missingDiv = createDivision(["stats_set_completion"]);
+    let missingCost = getBoosterCountEstimate(missing);
+    let missingIcon = createDivision(["stats_set_icon", "bo_explore_cost"]);
+    missingIcon.style.height = "30px";
+    let missingSpan = document.createElement("span");
+    missingSpan.innerHTML = `<i>~${missingCost} estimated boosters for all cards.</i>`;
+    missingIcon.appendChild(missingSpan);
+    missingDiv.appendChild(missingIcon);
+    substats.appendChild(missingDiv);
   });
 
   return setDiv;
@@ -504,7 +529,7 @@ function renderCompletionDiv(countStats, image, title) {
   setIcon.style.backgroundImage = `url(../images/${image})`;
 
   let setIconSpan = document.createElement("span");
-  setIconSpan.innerHTML = `${title} <i>(${countStats.owned}/${countStats.total}, ${Math.round(countStats.percentage)}%)</i>`;
+  setIconSpan.innerHTML = `${title} <i>(${countStats.owned}/${countStats.total}, ${Math.round(countStats.percentage)}%, ${countStats.wanted} wanted)</i>`;
 
   setIcon.appendChild(setIconSpan);
   completionDiv.appendChild(setIcon);
