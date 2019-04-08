@@ -1,6 +1,7 @@
 /*
 global
   cards
+  decks
   shell
   settings
 */
@@ -1430,6 +1431,13 @@ function get_collection_stats() {
           stats.complete[card.rarity].owned += owned;
           stats.singles[card.rarity].owned += 1;
         }
+
+        // count cards we know we want across decks
+        let deckWantedCounts = decks.map(deck => getCardsMissingCount(deck, grpId));
+        let wanted = Math.max(...deckWantedCounts);
+        stats[card.set][card.rarity].wanted += wanted;
+        stats.complete[card.rarity].wanted += wanted;
+        stats.singles[card.rarity].wanted += Math.min(1, wanted);
       }
     }
   });
