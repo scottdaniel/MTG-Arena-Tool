@@ -14,6 +14,7 @@ globals
   selectAdd,
   createSelect,
   compare_cards,
+  sort_decks,
   getReadableEvent,
   getReadableDeckName,
   getReadableDeckNameWithCost,
@@ -34,6 +35,7 @@ const DEFAULT_DECK = "All Decks";
 let loadHistory = 0;
 let filterEvent = DEFAULT_FORMAT;
 let filterDeck = DEFAULT_DECK;
+let filteredDecks = null;
 let filteredSampleSize = 0;
 let viewingLimitSeason = false;
 
@@ -113,13 +115,17 @@ function open_history_tab(loadMore) {
     });
 
     // count matches which match the current filter
-    let filteredDecks = [DEFAULT_DECK];
+    let getFilteredDecks = false;
+    if (filteredDecks == null) {
+      filteredDecks = [DEFAULT_DECK];
+      getFilteredDecks = true;
+    }
     validMatches.filter(filterMatch).forEach(match => {
       wins += match.player.win;
       losses += match.opponent.win;
 
       let deckId = match.playerDeck.id;
-      if (filteredDecks.indexOf(deckId) == -1) {
+      if (getFilteredDecks && filteredDecks.indexOf(deckId) == -1) {
         filteredDecks.push(deckId);
       }
 
@@ -721,6 +727,7 @@ function filterHistoryByEvent(filter) {
   filterEvent = filter;
   // automatically clear deck filter upon changing format filter
   // helps prevent user confusion caused by invalid filter combinations
+  filteredDecks = null;
   filterDeck = DEFAULT_DECK;
   open_history_tab(0);
 }
