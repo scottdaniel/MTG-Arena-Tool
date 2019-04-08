@@ -835,13 +835,16 @@ function addCardTile(grpId, indent, quantity, element) {
  * Creates a select box
  * This is a "fixed" version of SelectAdd and should replace it.
  **/
-function createSelect(parent, options, current, callback, divClass) {
+function createSelect(parent, options, current, callback, divClass, optionFormatter) {
   let selectContainer = createDivision(["select_container", divClass]);
   selectContainer.id = divClass;
   if (!options.includes(current)) current = options[0];
   selectContainer.value = current;
-
-  let selectButton = createDivision(["select_button"], current);
+  let currentDisplay = current;
+  if (typeof optionFormatter === 'function') {
+    currentDisplay = optionFormatter(current);
+  }
+  let selectButton = createDivision(["select_button"], currentDisplay);
   let selectOptions = createDivision(["select_options_container"]);
 
   selectContainer.appendChild(selectButton);
@@ -855,12 +858,17 @@ function createSelect(parent, options, current, callback, divClass) {
       selectOptions.style.display = "block";
       for (let i = 0; i < options.length; i++) {
         if (options[i] !== current) {
-          let option = createDivision(["select_option"], options[i]);
+          let optionDisplay = options[i];
+          if (typeof optionFormatter === 'function') {
+            optionDisplay = optionFormatter(optionDisplay);
+          }
+
+          let option = createDivision(["select_option"], optionDisplay);
           selectOptions.appendChild(option);
 
           option.addEventListener("click", () => {
             selectButton.classList.remove("active");
-            selectButton.innerHTML = options[i];
+            selectButton.innerHTML = optionDisplay;
             selectContainer.value = options[i];
             selectOptions.style.display = "none";
             selectOptions.innerHTML = "";
@@ -1133,6 +1141,37 @@ function getReadableEvent(arg) {
   }
 
   return arg;
+}
+
+//
+function getReadableDeckName(deck_id) {
+  if (typeof decks === 'undefined') {
+    return deck_id;
+  }
+  matches = decks.filter(deck => deck.id == deck_id);
+  if (matches.length) {
+    return matches[0].name;
+  }
+  return deck_id;
+}
+
+//
+function getReadableDeckNameWithCost(deck_id) {
+  if (typeof decks === 'undefined') {
+    return deck_id;
+  }
+  matches = decks.filter(deck => deck.id == deck_id);
+  console.log(matches);
+  if (matches.length) {
+    let colorsString = '';
+    if (matches[0].colors) {
+      matches[0].colors.forEach(color => {
+          colorsString += `<div class="mana_s16 mana_${orderedColorCodes[color-1]}"></div>`;
+      });
+    }
+    return `${matches[0].name}<div class="flex_item">${colorsString}</div>`;
+  }
+  return deck_id;
 }
 
 //
