@@ -497,37 +497,40 @@ function renderSetStats(setStats, setIconCode, setName) {
       missing[rarity] = countStats.total - countStats.owned;
     });
 
-    let wantedDiv = createDivision(["stats_set_completion"]);
-    let wantedCost = getBoosterCountEstimate(wanted);
-    let wantedIcon = createDivision(["stats_set_icon", "bo_explore_cost"]);
-    wantedIcon.style.height = "30px";
-    let wantedSpan = document.createElement("span");
-    wantedSpan.innerHTML = `<i>~${wantedCost} estimated boosters for wanted cards.</i>`;
-    wantedIcon.appendChild(wantedSpan);
-    wantedDiv.appendChild(wantedIcon);
-    substats.appendChild(wantedDiv);
+    // If the set has a collationId, it means boosters for it exists
+    if (setsList[setName].collation) {
+      let wantedDiv = createDivision(["stats_set_completion"]);
+      let wantedCost = getBoosterCountEstimate(wanted);
+      let wantedIcon = createDivision(["stats_set_icon", "bo_explore_cost"]);
+      wantedIcon.style.height = "30px";
+      let wantedSpan = document.createElement("span");
+      wantedSpan.innerHTML = `<i>~${wantedCost} estimated boosters for wanted cards.</i>`;
+      wantedIcon.appendChild(wantedSpan);
+      wantedDiv.appendChild(wantedIcon);
+      substats.appendChild(wantedDiv);
 
-    // This is very vague, assuming the distribution of mythic cards is 7 rares out of 8 packs.
-    let estimatedRareCompletion = Math.round(missing["rare"] / 0.875);
-    let missingRaresDiv = createDivision(["stats_set_completion"]);
-    let missingRaresIcon = createDivision(["stats_set_icon", "bo_explore_cost"]);
-    missingRaresIcon.style.height = "30px";
-    let missingRaresSpan = document.createElement("span");
-    missingRaresSpan.innerHTML = `<i>~${estimatedRareCompletion} estimated boosters for all rares.</i>`;
-    missingRaresIcon.appendChild(missingRaresSpan);
-    missingRaresDiv.appendChild(missingRaresIcon);
-    substats.appendChild(missingRaresDiv);
+      // This is very vague, assuming the distribution of mythic cards is 7 rares out of 8 packs.
+      let estimatedRareCompletion = Math.round(missing["rare"] / 0.875);
+      let missingRaresDiv = createDivision(["stats_set_completion"]);
+      let missingRaresIcon = createDivision(["stats_set_icon", "bo_explore_cost"]);
+      missingRaresIcon.style.height = "30px";
+      let missingRaresSpan = document.createElement("span");
+      missingRaresSpan.innerHTML = `<i>~${estimatedRareCompletion} estimated boosters for all rares.</i>`;
+      missingRaresIcon.appendChild(missingRaresSpan);
+      missingRaresDiv.appendChild(missingRaresIcon);
+      substats.appendChild(missingRaresDiv);
 
-    // Same as above, assuming 1 every 8 packs has a mythic.
-    let estimatedMythicsCompletion = Math.round(missing["rare"] / 0.125);
-    let missingMythicsDiv = createDivision(["stats_set_completion"]);
-    let missingMythicsIcon = createDivision(["stats_set_icon", "bo_explore_cost"]);
-    missingMythicsIcon.style.height = "30px";
-    let missingMythicsSpan = document.createElement("span");
-    missingMythicsSpan.innerHTML = `<i>~${estimatedMythicsCompletion} estimated boosters for all mythics.</i>`;
-    missingMythicsIcon.appendChild(missingMythicsSpan);
-    missingMythicsDiv.appendChild(missingMythicsIcon);
-    substats.appendChild(missingMythicsDiv);
+      // Same as above, assuming 1 every 8 packs has a mythic.
+      let estimatedMythicsCompletion = Math.round(missing["rare"] / 0.125);
+      let missingMythicsDiv = createDivision(["stats_set_completion"]);
+      let missingMythicsIcon = createDivision(["stats_set_icon", "bo_explore_cost"]);
+      missingMythicsIcon.style.height = "30px";
+      let missingMythicsSpan = document.createElement("span");
+      missingMythicsSpan.innerHTML = `<i>~${estimatedMythicsCompletion} estimated boosters for all mythics.</i>`;
+      missingMythicsIcon.appendChild(missingMythicsSpan);
+      missingMythicsDiv.appendChild(missingMythicsIcon);
+      substats.appendChild(missingMythicsDiv);
+    }
   });
 
   return setDiv;
