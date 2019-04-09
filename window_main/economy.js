@@ -1,8 +1,8 @@
 /*
 global
   $,
-  daysPast,
   get_colation_set,
+  localDateFormat,
   getReadableEvent,
   setsList,
   addCardHover,
@@ -21,6 +21,8 @@ var loadEconomy = 0;
 var filterEconomy = "All";
 var daysago = 0;
 var dayList = [];
+
+const differenceInCalendarDays = require("date-fns").differenceInCalendarDays;
 
 class economyDay {
   constructor(goldEarned = 0, gemsEarned = 0, goldSpent = 0, gemsSpent = 0) {
@@ -93,7 +95,10 @@ function openEconomyTab(loadMore) {
     if (change == undefined) continue;
 
     // print out daily summaries but no sub-events
-    if (filterEconomy === "Day Summaries" && daysago != daysPast(change.date)) {
+    if (
+      filterEconomy === "Day Summaries" &&
+      daysago != differenceInCalendarDays(new Date(), change.date)
+    ) {
       mainDiv.appendChild(createDayHeader(change));
       loadEnd++;
       continue;
@@ -104,7 +109,7 @@ function openEconomyTab(loadMore) {
       continue;
     }
 
-    if (daysago != daysPast(change.date)) {
+    if (daysago != differenceInCalendarDays(new Date(), change.date)) {
       mainDiv.appendChild(createDayHeader(change));
     }
 
@@ -132,7 +137,7 @@ function openEconomyTab(loadMore) {
 }
 
 function createDayHeader(change) {
-  daysago = daysPast(change.date);
+  daysago = differenceInCalendarDays(new Date(), change.date);
   let div = createDivision(["economy_title", "flex_item"]);
 
   let flexLeft = createDivision(["flex_item"]);
@@ -142,7 +147,7 @@ function createDayHeader(change) {
   if (daysago == 1) flexLeft.innerHTML = "Yesterday";
   if (daysago > 1) {
     let date = new Date(change.date);
-    flexLeft.innerHTML = niceDateFormat(date);
+    flexLeft.innerHTML = localDateFormat(date);
   }
 
   let flexRight = createDivision(["economy_day_stats", "flex_item"]);
@@ -507,7 +512,7 @@ function createChangeRow(change, economyId) {
     )
   );
 
-  var niceDate = niceDateFormat(new Date(change.date));
+  var niceDate = localDateFormat(new Date(change.date));
   flexTop.appendChild(createDivision(["list_economy_time"], niceDate));
 
   var flexLeft = createDivision(["flex_item"]);
@@ -555,8 +560,8 @@ function createEconomyUI(mainDiv) {
       else dayList[daysago].goldSpent += Math.abs(change.delta.goldDelta);
     }
 
-    if (daysago != daysPast(change.date)) {
-      daysago = daysPast(change.date);
+    if (daysago != differenceInCalendarDays(new Date(), change.date)) {
+      daysago = differenceInCalendarDays(new Date(), change.date);
       dayList[daysago] = new economyDay();
     }
   }

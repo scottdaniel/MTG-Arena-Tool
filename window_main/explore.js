@@ -84,6 +84,12 @@ function openExploreTab() {
   exploreList.id = "explore_list";
   mainDiv.appendChild(exploreList);
 
+  let welcomeMessage = createDivision(
+    ["text_centered", "white"],
+    'Choose filter options and click "Search" to begin.'
+  );
+  exploreList.appendChild(welcomeMessage);
+
   drawFilters(exploreFiltersContainer);
 
   d = document.createElement("div");
@@ -461,7 +467,7 @@ function deckLoad(_deck, index) {
     wc = createDivision(["wc_complete"]);
     flcf.appendChild(wc);
   } else {
-    let bo = createDivision(["bo_explore_cost"], boosterCost);
+    let bo = createDivision(["bo_explore_cost"], Math.round(boosterCost));
     bo.title = "Boosters needed (estimated)";
     flcf.appendChild(bo);
   }
@@ -599,7 +605,7 @@ function eventLoad(event, index) {
     wc = createDivision(["wc_complete"]);
     flcf.appendChild(wc);
   } else {
-    let bo = createDivision(["bo_explore_cost"], boosterCost);
+    let bo = createDivision(["bo_explore_cost"], Math.round(boosterCost));
     bo.title = "Boosters needed (estimated)";
     flcf.appendChild(bo);
   }

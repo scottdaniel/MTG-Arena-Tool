@@ -68,7 +68,7 @@ var orderedManaColors = [
   "#B7C89E",
   "#E3E3E3"
 ];
-var rarityBooster = { common: 3, uncommon: 3, rare: 6, mythic: 13 };
+var rarityBooster = { common: 3.36, uncommon: 2.6, rare: 5.72, mythic: 13.24 };
 
 let shell = electron.shell;
 let ipc = electron.ipcRenderer;
@@ -929,7 +929,11 @@ $(document).ready(function() {
       }
       if ($(this).hasClass("it3")) {
         sidebarActive = 3;
-        openExploreTab();
+        if (offlineMode) {
+          showOfflineSplash();
+        } else {
+          openExploreTab();
+        }
       }
       if ($(this).hasClass("it4")) {
         sidebarActive = 4;

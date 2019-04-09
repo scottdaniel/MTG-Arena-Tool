@@ -2,7 +2,7 @@ span i {
     margin-left: 4px;
 }
 
-relative-time {
+relative-time, local-time {
   margin-right: 8px;
   margin-left: 8px;
   font-size: 16px;
@@ -2219,6 +2219,7 @@ a:hover {
 
 .select_button {
     color: #FAE5D2;
+    overflow: hidden;
     line-height: 32px;
     text-indent: 16px;
     cursor: pointer;
@@ -2278,11 +2279,14 @@ a:hover {
 }
 
 .select_option {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     white-space: nowrap;
     color: #FAE5D2;
     margin: 0;
-    padding: 7px 0;
-    text-indent: 15px;
+    height: 33px;
+    padding: 0 12px;
     border-top: 1px solid rgba(145, 121, 97, 0.5);
     -webkit-transition: all .25s cubic-bezier(0.2, 0.5, 0.35, 1);
 }
