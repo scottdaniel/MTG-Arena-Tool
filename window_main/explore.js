@@ -39,7 +39,7 @@ let ranks_list = ["Bronze", "Silver", "Gold", "Platinum", "Diamond", "Mythic"];
 
 const open_deck = require("./deck_details").open_deck;
 
-let rarityBooster = { c: 3, u: 3, r: 6, m: 13 };
+let rarityBooster = { c: 3.36, u: 2.6, r: 5.72, m: 13.24 };
 let raritySort = { c: "common", u: "uncommon", r: "rare", m: "mythic" };
 
 function openExploreTab() {
@@ -472,7 +472,7 @@ function deckLoad(_deck, index) {
     wc = createDivision(["wc_complete"]);
     flcf.appendChild(wc);
   } else {
-    let bo = createDivision(["bo_explore_cost"], boosterCost);
+    let bo = createDivision(["bo_explore_cost"], Math.round(boosterCost));
     bo.title = "Boosters needed (estimated)";
     flcf.appendChild(bo);
   }
@@ -615,7 +615,7 @@ function eventLoad(event, index) {
     wc = createDivision(["wc_complete"]);
     flcf.appendChild(wc);
   } else {
-    let bo = createDivision(["bo_explore_cost"], boosterCost);
+    let bo = createDivision(["bo_explore_cost"], Math.round(boosterCost));
     bo.title = "Boosters needed (estimated)";
     flcf.appendChild(bo);
   }
