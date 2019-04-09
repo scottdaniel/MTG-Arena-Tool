@@ -929,7 +929,11 @@ $(document).ready(function() {
       }
       if ($(this).hasClass("it3")) {
         sidebarActive = 3;
-        openExploreTab();
+        if (offlineMode) {
+          showOfflineSplash();
+        } else {
+          openExploreTab();
+        }
       }
       if ($(this).hasClass("it4")) {
         sidebarActive = 4;
