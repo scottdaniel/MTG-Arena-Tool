@@ -68,7 +68,6 @@ var orderedManaColors = [
   "#B7C89E",
   "#E3E3E3"
 ];
-var rarityBooster = { common: 3.36, uncommon: 2.6, rare: 5.72, mythic: 13.24 };
 
 let shell = electron.shell;
 let ipc = electron.ipcRenderer;

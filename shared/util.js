@@ -1870,7 +1870,7 @@ function getCardsMissingCount(deck, grpid) {
 //
 function getBoosterCountEstimate(wildcards) {
   let boosterCost = 0;
-  let boosterEstimates = { common: 3, uncommon: 3, rare: 6, mythic: 13 };
+  let boosterEstimates = { common: 3.36, uncommon: 2.6, rare: 5.72, mythic: 13.24 };
   for (let rarity in boosterEstimates) {
     // accept either short or long form of keys in argument
     let shortForm = rarity[0]; // grab first letter
@@ -1880,7 +1880,7 @@ function getBoosterCountEstimate(wildcards) {
         boosterEstimates[rarity] * missing
     );
   }
-  return boosterCost;
+  return Math.round(boosterCost);
 }
 
 //
