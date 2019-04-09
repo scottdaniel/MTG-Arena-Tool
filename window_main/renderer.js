@@ -1000,7 +1000,7 @@ ipc.on("tou_set", function(event, arg) {
 });
 
 //
-function drawDeck(div, deck) {
+function drawDeck(div, deck, showWildcards = false) {
   var unique = makeId(4);
   div.html("");
   var prevIndex = 0;
@@ -1019,7 +1019,7 @@ function drawDeck(div, deck) {
     }
 
     if (card.quantity > 0) {
-      addCardTile(grpId, unique + "a", card.quantity, div);
+      addCardTile(grpId, unique + "a", card.quantity, div, showWildcards, deck, false);
     }
 
     prevIndex = grpId;
@@ -1033,7 +1033,7 @@ function drawDeck(div, deck) {
         var grpId = card.id;
         //var type = cardsDb.get(grpId).type;
         if (card.quantity > 0) {
-          addCardTile(grpId, unique + "b", card.quantity, div);
+          addCardTile(grpId, unique + "b", card.quantity, div, showWildcards, deck, true);
         }
       });
     }
