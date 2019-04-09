@@ -507,16 +507,6 @@ function renderSetStats(setStats, setIconCode, setName) {
     wantedDiv.appendChild(wantedIcon);
     substats.appendChild(wantedDiv);
 
-    let missingDiv = createDivision(["stats_set_completion"]);
-    let missingCost = getBoosterCountEstimate(missing);
-    let missingIcon = createDivision(["stats_set_icon", "bo_explore_cost"]);
-    missingIcon.style.height = "30px";
-    let missingSpan = document.createElement("span");
-    missingSpan.innerHTML = `<i>~${missingCost} estimated boosters for all cards.</i>`;
-    missingIcon.appendChild(missingSpan);
-    missingDiv.appendChild(missingIcon);
-    substats.appendChild(missingDiv);
-
     // This is very vague, assuming the distribution of mythic cards is 7 rares out of 8 packs.
     let estimatedRareCompletion = Math.round(missing["rare"] / 0.875);
     let missingRaresDiv = createDivision(["stats_set_completion"]);
