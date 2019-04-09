@@ -504,32 +504,21 @@ function renderSetStats(setStats, setIconCode, setName) {
       let wantedIcon = createDivision(["stats_set_icon", "bo_explore_cost"]);
       wantedIcon.style.height = "30px";
       let wantedSpan = document.createElement("span");
-      wantedSpan.innerHTML = `<i>~${wantedCost} estimated boosters for wanted cards.</i>`;
+      wantedSpan.innerHTML = `<i>~${wantedCost} boosters to craft wanted cards using wilds.</i>`;
       wantedIcon.appendChild(wantedSpan);
       wantedDiv.appendChild(wantedIcon);
       substats.appendChild(wantedDiv);
 
-      // This is very vague, assuming the distribution of mythic cards is 7 rares out of 8 packs.
-      let estimatedRareCompletion = Math.round(missing["rare"] / 0.875);
-      let missingRaresDiv = createDivision(["stats_set_completion"]);
-      let missingRaresIcon = createDivision(["stats_set_icon", "bo_explore_cost"]);
-      missingRaresIcon.style.height = "30px";
-      let missingRaresSpan = document.createElement("span");
-      missingRaresSpan.innerHTML = `<i>~${estimatedRareCompletion} estimated boosters for all rares.</i>`;
-      missingRaresIcon.appendChild(missingRaresSpan);
-      missingRaresDiv.appendChild(missingRaresIcon);
-      substats.appendChild(missingRaresDiv);
-
-      // Same as above, assuming 1 every 8 packs has a mythic.
-      let estimatedMythicsCompletion = Math.round(missing["rare"] / 0.125);
-      let missingMythicsDiv = createDivision(["stats_set_completion"]);
-      let missingMythicsIcon = createDivision(["stats_set_icon", "bo_explore_cost"]);
-      missingMythicsIcon.style.height = "30px";
-      let missingMythicsSpan = document.createElement("span");
-      missingMythicsSpan.innerHTML = `<i>~${estimatedMythicsCompletion} estimated boosters for all mythics.</i>`;
-      missingMythicsIcon.appendChild(missingMythicsSpan);
-      missingMythicsDiv.appendChild(missingMythicsIcon);
-      substats.appendChild(missingMythicsDiv);
+      // This is exact because we can depend on duplicate protection
+      let rareMythicCompletion = missing["rare"] + missing["mythic"];
+      let completionDiv = createDivision(["stats_set_completion"]);
+      let completionIcon = createDivision(["stats_set_icon", "bo_explore_cost"]);
+      completionIcon.style.height = "30px";
+      let completionSpan = document.createElement("span");
+      completionSpan.innerHTML = `<i>${rareMythicCompletion} boosters to open all rares and mythics.</i>`;
+      completionIcon.appendChild(completionSpan);
+      completionDiv.appendChild(completionIcon);
+      substats.appendChild(completionDiv);
     }
   });
 
