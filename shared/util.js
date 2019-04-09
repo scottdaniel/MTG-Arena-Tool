@@ -2304,7 +2304,7 @@ function daysPast(_date) {
   );
 }
 
-function niceDateFormat(date) {
+function relativeDateFormat(date) {
   return `<relative-time datetime="${date.toISOString()}">${date.toString()}</relative-time>`;
 }
 

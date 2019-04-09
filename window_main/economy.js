@@ -147,7 +147,7 @@ function createDayHeader(change) {
   if (daysago == 1) flexLeft.innerHTML = "Yesterday";
   if (daysago > 1) {
     let date = new Date(change.date);
-    flexLeft.innerHTML = niceDateFormat(date);
+    flexLeft.innerHTML = localDateFormat(date);
   }
 
   let flexRight = createDivision(["economy_day_stats", "flex_item"]);
