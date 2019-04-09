@@ -2308,6 +2308,16 @@ function niceDateFormat(date) {
   return `<relative-time datetime="${date.toISOString()}">${date.toString()}</relative-time>`;
 }
 
+function localDateFormat(date) {
+  return `<local-time datetime="${date.toISOString()}"
+    month="short"
+    day="numeric"
+    hour="numeric"
+    minute="numeric">
+    ${date.toString()}
+  </local-time>`;
+}
+
 //
 function replaceAll(str, find, replace) {
   return str.replace(new RegExp(find, "g"), replace);
