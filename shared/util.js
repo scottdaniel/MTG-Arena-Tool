@@ -1,6 +1,7 @@
 /*
 global
   cards
+  decks
   shell
   settings
 */
@@ -1394,9 +1395,13 @@ function get_set_code(set) {
 
 //
 class CountStats {
-  constructor(owned = 0, total = 0) {
+  constructor(owned = 0, total = 0, unique = 0, complete = 0, wanted = 0, uniqueWanted = 0) {
     this.owned = owned;
     this.total = total;
+    this.unique = unique;
+    this.complete = complete; // all 4 copies of a card
+    this.wanted = wanted;
+    this.uniqueWanted = uniqueWanted;
   }
 
   get percentage() {
@@ -1428,6 +1433,8 @@ class SetStats {
     ].reduce((acc, c) => {
       acc.owned += c.owned;
       acc.total += c.total;
+      acc.unique += c.unique;
+      acc.wanted += c.wanted;
       return acc;
     });
   }
@@ -1459,6 +1466,9 @@ function get_collection_stats() {
         stats[card.set][card.rarity].total += 4;
         stats.complete[card.rarity].total += 4;
         stats.singles[card.rarity].total += 1;
+        stats[card.set][card.rarity].unique += 1;
+        stats.complete[card.rarity].unique += 1;
+        stats.singles[card.rarity].unique += 1;
 
         // add cards we own
         if (cards[grpId] !== undefined) {
@@ -1466,7 +1476,26 @@ function get_collection_stats() {
           stats[card.set][card.rarity].owned += owned;
           stats.complete[card.rarity].owned += owned;
           stats.singles[card.rarity].owned += 1;
+
+          // count complete sets we own
+          if (owned == 4) {
+            stats[card.set][card.rarity].complete += 1;
+            stats.complete[card.rarity].complete += 1;
+            stats.singles[card.rarity].complete += 1;
+          }
         }
+
+        // count cards we know we want across decks
+        let deckWantedCounts = decks.map(deck => getCardsMissingCount(deck, grpId));
+        let wanted = Math.max(...deckWantedCounts);
+        stats[card.set][card.rarity].wanted += wanted;
+        stats.complete[card.rarity].wanted += wanted;
+        stats.singles[card.rarity].wanted += Math.min(1, wanted);
+
+        // count unique cards we know we want across decks
+        stats[card.set][card.rarity].uniqueWanted += Math.min(1, wanted);
+        stats.complete[card.rarity].uniqueWanted += Math.min(1, wanted);
+        stats.singles[card.rarity].uniqueWanted += Math.min(1, wanted);
       }
     }
   });
@@ -1846,6 +1875,31 @@ function get_deck_missing_short(deck) {
   });
 
   return missing;
+}
+
+//
+function getCardsMissingCount(deck, grpid) {
+  let neededCount = 0;
+  let entireDeck = [...deck.mainDeck, ...deck.sideboard];
+  let matches = entireDeck.filter(card => card.id == grpid);
+  matches.forEach(card => neededCount += card.quantity);
+  return get_wc_missing(grpid, neededCount);
+}
+
+//
+function getBoosterCountEstimate(wildcards) {
+  let boosterCost = 0;
+  let boosterEstimates = { common: 3.36, uncommon: 2.6, rare: 5.72, mythic: 13.24 };
+  for (let rarity in boosterEstimates) {
+    // accept either short or long form of keys in argument
+    let shortForm = rarity[0]; // grab first letter
+    let missing = wildcards[rarity] || wildcards[shortForm] || 0;
+    boosterCost = Math.max(
+        boosterCost,
+        boosterEstimates[rarity] * missing
+    );
+  }
+  return Math.round(boosterCost);
 }
 
 //

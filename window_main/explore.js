@@ -18,6 +18,7 @@ globals
   createDivision,
   removeDuplicates,
   compare_cards,
+  getBoosterCountEstimate,
   $$
 */
 
@@ -39,7 +40,6 @@ let ranks_list = ["Bronze", "Silver", "Gold", "Platinum", "Diamond", "Mythic"];
 
 const open_deck = require("./deck_details").open_deck;
 
-let rarityBooster = { c: 3.36, u: 2.6, r: 5.72, m: 13.24 };
 let raritySort = { c: "common", u: "uncommon", r: "rare", m: "mythic" };
 
 function openExploreTab() {
@@ -450,20 +450,15 @@ function deckLoad(_deck, index) {
 
   let wc;
   let n = 0;
-  let boosterCost = 0;
+  let boosterCost = getBoosterCountEstimate(_deck.wildcards);
   for (var key in raritySort) {
     if (_deck.wildcards.hasOwnProperty(key) && _deck.wildcards[key] > 0) {
       wc = createDivision(
         ["wc_explore_cost", "wc_" + raritySort[key]],
         _deck.wildcards[key]
       );
-      wc.title = raritySort[key].capitalize() + " wldcards needed.";
+      wc.title = raritySort[key].capitalize() + " wildcards needed.";
       flcf.appendChild(wc);
-
-      boosterCost = Math.max(
-        boosterCost,
-        rarityBooster[key] * _deck.wildcards[key]
-      );
       n++;
     }
   }
@@ -594,7 +589,7 @@ function eventLoad(event, index) {
 
   let wc;
   let n = 0;
-  let boosterCost = 0;
+  let boosterCost = getBoosterCountEstimate(event.wildcards);
   for (var key in raritySort) {
     if (event.wildcards.hasOwnProperty(key) && event.wildcards[key] > 0) {
       wc = createDivision(
@@ -603,11 +598,6 @@ function eventLoad(event, index) {
       );
       wc.title = raritySort[key].capitalize() + " wldcards needed.";
       flcf.appendChild(wc);
-
-      boosterCost = Math.max(
-        boosterCost,
-        rarityBooster[key] * event.wildcards[key]
-      );
       n++;
     }
   }

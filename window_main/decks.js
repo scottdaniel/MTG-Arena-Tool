@@ -9,7 +9,8 @@ global
 	open_deck,
 	tags_colors,
 	ipc_send,
-	selectAdd
+	selectAdd,
+  getBoosterCountEstimate
 */
 
 let filterTag = "All";
@@ -139,16 +140,10 @@ function open_decks_tab() {
 
         let wc;
         let n = 0;
-        let boosterCost = 0;
+        let boosterCost = getBoosterCountEstimate(missingWildcards);
         orderedCardRarities.forEach(cardRarity => {
           if (missingWildcards[cardRarity]) {
             n++;
-            let bc =
-              rarityBooster[cardRarity] *
-              (missingWildcards[cardRarity] - ownedWildcards[cardRarity]);
-            if (bc > boosterCost) {
-              boosterCost = bc;
-            }
             wc = document.createElement("div");
             wc.classList.add("wc_explore_cost");
             wc.classList.add("wc_" + cardRarity);

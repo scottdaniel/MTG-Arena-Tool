@@ -20,7 +20,8 @@ global
   addCardHover,
   shell,
   get_set_scryfall,
-  createSelect
+  createSelect,
+  getBoosterCountEstimate
 */
 let collectionPage = 0;
 let sortingAlgorithm = "Sort by Set";
@@ -37,10 +38,10 @@ function openCollectionTab() {
 
   orderedSets.sort((a, b) => {
     if (setsList[a].release < setsList[b].release) {
-      return -1;
+      return 1;
     }
     if (setsList[a].release > setsList[b].release) {
-      return 1;
+      return -1;
     }
     return 0;
   });
@@ -477,7 +478,9 @@ function renderSetStats(setStats, setIconCode, setName) {
     label.innerHTML = setName + " completion";
     substats.appendChild(label);
 
-    ["common", "uncommon", "rare", "mythic"].forEach(rarity => {
+    let wanted = {};
+    let missing = {};
+    orderedCardRarities.forEach(rarity => {
       const countStats = setStats[rarity];
       if (countStats.total > 0) {
         const capitalizedRarity =
@@ -490,7 +493,49 @@ function renderSetStats(setStats, setIconCode, setName) {
           )
         );
       }
+      wanted[rarity] = countStats.wanted;
+      missing[rarity] = countStats.total - countStats.owned;
     });
+
+    // If the set has a collationId, it means boosters for it exists
+    if (setsList[setName] && setsList[setName].collation) {
+      let chanceBoosterHasMythic = 0.125; // assume 1/8 of packs have a mythic
+      let chanceBoosterHasRare = 1 - chanceBoosterHasMythic;
+      let wantedText =
+        "<abbr title='missing copy of a card in a current deck'>wanted</abbr>";
+
+      // chance that the next booster opened contains a rare missing from one of our decks
+      let possibleRares = setStats["rare"].unique - setStats["rare"].complete;
+      let chanceBoosterRareWanted = (
+        (chanceBoosterHasRare * setStats["rare"].uniqueWanted) /
+        possibleRares
+      ).toLocaleString([], { style: "percent", maximumSignificantDigits: 2 });
+      let rareWantedDiv = createDivision(["stats_set_completion"]);
+      let rareWantedIcon = createDivision(["stats_set_icon", "bo_explore_cost"]);
+      rareWantedIcon.style.height = "30px";
+      let rareWantedSpan = document.createElement("span");
+      rareWantedSpan.innerHTML = `<i>~${chanceBoosterRareWanted} chance next booster has ${wantedText} rare.</i>`;
+      rareWantedSpan.style.fontSize = "13px";
+      rareWantedIcon.appendChild(rareWantedSpan);
+      rareWantedDiv.appendChild(rareWantedIcon);
+      substats.appendChild(rareWantedDiv);
+
+      // chance that the next booster opened contains a mythic missing from one of our decks
+      let possibleMythics = setStats["mythic"].unique - setStats["mythic"].complete;
+      let chanceBoosterMythicWanted = (
+        (chanceBoosterHasMythic * setStats["mythic"].uniqueWanted) /
+        possibleMythics
+      ).toLocaleString([], { style: "percent", maximumSignificantDigits: 2 });
+      let mythicWantedDiv = createDivision(["stats_set_completion"]);
+      let mythicWantedIcon = createDivision(["stats_set_icon", "bo_explore_cost"]);
+      mythicWantedIcon.style.height = "30px";
+      let mythicWantedSpan = document.createElement("span");
+      mythicWantedSpan.innerHTML = `<i>~${chanceBoosterMythicWanted} chance next booster has ${wantedText} mythic.</i>`;
+      mythicWantedSpan.style.fontSize = "13px";
+      mythicWantedIcon.appendChild(mythicWantedSpan);
+      mythicWantedDiv.appendChild(mythicWantedIcon);
+      substats.appendChild(mythicWantedDiv);
+    }
   });
 
   return setDiv;
@@ -502,12 +547,30 @@ function renderCompletionDiv(countStats, image, title) {
 
   let setIcon = createDivision(["stats_set_icon"]);
   setIcon.style.backgroundImage = `url(../images/${image})`;
-
   let setIconSpan = document.createElement("span");
-  setIconSpan.innerHTML = `${title} <i>(${countStats.owned}/${countStats.total}, ${Math.round(countStats.percentage)}%)</i>`;
-
+  setIconSpan.innerHTML = title;
   setIcon.appendChild(setIconSpan);
   completionDiv.appendChild(setIcon);
+
+  const wrapperDiv = createDivision([]);
+  const detailsDiv = createDivision(["stats_set_details"]);
+
+  const percentSpan = document.createElement("span");
+  percentSpan.innerHTML = Math.round(countStats.percentage) + "%";
+  detailsDiv.appendChild(percentSpan);
+
+  const countSpan = document.createElement("span");
+  countSpan.innerHTML = countStats.owned + " / " + countStats.total;
+  detailsDiv.appendChild(countSpan);
+
+  const wantedSpan = document.createElement("span");
+  wantedSpan.innerHTML =
+    countStats.wanted +
+    " <abbr title='missing copies of cards in current decks'>wanted cards</abbr>";
+  detailsDiv.appendChild(wantedSpan);
+
+  wrapperDiv.appendChild(detailsDiv);
+  completionDiv.appendChild(wrapperDiv);
 
   let setBar = createDivision(["stats_set_bar"]);
   setBar.style.width = countStats.percentage + "%";
