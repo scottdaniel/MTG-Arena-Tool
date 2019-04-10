@@ -1,0 +1,49 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>MTG Arena Tool</title>
+    <style>
+      html, body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        -webkit-app-region: drag;
+      }
+
+      .wrapper {
+        align-items: center;
+        background-color: #352c25;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        display: flex;
+      }
+
+      .spinner {
+        background-image: url(../icon-256.png);
+        background-size: contain;
+        margin: auto;
+        height: 128px;
+        width: 128px;
+        animation-name: spin;
+        animation-duration: 1500ms;
+        animation-iteration-count: infinite;
+        animation-timing-function: cubic-bezier(0.59, 1.81, 0.63, 0.88);
+      }
+
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+
+    </style>
+  </head>
+  <script src="updater.js"></script>
+  <body>
+    <div class="wrapper">
+      <div class="spinner"></div>
+      <div class="message"></div>
+    </div>
+  </body>
+</html>
