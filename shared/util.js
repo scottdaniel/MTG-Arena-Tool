@@ -1395,10 +1395,13 @@ function get_set_code(set) {
 
 //
 class CountStats {
-  constructor(owned = 0, total = 0, wanted = 0) {
+  constructor(owned = 0, total = 0, unique = 0, complete = 0, wanted = 0, uniqueWanted = 0) {
     this.owned = owned;
     this.total = total;
+    this.unique = unique;
+    this.complete = complete; // all 4 copies of a card
     this.wanted = wanted;
+    this.uniqueWanted = uniqueWanted;
   }
 
   get percentage() {
@@ -1430,6 +1433,7 @@ class SetStats {
     ].reduce((acc, c) => {
       acc.owned += c.owned;
       acc.total += c.total;
+      acc.unique += c.unique;
       acc.wanted += c.wanted;
       return acc;
     });
@@ -1462,6 +1466,9 @@ function get_collection_stats() {
         stats[card.set][card.rarity].total += 4;
         stats.complete[card.rarity].total += 4;
         stats.singles[card.rarity].total += 1;
+        stats[card.set][card.rarity].unique += 1;
+        stats.complete[card.rarity].unique += 1;
+        stats.singles[card.rarity].unique += 1;
 
         // add cards we own
         if (cards[grpId] !== undefined) {
@@ -1469,6 +1476,13 @@ function get_collection_stats() {
           stats[card.set][card.rarity].owned += owned;
           stats.complete[card.rarity].owned += owned;
           stats.singles[card.rarity].owned += 1;
+
+          // count complete sets we own
+          if (owned == 4) {
+            stats[card.set][card.rarity].complete += 1;
+            stats.complete[card.rarity].complete += 1;
+            stats.singles[card.rarity].complete += 1;
+          }
         }
 
         // count cards we know we want across decks
@@ -1477,6 +1491,11 @@ function get_collection_stats() {
         stats[card.set][card.rarity].wanted += wanted;
         stats.complete[card.rarity].wanted += wanted;
         stats.singles[card.rarity].wanted += Math.min(1, wanted);
+
+        // count unique cards we know we want across decks
+        stats[card.set][card.rarity].uniqueWanted += Math.min(1, wanted);
+        stats.complete[card.rarity].uniqueWanted += Math.min(1, wanted);
+        stats.singles[card.rarity].uniqueWanted += Math.min(1, wanted);
       }
     }
   });
