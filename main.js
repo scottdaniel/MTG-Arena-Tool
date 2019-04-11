@@ -54,6 +54,10 @@ if (!singleLock) {
   app.on("ready", () => {
     updaterWindow = createUpdaterWindow();
 
+    updaterWindow.webContents.on("did-finish-load", function() {
+      updaterWindow.show();
+    });
+
     // Initiate the module
     EAU.init({
       api: "https://mtgatool.com/updates/",
@@ -61,32 +65,40 @@ if (!singleLock) {
       debug: false
     });
 
-    EAU.check((error, last, body) => {
-      if (error) {
-        if (error === "no_update_available") {
-          setTimeout(() => {
-            console.log("No update available.");
-            //startApp();
-          }, 1000);
+    checkUpdates();
+  });
+}
 
-          return false;
-        }
-        console.log(error);
+function checkUpdates() {
+  EAU.check((error, last, body) => {
+    if (error) {
+      if (error === "no_update_available") {
+        setTimeout(() => {
+          console.log("No update available.");
+          startApp();
+        }, 1000);
+
         return false;
       }
+      console.log(error);
+      return false;
+    }
 
-      EAU.progress(state => {
-        updaterWindow.webContents.send("update_progress", state);
-      });
+    EAU.progress(state => {
+      updaterWindow.webContents.send("update_progress", state);
+    });
 
-      EAU.download(error => {
-        console.log("Update download.", error);
-        if (error) {
-          return false;
-        }
-        app.relaunch();
-        app.exit();
-      });
+    EAU.download(error => {
+      dialog.showErrorBox(
+        "info",
+        "App updated successfully! Restart it please."
+      );
+      console.log("Update download.", error);
+      app.relaunch();
+      app.exit();
+      if (error) {
+        return false;
+      }
     });
   });
 }
@@ -439,7 +451,7 @@ function createUpdaterWindow() {
     maximizable: false,
     fullscreenable: false,
     center: true,
-    show: true,
+    show: false,
     width: 320,
     height: 240,
     title: "Updater",

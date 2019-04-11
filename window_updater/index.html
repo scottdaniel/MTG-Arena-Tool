@@ -34,14 +34,25 @@
         animation-timing-function: cubic-bezier(0.59, 1.81, 0.63, 0.88);
       }
 
-      .barContainer {
+      #barContainer {
         margin: 16px;
         width: calc(100% - 32px);
+        display: flex;
+        flex-direction: column;
       }
 
       #progressBar {
-        border-bottom: solid 2px #b2dfff;
+        width: 0%;
+        border-top: solid 2px #b2dfff;
         -webkit-transition: all .5s ease-in-out;
+      }
+
+      #barContainer {
+        font-family: sans-serif;
+        font-size: 12px;
+        text-align: center;
+        line-height: 32px;
+        color: #c1c1c1;
       }
 
       @keyframes spin {
@@ -55,8 +66,9 @@
   <body>
     <div class="wrapper">
       <div class="spinner"></div>
-      <div class="barContainer">
+      <div id="barContainer">
         <div id="progressBar"></div>
+        <div id="progressText"></div>
       </div>
     </div>
   </body>
