@@ -2,8 +2,12 @@ const electron = require("electron");
 const ipc = electron.ipcRenderer;
 
 //
-ipc.on("update_progress", (event, arg) => {
-  console.log(arg);
+ipc.on("update_progress", (event, state) => {
+  console.log(state);
+
+  let progress = state.percent;
+  let progressBar = document.getElementById("progressBar");
+  progressBar.style.width = Math.round(progress * 100) + "%";
 });
 
 // The state is an object that looks like this:

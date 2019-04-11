@@ -61,7 +61,7 @@ if (!singleLock) {
       debug: false
     });
 
-    EAU.check(function(error, last, body) {
+    EAU.check((error, last, body) => {
       if (error) {
         if (error === "no_update_available") {
           setTimeout(() => {
@@ -71,30 +71,17 @@ if (!singleLock) {
 
           return false;
         }
-        console.log("info", error);
+        console.log(error);
         return false;
       }
 
-      EAU.progress(function(state) {
+      EAU.progress(state => {
         updaterWindow.webContents.send("update_progress", state);
-        // The state is an object that looks like this:
-        // {
-        //     percent: 0.5,
-        //     speed: 554732,
-        //     size: {
-        //         total: 90044871,
-        //         transferred: 27610959
-        //     },
-        //     time: {
-        //         elapsed: 36.235,
-        //         remaining: 81.403
-        //     }
-        // }
       });
 
-      EAU.download(function(error) {
+      EAU.download(error => {
+        console.log("Update download.", error);
         if (error) {
-          console.log(error);
           return false;
         }
         app.relaunch();
