@@ -89,10 +89,6 @@ function checkUpdates() {
     });
 
     EAU.download(error => {
-      dialog.showErrorBox(
-        "info",
-        "App updated successfully! Restart it please."
-      );
       console.log("Update download.", error);
       app.relaunch();
       app.exit();
