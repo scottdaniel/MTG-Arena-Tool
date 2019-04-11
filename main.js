@@ -11,6 +11,7 @@ const {
 } = require("electron");
 const path = require("path");
 const fs = require("fs");
+const EAU = require("electron-asar-hot-updater");
 
 app.setAppUserModelId("com.github.manuel777.mtgatool");
 
@@ -52,6 +53,54 @@ if (!singleLock) {
 
   app.on("ready", () => {
     updaterWindow = createUpdaterWindow();
+
+    // Initiate the module
+    EAU.init({
+      api: "https://mtgatool.com/updates/",
+      server: false,
+      debug: false
+    });
+
+    EAU.check(function(error, last, body) {
+      if (error) {
+        if (error === "no_update_available") {
+          setTimeout(() => {
+            console.log("No update available.");
+            //startApp();
+          }, 1000);
+
+          return false;
+        }
+        console.log("info", error);
+        return false;
+      }
+
+      EAU.progress(function(state) {
+        updaterWindow.webContents.send("update_progress", state);
+        // The state is an object that looks like this:
+        // {
+        //     percent: 0.5,
+        //     speed: 554732,
+        //     size: {
+        //         total: 90044871,
+        //         transferred: 27610959
+        //     },
+        //     time: {
+        //         elapsed: 36.235,
+        //         remaining: 81.403
+        //     }
+        // }
+      });
+
+      EAU.download(function(error) {
+        if (error) {
+          console.log(error);
+          return false;
+        }
+        app.relaunch();
+        app.exit();
+      });
+    });
   });
 }
 
@@ -401,7 +450,7 @@ function createUpdaterWindow() {
     frame: false,
     resizable: false,
     maximizable: false,
-    fullscreenable: false, 
+    fullscreenable: false,
     center: true,
     show: true,
     width: 320,
@@ -497,11 +546,11 @@ function createOverlay() {
   });
 
   /*
-	setTimeout( function() {
-		overlay.webContents.send("set_deck", currentDeck);
-		//debug_overlay_show();
-	}, 1000);
-	*/
+  setTimeout( function() {
+    overlay.webContents.send("set_deck", currentDeck);
+    //debug_overlay_show();
+  }, 1000);
+  */
   return over;
 }
 
