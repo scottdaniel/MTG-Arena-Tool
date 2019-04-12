@@ -96,7 +96,7 @@
                     <div class="message_sub white">Just a moment..</div>
                 </div>
 
-                <div class="authenticate">
+                <form id="authenticate_form" class="authenticate">
                     <div class="message_big green">Welcome!</div>
                         <label style="display: table">Email</label>
                     <div class="input_login_container">
@@ -107,6 +107,7 @@
                         <input type="password" id="signin_pass" autocomplete="off" />
                     </div>
                     <div class="button_simple_disabled centered login_link">Login</div>
+                    <input type="submit" style="display:none" />
 
                     <label class="check_container check_container_centered hover_label">Remember me?
                         <input type="checkbox" id="rememberme" onclick="rememberMe()" />
@@ -116,7 +117,7 @@
                     <div class="message_small">Dont have an account? <a class="signup_link">Sign up!</a></div>
                     <div class="message_small">You can also <a class="offline_link">continue offline</a></div>
                     --<div class="message_small">Did you <a class="forgot_link">forget your password?</a></div>
-                </div>
+                </form>
             </div>
         </div>
     </body>

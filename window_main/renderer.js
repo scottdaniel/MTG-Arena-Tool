@@ -237,6 +237,7 @@ ipc.on("set_db", function(event, arg) {
     canLogin = true;
     cardsDb.set(arg);
     $(".button_simple_disabled").addClass("button_simple");
+    $("#signin_user").focus();
   } catch (e) {
     pop("Error parsing metadata", null);
     console.log("Error parsing metadata", e);
@@ -855,7 +856,7 @@ $(document).ready(function() {
     shell.openExternal("https://mtgatool.com/resetpassword/");
   });
 
-  $(".login_link").click(function() {
+  function submitAuthenticateForm() {
     if (canLogin) {
       var user = document.getElementById("signin_user").value;
       var pass = document.getElementById("signin_pass").value;
@@ -865,7 +866,14 @@ $(document).ready(function() {
       ipc_send("login", { username: user, password: pass });
       canLogin = false;
     }
+  }
+
+  $("#authenticate_form").on("submit", e => {
+    e.preventDefault();
+    submitAuthenticateForm();
   });
+
+  $(".login_link").click(submitAuthenticateForm);
 
   //
   $(".close").click(function() {
