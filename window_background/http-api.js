@@ -2,7 +2,6 @@
 global
   tokenAuth,
   decks,
-  rememberMe,
   rstore,
   loadPlayerConfig,
   cardsDb,
@@ -253,7 +252,7 @@ function httpBasic() {
 
                 ipc_send("auth", parsedResult);
                 //ipc_send("auth", parsedResult.arenaids);
-                if (rememberMe) {
+                if (rstore.get("settings").remember_me) {
                   rstore.set("token", tokenAuth);
                   rstore.set("email", playerData.userName);
                 }

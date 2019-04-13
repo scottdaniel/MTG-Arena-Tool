@@ -617,19 +617,18 @@ ipc.on("init_login", function() {
 });
 
 //
-ipc.on("set_remember", function(event, arg) {
-  if (arg != "") {
-    document.getElementById("rememberme").checked = true;
-    document.getElementById("signin_user").value = arg;
-    document.getElementById("signin_pass").value = "********";
-  } else {
-    document.getElementById("rememberme").checked = false;
-  }
+ipc.on("prefill_auth_form", function(event, arg) {
+  document.getElementById("rememberme").checked = arg.remember_me;
+  document.getElementById("signin_user").value = arg.username;
+  document.getElementById("signin_pass").value = arg.password;
 });
 
 //
 function rememberMe() {
-  ipc_send("remember", document.getElementById("rememberme").checked);
+  const rSettings = {
+    remember_me: document.getElementById("rememberme").checked
+  };
+  ipc_send("save_app_settings", rSettings);
 }
 
 //
@@ -2651,7 +2650,7 @@ function updateSettings() {
     skip_firstpass: !readonlogin
   };
   cardSize = 100 + cardSizePos * 10;
-  ipc_send("save_settings", settings);
+  ipc_send("save_user_settings", settings);
 }
 
 //

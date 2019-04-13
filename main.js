@@ -176,7 +176,7 @@ function startApp() {
 
       case "set_settings":
         //console.log("set settings: ", arg);
-        saveSettings(arg);
+        setSettings(arg);
         mainWindow.webContents.send("set_settings", arg);
         overlay.webContents.send("set_settings", arg);
         break;
@@ -201,12 +201,6 @@ function startApp() {
       case "set_cards":
         mainWindow.webContents.send("set_cards", arg.cards, arg.new);
         overlay.webContents.send("set_cards", arg.cards);
-        break;
-
-      case "save_settings":
-        saveSettings(arg);
-        background.webContents.send("save_settings", arg);
-        overlay.webContents.send("set_settings", arg);
         break;
 
       case "renderer_update_install":
@@ -382,7 +376,7 @@ function startApp() {
   });
 }
 
-function saveSettings(settings) {
+function setSettings(settings) {
   app.setLoginItemSettings({
     openAtLogin: settings.startup
   });

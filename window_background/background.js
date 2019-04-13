@@ -62,7 +62,10 @@ const manifestParser = require("./manifest-parser");
 
 const rememberCfg = {
   email: "",
-  token: ""
+  token: "",
+  settings: {
+    remember_me: true
+  }
 };
 
 const settingsCfg = {
@@ -261,22 +264,21 @@ function ipc_send(method, arg, to = windowRenderer) {
   ipc.send("ipc_switch", method, windowBackground, arg, to);
 }
 
-var rememberMe = false;
-
 //
-ipc.on("remember", function(event, arg) {
-  rememberMe = arg;
-  if (!arg) {
+ipc.on("save_app_settings", function(event, arg) {
+  const rSettings = rstore.get("settings");
+  const updated = { ...rSettings, ...arg };
+
+  if (!updated.remember_me) {
     rstore.set("email", "");
     rstore.set("token", "");
   }
+
+  rstore.set("settings", updated);
+  loadSettings();
 });
 
-function loadSettings() {
-  var settings = store.get("settings");
-  updateSettings(settings, true);
-}
-
+//
 ipc.on("reload_overlay", function() {
   loadSettings();
   var obj = store.get("overlayBounds");
@@ -289,11 +291,24 @@ ipc.on("set_renderer_state", function(event, arg) {
   renderer_state = arg;
   loadSettings();
 
-  if (rstore.get("token") !== "" && rstore.get("email") !== "") {
-    rememberMe = true;
-    tokenAuth = rstore.get("token");
-    ipc_send("set_remember", rstore.get("email"));
+  let username = "";
+  let password = "";
+  const remember_me = rstore.get("settings").remember_me;
+
+  if (remember_me) {
+    username = rstore.get("email");
+    const token = rstore.get("token");
+    if (username != "" && token != "") {
+      password = HIDDEN_PW;
+      tokenAuth = token;
+    }
   }
+
+  ipc_send("prefill_auth_form", {
+    username,
+    password,
+    remember_me
+  });
 });
 
 //
@@ -329,9 +344,9 @@ ipc.on("overlayBounds", function(event, obj) {
 });
 
 //
-ipc.on("save_settings", function(event, settings) {
+ipc.on("save_user_settings", function(event, settings) {
   store.set("settings", settings);
-  updateSettings(settings, false);
+  loadSettings();
 });
 
 //
@@ -636,18 +651,6 @@ function sendEconomy() {
   ec.wcMythic = wcMythic;
   ipc_send("set_economy", JSON.stringify(ec));
 }
-/*
-function rememberLogin(bool) {
-  if (bool) {
-    rstore.set("email", playerData.userName);
-    rstore.set("token", tokenAuth);
-  }
-  else {
-    rstore.set("email", "");
-    rstore.set("token", "");
-  }
-}
-*/
 
 // Loads this player's configuration file
 function loadPlayerConfig(playerId, serverData = undefined) {
@@ -859,29 +862,23 @@ function syncUserData(data) {
   store.set("draft_index", draft_index);
 }
 
-// Updates the settings variables , sends to overlay if 'relay' is set
-function updateSettings(_settings, relay) {
+// Loads and combines settings variables, sends result to display
+function loadSettings() {
+  // Blends together default, user, and app config
+  // Since settings have migrated between areas, collisions happen
+  // Order of precedence is: app > user > defaults
+  const settings = store.get("settings");
+  const rSettings = rstore.get("settings");
+  const _settings = { ...defaultCfg.settings, ...settings, ...rSettings };
+
+  if (_settings.decks_last_used == undefined) _settings.decks_last_used = [];
+
   //console.log(_settings);
   //const exeName = path.basename(process.execPath);
-
-  if (_settings.overlay_top == undefined) _settings.overlay_top = true;
-  if (_settings.overlay_title == undefined) _settings.overlay_title = true;
-  if (_settings.overlay_deck == undefined) _settings.overlay_deck = true;
-  if (_settings.overlay_clock == undefined) _settings.overlay_clock = true;
-  if (_settings.overlay_ontop == undefined) _settings.overlay_ontop = true;
-  if (_settings.overlay_scale == undefined) _settings.overlay_scale = 100;
-  if (_settings.skip_firstpass == undefined) _settings.skip_firstpass = false;
-  if (_settings.decks_last_used == undefined) _settings.decks_last_used = [];
-  if (_settings.sound_priority_volume == undefined)
-    _settings.sound_priority_volume = 1;
 
   skipFirstPass = _settings.skip_firstpass;
 
   ipc_send("overlay_set_ontop", _settings.overlay_ontop);
-
-  if (_settings.export_format == undefined) {
-    _settings.export_format = "$Name,$Count,$Rarity,$SetName,$Collector";
-  }
 
   if (_settings.show_overlay == false) {
     ipc_send("overlay_close", 1);
@@ -889,9 +886,7 @@ function updateSettings(_settings, relay) {
     ipc_send("overlay_show", 1);
   }
 
-  if (relay) {
-    ipc_send("set_settings", _settings);
-  }
+  ipc_send("set_settings", _settings);
 }
 
 //
