@@ -845,7 +845,7 @@ function selectTourneyDeck() {
   tournamentDeck = document.getElementById("deck_select").value;
   decks.forEach(_deck => {
     if (_deck.id == tournamentDeck) {
-      drawDeck($(".join_decklist"), _deck);
+      drawDeck($(".join_decklist"), _deck, true);
     }
   });
 

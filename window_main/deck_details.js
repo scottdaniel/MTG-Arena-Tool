@@ -261,11 +261,9 @@ function deckStatsSection(deck, deck_type) {
   // Mana Curve
   deckManaCurve(deck).appendTo(stats);
 
-  //let missing = get_deck_missing(deck);
+  // Deck colors
   let pieContainer = $('<div class="pie_container_outer"></div>');
   pieContainer.appendTo(stats);
-
-  // Deck colors
   let colorCounts = get_deck_colors_ammount(deck);
   let pieChart;
   pieChart = colorPieChart(colorCounts, "Mana Symbols");
@@ -344,7 +342,7 @@ function openDeck(deck, deck_type) {
   }
 
   let deckListSection = $('<div class="decklist"></div>');
-  drawDeck(deckListSection, deck);
+  drawDeck(deckListSection, deck, true);
 
   let statsSection = deckStatsSection(deck, deck_type);
 
