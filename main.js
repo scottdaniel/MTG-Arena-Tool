@@ -85,6 +85,8 @@ function checkUpdates() {
     if (error) {
       if (mainWindow) {
         mainWindow.webContents.send("set_update_state", error);
+        updaterWindow.destroy();
+        updaterWindow = undefined;
       } else {
         startApp();
       }
