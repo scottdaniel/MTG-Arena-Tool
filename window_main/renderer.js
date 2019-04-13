@@ -1963,7 +1963,7 @@ function toggleVisibility(...ids) {
 }
 
 //
-function add_checkbox(div, label, iid, def, func = "updateSettings()") {
+function add_checkbox(div, label, iid, def, func = "updateUserSettings()") {
   label = $('<label class="check_container hover_label">' + label + "</label>");
   label.appendTo(div);
   var check_new = $(
@@ -2010,6 +2010,13 @@ function open_settings(openSection) {
   section.appendTo(div);
   section.append('<div class="settings_title">Behaviour</div>');
 
+  add_checkbox(
+    section,
+    "Remember me",
+    "settings_rememberme",
+    settings.remember_me,
+    "updateAppSettings()"
+  );
   add_checkbox(
     section,
     "Launch on startup",
@@ -2208,7 +2215,7 @@ function open_settings(openSection) {
 
   colorPick.on("move.spectrum", function(e, color) {
     $(".main_wrapper").css("background-color", color.toRgbString());
-    updateSettings();
+    updateUsersettings();
   });
 
   label = $('<label class="but_container_label">Cards quality:</label>');
@@ -2412,12 +2419,12 @@ function open_settings(openSection) {
 
   url_input.on("keyup", function(e) {
     if (e.keyCode == 13) {
-      updateSettings();
+      updateUsersettings();
     }
   });
 
   export_input.on("keyup", function() {
-    updateSettings();
+    updateUsersettings();
   });
 
   $(".sliderA").off();
@@ -2440,7 +2447,7 @@ function open_settings(openSection) {
 
   $(".sliderA").on("click mouseup", function() {
     cardSizePos = Math.round(parseInt(this.value));
-    updateSettings();
+    updateUsersettings();
   });
 
   $(".sliderB").off();
@@ -2454,7 +2461,7 @@ function open_settings(openSection) {
 
   $(".sliderB").on("click mouseup", function() {
     overlayAlpha = alphaFromTransparency(parseInt(this.value));
-    updateSettings();
+    updateUsersettings();
   });
 
   $(".sliderC").on("click mousemove", function() {
@@ -2468,7 +2475,7 @@ function open_settings(openSection) {
 
   $(".sliderC").on("click mouseup", function() {
     overlayAlphaBack = alphaFromTransparency(parseInt(this.value));
-    updateSettings();
+    updateUsersettings();
   });
 
   $(".sliderD").off();
@@ -2480,7 +2487,7 @@ function open_settings(openSection) {
 
   $(".sliderD").on("click mouseup", function() {
     overlayScale = parseInt(this.value);
-    updateSettings();
+    updateUsersettings();
   });
 
   $(".sliderSoundVolume").off();
@@ -2491,7 +2498,7 @@ function open_settings(openSection) {
     );
     let { Howl, Howler } = require("howler");
     let sound = new Howl({ src: ["../sounds/blip.mp3"] });
-    updateSettings();
+    updateUsersettings();
     Howler.volume(settings.sound_priority_volume);
     sound.play();
   });
@@ -2569,7 +2576,7 @@ function changeQuality(dom) {
     cardQuality = "normal";
   }
   dom.innerHTML = cardQuality;
-  updateSettings();
+  updateUsersettings();
   open_settings(lastSettingsSection);
 }
 
@@ -2588,7 +2595,7 @@ function eraseData() {
 /* eslint-enable */
 
 //
-function updateSettings() {
+function updateUserSettings() {
   var startup = document.getElementById("settings_startup").checked;
   var readonlogin = document.getElementById("settings_readlogonlogin").checked;
   var showOverlay = document.getElementById("settings_showoverlay").checked;
@@ -2651,6 +2658,14 @@ function updateSettings() {
   };
   cardSize = 100 + cardSizePos * 10;
   ipc_send("save_user_settings", settings);
+}
+
+//
+function updateAppSettings() {
+  const rSettings = {
+    remember_me: document.getElementById("settings_rememberme").checked
+  };
+  ipc_send("save_app_settings", rSettings);
 }
 
 //
