@@ -734,6 +734,11 @@ ipc.on("log_ok", function() {
 });
 
 //
+ipc.on("set_offline", (_event, arg) => {
+  offlineMode = arg;
+});
+
+//
 ipc.on("offline", function() {
   showOfflineSplash();
 });
@@ -844,7 +849,6 @@ $(document).ready(function() {
 
   $(".offline_link").click(function() {
     ipc_send("login", { username: "", password: "" });
-    offlineMode = true;
     $(".unlink").show();
   });
 

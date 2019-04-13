@@ -317,6 +317,7 @@ ipc.on("set_renderer_state", function(event, arg) {
 
 function offlineLogin() {
   ipc_send("auth", { ok: true, user: -1 });
+  ipc_send("set_offline", true);
   loadPlayerConfig(playerData.arenaId);
   playerData.userName = "";
 }
