@@ -2369,6 +2369,12 @@ function open_settings(openSection) {
   });
 
   $(".login_link_about").click(function() {
+    const clearAppSettings = {
+      remember_me: false,
+      auto_login: false,
+      launch_to_tray: false
+    };
+    ipc_send("save_app_settings", clearAppSettings);
     remote.app.relaunch();
     remote.app.exit(0);
   });
