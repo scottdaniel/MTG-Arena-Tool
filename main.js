@@ -39,10 +39,13 @@ var backLoaded = false;
 const singleLock = app.requestSingleInstanceLock();
 
 if (!singleLock) {
+  console.log("We dont have single instance lock! quitting the app.");
   app.quit();
 } else {
   app.on("second-instance", () => {
-    if (mainWindow.isVisible()) {
+    if (updaterWindow) {
+      showWindow();
+    } else if (mainWindow.isVisible()) {
       if (mainWindow.isMinimized()) {
         showWindow();
       }
@@ -52,39 +55,50 @@ if (!singleLock) {
   });
 
   app.on("ready", () => {
-    updaterWindow = createUpdaterWindow();
-
-    updaterWindow.webContents.on("did-finish-load", function() {
-      updaterWindow.show();
-    });
-
-    // Initiate the module
-    EAU.init({
-      api: "https://mtgatool.com/updates/",
-      server: false,
-      debug: false
-    });
-
-    checkUpdates();
+    if (app.isPackaged) {
+      startUpdater();
+    } else {
+      startApp();
+    }
   });
+}
+
+function startUpdater() {
+  updaterWindow = createUpdaterWindow();
+
+  updaterWindow.webContents.on("did-finish-load", function() {
+    updaterWindow.show();
+  });
+
+  // Initiate the module
+  EAU.init({
+    api: "https://mtgatool.com/latest/",
+    server: false,
+    debug: false
+  });
+
+  checkUpdates();
 }
 
 function checkUpdates() {
   EAU.check((error, last, body) => {
     if (error) {
-      if (error === "no_update_available") {
+      if (mainWindow) {
+        background.webContents.send("set_update_state", error);
+      } else {
         setTimeout(() => {
-          console.log("No update available.");
           startApp();
         }, 1000);
-
-        return false;
       }
-      console.log(error);
+      console.log("Updater: " + error);
       return false;
     }
 
     EAU.progress(state => {
+      if (!state) {
+        startApp();
+        return false;
+      }
       updaterWindow.webContents.send("update_progress", state);
     });
 
@@ -100,7 +114,9 @@ function checkUpdates() {
 }
 
 function startApp() {
-  updaterWindow.destroy();
+  if (updaterWindow) {
+    updaterWindow.destroy();
+  }
   mainWindow = createMainWindow();
   overlay = createOverlay();
   background = createBackgroundWindow();
@@ -270,7 +286,7 @@ function startApp() {
         break;
 
       case "updates_check":
-        autoUpdater.checkForUpdatesAndNotify();
+        startUpdater();
         break;
 
       case "export_txt":
@@ -397,7 +413,7 @@ function hideWindow() {
 }
 
 function toggleWindow() {
-  if (mainWindow.isVisible()) {
+  if (mainWindow && mainWindow.isVisible()) {
     if (!mainWindow.isMinimized()) {
       mainWindow.minimize();
     } else {
@@ -409,8 +425,11 @@ function toggleWindow() {
 }
 
 function showWindow() {
-  if (!mainWindow.isVisible()) {
+  if (mainWindow && !mainWindow.isVisible()) {
     mainWindow.show();
+  }
+  if (updaterWindow && !updaterWindow.isVisible()) {
+    updaterWindow.show();
   }
 }
 
