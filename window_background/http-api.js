@@ -342,14 +342,15 @@ function httpBasic() {
                 });
               }
               if (_headers.method == "auth") {
-                if (parsedResult.error == "Invalid credentials.") {
-                  tokenAuth = undefined;
-                  rstore.set("email", "");
-                  rstore.set("token", "");
-                  ipc_send("auth", {});
-                  ipc_send("clear_pwd", 1);
-                  ipc_send("set_remember", false);
-                }
+                tokenAuth = undefined;
+                rstore.set("email", "");
+                rstore.set("token", "");
+                ipc_send("auth", {});
+                ipc_send("clear_pwd", 1);
+                ipc_send("popup", {
+                  text: `Error: ${parsedResult.error}`,
+                  time: 3000
+                });
               }
               // errors here
             } else if (!parsedResult && _headers.method == "auth") {
