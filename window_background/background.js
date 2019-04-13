@@ -64,6 +64,7 @@ const rememberCfg = {
   email: "",
   token: "",
   settings: {
+    auto_login: false,
     remember_me: true
   }
 };

@@ -2019,6 +2019,13 @@ function open_settings(openSection) {
   );
   add_checkbox(
     section,
+    "Login automatically",
+    "settings_autologin",
+    settings.auto_login,
+    "updateAppSettings()"
+  );
+  add_checkbox(
+    section,
     "Launch on startup",
     "settings_startup",
     settings.startup
@@ -2663,6 +2670,7 @@ function updateUserSettings() {
 //
 function updateAppSettings() {
   const rSettings = {
+    auto_login: document.getElementById("settings_autologin").checked,
     remember_me: document.getElementById("settings_rememberme").checked
   };
   ipc_send("save_app_settings", rSettings);
