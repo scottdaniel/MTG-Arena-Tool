@@ -84,11 +84,9 @@ function checkUpdates() {
   EAU.check((error, last, body) => {
     if (error) {
       if (mainWindow) {
-        background.webContents.send("set_update_state", error);
+        mainWindow.webContents.send("set_update_state", error);
       } else {
-        setTimeout(() => {
-          startApp();
-        }, 1000);
+        startApp();
       }
       console.log("Updater: " + error);
       return false;
@@ -114,9 +112,6 @@ function checkUpdates() {
 }
 
 function startApp() {
-  if (updaterWindow) {
-    updaterWindow.destroy();
-  }
   mainWindow = createMainWindow();
   overlay = createOverlay();
   background = createBackgroundWindow();
@@ -144,6 +139,13 @@ function startApp() {
       background.webContents.send("set_renderer_state", 1);
     }
   });
+
+  // If we destroy updater before creating another renderer
+  // Electron shuts down the whole app.
+  if (updaterWindow) {
+    updaterWindow.destroy();
+    updaterWindow = undefined;
+  }
 
   ipc.on("ipc_switch", function(event, method, from, arg, to) {
     if (debugIPC && method != "log_read") {
@@ -473,7 +475,6 @@ function createUpdaterWindow() {
     icon: "icon.png"
   });
   win.loadURL(`file://${__dirname}/window_updater/index.html`);
-  win.on("closed", onClosed);
 
   return win;
 }
