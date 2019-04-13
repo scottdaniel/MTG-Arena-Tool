@@ -36,7 +36,8 @@ global
   onLabelInEventCompleteDraft,
   onLabelMatchGameRoomStateChangedEvent,
   onLabelInEventGetSeasonAndRankDetail,
-  onLabelGetPlayerInventoryGetRewardSchedule
+  onLabelGetPlayerInventoryGetRewardSchedule,
+  HIDDEN_PW
 */
 var electron = require("electron");
 
@@ -297,7 +298,7 @@ ipc.on("set_renderer_state", function(event, arg) {
 
 //
 ipc.on("login", function(event, arg) {
-  if (arg.password == "********") {
+  if (arg.password == HIDDEN_PW) {
     tokenAuth = rstore.get("token");
     playerData.userName = arg.username;
     httpApi.httpAuth(arg.username, arg.password);

@@ -22,6 +22,7 @@ global
   windowRenderer,
   deck_count_types,
   removeDuplicates,
+  HIDDEN_PW,
   $$
 */
 
@@ -860,7 +861,7 @@ $(document).ready(function() {
     if (canLogin) {
       var user = document.getElementById("signin_user").value;
       var pass = document.getElementById("signin_pass").value;
-      if (pass != "********") {
+      if (pass != HIDDEN_PW) {
         pass = sha1(pass);
       }
       ipc_send("login", { username: user, password: pass });

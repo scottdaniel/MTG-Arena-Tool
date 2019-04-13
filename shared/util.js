@@ -16,6 +16,9 @@ const BLACK = 3;
 const RED = 4;
 const GREEN = 5;
 
+// Magic constant to represent auth token in form
+const HIDDEN_PW = "********";
+
 const math = require("mathjs");
 math.config({ precision: 2000 });
 
