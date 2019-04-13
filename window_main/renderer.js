@@ -922,6 +922,7 @@ $(document).ready(function() {
       }
       if ($(this).hasClass("it0")) {
         sidebarActive = 0;
+        $("#ux_0").html("");
         open_decks_tab();
       }
       if ($(this).hasClass("it1")) {
