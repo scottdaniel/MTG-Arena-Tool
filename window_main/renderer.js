@@ -838,7 +838,6 @@ window.addEventListener("resize", event => {
 });
 
 $(document).ready(function() {
-  //document.getElementById("rememberme").checked = false;
   $(".signup_link").click(function() {
     shell.openExternal("https://mtgatool.com/signup/");
   });
@@ -2009,13 +2008,6 @@ function open_settings(openSection) {
 
   add_checkbox(
     section,
-    "Remember me",
-    "settings_rememberme",
-    settings.remember_me,
-    "updateAppSettings()"
-  );
-  add_checkbox(
-    section,
     "Login automatically",
     "settings_autologin",
     settings.auto_login,
@@ -2683,8 +2675,7 @@ function updateAppSettings() {
   }
   const rSettings = {
     auto_login,
-    launch_to_tray,
-    remember_me: document.getElementById("settings_rememberme").checked
+    launch_to_tray
   };
   ipc_send("save_app_settings", rSettings);
 }
