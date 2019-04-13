@@ -312,6 +312,29 @@ ipc.on("set_renderer_state", function(event, arg) {
   });
 });
 
+function offlineLogin() {
+  ipc_send("auth", { ok: true, user: -1 });
+  loadPlayerConfig(playerData.arenaId);
+  playerData.userName = "";
+}
+
+//
+ipc.on("auto_login", () => {
+  const rSettings = rstore.get("settings");
+  if (!rSettings.auto_login) return;
+
+  tokenAuth = rstore.get("token");
+  ipc_send("popup", {
+    text: "Logging in automatically...",
+    time: 0
+  });
+  if (rSettings.remember_me) {
+    httpApi.httpAuth(rstore.get("email"), HIDDEN_PW);
+  } else {
+    offlineLogin();
+  }
+});
+
 //
 ipc.on("login", function(event, arg) {
   if (arg.password == HIDDEN_PW) {
@@ -319,9 +342,7 @@ ipc.on("login", function(event, arg) {
     playerData.userName = arg.username;
     httpApi.httpAuth(arg.username, arg.password);
   } else if (arg.username == "" && arg.password == "") {
-    ipc_send("auth", { ok: true, user: -1 });
-    loadPlayerConfig(playerData.arenaId);
-    playerData.userName = "";
+    offlineLogin();
   } else {
     playerData.userName = arg.username;
     tokenAuth = "";
