@@ -81,7 +81,7 @@ let ladder = null;
 let cards = {};
 let cardsNew = {};
 let settings = null;
-let updateState = { state: -1, available: false, progress: 0, speed: 0 };
+let updateState = "";
 let sidebarActive = -1;
 let filterEvent = "All";
 let filterSort = "By Winrate";
@@ -572,7 +572,7 @@ ipc.on("set_settings", function(event, arg) {
 });
 
 //
-ipc.on("set_update", function(event, arg) {
+ipc.on("set_update_state", function(event, arg) {
   updateState = arg;
 
   if (sidebarActive == 9) {
@@ -2291,42 +2291,11 @@ function open_settings(openSection) {
       "</div>"
   );
 
-  if (updateState.state == 0) {
-    about.append(
-      '<div class="message_updates white">Checking for updates..</div>'
-    );
-  }
-  if (updateState.state == 1) {
-    about.append('<div class="message_updates green">Update available.</div>');
-    about.append('<a class="release_notes_link">Release Notes</a>');
-  }
-  if (updateState.state == -1) {
-    about.append(
-      '<div class="message_updates green">Client is up to date.</div>'
-    );
-    button = $(
-      '<div class="button_simple centered update_link_about">Check for updates</div>'
-    );
-    button.appendTo(about);
-  }
-  if (updateState.state == -2) {
-    about.append('<div class="message_updates red">Error updating.</div>');
-  }
-  if (updateState.state == 2) {
-    about.append(
-      '<div class="message_updates green">Donwloading (' +
-        updateState.progress +
-        "%)</div>"
-    );
-    about.append('<a class="release_notes_link">Release Notes</a>');
-  }
-  if (updateState.state == 3) {
-    about.append('<div class="message_updates green">Download complete.</div>');
-    about.append('<a class="release_notes_link">Release Notes</a>');
-    about.append(
-      '<div class="button_simple" onClick="installUpdate()">Install</div>'
-    );
-  }
+  about.append('<div class="message_updates green">'+ updateState +'.</div>');
+  button = $(
+    '<div class="button_simple centered update_link_about">Check for updates</div>'
+  );
+  button.appendTo(about);
 
   about.append(
     '<div class="flex_item" style="margin: 64px auto 0px auto;"><div class="discord_link"></div><div class="twitter_link"></div><div class="git_link"></div></div>'
