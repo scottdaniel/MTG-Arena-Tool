@@ -29,6 +29,7 @@ var overlay;
 var tray = null;
 var closeToTray = true;
 let autoLogin = false;
+let launchToTray = false;
 var alphaEnabled = false;
 
 const ipc = electron.ipcMain;
@@ -130,16 +131,16 @@ function startApp() {
   mainWindow.webContents.once("dom-ready", () => {
     mainLoaded = true;
     if (backLoaded == true) {
-      showWindow();
       background.webContents.send("set_renderer_state", 1);
+      showWindow();
     }
   });
 
   background.webContents.once("dom-ready", () => {
     backLoaded = true;
     if (mainLoaded == true) {
-      showWindow();
       background.webContents.send("set_renderer_state", 1);
+      showWindow();
     }
   });
 
@@ -187,6 +188,9 @@ function startApp() {
         overlay.webContents.send("set_db", arg);
         if (autoLogin) {
           background.webContents.send("auto_login");
+          if (launchToTray) {
+            hideWindow();
+          }
         }
         break;
 
@@ -386,6 +390,7 @@ function setSettings(settings) {
   });
   closeToTray = settings.close_to_tray;
   autoLogin = settings.auto_login;
+  launchToTray = settings.launch_to_tray;
 
   var oldAlphaEnabled = alphaEnabled;
   alphaEnabled = settings.overlay_alpha_back < 1;

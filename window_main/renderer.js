@@ -178,6 +178,7 @@ ipc.on("auth", function(event, arg) {
     loggedIn = true;
   } else {
     canLogin = true;
+    ipc_send("renderer_show");
     pop(arg.error, -1);
   }
 });
@@ -237,6 +238,9 @@ ipc.on("set_db", function(event, arg) {
     delete arg.ranked_events;
     canLogin = true;
     cardsDb.set(arg);
+    $(".authenticate").show();
+    $(".message_center").css("display", "none");
+    $(".init_loading").hide();
     $(".button_simple_disabled").addClass("button_simple");
     $("#signin_user").focus();
   } catch (e) {
@@ -607,13 +611,6 @@ ipc.on("force_open_settings", function() {
 //
 ipc.on("force_open_about", function() {
   force_open_about();
-});
-
-//
-ipc.on("init_login", function() {
-  $(".authenticate").show();
-  $(".message_center").css("display", "none");
-  $(".init_loading").hide();
 });
 
 //
@@ -2024,6 +2021,14 @@ function open_settings(openSection) {
     settings.auto_login,
     "updateAppSettings()"
   );
+  const launchToTrayCheckbox = add_checkbox(
+    section,
+    "Launch to tray",
+    "settings_launchtotray",
+    settings.launch_to_tray,
+    "updateAppSettings()"
+  );
+  launchToTrayCheckbox.attr("style", "margin-left:64px;");
   add_checkbox(
     section,
     "Launch on startup",
@@ -2669,8 +2674,16 @@ function updateUserSettings() {
 
 //
 function updateAppSettings() {
+  const auto_login = document.getElementById("settings_autologin").checked;
+  let launch_to_tray = document.getElementById("settings_launchtotray").checked;
+  // launch to tray depends on auto login
+  if (!auto_login) {
+    launch_to_tray = false;
+    document.getElementById("settings_launchtotray").checked = false;
+  }
   const rSettings = {
-    auto_login: document.getElementById("settings_autologin").checked,
+    auto_login,
+    launch_to_tray,
     remember_me: document.getElementById("settings_rememberme").checked
   };
   ipc_send("save_app_settings", rSettings);

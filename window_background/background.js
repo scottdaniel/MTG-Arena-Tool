@@ -65,6 +65,7 @@ const rememberCfg = {
   token: "",
   settings: {
     auto_login: false,
+    launch_to_tray: false,
     remember_me: true
   }
 };
@@ -274,6 +275,8 @@ ipc.on("save_app_settings", function(event, arg) {
     rstore.set("email", "");
     rstore.set("token", "");
   }
+  // launch to tray depends on auto login
+  updated.launch_to_tray = updated.auto_login && updated.launch_to_tray;
 
   rstore.set("settings", updated);
   loadSettings();
@@ -1274,7 +1277,6 @@ function processLogUser(rawString) {
     if (value.indexOf(strCheck) > -1) {
       playerData.name = dataChop(value, strCheck, '"');
       ipc_send("set_player_data", playerData);
-      ipc_send("init_login", true);
       ipc_send("ipc_log", "Arena screen name: " + playerData.name);
     }
 
