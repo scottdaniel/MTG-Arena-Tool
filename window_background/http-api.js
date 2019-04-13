@@ -89,6 +89,7 @@ function httpBasic() {
         _headers.method != "get_status" &&
         debugLog == false
       ) {
+        ipc_send("set_offline", true);
         callback({
           message: "Settings dont allow sending data! > " + _headers.method
         });
