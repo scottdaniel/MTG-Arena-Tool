@@ -2569,6 +2569,23 @@ a:hover {
     overflow: auto;
 }
 
+.tou_create_but {
+    cursor: pointer;
+    margin: auto 0;
+    width: 24px;
+    height: 24px;
+    opacity: 0.75;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-image: url(../images/create.png);
+    -webkit-transition: all .25s ease-in-out;
+}
+
+.tou_create_but:hover {
+    opacity: 1;
+    -webkit-transform: rotate(90deg);
+}
+
 .tou_check_cont {
     display: flex;
 }

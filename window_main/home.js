@@ -1,7 +1,7 @@
 /*
 global
 	timestamp,
-	toHHMM,
+	$$,
 	userName,
 	ipc_send,
 	change_background,decks
@@ -118,8 +118,22 @@ function open_home_tab(arg, opentab = true) {
     });
     listInterval = [];
     if (tournaments_list) {
+      // Create tournament button
+      if (playerData.patreon) {
+        let div = createDivision(["tou_container"]);
+        div.id = "create";
+        div.style.justifyContent = "center";
+        let createBut = createDivision(["tou_create_but"]);
+        let nam = createDivision(["tou_name"], "Create tournament");
+        nam.style.width = "auto";
+
+        div.appendChild(createBut);
+        div.appendChild(nam);
+        cont.appendChild(div);
+      }
+
+      // Tournaments list
       tournaments_list.forEach(function(tou, index) {
-        //console.log(tou);
         let div = createDivision(["tou_container"]);
         div.id = tou._id;
 
@@ -130,7 +144,6 @@ function open_home_tab(arg, opentab = true) {
 
         let sd = tou.signupDuration;
         let rd = tou.roundDuration;
-        //let now = timestamp();
 
         let roundsStart = tou.starts + sd * 60 * 60;
         let roundEnd =
@@ -200,7 +213,6 @@ function open_home_tab(arg, opentab = true) {
         cont.appendChild(div);
       });
     }
-
   }
 
   mainDiv.appendChild(cont);
@@ -208,8 +220,13 @@ function open_home_tab(arg, opentab = true) {
   $(".tou_container").each(function() {
     $(this).on("click", function() {
       let ti = $(this).attr("id");
-      document.body.style.cursor = "progress";
-      ipc_send("tou_get", ti);
+      if (ti == "create") {
+        createTournament();
+      }
+      else {
+        document.body.style.cursor = "progress";
+        ipc_send("tou_get", ti);
+      }
     });
   });
 
@@ -296,6 +313,27 @@ function open_home_tab(arg, opentab = true) {
 
 let stateClockInterval = null;
 let lastSeenInterval = null;
+
+function createTournament() {
+  $(".moving_ux").animate({ left: "-100%" }, 250, "easeInOutCubic");
+  let mainDiv = $$("#ux_1")[0];
+  mainDiv.innerHTML = "";
+  // Top navigation stuff
+  let top = createDivision(["decklist_top"]);
+  let buttonBack = createDivision(["button", "back"]);
+  let topTitle = createDivision(["deck_name"], "Create Tournament");
+  let topStatus = createDivision(["tou_top_status"]);
+  top.appendChild(buttonBack);
+  top.appendChild(topTitle);
+  top.appendChild(topStatus);
+
+  // Append
+  mainDiv.appendChild(top);
+  buttonBack.addEventListener("click", () => {
+    change_background("default");
+    $(".moving_ux").animate({ left: "0px" }, 250, "easeInOutCubic");
+  });
+}
 
 /* eslint-disable */
 function open_tournament(t) {
