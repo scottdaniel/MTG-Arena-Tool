@@ -503,7 +503,6 @@ ipc.on("set_home", function(event, arg) {
   }
 });
 
-
 //
 ipc.on("set_explore_decks", function(event, arg) {
   hideLoadingBars();
@@ -925,7 +924,7 @@ $(document).ready(function() {
             open_home_tab(null, true);
           } else {
             document.body.style.cursor = "progress";
-            ipc_send("request_home", true);
+            ipc_send("request_home", "");
           }
         }
       }
