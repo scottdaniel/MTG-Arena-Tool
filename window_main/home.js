@@ -190,7 +190,7 @@ function open_home_tab(arg, opentab = true) {
         let st = createDivision(["tou_state", "list_state_" + index], state);
         let stb = createDivision(["tou_cell"], tou.players.length + " players.");
         let pln = createDivision(["tou_cell", "list_stateb_" + index], stateb);
-        pln.style.width = "200px";
+        pln.style.width = "120px";
         div.appendChild(stat);
         div.appendChild(nam);
         div.appendChild(fo);
@@ -297,6 +297,7 @@ function open_home_tab(arg, opentab = true) {
 let stateClockInterval = null;
 let lastSeenInterval = null;
 
+/* eslint-disable */
 function open_tournament(t) {
   //console.log(t);
   tou = t;
@@ -386,195 +387,275 @@ function open_tournament(t) {
   desc.appendTo(mainDiv);
 
   if (tou.state <= 0) {
-    if (joined) {
-      let deckContainer = $('<div class="flex_item"></div>');
-      let deckvisual = $('<div class="decklist"></div>');
-      deckvisual.appendTo(deckContainer);
-      if (tou.deck) {
-        drawDeckVisual(deckvisual, undefined, tou.deck);
-      }
-      deckContainer.appendTo(mainDiv);
-
-      if (tou.state !== 4) {
-        $('<div class="button_simple but_drop">Drop</div>').appendTo(mainDiv);
-      }
-    } else {
-      let cont = $('<div class="flex_item"></div>');
-      var select = $('<select id="deck_select">Select Deck</select>');
-      decks.forEach(_deck => {
-        try {
-          select.append(`<option value="${_deck.id}">${_deck.name}</option>`);
-        } catch (e) {
-          console.log(e);
-        }
-      });
-      select.appendTo(cont);
-      cont.appendTo(mainDiv);
-      selectAdd(select, selectTourneyDeck);
-      select.parent().css("width", "300px");
-      select.parent().css("margin", "16px auto");
-
-      if (tou.state == 0) {
-        $('<div class="button_simple_disabled but_join">Join</div>').appendTo(
-          mainDiv
-        );
-      }
-
-      $('<div class="join_decklist"></div>').appendTo(mainDiv);
-    }
-
-    let list = $('<div class="tou_list_players"></div>');
-    $(
-      `<div class="tou_list_player_name tou_list_player_name_title">Players joined:</div>`
-    ).appendTo(list);
-    tou.players.forEach(p => {
-      $(`<div class="tou_list_player_name">${p.slice(0, -6)}</div>`).appendTo(
-        list
-      );
-    });
-    $(`<br><br>`).appendTo(list);
-    list.appendTo(mainDiv);
-
-    $(".but_join").click(function() {
-      if ($(this).hasClass("button_simple")) {
-        ipc_send("tou_join", { id: tou._id, deck: tournamentDeck });
-      }
-    });
-
-    $(".but_drop").click(function() {
-      ipc_send("tou_drop", tou._id);
-    });
+    showTournamentRegister(mainDiv, tou);
   } else {
+    showTournamentStarted(mainDiv, tou);
+  }
+
+  $(".back").click(function() {
+    change_background("default");
+    $(".moving_ux").animate({ left: "0px" }, 250, "easeInOutCubic");
+  });
+}
+
+function showTournamentRegister(mainDiv, tou) {
+  let joined = false;
+  if (tou.players.indexOf(playerData.name) !== -1) {
+    joined = true;
+  }
+
+  if (joined) {
+    let deckContainer = $('<div class="flex_item"></div>');
+    let deckvisual = $('<div class="decklist"></div>');
+    deckvisual.appendTo(deckContainer);
+    if (tou.deck) {
+      drawDeckVisual(deckvisual, undefined, tou.deck);
+    }
+    deckContainer.appendTo(mainDiv);
+
     if (tou.state !== 4) {
-      $(`<div class="tou_reload"></div>`).appendTo(mainDiv);
+      $('<div class="button_simple but_drop">Drop</div>').appendTo(mainDiv);
     }
-    if (joined) {
-      $(`<div class="tou_record green">${record}</div>`).appendTo(mainDiv);
-      if (tou.state !== 4) {
-        $(
-          `<div class="tou_opp"><span>On MTGA: </span><span style="margin-left: 10px; color: rgb(250, 229, 210);">${
-            tou.current_opponent
-          }</span><div class="copy_button copy_mtga"></div></div>`
-        ).appendTo(mainDiv);
-        $(
-          `<div class="tou_opp"><span>On Discord: </span><span style="margin-left: 10px; color: rgb(250, 229, 210);">${
-            tou.current_opponent_discord
-          }</span><div class="copy_button copy_discord"></div></div>`
-        ).appendTo(mainDiv);
-        $(
-          `<div class="tou_opp tou_opp_sub"><span class="last_seen_clock"></span></div></div>`
-        ).appendTo(mainDiv);
+  } else {
+    let cont = $('<div class="flex_item"></div>');
+    var select = $('<select id="deck_select">Select Deck</select>');
+    decks.forEach(_deck => {
+      try {
+        select.append(`<option value="${_deck.id}">${_deck.name}</option>`);
+      } catch (e) {
+        console.log(e);
       }
+    });
+    select.appendTo(cont);
+    cont.appendTo(mainDiv);
+    selectAdd(select, selectTourneyDeck);
+    select.parent().css("width", "300px");
+    select.parent().css("margin", "16px auto");
 
-      if (lastSeenInterval !== null) clearInterval(lastSeenInterval);
-      if (tou.current_opponent_last !== tou.server_time) {
-        lastSeenInterval = window.setInterval(() => {
-          let tst = timestamp();
-          let diff = tst - tou.current_opponent_last;
-          $(".last_seen_clock").html(`Last seen ${toHHMMSS(diff)} ago.`);
-        }, 250);
-      }
-
-      if (
-        tou.state !== 4 &&
-        tou.current_opponent !== "bye" &&
-        tou.current_opponent !== ""
-      ) {
-        let checks = $(`<div class="tou_checks"></div>`);
-        generateChecks(
-          tou.current_check,
-          tou.current_seat
-        ).appendTo(checks);
-        checks.appendTo(mainDiv);
-      }
-
-      $(".copy_mtga").click(() => {
-        pop("Copied to clipboard", 1000);
-        ipc_send("set_clipboard", tou.current_opponent);
-      });
-
-      $(".copy_discord").click(() => {
-        pop("Copied to clipboard", 1000);
-        ipc_send("set_clipboard", tou.current_opponent_discord);
-      });
+    if (tou.state == 0) {
+      $('<div class="button_simple_disabled but_join">Join</div>').appendTo(
+        mainDiv
+      );
     }
 
-    let tabs = $('<div class="tou_tabs_cont"></div>');
-    let tab_rounds = $(
-      '<div class="tou_tab tab_a tou_tab_selected">Rounds</div>'
+    $('<div class="join_decklist"></div>').appendTo(mainDiv);
+  }
+
+  let list = $('<div class="tou_list_players"></div>');
+  $(
+    `<div class="tou_list_player_name tou_list_player_name_title">Players joined:</div>`
+  ).appendTo(list);
+  tou.players.forEach(p => {
+    $(`<div class="tou_list_player_name">${p.slice(0, -6)}</div>`).appendTo(
+      list
     );
-    let tab_standings = $('<div class="tou_tab tab_b ">Standings</div>');
+  });
+  $(`<br><br>`).appendTo(list);
+  list.appendTo(mainDiv);
 
-    tab_rounds.appendTo(tabs);
-    tab_standings.appendTo(tabs);
-    if (joined) {
-      let tab_decklist = $('<div class="tou_tab tab_c">Decklist</div>');
-      tab_decklist.appendTo(tabs);
-      /*
-			if (tou.current_opponent !== '' && tou.current_opponent !== 'bye') {
-				let tab_chat = $('<div class="tou_tab tab_d">Chat</div>');
-				tab_chat.appendTo(tabs);
-			}
-			*/
+  $(".but_join").click(function() {
+    if ($(this).hasClass("button_simple")) {
+      ipc_send("tou_join", { id: tou._id, deck: tournamentDeck });
+    }
+  });
+
+  $(".but_drop").click(function() {
+    ipc_send("tou_drop", tou._id);
+  });
+}
+
+function showTournamentStarted(mainDiv, tou) {
+  let joined = false;
+  if (tou.players.indexOf(playerData.name) !== -1) {
+    joined = true;
+    stats = tou.playerStats[playerData.name];
+    record = stats.w + " - " + stats.d + " - " + stats.l;
+  }
+
+  if (tou.state !== 4) {
+    $(`<div class="tou_reload"></div>`).appendTo(mainDiv);
+  }
+  if (joined) {
+    $(`<div class="tou_record green">${record}</div>`).appendTo(mainDiv);
+    if (tou.state !== 4) {
+      $(
+        `<div class="tou_opp"><span>On MTGA: </span><span style="margin-left: 10px; color: rgb(250, 229, 210);">${
+          tou.current_opponent
+        }</span><div class="copy_button copy_mtga"></div></div>`
+      ).appendTo(mainDiv);
+      $(
+        `<div class="tou_opp"><span>On Discord: </span><span style="margin-left: 10px; color: rgb(250, 229, 210);">${
+          tou.current_opponent_discord
+        }</span><div class="copy_button copy_discord"></div></div>`
+      ).appendTo(mainDiv);
+      $(
+        `<div class="tou_opp tou_opp_sub"><span class="last_seen_clock"></span></div></div>`
+      ).appendTo(mainDiv);
     }
 
-    tabs.appendTo(mainDiv);
+    if (lastSeenInterval !== null) clearInterval(lastSeenInterval);
+    if (tou.current_opponent_last !== tou.server_time) {
+      lastSeenInterval = window.setInterval(() => {
+        let tst = timestamp();
+        let diff = tst - tou.current_opponent_last;
+        $(".last_seen_clock").html(`Last seen ${toHHMMSS(diff)} ago.`);
+      }, 250);
+    }
 
-    let tab_cont_a = $('<div class="tou_cont_a"></div>');
+    if (
+      tou.state !== 4 &&
+      tou.current_opponent !== "bye" &&
+      tou.current_opponent !== ""
+    ) {
+      let checks = $(`<div class="tou_checks"></div>`);
+      generateChecks(
+        tou.current_check,
+        tou.current_seat
+      ).appendTo(checks);
+      checks.appendTo(mainDiv);
+    }
 
-    if (tou.top > 0 && tou.state >= 3) {
-      $(`<div class="tou_round_title">Top ${tou.top}</div>`).appendTo(
+    $(".copy_mtga").click(() => {
+      pop("Copied to clipboard", 1000);
+      ipc_send("set_clipboard", tou.current_opponent);
+    });
+
+    $(".copy_discord").click(() => {
+      pop("Copied to clipboard", 1000);
+      ipc_send("set_clipboard", tou.current_opponent_discord);
+    });
+  }
+
+  let tabs = $('<div class="tou_tabs_cont"></div>');
+  let tab_rounds = $(
+    '<div class="tou_tab tab_a tou_tab_selected">Rounds</div>'
+  );
+  let tab_standings = $('<div class="tou_tab tab_b ">Standings</div>');
+
+  tab_rounds.appendTo(tabs);
+  tab_standings.appendTo(tabs);
+  if (joined) {
+    let tab_decklist = $('<div class="tou_tab tab_c">Decklist</div>');
+    tab_decklist.appendTo(tabs);
+    /*
+    if (tou.current_opponent !== '' && tou.current_opponent !== 'bye') {
+      let tab_chat = $('<div class="tou_tab tab_d">Chat</div>');
+      tab_chat.appendTo(tabs);
+    }
+    */
+  }
+
+  tabs.appendTo(mainDiv);
+
+  let tab_cont_a = $('<div class="tou_cont_a"></div>');
+
+  // DRAW TOP 8
+  if (tou.top > 0 && tou.state >= 3) {
+    $(`<div class="tou_round_title">Top ${tou.top}</div>`).appendTo(
+      tab_cont_a
+    );
+
+    let top_matches = [];
+    let top_cont = $('<div class="tou_top"></div>');
+    let m;
+    let tou_cont_a = $('<div class="tou_top_cont"></div>');
+    let tou_cont_b = $('<div class="tou_top_cont"></div>');
+    let tou_cont_c = $('<div class="tou_top_cont"></div>');
+
+    if (tou.top >= 2) {
+      m = $('<div class="tou_match_cont top_0"></div>');
+      top_matches.push(m);
+      m.appendTo(tou_cont_c);
+    }
+    if (tou.top >= 4) {
+      m = $('<div class="tou_match_cont top_1"></div>');
+      top_matches.push(m);
+      m.appendTo(tou_cont_b);
+      m = $('<div class="tou_match_cont top_2"></div>');
+      top_matches.push(m);
+      m.appendTo(tou_cont_b);
+    }
+    if (tou.top >= 8) {
+      m = $('<div class="tou_match_cont top_3"></div>');
+      top_matches.push(m);
+      m.appendTo(tou_cont_a);
+      m = $('<div class="tou_match_cont top_4"></div>');
+      top_matches.push(m);
+      m.appendTo(tou_cont_a);
+      m = $('<div class="tou_match_cont top_5"></div>');
+      top_matches.push(m);
+      m.appendTo(tou_cont_a);
+      m = $('<div class="tou_match_cont top_6"></div>');
+      top_matches.push(m);
+      m.appendTo(tou_cont_a);
+    }
+    if (tou.top >= 8) tou_cont_a.appendTo(top_cont);
+    if (tou.top >= 4) tou_cont_b.appendTo(top_cont);
+    if (tou.top >= 2) tou_cont_c.appendTo(top_cont);
+    top_cont.appendTo(tab_cont_a);
+
+    tou["round_top"].forEach(function(match) {
+      if (match.p1 == "") {
+        match.p1 = "TBD#00000";
+      }
+      if (match.p2 == "") {
+        match.p2 = "TBD#00000";
+      }
+      let cont = top_matches[match.id];
+
+      let p1wc = "";
+      let p2wc = "";
+      if (match.winner == 1) {
+        p1wc = "tou_score_win";
+      }
+      if (match.winner == 2) {
+        p2wc = "tou_score_win";
+      }
+
+      let d1 = "";
+      let d2 = "";
+      if (match.p2 == "bye") match.p2 = "BYE#00000";
+      try {
+        if (match.drop1) d1 = " (drop)";
+        if (match.drop2) d2 = " (drop)";
+      } catch (e) {
+        console.error(e);
+      }
+
+      let s = "";
+      if (match.p1 == userName) s = 'style="color: rgba(183, 200, 158, 1);"';
+      if (match.p1 == "TBD#00000")
+        s = 'style="color: rgba(250, 229, 210, 0.65);"';
+
+      let p1 = $(
+        `<div ${s} class="tou_match_p ${match.p1}pn">${match.p1.slice(0, -6) +
+          d1}<div class="${p1wc} tou_match_score">${match.p1w}</div></div>`
+      );
+      s = "";
+      if (match.p2 == userName) s = 'style="color: rgba(183, 200, 158, 1);"';
+      if (match.p2 == "TBD#00000")
+        s = 'style="color: rgba(250, 229, 210, 0.65);"';
+      let p2 = $(
+        `<div ${s} class="tou_match_p ${match.p2}pn">${match.p2.slice(0, -6) +
+          d2}<div class="${p2wc} tou_match_score">${match.p2w}</div></div>`
+      );
+
+      p1.appendTo(cont);
+      p2.appendTo(cont);
+    });
+  }
+
+  // DRAW ROUNDS
+  for (let i = tou.currentRound; i >= 0; i--) {
+    let rname = "round_" + i;
+    if (tou[rname] !== undefined) {
+      $(`<div class="tou_round_title">Round ${i + 1}</div>`).appendTo(
         tab_cont_a
       );
+      let round_cont = $('<div class="tou_round_cont"></div>');
 
-      let top_matches = [];
-      let top_cont = $('<div class="tou_top"></div>');
-      let m;
-      let tou_cont_a = $('<div class="tou_top_cont"></div>');
-      let tou_cont_b = $('<div class="tou_top_cont"></div>');
-      let tou_cont_c = $('<div class="tou_top_cont"></div>');
-
-      if (tou.top >= 2) {
-        m = $('<div class="tou_match_cont top_0"></div>');
-        top_matches.push(m);
-        m.appendTo(tou_cont_c);
-      }
-      if (tou.top >= 4) {
-        m = $('<div class="tou_match_cont top_1"></div>');
-        top_matches.push(m);
-        m.appendTo(tou_cont_b);
-        m = $('<div class="tou_match_cont top_2"></div>');
-        top_matches.push(m);
-        m.appendTo(tou_cont_b);
-      }
-      if (tou.top >= 8) {
-        m = $('<div class="tou_match_cont top_3"></div>');
-        top_matches.push(m);
-        m.appendTo(tou_cont_a);
-        m = $('<div class="tou_match_cont top_4"></div>');
-        top_matches.push(m);
-        m.appendTo(tou_cont_a);
-        m = $('<div class="tou_match_cont top_5"></div>');
-        top_matches.push(m);
-        m.appendTo(tou_cont_a);
-        m = $('<div class="tou_match_cont top_6"></div>');
-        top_matches.push(m);
-        m.appendTo(tou_cont_a);
-      }
-      if (tou.top >= 8) tou_cont_a.appendTo(top_cont);
-      if (tou.top >= 4) tou_cont_b.appendTo(top_cont);
-      if (tou.top >= 2) tou_cont_c.appendTo(top_cont);
-      top_cont.appendTo(tab_cont_a);
-
-      tou["round_top"].forEach(function(match) {
-        if (match.p1 == "") {
-          match.p1 = "TBD#00000";
-        }
-        if (match.p2 == "") {
-          match.p2 = "TBD#00000";
-        }
-        let cont = top_matches[match.id];
-
+      tou[rname].forEach(function(match) {
+        let cont = $('<div class="tou_match_cont"></div>');
         let p1wc = "";
         let p2wc = "";
         if (match.winner == 1) {
@@ -595,224 +676,170 @@ function open_tournament(t) {
         }
 
         let s = "";
-        if (match.p1 == userName) s = 'style="color: rgba(183, 200, 158, 1);"';
-        if (match.p1 == "TBD#00000")
-          s = 'style="color: rgba(250, 229, 210, 0.65);"';
-
+        if (match.p1 == playerData.name)
+          s = 'style="color: rgba(183, 200, 158, 1);"';
         let p1 = $(
-          `<div ${s} class="tou_match_p ${match.p1}pn">${match.p1.slice(0, -6) +
-            d1}<div class="${p1wc} tou_match_score">${match.p1w}</div></div>`
+          `<div ${s} class="tou_match_p ${match.p1}pn">${match.p1.slice(
+            0,
+            -6
+          ) + d1}<div class="${p1wc} tou_match_score">${
+            match.p1w
+          }</div></div>`
         );
         s = "";
-        if (match.p2 == userName) s = 'style="color: rgba(183, 200, 158, 1);"';
-        if (match.p2 == "TBD#00000")
+        if (match.p2 == playerData.name)
+          s = 'style="color: rgba(183, 200, 158, 1);"';
+        if (match.p2 == "BYE#00000")
           s = 'style="color: rgba(250, 229, 210, 0.65);"';
         let p2 = $(
-          `<div ${s} class="tou_match_p ${match.p2}pn">${match.p2.slice(0, -6) +
-            d2}<div class="${p2wc} tou_match_score">${match.p2w}</div></div>`
+          `<div ${s} class="tou_match_p ${match.p2}pn">${match.p2.slice(
+            0,
+            -6
+          ) + d2}<div class="${p2wc} tou_match_score">${
+            match.p2w
+          }</div></div>`
         );
 
         p1.appendTo(cont);
         p2.appendTo(cont);
+        cont.appendTo(round_cont);
       });
-    }
-
-    for (let i = tou.currentRound; i >= 0; i--) {
-      let rname = "round_" + i;
-      if (tou[rname] !== undefined) {
-        $(`<div class="tou_round_title">Round ${i + 1}</div>`).appendTo(
-          tab_cont_a
-        );
-        let round_cont = $('<div class="tou_round_cont"></div>');
-
-        tou[rname].forEach(function(match) {
-          let cont = $('<div class="tou_match_cont"></div>');
-          let p1wc = "";
-          let p2wc = "";
-          if (match.winner == 1) {
-            p1wc = "tou_score_win";
-          }
-          if (match.winner == 2) {
-            p2wc = "tou_score_win";
-          }
-
-          let d1 = "";
-          let d2 = "";
-          if (match.p2 == "bye") match.p2 = "BYE#00000";
-          try {
-            if (match.drop1) d1 = " (drop)";
-            if (match.drop2) d2 = " (drop)";
-          } catch (e) {
-            console.error(e);
-          }
-
-          let s = "";
-          if (match.p1 == playerData.name)
-            s = 'style="color: rgba(183, 200, 158, 1);"';
-          let p1 = $(
-            `<div ${s} class="tou_match_p ${match.p1}pn">${match.p1.slice(
-              0,
-              -6
-            ) + d1}<div class="${p1wc} tou_match_score">${
-              match.p1w
-            }</div></div>`
-          );
-          s = "";
-          if (match.p2 == playerData.name)
-            s = 'style="color: rgba(183, 200, 158, 1);"';
-          if (match.p2 == "BYE#00000")
-            s = 'style="color: rgba(250, 229, 210, 0.65);"';
-          let p2 = $(
-            `<div ${s} class="tou_match_p ${match.p2}pn">${match.p2.slice(
-              0,
-              -6
-            ) + d2}<div class="${p2wc} tou_match_score">${
-              match.p2w
-            }</div></div>`
-          );
-
-          p1.appendTo(cont);
-          p2.appendTo(cont);
-          cont.appendTo(round_cont);
-        });
-        round_cont.appendTo(tab_cont_a);
-      }
-    }
-
-    if (joined) {
-      $('<div class="button_simple but_drop">Drop</div>').appendTo(tab_cont_a);
-    }
-
-    let tab_cont_b = $('<div class="tou_cont_b" style="height: 0px"></div>');
-    tou.players.sort(function(a, b) {
-      if (tou.playerStats[a].mp > tou.playerStats[b].mp) return -1;
-      else if (tou.playerStats[a].mp < tou.playerStats[b].mp) return 1;
-      else {
-        if (tou.playerStats[a].omwp > tou.playerStats[b].omwp) return -1;
-        else if (tou.playerStats[a].omwp < tou.playerStats[b].omwp) return 1;
-        else {
-          if (tou.playerStats[a].gwp > tou.playerStats[b].gwp) return -1;
-          else if (tou.playerStats[a].gwp < tou.playerStats[b].gwp) return 1;
-          else {
-            if (tou.playerStats[a].ogwp > tou.playerStats[b].ogwp) return -1;
-            else if (tou.playerStats[a].ogwp < tou.playerStats[b].ogwp)
-              return 1;
-          }
-        }
-      }
-      return 0;
-    });
-
-    let desc = $(
-      `<div class="tou_desc" style="align-self: center;">Points are updated only when a round ends.</div>`
-    );
-    desc.appendTo(tab_cont_b);
-
-    let line = $('<div class="tou_stand_line_title line_dark"></div>');
-    $(`
-			<div class="tou_stand_small">Pos</div>
-			<div class="tou_stand_name" style="width: 206px;">Name</div>
-			<div class="tou_stand_cell">Points</div>
-			<div class="tou_stand_cell">Score</div>
-			<div class="tou_stand_cell">Matches</div>
-			<div class="tou_stand_cell">Games</div>
-			<div class="tou_stand_cell">OMW</div>
-			<div class="tou_stand_cell">GW</div>
-			<div class="tou_stand_cell">OGW</div>
-		`).appendTo(line);
-    line.appendTo(tab_cont_b);
-
-    tou.players.forEach(function(pname, index) {
-      let stat = tou.playerStats[pname];
-      if (index % 2) {
-        line = $('<div class="tou_stand_line line_dark"></div>');
-      } else {
-        line = $('<div class="tou_stand_line"></div>');
-      }
-
-      let s = "";
-      if (pname == playerData.name) s = 'style="color: rgba(183, 200, 158, 1);"';
-
-      let str = `
-			<div class="tou_stand_small">${index + 1}</div>
-			<img src="blank.gif" class="flag tou_flag flag-${tou.flags[
-        pname
-      ].toLowerCase()}" />
-			<div ${s} class="tou_stand_name">${pname.slice(0, -6)} ${
-        tou.drops.indexOf(pname) !== -1 ? " (drop)" : ""
-      }</div>
-			<div class="tou_stand_cell">${stat.mp}</div>
-			<div class="tou_stand_cell">${stat.w}-${stat.d}-${stat.l}</div>
-			<div class="tou_stand_cell">${stat.rpl}</div>
-			<div class="tou_stand_cell">${stat.gpl}</div>
-			<div class="tou_stand_cell">${Math.round(stat.omwp * 10000) / 100}%</div>
-			<div class="tou_stand_cell">${Math.round(stat.gwp * 10000) / 100}%</div>
-			<div class="tou_stand_cell">${Math.round(stat.ogwp * 10000) / 100}%</div>`;
-
-      $(str).appendTo(line);
-      line.appendTo(tab_cont_b);
-    });
-
-    tab_cont_a.appendTo(mainDiv);
-    tab_cont_b.appendTo(mainDiv);
-    if (joined) {
-      let tab_cont_c = $('<div class="tou_cont_c" style="height: 0px"></div>');
-      let decklistCont = $('<div class="sideboarder_container"></div>');
-
-      $('<div class="button_simple exportDeck">Export to Arena</div>').appendTo(
-        tab_cont_c
-      );
-      decklistCont.appendTo(tab_cont_c);
-
-      tab_cont_c.appendTo(mainDiv);
-
-      drawSideboardableDeck();
-
-      $(".exportDeck").click(() => {
-        let list = get_deck_export(currentDeck);
-        ipc_send("set_clipboard", list);
-      });
-    }
-
-    $(".tou_tab").click(function() {
-      if (!$(this).hasClass("tou_tab_selected")) {
-        $(".tou_tab").each(function() {
-          $(this).removeClass("tou_tab_selected");
-        });
-        $(this).addClass("tou_tab_selected");
-        $(".tou_cont_a").css("height", "0px");
-        $(".tou_cont_b").css("height", "0px");
-        $(".tou_cont_c").css("height", "0px");
-        $(".tou_cont_d").css("height", "0px");
-        if ($(this).hasClass("tab_a")) {
-          $(".tou_cont_a").css("height", "auto");
-        }
-        if ($(this).hasClass("tab_b")) {
-          $(".tou_cont_b").css("height", "auto");
-        }
-        if ($(this).hasClass("tab_c")) {
-          $(".tou_cont_c").css("height", "auto");
-        }
-        if ($(this).hasClass("tab_d")) {
-          $(".tou_cont_d").css("height", "auto");
-        }
-      }
-    });
-
-    if (joined) {
-      $(".tou_reload").click(() => {
-        open_tournament(t);
-      });
-      $(".but_drop").click(() => {
-        ipc_send("tou_drop", tou._id);
-      });
+      round_cont.appendTo(tab_cont_a);
     }
   }
 
-  $(".back").click(function() {
-    change_background("default");
-    $(".moving_ux").animate({ left: "0px" }, 250, "easeInOutCubic");
+  // DRAW DROP
+  if (joined) {
+    $('<div class="button_simple but_drop">Drop</div>').appendTo(tab_cont_a);
+  }
+
+  // SORT PLAYERS
+  let tab_cont_b = $('<div class="tou_cont_b" style="height: 0px"></div>');
+  tou.players.sort(function(a, b) {
+    if (tou.playerStats[a].mp > tou.playerStats[b].mp) return -1;
+    else if (tou.playerStats[a].mp < tou.playerStats[b].mp) return 1;
+    else {
+      if (tou.playerStats[a].omwp > tou.playerStats[b].omwp) return -1;
+      else if (tou.playerStats[a].omwp < tou.playerStats[b].omwp) return 1;
+      else {
+        if (tou.playerStats[a].gwp > tou.playerStats[b].gwp) return -1;
+        else if (tou.playerStats[a].gwp < tou.playerStats[b].gwp) return 1;
+        else {
+          if (tou.playerStats[a].ogwp > tou.playerStats[b].ogwp) return -1;
+          else if (tou.playerStats[a].ogwp < tou.playerStats[b].ogwp)
+            return 1;
+        }
+      }
+    }
+    return 0;
   });
+
+  let desc = $(
+    `<div class="tou_desc" style="align-self: center;">Points are updated only when a round ends.</div>`
+  );
+  desc.appendTo(tab_cont_b);
+
+  let line = $('<div class="tou_stand_line_title line_dark"></div>');
+  $(`
+    <div class="tou_stand_small">Pos</div>
+    <div class="tou_stand_name" style="width: 206px;">Name</div>
+    <div class="tou_stand_cell">Points</div>
+    <div class="tou_stand_cell">Score</div>
+    <div class="tou_stand_cell">Matches</div>
+    <div class="tou_stand_cell">Games</div>
+    <div class="tou_stand_cell">OMW</div>
+    <div class="tou_stand_cell">GW</div>
+    <div class="tou_stand_cell">OGW</div>
+  `).appendTo(line);
+  line.appendTo(tab_cont_b);
+
+  // DRAW STANDINGS
+  tou.players.forEach(function(pname, index) {
+    let stat = tou.playerStats[pname];
+    if (index % 2) {
+      line = $('<div class="tou_stand_line line_dark"></div>');
+    } else {
+      line = $('<div class="tou_stand_line"></div>');
+    }
+
+    let s = "";
+    if (pname == playerData.name) s = 'style="color: rgba(183, 200, 158, 1);"';
+
+    let str = `
+    <div class="tou_stand_small">${index + 1}</div>
+    <img src="blank.gif" class="flag tou_flag flag-${tou.flags[
+      pname
+    ].toLowerCase()}" />
+    <div ${s} class="tou_stand_name">${pname.slice(0, -6)} ${
+      tou.drops.indexOf(pname) !== -1 ? " (drop)" : ""
+    }</div>
+    <div class="tou_stand_cell">${stat.mp}</div>
+    <div class="tou_stand_cell">${stat.w}-${stat.d}-${stat.l}</div>
+    <div class="tou_stand_cell">${stat.rpl}</div>
+    <div class="tou_stand_cell">${stat.gpl}</div>
+    <div class="tou_stand_cell">${Math.round(stat.omwp * 10000) / 100}%</div>
+    <div class="tou_stand_cell">${Math.round(stat.gwp * 10000) / 100}%</div>
+    <div class="tou_stand_cell">${Math.round(stat.ogwp * 10000) / 100}%</div>`;
+
+    $(str).appendTo(line);
+    line.appendTo(tab_cont_b);
+  });
+
+  // DRAW DECK (ex sideboarder)
+  tab_cont_a.appendTo(mainDiv);
+  tab_cont_b.appendTo(mainDiv);
+  if (joined) {
+    let tab_cont_c = $('<div class="tou_cont_c" style="height: 0px"></div>');
+    let decklistCont = $('<div class="sideboarder_container"></div>');
+
+    $('<div class="button_simple exportDeck">Export to Arena</div>').appendTo(
+      tab_cont_c
+    );
+    decklistCont.appendTo(tab_cont_c);
+
+    tab_cont_c.appendTo(mainDiv);
+
+    drawSideboardableDeck();
+
+    $(".exportDeck").click(() => {
+      let list = get_deck_export(currentDeck);
+      ipc_send("set_clipboard", list);
+    });
+  }
+
+  $(".tou_tab").click(function() {
+    if (!$(this).hasClass("tou_tab_selected")) {
+      $(".tou_tab").each(function() {
+        $(this).removeClass("tou_tab_selected");
+      });
+      $(this).addClass("tou_tab_selected");
+      $(".tou_cont_a").css("height", "0px");
+      $(".tou_cont_b").css("height", "0px");
+      $(".tou_cont_c").css("height", "0px");
+      $(".tou_cont_d").css("height", "0px");
+      if ($(this).hasClass("tab_a")) {
+        $(".tou_cont_a").css("height", "auto");
+      }
+      if ($(this).hasClass("tab_b")) {
+        $(".tou_cont_b").css("height", "auto");
+      }
+      if ($(this).hasClass("tab_c")) {
+        $(".tou_cont_c").css("height", "auto");
+      }
+      if ($(this).hasClass("tab_d")) {
+        $(".tou_cont_d").css("height", "auto");
+      }
+    }
+  });
+
+  if (joined) {
+    $(".tou_reload").click(() => {
+      open_tournament(tou);
+    });
+    $(".but_drop").click(() => {
+      ipc_send("tou_drop", tou._id);
+    });
+  }
 }
 
 function set_tou_state(state) {
