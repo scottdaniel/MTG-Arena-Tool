@@ -584,11 +584,12 @@ function httpDraftShareLink(did, exp) {
   });
 }
 
-function httpHomeGet() {
+function httpHomeGet(set) {
   var _id = makeId(6);
   httpAsync.unshift({
     reqId: _id,
     method: "home_get",
+    set: set,
     method_path: "/api/get_home.php"
   });
 }

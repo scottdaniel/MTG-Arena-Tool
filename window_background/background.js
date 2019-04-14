@@ -575,11 +575,11 @@ ipc.on("request_course", function(event, arg) {
   httpApi.httpGetCourse(arg);
 });
 
-ipc.on("request_home", function() {
+ipc.on("request_home", (event, set) => {
   if (playerData.userName == "") {
     ipc_send("offline", 1);
   } else {
-    httpApi.httpHomeGet();
+    httpApi.httpHomeGet(set);
   }
 });
 

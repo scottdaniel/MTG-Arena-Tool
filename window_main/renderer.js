@@ -644,7 +644,7 @@ ipc.on("initialize", function() {
 
   sidebarActive = -1;
   showLoadingBars();
-  ipc_send("request_home", true);
+  ipc_send("request_home", "");
   $(".top_nav").removeClass("hidden");
   $(".overflow_ux").removeClass("hidden");
   $(".message_center").css("display", "none");
