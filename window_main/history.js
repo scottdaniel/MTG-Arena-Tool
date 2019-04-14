@@ -23,6 +23,8 @@ globals
   playerData,
   tags_colors,
   showLoadingBars,
+  sidebarActive,
+  decks
   $$
 */
 
@@ -58,6 +60,8 @@ function filterMatch(match) {
 }
 
 function open_history_tab(loadMore) {
+  if (sidebarActive != 1 || decks == null) return;
+
   sort_decks();
   var mainDiv = document.getElementById("ux_0");
   var div, d;

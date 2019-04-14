@@ -22,6 +22,7 @@ global
   windowRenderer,
   deck_count_types,
   removeDuplicates,
+  HIDDEN_PW,
   $$
 */
 
@@ -177,6 +178,7 @@ ipc.on("auth", function(event, arg) {
     loggedIn = true;
   } else {
     canLogin = true;
+    ipc_send("renderer_show");
     pop(arg.error, -1);
   }
 });
@@ -234,16 +236,28 @@ ipc.on("set_db", function(event, arg) {
     delete arg.events;
     delete arg.events_format;
     delete arg.ranked_events;
-    canLogin = true;
     cardsDb.set(arg);
-    $(".button_simple_disabled").addClass("button_simple");
-    $("#signin_user").focus();
+    canLogin = true;
+    showLogin();
   } catch (e) {
     pop("Error parsing metadata", null);
     console.log("Error parsing metadata", e);
     return false;
   }
 });
+
+ipc.on("show_login", () => {
+  canLogin = true;
+  showLogin();
+});
+
+function showLogin() {
+  $(".authenticate").show();
+  $(".message_center").css("display", "none");
+  $(".init_loading").hide();
+  $(".button_simple_disabled").addClass("button_simple");
+  $("#signin_user").focus();
+}
 
 //
 ipc.on("set_player_data", (event, _data) => {
@@ -609,26 +623,18 @@ ipc.on("force_open_about", function() {
 });
 
 //
-ipc.on("init_login", function() {
-  $(".authenticate").show();
-  $(".message_center").css("display", "none");
-  $(".init_loading").hide();
-});
-
-//
-ipc.on("set_remember", function(event, arg) {
-  if (arg != "") {
-    document.getElementById("rememberme").checked = true;
-    document.getElementById("signin_user").value = arg;
-    document.getElementById("signin_pass").value = "********";
-  } else {
-    document.getElementById("rememberme").checked = false;
-  }
+ipc.on("prefill_auth_form", function(event, arg) {
+  document.getElementById("rememberme").checked = arg.remember_me;
+  document.getElementById("signin_user").value = arg.username;
+  document.getElementById("signin_pass").value = arg.password;
 });
 
 //
 function rememberMe() {
-  ipc_send("remember", document.getElementById("rememberme").checked);
+  const rSettings = {
+    remember_me: document.getElementById("rememberme").checked
+  };
+  ipc_send("save_app_settings", rSettings);
 }
 
 //
@@ -737,6 +743,11 @@ ipc.on("log_ok", function() {
 });
 
 //
+ipc.on("set_offline", (_event, arg) => {
+  offlineMode = arg;
+});
+
+//
 ipc.on("offline", function() {
   showOfflineSplash();
 });
@@ -841,14 +852,12 @@ window.addEventListener("resize", event => {
 });
 
 $(document).ready(function() {
-  //document.getElementById("rememberme").checked = false;
   $(".signup_link").click(function() {
     shell.openExternal("https://mtgatool.com/signup/");
   });
 
   $(".offline_link").click(function() {
     ipc_send("login", { username: "", password: "" });
-    offlineMode = true;
     $(".unlink").show();
   });
 
@@ -860,7 +869,7 @@ $(document).ready(function() {
     if (canLogin) {
       var user = document.getElementById("signin_user").value;
       var pass = document.getElementById("signin_pass").value;
-      if (pass != "********") {
+      if (pass != HIDDEN_PW) {
         pass = sha1(pass);
       }
       ipc_send("login", { username: user, password: pass });
@@ -922,6 +931,7 @@ $(document).ready(function() {
       }
       if ($(this).hasClass("it0")) {
         sidebarActive = 0;
+        $("#ux_0").html("");
         open_decks_tab();
       }
       if ($(this).hasClass("it1")) {
@@ -1962,7 +1972,7 @@ function toggleVisibility(...ids) {
 }
 
 //
-function add_checkbox(div, label, iid, def, func = "updateSettings()") {
+function add_checkbox(div, label, iid, def, func = "updateUserSettings()") {
   label = $('<label class="check_container hover_label">' + label + "</label>");
   label.appendTo(div);
   var check_new = $(
@@ -2009,6 +2019,20 @@ function open_settings(openSection) {
   section.appendTo(div);
   section.append('<div class="settings_title">Behaviour</div>');
 
+  add_checkbox(
+    section,
+    "Login automatically",
+    "settings_autologin",
+    settings.auto_login,
+    "updateAppSettings()"
+  );
+  const launchToTrayCheckbox = add_checkbox(
+    section,
+    "Launch to tray",
+    "settings_launchtotray",
+    settings.launch_to_tray,
+    "updateAppSettings()"
+  );
   add_checkbox(
     section,
     "Launch on startup",
@@ -2207,7 +2231,7 @@ function open_settings(openSection) {
 
   colorPick.on("move.spectrum", function(e, color) {
     $(".main_wrapper").css("background-color", color.toRgbString());
-    updateSettings();
+    updateUsersettings();
   });
 
   label = $('<label class="but_container_label">Cards quality:</label>');
@@ -2357,6 +2381,12 @@ function open_settings(openSection) {
   });
 
   $(".login_link_about").click(function() {
+    const clearAppSettings = {
+      remember_me: false,
+      auto_login: false,
+      launch_to_tray: false
+    };
+    ipc_send("save_app_settings", clearAppSettings);
     remote.app.relaunch();
     remote.app.exit(0);
   });
@@ -2411,12 +2441,12 @@ function open_settings(openSection) {
 
   url_input.on("keyup", function(e) {
     if (e.keyCode == 13) {
-      updateSettings();
+      updateUsersettings();
     }
   });
 
   export_input.on("keyup", function() {
-    updateSettings();
+    updateUsersettings();
   });
 
   $(".sliderA").off();
@@ -2439,7 +2469,7 @@ function open_settings(openSection) {
 
   $(".sliderA").on("click mouseup", function() {
     cardSizePos = Math.round(parseInt(this.value));
-    updateSettings();
+    updateUsersettings();
   });
 
   $(".sliderB").off();
@@ -2453,7 +2483,7 @@ function open_settings(openSection) {
 
   $(".sliderB").on("click mouseup", function() {
     overlayAlpha = alphaFromTransparency(parseInt(this.value));
-    updateSettings();
+    updateUsersettings();
   });
 
   $(".sliderC").on("click mousemove", function() {
@@ -2467,7 +2497,7 @@ function open_settings(openSection) {
 
   $(".sliderC").on("click mouseup", function() {
     overlayAlphaBack = alphaFromTransparency(parseInt(this.value));
-    updateSettings();
+    updateUsersettings();
   });
 
   $(".sliderD").off();
@@ -2479,7 +2509,7 @@ function open_settings(openSection) {
 
   $(".sliderD").on("click mouseup", function() {
     overlayScale = parseInt(this.value);
-    updateSettings();
+    updateUsersettings();
   });
 
   $(".sliderSoundVolume").off();
@@ -2490,7 +2520,7 @@ function open_settings(openSection) {
     );
     let { Howl, Howler } = require("howler");
     let sound = new Howl({ src: ["../sounds/blip.mp3"] });
-    updateSettings();
+    updateUsersettings();
     Howler.volume(settings.sound_priority_volume);
     sound.play();
   });
@@ -2568,7 +2598,7 @@ function changeQuality(dom) {
     cardQuality = "normal";
   }
   dom.innerHTML = cardQuality;
-  updateSettings();
+  updateUsersettings();
   open_settings(lastSettingsSection);
 }
 
@@ -2587,7 +2617,7 @@ function eraseData() {
 /* eslint-enable */
 
 //
-function updateSettings() {
+function updateUserSettings() {
   var startup = document.getElementById("settings_startup").checked;
   var readonlogin = document.getElementById("settings_readlogonlogin").checked;
   var showOverlay = document.getElementById("settings_showoverlay").checked;
@@ -2649,7 +2679,18 @@ function updateSettings() {
     skip_firstpass: !readonlogin
   };
   cardSize = 100 + cardSizePos * 10;
-  ipc_send("save_settings", settings);
+  ipc_send("save_user_settings", settings);
+}
+
+//
+function updateAppSettings() {
+  const auto_login = document.getElementById("settings_autologin").checked;
+  let launch_to_tray = document.getElementById("settings_launchtotray").checked;
+  const rSettings = {
+    auto_login,
+    launch_to_tray
+  };
+  ipc_send("save_app_settings", rSettings);
 }
 
 //

@@ -28,12 +28,15 @@ var background;
 var overlay;
 var tray = null;
 var closeToTray = true;
+let autoLogin = false;
+let launchToTray = false;
 var alphaEnabled = false;
 
 const ipc = electron.ipcMain;
 
 var mainLoaded = false;
 var backLoaded = false;
+var firstSettingsRead = true;
 
 //commandLine, workingDirectory
 const singleLock = app.requestSingleInstanceLock();
@@ -129,7 +132,6 @@ function startApp() {
   mainWindow.webContents.once("dom-ready", () => {
     mainLoaded = true;
     if (backLoaded == true) {
-      showWindow();
       background.webContents.send("set_renderer_state", 1);
     }
   });
@@ -137,7 +139,6 @@ function startApp() {
   background.webContents.once("dom-ready", () => {
     backLoaded = true;
     if (mainLoaded == true) {
-      showWindow();
       background.webContents.send("set_renderer_state", 1);
     }
   });
@@ -176,7 +177,7 @@ function startApp() {
 
       case "set_settings":
         //console.log("set settings: ", arg);
-        saveSettings(arg);
+        setSettings(arg);
         mainWindow.webContents.send("set_settings", arg);
         overlay.webContents.send("set_settings", arg);
         break;
@@ -184,6 +185,9 @@ function startApp() {
       case "set_db":
         mainWindow.webContents.send("set_db", arg);
         overlay.webContents.send("set_db", arg);
+        if (autoLogin) {
+          background.webContents.send("auto_login");
+        }
         break;
 
       case "popup":
@@ -201,12 +205,6 @@ function startApp() {
       case "set_cards":
         mainWindow.webContents.send("set_cards", arg.cards, arg.new);
         overlay.webContents.send("set_cards", arg.cards);
-        break;
-
-      case "save_settings":
-        saveSettings(arg);
-        background.webContents.send("save_settings", arg);
-        overlay.webContents.send("set_settings", arg);
         break;
 
       case "renderer_update_install":
@@ -382,17 +380,24 @@ function startApp() {
   });
 }
 
-function saveSettings(settings) {
+function setSettings(settings) {
   app.setLoginItemSettings({
     openAtLogin: settings.startup
   });
   closeToTray = settings.close_to_tray;
+  autoLogin = settings.auto_login;
+  launchToTray = settings.launch_to_tray;
+
+  if (!launchToTray && firstSettingsRead) {
+    showWindow();
+  }
 
   var oldAlphaEnabled = alphaEnabled;
   alphaEnabled = settings.overlay_alpha_back < 1;
   if (oldAlphaEnabled != alphaEnabled) {
     recreateOverlay();
   }
+  firstSettingsRead = false;
 }
 
 // Catch exceptions
