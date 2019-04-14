@@ -36,6 +36,7 @@ const ipc = electron.ipcMain;
 
 var mainLoaded = false;
 var backLoaded = false;
+var firstSettingsRead = true;
 
 //commandLine, workingDirectory
 const singleLock = app.requestSingleInstanceLock();
@@ -132,7 +133,6 @@ function startApp() {
     mainLoaded = true;
     if (backLoaded == true) {
       background.webContents.send("set_renderer_state", 1);
-      showWindow();
     }
   });
 
@@ -140,7 +140,6 @@ function startApp() {
     backLoaded = true;
     if (mainLoaded == true) {
       background.webContents.send("set_renderer_state", 1);
-      showWindow();
     }
   });
 
@@ -188,9 +187,6 @@ function startApp() {
         overlay.webContents.send("set_db", arg);
         if (autoLogin) {
           background.webContents.send("auto_login");
-          if (launchToTray) {
-            hideWindow();
-          }
         }
         break;
 
@@ -392,11 +388,16 @@ function setSettings(settings) {
   autoLogin = settings.auto_login;
   launchToTray = settings.launch_to_tray;
 
+  if (!launchToTray && firstSettingsRead) {
+    showWindow();
+  }
+
   var oldAlphaEnabled = alphaEnabled;
   alphaEnabled = settings.overlay_alpha_back < 1;
   if (oldAlphaEnabled != alphaEnabled) {
     recreateOverlay();
   }
+  firstSettingsRead = false;
 }
 
 // Catch exceptions

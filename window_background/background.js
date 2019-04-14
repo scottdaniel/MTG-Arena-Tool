@@ -275,8 +275,6 @@ ipc.on("save_app_settings", function(event, arg) {
     rstore.set("email", "");
     rstore.set("token", "");
   }
-  // launch to tray depends on auto login
-  updated.launch_to_tray = updated.auto_login && updated.launch_to_tray;
 
   rstore.set("settings", updated);
   loadSettings();

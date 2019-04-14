@@ -2033,7 +2033,6 @@ function open_settings(openSection) {
     settings.launch_to_tray,
     "updateAppSettings()"
   );
-  launchToTrayCheckbox.attr("style", "margin-left:64px;");
   add_checkbox(
     section,
     "Launch on startup",
@@ -2687,11 +2686,6 @@ function updateUserSettings() {
 function updateAppSettings() {
   const auto_login = document.getElementById("settings_autologin").checked;
   let launch_to_tray = document.getElementById("settings_launchtotray").checked;
-  // launch to tray depends on auto login
-  if (!auto_login) {
-    launch_to_tray = false;
-    document.getElementById("settings_launchtotray").checked = false;
-  }
   const rSettings = {
     auto_login,
     launch_to_tray
