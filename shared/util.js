@@ -2315,6 +2315,15 @@ function localDateFormat(date) {
   </local-time>`;
 }
 
+function localDayDateFormat(date) {
+  return `<local-time datetime="${date.toISOString()}"
+    year="numeric"
+    month="long"
+    day="numeric">
+    ${date.toDateString()}
+  </local-time>`;
+}
+
 //
 function replaceAll(str, find, replace) {
   return str.replace(new RegExp(find, "g"), replace);
