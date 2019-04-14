@@ -236,19 +236,28 @@ ipc.on("set_db", function(event, arg) {
     delete arg.events;
     delete arg.events_format;
     delete arg.ranked_events;
-    canLogin = true;
     cardsDb.set(arg);
-    $(".authenticate").show();
-    $(".message_center").css("display", "none");
-    $(".init_loading").hide();
-    $(".button_simple_disabled").addClass("button_simple");
-    $("#signin_user").focus();
+    canLogin = true;
+    showLogin();
   } catch (e) {
     pop("Error parsing metadata", null);
     console.log("Error parsing metadata", e);
     return false;
   }
 });
+
+ipc.on("show_login", () => {
+  canLogin = true;
+  showLogin();
+});
+
+function showLogin() {
+  $(".authenticate").show();
+  $(".message_center").css("display", "none");
+  $(".init_loading").hide();
+  $(".button_simple_disabled").addClass("button_simple");
+  $("#signin_user").focus();
+}
 
 //
 ipc.on("set_player_data", (event, _data) => {
