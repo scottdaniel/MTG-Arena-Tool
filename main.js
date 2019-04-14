@@ -11,7 +11,7 @@ const {
 } = require("electron");
 const path = require("path");
 const fs = require("fs");
-const EAU = require("electron-asar-hot-updater");
+const EAU = require("./electron-asar-hot-updater");
 
 app.setAppUserModelId("com.github.manuel777.mtgatool");
 
@@ -77,7 +77,8 @@ function startUpdater() {
   EAU.init({
     api: "https://mtgatool.com/latest/",
     server: false,
-    debug: false
+    debug: true,
+    logFile: false
   });
 
   checkUpdates();
