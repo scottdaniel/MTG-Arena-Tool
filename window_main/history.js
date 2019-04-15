@@ -16,15 +16,15 @@ globals
   compare_cards,
   sort_decks,
   getReadableEvent,
-  getReadableDeckName,
-  getReadableDeckNameWithCost,
   getWinrateClass,
   createDivision,
   playerData,
   tags_colors,
   showLoadingBars,
   sidebarActive,
-  decks
+  decks,
+  orderedColorCodes,
+  eventsList,
   $$
 */
 
@@ -109,7 +109,7 @@ function open_history_tab(loadMore) {
     filteredSampleSize = 0;
     let validMatches = matchesHistory.matches
       .map(matchId => matchesHistory[matchId])
-      .filter(match => match !== undefined && match.eventId);
+      .filter(match => match !== undefined && match.eventId && match.eventId != "AIBotMatch");
 
     // construct list of all events we have matches for
     validMatches.forEach(match => {
@@ -121,16 +121,16 @@ function open_history_tab(loadMore) {
     // count matches which match the current filter
     let getFilteredDecks = false;
     if (filteredDecks == null) {
-      filteredDecks = [DEFAULT_DECK];
+      filteredDecks = {};
+      filteredDecks[DEFAULT_DECK] = { id: DEFAULT_DECK, name: DEFAULT_DECK };
       getFilteredDecks = true;
     }
     validMatches.filter(filterMatch).forEach(match => {
       wins += match.player.win;
       losses += match.opponent.win;
 
-      let deckId = match.playerDeck.id;
-      if (getFilteredDecks && filteredDecks.indexOf(deckId) == -1) {
-        filteredDecks.push(deckId);
+      if (getFilteredDecks && !(match.playerDeck.id in filteredDecks)) {
+        filteredDecks[match.playerDeck.id] = match.playerDeck;
       }
 
       // some of the data is wierd. Games which last years or have no data.
@@ -180,14 +180,49 @@ function open_history_tab(loadMore) {
     );
     formatSelect.style.margin = "12px auto auto auto";
 
-    //let sortedDecks = [...decks];
-    //sortedDecks.sort((a, b) => a.name.localeCompare(b.name));
-    filteredDecks.sort((a, b) =>
-      getReadableDeckName(a).localeCompare(getReadableDeckName(b))
-    );
-    let deckSelect = createSelect(
+    const doesDeckStillExist = deck_id => {
+      return decks.filter(deck => deck.id == deck_id).length > 0;
+    };
+
+    const getRecentDeckName = deck => {
+      if (doesDeckStillExist(deck.id)) {
+        return decks.filter(_deck => _deck.id == deck.id)[0].name;
+      }
+      return deck.name;
+    };
+
+    const filterDeckList = Object.values(filteredDecks);
+    filterDeckList.sort((a, b) => {
+      const aName = getRecentDeckName(filteredDecks[a.id]);
+      const aExists = doesDeckStillExist(a.id) ? 1 : 0;
+      const bName = getRecentDeckName(filteredDecks[b.id]);
+      const bExists = doesDeckStillExist(b.id) ? 1 : 0;
+      // sort by existence, then name
+      return bExists - aExists || aName.localeCompare(bName);
+    });
+
+    const getReadableDeckNameWithCost = deck_id => {
+      if (!(deck_id in filteredDecks)) return deck_id;
+      const deck = filteredDecks[deck_id];
+
+      let deckName = getRecentDeckName(deck);
+      if (doesDeckStillExist(deck_id)) {
+        deckName = decks.filter(deck => deck.id == deck_id)[0].name;
+      } else if (deck_id != DEFAULT_DECK) {
+        deckName += "<small><i> (deleted)</i></small>";
+      }
+      let colorsString = "";
+      if (deck.colors) {
+        deck.colors.forEach(color => {
+          colorsString += `<div class="mana_s16 mana_${orderedColorCodes[color - 1]}"></div>`;
+        });
+      }
+      return `${deckName}<div class="flex_item">${colorsString}</div>`;
+    };
+
+    const deckSelect = createSelect(
       historyTopFilter,
-      filteredDecks,
+      filterDeckList.map(deck => deck.id),
       filterDeck,
       filterHistoryByDeck,
       "history_query_deck",
