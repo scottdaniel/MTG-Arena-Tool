@@ -11,7 +11,7 @@ const {
 } = require("electron");
 const path = require("path");
 const fs = require("fs");
-const EAU = require("electron-asar-hot-updater");
+const {autoUpdater} = require("electron-updater");
 
 app.setAppUserModelId("com.github.manuel777.mtgatool");
 
@@ -38,7 +38,6 @@ var mainLoaded = false;
 var backLoaded = false;
 var firstSettingsRead = true;
 
-//commandLine, workingDirectory
 const singleLock = app.requestSingleInstanceLock();
 
 if (!singleLock) {
@@ -73,48 +72,39 @@ function startUpdater() {
     updaterWindow.show();
   });
 
-  // Initiate the module
-  EAU.init({
-    api: "https://mtgatool.com/latest/?os=" + process.platform,
-    server: false,
-    debug: true,
-    logFile: false
-  });
-
-  checkUpdates();
+  autoUpdater.checkForUpdatesAndNotify();
 }
 
-function checkUpdates() {
-  EAU.check((error, last, body) => {
-    if (error) {
-      if (mainWindow) {
-        mainWindow.webContents.send("set_update_state", error);
-        updaterWindow.destroy();
-        updaterWindow = undefined;
-      } else {
-        startApp();
-      }
-      console.log("Updater: " + error);
-      return false;
-    }
+/*
+autoUpdater.on("checking-for-update", () => {
+});
+autoUpdater.on("update-available", info => {
+});
+*/
+autoUpdater.on("update-not-available", info => {
+  console.log("Update not available", info);
+  if (mainWindow) {
+    mainWindow.webContents.send("set_update_state", "Client up to date!");
+  }
+  startApp();
+});
+autoUpdater.on("error", err => {
+  if (mainWindow) {
+    mainWindow.webContents.send("set_update_state", "Update error.");
+  }
+  console.log("Update error: ", err);
+  startApp();
+});
+autoUpdater.on("download-progress", progressObj => {
+  updaterWindow.webContents.send("update_progress", progressObj);
+});
+autoUpdater.on("update-downloaded", info => {
+  console.log("Update downloaded: ", info);
+  installUpdate();
+});
 
-    EAU.progress(state => {
-      if (!state) {
-        startApp();
-        return false;
-      }
-      updaterWindow.webContents.send("update_progress", state);
-    });
-
-    EAU.download(error => {
-      console.log("Update download.", error);
-      app.relaunch();
-      app.exit();
-      if (error) {
-        return false;
-      }
-    });
-  });
+function installUpdate() {
+  autoUpdater.quitAndInstall(true, true);
 }
 
 function startApp() {
