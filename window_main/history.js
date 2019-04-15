@@ -129,7 +129,7 @@ function open_history_tab(loadMore) {
       wins += match.player.win;
       losses += match.opponent.win;
 
-      if (getFilteredDecks) {
+      if (getFilteredDecks && !(match.playerDeck.id in filteredDecks)) {
         filteredDecks[match.playerDeck.id] = match.playerDeck;
       }
 
@@ -184,11 +184,18 @@ function open_history_tab(loadMore) {
       return decks.filter(deck => deck.id == deck_id).length > 0;
     };
 
+    const getRecentDeckName = deck => {
+      if (doesDeckStillExist(deck.id)) {
+        return decks.filter(_deck => _deck.id == deck.id)[0].name;
+      }
+      return deck.name;
+    };
+
     const filterDeckList = Object.values(filteredDecks);
     filterDeckList.sort((a, b) => {
-      const aName = filteredDecks[a.id].name;
+      const aName = getRecentDeckName(filteredDecks[a.id]);
       const aExists = doesDeckStillExist(a.id) ? 1 : 0;
-      const bName = filteredDecks[b.id].name;
+      const bName = getRecentDeckName(filteredDecks[b.id]);
       const bExists = doesDeckStillExist(b.id) ? 1 : 0;
       // sort by existence, then name
       return bExists - aExists || aName.localeCompare(bName);
@@ -197,9 +204,11 @@ function open_history_tab(loadMore) {
     const getReadableDeckNameWithCost = deck_id => {
       if (!(deck_id in filteredDecks)) return deck_id;
       const deck = filteredDecks[deck_id];
-      let deckName = deck.name;
 
-      if (!doesDeckStillExist(deck_id) && deck_id != DEFAULT_DECK) {
+      let deckName = getRecentDeckName(deck);
+      if (doesDeckStillExist(deck_id)) {
+        deckName = decks.filter(deck => deck.id == deck_id)[0].name;
+      } else if (deck_id != DEFAULT_DECK) {
         deckName += "<small><i> (deleted)</i></small>";
       }
       let colorsString = "";
