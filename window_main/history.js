@@ -294,7 +294,6 @@ function open_history_tab(loadMore) {
     let flc = createDivision(["flex_item"]);
     flc.style.flexDirection = "column";
     flc.style.flexGrow = 2;
-    flc.style.overflow = "hidden";
     flc.appendChild(fct);
 
     let fcb = createDivision(["flex_bottom"]);
