@@ -75,7 +75,7 @@ function startUpdater() {
 
   // Initiate the module
   EAU.init({
-    api: "https://mtgatool.com/latest/index-test.php?os=" + process.platform,
+    api: "https://mtgatool.com/latest/?os=" + process.platform,
     server: false,
     debug: true,
     logFile: false
