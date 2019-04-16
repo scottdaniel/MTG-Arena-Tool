@@ -166,6 +166,7 @@ var currentMatchDefault = {
   turn: {},
   playerCards: {},
   oppCards: {},
+  onThePlay: 0,
   player: {
     seat: 1,
     deck: { mainDeck: [], sideboard: [] },

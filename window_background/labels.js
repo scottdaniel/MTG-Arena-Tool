@@ -144,6 +144,13 @@ function onLabelGreToClient(entry, json) {
       currentMatch.gameObjs = {};
     }
 
+    if (msg.type == "GREMessageType_DieRollResultsResp") {
+      if (msg.dieRollResultsResp) {
+        let highest = msg.dieRollResultsResp.playerDieRolls.reduce((a, b) => { if (a.rollValue > b.rollValue) return a; else return b;});
+        currentMatch.onThePlay = highest.systemSeatId;
+      }
+    }
+
     // Declare attackers message
     if (msg.type == "GREMessageType_DeclareAttackersReq") {
       msg.declareAttackersReq.attackers.forEach(function(obj) {
