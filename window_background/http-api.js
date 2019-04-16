@@ -430,7 +430,7 @@ function httpAuth(user, pass) {
     email: user,
     password: pass,
     playerid: playerData.arenaId,
-    playername: playerData.name,
+    playername: encodeURIComponent(playerData.name),
     mtgaversion: playerData.arenaVersion,
     version: window.electron.remote.app.getVersion()
   });
