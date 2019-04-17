@@ -349,8 +349,9 @@ function createMatchRow(match) {
   // insert contents of flexRight
 
   var resultClass = "list_match_result";
+  var winLossClass =  match.player.win > match.opponent.win ? "green" : "red";
   flexRight.appendChild(
-    createDivision([resultClass], match.player.win + ":" + match.opponent.win)
+    createDivision([resultClass, winLossClass], match.player.win + ":" + match.opponent.win)
   );
 
   return rowContainer;
