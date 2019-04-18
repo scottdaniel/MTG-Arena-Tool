@@ -2115,7 +2115,7 @@ function open_settings(openSection) {
   );
   add_checkbox(
     section,
-    "Persistent overlay <i>(useful for OBS setup)</i>",
+    "Persistent overlay&nbsp;<i>(useful for OBS setup)</i>",
     "settings_showoverlayalways",
     settings.show_overlay_always
   );
@@ -2280,13 +2280,13 @@ function open_settings(openSection) {
   section.append('<div class="settings_title">Privacy</div>');
   add_checkbox(
     section,
-    "Anonymous sharing <i>(makes your username anonymous on Explore)</i>",
+    "Anonymous sharing&nbsp;<i>(makes your username anonymous on Explore)</i>",
     "settings_anon_explore",
     settings.anon_explore
   );
   add_checkbox(
     section,
-    "Online sharing <i>(when disabled, blocks any connections with our servers)</i>",
+    "Online sharing&nbsp;<i>(when disabled, blocks any connections with our servers)</i>",
     "settings_senddata",
     settings.send_data
   );
