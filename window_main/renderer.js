@@ -973,9 +973,15 @@ function showLoadingBars() {
   $$(".main_loading")[0].style.display = "block";
 }
 
+//
+ipc.on("show_loading", () => showLoadingBars());
+
 function hideLoadingBars() {
   $$(".main_loading")[0].style.display = "none";
 }
+
+//
+ipc.on("hide_loading", () => hideLoadingBars());
 
 //
 ipc.on("set_draft_link", function(event, arg) {
