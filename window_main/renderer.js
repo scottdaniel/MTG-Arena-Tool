@@ -2230,7 +2230,7 @@ function open_settings(openSection) {
 
   colorPick.on("move.spectrum", function(e, color) {
     $(".main_wrapper").css("background-color", color.toRgbString());
-    updateUsersettings();
+    updateUserSettings();
   });
 
   label = $('<label class="but_container_label">Cards quality:</label>');
@@ -2440,12 +2440,12 @@ function open_settings(openSection) {
 
   url_input.on("keyup", function(e) {
     if (e.keyCode == 13) {
-      updateUsersettings();
+      updateUserSettings();
     }
   });
 
   export_input.on("keyup", function() {
-    updateUsersettings();
+    updateUserSettings();
   });
 
   $(".sliderA").off();
@@ -2468,7 +2468,7 @@ function open_settings(openSection) {
 
   $(".sliderA").on("click mouseup", function() {
     cardSizePos = Math.round(parseInt(this.value));
-    updateUsersettings();
+    updateUserSettings();
   });
 
   $(".sliderB").off();
@@ -2482,7 +2482,7 @@ function open_settings(openSection) {
 
   $(".sliderB").on("click mouseup", function() {
     overlayAlpha = alphaFromTransparency(parseInt(this.value));
-    updateUsersettings();
+    updateUserSettings();
   });
 
   $(".sliderC").on("click mousemove", function() {
@@ -2496,7 +2496,7 @@ function open_settings(openSection) {
 
   $(".sliderC").on("click mouseup", function() {
     overlayAlphaBack = alphaFromTransparency(parseInt(this.value));
-    updateUsersettings();
+    updateUserSettings();
   });
 
   $(".sliderD").off();
@@ -2508,7 +2508,7 @@ function open_settings(openSection) {
 
   $(".sliderD").on("click mouseup", function() {
     overlayScale = parseInt(this.value);
-    updateUsersettings();
+    updateUserSettings();
   });
 
   $(".sliderSoundVolume").off();
@@ -2519,7 +2519,7 @@ function open_settings(openSection) {
     );
     let { Howl, Howler } = require("howler");
     let sound = new Howl({ src: ["../sounds/blip.mp3"] });
-    updateUsersettings();
+    updateUserSettings();
     Howler.volume(settings.sound_priority_volume);
     sound.play();
   });
@@ -2597,7 +2597,7 @@ function changeQuality(dom) {
     cardQuality = "normal";
   }
   dom.innerHTML = cardQuality;
-  updateUsersettings();
+  updateUserSettings();
   open_settings(lastSettingsSection);
 }
 
