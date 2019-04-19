@@ -939,6 +939,14 @@ function onLabelInventoryUpdated(entry, transaction) {
   // Add missing data
   transaction.date = parseWotcTime2(entry.timestamp);
 
+  // hacky work around until date parsing for non-english languages is fixed.
+  // FIXME: Sort out the parseWotcTime2 parsing
+  let dateIsInvalid = !transaction.date || isNaN(transaction.date.getTime());
+  if (dateIsInvalid) {
+    console.log(`Invalid date ('${entry.timestamp}') - using current date as backup.`);
+    transaction.date = new Date();
+  }
+
   // Reduce the size for storage
   transaction.delta = minifiedDelta(transaction.delta);
 
@@ -948,7 +956,6 @@ function onLabelInventoryUpdated(entry, transaction) {
   transaction.id = sha1(milliseconds + context);
 
   // Do not modify the context from now on.
-
   saveEconomyTransaction(transaction);
   return;
 }
