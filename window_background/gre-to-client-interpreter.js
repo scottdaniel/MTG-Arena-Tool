@@ -3,8 +3,9 @@ globals
   actionLog,
   actionLogGenerateLink,
   currentMatch,
+  cloneDeep,
   getNameBySeat,
-  cardsDb
+  actionLogGenerateAbilityLink
 */
 
 let actionType = [];
@@ -64,36 +65,165 @@ function processAnnotations() {
 
     let processedOk = true;
     try {
-      // Object changed its ID
-      if (ann.type.includes("AnnotationType_ObjectIdChanged")) {
-        //
-      }
-
-      // Object moved between zones
-      // This could be for many reasons
-      if (ann.type.includes("AnnotationType_ZoneTransfer")) {
-        if (details.category == "PlayLand") {
-          let grpId = currentMatch.gameObjs[ann.affectedIds[0]].grpId;
-          let playerName = getNameBySeat(ann.affectorId);
-          actionLog(
-            ann.affectorId,
-            false,
-            `${playerName} played ${actionLogGenerateLink(grpId)}`
-          );
+      ann.type.forEach(type => {
+        var fn = annotationFunctions[type];
+        if (typeof fn == "function") {
+          fn(ann, details);
         }
-      }
+      });
     } catch (e) {
       console.log(ann, e);
       processedOk = false;
     }
 
     if (processedOk) {
-      currentMatch.annotations = currentMatch.annotations.splice(index, 1);
+      //currentMatch.annotations = currentMatch.annotations.splice(index, 1);
       // add this annotation to the list of processed
       currentMatch.processedAnnotations.push(ann.id);
     }
   });
 }
+
+function removeProcessedAnnotations() {
+  currentMatch.annotations = currentMatch.annotations.filter(
+    ann => !currentMatch.processedAnnotations.includes(ann.id)
+  );
+}
+
+let annotationFunctions = {};
+
+annotationFunctions.AnnotationType_ObjectIdChanged = function(ann, details) {
+  let newObj = cloneDeep(currentMatch.gameObjs[details.orig_id]);
+  currentMatch.gameObjs[details.new_id] = newObj;
+};
+
+annotationFunctions.AnnotationType_ZoneTransfer = function(ann, details) {
+  // A player played a land
+  if (details.category == "PlayLand") {
+    let grpId = currentMatch.gameObjs[ann.affectedIds[0]].grpId;
+    let playerName = getNameBySeat(ann.affectorId);
+    actionLog(
+      ann.affectorId,
+      false,
+      `${playerName} played ${actionLogGenerateLink(grpId)}`
+    );
+  }
+
+  // A player drew a card
+  if (details.category == "Draw") {
+    let zone = currentMatch.zones[details.zone_src];
+    let playerName = getNameBySeat(zone.ownerSeatId);
+    if (zone.ownerSeatId == currentMatch.player.seat) {
+      let grpId = currentMatch.gameObjs[ann.affectedIds[0]].grpId;
+      actionLog(
+        zone.ownerSeatId,
+        false,
+        `${playerName} drew ${actionLogGenerateLink(grpId)}`
+      );
+    } else {
+      actionLog(zone.ownerSeatId, false, `${playerName} drew a card`);
+    }
+  }
+
+  // A player casts a spell
+  if (details.category == "CastSpell") {
+    let obj = currentMatch.gameObjs[ann.affectedIds[0]];
+    let grpId = obj.grpId;
+    let seat = obj.ownerSeatId;
+    let playerName = getNameBySeat(seat);
+    actionLog(
+      seat,
+      false,
+      `${playerName} casted ${actionLogGenerateLink(grpId)}`
+    );
+  }
+
+  // A player discards a card
+  if (details.category == "Discard") {
+    let obj = currentMatch.gameObjs[ann.affectedIds[0]];
+    let grpId = obj.grpId;
+    let seat = obj.ownerSeatId;
+    let playerName = getNameBySeat(seat);
+    actionLog(
+      seat,
+      false,
+      `${playerName} discarded ${actionLogGenerateLink(grpId)}`
+    );
+  }
+
+  // A player puts a card in a zone
+  if (details.category == "Put") {
+    let zone = currentMatch.zones[details.zone_dest].type;
+    let obj = currentMatch.gameObjs[ann.affectedIds[0]];
+    let grpId = obj.grpId;
+    let affector = currentMatch.gameObjs[ann.affectorId];
+    let seat = obj.ownerSeatId;
+    let text = getNameBySeat(seat);
+    if (affector.type == "GameObjectType_Ability") {
+      text = `${actionLogGenerateLink(
+        affector.objectSourceGrpId
+      )}'s ${actionLogGenerateAbilityLink(affector.grpId)}`;
+    }
+    if (affector.type == "GameObjectType_Card") {
+      text = actionLogGenerateLink(affector.grpId);
+    }
+    actionLog(
+      seat,
+      false,
+      `${text} put ${actionLogGenerateLink(grpId)} in ${zone}`
+    );
+  }
+
+  // A card is returned to a zone
+  if (details.category == "Return") {
+    let zone = currentMatch.zones[details.zone_dest].type;
+    let obj = currentMatch.gameObjs[ann.affectedIds[0]];
+    let grpId = obj.grpId;
+    let affector = currentMatch.gameObjs[ann.affectorId];
+    let seat = obj.ownerSeatId;
+    let text = getNameBySeat(seat);
+    if (affector.type == "GameObjectType_Ability") {
+      text = `${actionLogGenerateLink(
+        affector.objectSourceGrpId
+      )}'s ${actionLogGenerateAbilityLink(affector.grpId)}`;
+    }
+    if (affector.type == "GameObjectType_Card") {
+      text = actionLogGenerateLink(affector.grpId);
+    }
+    actionLog(
+      seat,
+      false,
+      `${text} returned ${actionLogGenerateLink(grpId)} to ${zone}`
+    );
+  }
+
+  // A spell or ability counters something
+  if (details.category == "Countered") {
+    //
+  }
+
+  // A spell or ability destroys something
+  if (details.category == "Destroy") {
+    //
+  }
+};
+
+annotationFunctions.AnnotationType_TargetSpec = function(ann) {
+  let obj = currentMatch.gameObjs[ann.affectedIds[0]];
+  let grpId = obj.grpId;
+  let affector = currentMatch.gameObjs[ann.affectorId];
+  let seat = obj.ownerSeatId;
+  let text = getNameBySeat(seat);
+  if (affector.type == "GameObjectType_Ability") {
+    text = `${actionLogGenerateLink(
+      affector.objectSourceGrpId
+    )}'s ${actionLogGenerateAbilityLink(affector.grpId)}`;
+  }
+  if (affector.type == "GameObjectType_Card") {
+    text = actionLogGenerateLink(affector.grpId);
+  }
+  actionLog(seat, false, `${text} targetted ${actionLogGenerateLink(grpId)}`);
+};
 
 function processAll() {
   for (var i = 0; i < currentMatch.latestMessage; i++) {
@@ -106,8 +236,8 @@ function processAll() {
       }
     }
   }
-  currentMatch.playerCardsUsed = getPlayerCardsLeft();
-  currentMatch.oppCardsUsed = getOppCards();
+  currentMatch.playerCardsUsed = getPlayerUsedCards();
+  currentMatch.oppCardsUsed = getOppUsedCards();
 }
 
 function GREMessage(msgId) {
@@ -119,20 +249,20 @@ function GREMessage(msgId) {
   }
 }
 
-function getOppCards() {
+function getOppUsedCards() {
   let cardsUsed = [];
   Object.keys(currentMatch.zones).forEach(key => {
     let zone = currentMatch.zones[key];
-    if (zone.objectInstanceIds && zone.type != "ZoneType_Limbo" && zone.type != "ZoneType_Revealed") {
+    if (zone.objectInstanceIds && zone.type != "ZoneType_Limbo") {
       zone.objectInstanceIds.forEach(id => {
         let grpId;
         try {
           let obj = currentMatch.gameObjs[id];
           if (obj.ownerSeatId == currentMatch.opponent.seat) {
             grpId = obj.grpId;
-            cardsUsed.push(cardsDb.get(grpId).name+" - "+zone.type);
+            //cardsUsed.push(cardsDb.get(grpId).name+" - "+zone.type);
+            cardsUsed.push(grpId);
           }
-          //cardsUsed.push(grpId);
         } catch (e) {
           //
         }
@@ -142,20 +272,24 @@ function getOppCards() {
   return cardsUsed;
 }
 
-function getPlayerCardsLeft() {
+function getPlayerUsedCards() {
   let cardsUsed = [];
   Object.keys(currentMatch.zones).forEach(key => {
     let zone = currentMatch.zones[key];
-    if (zone.objectInstanceIds && zone.type != "ZoneType_Limbo" && zone.type != "ZoneType_Revealed") {
+    if (
+      zone.objectInstanceIds &&
+      zone.type != "ZoneType_Limbo" &&
+      zone.type != "ZoneType_Revealed"
+    ) {
       zone.objectInstanceIds.forEach(id => {
         let grpId;
         try {
           let obj = currentMatch.gameObjs[id];
           if (obj.ownerSeatId == currentMatch.player.seat) {
             grpId = obj.grpId;
-            cardsUsed.push(cardsDb.get(grpId).name+" - "+zone.type);
+            //cardsUsed.push(cardsDb.get(grpId).name+" - "+zone.type);
+            cardsUsed.push(grpId);
           }
-          //cardsUsed.push(grpId);
         } catch (e) {
           //
         }
@@ -198,6 +332,7 @@ GREMessages.GREMessageType_GameStateMessage = function(msg) {
       currentMatch.annotations[annotation.id] = annotation;
     });
     processAnnotations();
+    removeProcessedAnnotations();
   }
 
   if (msg.gameStateMessage.type == "GameStateType_Full") {
