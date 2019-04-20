@@ -25,6 +25,10 @@ math.config({ precision: 2000 });
 const Database = require("../shared/database.js");
 const cardsDb = new Database();
 
+const Deck = require("../shared/deck.js");
+const CardsList = require("../shared/cards-list.js");
+const Colors = require("../shared/colors.js");
+
 const enums = {
   CounterType: {
     "1": "+1/+1",
@@ -2430,6 +2434,11 @@ function createDivision(classNames, innerHTML) {
     div.innerHTML = innerHTML;
   }
   return div;
+}
+
+//
+function objectClone(originalObject) {
+    return JSON.parse(JSON.stringify(originalObject));
 }
 
 //
