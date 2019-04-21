@@ -1,11 +1,18 @@
 /*
 globals
   actionLog,
+  actionLogGenerateAbilityLink,
   actionLogGenerateLink,
+  currentDeck,
   currentMatch,
   cloneDeep,
+  changePriority,
+  firstPass,
+  forceDeckUpdate,
+  gameStage,
   getNameBySeat,
-  actionLogGenerateAbilityLink
+  ipc,
+  update_deck
 */
 
 let actionType = [];
@@ -72,7 +79,7 @@ function processAnnotations() {
         }
       });
     } catch (e) {
-      console.log(ann, e);
+      //console.log(ann, e);
       processedOk = false;
     }
 
@@ -95,6 +102,8 @@ let annotationFunctions = {};
 annotationFunctions.AnnotationType_ObjectIdChanged = function(ann, details) {
   let newObj = cloneDeep(currentMatch.gameObjs[details.orig_id]);
   currentMatch.gameObjs[details.new_id] = newObj;
+
+  idChanges[details.orig_id] = details.new_id;
 };
 
 annotationFunctions.AnnotationType_ZoneTransfer = function(ann, details) {
@@ -208,6 +217,21 @@ annotationFunctions.AnnotationType_ZoneTransfer = function(ann, details) {
   }
 };
 
+annotationFunctions.AnnotationType_ResolutionStart = function(ann, details) {
+  let affected = currentMatch.gameObjs[ann.affectedIds[0]];
+  let grpId = details.grpid;
+
+  if (affected.type == "GameObjectType_Ability") {
+    actionLog(
+      affected.controllerSeatId,
+      false,
+      `${actionLogGenerateLink(
+        affected.objectSourceGrpId
+      )} 's ${actionLogGenerateAbilityLink(grpId)}`
+    );
+  }
+};
+
 annotationFunctions.AnnotationType_TargetSpec = function(ann) {
   let obj = currentMatch.gameObjs[ann.affectedIds[0]];
   let grpId = obj.grpId;
@@ -225,6 +249,7 @@ annotationFunctions.AnnotationType_TargetSpec = function(ann) {
   actionLog(seat, false, `${text} targetted ${actionLogGenerateLink(grpId)}`);
 };
 
+// Used for debug only.
 function processAll() {
   for (var i = 0; i < currentMatch.latestMessage; i++) {
     let message = currentMatch.GREtoClient[i];
@@ -240,13 +265,30 @@ function processAll() {
   currentMatch.oppCardsUsed = getOppUsedCards();
 }
 
-function GREMessage(msgId) {
+let logTime;
+function GREMessageByID(msgId, time) {
   let message = currentMatch.GREtoClient[msgId];
+  logTime = time;
 
   var fn = GREMessages[message.type];
   if (typeof fn == "function") {
     fn(message);
   }
+
+  currentMatch.playerCardsUsed = getPlayerUsedCards();
+  currentMatch.oppCardsUsed = getOppUsedCards();
+}
+
+function GREMessage(message, time) {
+  logTime = time;
+
+  var fn = GREMessages[message.type];
+  if (typeof fn == "function") {
+    fn(message);
+  }
+
+  currentMatch.playerCardsUsed = getPlayerUsedCards();
+  currentMatch.oppCardsUsed = getOppUsedCards();
 }
 
 function getOppUsedCards() {
@@ -258,7 +300,10 @@ function getOppUsedCards() {
         let grpId;
         try {
           let obj = currentMatch.gameObjs[id];
-          if (obj.ownerSeatId == currentMatch.opponent.seat) {
+          if (
+            obj.ownerSeatId == currentMatch.opponent.seat &&
+            obj.type == "GameObjectType_Card"
+          ) {
             grpId = obj.grpId;
             //cardsUsed.push(cardsDb.get(grpId).name+" - "+zone.type);
             cardsUsed.push(grpId);
@@ -285,7 +330,10 @@ function getPlayerUsedCards() {
         let grpId;
         try {
           let obj = currentMatch.gameObjs[id];
-          if (obj.ownerSeatId == currentMatch.player.seat) {
+          if (
+            obj.ownerSeatId == currentMatch.player.seat &&
+            obj.type == "GameObjectType_Card"
+          ) {
             grpId = obj.grpId;
             //cardsUsed.push(cardsDb.get(grpId).name+" - "+zone.type);
             cardsUsed.push(grpId);
@@ -303,6 +351,17 @@ let GREMessages = {};
 
 GREMessages.GREMessageType_GameStateMessage = function(msg) {
   let gameState = msg.gameStateMessage;
+
+  if (currentMatch.gameInfo) {
+    checkGameInfo(currentMatch.gameInfo);
+    currentMatch.gameInfo = gameState.gameInfo;
+  }
+
+  if (gameState.turnInfo) {
+    checkTurnDiff(gameState.turnInfo);
+    currentMatch.turnInfo = gameState.turnInfo;
+  }
+
   if (gameState.timers) {
     gameState.timers.forEach(timer => {
       currentMatch.timers[timer.timerId] = timer;
@@ -324,6 +383,7 @@ GREMessages.GREMessageType_GameStateMessage = function(msg) {
   if (gameState.gameObjects) {
     gameState.gameObjects.forEach(obj => {
       currentMatch.gameObjs[obj.instanceId] = obj;
+      instanceToCardIdMap[obj.instanceId] = obj.grpId;
     });
   }
 
@@ -331,28 +391,94 @@ GREMessages.GREMessageType_GameStateMessage = function(msg) {
     gameState.annotations.forEach(annotation => {
       currentMatch.annotations[annotation.id] = annotation;
     });
-    processAnnotations();
-    removeProcessedAnnotations();
   }
 
-  if (msg.gameStateMessage.type == "GameStateType_Full") {
-    GameStateType_Full(gameState);
-  } else if (gameState.type == "GameStateType_Diff") {
-    GameStateType_Diff(gameState);
-  }
+  processAnnotations();
+  removeProcessedAnnotations();
+  checkForStartingLibrary();
 
+  currentMatch.playerCardsLeft = currentMatch.player.deck.clone();
+  forceDeckUpdate();
+  update_deck(false);
   return true;
 };
 
-function GameStateType_Full(gameState) {
-  if (currentMatch.gameInfo) {
-    currentMatch.gameInfo = gameState.gameInfo;
+function checkForStartingLibrary() {
+  let zoneHand, zoneLibrary;
+  Object.keys(currentMatch.zones).forEach(key => {
+    let zone = currentMatch.zones[key];
+    if (zone.ownerSeatId == currentMatch.player.seat) {
+      if (zone.type == "ZoneType_Hand") zoneHand = zone;
+      if (zone.type == "ZoneType_Library") zoneLibrary = zone;
+    }
+  });
+
+  if (gameStage != "GameStage_Start") return;
+  if (!zoneHand.objectInstanceIds) return;
+  if (!zoneLibrary.objectInstanceIds) return;
+
+  let hand = zoneHand.objectInstanceIds || [];
+  let library = zoneLibrary.objectInstanceIds || [];
+  // Check that a post-mulligan scry hasn't been done
+  if (library.length == 0 || library[library.length - 1] < library[0]) return;
+
+  if (hand.length + library.length == currentDeck.mainboard.count()) {
+    if (hand.length >= 2 && hand[0] == hand[1] + 1) hand.reverse();
+    initialLibraryInstanceIds = [...hand, ...library];
   }
 }
 
-function GameStateType_Diff(gameState) {
-  if (gameState.turnInfo) {
-    currentMatch.turnInfo = gameState.turnInfo;
+function checkGameInfo(gameInfo) {
+  if (gameInfo.stage && gameInfo.stage != gameStage) {
+    gameStage = gameInfo.stage;
+    if (gameStage == "GameStage_Start") {
+      initialLibraryInstanceIds = [];
+      idChanges = {};
+      instanceToCardIdMap = {};
+    }
+  }
+  if (gameInfo.matchWinCondition) {
+    if (gameInfo.matchWinCondition == "MatchWinCondition_SingleElimination") {
+      currentMatch.bestOf = 1;
+    } else if (gameInfo.matchWinCondition == "MatchWinCondition_Best2of3") {
+      currentMatch.bestOf = 3;
+    } else {
+      currentMatch.bestOf = undefined;
+    }
+  }
+}
+
+function checkTurnDiff(turnInfo) {
+  if (currentMatch.turnInfo.turnNumber !== turnInfo.turnNumber) {
+    if (turnInfo.priorityPlayer !== currentMatch.turnInfo.currentPriority) {
+      changePriority(
+        turnInfo.priorityPlayer,
+        currentMatch.turnInfo.currentPriority,
+        logTime
+      );
+    }
+
+    actionLog(
+      -1,
+      false,
+      getNameBySeat(turnInfo.activePlayer) +
+        "'s turn begin. (#" +
+        turnInfo.turnNumber +
+        ")"
+    );
+  }
+
+  if (!firstPass) {
+    ipc.send(
+      "set_turn",
+      currentMatch.player.seat,
+      turnInfo.phase,
+      turnInfo.step,
+      turnInfo.turnNumber,
+      turnInfo.activePlayer,
+      turnInfo.priorityPlayer,
+      turnInfo.decisionPlayer
+    );
   }
 }
 
@@ -373,8 +499,43 @@ GREMessages.GREMessageType_PromptReq = function() {};
 GREMessages.GREMessageType_Revealhandreq = function() {};
 
 GREMessages.GREMessageType_Selectnreq = function() {};
-
-GREMessages.GREMessageType_Declareattackersreq = function() {};
+/*
+GREMessages.GREMessageType_DeclareAttackersReq = function(msg) {
+  msg.declareAttackersReq.attackers.forEach(attacker => {
+    let obj = currentMatch.gameObjs[attacker.attackerInstanceId];
+    let recipient = "";
+    if (attacker.legalDamageRecipients) {
+      if (attacker.legalDamageRecipients[0].type == "DamageRecType_Player") {
+          recipient = getNameBySeat(
+            attacker.legalDamageRecipients[0].playerSystemSeatId
+          );
+        }
+        if (attacker.legalDamageRecipients[0].type == "DamageRecType_Planeswalker") {
+          recipient = actionLogGenerateLink(
+            attacker.legalDamageRecipients[0].planeswalkerinstanceid
+          );
+        }
+    }
+    else {
+      if (attacker.selectedDamageRecipient.type == "DamageRecType_Player") {
+        recipient = getNameBySeat(
+          attacker.selectedDamageRecipient.playerSystemSeatId
+        );
+      }
+      if (attacker.selectedDamageRecipient.type == "DamageRecType_Planeswalker") {
+        recipient = actionLogGenerateLink(
+          attacker.selectedDamageRecipient.planeswalkerinstanceid
+        );
+      }
+    }
+    actionLog(
+      obj.controllerSeatId,
+      false,
+      `${actionLogGenerateLink(obj.grpId)} attacked ${recipient}`
+    );
+  });
+};
+*/
 
 GREMessages.GREMessageType_Submitattackersresp = function() {};
 
