@@ -973,9 +973,15 @@ function showLoadingBars() {
   $$(".main_loading")[0].style.display = "block";
 }
 
+//
+ipc.on("show_loading", () => showLoadingBars());
+
 function hideLoadingBars() {
   $$(".main_loading")[0].style.display = "none";
 }
+
+//
+ipc.on("hide_loading", () => hideLoadingBars());
 
 //
 ipc.on("set_draft_link", function(event, arg) {
@@ -2115,7 +2121,7 @@ function open_settings(openSection) {
   );
   add_checkbox(
     section,
-    "Persistent overlay <i>(useful for OBS setup)</i>",
+    "Persistent overlay&nbsp;<i>(useful for OBS setup)</i>",
     "settings_showoverlayalways",
     settings.show_overlay_always
   );
@@ -2230,7 +2236,7 @@ function open_settings(openSection) {
 
   colorPick.on("move.spectrum", function(e, color) {
     $(".main_wrapper").css("background-color", color.toRgbString());
-    updateUsersettings();
+    updateUserSettings();
   });
 
   label = $('<label class="but_container_label">Cards quality:</label>');
@@ -2280,13 +2286,13 @@ function open_settings(openSection) {
   section.append('<div class="settings_title">Privacy</div>');
   add_checkbox(
     section,
-    "Anonymous sharing <i>(makes your username anonymous on Explore)</i>",
+    "Anonymous sharing&nbsp;<i>(makes your username anonymous on Explore)</i>",
     "settings_anon_explore",
     settings.anon_explore
   );
   add_checkbox(
     section,
-    "Online sharing <i>(when disabled, blocks any connections with our servers)</i>",
+    "Online sharing&nbsp;<i>(when disabled, blocks any connections with our servers)</i>",
     "settings_senddata",
     settings.send_data
   );
@@ -2440,12 +2446,12 @@ function open_settings(openSection) {
 
   url_input.on("keyup", function(e) {
     if (e.keyCode == 13) {
-      updateUsersettings();
+      updateUserSettings();
     }
   });
 
   export_input.on("keyup", function() {
-    updateUsersettings();
+    updateUserSettings();
   });
 
   $(".sliderA").off();
@@ -2468,7 +2474,7 @@ function open_settings(openSection) {
 
   $(".sliderA").on("click mouseup", function() {
     cardSizePos = Math.round(parseInt(this.value));
-    updateUsersettings();
+    updateUserSettings();
   });
 
   $(".sliderB").off();
@@ -2482,7 +2488,7 @@ function open_settings(openSection) {
 
   $(".sliderB").on("click mouseup", function() {
     overlayAlpha = alphaFromTransparency(parseInt(this.value));
-    updateUsersettings();
+    updateUserSettings();
   });
 
   $(".sliderC").on("click mousemove", function() {
@@ -2496,7 +2502,7 @@ function open_settings(openSection) {
 
   $(".sliderC").on("click mouseup", function() {
     overlayAlphaBack = alphaFromTransparency(parseInt(this.value));
-    updateUsersettings();
+    updateUserSettings();
   });
 
   $(".sliderD").off();
@@ -2508,7 +2514,7 @@ function open_settings(openSection) {
 
   $(".sliderD").on("click mouseup", function() {
     overlayScale = parseInt(this.value);
-    updateUsersettings();
+    updateUserSettings();
   });
 
   $(".sliderSoundVolume").off();
@@ -2519,7 +2525,7 @@ function open_settings(openSection) {
     );
     let { Howl, Howler } = require("howler");
     let sound = new Howl({ src: ["../sounds/blip.mp3"] });
-    updateUsersettings();
+    updateUserSettings();
     Howler.volume(settings.sound_priority_volume);
     sound.play();
   });
@@ -2597,7 +2603,7 @@ function changeQuality(dom) {
     cardQuality = "normal";
   }
   dom.innerHTML = cardQuality;
-  updateUsersettings();
+  updateUserSettings();
   open_settings(lastSettingsSection);
 }
 

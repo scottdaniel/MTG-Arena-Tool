@@ -279,6 +279,7 @@ function ipc_send(method, arg, to = windowRenderer) {
 
 //
 ipc.on("save_app_settings", function(event, arg) {
+  ipc_send("show_loading");
   const rSettings = rstore.get("settings");
   const updated = { ...rSettings, ...arg };
 
@@ -286,9 +287,10 @@ ipc.on("save_app_settings", function(event, arg) {
     rstore.set("email", "");
     rstore.set("token", "");
   }
-
+  
+  loadSettings(updated);
   rstore.set("settings", updated);
-  loadSettings();
+  ipc_send("hide_loading");
 });
 
 //
@@ -380,8 +382,10 @@ ipc.on("overlayBounds", function(event, obj) {
 
 //
 ipc.on("save_user_settings", function(event, settings) {
+  ipc_send("show_loading");
+  loadSettings(settings);
   store.set("settings", settings);
-  loadSettings();
+  ipc_send("hide_loading");
 });
 
 //
@@ -391,17 +395,20 @@ ipc.on("delete_data", function() {
 
 //
 ipc.on("delete_course", function(event, arg) {
+  ipc_send("show_loading");
   var i = events.courses.indexOf(arg);
   if (i > -1) {
     events.courses.splice(i, 1);
     store.set("courses_index", events.courses);
     store.delete(arg);
   }
+  ipc_send("hide_loading");
   //console.log("Delete ", arg);
 });
 
 //
 ipc.on("delete_deck", function(event, arg) {
+  ipc_send("show_loading");
   var i = decks.index.indexOf(arg);
   if (i > -1) {
     decks.index.splice(i, 1);
@@ -412,11 +419,13 @@ ipc.on("delete_deck", function(event, arg) {
   // If we do it imediately it looks awful
   setTimeout(() => {
     ipc_send("set_decks", JSON.stringify(decks));
+    ipc_send("hide_loading");
   }, 200);
 });
 
 //
 ipc.on("delete_match", function(event, arg) {
+  ipc_send("show_loading");
   var i = history.matches.indexOf(arg);
   if (i > -1) {
     history.matches.splice(i, 1);
@@ -429,6 +438,7 @@ ipc.on("delete_match", function(event, arg) {
     store.set("draft_index", drafts.matches);
     store.delete(arg);
   }
+  ipc_send("hide_loading");
 });
 
 //
@@ -893,13 +903,20 @@ function syncUserData(data) {
 }
 
 // Loads and combines settings variables, sends result to display
-function loadSettings() {
-  // Blends together default, user, and app config
+function loadSettings(dirtySettings = {}) {
+  // Blends together default, user, app, and optional dirty config
+  // "dirty" config may be a subset, which allows early UI updates
+  //  to make UI responsive without waiting for slow store IO
   // Since settings have migrated between areas, collisions happen
-  // Order of precedence is: app > user > defaults
+  // Order of precedence is: dirty > app > user > defaults
   const settings = store.get("settings");
   const rSettings = rstore.get("settings");
-  const _settings = { ...defaultCfg.settings, ...settings, ...rSettings };
+  const _settings = {
+    ...defaultCfg.settings,
+    ...settings,
+    ...rSettings,
+    ...dirtySettings
+  };
 
   if (_settings.decks_last_used == undefined) _settings.decks_last_used = [];
 
