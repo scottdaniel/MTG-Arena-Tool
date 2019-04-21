@@ -39,10 +39,10 @@ function onLabelOutLogInfo(entry, json) {
 
       if (gameNumberCompleted > 1) {
         let deckDiff = {};
-        currentMatch.player.deck.mainDeck.forEach(card => {
+        currentMatch.player.deck.mainboard.get().forEach(card => {
           deckDiff[card.id] = card.quantity;
         });
-        currentMatch.player.originalDeck.mainDeck.forEach(card => {
+        currentMatch.player.originalDeck.mainboard.get().forEach(card => {
           deckDiff[card.id] = (deckDiff[card.id] || 0) - card.quantity;
         });
         matchGameStats.forEach((stats, i) => {
@@ -72,7 +72,7 @@ function onLabelOutLogInfo(entry, json) {
         });
 
         game.sideboardChanges = sideboardChanges;
-        game.deck = JSON.parse(JSON.stringify(currentMatch.player.deck));
+        game.deck = JSON.parse(JSON.stringify(currentMatch.player.deck.getSave()));
       }
 
       game.handLands = game.handsDrawn.map(
@@ -84,7 +84,7 @@ function onLabelOutLogInfo(entry, json) {
       let landsInDeck = 0;
       let multiCardPositions = { "2": {}, "3": {}, "4": {} };
       let cardCounts = {};
-      currentMatch.player.deck.mainDeck.forEach(card => {
+      currentMatch.player.deck.mainboard.get().forEach(card => {
         cardCounts[card.id] = card.quantity;
         deckSize += card.quantity;
         if (card.quantity >= 2 && card.quantity <= 4) {
@@ -135,529 +135,18 @@ function onLabelGreToClient(entry, json) {
 
   json = json.greToClientEvent.greToClientMessages;
   json.forEach(function(msg) {
-    //console.log("Message: "+msg.msgId, msg);
-    // Sometimes Gre messages have many bulked messages at once
-    // Process each individually
-
-    // Nothing here..
-    if (msg.type == "GREMessageType_SubmitDeckReq") {
-      currentMatch.gameObjs = {};
-    }
-
-    if (msg.type == "GREMessageType_DieRollResultsResp") {
-      if (msg.dieRollResultsResp) {
-        let highest = msg.dieRollResultsResp.playerDieRolls.reduce((a, b) => { if (a.rollValue > b.rollValue) return a; else return b;});
-        currentMatch.onThePlay = highest.systemSeatId;
-      }
-    }
-
-    // Declare attackers message
-    if (msg.type == "GREMessageType_DeclareAttackersReq") {
-      msg.declareAttackersReq.attackers.forEach(function(obj) {
-        let att = obj.attackerInstanceId;
-        if (!attackersDetected.includes(att)) {
-          if (currentMatch.gameObjs[att] != undefined) {
-            let str =
-              actionLogGenerateLink(currentMatch.gameObjs[att].grpId) +
-              " attacked ";
-            let rec;
-            if (obj.selectedDamageRecipient !== undefined) {
-              rec = obj.selectedDamageRecipient;
-              if (rec.type == "DamageRecType_Player") {
-                actionLog(
-                  currentMatch.gameObjs[att].controllerSeatId,
-                  new Date(),
-                  str + getNameBySeat(rec.playerSystemSeatId)
-                );
-                //ipc_send("", str+getNameBySeat(rec.playerSystemSeatId));
-              }
-            }
-            if (obj.legalDamageRecipients !== undefined) {
-              rec = obj.legalDamageRecipients.forEach(function(rec) {
-                if (rec.type == "DamageRecType_Player") {
-                  actionLog(
-                    currentMatch.gameObjs[att].controllerSeatId,
-                    new Date(),
-                    str + getNameBySeat(rec.playerSystemSeatId)
-                  );
-                  //ipc_send("ipc_log", str+getNameBySeat(rec.playerSystemSeatId));
-                }
-              });
-            }
-            attackersDetected.push(att);
-          }
-        }
-      });
-    }
-
-    // An update about the game state, can either be;
-    // - A change (diff)
-    // - The entire board state (full)
-    // - binary (we dont check that one)
-    if (msg.type == "GREMessageType_GameStateMessage") {
-      if (msg.gameStateMessage.gameInfo) {
-        let gameInfo = msg.gameStateMessage.gameInfo;
-        if (gameInfo.stage && gameInfo.stage != gameStage) {
-          gameStage = gameInfo.stage;
-          if (gameStage == "GameStage_Start") {
-            resetGameState();
-          }
-        }
-        if (gameInfo.matchWinCondition) {
-          if (
-            gameInfo.matchWinCondition == "MatchWinCondition_SingleElimination"
-          ) {
-            currentMatchBestOfNumber = 1;
-            currentMatch.bestOf = 1;
-          } else if (
-            gameInfo.matchWinCondition == "MatchWinCondition_Best2of3"
-          ) {
-            currentMatchBestOfNumber = 3;
-            currentMatch.bestOf = 3;
-          } else {
-            currentMatch.bestOf = undefined;
-            currentMatchBestOfNumber = undefined;
-          }
-        }
-      }
-
-      if (msg.gameStateMessage.type == "GameStateType_Full") {
-        // For the full board state we only update the zones
-        // We DO NOT update currentMatch.gameObjs array here, this is because sometimes cards become invisible for us
-        // and updating the entire currentMatch.gameObjs array to what the server says we should be looking at will remove those from our view
-        // This includes also cards and actions we STILL havent processed!
-
-        if (msg.gameStateMessage.zones != undefined) {
-          msg.gameStateMessage.zones.forEach(function(zone) {
-            currentMatch.zones[zone.zoneId] = zone;
-            currentMatch.zones[zone.type + (zone.ownerSeatId || "")] = zone;
-          });
-        }
-      } else if (msg.gameStateMessage.type == "GameStateType_Diff") {
-        // Most game updates happen here
-        // Sometimes, especially with annotations, stuff gets sent to us repeatedly
-        // Like if we recieve an object moved from zone A to B , we may recieve the same message many times
-        // So we should be careful reading stuff as it may:
-        // - not be unique
-        // - reference changes we still havent recieved
-        // - reference objects that may be deleted
-
-        if (msg.gameStateMessage.turnInfo != undefined) {
-          if (
-            msg.gameStateMessage.turnInfo.priorityPlayer !==
-            currentMatch.currentPriority
-          ) {
-            changePriority(
-              msg.gameStateMessage.turnInfo.priorityPlayer,
-              currentMatch.currentPriority,
-              logTime
-            );
-          }
-          currentMatch.prevTurn = currentMatch.turn.turnNumber;
-          currentMatch.turn = msg.gameStateMessage.turnInfo;
-          // turnPhase = msg.gameStateMessage.turnInfo.phase;
-          // turnStep = msg.gameStateMessage.turnInfo.step;
-          // turnNumber = msg.gameStateMessage.turnInfo.turnNumber;
-          // turnActive = msg.gameStateMessage.turnInfo.activePlayer;
-          // currentMatch.currentPriority = msg.gameStateMessage.turnInfo.priorityPlayer;
-          // turnDecision = msg.gameStateMessage.turnInfo.decisionPlayer;
-
-          if (
-            currentMatch.turn.turnNumber != undefined &&
-            currentMatch.prevTurn !== currentMatch.turn.turnNumber
-          ) {
-            attackersDetected = [];
-            actionLog(
-              -1,
-              new Date(),
-              getNameBySeat(currentMatch.turn.activePlayer) +
-                "'s turn begin. (#" +
-                currentMatch.turn.turnNumber +
-                ")"
-            );
-            //ipc_send("ipc_log", playerName+"'s turn begin. (#"+turnNumber+")");
-          }
-          if (!firstPass) {
-            ipc.send(
-              "set_turn",
-              currentMatch.player.seat,
-              currentMatch.turn.phase,
-              currentMatch.turn.step,
-              currentMatch.turn.turnNumber,
-              currentMatch.turn.activePlayer,
-              currentMatch.turn.priorityPlayer,
-              currentMatch.turn.decisionPlayer
-            );
-          }
-        }
-
-        if (msg.gameStateMessage.gameInfo != undefined) {
-          let gameInfo = msg.gameStateMessage.gameInfo;
-
-          if (gameInfo.stage == "GameStage_GameOver") {
-            //console.log("gameInfo", gameInfo);
-            if (gameInfo.matchState == "MatchState_GameComplete") {
-              playerWin = 0;
-              draws = 0;
-              oppWin = 0;
-              // game end
-              let results = gameInfo.results;
-              currentMatch.results = gameInfo.results;
-
-              results.forEach(function(res, index) {
-                //console.log(res, index);
-                if (res.scope == "MatchScope_Game") {
-                  if (res.result == "ResultType_Draw") {
-                    if (index == gameInfo.gameNumber - 1) {
-                      actionLog(-1, new Date(), "The game is a draw!");
-                    }
-                    draws += 1;
-                  } else {
-                    let loser = 0;
-                    if (index == gameInfo.gameNumber - 1) {
-                      actionLog(
-                        -1,
-                        new Date(),
-                        getNameBySeat(res.winningTeamId) + " wins!"
-                      );
-                    }
-                    if (res.winningTeamId == currentMatch.player.seat) {
-                      loser = currentMatch.opponent.seat;
-                      playerWin += 1;
-                    }
-                    if (res.winningTeamId == currentMatch.opponent.seat) {
-                      loser = currentMatch.player.seat;
-                      oppWin += 1;
-                    }
-
-                    if (res.reason == "ResultReason_Concede") {
-                      actionLog(
-                        -1,
-                        new Date(),
-                        getNameBySeat(loser) + " conceded."
-                      );
-                    }
-                    if (res.reason == "ResultReason_Timeout") {
-                      actionLog(
-                        -1,
-                        new Date(),
-                        getNameBySeat(loser) + " timed out."
-                      );
-                    }
-                    if (res.reason == "ResultReason_Loop") {
-                      actionLog(-1, new Date(), "Game ended in a loop.");
-                    }
-                  }
-                }
-              });
-            }
-            if (gameInfo.matchState == "MatchState_MatchComplete") {
-              // match end
-              duringMatch = false;
-
-              ipc_send("save_overlay_pos", 1);
-              clear_deck();
-              if (!store.get("settings.show_overlay_always")) {
-                ipc_send("overlay_close", 1);
-              }
-
-              currentMatch.game = gameInfo.gameNumber; // probably wrong
-              matchCompletedOnGameNumber = gameInfo.gameNumber;
-              saveMatch(gameInfo.matchID + "-" + playerData.arenaId);
-            }
-          }
-        }
-
-        if (msg.gameStateMessage.annotations != undefined) {
-          msg.gameStateMessage.annotations.forEach(function(obj) {
-            let affector = obj.affectorId;
-            let affected = obj.affectedIds;
-
-            if (affected != undefined) {
-              affected.forEach(function(aff) {
-                // An object ID changed, create new object and move it
-                if (obj.type.includes("AnnotationType_ObjectIdChanged")) {
-                  var _orig = undefined;
-                  var _new = undefined;
-                  obj.details.forEach(function(detail) {
-                    if (detail.key == "orig_id") {
-                      _orig = detail.valueInt32[0];
-                    }
-                    if (detail.key == "new_id") {
-                      _new = detail.valueInt32[0];
-                    }
-                  });
-
-                  if (_orig == undefined || _new == undefined) {
-                    console.log("undefined value: ", obj);
-                  } else if (currentMatch.gameObjs[_orig] != undefined) {
-                    //console.log("AnnotationType_ObjectIdChanged", aff, _orig, _new, currentMatch.gameObjs[_orig], currentMatch.gameObjs);
-                    currentMatch.gameObjs[_new] = JSON.parse(
-                      JSON.stringify(currentMatch.gameObjs[_orig])
-                    );
-                    //currentMatch.gameObjs[_orig] = undefined;
-                  }
-
-                  if (_orig != undefined && _new != undefined) {
-                    idChanges[_orig] = _new;
-                  }
-                }
-
-                // An object changed zone, here we only update the currentMatch.gameObjs array
-                if (obj.type.includes("AnnotationType_EnteredZoneThisTurn")) {
-                  if (
-                    currentMatch.gameObjs[aff] &&
-                    currentMatch.zones[affector]
-                  ) {
-                    //console.log("AnnotationType_EnteredZoneThisTurn", aff, affector, currentMatch.gameObjs[aff], currentMatch.zones[affector], currentMatch.gameObjs);
-                    currentMatch.gameObjs[aff].zoneId = affector;
-                    currentMatch.gameObjs[aff].zoneName =
-                      currentMatch.zones[affector].type;
-                  }
-                }
-
-                if (obj.type.includes("AnnotationType_ResolutionStart")) {
-                  var grpid = undefined;
-                  obj.details.forEach(function(detail) {
-                    if (detail.key == "grpid") {
-                      grpid = detail.valueInt32[0];
-                    }
-                  });
-                  if (grpid != undefined) {
-                    //let card = cardsDb.get(grpid);
-                    aff = obj.affectorId;
-                    //var pn = currentMatch.opponent.name;
-                    if (currentMatch.gameObjs[aff] != undefined) {
-                      // We ooly check for abilities here, since cards and spells are better processed with "AnnotationType_ZoneTransfer"
-                      if (
-                        currentMatch.gameObjs[aff].type ==
-                        "GameObjectType_Ability"
-                      ) {
-                        var src = currentMatch.gameObjs[aff].objectSourceGrpId;
-                        var abId = currentMatch.gameObjs[aff].grpId;
-                        var ab = cardsDb.getAbility(abId);
-                        //var cname = "";
-                        try {
-                          ab = replaceAll(
-                            ab,
-                            "CARDNAME",
-                            cardsDb.get(src).name
-                          );
-                        } catch (e) {
-                          //
-                        }
-
-                        actionLog(
-                          currentMatch.gameObjs[aff].controllerSeatId,
-                          new Date(),
-                          actionLogGenerateLink(src) +
-                            '\'s <a class="card_ability click-on" title="' +
-                            ab +
-                            '">ability</a>'
-                        );
-                        //ipc_send("ipc_log", cardsDb.get(src).name+"'s ability");
-                        //console.log(cardsDb.get(src).name+"'s ability", currentMatch.gameObjs[aff]);
-                      } else {
-                        //actionLog(currentMatch.gameObjs[aff].controllerSeatId, new Date(), getNameBySeat(currentMatch.gameObjs[aff].controllerSeatId)+" cast "+card.name);
-                        //ipc_send("ipc_log", currentMatch.gameObjs[aff].controllerSeatId+" cast "+card.name);
-                        //console.log(getNameBySeat(currentMatch.gameObjs[aff].controllerSeatId)+" cast "+card.name, currentMatch.gameObjs[aff]);
-                      }
-                    }
-                  }
-                }
-
-                /*
-                // Life total changed, see below (msg.gameStateMessage.players) 
-                // Not optimal, this triggers too many times
-                if (obj.type.includes("AnnotationType_ModifiedLife")) {
-                  obj.details.forEach(function(detail) {
-                    if (detail.key == "life") {
-                      var change = detail.valueInt32[0];
-                      if (change < 0) {
-                        actionLog(aff, new Date(), getNameBySeat(aff)+' lost '+Math.abs(change)+' life');
-                      }
-                      else {
-                        actionLog(aff, new Date(), getNameBySeat(aff)+' gained '+Math.abs(change)+' life');
-                      }
-                    }
-                  });
-                }
-                */
-
-                // Something moved between zones
-                // This requires some "async" work, as data referenced by annotations sometimes has future data
-                // That is , data we have already recieved and still havent processed (particularly, game objects)
-                if (obj.type.includes("AnnotationType_ZoneTransfer")) {
-                  obj.remove = false;
-                  obj.aff = aff;
-                  obj.time = new Date();
-                  zoneTransfers.push(obj);
-                }
-
-                if (obj.type.includes("AnnotationType_DamageDealt")) {
-                  var aff = obj.affectorId;
-                  var affected = obj.affectedIds;
-                  var damage = 0;
-                  obj.details.forEach(function(detail) {
-                    if (detail.key == "damage") {
-                      damage = detail.valueInt32[0];
-                    }
-                  });
-
-                  affected.forEach(function(affd) {
-                    if (currentMatch.gameObjs[aff] !== undefined) {
-                      try {
-                        if (
-                          affd == currentMatch.player.seat ||
-                          affd == currentMatch.opponent.seat
-                        ) {
-                          actionLog(
-                            currentMatch.gameObjs[aff].controllerSeatId,
-                            new Date(),
-                            actionLogGenerateLink(
-                              currentMatch.gameObjs[aff].grpId
-                            ) +
-                              " dealt " +
-                              damage +
-                              " damage to " +
-                              getNameBySeat(affd)
-                          );
-                          //ipc_send("ipc_log", currentMatch.gameObjs[aff].name+" dealt "+damage+" damage to "+getNameBySeat(affd));
-                        } else {
-                          actionLog(
-                            currentMatch.gameObjs[aff].controllerSeatId,
-                            new Date(),
-                            actionLogGenerateLink(
-                              currentMatch.gameObjs[aff].grpId
-                            ) +
-                              " dealt " +
-                              damage +
-                              " damage to " +
-                              actionLogGenerateLink(
-                                currentMatch.gameObjs[affd].grpId
-                              )
-                          );
-                          //ipc_send("ipc_log", currentMatch.gameObjs[aff].name+" dealt "+damage+" damage to "+currentMatch.gameObjs[affd]);
-                        }
-                      } catch (e) {
-                        //
-                      }
-                    }
-                  });
-                }
-              });
-            }
-          });
-        }
-
-        // Update the zones
-        // Each zone has every object ID that lives inside that zone
-        // Sometimes object IDs we dont have any data from are here
-        // So, for example, a card in the opp library HAS an ID in its zone, but we just dont have any data about it
-        if (msg.gameStateMessage.zones != undefined) {
-          //ipc_send("ipc_log", "Zones updated");
-          msg.gameStateMessage.zones.forEach(function(zone) {
-            currentMatch.zones[zone.zoneId] = zone;
-            currentMatch.zones[zone.type + (zone.ownerSeatId || "")] = zone;
-            if (zone.objectInstanceIds != undefined) {
-              zone.objectInstanceIds.forEach(function(objId) {
-                if (currentMatch.gameObjs[objId] != undefined) {
-                  currentMatch.gameObjs[objId].zoneId = zone.zoneId;
-                  currentMatch.gameObjs[objId].zoneName = zone.type;
-                }
-              });
-            }
-          });
-        }
-
-        // Update the game objects
-        if (msg.gameStateMessage.gameObjects != undefined) {
-          msg.gameStateMessage.gameObjects.forEach(function(obj) {
-            instanceToCardIdMap[obj.instanceId] = obj.grpId;
-            let name = cardsDb.get(obj.grpId).name;
-            if (name) {
-              obj.name = name;
-            }
-
-            // This should be a delayed check
-            try {
-              obj.zoneName = currentMatch.zones[obj.zoneId].type;
-              currentMatch.gameObjs[obj.instanceId] = obj;
-            } catch (e) {
-              //
-            }
-
-            //ipc_send("ipc_log", "Message: "+msg.msgId+" > ("+obj.instanceId+") created at "+currentMatch.zones[obj.zoneId].type);
-          });
-        }
-
-        // An object has been deleted
-        // Removing this caused some objects to end up duplicated , unfortunately
-        if (msg.gameStateMessage.diffDeletedInstanceIds != undefined) {
-          msg.gameStateMessage.diffDeletedInstanceIds.forEach(function(obj) {
-            currentMatch.gameObjs[obj] = undefined;
-          });
-        }
-
-        // Players data update
-        // We only read life totals at the moment, but we also get timers and such
-        if (msg.gameStateMessage.players != undefined) {
-          msg.gameStateMessage.players.forEach(function(obj) {
-            let sign = "";
-            let diff;
-            if (currentMatch.player.seat == obj.controllerSeatId) {
-              diff = obj.lifeTotal - playerLife;
-              if (diff > 0) sign = "+";
-
-              if (diff != 0) {
-                actionLog(
-                  obj.controllerSeatId,
-                  new Date(),
-                  getNameBySeat(obj.controllerSeatId) +
-                    "'s life changed to " +
-                    obj.lifeTotal +
-                    " (" +
-                    sign +
-                    diff +
-                    ")"
-                );
-              }
-
-              playerLife = obj.lifeTotal;
-            } else {
-              diff = obj.lifeTotal - opponentLife;
-              if (diff > 0) sign = "+";
-              if (diff != 0) {
-                actionLog(
-                  obj.controllerSeatId,
-                  new Date(),
-                  getNameBySeat(obj.controllerSeatId) +
-                    "'s life changed to " +
-                    obj.lifeTotal +
-                    " (" +
-                    sign +
-                    diff +
-                    ")"
-                );
-              }
-
-              opponentLife = obj.lifeTotal;
-            }
-          });
-        }
-      }
-      checkForStartingLibrary();
-    }
+    greToClientInterpreter.GREMessage(msg, logTime);
+    /*
+    let msgId = msg.msgId;
+    currentMatch.GREtoClient[msgId] = msg;
+    currentMatch.latestMessage = msgId;
+    greToClientInterpreter.GREMessageByID(msg, logTime);
+    */
   });
-  tryZoneTransfers();
-
-  var str = JSON.stringify(currentMatch.player.deck);
-  currentMatch.playerCards = JSON.parse(str);
-  forceDeckUpdate();
-  update_deck(false);
 }
 
 function onLabelClientToMatchServiceMessageTypeClientToGREMessage(entry, json) {
+  //
   if (!json) return;
   if (skipMatch) return;
   if (json.Payload) {
@@ -672,33 +161,19 @@ function onLabelClientToMatchServiceMessageTypeClientToGREMessage(entry, json) {
 
   if (json.payload.submitdeckresp) {
     // Get sideboard changes
-    let deckResp = json.payload.submitdeckresp;
+    let deckResp = json.payload.submitdeckresp.deck;
 
-    let newDeck = { mainDeck: [], sideboard: [] };
-    let card = { id: 0, quantity: 0 };
-
-    deckResp.deck.deckcards.forEach(grpId => {
-      if (card.id === grpId) {
-        card.quantity++;
-      } else {
-        card = { id: grpId, quantity: 1 };
-        newDeck.mainDeck.push(card);
-      }
-    });
-    if (deckResp.deck.sideboardcards !== undefined) {
-      card = { id: 0, quantity: 0 };
-      deckResp.deck.sideboardcards.forEach(grpId => {
-        if (card.id === grpId) {
-          card.quantity++;
-        } else {
-          card = { id: grpId, quantity: 1 };
-          newDeck.sideboard.push(card);
-        }
-      });
-    }
+    let tempMain = new CardsList(deckResp.deckcards);
+    let tempSide = new CardsList(deckResp.sideboardcards);
+    let newDeck = currentMatch.player.deck.clone();
+    newDeck.mainboard = tempMain;
+    newDeck.sideboard = tempSide;
+    newDeck.mainboard.removeDuplicates();
+    newDeck.sideboard.removeDuplicates();
+    newDeck.getColors();
 
     currentMatch.player.deck = newDeck;
-    ipc_send("set_deck", currentMatch.player.deck, windowOverlay);
+    console.log("> ", currentMatch.player.deck);
   }
 }
 
@@ -1097,7 +572,6 @@ function onLabelOutDraftMakePick(entry, json) {
   value.pack = currentDraft.currentPack;
   var key = "pack_" + json.params.packNumber + "pick_" + json.params.pickNumber;
   currentDraft[key] = value;
-  debugLogSpeed = 200;
 }
 
 function onLabelInEventCompleteDraft(entry, json) {

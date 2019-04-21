@@ -1,6 +1,9 @@
 /*
 global
   cardsDb,
+  compare_archetypes,
+  Deck,
+  eventsToFormat,
   stripTags,
   windowBackground,
   windowRenderer,
@@ -10,8 +13,7 @@ global
   hypergeometricRange,
   onLabelOutLogInfo,
   onLabelGreToClient,
-  eventsToFormat,
-  compare_archetypes,
+  objectClone,
   onLabelClientToMatchServiceMessageTypeClientToGREMessage,
   onLabelInEventGetPlayerCourse,
   onLabelInEventGetPlayerCourseV2,
@@ -59,6 +61,7 @@ const cloneDeep = require("lodash.clonedeep");
 
 const httpApi = require("./http-api");
 const manifestParser = require("./manifest-parser");
+const greToClientInterpreter = require("./gre-to-client-interpreter");
 
 const rememberCfg = {
   email: "",
@@ -137,7 +140,7 @@ var settingsStore = new Store({
 
 const debugLog = false;
 const debugNet = true;
-var debugLogSpeed = 0.1;
+var debugLogSpeed = 0.001;
 
 const actionLogDir = path.join(
   (electron.app || electron.remote.app).getPath("userData"),
@@ -161,12 +164,21 @@ var currentMatchDefault = {
   priorityTimers: [0, 0, 0, 0, 0],
   lastPriorityChangeTime: 0,
   results: [],
-  zones: {},
-  gameObjs: {},
-  turn: {},
-  playerCards: {},
+  playerChances: {},
+  playerCardsLeft: {},
   oppCards: {},
   onThePlay: 0,
+  GREtoClient: {},
+  processedAnnotations: [],
+  timers: {},
+  zones: {},
+  players: {},
+  annotations: [],
+  gameObjs: {},
+  gameInfo: {},
+  turnInfo: {},
+  playerCardsUsed: [],
+  oppCardsUsed: [],
   player: {
     seat: 1,
     deck: { mainDeck: [], sideboard: [] },
@@ -216,11 +228,10 @@ var matchBeginTime = 0;
 var matchGameStats = [];
 var matchCompletedOnGameNumber = 0;
 var gameNumberCompleted = 0;
-
-var gameStage = "";
-var initialLibraryInstanceIds = [];
-var idChanges = {};
-var instanceToCardIdMap = {};
+let gameStage = "";
+let initialLibraryInstanceIds = [];
+let idChanges = {};
+let instanceToCardIdMap = {};
 
 var history = {};
 var drafts = {};
@@ -244,7 +255,6 @@ var wcUncommon = 0;
 var wcRare = 0;
 var wcMythic = 0;
 
-var overlayDeckMode = 0;
 var lastDeckUpdate = new Date();
 
 let formats = {
@@ -656,11 +666,6 @@ ipc.on("add_history_tag", function(event, arg) {
 
   httpApi.httpSetDeckTag(arg.name, match.oppDeck.mainDeck, match.eventId);
   store.set(arg.match, match);
-});
-
-ipc.on("set_deck_mode", function(event, state) {
-  overlayDeckMode = state;
-  update_deck(true);
 });
 
 let odds_sample_size = 1;
@@ -1379,10 +1384,16 @@ function actionLogGenerateLink(grpId) {
   );
 }
 
+function actionLogGenerateAbilityLink(abId) {
+  var ab = cardsDb.getAbility(abId);
+  return `<a class="card_ability click-on" title="${ab}">ability</a>`;
+}
+
 var currentActionLog = "";
 
 // Send action log data to overlay
 function actionLog(seat, time, str, grpId = 0) {
+  if (!time) time = new Date();
   if (seat == -99) {
     currentActionLog = "";
   } else {
@@ -1409,127 +1420,6 @@ function actionLog(seat, time, str, grpId = 0) {
     { seat: seat, time: time, str: str, grpId: grpId },
     windowOverlay
   );
-}
-
-var attackersDetected = [];
-var zoneTransfers = [];
-
-// Process zone transfers
-// Sometimes GreToClient sends data about transfers when they havent been reported elsewhere
-// Here we check if the object ID the transfer refers to exists in the main objects array and process it if it does
-function tryZoneTransfers() {
-  zoneTransfers.forEach(function(obj) {
-    var _dest,
-      _cat = undefined;
-    var cname = "";
-    var grpid = 0;
-    var removeFromListAnyway = false;
-    var removeFromList = true;
-
-    var owner = -1;
-    try {
-      owner = currentMatch.gameObjs[obj.affectorId].controllerSeatId;
-    } catch (e) {
-      try {
-        owner = currentMatch.gameObjs[obj.aff].controllerSeatId;
-      } catch (e) {
-        owner = currentMatch.opponent.seat;
-      }
-    }
-
-    obj.details.forEach(function(detail) {
-      if (detail.key == "zone_src") {
-        _src = detail.valueInt32[0];
-      }
-      if (detail.key == "zone_dest") {
-        _dest = detail.valueInt32[0];
-      }
-      if (detail.key == "category") {
-        _cat = detail.valueString[0];
-      }
-    });
-
-    // If the transfer is already in the gameObjs array..
-    try {
-      cname = currentMatch.gameObjs[obj.aff].name;
-      grpid = currentMatch.gameObjs[obj.aff].grpId;
-    } catch (e) {
-      removeFromList = false;
-    }
-
-    // Try processing it
-    try {
-      var affectorGrpid;
-      //console.log("AnnotationType_ZoneTransfer", obj, obj.aff, gameObjs, _src, _dest, _cat);
-      if (_cat == "CastSpell") {
-        actionLog(
-          owner,
-          obj.time,
-          getNameBySeat(owner) + " casted " + actionLogGenerateLink(grpid)
-        );
-      } else if (_cat == "Resolve") {
-        actionLog(
-          owner,
-          obj.time,
-          getNameBySeat(owner) + " resolved " + actionLogGenerateLink(grpid)
-        );
-      } else if (_cat == "PlayLand") {
-        actionLog(
-          owner,
-          obj.time,
-          getNameBySeat(owner) + " played " + actionLogGenerateLink(grpid)
-        );
-      } else if (_cat == "Countered") {
-        affectorGrpid = currentMatch.gameObjs[obj.affectorId].grpId;
-        if (affectorGrpid == undefined) {
-          removeFromList = false;
-        } else {
-          actionLog(
-            owner,
-            obj.time,
-            actionLogGenerateLink(affectorGrpid) +
-              " countered " +
-              actionLogGenerateLink(grpid)
-          );
-        }
-      } else if (_cat == "Destroy") {
-        affectorGrpid = currentMatch.gameObjs[obj.affectorId].grpId;
-        if (affectorGrpid == undefined) {
-          removeFromList = false;
-        } else {
-          actionLog(
-            owner,
-            obj.time,
-            actionLogGenerateLink(affectorGrpid) +
-              " destroyed " +
-              actionLogGenerateLink(grpid)
-          );
-        }
-      } else if (_cat == "Draw") {
-        actionLog(owner, obj.time, getNameBySeat(owner) + " drew a card");
-        removeFromListAnyway = true;
-      } else if (cname != "") {
-        actionLog(
-          owner,
-          obj.time,
-          actionLogGenerateLink(grpid) +
-            " moved to " +
-            currentMatch.zones[_dest].type
-        );
-      }
-      currentMatch.gameObjs[obj.aff].zoneId = _dest;
-      currentMatch.gameObjs[obj.aff].zoneName = currentMatch.zones[_dest].type;
-    } catch (e) {
-      removeFromList = false;
-    }
-
-    if (removeFromList || removeFromListAnyway) {
-      obj.remove = true;
-    }
-  });
-  if (zoneTransfers.length > 0) {
-    zoneTransfers = zoneTransfers.filter(obj => obj.remove == false);
-  }
 }
 
 //
@@ -1577,49 +1467,6 @@ function updateCustomDecks() {
 }
 
 //
-function resetGameState() {
-  zones = {};
-  gameObjs = {};
-  initialLibraryInstanceIds = [];
-  idChanges = {};
-  instanceToCardIdMap = {};
-  attackersDetected = [];
-  zoneTransfers = [];
-  playerLife = 20;
-  opponentLife = 20;
-}
-
-//
-function checkForStartingLibrary() {
-  if (gameStage != "GameStage_Start") return;
-  if (
-    !currentMatch.zones["ZoneType_Hand" + currentMatch.player.seat]
-      .objectInstanceIds
-  )
-    return;
-  if (
-    !currentMatch.zones["ZoneType_Library" + currentMatch.player.seat]
-      .objectInstanceIds
-  )
-    return;
-
-  let hand =
-    currentMatch.zones["ZoneType_Hand" + currentMatch.player.seat]
-      .objectInstanceIds || [];
-  let library =
-    currentMatch.zones["ZoneType_Library" + currentMatch.player.seat]
-      .objectInstanceIds || [];
-  // Check that a post-mulligan scry hasn't been done
-  if (library.length == 0 || library[library.length - 1] < library[0]) return;
-
-  if (!currentDeck.mainDeck) return;
-  if (hand.length + library.length == deck_count(currentDeck)) {
-    if (hand.length >= 2 && hand[0] == hand[1] + 1) hand.reverse();
-    initialLibraryInstanceIds = [...hand, ...library];
-  }
-}
-
-//
 function createMatch(arg) {
   actionLog(-99, new Date(), "");
   var obj = store.get("overlayBounds");
@@ -1637,8 +1484,8 @@ function createMatch(arg) {
   let str = JSON.stringify(currentDeck);
 
   currentMatch.player.originalDeck = originalDeck;
-  currentMatch.player.deck = JSON.parse(str);
-  currentMatch.playerCards = JSON.parse(str);
+  currentMatch.player.deck = originalDeck.clone();
+  currentMatch.playerCardsLeft = originalDeck.clone();
 
   currentMatch.opponent.name = arg.opponentScreenName;
   currentMatch.opponent.rank = arg.opponentRankingClass;
@@ -1699,14 +1546,14 @@ function createDraft() {
 
 //
 function select_deck(arg) {
-  if (arg.CourseDeck !== undefined) {
-    currentDeck = arg.CourseDeck;
+  if (arg.CourseDeck) {
+    currentDeck = new Deck(arg.CourseDeck);
   } else {
-    currentDeck = arg;
+    currentDeck = new Deck(arg);
   }
-  originalDeck = currentDeck;
-  //console.log(currentDeck, arg);
-  ipc_send("set_deck", currentDeck, windowOverlay);
+  console.log("Select deck: ", currentDeck, arg);
+  originalDeck = currentDeck.clone();
+  ipc_send("set_deck", currentDeck.getSave(), windowOverlay);
 }
 
 //
@@ -1719,24 +1566,63 @@ function clear_deck() {
 function update_deck(force) {
   var nd = new Date();
   if (nd - lastDeckUpdate > 1000 || debugLog || !firstPass || force) {
-    if (overlayDeckMode == 0) {
-      ipc_send("set_deck", currentMatch.playerCards, windowOverlay);
-    }
-    if (overlayDeckMode == 1) {
-      ipc_send("set_deck", currentMatch.player.deck, windowOverlay);
-    }
-    if (overlayDeckMode == 2) {
-      ipc_send("set_deck", currentMatch.playerCards, windowOverlay);
-    }
-    if (overlayDeckMode == 3) {
-      let currentOppDeck = getOppDeck();
-      ipc_send("set_deck", currentOppDeck, windowOverlay);
-    }
-    if (overlayDeckMode == 4) {
-      ipc_send("set_deck", currentMatch.playerCards, windowOverlay);
-    }
-    lastDeckUpdate = nd;
+    forceDeckUpdate();
+
+    let currentMatchCopy = objectClone(currentMatch);
+    currentMatchCopy.oppCards = getOppDeck();
+    currentMatchCopy.playerCardsLeft = currentMatch.playerCardsLeft.getSave();
+    currentMatchCopy.playerCardsOdds = currentMatch.playerChances;
+    currentMatchCopy.player.deck = currentMatch.player.deck.getSave();
+    currentMatchCopy.player.originalDeck = currentMatch.player.originalDeck.getSave();
+    delete currentMatchCopy.GREtoClient;
+    delete currentMatchCopy.oppCardsUsed;
+    delete currentMatchCopy.playerChances;
+    delete currentMatchCopy.annotations;
+    delete currentMatchCopy.gameObjs;
+    delete currentMatchCopy.latestMessage;
+    delete currentMatchCopy.processedAnnotations;
+    delete currentMatchCopy.zones;
+    currentMatchCopy = JSON.stringify(currentMatchCopy);
+    ipc_send("set_match", currentMatchCopy, windowOverlay);
   }
+}
+
+function getOppDeck() {
+  let _deck = new Deck({}, currentMatch.oppCardsUsed, false);
+  _deck.mainboard.removeDuplicates(true);
+  _deck.getColors();
+
+  let format = eventsToFormat[currentMatch.eventId];
+  currentMatch.opponent.deck.archetype = "-";
+  let bestMatch = "-";
+  if (format && deck_archetypes[format]) {
+    deck_archetypes[format].sort(compare_archetypes);
+
+    let possible = deck_archetypes[format];
+    let bestMatchRate = 0;
+    possible.forEach(arch => {
+      let found = 0;
+      arch.cards.forEach(card => {
+        let cName = cardsDb.get(card.id).name;
+
+        _deck.mainboard.get().forEach(oppCard => {
+          let oName = cardsDb.get(oppCard.id).name;
+          if (cName == oName) {
+            found += card.quantity / arch.average;
+          }
+        });
+      });
+      if (found > bestMatchRate) {
+        bestMatchRate = found;
+        bestMatch = arch.tag;
+      }
+    });
+  }
+
+  _deck = _deck.getSave();
+  _deck.archetype = bestMatch;
+
+  return _deck;
 }
 
 //
@@ -1750,80 +1636,27 @@ function forceDeckUpdate(removeUsed = true) {
   var typeArt = 0;
   var typeEnc = 0;
   var typeLan = 0;
-  if (
-    (debugLog || !firstPass) &&
-    currentMatch.playerCards.mainDeck != undefined
-  ) {
-    /*
-    // DEBUG
-    currentMatch.playerCards.mainDeck = [];
-    decksize = 0;
-    cardsleft = 0;
-    */
-    currentMatch.playerCards.mainDeck.forEach(function(card) {
+
+  currentMatch.playerCardsLeft = currentMatch.player.deck.clone();
+
+  if (debugLog || !firstPass) {
+    currentMatch.playerCardsLeft.mainboard.get().forEach(card => {
       card.total = card.quantity;
       decksize += card.quantity;
       cardsleft += card.quantity;
     });
   }
-  if (removeUsed) {
-    Object.keys(currentMatch.gameObjs).forEach(function(key) {
-      if (currentMatch.gameObjs[key] != undefined) {
-        if (currentMatch.zones[currentMatch.gameObjs[key].zoneId]) {
-          if (
-            currentMatch.zones[currentMatch.gameObjs[key].zoneId].type !=
-              "ZoneType_Limbo" &&
-            currentMatch.zones[currentMatch.gameObjs[key].zoneId].type !=
-              "ZoneType_Library"
-          ) {
-            if (
-              currentMatch.gameObjs[key].ownerSeatId ==
-                currentMatch.player.seat &&
-              currentMatch.gameObjs[key].type != "GameObjectType_Token" &&
-              currentMatch.gameObjs[key].type != "GameObjectType_Ability"
-            ) {
-              /*
-              // DEBUG
-              if (currentMatch.gameObjs[key].grpId != 3) {
-                decksize += 1;
-                cardsleft += 1;
-                currentMatch.playerCards.mainDeck.push({id: currentMatch.gameObjs[key].grpId, quantity: currentMatch.gameObjs[key].zoneId})
-              }
-              */
 
-              cardsleft -= 1;
-              if (currentMatch.playerCards.mainDeck != undefined) {
-                currentMatch.playerCards.mainDeck.forEach(function(card) {
-                  if (card.id == currentMatch.gameObjs[key].grpId) {
-                    //console.log(currentMatch.gameObjs[key].instanceId, cardsDb.get(currentMatch.gameObjs[key].grpId).name, currentMatch.zones[currentMatch.gameObjs[key].zoneId].type);
-                    card.quantity -= 1;
-                  }
-                  if (card.quantity < 0) card.quantity = 0;
-                });
-              }
-            }
-          }
-        }
-      }
-    });
-  }
-
-  if (
-    (debugLog || !firstPass) &&
-    currentMatch.playerCards.mainDeck != undefined
-  ) {
-    currentMatch.playerCards.mainDeck.forEach(function(card) {
-      var c = cardsDb.get(card.id);
-      if (c) {
-        if (c.type.includes("Land", 0)) typeLan += card.quantity;
-        else if (c.type.includes("Creature", 0)) typeCre += card.quantity;
-        else if (c.type.includes("Artifact", 0)) typeArt += card.quantity;
-        else if (c.type.includes("Enchantment", 0)) typeEnc += card.quantity;
-        else if (c.type.includes("Instant", 0)) typeIns += card.quantity;
-        else if (c.type.includes("Sorcery", 0)) typeSor += card.quantity;
-        else if (c.type.includes("Planeswalker", 0)) typePla += card.quantity;
-      }
-      card.chance = Math.round(
+  if (debugLog || !firstPass) {
+    if (removeUsed) {
+      cardsleft -= currentMatch.playerCardsUsed.length;
+      currentMatch.playerCardsUsed.forEach(grpId => {
+        currentMatch.playerCardsLeft.mainboard.remove(grpId, 1);
+      });
+    }
+    let main = currentMatch.playerCardsLeft.mainboard;
+    main.addProperty("chance", card =>
+      Math.round(
         hypergeometricRange(
           1,
           Math.min(odds_sample_size, card.quantity),
@@ -1831,156 +1664,57 @@ function forceDeckUpdate(removeUsed = true) {
           odds_sample_size,
           card.quantity
         ) * 100
-      );
-    });
+      )
+    );
 
-    currentMatch.playerCards.chanceCre =
-      Math.round(
-        hypergeometricRange(
-          1,
-          Math.min(odds_sample_size, typeCre),
-          cardsleft,
-          odds_sample_size,
-          typeCre
-        ) * 1000
-      ) / 10;
-    currentMatch.playerCards.chanceIns =
-      Math.round(
-        hypergeometricRange(
-          1,
-          Math.min(odds_sample_size, typeIns),
-          cardsleft,
-          odds_sample_size,
-          typeIns
-        ) * 1000
-      ) / 10;
-    currentMatch.playerCards.chanceSor =
-      Math.round(
-        hypergeometricRange(
-          1,
-          Math.min(odds_sample_size, typeSor),
-          cardsleft,
-          odds_sample_size,
-          typeSor
-        ) * 1000
-      ) / 10;
-    currentMatch.playerCards.chancePla =
-      Math.round(
-        hypergeometricRange(
-          1,
-          Math.min(odds_sample_size, typePla),
-          cardsleft,
-          odds_sample_size,
-          typePla
-        ) * 1000
-      ) / 10;
-    currentMatch.playerCards.chanceArt =
-      Math.round(
-        hypergeometricRange(
-          1,
-          Math.min(odds_sample_size, typeArt),
-          cardsleft,
-          odds_sample_size,
-          typeArt
-        ) * 1000
-      ) / 10;
-    currentMatch.playerCards.chanceEnc =
-      Math.round(
-        hypergeometricRange(
-          1,
-          Math.min(odds_sample_size, typeEnc),
-          cardsleft,
-          odds_sample_size,
-          typeEnc
-        ) * 1000
-      ) / 10;
-    currentMatch.playerCards.chanceLan =
-      Math.round(
-        hypergeometricRange(
-          1,
-          Math.min(odds_sample_size, typeLan),
-          cardsleft,
-          odds_sample_size,
-          typeLan
-        ) * 1000
-      ) / 10;
-    currentMatch.playerCards.deckSize = decksize;
-    currentMatch.playerCards.cardsLeft = cardsleft;
+    typeLan = Math.min(odds_sample_size, main.countType("Land"));
+    typeCre = Math.min(odds_sample_size, main.countType("Creature"));
+    typeArt = Math.min(odds_sample_size, main.countType("Artifact"));
+    typeEnc = Math.min(odds_sample_size, main.countType("Enchantment"));
+    typeIns = Math.min(odds_sample_size, main.countType("Instant"));
+    typeSor = Math.min(odds_sample_size, main.countType("Sorcery"));
+    typePla = Math.min(odds_sample_size, main.countType("Planeswalker"));
+
+    let chancesObj = {};
+    chancesObj.chanceCre = chanceType(typeCre, cardsleft, odds_sample_size);
+    chancesObj.chanceIns = chanceType(typeIns, cardsleft, odds_sample_size);
+    chancesObj.chanceSor = chanceType(typeSor, cardsleft, odds_sample_size);
+    chancesObj.chancePla = chanceType(typePla, cardsleft, odds_sample_size);
+    chancesObj.chanceArt = chanceType(typeArt, cardsleft, odds_sample_size);
+    chancesObj.chanceEnc = chanceType(typeEnc, cardsleft, odds_sample_size);
+    chancesObj.chanceLan = chanceType(typeLan, cardsleft, odds_sample_size);
+
+    chancesObj.deckSize = decksize;
+    chancesObj.cardsLeft = cardsleft;
+    currentMatch.playerChances = chancesObj;
+  } else {
+    let main = currentMatch.playerCardsLeft.mainboard;
+    main.addProperty("chance", card => 1);
+
+    let chancesObj = {};
+    chancesObj.chanceCre = 0;
+    chancesObj.chanceIns = 0;
+    chancesObj.chanceSor = 0;
+    chancesObj.chancePla = 0;
+    chancesObj.chanceArt = 0;
+    chancesObj.chanceEnc = 0;
+    chancesObj.chanceLan = 0;
+    currentMatch.playerChances = chancesObj;
   }
 }
 
-//
-function getOppDeck() {
-  //var oppDeck = {mainDeck: [], sideboard : []};
-  var doAdd = true;
-  currentMatch.opponent.deck = { mainDeck: [], sideboard: [] };
-  currentMatch.opponent.deck.name = currentMatch.opponent.name;
-  //console.log("Deck "+currentMatch.opponent.name;);
-  Object.keys(currentMatch.gameObjs).forEach(function(key) {
-    if (currentMatch.gameObjs[key] != undefined) {
-      if (
-        currentMatch.zones[currentMatch.gameObjs[key].zoneId].type !=
-        "ZoneType_Limbo"
-      ) {
-        //console.log(cardsDb.get(currentMatch.gameObjs[key].grpId), cardsDb.get(currentMatch.gameObjs[key].grpId).name, currentMatch.zones[currentMatch.gameObjs[key].zoneId].type, currentMatch.gameObjs[key]);
-        if (
-          currentMatch.gameObjs[key].ownerSeatId ==
-            currentMatch.opponent.seat &&
-          currentMatch.gameObjs[key].type != "GameObjectType_SplitLeft" &&
-          currentMatch.gameObjs[key].type != "GameObjectType_SplitRight" &&
-          currentMatch.gameObjs[key].type != "GameObjectType_Token" &&
-          currentMatch.gameObjs[key].type != "GameObjectType_Ability"
-        ) {
-          doAdd = true;
-          currentMatch.opponent.deck.mainDeck.forEach(function(card) {
-            if (card.id == currentMatch.gameObjs[key].grpId) {
-              doAdd = false;
-              //card.quantity += 1;
-            }
-          });
-          if (doAdd) {
-            if (cardsDb.get(currentMatch.gameObjs[key].grpId) != false) {
-              currentMatch.opponent.deck.mainDeck.push({
-                id: currentMatch.gameObjs[key].grpId,
-                quantity: 9999
-              });
-            }
-          }
-        }
-      }
-    }
-  });
-
-  //
-  let format = eventsToFormat[currentMatch.eventId];
-  currentMatch.opponent.deck.archetype = "-";
-  if (format && deck_archetypes[format]) {
-    deck_archetypes[format].sort(compare_archetypes);
-
-    let possible = deck_archetypes[format];
-    let bestMatch = "-";
-    let bestMatchRate = 0;
-    possible.forEach(arch => {
-      let found = 0;
-      arch.cards.forEach(card => {
-        let cName = cardsDb.get(card.id).name;
-
-        currentMatch.opponent.deck.mainDeck.forEach(oppCard => {
-          let oName = cardsDb.get(oppCard.id).name;
-          if (cName == oName) {
-            found += card.quantity / arch.average;
-          }
-        });
-      });
-      if (found > bestMatchRate) {
-        bestMatchRate = found;
-        bestMatch = arch.tag;
-      }
-    });
-    currentMatch.opponent.deck.archetype = bestMatch;
-  }
-
-  return currentMatch.opponent.deck;
+function chanceType(typeNumber, cardsleft, odds_sample_size) {
+  return (
+    Math.round(
+      hypergeometricRange(
+        1,
+        typeNumber,
+        cardsleft,
+        odds_sample_size,
+        typeNumber
+      ) * 1000
+    ) / 10
+  );
 }
 
 //
@@ -2068,10 +1802,11 @@ function saveMatch(matchId) {
     win: pw
   };
   match.draws = dr;
+
   match.eventId = currentMatch.eventId;
-  match.playerDeck = currentMatch.player.originalDeck;
-  match.playerDeck.colors = get_deck_colors(currentMatch.player.originalDeck);
+  match.playerDeck = currentMatch.player.originalDeck.getSave();
   match.oppDeck = getOppDeck();
+
   if (match.oppDeck.archetype && match.oppDeck.archetype !== "-") {
     match.tags = [match.oppDeck.archetype];
   }

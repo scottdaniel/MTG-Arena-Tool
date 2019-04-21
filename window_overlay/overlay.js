@@ -1,17 +1,13 @@
 /*
 global
+  addCardTile,
+  cardsDb,
+  compare_draft_cards,
+  Deck,
+  draftRanks,
+  get_ids_colors,
   windowBackground,
   windowOverlay,
-  get_deck_colors,
-  get_deck_uniquestring,
-  removeDuplicates,
-  compare_chances,
-  compare_cards,
-  get_ids_colors,
-  compare_draft_cards,
-  addCardTile,
-  draftRanks,
-  cardsDb
 */
 const electron = require("electron");
 const { webFrame, remote } = require("electron");
@@ -22,7 +18,7 @@ let matchBeginTime = Date.now();
 let priorityTimers = [];
 let clockMode = 0;
 let draftMode = 1;
-let deckMode = 0;
+let deckMode = 4;
 let overlayMode = 0;
 var renderer = 1;
 
@@ -47,7 +43,7 @@ let cardQuality = "normal";
 let showSideboard = false;
 let actionLog = [];
 
-let currentDeck = null;
+let currentMatch = null;
 let cards = {};
 let mana = {
   0: "",
@@ -306,8 +302,24 @@ ipc.on("set_cards", function(event, _cards) {
 });
 
 let changedMode = true;
-//
-ipc.on("set_deck", function(event, arg) {
+
+ipc.on("set_match", (event, arg) => {
+  currentMatch = JSON.parse(arg);
+
+  currentMatch.oppCards = new Deck(currentMatch.oppCards);
+  currentMatch.oppCards.sortMainboard(compare_cards);
+
+  let tempMain = currentMatch.playerCardsLeft.mainDeck;
+  currentMatch.playerCardsLeft = new Deck(currentMatch.playerCardsLeft);
+  currentMatch.playerCardsLeft.mainboard._list = tempMain;
+
+  currentMatch.player.deck = new Deck(currentMatch.player.deck);
+  currentMatch.player.originalDeck = new Deck(currentMatch.player.originalDeck);
+
+  updateView();
+});
+
+function updateView() {
   if (overlayMode == 1) {
     $(".overlay_draft_container").hide();
     $(".overlay_deck_container").show();
@@ -320,200 +332,231 @@ ipc.on("set_deck", function(event, arg) {
   ) {
     doscroll = true;
   }
-
-  if (arg !== null) {
-    if (!changedMode) {
-      let oldstr = get_deck_uniquestring(currentDeck);
-      if (oldstr == get_deck_uniquestring(arg)) return;
-    }
-    changedMode = true;
-
-    $(".overlay_archetype").remove();
-
-    $(".overlay_deck_container").show();
+  if (overlayMode == 1) {
     $(".overlay_draft_container").hide();
+    $(".overlay_deck_container").show();
+  }
 
-    $(".overlay_decklist").html("");
-    $(".overlay_deckcolors").html("");
-    currentDeck = arg;
+  $(".overlay_archetype").remove();
+  $(".overlay_deck_container").show();
+  $(".overlay_draft_container").hide();
+  $(".overlay_decklist").html("");
+  $(".overlay_deckcolors").html("");
 
-    let deckListDiv;
-    if (deckMode == 4) {
-      $(".overlay_deckname").html("Action Log");
-      deckListDiv = $(".overlay_decklist");
+  let deckListDiv;
 
-      actionLog.forEach(function(log) {
-        var d = new Date(log.time);
-        var hh = ("0" + d.getHours()).slice(-2);
-        var mm = ("0" + d.getMinutes()).slice(-2);
-        var ss = ("0" + d.getSeconds()).slice(-2);
+  //
+  // Action Log Mode
+  //
+  deckListDiv = $(".overlay_decklist");
+  if (deckMode == 4) {
+    $(".overlay_deckname").html("Action Log");
 
-        var box = $('<div class="actionlog log_p' + log.seat + '"></div>');
-        var time = $(
-          '<div class="actionlog_time">' + hh + ":" + mm + ":" + ss + "</div>"
-        );
-        var str = $('<div class="actionlog_text">' + log.str + "</div>");
+    actionLog.forEach(function(log) {
+      var d = new Date(log.time);
+      var hh = ("0" + d.getHours()).slice(-2);
+      var mm = ("0" + d.getMinutes()).slice(-2);
+      var ss = ("0" + d.getSeconds()).slice(-2);
 
-        box.append(time);
-        box.append(str);
-        deckListDiv.append(box);
-      });
+      var box = $('<div class="actionlog log_p' + log.seat + '"></div>');
+      var time = $(
+        '<div class="actionlog_time">' + hh + ":" + mm + ":" + ss + "</div>"
+      );
+      var str = $('<div class="actionlog_text">' + log.str + "</div>");
 
-      if (doscroll) {
-        deckListDiv.scrollTop(deckListDiv[0].scrollHeight);
-      }
+      box.append(time);
+      box.append(str);
+      deckListDiv.append(box);
+    });
 
-      $(".card_link").each(function() {
-        $(this).click(function() {
-          return false;
-        });
-        var grpId = $(this).attr("href");
-        addCardHover($(this), cardsDb.get(grpId));
-      });
-
-      return;
+    if (doscroll) {
+      deckListDiv.scrollTop(deckListDiv[0].scrollHeight);
     }
 
-    if (arg.name !== null) {
-      if (deckMode == 3) {
-        $('<div class="overlay_archetype"></div>').insertAfter(
-          ".overlay_deckname"
-        );
-        $(".overlay_deckname").html("Played by " + arg.name.slice(0, -6));
-        $(".overlay_archetype").html(arg.archetype);
-      } else {
-        $(".overlay_deckname").html(arg.name);
-      }
-    }
+    $(".card_link").each(function() {
+      $(this).click(function() {
+        return false;
+      });
+      var grpId = $(this).attr("href");
+      addCardHover($(this), cardsDb.get(grpId));
+    });
 
-    arg.colors = get_deck_colors(arg);
-    arg.colors.forEach(function(color) {
+    return;
+  }
+
+  let deckToDraw = false;
+
+  //
+  // Opponent Cards Mode
+  //
+  if (deckMode == 3) {
+    $('<div class="overlay_archetype"></div>').insertAfter(".overlay_deckname");
+    $(".overlay_deckname").html(
+      "Played by " + currentMatch.opponent.name.slice(0, -6)
+    );
+    $(".overlay_archetype").html(currentMatch.oppCards.archetype);
+
+    currentMatch.oppCards.colors.get().forEach(color => {
       $(".overlay_deckcolors").append(
         '<div class="mana_s20 mana_' + mana[color] + '"></div>'
       );
     });
+    deckToDraw = currentMatch.oppCards;
+  }
 
-    arg.mainDeck = removeDuplicates(arg.mainDeck);
+  //
+  // Player Cards Odds Mode
+  //
+  if (deckMode == 2) {
+    let cardsLeft = currentMatch.playerCardsLeft.mainboard.count();
+    deckListDiv.append(
+      `<div class="chance_title">${cardsLeft} cards left</div>`
+    );
+    deckToDraw = currentMatch.playerCardsLeft;
+  }
 
+  //
+  // Player Full Deck Mode
+  //
+  if (deckMode == 1) {
+    let cardsCount = currentMatch.player.deck.mainboard.count();
+    deckListDiv.append(`<div class="chance_title">${cardsCount} cards</div>`);
+    deckToDraw = currentMatch.player.deck;
+  }
+
+  //
+  // Player Cards Left Mode
+  //
+  if (deckMode == 0) {
+    let cardsLeft = currentMatch.playerCardsLeft.mainboard.count();
+    deckListDiv.append(
+      `<div class="chance_title">${cardsLeft} cards left</div>`
+    );
+    deckToDraw = currentMatch.playerCardsLeft;
+  }
+
+  if (deckMode !== 3) {
+    $(".overlay_deckname").html(deckToDraw.name);
+    deckToDraw.colors.get().forEach(color => {
+      $(".overlay_deckcolors").append(
+        '<div class="mana_s20 mana_' + mana[color] + '"></div>'
+      );
+    });
+  }
+
+  let prevIndex = 0;
+  if (!deckToDraw) return;
+  deckToDraw.mainboard.get().forEach(card => {
+    var grpId = card.id;
     if (deckMode == 2) {
-      arg.mainDeck.sort(compare_chances);
-    } else {
-      arg.mainDeck.sort(compare_cards);
-    }
-
-    deckListDiv = $(".overlay_decklist");
-    var prevIndex = 0;
-
-    if (arg.cardsLeft && (deckMode == 0 || deckMode == 2)) {
-      cardsLeft = arg.cardsLeft;
-      deckListDiv.append(
-        '<div class="chance_title">' + arg.cardsLeft + " cards left</div>"
+      addCardTile(
+        grpId,
+        "a",
+        (card.chance != undefined ? card.chance : "0") + "%",
+        deckListDiv
       );
     } else {
-      var deckSize = 0;
-      arg.mainDeck.forEach(function(card) {
-        if (deckMode == 3) deckSize++;
-        else deckSize += card.quantity;
-      });
-
-      deckListDiv.append(
-        '<div class="chance_title">' + deckSize + " cards</div>"
-      );
+      addCardTile(grpId, "a", card.quantity, deckListDiv);
     }
+    prevIndex = grpId;
+  });
+  if (showSideboard && deckToDraw.sideboard.count() > 0) {
+    deckListDiv.append('<div class="card_tile_separator">Sideboard</div>');
 
-    arg.mainDeck.forEach(function(card) {
+    deckToDraw.sideboard.get().forEach(function(card) {
       var grpId = card.id;
       if (deckMode == 2) {
-        addCardTile(
-          grpId,
-          "a",
-          (card.chance != undefined ? card.chance : "0") + "%",
-          deckListDiv
-        );
+        addCardTile(grpId, "a", "0%", deckListDiv);
       } else {
         addCardTile(grpId, "a", card.quantity, deckListDiv);
       }
       prevIndex = grpId;
     });
-    if (showSideboard && arg.sideboard !== undefined) {
-      deckListDiv.append('<div class="card_tile_separator">Sideboard</div>');
-
-      arg.sideboard.forEach(function(card) {
-        var grpId = card.id;
-        if (deckMode == 2) {
-          addCardTile(grpId, "a", "0%", deckListDiv);
-        } else {
-          addCardTile(grpId, "a", card.quantity, deckListDiv);
-        }
-        prevIndex = grpId;
-      });
-    }
-
-    if (deckMode == 2) {
-      deckListDiv.append(`
-              <div class="overlay_samplesize_container">
-                  <div class="odds_prev click-on"></div>
-                  <div class="odds_number">Sample size: ${oddsSampleSize}</div>
-                  <div class="odds_next click-on"></div>
-              </div>
-           `);
-
-      deckListDiv.append('<div class="chance_title"></div>'); // Add some space
-      deckListDiv.append(
-        '<div class="chance_title">Creature: ' +
-          (arg.chanceCre != undefined ? arg.chanceCre : "0") +
-          "%</div>"
-      );
-      deckListDiv.append(
-        '<div class="chance_title">Instant: ' +
-          (arg.chanceIns != undefined ? arg.chanceIns : "0") +
-          "%</div>"
-      );
-      deckListDiv.append(
-        '<div class="chance_title">Sorcery: ' +
-          (arg.chanceSor != undefined ? arg.chanceSor : "0") +
-          "%</div>"
-      );
-      deckListDiv.append(
-        '<div class="chance_title">Artifact: ' +
-          (arg.chanceArt != undefined ? arg.chanceArt : "0") +
-          "%</div>"
-      );
-      deckListDiv.append(
-        '<div class="chance_title">Enchantment: ' +
-          (arg.chanceEnc != undefined ? arg.chanceEnc : "0") +
-          "%</div>"
-      );
-      deckListDiv.append(
-        '<div class="chance_title">Planeswalker: ' +
-          (arg.chancePla != undefined ? arg.chancePla : "0") +
-          "%</div>"
-      );
-      deckListDiv.append(
-        '<div class="chance_title">Land: ' +
-          (arg.chanceLan != undefined ? arg.chanceLan : "0") +
-          "%</div>"
-      );
-
-      //
-      $(".odds_prev").click(function() {
-        oddsSampleSize -= 1;
-        if (oddsSampleSize < 1) {
-          oddsSampleSize = cardsLeft - 1;
-        }
-        ipc_send("set_odds_samplesize", oddsSampleSize);
-      });
-      //
-      $(".odds_next").click(function() {
-        oddsSampleSize += 1;
-        if (oddsSampleSize > cardsLeft - 1) {
-          oddsSampleSize = 1;
-        }
-        ipc_send("set_odds_samplesize", oddsSampleSize);
-      });
-    }
   }
-});
+
+  if (deckMode == 2) {
+    drawDeckOdds();
+  }
+}
+
+function drawDeckOdds() {
+  let deckListDiv = $(".overlay_decklist");
+  deckListDiv.append(`
+          <div class="overlay_samplesize_container">
+              <div class="odds_prev click-on"></div>
+              <div class="odds_number">Sample size: ${oddsSampleSize}</div>
+              <div class="odds_next click-on"></div>
+          </div>
+       `);
+
+  deckListDiv.append('<div class="chance_title"></div>'); // Add some space
+  deckListDiv.append(
+    '<div class="chance_title">Creature: ' +
+      (currentMatch.playerCardsOdds.chanceCre != undefined
+        ? currentMatch.playerCardsOdds.chanceCre
+        : "0") +
+      "%</div>"
+  );
+  deckListDiv.append(
+    '<div class="chance_title">Instant: ' +
+      (currentMatch.playerCardsOdds.chanceIns != undefined
+        ? currentMatch.playerCardsOdds.chanceIns
+        : "0") +
+      "%</div>"
+  );
+  deckListDiv.append(
+    '<div class="chance_title">Sorcery: ' +
+      (currentMatch.playerCardsOdds.chanceSor != undefined
+        ? currentMatch.playerCardsOdds.chanceSor
+        : "0") +
+      "%</div>"
+  );
+  deckListDiv.append(
+    '<div class="chance_title">Artifact: ' +
+      (currentMatch.playerCardsOdds.chanceArt != undefined
+        ? currentMatch.playerCardsOdds.chanceArt
+        : "0") +
+      "%</div>"
+  );
+  deckListDiv.append(
+    '<div class="chance_title">Enchantment: ' +
+      (currentMatch.playerCardsOdds.chanceEnc != undefined
+        ? currentMatch.playerCardsOdds.chanceEnc
+        : "0") +
+      "%</div>"
+  );
+  deckListDiv.append(
+    '<div class="chance_title">Planeswalker: ' +
+      (currentMatch.playerCardsOdds.chancePla != undefined
+        ? currentMatch.playerCardsOdds.chancePla
+        : "0") +
+      "%</div>"
+  );
+  deckListDiv.append(
+    '<div class="chance_title">Land: ' +
+      (currentMatch.playerCardsOdds.chanceLan != undefined
+        ? currentMatch.playerCardsOdds.chanceLan
+        : "0") +
+      "%</div>"
+  );
+
+  //
+  $(".odds_prev").click(function() {
+    oddsSampleSize -= 1;
+    if (oddsSampleSize < 1) {
+      oddsSampleSize = cardsLeft - 1;
+    }
+    ipc_send("set_odds_samplesize", oddsSampleSize);
+  });
+  //
+  $(".odds_next").click(function() {
+    oddsSampleSize += 1;
+    if (oddsSampleSize > cardsLeft - 1) {
+      oddsSampleSize = 1;
+    }
+    ipc_send("set_odds_samplesize", oddsSampleSize);
+  });
+}
 
 var currentDraft;
 //
@@ -775,7 +818,7 @@ $(document).ready(function() {
     if (deckMode < 0) {
       deckMode = 4;
     }
-    ipc_send("set_deck_mode", deckMode);
+    updateView();
   });
   //
   $(".deck_next").click(function() {
@@ -784,7 +827,7 @@ $(document).ready(function() {
     if (deckMode > 4) {
       deckMode = 0;
     }
-    ipc_send("set_deck_mode", deckMode);
+    updateView();
   });
 
   //
