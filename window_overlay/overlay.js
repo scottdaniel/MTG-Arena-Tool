@@ -169,7 +169,6 @@ ipc.on("set_db", function(event, arg) {
     delete arg.ranked_events;
     cardsDb.set(arg);
   } catch (e) {
-    pop("Error parsing metadata", null);
     console.log("Error parsing metadata", e);
     return false;
   }
@@ -327,11 +326,13 @@ function updateView() {
   overlayMode = 0;
   var doscroll = false;
   if (
-    $(".overlay_decklist")[0].scrollHeight - $(".overlay_decklist").height() ==
-    $(".overlay_decklist").scrollTop()
+    Math.round(
+      $(".overlay_decklist")[0].scrollHeight - $(".overlay_decklist").height()
+    ) - Math.round($(".overlay_decklist").scrollTop()) < 32
   ) {
     doscroll = true;
   }
+
   if (overlayMode == 1) {
     $(".overlay_draft_container").hide();
     $(".overlay_deck_container").show();
@@ -444,7 +445,6 @@ function updateView() {
     });
   }
 
-  let prevIndex = 0;
   if (!deckToDraw) return;
   deckToDraw.mainboard.get().forEach(card => {
     var grpId = card.id;
@@ -458,7 +458,6 @@ function updateView() {
     } else {
       addCardTile(grpId, "a", card.quantity, deckListDiv);
     }
-    prevIndex = grpId;
   });
   if (showSideboard && deckToDraw.sideboard.count() > 0) {
     deckListDiv.append('<div class="card_tile_separator">Sideboard</div>');
@@ -470,7 +469,6 @@ function updateView() {
       } else {
         addCardTile(grpId, "a", card.quantity, deckListDiv);
       }
-      prevIndex = grpId;
     });
   }
 
