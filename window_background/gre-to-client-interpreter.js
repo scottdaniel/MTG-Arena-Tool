@@ -468,8 +468,7 @@ function instanceIdToObject(instanceID) {
 }
 
 function noInstanceException(orig, instanceID, instance) {
-  this.message = "No instance with ID"
-  this.orig = orig;
+  this.message = `No instance with ID ${orig} found.`;
   this.instanceID = instanceID;
   this.instance = instance;
 }
