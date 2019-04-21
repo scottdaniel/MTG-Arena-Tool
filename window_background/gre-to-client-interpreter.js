@@ -432,9 +432,20 @@ function checkGameInfo(gameInfo) {
   if (gameInfo.stage && gameInfo.stage != gameStage) {
     gameStage = gameInfo.stage;
     if (gameStage == "GameStage_Start") {
+      currentMatch.processedAnnotations = [];
+      currentMatch.timers = {};
+      currentMatch.zones = {};
+      currentMatch.players = {};
+      currentMatch.annotations = [];
+      currentMatch.gameObjs = {};
+      currentMatch.gameInfo = {};
+      currentMatch.turnInfo = {};
+      currentMatch.playerCardsUsed = [];
+      currentMatch.oppCardsUsed = [];
       initialLibraryInstanceIds = [];
       idChanges = {};
       instanceToCardIdMap = {};
+      currentMatch.game = gameInfo.gameNumber;
     }
   }
   if (gameInfo.matchWinCondition) {
