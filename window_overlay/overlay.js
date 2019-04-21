@@ -818,7 +818,7 @@ $(document).ready(function() {
     if (deckMode < 0) {
       deckMode = 4;
     }
-    ipc_send("set_deck_mode", deckMode);
+    updateView();
   });
   //
   $(".deck_next").click(function() {
@@ -827,7 +827,7 @@ $(document).ready(function() {
     if (deckMode > 4) {
       deckMode = 0;
     }
-    ipc_send("set_deck_mode", deckMode);
+    updateView();
   });
 
   //

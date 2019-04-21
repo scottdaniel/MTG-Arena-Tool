@@ -658,10 +658,6 @@ ipc.on("add_history_tag", function(event, arg) {
   store.set(arg.match, match);
 });
 
-ipc.on("set_deck_mode", function(event, state) {
-  update_deck(true);
-});
-
 let odds_sample_size = 1;
 ipc.on("set_odds_samplesize", function(event, state) {
   odds_sample_size = state;

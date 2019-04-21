@@ -14,7 +14,6 @@ function onLabelOutLogInfo(entry, json) {
 
       let game = {};
       game.shuffledOrder = [];
-      console.log("initialLibraryInstanceIds", initialLibraryInstanceIds);
       for (let i = 0; i < initialLibraryInstanceIds.length; i++) {
         let instance = initialLibraryInstanceIds[i];
         while (
@@ -73,7 +72,7 @@ function onLabelOutLogInfo(entry, json) {
         });
 
         game.sideboardChanges = sideboardChanges;
-        game.deck = JSON.parse(JSON.stringify(currentMatch.player.deck));
+        game.deck = JSON.parse(JSON.stringify(currentMatch.player.deck.getSave()));
       }
 
       game.handLands = game.handsDrawn.map(
@@ -162,6 +161,7 @@ function onLabelClientToMatchServiceMessageTypeClientToGREMessage(entry, json) {
   }
 
   if (json.payload.submitdeckresp) {
+    console.log("Sideboard changes submit: ", json.payload.submitdeckresp);
     // Get sideboard changes
     let deckResp = json.payload.submitdeckresp.deck;
 
@@ -175,9 +175,7 @@ function onLabelClientToMatchServiceMessageTypeClientToGREMessage(entry, json) {
     newDeck.getColors();
 
     currentMatch.player.deck = newDeck;
-    ipc_send("set_deck", currentMatch.player.deck, windowOverlay);
-    currentMatch.player.deck = newDeck;
-    ipc_send("set_deck", currentMatch.player.deck, windowOverlay);
+    console.log("> ", currentMatch.player.deck);
   }
 }
 
