@@ -146,7 +146,6 @@ function onLabelGreToClient(entry, json) {
 }
 
 function onLabelClientToMatchServiceMessageTypeClientToGREMessage(entry, json) {
-  return;
   //
   if (!json) return;
   if (skipMatch) return;
@@ -161,7 +160,6 @@ function onLabelClientToMatchServiceMessageTypeClientToGREMessage(entry, json) {
   }
 
   if (json.payload.submitdeckresp) {
-    console.log("Sideboard changes submit: ", json.payload.submitdeckresp);
     // Get sideboard changes
     let deckResp = json.payload.submitdeckresp.deck;
 
