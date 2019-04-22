@@ -252,16 +252,43 @@ function createChangeRow(change, economyId) {
 
     flexRight.appendChild(bos);
   } else if (change.contextPretty == "Redeem Wildcard") {
-    var imgUri = "";
-    if (change.delta.wcCommonDelta != undefined) imgUri = "wc_common";
-    if (change.delta.wcUncommonDelta != undefined) imgUri = "wc_uncommon";
-    if (change.delta.wcRareDelta != undefined) imgUri = "wc_rare";
-    if (change.delta.wcMythicDelta != undefined) imgUri = "wc_mythic";
-    if (imgUri != "") {
+    let imgUri = "";
+    let title = "";
+    let count = 0;
+
+    if (change.delta.wcCommonDelta !== undefined) {
+      imgUri = "wc_common";
+      title = "Common Wildcard";
+      count = change.delta.wcCommonDelta;
+    }
+    if (change.delta.wcUncommonDelta !== undefined) {
+      imgUri = "wc_uncommon";
+      title = "Uncommon Wildcard";
+      count = change.delta.wcUncommonDelta;
+    }
+    if (change.delta.wcRareDelta !== undefined) {
+      imgUri = "wc_rare";
+      title = "Rare Wildcard";
+      count = change.delta.wcRareDelta;
+    }
+    if (change.delta.wcMythicDelta !== undefined) {
+      imgUri = "wc_mythic";
+      title = "Mythic Wildcard";
+      count = change.delta.wcMythicDelta;
+    }
+    count = Math.abs(count);
+    if (count) {
       bos = createDivision(["economy_wc"]);
+      bos.title = title;
       bos.style.backgroundImage = "url(../images/" + imgUri + ".png)";
 
+      bon = createDivision();
+      bon.style.lineHeight = "32px";
+      bon.classList.add("economy_sub");
+      bon.innerHTML = "x" + count;
+
       flexBottom.appendChild(bos);
+      flexBottom.appendChild(bon);
     }
 
     checkCardsAdded = true;
@@ -351,7 +378,6 @@ function createChangeRow(change, economyId) {
     if (change.delta.wcCommonDelta != undefined) {
       bos = createDivision(["economy_wc"]);
       bos.title = "Common Wildcard";
-      bos.style.margin = "auto 4px";
       bos.style.backgroundImage = "url(../images/wc_common.png)";
       bon = createDivision();
       bon.style.lineHeight = "64px";
@@ -364,7 +390,6 @@ function createChangeRow(change, economyId) {
     if (change.delta.wcUncommonDelta != undefined) {
       bos = createDivision(["economy_wc"]);
       bos.title = "Uncommon Wildcard";
-      bos.style.margin = "auto 4px";
       bos.style.backgroundImage = "url(../images/wc_uncommon.png)";
       bon = createDivision();
       bon.style.lineHeight = "64px";
@@ -377,7 +402,6 @@ function createChangeRow(change, economyId) {
     if (change.delta.wcRareDelta != undefined) {
       bos = createDivision(["economy_wc"]);
       bos.title = "Rare Wildcard";
-      bos.style.margin = "auto 4px";
       bos.style.backgroundImage = "url(../images/wc_rare.png)";
       bon = createDivision();
       bon.style.lineHeight = "64px";
@@ -389,7 +413,6 @@ function createChangeRow(change, economyId) {
     if (change.delta.wcMythicDelta != undefined) {
       bos = createDivision(["economy_wc"]);
       bos.title = "Mythic Wildcard";
-      bos.style.margin = "auto 4px";
       bos.style.backgroundImage = "url(../images/wc_mythic.png)";
       bon = createDivision();
       bon.style.lineHeight = "64px";
