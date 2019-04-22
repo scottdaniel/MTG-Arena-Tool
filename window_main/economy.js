@@ -147,91 +147,88 @@ function openEconomyTab(loadMore) {
 
 function createDayHeader(change) {
   daysago = differenceInCalendarDays(new Date(), change.date);
-  let div = createDivision(["economy_title", "flex_item"]);
-
-  let flexLeft = createDivision(["flex_item"]);
-  flexLeft.style.lineHeight = "64px";
-
-  if (daysago == 0) flexLeft.innerHTML = "Today";
-  if (daysago == 1) flexLeft.innerHTML = "Yesterday";
-  if (daysago > 1) {
-    let date = new Date(change.date);
-    date = new Date(date.setHours(0, 0, 0, 0));
-    flexLeft.innerHTML = localDayDateFormat(date);
-  }
-
-  let flexRight = createDivision(["economy_day_stats", "flex_item"]);
+  let headerGrid = createDivision(["economy_title"]);
 
   const cont = createDivision(["economy_metric"]);
-
   let tx = createDivision();
   tx.style.lineHeight = "64px";
   tx.classList.add("economy_sub");
-
   let up = createDivision(["economy_up"]);
-
   let down = createDivision(["economy_down"]);
 
-  const contca = cont.cloneNode(true);
-  contca.style.flex = 1;
+  // Title
+  let gridTitle = createDivision(["flex_item"]);
+  gridTitle.style.gridArea = "1 / 1 / auto / 2";
+  gridTitle.style.lineHeight = "64px";
+
+  if (daysago == 0) gridTitle.innerHTML = "Today";
+  if (daysago == 1) gridTitle.innerHTML = "Yesterday";
+  if (daysago > 1) {
+    let date = new Date(change.date);
+    date = new Date(date.setHours(0, 0, 0, 0));
+    gridTitle.innerHTML = localDayDateFormat(date);
+  }
+
+  // Cards
+  const gridCards = cont.cloneNode(true);
+  gridCards.style.gridArea = "1 / 2 / auto / 3";
   const icca = tx.cloneNode(true);
   icca.innerHTML = "Cards:";
   const catx = tx.cloneNode(true);
   catx.innerHTML = dayList[daysago].cardsEarned;
-  contca.appendChild(icca);
+  gridCards.appendChild(icca);
   const upcontca = createDivision(["economy_delta"]);
+  upcontca.style.width = "auto";
   upcontca.appendChild(catx);
   upcontca.appendChild(up.cloneNode(true));
-  contca.appendChild(upcontca);
-  flexRight.appendChild(contca);
+  gridCards.appendChild(upcontca);
 
-  const contgo = cont.cloneNode(true);
-  contgo.style.flex = 3;
-  {
-    let icgo = createDivision(["economy_gold_med"]);
-    icgo.title = "Gold";
-    contgo.appendChild(icgo);
+  // Gold
+  const gridGold = cont.cloneNode(true);
+  gridGold.style.gridArea = "1 / 3 / auto / 4";
+  let icgo = createDivision(["economy_gold_med"]);
+  icgo.margin = "3px";
+  icgo.title = "Gold";
+  gridGold.appendChild(icgo);
 
-    const upcontgo = createDivision(["economy_delta"]);
-    tx.innerHTML = dayList[daysago].goldEarned;
-    upcontgo.appendChild(tx);
-    upcontgo.appendChild(up.cloneNode(true));
-    contgo.appendChild(upcontgo);
+  const upcontgo = createDivision(["economy_delta"]);
+  tx.innerHTML = dayList[daysago].goldEarned;
+  upcontgo.appendChild(tx);
+  upcontgo.appendChild(up.cloneNode(true));
+  gridGold.appendChild(upcontgo);
 
-    const dncontgo = createDivision(["economy_delta"]);
-    let ntx = tx.cloneNode(true);
-    ntx.innerHTML = dayList[daysago].goldSpent;
-    dncontgo.appendChild(ntx);
-    dncontgo.appendChild(down.cloneNode(true));
-    contgo.appendChild(dncontgo);
-  }
-  flexRight.appendChild(contgo);
+  const dncontgo = createDivision(["economy_delta"]);
+  let ntx = tx.cloneNode(true);
+  ntx.innerHTML = dayList[daysago].goldSpent;
+  dncontgo.appendChild(ntx);
+  dncontgo.appendChild(down.cloneNode(true));
+  gridGold.appendChild(dncontgo);
 
-  const contge = cont.cloneNode(true);
-  contge.style.flex = 3;
-  {
-    let icge = createDivision(["economy_gems_med"]);
-    icge.title = "Gems";
-    contge.appendChild(icge);
+  // Gems
+  const gridGems = cont.cloneNode(true);
+  gridGems.style.gridArea = "1 / 4 / auto / 5";
+  let icge = createDivision(["economy_gems_med"]);
+  icge.margin = "3px";
+  icge.title = "Gems";
+  gridGems.appendChild(icge);
 
-    const upcontge = createDivision(["economy_delta"]);
-    let ntx = tx.cloneNode(true);
-    ntx.innerHTML = dayList[daysago].gemsEarned;
-    upcontge.appendChild(ntx);
-    upcontge.appendChild(up.cloneNode(true));
-    contge.appendChild(upcontge);
+  const upcontge = createDivision(["economy_delta"]);
+  ntx = tx.cloneNode(true);
+  ntx.innerHTML = dayList[daysago].gemsEarned;
+  upcontge.appendChild(ntx);
+  upcontge.appendChild(up.cloneNode(true));
+  gridGems.appendChild(upcontge);
 
-    const dncontge = createDivision(["economy_delta"]);
-    ntx = tx.cloneNode(true);
-    ntx.innerHTML = dayList[daysago].gemsSpent;
-    dncontge.appendChild(ntx);
-    dncontge.appendChild(down.cloneNode(true));
-    contge.appendChild(dncontge);
-  }
-  flexRight.appendChild(contge);
+  const dncontge = createDivision(["economy_delta"]);
+  ntx = tx.cloneNode(true);
+  ntx.innerHTML = dayList[daysago].gemsSpent;
+  dncontge.appendChild(ntx);
+  dncontge.appendChild(down.cloneNode(true));
+  gridGems.appendChild(dncontge);
 
-  const contva = cont.cloneNode(true);
-  contva.style.flex = 2;
+  // Vault
+  const gridVault = cont.cloneNode(true);
+  gridVault.style.gridArea = "1 / 5 / auto / 6";
   const icva = tx.cloneNode(true);
   icva.innerHTML = "Vault:";
   const vatx = tx.cloneNode(true);
@@ -240,16 +237,19 @@ function createDayHeader(change) {
     style: "percent",
     maximumSignificantDigits: 2
   });
-  contva.appendChild(icva);
+  gridVault.appendChild(icva);
   const upcontva = createDivision(["economy_delta"]);
+  upcontva.style.width = "auto";
   upcontva.appendChild(vatx);
   upcontva.appendChild(up.cloneNode(true));
-  contva.appendChild(upcontva);
-  flexRight.appendChild(contva);
+  gridVault.appendChild(upcontva);
 
-  div.appendChild(flexLeft);
-  div.appendChild(flexRight);
-  return div;
+  headerGrid.appendChild(gridTitle);
+  headerGrid.appendChild(gridCards);
+  headerGrid.appendChild(gridGold);
+  headerGrid.appendChild(gridGems);
+  headerGrid.appendChild(gridVault);
+  return headerGrid;
 }
 
 function createChangeRow(change, economyId) {

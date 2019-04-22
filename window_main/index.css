@@ -1476,16 +1476,14 @@ a:hover {
 .economy_metric {
     align-items: center;
     display: flex;
-    justify-content: space-between;
-    margin-left: 36px;
+    justify-content: flex-end;
 }
 
 .economy_delta {
     align-items: center;
     display: flex;
     justify-content: flex-end;
-    margin: 0 4px;
-    width: 75px;
+    margin: 0 6px;
 }
 
 .economy_up {
@@ -1507,12 +1505,14 @@ a:hover {
 }
 
 .economy_title {
+    display: grid;
+    padding: 0px 16px;
+    grid-template-columns: auto 15% 25% 25% 15%;
     margin-left: 2px;
     color: #FAE5D2;
-    padding-left: 16px;
     line-height: 64px;
     font-family: 'belerenbold' !important;
-    font-size: 18px;
+    font-size: 16px;
     background-color: rgba(145, 121, 97, 0.2);
 }
 
