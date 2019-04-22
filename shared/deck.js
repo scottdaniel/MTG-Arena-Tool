@@ -258,7 +258,7 @@ class Deck {
     ret.id = this.id;
     ret.lastUpdated = this.lastUpdated;
     ret.deckTileId = this.tile;
-    ret.colors = this.colors;
+    ret.colors = this.colors.get();
     ret.tags = this.tags;
     ret.custom = this.custom;
 
