@@ -1469,11 +1469,26 @@ a:hover {
   font-family:  var(--main-font-name);
     font-size: 16px;
     margin: auto 16px auto auto;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.economy_metric {
+    align-items: center;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.economy_delta {
+    align-items: center;
+    display: flex;
+    justify-content: flex-end;
+    margin: 0 6px;
 }
 
 .economy_up {
     background-repeat: no-repeat;
-    margin: auto 4px;
+    margin: 4px;
     width: 24px;
     height: 24px;
     background-image: url(../images/up_green.png);
@@ -1482,7 +1497,7 @@ a:hover {
 
 .economy_down {
     background-repeat: no-repeat;
-    margin: auto 4px;
+    margin: 4px;
     width: 24px;
     height: 24px;
     background-image: url(../images/down_red.png);
@@ -1490,12 +1505,14 @@ a:hover {
 }
 
 .economy_title {
+    display: grid;
+    padding: 0px 16px;
+    grid-template-columns: auto 15% 25% 25% 15%;
     margin-left: 2px;
     color: #FAE5D2;
-    padding-left: 16px;
     line-height: 64px;
     font-family: 'belerenbold' !important;
-    font-size: 18px;
+    font-size: 16px;
     background-color: rgba(145, 121, 97, 0.2);
 }
 
