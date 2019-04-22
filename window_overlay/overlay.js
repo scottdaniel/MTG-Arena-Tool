@@ -36,7 +36,6 @@ let soundPriorityVolume = 1;
 let overlayAlpha = 1;
 let overlayAlphaBack = 1;
 let oddsSampleSize = 1;
-let cardsLeft = 60;
 
 let cardQuality = "normal";
 
@@ -540,6 +539,7 @@ function drawDeckOdds() {
 
   //
   $(".odds_prev").click(function() {
+    let cardsLeft = currentMatch.playerCardsLeft.mainboard.count();
     oddsSampleSize -= 1;
     if (oddsSampleSize < 1) {
       oddsSampleSize = cardsLeft - 1;
@@ -548,6 +548,7 @@ function drawDeckOdds() {
   });
   //
   $(".odds_next").click(function() {
+    let cardsLeft = currentMatch.playerCardsLeft.mainboard.count();
     oddsSampleSize += 1;
     if (oddsSampleSize > cardsLeft - 1) {
       oddsSampleSize = 1;

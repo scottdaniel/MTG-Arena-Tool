@@ -821,7 +821,7 @@ function addCardTile(grpId, indent, quantity, element, showWildcards = false, de
           var asasdf = createDivision(["not_owned_sprite"]);
           asasdf.style.cssText = `background-position: ${xoff}px ${yoff}px; left: calc(0px - 100% + ${ww -
             14}px);`;
-          asasdf.title = "${missing} missing";
+          asasdf.title = `${missing} missing`;
           cont.appendChild(asasdf);
         }
         /*}
