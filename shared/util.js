@@ -1370,13 +1370,22 @@ function get_set_code(set) {
 
 //
 class CountStats {
-  constructor(owned = 0, total = 0, unique = 0, complete = 0, wanted = 0, uniqueWanted = 0) {
+  constructor(
+    owned = 0,
+    total = 0,
+    unique = 0,
+    complete = 0,
+    wanted = 0,
+    uniqueWanted = 0,
+    uniqueOwned = 0
+  ) {
     this.owned = owned;
     this.total = total;
     this.unique = unique;
     this.complete = complete; // all 4 copies of a card
     this.wanted = wanted;
     this.uniqueWanted = uniqueWanted;
+    this.uniqueOwned = uniqueOwned;
   }
 
   get percentage() {
@@ -1409,7 +1418,9 @@ class SetStats {
       acc.owned += c.owned;
       acc.total += c.total;
       acc.unique += c.unique;
+      acc.complete += c.complete;
       acc.wanted += c.wanted;
+      acc.uniqueOwned += c.uniqueOwned;
       return acc;
     });
   }
@@ -1418,8 +1429,7 @@ class SetStats {
 //
 function get_collection_stats() {
   const stats = {
-    complete: new SetStats("complete"),
-    singles: new SetStats("singles")
+    complete: new SetStats("complete")
   };
 
   for (var set in setsList) {
@@ -1440,23 +1450,21 @@ function get_collection_stats() {
         // add to totals
         stats[card.set][card.rarity].total += 4;
         stats.complete[card.rarity].total += 4;
-        stats.singles[card.rarity].total += 1;
         stats[card.set][card.rarity].unique += 1;
         stats.complete[card.rarity].unique += 1;
-        stats.singles[card.rarity].unique += 1;
 
         // add cards we own
         if (cards[grpId] !== undefined) {
           var owned = cards[grpId];
           stats[card.set][card.rarity].owned += owned;
           stats.complete[card.rarity].owned += owned;
-          stats.singles[card.rarity].owned += 1;
+          stats[card.set][card.rarity].uniqueOwned += 1;
+          stats.complete[card.rarity].uniqueOwned += 1;
 
           // count complete sets we own
           if (owned == 4) {
             stats[card.set][card.rarity].complete += 1;
             stats.complete[card.rarity].complete += 1;
-            stats.singles[card.rarity].complete += 1;
           }
         }
 
@@ -1465,12 +1473,10 @@ function get_collection_stats() {
         let wanted = Math.max(...deckWantedCounts);
         stats[card.set][card.rarity].wanted += wanted;
         stats.complete[card.rarity].wanted += wanted;
-        stats.singles[card.rarity].wanted += Math.min(1, wanted);
 
         // count unique cards we know we want across decks
         stats[card.set][card.rarity].uniqueWanted += Math.min(1, wanted);
         stats.complete[card.rarity].uniqueWanted += Math.min(1, wanted);
-        stats.singles[card.rarity].uniqueWanted += Math.min(1, wanted);
       }
     }
   });
