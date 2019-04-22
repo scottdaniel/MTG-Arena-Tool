@@ -25,11 +25,20 @@ var dayList = [];
 const differenceInCalendarDays = require("date-fns").differenceInCalendarDays;
 
 class economyDay {
-  constructor(goldEarned = 0, gemsEarned = 0, goldSpent = 0, gemsSpent = 0) {
+  constructor(
+    goldEarned = 0,
+    gemsEarned = 0,
+    goldSpent = 0,
+    gemsSpent = 0,
+    cardsEarned = 0,
+    vaultProgress = 0.0
+  ) {
     this.goldEarned = goldEarned;
     this.gemsEarned = gemsEarned;
     this.goldSpent = goldSpent;
     this.gemsSpent = gemsSpent;
+    this.cardsEarned = cardsEarned;
+    this.vaultProgress = vaultProgress;
   }
 }
 
@@ -153,41 +162,90 @@ function createDayHeader(change) {
 
   let flexRight = createDivision(["economy_day_stats", "flex_item"]);
 
-  let icgo = createDivision(["economy_gold_med"]);
-  icgo.title = "Gold";
-
-  let icge = createDivision(["economy_gems_med"]);
-  icge.style.marginLeft = "24px";
-  icge.title = "Gems";
-
-  let up = createDivision(["economy_up"]);
-
-  let down = createDivision(["economy_down"]);
+  const cont = createDivision(["economy_metric"]);
 
   let tx = createDivision();
   tx.style.lineHeight = "64px";
   tx.classList.add("economy_sub");
 
-  flexRight.appendChild(icgo);
-  flexRight.appendChild(up);
-  tx.innerHTML = dayList[daysago].goldEarned;
-  flexRight.appendChild(tx);
+  let up = createDivision(["economy_up"]);
 
-  flexRight.appendChild(down);
-  let ntx = tx.cloneNode(true);
-  ntx.innerHTML = dayList[daysago].goldSpent;
-  flexRight.appendChild(ntx);
+  let down = createDivision(["economy_down"]);
 
-  flexRight.appendChild(icge);
-  flexRight.appendChild(up.cloneNode(true));
-  ntx = tx.cloneNode(true);
-  ntx.innerHTML = dayList[daysago].gemsEarned;
-  flexRight.appendChild(ntx);
+  const contca = cont.cloneNode(true);
+  contca.style.flex = 1;
+  const icca = tx.cloneNode(true);
+  icca.innerHTML = "Cards:";
+  const catx = tx.cloneNode(true);
+  catx.innerHTML = dayList[daysago].cardsEarned;
+  contca.appendChild(icca);
+  const upcontca = createDivision(["economy_delta"]);
+  upcontca.appendChild(catx);
+  upcontca.appendChild(up.cloneNode(true));
+  contca.appendChild(upcontca);
+  flexRight.appendChild(contca);
 
-  flexRight.appendChild(down.cloneNode(true));
-  ntx = tx.cloneNode(true);
-  ntx.innerHTML = dayList[daysago].gemsSpent;
-  flexRight.appendChild(ntx);
+  const contgo = cont.cloneNode(true);
+  contgo.style.flex = 3;
+  {
+    let icgo = createDivision(["economy_gold_med"]);
+    icgo.title = "Gold";
+    contgo.appendChild(icgo);
+
+    const upcontgo = createDivision(["economy_delta"]);
+    tx.innerHTML = dayList[daysago].goldEarned;
+    upcontgo.appendChild(tx);
+    upcontgo.appendChild(up.cloneNode(true));
+    contgo.appendChild(upcontgo);
+
+    const dncontgo = createDivision(["economy_delta"]);
+    let ntx = tx.cloneNode(true);
+    ntx.innerHTML = dayList[daysago].goldSpent;
+    dncontgo.appendChild(ntx);
+    dncontgo.appendChild(down.cloneNode(true));
+    contgo.appendChild(dncontgo);
+  }
+  flexRight.appendChild(contgo);
+
+  const contge = cont.cloneNode(true);
+  contge.style.flex = 3;
+  {
+    let icge = createDivision(["economy_gems_med"]);
+    icge.title = "Gems";
+    contge.appendChild(icge);
+
+    const upcontge = createDivision(["economy_delta"]);
+    let ntx = tx.cloneNode(true);
+    ntx.innerHTML = dayList[daysago].gemsEarned;
+    upcontge.appendChild(ntx);
+    upcontge.appendChild(up.cloneNode(true));
+    contge.appendChild(upcontge);
+
+    const dncontge = createDivision(["economy_delta"]);
+    ntx = tx.cloneNode(true);
+    ntx.innerHTML = dayList[daysago].gemsSpent;
+    dncontge.appendChild(ntx);
+    dncontge.appendChild(down.cloneNode(true));
+    contge.appendChild(dncontge);
+  }
+  flexRight.appendChild(contge);
+
+  const contva = cont.cloneNode(true);
+  contva.style.flex = 2;
+  const icva = tx.cloneNode(true);
+  icva.innerHTML = "Vault:";
+  const vatx = tx.cloneNode(true);
+  const deltaPercent = dayList[daysago].vaultProgress / 100.0;
+  vatx.innerHTML = deltaPercent.toLocaleString([], {
+    style: "percent",
+    maximumSignificantDigits: 2
+  });
+  contva.appendChild(icva);
+  const upcontva = createDivision(["economy_delta"]);
+  upcontva.appendChild(vatx);
+  upcontva.appendChild(up.cloneNode(true));
+  contva.appendChild(upcontva);
+  flexRight.appendChild(contva);
 
   div.appendChild(flexLeft);
   div.appendChild(flexRight);
@@ -565,6 +623,13 @@ function createEconomyUI(mainDiv) {
       else dayList[daysago].goldSpent += Math.abs(change.delta.goldDelta);
 
       console.log(economyId, "> ", change.date, " > ", change.delta.goldDelta);
+    }
+
+    if (change.delta && change.delta.cardsAdded) {
+      dayList[daysago].cardsEarned += change.delta.cardsAdded.length;
+    }
+    if (change.delta && change.delta.vaultProgressDelta) {
+      dayList[daysago].vaultProgress += change.delta.vaultProgressDelta;
     }
   }
 

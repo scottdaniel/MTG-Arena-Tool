@@ -1469,11 +1469,28 @@ a:hover {
   font-family:  var(--main-font-name);
     font-size: 16px;
     margin: auto 16px auto auto;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.economy_metric {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    margin-left: 36px;
+}
+
+.economy_delta {
+    align-items: center;
+    display: flex;
+    justify-content: flex-end;
+    margin: 0 4px;
+    width: 75px;
 }
 
 .economy_up {
     background-repeat: no-repeat;
-    margin: auto 4px;
+    margin: 4px;
     width: 24px;
     height: 24px;
     background-image: url(../images/up_green.png);
@@ -1482,7 +1499,7 @@ a:hover {
 
 .economy_down {
     background-repeat: no-repeat;
-    margin: auto 4px;
+    margin: 4px;
     width: 24px;
     height: 24px;
     background-image: url(../images/down_red.png);
