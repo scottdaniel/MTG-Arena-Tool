@@ -29,6 +29,12 @@ let filteredSets = [];
 let filteredMana = [];
 let orderedSets;
 
+const ALL_CARDS = "All cards";
+const SINGLETONS = "Singletons (at least one)";
+const FULL_SETS = "Full sets (all 4 copies)";
+
+let countMode = ALL_CARDS;
+
 //
 function openCollectionTab() {
   orderedSets = [];
@@ -433,19 +439,31 @@ function printStats() {
   completionLabel.innerHTML = "Sets Completion";
   mainstats.appendChild(completionLabel);
 
-  // each set stats
-  orderedSets.forEach(set => {
-    let rs = renderSetStats(stats[set], setsList[set].code, set);
-    mainstats.appendChild(rs);
-  });
+  // Counting Mode Selector
+  const countModeDiv = createDivision(["stats_count_div"]);
+  const countModeSelect = createSelect(
+    countModeDiv,
+    [ALL_CARDS, SINGLETONS, FULL_SETS],
+    countMode,
+    selectedMode => {
+      countMode = selectedMode;
+      printStats();
+    },
+    "stats_count_select"
+  );
+  countModeSelect.style.margin = "12px auto auto auto";
+  countModeSelect.style.textAlign = "left";
+  mainstats.appendChild(countModeSelect);
 
   // Complete collection sats
   let rs = renderSetStats(stats.complete, "PW", "Complete collection");
   mainstats.appendChild(rs);
 
-  // Singleton collection sats
-  rs = renderSetStats(stats.singles, "PW", "Singles");
-  mainstats.appendChild(rs);
+  // each set stats
+  orderedSets.forEach(set => {
+    let rs = renderSetStats(stats[set], setsList[set].code, set);
+    mainstats.appendChild(rs);
+  });
 
   const substats = createDivision(["main_stats", "sub_stats"]);
 
@@ -543,6 +561,24 @@ function renderSetStats(setStats, setIconCode, setName) {
 
 //
 function renderCompletionDiv(countStats, image, title) {
+  let numerator, denominator;
+  switch (countMode) {
+    case SINGLETONS:
+      numerator = countStats.uniqueOwned;
+      denominator = countStats.unique;
+      break;
+    case FULL_SETS:
+      numerator = countStats.complete;
+      denominator = countStats.unique;
+      break;
+    default:
+    case ALL_CARDS:
+      numerator = countStats.owned;
+      denominator = countStats.total;
+      break;
+  }
+  const completionRatio = numerator / denominator;
+
   const completionDiv = createDivision(["stats_set_completion"]);
 
   let setIcon = createDivision(["stats_set_icon"]);
@@ -556,11 +592,14 @@ function renderCompletionDiv(countStats, image, title) {
   const detailsDiv = createDivision(["stats_set_details"]);
 
   const percentSpan = document.createElement("span");
-  percentSpan.innerHTML = Math.round(countStats.percentage) + "%";
+  percentSpan.innerHTML = completionRatio.toLocaleString([], {
+    style: "percent",
+    maximumSignificantDigits: 2
+  });
   detailsDiv.appendChild(percentSpan);
 
   const countSpan = document.createElement("span");
-  countSpan.innerHTML = countStats.owned + " / " + countStats.total;
+  countSpan.innerHTML = numerator + " / " + denominator;
   detailsDiv.appendChild(countSpan);
 
   const wantedSpan = document.createElement("span");
@@ -573,7 +612,7 @@ function renderCompletionDiv(countStats, image, title) {
   completionDiv.appendChild(wrapperDiv);
 
   let setBar = createDivision(["stats_set_bar"]);
-  setBar.style.width = countStats.percentage + "%";
+  setBar.style.width = Math.round(completionRatio * 100) + "%";
 
   completionDiv.appendChild(setBar);
   return completionDiv;
