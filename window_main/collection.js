@@ -708,7 +708,7 @@ function printCards() {
     // filter type
     arr = filterType.split(" ");
     for (let t = 0; t < arr.length; t++) {
-      if (name.indexOf(arr[t]) == -1) {
+      if (type.indexOf(arr[t]) == -1) {
         continue cardLoop;
       }
     }
