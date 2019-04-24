@@ -231,6 +231,12 @@ function openCollectionTab() {
   );
   addCheckboxSearch(
     cont,
+    '<div class="icon_search_incomplete_left"></div><div class="icon_search_incomplete_right"></div>Incomplete only',
+    "query_incomplete",
+    false
+  );
+  addCheckboxSearch(
+    cont,
     '<div class="icon_search_new"></div>Newly acquired only',
     "query_new",
     false
@@ -395,6 +401,7 @@ function resetFilters() {
   document.getElementById("query_name").value = "";
   document.getElementById("query_type").value = "";
   document.getElementById("query_unown").checked = false;
+  document.getElementById("query_incomplete").checked = false;
   document.getElementById("query_new").checked = false;
   document.getElementById("query_multicolor").checked = false;
   document.getElementById("query_exclude").checked = false;
@@ -642,6 +649,7 @@ function printCards() {
   let filterName = document.getElementById("query_name").value.toLowerCase();
   let filterType = document.getElementById("query_type").value.toLowerCase();
   let filterUnown = document.getElementById("query_unown").checked;
+  let filterIncomplete = document.getElementById("query_incomplete").checked;
   let filterNew = document.getElementById("query_new");
   let filterMulti = document.getElementById("query_multicolor");
   let filterExclude = document.getElementById("query_exclude");
@@ -710,6 +718,13 @@ function printCards() {
     for (let t = 0; t < arr.length; t++) {
       if (type.indexOf(arr[t]) == -1) {
         continue cardLoop;
+      }
+    }
+
+    if (filterIncomplete) {
+      let owned = cards[card.id];
+      if (owned >= 4) {
+        continue;
       }
     }
 

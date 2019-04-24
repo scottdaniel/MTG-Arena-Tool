@@ -1231,6 +1231,23 @@ a:hover {
     background: center no-repeat url('../images/quantity_gray.png');
 }
 
+.icon_search_incomplete_left {
+    display: -webkit-inline-box;
+    width: 10px;
+    height: 20px;
+    background: left no-repeat url('../images/quantity_green.png');
+    background-size: cover;
+}
+
+.icon_search_incomplete_right {
+    display: -webkit-inline-box;
+    width: 10px;
+    margin-right: 16px;
+    height: 20px;
+    background: right no-repeat url('../images/quantity_gray.png');
+    background-size: cover;
+}
+
 .icon_search_new {
     display: -webkit-inline-box;
     width: 20px;
