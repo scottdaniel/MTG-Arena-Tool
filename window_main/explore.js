@@ -431,11 +431,11 @@ function setExploreDecks(data) {
   filterSkip += data.results_number;
   if (data.results_type == "Ranked Constructed") {
     data.result.forEach((deck, index) => {
-      deckLoad(deck, index);
+      deckLoad(deck, filterSkip + index);
     });
   } else {
     data.result.forEach((course, index) => {
-      eventLoad(course, index);
+      eventLoad(course, filterSkip + index);
     });
   }
 }
