@@ -42,29 +42,36 @@ function keyValuePair(obj, addTo) {
     addTo[obj.key] = obj.f[0];
     return addTo;
   }
-  if (obj.type == "KeyValuePairValueType_None")
-    addTo[obj.key] = obj.valueNone[0];
-  if (obj.type == "KeyValuePairValueType_uint32")
-    addTo[obj.key] = obj.valueUint32[0];
-  if (obj.type == "KeyValuePairValueType_int32")
-    addTo[obj.key] = obj.valueInt32[0];
-  if (obj.type == "KeyValuePairValueType_uint64")
-    addTo[obj.key] = obj.valueUint64[0];
-  if (obj.type == "KeyValuePairValueType_int64")
-    addTo[obj.key] = obj.valueInt64[0];
-  if (obj.type == "KeyValuePairValueType_bool")
-    addTo[obj.key] = obj.valueBool[0];
-  if (obj.type == "KeyValuePairValueType_string")
-    addTo[obj.key] = obj.valueString[0];
-  if (obj.type == "KeyValuePairValueType_float")
-    addTo[obj.key] = obj.valueFloat[0];
-  if (obj.type == "KeyValuePairValueType_double")
-    addTo[obj.key] = obj.valueDouble[0];
+  try {
+    if (obj.type == "KeyValuePairValueType_None")
+      addTo[obj.key] = obj.valueNone;
+    if (obj.type == "KeyValuePairValueType_uint32")
+      addTo[obj.key] = obj.valueUint32;
+    if (obj.type == "KeyValuePairValueType_int32")
+      addTo[obj.key] = obj.valueInt32;
+    if (obj.type == "KeyValuePairValueType_uint64")
+      addTo[obj.key] = obj.valueUint64;
+    if (obj.type == "KeyValuePairValueType_int64")
+      addTo[obj.key] = obj.valueInt64;
+    if (obj.type == "KeyValuePairValueType_bool")
+      addTo[obj.key] = obj.valueBool;
+    if (obj.type == "KeyValuePairValueType_string")
+      addTo[obj.key] = obj.valueString;
+    if (obj.type == "KeyValuePairValueType_float")
+      addTo[obj.key] = obj.valueFloat;
+    if (obj.type == "KeyValuePairValueType_double")
+      addTo[obj.key] = obj.valueDouble;
+
+    if (addTo[obj.key].length == 1) addTo[obj.key] = addTo[obj.key][0];
+  } catch (e) {
+    addTo[obj.key] = undefined;
+  }
+
   return addTo;
 }
 
 function processAnnotations() {
-  currentMatch.annotations.forEach((ann, index) => {
+  currentMatch.annotations.forEach(ann => {
     // if this annotation has already been processed, skip
     if (currentMatch.processedAnnotations.includes(ann.id)) return;
 
@@ -193,7 +200,7 @@ annotationFunctions.AnnotationType_ZoneTransfer = function(ann, details) {
     let affected = instanceIdToObject(ann.affectedIds[0]);
     let affector = instanceIdToObject(ann.affectorId);
 
-    let text = getNameBySeat(seat);
+    let text = "";
     if (affector.type == "GameObjectType_Ability") {
       text = `${actionLogGenerateLink(
         affector.objectSourceGrpId
@@ -208,6 +215,29 @@ annotationFunctions.AnnotationType_ZoneTransfer = function(ann, details) {
       seat,
       false,
       `${text} returned ${actionLogGenerateLink(affected.grpId)} to ${zone}`
+    );
+  }
+
+  // A card was exiled
+  if (details.category == "Exile") {
+    let affected = instanceIdToObject(ann.affectedIds[0]);
+    let affector = instanceIdToObject(ann.affectorId);
+
+    let text = "";
+    if (affector.type == "GameObjectType_Ability") {
+      text = `${actionLogGenerateLink(
+        affector.objectSourceGrpId
+      )}'s ${actionLogGenerateAbilityLink(affector.grpId)}`;
+    }
+    if (affector.type == "GameObjectType_Card") {
+      text = actionLogGenerateLink(affector.grpId);
+    }
+
+    let seat = affector.ownerSeatId;
+    actionLog(
+      seat,
+      false,
+      `${text} exiled ${actionLogGenerateLink(affected.grpId)}`
     );
   }
 
@@ -317,6 +347,59 @@ annotationFunctions.AnnotationType_TargetSpec = function(ann) {
   actionLog(seat, false, `${text} targetted ${target}`);
 };
 
+annotationFunctions.AnnotationType_Scry = function(ann, details) {
+  let affector = ann.affectorId;
+  let player = getNameBySeat(affector);
+
+  let top = details.topIds;
+  let bottom = details.bottomIds;
+  if (!Array.isArray(top)) {
+    top = top !== undefined ? [top] : [];
+  }
+  if (!Array.isArray(bottom)) {
+    bottom = bottom !== undefined ? [bottom] : [];
+  }
+  let xtop = top.length;
+  let xbottom = bottom.length;
+  let scrySize = xtop + xbottom;
+
+  actionLog(
+    affector,
+    false,
+    `${player} scry ${scrySize}: ${xtop} top, ${xbottom} bottom`
+  );
+  if (xtop > 0) {
+    top.forEach(instanceId => {
+      let grpId = instanceIdToObject(instanceId).grpId;
+      actionLog(affector, false, ` ${actionLogGenerateLink(grpId)} to the top`);
+    });
+  }
+  if (xbottom > 0) {
+    bottom.forEach(instanceId => {
+      let grpId = instanceIdToObject(instanceId).grpId;
+      actionLog(
+        affector,
+        false,
+        ` ${actionLogGenerateLink(grpId)} to the bottom`
+      );
+    });
+  }
+};
+
+annotationFunctions.AnnotationType_CardRevealed = function(ann, details) {
+  if (ann.ignoreForSeatIds == currentMatch.player.seat) return;
+
+  let grpId = ann.affectedIds;
+  let zone = currentMatch.zones[details.source_zone];
+  let owner = zone.ownerSeatId;
+
+  actionLog(
+    owner,
+    false,
+    `revealed ${actionLogGenerateLink(grpId)} from ${zone.type}`
+  );
+};
+
 // Used for debug only.
 function processAll() {
   for (var i = 0; i < currentMatch.latestMessage; i++) {
@@ -393,6 +476,8 @@ function getPlayerUsedCards() {
     if (
       zone.objectInstanceIds &&
       zone.type != "ZoneType_Limbo" &&
+      zone.type != "ZoneType_Library" &&
+      zone.type != "ZoneType_Library" &&
       zone.type != "ZoneType_Revealed"
     ) {
       zone.objectInstanceIds.forEach(id => {
