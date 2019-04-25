@@ -231,7 +231,7 @@ function openCollectionTab() {
   );
   addCheckboxSearch(
     cont,
-    '<div class="icon_search_incomplete_left"></div><div class="icon_search_incomplete_right"></div>Incomplete only',
+    '<div class="icon_search_incomplete"></div>Incomplete only',
     "query_incomplete",
     false
   );
