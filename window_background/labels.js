@@ -5,6 +5,8 @@ function onLabelOutLogInfo(entry, json) {
   if (skipMatch) return;
 
   if (json.params.messageName == "DuelScene.GameStop") {
+    currentMatch.opponent.cards = currentMatch.oppCardsUsed;
+
     var payload = json.params.payloadObject;
     var mid = payload.matchId + "-" + playerData.arenaId;
     var time = payload.secondsCount;
@@ -135,13 +137,12 @@ function onLabelGreToClient(entry, json) {
 
   json = json.greToClientEvent.greToClientMessages;
   json.forEach(function(msg) {
-    greToClientInterpreter.GREMessage(msg, logTime);
-    /*
+    //greToClientInterpreter.GREMessage(msg, logTime);
+    
     let msgId = msg.msgId;
     currentMatch.GREtoClient[msgId] = msg;
     currentMatch.latestMessage = msgId;
-    greToClientInterpreter.GREMessageByID(msg, logTime);
-    */
+    greToClientInterpreter.GREMessageByID(msgId, logTime);
   });
 }
 

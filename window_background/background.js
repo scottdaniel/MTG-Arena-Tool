@@ -176,6 +176,7 @@ var currentMatchDefault = {
   annotations: [],
   gameObjs: {},
   gameInfo: {},
+  gameStage: "",
   turnInfo: {},
   playerCardsUsed: [],
   oppCardsUsed: [],
@@ -228,7 +229,6 @@ var matchBeginTime = 0;
 var matchGameStats = [];
 var matchCompletedOnGameNumber = 0;
 var gameNumberCompleted = 0;
-let gameStage = "";
 let initialLibraryInstanceIds = [];
 let idChanges = {};
 let instanceToCardIdMap = {};
@@ -1490,8 +1490,10 @@ function createMatch(arg) {
   currentMatch.opponent.name = arg.opponentScreenName;
   currentMatch.opponent.rank = arg.opponentRankingClass;
   currentMatch.opponent.tier = arg.opponentRankingTier;
+  currentMatch.opponent.cards = [];
   currentMatch.eventId = arg.eventId;
   currentMatch.matchId = arg.matchId + "-" + playerData.arenaId;
+  currentMatch.gameStage = "";
 
   currentMatch.beginTime = matchBeginTime;
 
@@ -1499,7 +1501,7 @@ function createMatch(arg) {
   matchGameStats = [];
   matchCompletedOnGameNumber = 0;
   gameNumberCompleted = 0;
-  gameStage = "";
+  
 
   ipc_send("ipc_log", "vs " + currentMatch.opponent.name);
   ipc_send("set_timer", currentMatch.beginTime, windowOverlay);

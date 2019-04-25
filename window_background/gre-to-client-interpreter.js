@@ -349,6 +349,9 @@ annotationFunctions.AnnotationType_TargetSpec = function(ann) {
 
 annotationFunctions.AnnotationType_Scry = function(ann, details) {
   let affector = ann.affectorId;
+  if (affector > 3) {
+    affector = instanceIdToObject(affector).ownerSeatId;
+  }
   let player = getNameBySeat(affector);
 
   let top = details.topIds;
@@ -368,21 +371,27 @@ annotationFunctions.AnnotationType_Scry = function(ann, details) {
     false,
     `${player} scry ${scrySize}: ${xtop} top, ${xbottom} bottom`
   );
-  if (xtop > 0) {
-    top.forEach(instanceId => {
-      let grpId = instanceIdToObject(instanceId).grpId;
-      actionLog(affector, false, ` ${actionLogGenerateLink(grpId)} to the top`);
-    });
-  }
-  if (xbottom > 0) {
-    bottom.forEach(instanceId => {
-      let grpId = instanceIdToObject(instanceId).grpId;
-      actionLog(
-        affector,
-        false,
-        ` ${actionLogGenerateLink(grpId)} to the bottom`
-      );
-    });
+  if (affector == currentMatch.player.seat) {
+    if (xtop > 0) {
+      top.forEach(instanceId => {
+        let grpId = instanceIdToObject(instanceId).grpId;
+        actionLog(
+          affector,
+          false,
+          ` ${actionLogGenerateLink(grpId)} to the top`
+        );
+      });
+    }
+    if (xbottom > 0) {
+      bottom.forEach(instanceId => {
+        let grpId = instanceIdToObject(instanceId).grpId;
+        actionLog(
+          affector,
+          false,
+          ` ${actionLogGenerateLink(grpId)} to the bottom`
+        );
+      });
+    }
   }
 };
 
@@ -427,7 +436,9 @@ function GREMessageByID(msgId, time) {
   }
 
   currentMatch.playerCardsUsed = getPlayerUsedCards();
-  currentMatch.oppCardsUsed = getOppUsedCards();
+  currentMatch.oppCardsUsed = currentMatch.opponent.cards.concat(
+    getOppUsedCards()
+  );
 }
 
 function GREMessage(message, time) {
@@ -440,7 +451,9 @@ function GREMessage(message, time) {
   }
 
   currentMatch.playerCardsUsed = getPlayerUsedCards();
-  currentMatch.oppCardsUsed = getOppUsedCards();
+  currentMatch.oppCardsUsed = currentMatch.opponent.cards.concat(
+    getOppUsedCards()
+  );
 }
 
 function getOppUsedCards() {
@@ -511,7 +524,7 @@ GREMessages.GREMessageType_QueuedGameStateMessage = function(msg) {
 GREMessages.GREMessageType_GameStateMessage = function(msg) {
   let gameState = msg.gameStateMessage;
 
-  if (currentMatch.gameInfo) {
+  if (gameState.gameInfo) {
     checkGameInfo(currentMatch.gameInfo);
     currentMatch.gameInfo = gameState.gameInfo;
   }
@@ -592,9 +605,9 @@ function checkForStartingLibrary() {
     }
   });
 
-  if (gameStage != "GameStage_Start") return;
-  if (!zoneHand.objectInstanceIds) return;
-  if (!zoneLibrary.objectInstanceIds) return;
+  if (currentMatch.gameStage != "GameStage_Start") return;
+  if (!zoneHand || !zoneHand.objectInstanceIds) return;
+  if (!zoneLibrary || !zoneLibrary.objectInstanceIds) return;
 
   let hand = zoneHand.objectInstanceIds || [];
   let library = zoneLibrary.objectInstanceIds || [];
@@ -608,9 +621,11 @@ function checkForStartingLibrary() {
 }
 
 function checkGameInfo(gameInfo) {
-  if (gameInfo.stage && gameInfo.stage != gameStage) {
-    gameStage = gameInfo.stage;
-    if (gameStage == "GameStage_Start") {
+  //console.log(`>> GameStage: ${gameInfo.stage} (${currentMatch.gameStage})`);
+  //actionLog(-1, false, `>> GameStage: ${gameInfo.stage} (${currentMatch.gameStage})`);
+  if (currentMatch.gameStage !== gameInfo.stage) {
+    currentMatch.gameStage = gameInfo.stage;
+    if (currentMatch.gameStage == "GameStage_Start") {
       currentMatch.processedAnnotations = [];
       currentMatch.timers = {};
       currentMatch.zones = {};
@@ -799,5 +814,6 @@ GREMessages.GREMessageType_Timeoutmessage = function() {};
 
 module.exports = {
   GREMessage,
+  GREMessageByID,
   processAll
 };
