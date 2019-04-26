@@ -1,5 +1,6 @@
 /*
 global
+  filteredWildcardsSet,
 	timestamp,
 	$$,
 	userName,
@@ -14,6 +15,8 @@ global
 	authToken,
 	discordTag,
 	shell,
+  setsList,
+  showLoadingBars,
 	pop,
 	toHHMMSS,
 	createDivision
@@ -222,12 +225,24 @@ function open_home_tab(arg, opentab = true) {
       let ti = $(this).attr("id");
       if (ti == "create") {
         createTournament();
-      }
-      else {
+      } else {
         document.body.style.cursor = "progress";
         ipc_send("tou_get", ti);
       }
     });
+  });
+
+  let orderedSets = [];
+  for (let set in setsList) {
+    if (set.collation !== false) {
+      orderedSets.push(set);
+    }
+  }
+
+  orderedSets.sort((a, b) => {
+    if (a.release < b.release) return 1;
+    if (a.release > b.release) return -1;
+    return 0;
   });
 
   if (topWildcards) {
@@ -237,6 +252,28 @@ function open_home_tab(arg, opentab = true) {
     title.setAttribute("tooltip-content", "In the last 15 days.");
     title.setAttribute("tooltip-bottom", "");
     mainDiv.appendChild(title);
+
+    let setsContainer = createDivision(["top_wildcards_sets_cont"]);
+    orderedSets.forEach(set => {
+      let setbutton = createDivision(["set_filter"]);
+      if (filteredWildcardsSet !== set) {
+        setbutton.classList.add("set_filter_on");
+      }
+      setbutton.style.backgroundImage = `url(../images/sets/${
+        setsList[set].code
+      }.png)`;
+      setbutton.title = set;
+
+      setsContainer.appendChild(setbutton);
+      setbutton.addEventListener("click", () => {
+        setbutton.classList.remove("set_filter_on");
+        filteredWildcardsSet = set;
+        showLoadingBars();
+        ipc_send("request_home", filteredWildcardsSet);
+      });
+    });
+
+    mainDiv.appendChild(setsContainer);
     cont = createDivision(["top_wildcards_cont"]);
 
     let cell;

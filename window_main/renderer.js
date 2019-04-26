@@ -111,6 +111,8 @@ let rewards_daily_ends = new Date();
 let rewards_weekly_ends = new Date();
 let activeEvents = [];
 
+let filteredWildcardsSet = "";
+
 let deck_tags = {};
 let tags_colors = {};
 let authToken = null;
@@ -924,7 +926,7 @@ $(document).ready(function() {
             open_home_tab(null, true);
           } else {
             document.body.style.cursor = "progress";
-            ipc_send("request_home", "");
+            ipc_send("request_home", filteredWildcardsSet);
           }
         }
       }

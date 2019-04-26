@@ -43,12 +43,8 @@ function openCollectionTab() {
   }
 
   orderedSets.sort((a, b) => {
-    if (setsList[a].release < setsList[b].release) {
-      return 1;
-    }
-    if (setsList[a].release > setsList[b].release) {
-      return -1;
-    }
+    if (a.release < b.release) return 1;
+    if (a.release > b.release) return -1;
     return 0;
   });
 
