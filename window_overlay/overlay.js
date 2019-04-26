@@ -628,7 +628,11 @@ function setDraft(_packN = -1, _pickN = -1) {
   }
   $(".overlay_decklist").html("");
   $(".overlay_deckcolors").html("");
-  $(".overlay_deckname").html("Pack " + (packN + 1) + " - Pick " + (pickN + 1));
+  let title = "Pack " + (packN + 1) + " - Pick " + (pickN + 1);
+  if (packN === currentDraft.packNumber && pickN === currentDraft.pickNumber) {
+    title += " - Current";
+  }
+  $(".overlay_deckname").html(title);
 
   let colors;
   if (draftMode == 0) {
