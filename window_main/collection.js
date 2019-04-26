@@ -82,7 +82,7 @@ function openCollectionTab() {
 
   input.addEventListener("keydown", function(e) {
     if (e.keyCode == 13) {
-      printCards();
+      printCollectionPage();
     }
   });
 
@@ -96,7 +96,7 @@ function openCollectionTab() {
   flrt.appendChild(advancedButton);
 
   searchButton.addEventListener("click", () => {
-    printCards();
+    printCollectionPage();
   });
 
   advancedButton.addEventListener("click", () => {
@@ -110,7 +110,7 @@ function openCollectionTab() {
     sortingAlgorithm,
     res => {
       sortingAlgorithm = res;
-      printCards();
+      printCollectionPage();
     },
     "query_select"
   );
@@ -314,7 +314,7 @@ function openCollectionTab() {
   filters.appendChild(searchButton);
 
   searchButton.addEventListener("click", () => {
-    printCards();
+    printCollectionPage();
   });
 
   mainDiv.appendChild(basicFilters);
@@ -412,7 +412,7 @@ function resetFilters() {
   document.getElementById("query_cmcequal").checked = true;
   document.getElementById("query_cmchigher").checked = false;
 
-  printCards();
+  printCollectionPage();
 }
 
 //
@@ -623,7 +623,7 @@ function renderCompletionDiv(countStats, image, title) {
 
 function sortCollection(alg) {
   sortingAlgorithm = alg;
-  printCards();
+  printCollectionPage();
 }
 
 //
@@ -872,11 +872,11 @@ function printCards() {
     but = createDivision(["paging_button"], " < ");
 
     but.addEventListener("click", () => {
-      setCollectionPage(collectionPage - 1);
+      printCollectionPage(collectionPage - 1);
     });
     butClone = but.cloneNode(true);
     butClone.addEventListener("click", () => {
-      setCollectionPage(collectionPage + 1);
+      printCollectionPage(collectionPage + 1);
     });
   }
 
@@ -892,11 +892,11 @@ function printCards() {
 
     let page = n;
     but.addEventListener("click", () => {
-      setCollectionPage(page);
+      printCollectionPage(page);
     });
     butClone = but.cloneNode(true);
     butClone.addEventListener("click", () => {
-      setCollectionPage(page);
+      printCollectionPage(page);
     });
 
     paging.append(but);
@@ -908,11 +908,11 @@ function printCards() {
   } else {
     but = createDivision(["paging_button"], " > ");
     but.addEventListener("click", () => {
-      setCollectionPage(collectionPage + 1);
+      printCollectionPage(collectionPage + 1);
     });
     butClone = but.cloneNode(true);
     butClone.addEventListener("click", () => {
-      setCollectionPage(collectionPage + 1);
+      printCollectionPage(collectionPage + 1);
     });
   }
   paging.appendChild(but);
@@ -925,7 +925,7 @@ function printCards() {
 
 //
 /* eslint-disable */
-function setCollectionPage(page) {
+function printCollectionPage(page = 0) {
   collectionPage = page;
   printCards();
 }
