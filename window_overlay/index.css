@@ -82,6 +82,10 @@ body {
     z-index: 50;
 }
 
+.overlay_clock_spacer {
+    min-height: 64px;
+}
+
 .overlay_clock_container {
     -webkit-app-region: drag;
     position: relative;

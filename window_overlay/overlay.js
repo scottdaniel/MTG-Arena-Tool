@@ -240,6 +240,7 @@ ipc.on("set_settings", function(event, settings) {
   $(".overlay_deckcolors").css("display", "");
   $(".overlay_separator").css("display", "");
   $(".overlay_decklist").css("display", "");
+  $(".overlay_clock_spacer").css("display", "");
   $(".overlay_clock_container").css("display", "");
   $(".overlay_deck_container").attr("style", "");
   $(".overlay_draft_container").attr("style", "");
@@ -264,6 +265,7 @@ ipc.on("set_settings", function(event, settings) {
     hideDiv(".overlay_draft_container");
   }
   if (!settings.overlay_clock || overlayMode == 1) {
+    hideDiv(".overlay_clock_spacer");
     hideDiv(".overlay_clock_container");
   }
 });
