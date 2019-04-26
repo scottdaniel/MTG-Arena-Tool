@@ -809,7 +809,10 @@ $(document).ready(function() {
       packN = 0;
     }
 
-    if (pickN == currentDraft.pickNumber && packN == currentDraft.packNumber) {
+    if (
+      packN > currentDraft.packNumber ||
+      (pickN == currentDraft.pickNumber && packN == currentDraft.packNumber)
+    ) {
       setDraft();
     } else {
       setDraft(packN, pickN);
