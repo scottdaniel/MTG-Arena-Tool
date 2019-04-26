@@ -232,7 +232,11 @@ function createDayHeader(change) {
   const icva = tx.cloneNode(true);
   icva.innerHTML = "Vault:";
   const vatx = tx.cloneNode(true);
-  const deltaPercent = dayList[daysago].vaultProgress / 100.0;
+  const rawDelta = dayList[daysago].vaultProgress;
+  // Assume vault can only be redeemed once per day
+  // Rely on modulo arithmetic to derive pure vault gain
+  const delta = rawDelta < 0 ? rawDelta + 100 : rawDelta;
+  const deltaPercent = delta / 100.0;
   vatx.innerHTML = deltaPercent.toLocaleString([], {
     style: "percent",
     maximumSignificantDigits: 2
