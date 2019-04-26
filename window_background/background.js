@@ -171,7 +171,7 @@ var currentMatchDefault = {
   GREtoClient: {},
   processedAnnotations: [],
   timers: {},
-  zones: {},
+  zones: [],
   players: {},
   annotations: [],
   gameObjs: {},
@@ -287,7 +287,7 @@ ipc.on("save_app_settings", function(event, arg) {
     rstore.set("email", "");
     rstore.set("token", "");
   }
-  
+
   loadSettings(updated);
   rstore.set("settings", updated);
   ipc_send("hide_loading");
@@ -1414,7 +1414,7 @@ function actionLog(seat, time, str, grpId = 0) {
     }
   }
 
-  //console.log("action_log", str, {seat: seat, time:time, grpId: grpId});
+  //console.log("action_log", { seat: seat, time: time }, str);
   ipc_send(
     "action_log",
     { seat: seat, time: time, str: str, grpId: grpId },
@@ -1481,7 +1481,7 @@ function createMatch(arg) {
     ipc_send("overlay_set_bounds", obj);
   }
 
-  let str = JSON.stringify(currentDeck);
+  let str = JSON.stringify(currentDeck.getSave());
 
   currentMatch.player.originalDeck = originalDeck;
   currentMatch.player.deck = originalDeck.clone();
@@ -1501,7 +1501,9 @@ function createMatch(arg) {
   matchGameStats = [];
   matchCompletedOnGameNumber = 0;
   gameNumberCompleted = 0;
-  
+  initialLibraryInstanceIds = [];
+  idChanges = {};
+  instanceToCardIdMap = {};
 
   ipc_send("ipc_log", "vs " + currentMatch.opponent.name);
   ipc_send("set_timer", currentMatch.beginTime, windowOverlay);
@@ -1514,7 +1516,7 @@ function createMatch(arg) {
   );
 
   if (currentMatch.eventId == "DirectGame") {
-    httpApi.httpTournamentCheck(currentDeck, currentMatch.opponent.name, true);
+    httpApi.httpTournamentCheck(str, currentMatch.opponent.name, true);
   }
 
   ipc_send("set_priority_timer", currentMatch.priorityTimers, windowOverlay);
@@ -1763,7 +1765,7 @@ function saveCourse(json) {
 
 //
 function saveMatch(matchId) {
-  console.log(currentMatch.matchId, matchId);
+  //console.log(currentMatch.matchId, matchId);
   if (currentMatch.matchTime == 0 || currentMatch.matchId != matchId) {
     return;
   }

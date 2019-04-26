@@ -74,7 +74,7 @@ function onLabelOutLogInfo(entry, json) {
         });
 
         game.sideboardChanges = sideboardChanges;
-        game.deck = JSON.parse(JSON.stringify(currentMatch.player.deck.getSave()));
+        game.deck = objectClone(currentMatch.player.deck.getSave());
       }
 
       game.handLands = game.handsDrawn.map(
@@ -137,12 +137,13 @@ function onLabelGreToClient(entry, json) {
 
   json = json.greToClientEvent.greToClientMessages;
   json.forEach(function(msg) {
-    //greToClientInterpreter.GREMessage(msg, logTime);
-    
     let msgId = msg.msgId;
+    greToClientInterpreter.GREMessage(msg, logTime);
+    /*
     currentMatch.GREtoClient[msgId] = msg;
     currentMatch.latestMessage = msgId;
     greToClientInterpreter.GREMessageByID(msgId, logTime);
+    */
   });
 }
 

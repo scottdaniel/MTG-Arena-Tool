@@ -460,7 +460,7 @@ function getOppUsedCards() {
   let cardsUsed = [];
   Object.keys(currentMatch.zones).forEach(key => {
     let zone = currentMatch.zones[key];
-    if (zone.objectInstanceIds && zone.type != "ZoneType_Limbo") {
+    if (zone.objectInstanceIds && zone.type !== "ZoneType_Limbo") {
       zone.objectInstanceIds.forEach(id => {
         let grpId;
         try {
@@ -488,10 +488,9 @@ function getPlayerUsedCards() {
     let zone = currentMatch.zones[key];
     if (
       zone.objectInstanceIds &&
-      zone.type != "ZoneType_Limbo" &&
-      zone.type != "ZoneType_Library" &&
-      zone.type != "ZoneType_Library" &&
-      zone.type != "ZoneType_Revealed"
+      zone.type !== "ZoneType_Limbo" &&
+      zone.type !== "ZoneType_Library" &&
+      zone.type !== "ZoneType_Revealed"
     ) {
       zone.objectInstanceIds.forEach(id => {
         let grpId;
@@ -600,24 +599,29 @@ function checkForStartingLibrary() {
   Object.keys(currentMatch.zones).forEach(key => {
     let zone = currentMatch.zones[key];
     if (zone.ownerSeatId == currentMatch.player.seat) {
-      if (zone.type == "ZoneType_Hand") zoneHand = zone;
-      if (zone.type == "ZoneType_Library") zoneLibrary = zone;
+      if (zone.type == "ZoneType_Hand") {
+        zoneHand = zone;
+      }
+      if (zone.type == "ZoneType_Library") {
+        zoneLibrary = zone;
+      }
     }
   });
 
-  if (currentMatch.gameStage != "GameStage_Start") return;
-  if (!zoneHand || !zoneHand.objectInstanceIds) return;
-  if (!zoneLibrary || !zoneLibrary.objectInstanceIds) return;
+  if (currentMatch.gameStage !== "GameStage_Start") return -1;
+  if (!zoneHand || !zoneHand.objectInstanceIds) return -2;
+  if (!zoneLibrary || !zoneLibrary.objectInstanceIds) return -3;
 
   let hand = zoneHand.objectInstanceIds || [];
   let library = zoneLibrary.objectInstanceIds || [];
   // Check that a post-mulligan scry hasn't been done
-  if (library.length == 0 || library[library.length - 1] < library[0]) return;
+  if (library.length == 0 || library[library.length - 1] < library[0]) return -4;
 
   if (hand.length + library.length == currentDeck.mainboard.count()) {
     if (hand.length >= 2 && hand[0] == hand[1] + 1) hand.reverse();
     initialLibraryInstanceIds = [...hand, ...library];
   }
+  return initialLibraryInstanceIds;
 }
 
 function checkGameInfo(gameInfo) {
@@ -625,7 +629,7 @@ function checkGameInfo(gameInfo) {
   //actionLog(-1, false, `>> GameStage: ${gameInfo.stage} (${currentMatch.gameStage})`);
   if (currentMatch.gameStage !== gameInfo.stage) {
     currentMatch.gameStage = gameInfo.stage;
-    if (currentMatch.gameStage == "GameStage_Start") {
+    if (currentMatch.gameStage == "GameStage_GameOver") {
       currentMatch.processedAnnotations = [];
       currentMatch.timers = {};
       currentMatch.zones = {};
@@ -636,9 +640,9 @@ function checkGameInfo(gameInfo) {
       currentMatch.turnInfo = {};
       currentMatch.playerCardsUsed = [];
       currentMatch.oppCardsUsed = [];
-      initialLibraryInstanceIds = [];
-      idChanges = {};
-      instanceToCardIdMap = {};
+      //initialLibraryInstanceIds = [];
+      //idChanges = {};
+      //instanceToCardIdMap = {};
       currentMatch.game = gameInfo.gameNumber;
     }
   }
