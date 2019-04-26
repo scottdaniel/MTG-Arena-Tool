@@ -885,7 +885,7 @@ function printCards() {
 
   let totalPages = Math.ceil(totalCards / 100);
   for (let n = 0; n < totalPages; n++) {
-    but = createDivision(["paging_button"], n);
+    but = createDivision(["paging_button"], n + 1);
     if (collectionPage == n) {
       but.classList.add("paging_active");
     }
