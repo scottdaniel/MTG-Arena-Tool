@@ -1470,8 +1470,8 @@ function open_draft(id, tileGrpid, set) {
   var pi = Math.floor(((draftPosition - 1) / 2) % packSize);
   var key = "pack_" + pa + "pick_" + pi;
 
-  var pack = draft[key].pack;
-  var pick = draft[key].pick;
+  var pack = (draft[key] && draft[key].pack) || [];
+  var pick = (draft[key] && draft[key].pick) || "";
 
   var top = $(
     '<div class="decklist_top"><div class="button back"></div><div class="deck_name">' +
