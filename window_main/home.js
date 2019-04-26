@@ -1,25 +1,25 @@
 /*
 global
   filteredWildcardsSet,
-	timestamp,
-	$$,
-	userName,
-	ipc_send,
-	change_background,decks
-	drawDeckVisual,
-	selectAdd,
-	addCardSeparator,
-	addCardTile,
-	get_deck_export,
-	makeId,
-	authToken,
-	discordTag,
-	shell,
+  timestamp,
+  $$,
+  userName,
+  ipc_send,
+  change_background,decks
+  drawDeckVisual,
+  selectAdd,
+  addCardSeparator,
+  addCardTile,
+  get_deck_export,
+  makeId,
+  authToken,
+  discordTag,
+  shell,
   setsList,
   showLoadingBars,
-	pop,
-	toHHMMSS,
-	createDivision
+  pop,
+  toHHMMSS,
+  createDivision
 */
 
 let usersActive;
@@ -188,7 +188,9 @@ function open_home_tab(arg, opentab = true) {
           listInterval.push(
             window.setInterval(() => {
               let now = timestamp();
-              $(".list_stateb_" + index).html(toHHMMSS(roundEnd - now) + " left");
+              $(".list_stateb_" + index).html(
+                toHHMMSS(roundEnd - now) + " left"
+              );
             }, 250)
           );
         }
@@ -204,7 +206,10 @@ function open_home_tab(arg, opentab = true) {
         let nam = createDivision(["tou_name"], tou.name);
         let fo = createDivision(["tou_cell"], tou.format);
         let st = createDivision(["tou_state", "list_state_" + index], state);
-        let stb = createDivision(["tou_cell"], tou.players.length + " players.");
+        let stb = createDivision(
+          ["tou_cell"],
+          tou.players.length + " players."
+        );
         let pln = createDivision(["tou_cell", "list_stateb_" + index], stateb);
         pln.style.width = "120px";
         div.appendChild(stat);
@@ -232,12 +237,9 @@ function open_home_tab(arg, opentab = true) {
     });
   });
 
-  let orderedSets = [];
-  for (let set in setsList) {
-    if (set.collation !== false) {
-      orderedSets.push(set);
-    }
-  }
+  let orderedSets = Object.keys(setsList).filter(
+    set => setsList[set].collation > 0
+  );
 
   orderedSets.sort((a, b) => {
     if (a.release < b.release) return 1;
@@ -583,10 +585,7 @@ function showTournamentStarted(mainDiv, tou) {
       tou.current_opponent !== ""
     ) {
       let checks = $(`<div class="tou_checks"></div>`);
-      generateChecks(
-        tou.current_check,
-        tou.current_seat
-      ).appendTo(checks);
+      generateChecks(tou.current_check, tou.current_seat).appendTo(checks);
       checks.appendTo(mainDiv);
     }
 
@@ -626,9 +625,7 @@ function showTournamentStarted(mainDiv, tou) {
 
   // DRAW TOP 8
   if (tou.top > 0 && tou.state >= 3) {
-    $(`<div class="tou_round_title">Top ${tou.top}</div>`).appendTo(
-      tab_cont_a
-    );
+    $(`<div class="tou_round_title">Top ${tou.top}</div>`).appendTo(tab_cont_a);
 
     let top_matches = [];
     let top_cont = $('<div class="tou_top"></div>');
@@ -754,12 +751,8 @@ function showTournamentStarted(mainDiv, tou) {
         if (match.p1 == playerData.name)
           s = 'style="color: rgba(183, 200, 158, 1);"';
         let p1 = $(
-          `<div ${s} class="tou_match_p ${match.p1}pn">${match.p1.slice(
-            0,
-            -6
-          ) + d1}<div class="${p1wc} tou_match_score">${
-            match.p1w
-          }</div></div>`
+          `<div ${s} class="tou_match_p ${match.p1}pn">${match.p1.slice(0, -6) +
+            d1}<div class="${p1wc} tou_match_score">${match.p1w}</div></div>`
         );
         s = "";
         if (match.p2 == playerData.name)
@@ -767,12 +760,8 @@ function showTournamentStarted(mainDiv, tou) {
         if (match.p2 == "BYE#00000")
           s = 'style="color: rgba(250, 229, 210, 0.65);"';
         let p2 = $(
-          `<div ${s} class="tou_match_p ${match.p2}pn">${match.p2.slice(
-            0,
-            -6
-          ) + d2}<div class="${p2wc} tou_match_score">${
-            match.p2w
-          }</div></div>`
+          `<div ${s} class="tou_match_p ${match.p2}pn">${match.p2.slice(0, -6) +
+            d2}<div class="${p2wc} tou_match_score">${match.p2w}</div></div>`
         );
 
         p1.appendTo(cont);
@@ -801,8 +790,7 @@ function showTournamentStarted(mainDiv, tou) {
         else if (tou.playerStats[a].gwp < tou.playerStats[b].gwp) return 1;
         else {
           if (tou.playerStats[a].ogwp > tou.playerStats[b].ogwp) return -1;
-          else if (tou.playerStats[a].ogwp < tou.playerStats[b].ogwp)
-            return 1;
+          else if (tou.playerStats[a].ogwp < tou.playerStats[b].ogwp) return 1;
         }
       }
     }
