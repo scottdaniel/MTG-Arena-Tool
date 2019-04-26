@@ -1701,12 +1701,14 @@ function open_match(id) {
 
   match.oppDeck.mainDeck.sort(compare_cards);
   match.oppDeck.sideboard.sort(compare_cards);
+  /*
   match.oppDeck.mainDeck.forEach(function(c) {
     c.quantity = 9999;
   });
   match.oppDeck.sideboard.forEach(function(c) {
     c.quantity = 9999;
   });
+  */
   drawDeck(odl, match.oppDeck);
 
   $(
