@@ -196,6 +196,7 @@ ipc.on("action_log", function(event, arg) {
   if (arg.seat == -99) {
     actionLog = [];
   }
+  actionLog.sort(compare_logs);
   //console.log(arg.seat, arg.str);
 });
 
@@ -353,18 +354,7 @@ function updateView() {
   if (deckMode == 4) {
     $(".overlay_deckname").html("Action Log");
 
-    let defaultIndex = 0;
-    let sortedLog = [];
-    actionLog.forEach(log => {
-      const newLog = { ...log, defaultIndex };
-      defaultIndex++;
-      sortedLog.push(newLog);
-    });
-    sortedLog.sort(
-      (a, b) => b.time - a.time || b.defaultIndex - a.defaultIndex
-    );
-
-    sortedLog.forEach(function(log) {
+    actionLog.forEach(function(log) {
       var d = new Date(log.time);
       var hh = ("0" + d.getHours()).slice(-2);
       var mm = ("0" + d.getMinutes()).slice(-2);
