@@ -781,7 +781,7 @@ $(document).ready(function() {
   //
   $(".draft_prev").click(function() {
     pickN -= 1;
-    let packSize = packSizes[currentDraft.set] || 13;
+    let packSize = packSizes[currentDraft.set] || 14;
 
     if (pickN < 0) {
       pickN = packSize;
@@ -797,7 +797,7 @@ $(document).ready(function() {
   //
   $(".draft_next").click(function() {
     pickN += 1;
-    let packSize = packSizes[currentDraft.set] || 13;
+    let packSize = packSizes[currentDraft.set] || 14;
 
     if (pickN > packSize) {
       pickN = 0;
