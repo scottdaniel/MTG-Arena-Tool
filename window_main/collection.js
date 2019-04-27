@@ -43,12 +43,8 @@ function openCollectionTab() {
   }
 
   orderedSets.sort((a, b) => {
-    if (setsList[a].release < setsList[b].release) {
-      return 1;
-    }
-    if (setsList[a].release > setsList[b].release) {
-      return -1;
-    }
+    if (a.release < b.release) return 1;
+    if (a.release > b.release) return -1;
     return 0;
   });
 
@@ -86,7 +82,7 @@ function openCollectionTab() {
 
   input.addEventListener("keydown", function(e) {
     if (e.keyCode == 13) {
-      printCards();
+      printCollectionPage();
     }
   });
 
@@ -100,7 +96,7 @@ function openCollectionTab() {
   flrt.appendChild(advancedButton);
 
   searchButton.addEventListener("click", () => {
-    printCards();
+    printCollectionPage();
   });
 
   advancedButton.addEventListener("click", () => {
@@ -114,7 +110,7 @@ function openCollectionTab() {
     sortingAlgorithm,
     res => {
       sortingAlgorithm = res;
-      printCards();
+      printCollectionPage();
     },
     "query_select"
   );
@@ -318,7 +314,7 @@ function openCollectionTab() {
   filters.appendChild(searchButton);
 
   searchButton.addEventListener("click", () => {
-    printCards();
+    printCollectionPage();
   });
 
   mainDiv.appendChild(basicFilters);
@@ -416,7 +412,7 @@ function resetFilters() {
   document.getElementById("query_cmcequal").checked = true;
   document.getElementById("query_cmchigher").checked = false;
 
-  printCards();
+  printCollectionPage();
 }
 
 //
@@ -627,7 +623,7 @@ function renderCompletionDiv(countStats, image, title) {
 
 function sortCollection(alg) {
   sortingAlgorithm = alg;
-  printCards();
+  printCollectionPage();
 }
 
 //
@@ -688,9 +684,9 @@ function printCards() {
   if (sortingAlgorithm == "Sort by CMC")
     keysSorted = Object.keys(list).sort(collectionSortCmc);
 
+  cardLoop:
   for (let n = 0; n < keysSorted.length; n++) {
     let key = keysSorted[n];
-    let doDraw = true;
 
     let grpId = key;
     let card = cardsDb.get(grpId);
@@ -707,19 +703,19 @@ function printCards() {
     // Filter name
     let arr;
     arr = filterName.split(" ");
-    arr.forEach(function(s) {
-      if (name.indexOf(s) == -1) {
-        doDraw = false;
+    for (let m = 0; m < arr.length; m++) {
+      if (name.indexOf(arr[m]) == -1) {
+        continue cardLoop;
       }
-    });
+    }
 
     // filter type
     arr = filterType.split(" ");
-    arr.forEach(function(s) {
-      if (type.indexOf(s) == -1) {
-        doDraw = false;
+    for (let t = 0; t < arr.length; t++) {
+      if (type.indexOf(arr[t]) == -1) {
+        continue cardLoop;
       }
-    });
+    }
 
     if (filterIncomplete) {
       let owned = cards[card.id];
@@ -729,66 +725,69 @@ function printCards() {
     }
 
     if (filterNew.checked && cardsNew[key] == undefined) {
-      doDraw = false;
+      continue;
     }
 
     if (filteredSets.length > 0) {
       if (!filteredSets.includes(set)) {
-        doDraw = false;
+        continue;
       }
     }
 
-    if (filterCMC && doDraw) {
+    if (filterCMC) {
       if (filterCmcLower && filterCmcEqual) {
         if (cmc > filterCMC) {
-          doDraw = false;
+          continue;
         }
       } else if (filterCmcHigher && filterCmcEqual) {
         if (cmc < filterCMC) {
-          doDraw = false;
+          continue;
         }
       } else if (filterCmcLower && !filterCmcEqual) {
         if (cmc >= filterCMC) {
-          doDraw = false;
+          continue;
         }
       } else if (filterCmcHigher && !filterCmcEqual) {
         if (cmc <= filterCMC) {
-          doDraw = false;
+          continue;
         }
       } else if (!filterCmcHigher && !filterCmcLower && filterCmcEqual) {
         if (cmc != filterCMC) {
-          doDraw = false;
+          continue;
         }
       }
     }
 
-    if (rarity == "land" && !filterCommon.checked) doDraw = false;
-    if (rarity == "common" && !filterCommon.checked) doDraw = false;
-    if (rarity == "uncommon" && !filterUncommon.checked) doDraw = false;
-    if (rarity == "rare" && !filterRare.checked) doDraw = false;
-    if (rarity == "mythic" && !filterMythic.checked) doDraw = false;
+    if (rarity == "land" && !filterCommon.checked) continue;
+    if (rarity == "common" && !filterCommon.checked) continue;
+    if (rarity == "uncommon" && !filterUncommon.checked) continue;
+    if (rarity == "rare" && !filterRare.checked) continue;
+    if (rarity == "mythic" && !filterMythic.checked) continue;
 
     if (filterExclude.checked && cost.length == 0) {
-      doDraw = false;
+      continue;
     } else {
       let s = [];
       let generic = false;
-      cost.forEach(function(m) {
-        orderedColorCodesCommon.forEach((code, index) => {
+      for (let i = 0; i < cost.length; i++) {
+        let m = cost[i];
+        for (let j = 0; j < orderedColorCodesCommon.length; j++) {
+          let code = orderedColorCodesCommon[j];
           if (m.indexOf(code) !== -1) {
-            if (filterExclude.checked && !filteredMana.includes(index + 1)) {
-              doDraw = false;
+            if (filterExclude.checked && !filteredMana.includes(j + 1)) {
+              continue cardLoop;
             }
-            s[index + 1] = 1;
+            s[j + 1] = 1;
           }
-        });
+        }
         if (parseInt(m) > 0) {
           generic = true;
         }
-      });
+      }
+  
       let ms = s.reduce((a, b) => a + b, 0);
       if (generic && ms == 0 && filterExclude.checked) {
-        doDraw = false;
+        continue;
       }
       if (filteredMana.length > 0) {
         let su = 0;
@@ -798,72 +797,68 @@ function printCards() {
           }
         });
         if (su == 0) {
-          doDraw = false;
+          continue;
         }
       }
       if (filterMulti.checked && ms < 2) {
-        doDraw = false;
+        continue;
       }
     }
 
-    if (doDraw) {
-      totalCards++;
-    }
+    totalCards++;
 
     if (
       totalCards < collectionPage * 100 ||
       totalCards > collectionPage * 100 + 99
     ) {
-      doDraw = false;
+      continue;
     }
 
     //let dfc = "";
 
-    if (doDraw) {
-      let cardDiv = createDivision(["inventory_card"]);
-      cardDiv.style.width = cardSize + "px";
+    let cardDiv = createDivision(["inventory_card"]);
+    cardDiv.style.width = cardSize + "px";
 
-      let owned = cards[card.id];
-      let aquired = cardsNew[card.id];
-      for (let i = 0; i < 4; i++) {
-        if (aquired && i >= owned - aquired && i < owned) {
-          let q = createDivision(["inventory_card_quantity_orange"]);
-          q.style.width = cardSize / 4 + "px";
-          cardDiv.appendChild(q);
-        } else if (i < owned) {
-          let q = createDivision(["inventory_card_quantity_green"]);
-          q.style.width = cardSize / 4 + "px";
-          cardDiv.appendChild(q);
-        } else {
-          let q = createDivision(["inventory_card_quantity_gray"]);
-          q.style.width = cardSize / 4 + "px";
-          cardDiv.appendChild(q);
-        }
+    let owned = cards[card.id];
+    let aquired = cardsNew[card.id];
+    for (let i = 0; i < 4; i++) {
+      if (aquired && i >= owned - aquired && i < owned) {
+        let q = createDivision(["inventory_card_quantity_orange"]);
+        q.style.width = cardSize / 4 + "px";
+        cardDiv.appendChild(q);
+      } else if (i < owned) {
+        let q = createDivision(["inventory_card_quantity_green"]);
+        q.style.width = cardSize / 4 + "px";
+        cardDiv.appendChild(q);
+      } else {
+        let q = createDivision(["inventory_card_quantity_gray"]);
+        q.style.width = cardSize / 4 + "px";
+        cardDiv.appendChild(q);
       }
-
-      let img = document.createElement("img");
-      img.style.width = cardSize + "px";
-      img.classList.add("inventory_card_img");
-      img.src = get_card_image(card);
-
-      cardDiv.appendChild(img);
-
-      addCardHover(img, card);
-
-      img.addEventListener("click", () => {
-        if (cardsDb.get(grpId).dfc == "SplitHalf") {
-          card = cardsDb.get(card.dfcId);
-        }
-        //let newname = card.name.split(' ').join('-');
-        shell.openExternal(
-          `https://scryfall.com/card/${get_set_scryfall(card.set)}/${
-            card.cid
-          }/${card.name}`
-        );
-      });
-
-      div.appendChild(cardDiv);
     }
+
+    let img = document.createElement("img");
+    img.style.width = cardSize + "px";
+    img.classList.add("inventory_card_img");
+    img.src = get_card_image(card);
+
+    cardDiv.appendChild(img);
+
+    addCardHover(img, card);
+
+    img.addEventListener("click", () => {
+      if (cardsDb.get(grpId).dfc == "SplitHalf") {
+        card = cardsDb.get(card.dfcId);
+      }
+      //let newname = card.name.split(' ').join('-');
+      shell.openExternal(
+        `https://scryfall.com/card/${get_set_scryfall(card.set)}/${
+          card.cid
+        }/${card.name}`
+      );
+    });
+
+    div.appendChild(cardDiv);
   }
 
   let paging_bottom = createDivision(["paging_container"]);
@@ -876,11 +871,11 @@ function printCards() {
     but = createDivision(["paging_button"], " < ");
 
     but.addEventListener("click", () => {
-      setCollectionPage(collectionPage - 1);
+      printCollectionPage(collectionPage - 1);
     });
     butClone = but.cloneNode(true);
     butClone.addEventListener("click", () => {
-      setCollectionPage(collectionPage + 1);
+      printCollectionPage(collectionPage + 1);
     });
   }
 
@@ -889,18 +884,18 @@ function printCards() {
 
   let totalPages = Math.ceil(totalCards / 100);
   for (let n = 0; n < totalPages; n++) {
-    but = createDivision(["paging_button"], n);
+    but = createDivision(["paging_button"], n + 1);
     if (collectionPage == n) {
       but.classList.add("paging_active");
     }
 
     let page = n;
     but.addEventListener("click", () => {
-      setCollectionPage(page);
+      printCollectionPage(page);
     });
     butClone = but.cloneNode(true);
     butClone.addEventListener("click", () => {
-      setCollectionPage(page);
+      printCollectionPage(page);
     });
 
     paging.append(but);
@@ -912,11 +907,11 @@ function printCards() {
   } else {
     but = createDivision(["paging_button"], " > ");
     but.addEventListener("click", () => {
-      setCollectionPage(collectionPage + 1);
+      printCollectionPage(collectionPage + 1);
     });
     butClone = but.cloneNode(true);
     butClone.addEventListener("click", () => {
-      setCollectionPage(collectionPage + 1);
+      printCollectionPage(collectionPage + 1);
     });
   }
   paging.appendChild(but);
@@ -929,7 +924,7 @@ function printCards() {
 
 //
 /* eslint-disable */
-function setCollectionPage(page) {
+function printCollectionPage(page = 0) {
   collectionPage = page;
   printCards();
 }

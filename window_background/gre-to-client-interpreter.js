@@ -630,6 +630,7 @@ function checkGameInfo(gameInfo) {
   if (currentMatch.gameStage !== gameInfo.stage) {
     currentMatch.gameStage = gameInfo.stage;
     if (currentMatch.gameStage == "GameStage_GameOver") {
+      currentMatch.opponent.cards = currentMatch.oppCardsUsed;
       currentMatch.processedAnnotations = [];
       currentMatch.timers = {};
       currentMatch.zones = {};
@@ -640,9 +641,6 @@ function checkGameInfo(gameInfo) {
       currentMatch.turnInfo = {};
       currentMatch.playerCardsUsed = [];
       currentMatch.oppCardsUsed = [];
-      //initialLibraryInstanceIds = [];
-      //idChanges = {};
-      //instanceToCardIdMap = {};
       currentMatch.game = gameInfo.gameNumber;
     }
   }

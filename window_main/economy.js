@@ -59,6 +59,7 @@ const economyTransactionContextsMap = {
   "PlayerReward.OnMatchCompletedWeekly": "Weekly rewards"
 };
 
+
 function getPrettyContext(context, full = true) {
   if (context.startsWith("Event.Prize")) {
     var eventCode = context.substring(12);
@@ -67,7 +68,7 @@ function getPrettyContext(context, full = true) {
 
   if (context.startsWith("Quest.Completed")) {
     var questCode = context.substring(16);
-    return full ? `Quest Completed: ${questCode}` : "Quest Completed";
+    return full ? `Quest Completed: ${getReadableQuest(questCode)}` : "Quest Completed";
   }
 
   var pretty = economyTransactionContextsMap[context];
@@ -594,7 +595,7 @@ function createChangeRow(change, economyId) {
   flexTop.appendChild(
     createDivision(
       [],
-      `<span title="${change.originalContext || ""}">${change.context}</span>`
+      `<span title="${change.originalContext}">${change.contextPretty}</span>`
     )
   );
 
@@ -632,9 +633,16 @@ function createEconomyUI(mainDiv) {
       console.log("new day", change.date);
     }
 
-    let ctx = change.originalContext || change.context;
-    change.contextPretty = getPrettyContext(ctx);
-    change.context = getPrettyContext(ctx, false);
+
+    // IMPORTANT:
+    // Some old data stores the raw original context in ".originalContext"
+    // All NEW data stores this in ".context" and ".originalContext" is blank.
+
+    // In the below code all three of these values are used.
+    change.originalContext = change.originalContext || change.context;
+    change.contextPretty = getPrettyContext(change.originalContext);
+    change.context = getPrettyContext(change.originalContext, false);
+
     if (!selectItems.includes(change.context)) {
       selectItems.push(change.context);
     }
