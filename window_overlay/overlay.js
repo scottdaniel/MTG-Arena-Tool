@@ -2,7 +2,10 @@
 global
   addCardTile,
   cardsDb,
+  compare_cards,
+  compare_chances,
   compare_draft_cards,
+  CardsList,
   Deck,
   draftRanks,
   get_ids_colors,
@@ -307,7 +310,6 @@ ipc.on("set_match", (event, arg) => {
   currentMatch = JSON.parse(arg);
 
   currentMatch.oppCards = new Deck(currentMatch.oppCards);
-  currentMatch.oppCards.sortMainboard(compare_cards);
 
   let tempMain = currentMatch.playerCardsLeft.mainDeck;
   currentMatch.playerCardsLeft = new Deck(currentMatch.playerCardsLeft);
@@ -447,7 +449,17 @@ function updateView() {
   }
 
   if (!deckToDraw) return;
-  deckToDraw.mainboard.get().forEach(card => {
+
+  let sortFunc = compare_cards;
+  if (deckMode === 2) {
+    sortFunc = compare_chances;
+  }
+
+  const mainCards = new CardsList(deckToDraw.mainboard.get());
+  mainCards.removeDuplicates();
+  mainCards.get().sort(sortFunc);
+
+  mainCards.get().forEach(card => {
     var grpId = card.id;
     if (deckMode == 2) {
       addCardTile(
@@ -463,7 +475,11 @@ function updateView() {
   if (showSideboard && deckToDraw.sideboard.count() > 0) {
     deckListDiv.append('<div class="card_tile_separator">Sideboard</div>');
 
-    deckToDraw.sideboard.get().forEach(function(card) {
+    const sideCards = new CardsList(deckToDraw.sideboard.get());
+    sideCards.removeDuplicates();
+    sideCards.get().sort(sortFunc);
+
+    sideCards.get().forEach(function(card) {
       var grpId = card.id;
       if (deckMode == 2) {
         addCardTile(grpId, "a", "0%", deckListDiv);
