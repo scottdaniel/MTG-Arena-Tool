@@ -1317,31 +1317,25 @@ a:hover {
 }
 
 .stats_set_completion {
+    cursor: pointer;
     max-width: 320px;
     margin: 24px auto;
     display: flex;
     flex-direction: column;
+    opacity: 0.7;
 }
 
 .stats_set_icon {
-    cursor: pointer;
     width: 24px;
     height: 24px;
     background-repeat: no-repeat;
     background-size: cover;
     margin: 0 6px;
     background-size: contain;
-    opacity: 0.7;
     -webkit-transition: all .2s ease-in;
 }
 
-.stats_set_icon:hover {
-    opacity: 1;
-}
-
-
 .stats_set_icon span {
-    cursor: pointer;
     display: flex;
     line-height: 24px;
     width: max-content;
@@ -1349,12 +1343,7 @@ a:hover {
     position: relative;
     margin-left: 36px;
     color: #fae5d2;
-    opacity: 0.8;
     -webkit-transition: all .2s ease-in;
-}
-.stats_set_icon span:hover {
-    margin-left: 42px;
-    opacity: 1;
 }
 
 .stats_set_details {
@@ -1362,7 +1351,6 @@ a:hover {
     display: inline-flex;
     justify-content: space-between;
     width: 100%;
-    opacity: 0.7;
     -webkit-transition: all .2s ease-in;
 }
 
@@ -1372,11 +1360,7 @@ a:hover {
     margin: 0 6px;
     font-size: 13px;
     color: #fae5d2;
-    opacity: 0.8;
     -webkit-transition: all .2s ease-in;
-}
-.stats_set_details span:hover {
-    opacity: 1;
 }
 
 .stats_rarity_icon {

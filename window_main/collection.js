@@ -1,27 +1,27 @@
 /*
 global
   $$,
-  createDivision,
-  ipc_send,
-  change_background,
-  get_collection_export,
-  get_collection_stats,
+  addCardHover,
+  cards,
+  cardsDb,
+  cardsNew,
   collectionSortSet,
   collectionSortName,
   collectionSortCmc,
   collectionSortRarity,
+  change_background,
+  createDivision,
+  createSelect,
+  get_card_image,
+  get_collection_export,
+  get_collection_stats,
+  get_set_scryfall,
   orderedColorCodesCommon,
-  cardsNew,
-  cardsDb,
-  cards,
   setsList,
   cardSize,
-  get_card_image,
-  addCardHover,
-  shell,
-  get_set_scryfall,
-  createSelect,
-  getBoosterCountEstimate
+  insertAfter,
+  ipc_send,
+  shell
 */
 let collectionPage = 0;
 let sortingAlgorithm = "Sort by Set";
@@ -433,7 +433,7 @@ function printStats() {
   top.appendChild(createDivision(["deck_name"], "Collection Statistics"));
   top.appendChild(createDivision(["deck_top_colors"]));
 
-  change_background("", 67574);
+  //change_background("", 67574);
 
   const flex = createDivision(["flex_item"]);
   const mainstats = createDivision(["main_stats"]);
@@ -491,6 +491,21 @@ function renderSetStats(setStats, setIconCode, setName) {
     setName
   );
 
+  setDiv.addEventListener("mouseover", () => {
+    let span = setDiv
+      .getElementsByClassName("stats_set_icon")[0]
+      .getElementsByTagName("span")[0];
+    span.style.marginLeft = "48px";
+    setDiv.style.opacity = 1;
+  });
+  setDiv.addEventListener("mouseout", () => {
+    let span = setDiv
+      .getElementsByClassName("stats_set_icon")[0]
+      .getElementsByTagName("span")[0];
+    span.style.marginLeft = "36px";
+    setDiv.style.opacity = 0.7;
+  });
+
   setDiv.addEventListener("click", () => {
     const substats = $$(".sub_stats")[0];
     substats.innerHTML = "";
@@ -506,13 +521,13 @@ function renderSetStats(setStats, setIconCode, setName) {
       if (countStats.total > 0) {
         const capitalizedRarity =
           rarity[0].toUpperCase() + rarity.slice(1) + "s";
-        substats.appendChild(
-          renderCompletionDiv(
-            countStats,
-            "wc_" + rarity + ".png",
-            capitalizedRarity
-          )
+        let compDiv = renderCompletionDiv(
+          countStats,
+          "wc_" + rarity + ".png",
+          capitalizedRarity
         );
+        compDiv.style.opacity = 1;
+        substats.appendChild(compDiv);
       }
       wanted[rarity] = countStats.wanted;
       missing[rarity] = countStats.total - countStats.owned;
@@ -532,7 +547,10 @@ function renderSetStats(setStats, setIconCode, setName) {
         possibleRares
       ).toLocaleString([], { style: "percent", maximumSignificantDigits: 2 });
       let rareWantedDiv = createDivision(["stats_set_completion"]);
-      let rareWantedIcon = createDivision(["stats_set_icon", "bo_explore_cost"]);
+      let rareWantedIcon = createDivision([
+        "stats_set_icon",
+        "bo_explore_cost"
+      ]);
       rareWantedIcon.style.height = "30px";
       let rareWantedSpan = document.createElement("span");
       rareWantedSpan.innerHTML = `<i>~${chanceBoosterRareWanted} chance next booster has ${wantedText} rare.</i>`;
@@ -542,13 +560,17 @@ function renderSetStats(setStats, setIconCode, setName) {
       substats.appendChild(rareWantedDiv);
 
       // chance that the next booster opened contains a mythic missing from one of our decks
-      let possibleMythics = setStats["mythic"].unique - setStats["mythic"].complete;
+      let possibleMythics =
+        setStats["mythic"].unique - setStats["mythic"].complete;
       let chanceBoosterMythicWanted = (
         (chanceBoosterHasMythic * setStats["mythic"].uniqueWanted) /
         possibleMythics
       ).toLocaleString([], { style: "percent", maximumSignificantDigits: 2 });
       let mythicWantedDiv = createDivision(["stats_set_completion"]);
-      let mythicWantedIcon = createDivision(["stats_set_icon", "bo_explore_cost"]);
+      let mythicWantedIcon = createDivision([
+        "stats_set_icon",
+        "bo_explore_cost"
+      ]);
       mythicWantedIcon.style.height = "30px";
       let mythicWantedSpan = document.createElement("span");
       mythicWantedSpan.innerHTML = `<i>~${chanceBoosterMythicWanted} chance next booster has ${wantedText} mythic.</i>`;
@@ -684,8 +706,7 @@ function printCards() {
   if (sortingAlgorithm == "Sort by CMC")
     keysSorted = Object.keys(list).sort(collectionSortCmc);
 
-  cardLoop:
-  for (let n = 0; n < keysSorted.length; n++) {
+  cardLoop: for (let n = 0; n < keysSorted.length; n++) {
     let key = keysSorted[n];
 
     let grpId = key;
@@ -784,7 +805,7 @@ function printCards() {
           generic = true;
         }
       }
-  
+
       let ms = s.reduce((a, b) => a + b, 0);
       if (generic && ms == 0 && filterExclude.checked) {
         continue;
@@ -852,9 +873,9 @@ function printCards() {
       }
       //let newname = card.name.split(' ').join('-');
       shell.openExternal(
-        `https://scryfall.com/card/${get_set_scryfall(card.set)}/${
-          card.cid
-        }/${card.name}`
+        `https://scryfall.com/card/${get_set_scryfall(card.set)}/${card.cid}/${
+          card.name
+        }`
       );
     });
 
