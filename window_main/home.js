@@ -268,8 +268,13 @@ function open_home_tab(arg, opentab = true) {
 
       setsContainer.appendChild(setbutton);
       setbutton.addEventListener("click", () => {
-        setbutton.classList.remove("set_filter_on");
-        filteredWildcardsSet = set;
+        if (!setbutton.classList.contains("set_filter_on")) {
+          setbutton.classList.add("set_filter_on");
+          filteredWildcardsSet = "";
+        } else {
+          setbutton.classList.remove("set_filter_on");
+          filteredWildcardsSet = set;
+        }
         showLoadingBars();
         ipc_send("request_home", filteredWildcardsSet);
       });
