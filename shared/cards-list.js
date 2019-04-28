@@ -15,6 +15,7 @@ class CardsList {
     if (!list) list = [];
     this._list = list.map(obj => {
       return {
+        ...obj,
         quantity: obj.quantity || 1,
         id: obj.id || obj,
         measurable: true
