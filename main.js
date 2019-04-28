@@ -237,7 +237,7 @@ function startApp() {
 
       case "overlay_show":
         if (!overlay.isVisible()) {
-          overlay.show();
+          overlay.showInactive();
         }
         break;
 
