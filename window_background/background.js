@@ -1379,14 +1379,11 @@ function setDraftCards(json) {
 
 function actionLogGenerateLink(grpId) {
   var card = cardsDb.get(grpId);
-  return (
-    '<a class="card_link click-on" href="' + grpId + '">' + card.name + "</a>"
-  );
+  return '<card id="' + grpId + '">' + card.name + "</card>";
 }
 
 function actionLogGenerateAbilityLink(abId) {
-  var ab = cardsDb.getAbility(abId);
-  return `<a class="card_ability click-on" title="${ab}">ability</a>`;
+  return `<ability id="${abId}">ability</ability>`;
 }
 
 var currentActionLog = "";
@@ -1395,13 +1392,18 @@ var currentActionLog = "";
 function actionLog(seat, time, str, grpId = 0) {
   if (!time) time = new Date();
   if (seat == -99) {
-    currentActionLog = "";
+    currentActionLog = "version: 0\r\n";
   } else {
     var hh = ("0" + time.getHours()).slice(-2);
     var mm = ("0" + time.getMinutes()).slice(-2);
     var ss = ("0" + time.getSeconds()).slice(-2);
-    currentActionLog +=
-      hh + ":" + mm + ":" + ss + " " + stripTags(str) + "\r\n";
+    /*
+    str = str.replace(/(<([^>]+)>)/gi, "");
+    */
+
+    currentActionLog += `${seat}\r\n`;
+    currentActionLog += `${hh}:${mm}:${ss}\r\n`;
+    currentActionLog += `${str}\r\n`;
 
     try {
       fs.writeFileSync(

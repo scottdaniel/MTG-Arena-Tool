@@ -16,6 +16,7 @@ const electron = require("electron");
 const { webFrame, remote } = require("electron");
 const fs = require("fs");
 const ipc = electron.ipcRenderer;
+const striptags = require("striptags");
 
 let matchBeginTime = Date.now();
 let priorityTimers = [];
@@ -195,6 +196,7 @@ ipc.on("set_priority_timer", function(event, arg) {
 });
 
 ipc.on("action_log", function(event, arg) {
+  arg.str = striptags(arg.str, ["card", "ability"]);
   actionLog.push(arg);
   if (arg.seat == -99) {
     actionLog = [];
@@ -331,7 +333,9 @@ function updateView() {
   if (
     Math.round(
       $(".overlay_decklist")[0].scrollHeight - $(".overlay_decklist").height()
-    ) - Math.round($(".overlay_decklist").scrollTop()) < 32
+    ) -
+      Math.round($(".overlay_decklist").scrollTop()) <
+    32
   ) {
     doscroll = true;
   }
