@@ -122,7 +122,7 @@ function open_home_tab(arg, opentab = true) {
     listInterval = [];
     if (tournaments_list) {
       // Create tournament button
-      if (playerData.patreon) {
+      if (playerData.name == "Manuel777#63494") {
         let div = createDivision(["tou_container"]);
         div.id = "create";
         div.style.justifyContent = "center";
