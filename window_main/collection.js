@@ -25,8 +25,8 @@ global
 */
 let collectionPage = 0;
 let sortingAlgorithm = "Sort by Set";
-let filteredSets = [];
-let filteredMana = [];
+let filteredSets;
+let filteredMana;
 let orderedSets;
 
 const ALL_CARDS = "All cards";
@@ -37,6 +37,8 @@ let countMode = ALL_CARDS;
 
 //
 function openCollectionTab() {
+  filteredSets = [];
+  filteredMana = [];
   orderedSets = [];
   for (let set in setsList) {
     orderedSets.push(set);
