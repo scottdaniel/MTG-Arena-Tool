@@ -289,7 +289,11 @@ ipc.on("set_hover", function(event, arg) {
 
 //
 ipc.on("set_opponent", function(event, arg) {
-  oppName = arg.slice(0, -6);
+  let cleanName = arg;
+  if (cleanName && cleanName !== "Sparky") {
+    cleanName = cleanName.slice(0, -6);
+  }
+  oppName = cleanName || "Opponent";
   recreateClock();
   $(".top_username").html(oppName);
 });
@@ -324,6 +328,12 @@ ipc.on("set_match", (event, arg) => {
 });
 
 function updateView() {
+  let cleanName = currentMatch && currentMatch.opponent && currentMatch.opponent.name;
+  if (cleanName && cleanName !== "Sparky") {
+    cleanName = cleanName.slice(0, -6);
+  }
+  oppName = cleanName || "Opponent";
+
   if (overlayMode == 1) {
     $(".overlay_draft_container").hide();
     $(".overlay_deck_container").show();
@@ -399,9 +409,7 @@ function updateView() {
   //
   if (deckMode == 3) {
     $('<div class="overlay_archetype"></div>').insertAfter(".overlay_deckname");
-    $(".overlay_deckname").html(
-      "Played by " + currentMatch.opponent.name.slice(0, -6)
-    );
+    $(".overlay_deckname").html("Played by " + oppName);
     $(".overlay_archetype").html(currentMatch.oppCards.archetype);
 
     currentMatch.oppCards.colors.get().forEach(color => {
