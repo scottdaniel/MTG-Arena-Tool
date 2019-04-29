@@ -32,6 +32,7 @@ global
   onLabelInEventGetActiveEvents,
   onLabelEventMatchCreated,
   onLabelOutDirectGameChallenge,
+  onLabelOutEventAIPractice,
   onLabelInDraftDraftStatus,
   onLabelInDraftMakePick,
   onLabelOutDraftMakePick,
@@ -1139,6 +1140,13 @@ function onLogEntryFound(entry) {
           case "Event.MatchCreated":
             json = entry.json();
             onLabelEventMatchCreated(entry, json);
+            break;
+
+          case "Event.AIPractice":
+            if (entry.arrow == "==>") {
+              json = entry.json();
+              onLabelOutEventAIPractice(entry, json);
+            }
             break;
 
           case "DirectGame.Challenge":
