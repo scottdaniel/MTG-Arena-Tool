@@ -1662,7 +1662,15 @@ function forceDeckUpdate(removeUsed = true) {
     }
     let main = currentMatch.playerCardsLeft.mainboard;
     main.addProperty("chance", card =>
-      getChance(card.quantity, cardsleft, odds_sample_size)
+      Math.round(
+        hypergeometricRange(
+          1,
+          Math.min(odds_sample_size, card.quantity),
+          cardsleft,
+          odds_sample_size,
+          card.quantity
+        ) * 100
+      )
     );
 
     typeLan = main.countType("Land");
@@ -1674,13 +1682,13 @@ function forceDeckUpdate(removeUsed = true) {
     typePla = main.countType("Planeswalker");
 
     let chancesObj = {};
-    chancesObj.chanceCre = getChance(typeCre, cardsleft, odds_sample_size);
-    chancesObj.chanceIns = getChance(typeIns, cardsleft, odds_sample_size);
-    chancesObj.chanceSor = getChance(typeSor, cardsleft, odds_sample_size);
-    chancesObj.chancePla = getChance(typePla, cardsleft, odds_sample_size);
-    chancesObj.chanceArt = getChance(typeArt, cardsleft, odds_sample_size);
-    chancesObj.chanceEnc = getChance(typeEnc, cardsleft, odds_sample_size);
-    chancesObj.chanceLan = getChance(typeLan, cardsleft, odds_sample_size);
+    chancesObj.chanceCre = chanceType(typeCre, cardsleft, odds_sample_size);
+    chancesObj.chanceIns = chanceType(typeIns, cardsleft, odds_sample_size);
+    chancesObj.chanceSor = chanceType(typeSor, cardsleft, odds_sample_size);
+    chancesObj.chancePla = chanceType(typePla, cardsleft, odds_sample_size);
+    chancesObj.chanceArt = chanceType(typeArt, cardsleft, odds_sample_size);
+    chancesObj.chanceEnc = chanceType(typeEnc, cardsleft, odds_sample_size);
+    chancesObj.chanceLan = chanceType(typeLan, cardsleft, odds_sample_size);
 
     chancesObj.deckSize = decksize;
     chancesObj.cardsLeft = cardsleft;
@@ -1701,15 +1709,18 @@ function forceDeckUpdate(removeUsed = true) {
   }
 }
 
-function getChance(quantity, cardsleft, odds_sample_size) {
-  return Math.round(
-    hypergeometricRange(
-      1,
-      Math.min(odds_sample_size, quantity),
-      cardsleft,
-      odds_sample_size,
-      quantity
-    ) * 100);
+function chanceType(quantity, cardsleft, odds_sample_size) {
+  return (
+    Math.round(
+      hypergeometricRange(
+        1,
+        Math.min(odds_sample_size, quantity),
+        cardsleft,
+        odds_sample_size,
+        quantity
+      ) * 1000
+    ) / 10
+  );
 }
 
 //
