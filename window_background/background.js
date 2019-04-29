@@ -1662,40 +1662,32 @@ function forceDeckUpdate(removeUsed = true) {
     }
     let main = currentMatch.playerCardsLeft.mainboard;
     main.addProperty("chance", card =>
-      Math.round(
-        hypergeometricRange(
-          1,
-          Math.min(odds_sample_size, card.quantity),
-          cardsleft,
-          odds_sample_size,
-          card.quantity
-        ) * 100
-      )
+      getChance(card.quantity, cardsleft, odds_sample_size)
     );
 
-    typeLan = Math.min(odds_sample_size, main.countType("Land"));
-    typeCre = Math.min(odds_sample_size, main.countType("Creature"));
-    typeArt = Math.min(odds_sample_size, main.countType("Artifact"));
-    typeEnc = Math.min(odds_sample_size, main.countType("Enchantment"));
-    typeIns = Math.min(odds_sample_size, main.countType("Instant"));
-    typeSor = Math.min(odds_sample_size, main.countType("Sorcery"));
-    typePla = Math.min(odds_sample_size, main.countType("Planeswalker"));
+    typeLan = main.countType("Land");
+    typeCre = main.countType("Creature");
+    typeArt = main.countType("Artifact");
+    typeEnc = main.countType("Enchantment");
+    typeIns = main.countType("Instant");
+    typeSor = main.countType("Sorcery");
+    typePla = main.countType("Planeswalker");
 
     let chancesObj = {};
-    chancesObj.chanceCre = chanceType(typeCre, cardsleft, odds_sample_size);
-    chancesObj.chanceIns = chanceType(typeIns, cardsleft, odds_sample_size);
-    chancesObj.chanceSor = chanceType(typeSor, cardsleft, odds_sample_size);
-    chancesObj.chancePla = chanceType(typePla, cardsleft, odds_sample_size);
-    chancesObj.chanceArt = chanceType(typeArt, cardsleft, odds_sample_size);
-    chancesObj.chanceEnc = chanceType(typeEnc, cardsleft, odds_sample_size);
-    chancesObj.chanceLan = chanceType(typeLan, cardsleft, odds_sample_size);
+    chancesObj.chanceCre = getChance(typeCre, cardsleft, odds_sample_size);
+    chancesObj.chanceIns = getChance(typeIns, cardsleft, odds_sample_size);
+    chancesObj.chanceSor = getChance(typeSor, cardsleft, odds_sample_size);
+    chancesObj.chancePla = getChance(typePla, cardsleft, odds_sample_size);
+    chancesObj.chanceArt = getChance(typeArt, cardsleft, odds_sample_size);
+    chancesObj.chanceEnc = getChance(typeEnc, cardsleft, odds_sample_size);
+    chancesObj.chanceLan = getChance(typeLan, cardsleft, odds_sample_size);
 
     chancesObj.deckSize = decksize;
     chancesObj.cardsLeft = cardsleft;
     currentMatch.playerChances = chancesObj;
   } else {
     let main = currentMatch.playerCardsLeft.mainboard;
-    main.addProperty("chance", card => 1);
+    main.addProperty("chance", () => 1);
 
     let chancesObj = {};
     chancesObj.chanceCre = 0;
@@ -1709,18 +1701,15 @@ function forceDeckUpdate(removeUsed = true) {
   }
 }
 
-function chanceType(typeNumber, cardsleft, odds_sample_size) {
-  return (
-    Math.round(
-      hypergeometricRange(
-        1,
-        typeNumber,
-        cardsleft,
-        odds_sample_size,
-        typeNumber
-      ) * 1000
-    ) / 10
-  );
+function getChance(quantity, cardsleft, odds_sample_size) {
+  return Math.round(
+    hypergeometricRange(
+      1,
+      Math.min(odds_sample_size, quantity),
+      cardsleft,
+      odds_sample_size,
+      quantity
+    ) * 100);
 }
 
 //
