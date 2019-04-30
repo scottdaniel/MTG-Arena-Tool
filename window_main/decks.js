@@ -36,20 +36,25 @@ function open_decks_tab() {
 
     const tagSet = new Set();
     const formatSet = new Set();
+    const counts = {};
     decks.forEach(deck => {
       if (deck.tags) {
-        deck.tags.forEach(tag => tagSet.add(tag));
+        deck.tags.forEach(tag => {
+          tagSet.add(tag);
+          counts[tag] = (counts[tag] || 0) + 1;
+        });
       }
       if (deck.format) {
         formatSet.add(deck.format);
+        counts[deck.format] = (counts[deck.format] || 0) + 1;
       }
     });
     const tagList = [...tagSet].filter(
       tag => tag !== filterTag && !formatSet.has(tag)
     );
-    tagList.sort();
+    tagList.sort(); // alpha sort instead of counts for now
     const formatList = [...formatSet].filter(format => format !== filterTag);
-    formatList.sort();
+    formatList.sort((a, b) => counts[b] - counts[a]);
 
     var select = $('<select id="query_select"></select>');
     if (filterTag !== "All") {
@@ -129,20 +134,21 @@ function open_decks_tab() {
         flcfwc.style.marginRight = "8px";
         flcfwc.classList.add("flex_item");
 
-        let t = createTag(null, flcf, false);
+        const t = createTag(null, flcf, false);
         jQuery.data(t, "deck", deck.id);
+        if (deck.format) {
+          const fText = getReadableFormat(deck.format);
+          const t = createTag(fText, flcf, false);
+          t.style.fontStyle = "italic";
+          jQuery.data(t, "deck", deck.id);
+        }
         if (deck.tags) {
           deck.tags.forEach(tag => {
             if (tag !== deck.format) {
-              t = createTag(tag, flcf);
+              const t = createTag(tag, flcf);
               jQuery.data(t, "deck", deck.id);
             }
           });
-        }
-        if (deck.format) {
-          const fText = getReadableFormat(deck.format);
-          const t = createTag(fText, flcf, false, true);
-          jQuery.data(t, "deck", deck.id);
         }
 
         // Deck crafting cost section
@@ -314,14 +320,10 @@ function filterDecks(filter) {
   open_decks_tab();
 }
 
-function createTag(tag, div, showClose = true, isFormat = false) {
+function createTag(tag, div, showClose = true) {
   let tagCol = getTagColor(tag);
   let t = createDivision(["deck_tag"], tag == null ? "Add" : tag);
   t.style.backgroundColor = tagCol;
-
-  if (isFormat) {
-    t.style.fontStyle = "italic";
-  }
 
   if (tag) {
     $(t).on("click", function(e) {
