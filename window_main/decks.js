@@ -30,6 +30,14 @@ const formats = {
 };
 
 //
+function getReadableFormat(format) {
+  if (format in formats) {
+    return formats[format];
+  }
+  return format || "Unknown";
+}
+
+//
 function open_decks_tab() {
   if (sidebarActive == 0 && decks != null) {
     sort_decks();
@@ -47,30 +55,39 @@ function open_decks_tab() {
     let decks_top_filter = document.createElement("div");
     decks_top_filter.classList.add("decks_top_filter");
 
-    let tags_list = [];
-    decks.forEach(function(deck) {
+    const tagSet = new Set();
+    const formatSet = new Set();
+    decks.forEach(deck => {
       if (deck.tags) {
-        deck.tags.forEach(tag => {
-          if (tags_list.indexOf(tag) == -1) {
-            tags_list.push(tag);
-          }
-        });
+        deck.tags.forEach(tag => tagSet.add(tag));
+      }
+      if (deck.format) {
+        formatSet.add(deck.format);
       }
     });
+    const tagList = [...tagSet].filter(
+      tag => tag !== filterTag && !formatSet.has(tag)
+    );
+    tagList.sort();
+    const formatList = [...formatSet].filter(format => format !== filterTag);
+    formatList.sort();
 
     var select = $('<select id="query_select"></select>');
-    if (filterTag != "All") {
+    if (filterTag !== "All") {
       select.append('<option value="All">All</option>');
     }
-    tags_list.forEach(tag => {
-      if (tag !== filterTag) {
-        select.append('<option value="' + tag + '">' + tag + "</option>");
-      }
-      //reateTag(tag, decks_top, false);
-    });
+    tagList.forEach(tag =>
+      select.append('<option value="' + tag + '">' + tag + "</option>")
+    );
+    formatList.forEach(f =>
+      select.append(
+        '<option value="' + f + '">' + getReadableFormat(f) + "</option>"
+      )
+    );
+
     decks_top_filter.appendChild(select[0]);
     selectAdd(select, filterDecks);
-    select.next("div.select-styled").text(filterTag);
+    select.next("div.select-styled").text(getReadableFormat(filterTag));
 
     let decks_top_winrate = document.createElement("div");
     decks_top_winrate.classList.add("decks_top_winrate");
@@ -85,18 +102,18 @@ function open_decks_tab() {
     decks.forEach(function(deck, index) {
       var tileGrpid = deck.deckTileId;
 
-      var filter = false;
-      if (filterTag !== "All") {
-        if (deck.tags) {
-          if (deck.tags.indexOf(filterTag) == -1) {
-            filter = true;
-          }
-        } else {
-          filter = true;
-        }
+      let showDeck = false;
+      if (filterTag === "All") {
+        showDeck = true;
+      }
+      if (deck.tags) {
+        showDeck = showDeck || deck.tags.indexOf(filterTag) !== -1;
+      }
+      if (deck.format) {
+        showDeck = showDeck || deck.format === filterTag;
       }
 
-      if (!filter) {
+      if (showDeck) {
         if (cardsDb.get(tileGrpid).set == undefined) {
           tileGrpid = 67003;
         }
@@ -137,9 +154,16 @@ function open_decks_tab() {
         jQuery.data(t, "deck", deck.id);
         if (deck.tags) {
           deck.tags.forEach(tag => {
-            t = createTag(tag, flcf);
-            jQuery.data(t, "deck", deck.id);
+            if (tag !== deck.format) {
+              t = createTag(tag, flcf);
+              jQuery.data(t, "deck", deck.id);
+            }
           });
+        }
+        if (deck.format) {
+          const fText = getReadableFormat(deck.format);
+          const t = createTag(fText, flcf, false, true);
+          jQuery.data(t, "deck", deck.id);
         }
 
         // Deck crafting cost section
@@ -311,10 +335,14 @@ function filterDecks(filter) {
   open_decks_tab();
 }
 
-function createTag(tag, div, showClose = true) {
+function createTag(tag, div, showClose = true, isFormat = false) {
   let tagCol = getTagColor(tag);
   let t = createDivision(["deck_tag"], tag == null ? "Add" : tag);
   t.style.backgroundColor = tagCol;
+
+  if (isFormat) {
+    t.style.fontStyle = "italic";
+  }
 
   if (tag) {
     $(t).on("click", function(e) {
@@ -414,7 +442,7 @@ function createTag(tag, div, showClose = true) {
 
 function addTag(deckid, tag, div) {
   decks.forEach(function(deck) {
-    if (deck.id == deckid) {
+    if (deck.id === deckid && deck.format !== tag) {
       if (deck.tags) {
         if (deck.tags.indexOf(tag) == -1) {
           deck.tags.push(tag);
