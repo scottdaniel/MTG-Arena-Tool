@@ -1,20 +1,21 @@
 /*
 global
   $,
-  get_colation_set,
-  localDateFormat,
-  getReadableEvent,
-  setsList,
   addCardHover,
   cardsDb,
-  shell,
-  get_set_scryfall,
   collectionSortRarity,
-  addCardHover,
+  createDivision
   createSelect,
   economyHistory,
+  formatNumber,
+  formatPercent,
+  get_colation_set,
   get_card_image,
-  createDivision
+  get_set_scryfall,
+  getReadableEvent,
+  localDateFormat,
+  setsList,
+  shell
 */
 
 var loadEconomy = 0;
@@ -176,7 +177,7 @@ function createDayHeader(change) {
   const icca = tx.cloneNode(true);
   icca.innerHTML = "Cards:";
   const catx = tx.cloneNode(true);
-  catx.innerHTML = dayList[daysago].cardsEarned;
+  catx.innerHTML = formatNumber(dayList[daysago].cardsEarned);
   gridCards.appendChild(icca);
   const upcontca = createDivision(["economy_delta"]);
   upcontca.style.width = "auto";
@@ -193,14 +194,14 @@ function createDayHeader(change) {
   gridGold.appendChild(icgo);
 
   const upcontgo = createDivision(["economy_delta"]);
-  tx.innerHTML = dayList[daysago].goldEarned;
+  tx.innerHTML = formatNumber(dayList[daysago].goldEarned);
   upcontgo.appendChild(tx);
   upcontgo.appendChild(up.cloneNode(true));
   gridGold.appendChild(upcontgo);
 
   const dncontgo = createDivision(["economy_delta"]);
   let ntx = tx.cloneNode(true);
-  ntx.innerHTML = dayList[daysago].goldSpent;
+  ntx.innerHTML = formatNumber(dayList[daysago].goldSpent);
   dncontgo.appendChild(ntx);
   dncontgo.appendChild(down.cloneNode(true));
   gridGold.appendChild(dncontgo);
@@ -215,14 +216,14 @@ function createDayHeader(change) {
 
   const upcontge = createDivision(["economy_delta"]);
   ntx = tx.cloneNode(true);
-  ntx.innerHTML = dayList[daysago].gemsEarned;
+  ntx.innerHTML = formatNumber(dayList[daysago].gemsEarned);
   upcontge.appendChild(ntx);
   upcontge.appendChild(up.cloneNode(true));
   gridGems.appendChild(upcontge);
 
   const dncontge = createDivision(["economy_delta"]);
   ntx = tx.cloneNode(true);
-  ntx.innerHTML = dayList[daysago].gemsSpent;
+  ntx.innerHTML = formatNumber(dayList[daysago].gemsSpent);
   dncontge.appendChild(ntx);
   dncontge.appendChild(down.cloneNode(true));
   gridGems.appendChild(dncontge);
@@ -238,10 +239,7 @@ function createDayHeader(change) {
   // Rely on modulo arithmetic to derive pure vault gain
   const delta = rawDelta < 0 ? rawDelta + 100 : rawDelta;
   const deltaPercent = delta / 100.0;
-  vatx.innerHTML = deltaPercent.toLocaleString([], {
-    style: "percent",
-    maximumSignificantDigits: 2
-  });
+  vatx.innerHTML = formatPercent(deltaPercent);
   gridVault.appendChild(icva);
   const upcontva = createDivision(["economy_delta"]);
   upcontva.style.width = "auto";
@@ -373,7 +371,7 @@ function createChangeRow(change, economyId) {
     bon = createDivision();
     bon.style.lineHeight = "32px";
     bon.classList.add("economy_sub");
-    bon.innerHTML = Math.abs(change.delta.gemsDelta);
+    bon.innerHTML = formatNumber(Math.abs(change.delta.gemsDelta));
 
     flexBottom.appendChild(bos);
     flexBottom.appendChild(bon);
@@ -386,7 +384,7 @@ function createChangeRow(change, economyId) {
     bon = createDivision();
     bon.style.lineHeight = "32px";
     bon.classList.add("economy_sub");
-    bon.innerHTML = Math.abs(change.delta.goldDelta);
+    bon.innerHTML = formatNumber(Math.abs(change.delta.goldDelta));
 
     flexBottom.appendChild(bos);
     flexBottom.appendChild(bon);
@@ -399,7 +397,7 @@ function createChangeRow(change, economyId) {
     bon = createDivision();
     bon.style.lineHeight = "64px";
     bon.classList.add("economy_sub");
-    bon.innerHTML = Math.abs(change.delta.gemsDelta);
+    bon.innerHTML = formatNumber(Math.abs(change.delta.gemsDelta));
 
     flexRight.appendChild(bos);
     flexRight.appendChild(bon);
@@ -412,7 +410,7 @@ function createChangeRow(change, economyId) {
     bon = createDivision();
     bon.style.lineHeight = "64px";
     bon.classList.add("economy_sub");
-    bon.innerHTML = Math.abs(change.delta.goldDelta);
+    bon.innerHTML = formatNumber(Math.abs(change.delta.goldDelta));
 
     flexRight.appendChild(bos);
     flexRight.appendChild(bon);
@@ -545,6 +543,13 @@ function createChangeRow(change, economyId) {
         img.classList.add("inventory_card_aetherized");
         img.style.width = "39px";
         img.src = get_card_image(card);
+
+        if (card.rarity) {
+          // only uncommons and commons go to vault
+          let vaultProgressDelta =
+            card.rarity === "uncommon" ? 1 / 300 : 1 / 900;
+          img.title = "Vault: +" + formatPercent(vaultProgressDelta);
+        }
 
         d.appendChild(img);
         flexRight.appendChild(d);
@@ -718,36 +723,36 @@ function createEconomyUI(mainDiv) {
 
   div.appendChild(icwcc);
   let ntx = tx.cloneNode(true);
-  ntx.innerHTML = economyHistory.wcCommon;
+  ntx.innerHTML = formatNumber(economyHistory.wcCommon);
   div.appendChild(ntx);
 
   div.appendChild(icwcu);
   ntx = tx.cloneNode(true);
-  ntx.innerHTML = economyHistory.wcUncommon;
+  ntx.innerHTML = formatNumber(economyHistory.wcUncommon);
   div.appendChild(ntx);
 
   div.appendChild(icwcr);
   ntx = tx.cloneNode(true);
-  ntx.innerHTML = economyHistory.wcRare;
+  ntx.innerHTML = formatNumber(economyHistory.wcRare);
   div.appendChild(ntx);
 
   div.appendChild(icwcm);
   ntx = tx.cloneNode(true);
-  ntx.innerHTML = economyHistory.wcMythic;
+  ntx.innerHTML = formatNumber(economyHistory.wcMythic);
   div.appendChild(ntx);
 
   div.appendChild(icgo);
   ntx = tx.cloneNode(true);
-  ntx.innerHTML = economyHistory.gold;
+  ntx.innerHTML = formatNumber(economyHistory.gold);
   div.appendChild(ntx);
 
   div.appendChild(icge);
   ntx = tx.cloneNode(true);
-  ntx.innerHTML = economyHistory.gems;
+  ntx.innerHTML = formatNumber(economyHistory.gems);
   div.appendChild(ntx);
 
   ntx = tx.cloneNode(true);
-  ntx.innerHTML = "Vault: " + economyHistory.vault + "%";
+  ntx.innerHTML = "Vault: " + formatPercent(economyHistory.vault / 100);
   ntx.style.marginLeft = "32px";
   div.appendChild(ntx);
 
