@@ -1680,13 +1680,13 @@ function forceDeckUpdate(removeUsed = true) {
       )
     );
 
-    typeLan = Math.min(odds_sample_size, main.countType("Land"));
-    typeCre = Math.min(odds_sample_size, main.countType("Creature"));
-    typeArt = Math.min(odds_sample_size, main.countType("Artifact"));
-    typeEnc = Math.min(odds_sample_size, main.countType("Enchantment"));
-    typeIns = Math.min(odds_sample_size, main.countType("Instant"));
-    typeSor = Math.min(odds_sample_size, main.countType("Sorcery"));
-    typePla = Math.min(odds_sample_size, main.countType("Planeswalker"));
+    typeLan = main.countType("Land");
+    typeCre = main.countType("Creature");
+    typeArt = main.countType("Artifact");
+    typeEnc = main.countType("Enchantment");
+    typeIns = main.countType("Instant");
+    typeSor = main.countType("Sorcery");
+    typePla = main.countType("Planeswalker");
 
     let chancesObj = {};
     chancesObj.chanceCre = chanceType(typeCre, cardsleft, odds_sample_size);
@@ -1702,7 +1702,7 @@ function forceDeckUpdate(removeUsed = true) {
     currentMatch.playerChances = chancesObj;
   } else {
     let main = currentMatch.playerCardsLeft.mainboard;
-    main.addProperty("chance", card => 1);
+    main.addProperty("chance", () => 1);
 
     let chancesObj = {};
     chancesObj.chanceCre = 0;
@@ -1716,15 +1716,15 @@ function forceDeckUpdate(removeUsed = true) {
   }
 }
 
-function chanceType(typeNumber, cardsleft, odds_sample_size) {
+function chanceType(quantity, cardsleft, odds_sample_size) {
   return (
     Math.round(
       hypergeometricRange(
         1,
-        typeNumber,
+        Math.min(odds_sample_size, quantity),
         cardsleft,
         odds_sample_size,
-        typeNumber
+        quantity
       ) * 1000
     ) / 10
   );
