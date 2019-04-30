@@ -2703,6 +2703,23 @@ function updateAppSettings() {
 }
 
 //
+function formatPercent(value, config = {}) {
+  return value.toLocaleString([], {
+    style: "percent",
+    maximumSignificantDigits: 2,
+    ...config
+  });
+}
+
+//
+function formatNumber(value, config = {}) {
+  return value.toLocaleString([], {
+    style: "decimal",
+    ...config
+  });
+}
+
+//
 function getWinrateClass(wr) {
   if (wr > 0.65) return "blue";
   if (wr > 0.55) return "green";
