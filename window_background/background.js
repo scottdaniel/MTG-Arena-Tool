@@ -1452,7 +1452,11 @@ function getNameBySeat(seat) {
     if (seat == currentMatch.player.seat) {
       return playerData.name.slice(0, -6);
     } else {
-      return currentMatch.opponent.name.slice(0, -6);
+      let oppName = currentMatch.opponent.name;
+      if (oppName && oppName !== "Sparky") {
+        oppName = oppName.slice(0, -6);
+      }
+      return oppName || "Opponent";
     }
   } catch (e) {
     return "???";
