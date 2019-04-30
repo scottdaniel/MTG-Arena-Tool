@@ -618,6 +618,23 @@ const enums = {
 var setsList = cardsDb.get("sets");
 var eventsList = cardsDb.get("events");
 var eventsToFormat = cardsDb.get("events_format");
+const formats = {
+  Standard: "Standard",
+  TraditionalStandard: "Traditional Standard",
+  Draft: "Draft",
+  Sealed: "Sealed",
+  Pauper: "Pauper",
+  Singleton: "Singleton",
+  Cascade: "Cascade",
+  Pandemonium: "Pandemonium",
+  NoInstants: "No Instants",
+  DirectGame: "Direct Game",
+  precon: "Preconstructed",
+  Ravnica: "Ravnica Block",
+  Ixalan: "Ixalan Block",
+  GRN: "Ravnica Constructed",
+  XLN: "Ixalan Constructed"
+};
 var rankedEvents = cardsDb.get("ranked_events");
 var renderer = 0;
 var rarities = ["common", "uncommon", "rare", "mythic"];
@@ -1150,12 +1167,19 @@ function getReadableEvent(arg) {
   return arg;
 }
 
+//
+function getReadableFormat(format) {
+  if (format in formats) {
+    return formats[format];
+  }
+  return format || "Unknown";
+}
+
 function getReadableQuest(questCode) {
   // FIXME: Can we get a human readable quest name?
   // For now lets just use a small portion of the ID.
   return `#${questCode.substring(0, 6)}`
 }
-
 
 //
 function getEventId(arg) {

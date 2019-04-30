@@ -6,6 +6,7 @@ global
 	sort_decks,
 	cards,
 	getDeckWinrate,
+  getReadableFormat,
 	open_deck,
 	tags_colors,
 	ipc_send,
@@ -14,28 +15,6 @@ global
 */
 
 let filterTag = "All";
-
-const formats = {
-  precon: "Preconstructed",
-  Standard: "Standard",
-  Sealed: "Sealed",
-  Draft: "Draft",
-  TraditionalStandard: "Traditional Standard",
-  Pauper: "Pauper",
-  Singleton: "Singleton",
-  NoInstants: "No Instants",
-  Ravnica: "Ravnica Constructed",
-  XLN: "Ixalan Constructed",
-  Pandemonium: "Pandemonium"
-};
-
-//
-function getReadableFormat(format) {
-  if (format in formats) {
-    return formats[format];
-  }
-  return format || "Unknown";
-}
 
 //
 function open_decks_tab() {
