@@ -32,6 +32,7 @@ global
   onLabelInEventGetActiveEvents,
   onLabelEventMatchCreated,
   onLabelOutDirectGameChallenge,
+  onLabelOutEventAIPractice,
   onLabelInDraftDraftStatus,
   onLabelInDraftMakePick,
   onLabelOutDraftMakePick,
@@ -1141,6 +1142,13 @@ function onLogEntryFound(entry) {
             onLabelEventMatchCreated(entry, json);
             break;
 
+          case "Event.AIPractice":
+            if (entry.arrow == "==>") {
+              json = entry.json();
+              onLabelOutEventAIPractice(entry, json);
+            }
+            break;
+
           case "DirectGame.Challenge":
             if (entry.arrow == "==>") {
               json = entry.json();
@@ -1483,8 +1491,6 @@ function createMatch(arg) {
     ipc_send("overlay_set_bounds", obj);
   }
 
-  let str = JSON.stringify(currentDeck.getSave());
-
   currentMatch.player.originalDeck = originalDeck;
   currentMatch.player.deck = originalDeck.clone();
   currentMatch.playerCardsLeft = originalDeck.clone();
@@ -1517,7 +1523,8 @@ function createMatch(arg) {
     windowOverlay
   );
 
-  if (currentMatch.eventId == "DirectGame") {
+  if (currentMatch.eventId == "DirectGame" && currentDeck) {
+    let str = JSON.stringify(currentDeck.getSave());
     httpApi.httpTournamentCheck(str, currentMatch.opponent.name, true);
   }
 

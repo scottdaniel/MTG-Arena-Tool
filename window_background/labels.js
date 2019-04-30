@@ -528,6 +528,16 @@ function onLabelOutDirectGameChallenge(entry, json) {
   httpApi.httpTournamentCheck(deck, json.params.opponentDisplayName, false, json.params.playFirst, json.params.bo3);
 }
 
+function onLabelOutEventAIPractice(entry, json) {
+  if (!json) return;
+  var deck = json.params.deck;
+
+  deck = replaceAll(deck, '"Id"', '"id"');
+  deck = replaceAll(deck, '"Quantity"', '"quantity"');
+  deck = JSON.parse(deck);
+  select_deck(deck);
+}
+
 function onLabelInDraftDraftStatus(entry, json) {
   if (!json) return;
 
