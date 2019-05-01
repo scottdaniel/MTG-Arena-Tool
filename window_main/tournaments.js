@@ -86,14 +86,14 @@ function tournamentOpen(t) {
   flr = createDivision(["tou_top_status", "state_clock"]);
   flr.style.alignSelf = "center";
 
-
   let state = "";
   if (stateClockInterval !== null) clearInterval(stateClockInterval);
   if (tou.state == -1) {
     state = "";
     stateClockInterval = window.setInterval(() => {
       let tst = timestamp();
-      $$(".state_clock")[0].innerHTML = "Registration begin in " + toHHMMSS(tst - tou.starts);
+      $$(".state_clock")[0].innerHTML =
+        "Registration begin in " + toHHMMSS(tst - tou.starts);
     }, 1000);
   }
   if (tou.state == 0) {
@@ -101,9 +101,11 @@ function tournamentOpen(t) {
     stateClockInterval = window.setInterval(() => {
       let tst = timestamp();
       if (joined) {
-        $$(".state_clock")[0].innerHTML = "Starts in " + toHHMMSS(roundsStart - tst);
+        $$(".state_clock")[0].innerHTML =
+          "Starts in " + toHHMMSS(roundsStart - tst);
       } else {
-        $$(".state_clock")[0].innerHTML = toHHMMSS(roundsStart - tst) + " left to register."
+        $$(".state_clock")[0].innerHTML =
+          toHHMMSS(roundsStart - tst) + " left to register.";
       }
     }, 1000);
   }
@@ -111,7 +113,8 @@ function tournamentOpen(t) {
     state = "";
     stateClockInterval = window.setInterval(() => {
       let tst = timestamp();
-      $$(".state_clock")[0].innerHTML = `Round ${tou.currentRound + 1} ends in ${toHHMMSS(roundEnd - tst)}`;
+      $$(".state_clock")[0].innerHTML = `Round ${tou.currentRound +
+        1} ends in ${toHHMMSS(roundEnd - tst)}`;
     }, 1000);
   }
   if (tou.state == 3) {
@@ -185,7 +188,35 @@ function showTournamentRegister(mainDiv, tou) {
     mainDiv.appendChild(deckSelect);
 
     if (tou.state == 0) {
-      buttonJoin = createDivision(["button_simple_disabled", "but_join"], "Join");
+      if (tou.password) {
+        let cont = createDivision([
+          "input_login_container",
+          "tourney_pwd_container"
+        ]);
+
+        let lockIcon = createDivision(["status_locked", "input_lock"]);
+
+        let pwdInput = document.createElement("input");
+        pwdInput.id = "tourney_pass";
+        pwdInput.autocomplete = "off";
+        pwdInput.type = "password";
+
+        let lockedMsg = createDivision(
+          ["tou_desc"],
+          "This tournament is password protected."
+        );
+        lockedMsg.style.margin = "32px 0 0px 0px";
+        mainDiv.appendChild(lockedMsg);
+
+        cont.appendChild(lockIcon);
+        cont.appendChild(pwdInput);
+        mainDiv.appendChild(cont);
+      }
+
+      buttonJoin = createDivision(
+        ["button_simple_disabled", "but_join"],
+        "Join"
+      );
       mainDiv.appendChild(buttonJoin);
     }
 
@@ -194,7 +225,10 @@ function showTournamentRegister(mainDiv, tou) {
   }
 
   let list = createDivision(["tou_list_players"]);
-  let pJoined = createDivision(["tou_list_player_name", "tou_list_player_name_title"], "Players joined:");
+  let pJoined = createDivision(
+    ["tou_list_player_name", "tou_list_player_name_title"],
+    "Players joined:"
+  );
   list.appendChild(pJoined);
 
   tou.players.forEach(p => {
@@ -206,8 +240,13 @@ function showTournamentRegister(mainDiv, tou) {
 
   if (buttonJoin) {
     buttonJoin.addEventListener("click", () => {
-      if (this.classList.contains("button_simple")) {
-        ipc_send("tou_join", { id: tou._id, deck: tournamentDeck });
+      if (buttonJoin.classList.contains("button_simple")) {
+        if (tou.password) {
+          let pwd = document.getElementById("tourney_pass").value;
+          tournamentJoin(tou._id, tournamentDeck, pwd);
+        } else {
+          tournamentJoin(tou._id, tournamentDeck, "");
+        }
       }
     });
   }
@@ -217,6 +256,10 @@ function showTournamentRegister(mainDiv, tou) {
       ipc_send("tou_drop", tou._id);
     });
   }
+}
+
+function tournamentJoin(_id, _deck, _pass) {
+  ipc_send("tou_join", { id: _id, deck: _deck, pass: _pass });
 }
 
 function showTournamentStarted(mainDiv, tou) {
@@ -611,12 +654,13 @@ function generateChecks(state, seat) {
 
 function selectTourneyDeck(index) {
   let _deck = decks[index];
+  tournamentDeck = _deck.id;
   _deck.mainDeck.sort(compare_cards);
   _deck.sideboard.sort(compare_cards);
   // drawDeck requires a jquery div... mmm
   drawDeck($(".join_decklist"), _deck, true);
 
-  $$(".but_join").classList.add("button_simple");
+  $$(".but_join")[0].classList.add("button_simple");
 }
 
 function drawSideboardDeck() {

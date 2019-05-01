@@ -599,7 +599,7 @@ ipc.on("tou_get", function(event, arg) {
 });
 
 ipc.on("tou_join", function(event, arg) {
-  httpApi.httpTournamentJoin(arg.id, arg.deck);
+  httpApi.httpTournamentJoin(arg.id, arg.deck, sha1(arg.pass));
 });
 
 ipc.on("tou_drop", function(event, arg) {

@@ -2584,6 +2584,19 @@ a:hover {
     overflow: auto;
 }
 
+.tourney_pwd_container {
+    display: flex;
+    align-items: center;
+    max-width: 300px;
+    margin: auto;
+}
+
+.input_lock {
+    width: 24px;
+    height: 24px;
+    margin-right: 8px;
+}
+
 .tou_create_but {
     cursor: pointer;
     margin: auto 0;

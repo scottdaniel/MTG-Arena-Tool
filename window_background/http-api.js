@@ -11,7 +11,8 @@ global
   store,
   makeId,
   debugLog,
-  syncUserData
+  syncUserData,
+  sha1
 */
 const async = require("async");
 const qs = require("qs");
@@ -604,7 +605,7 @@ function httpTournamentGet(tid) {
   });
 }
 
-function httpTournamentJoin(tid, _deck) {
+function httpTournamentJoin(tid, _deck, pass) {
   let _id = makeId(6);
   let deck = JSON.stringify(decks[_deck]);
   httpAsync.unshift({
@@ -612,7 +613,8 @@ function httpTournamentJoin(tid, _deck) {
     method: "tou_join",
     method_path: "/api/tournament_join.php",
     id: tid,
-    deck: deck
+    deck: deck,
+    pass: pass
   });
 }
 
