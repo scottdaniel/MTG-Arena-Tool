@@ -196,7 +196,8 @@ ipc.on("set_priority_timer", function(event, arg) {
 });
 
 ipc.on("action_log", function(event, arg) {
-  arg.str = striptags(arg.str, ["card", "ability"]);
+  arg.str = striptags(arg.str, ["log-card", "log-ability"]);
+
   actionLog.push(arg);
   if (arg.seat == -99) {
     actionLog = [];
@@ -328,7 +329,8 @@ ipc.on("set_match", (event, arg) => {
 });
 
 function updateView() {
-  let cleanName = currentMatch && currentMatch.opponent && currentMatch.opponent.name;
+  let cleanName =
+    currentMatch && currentMatch.opponent && currentMatch.opponent.name;
   if (cleanName && cleanName !== "Sparky") {
     cleanName = cleanName.slice(0, -6);
   }
@@ -787,6 +789,7 @@ function change_background(arg) {
 }
 
 $(document).ready(function() {
+  addLogProtos();
   $(".overlay_draft_container").hide();
   recreateClock();
   //
@@ -892,3 +895,18 @@ $(document).ready(function() {
     }
   );
 });
+
+class cardProto extends HTMLElement {
+  constructor() {
+    super();
+    let grpId = this.getAttribute("id");
+    // This does not work
+    console.log(">> "+grpId);
+    addCardHover(this, cardsDb.get(grpId));
+  }
+}
+
+function addLogProtos() {
+  document.registerElement("log-card", cardProto);
+  document.registerElement("log-ability");
+}

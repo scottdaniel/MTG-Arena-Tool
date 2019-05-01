@@ -1387,11 +1387,11 @@ function setDraftCards(json) {
 
 function actionLogGenerateLink(grpId) {
   var card = cardsDb.get(grpId);
-  return '<card id="' + grpId + '">' + card.name + "</card>";
+  return '<log-card id="' + grpId + '">' + card.name + "</log-card>";
 }
 
 function actionLogGenerateAbilityLink(abId) {
-  return `<ability id="${abId}">ability</ability>`;
+  return `<log-ability id="${abId}">ability</log-ability>`;
 }
 
 var currentActionLog = "";
