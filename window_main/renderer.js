@@ -916,13 +916,14 @@ $(document).ready(function() {
       });
 
       $(this).addClass("item_selected");
+      $("#ux_0").html("");
+      showLoadingBars();
 
       if ($(this).hasClass("ith")) {
         sidebarActive = -1;
         if (offlineMode) {
           showOfflineSplash();
         } else {
-          showLoadingBars();
           if (discordTag == null) {
             open_home_tab(null, true);
           } else {
@@ -933,17 +934,14 @@ $(document).ready(function() {
       }
       if ($(this).hasClass("it0")) {
         sidebarActive = 0;
-        $("#ux_0").html("");
         open_decks_tab();
       }
       if ($(this).hasClass("it1")) {
         sidebarActive = 1;
-        $("#ux_0").html("");
         ipc_send("request_history", 1);
       }
       if ($(this).hasClass("it2")) {
         sidebarActive = 2;
-        $("#ux_0").html("");
         ipc_send("request_events", 1);
       }
       if ($(this).hasClass("it3")) {
