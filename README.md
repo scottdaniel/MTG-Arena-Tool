@@ -1,6 +1,9 @@
 # MTG Arena Tool
 An MTG Arena deck tracker and collection manager.
 
+[![Build Status](https://api.travis-ci.com/Manuel-777/MTG-Arena-Tool.svg?branch=master)](https://travis-ci.org/Manuel-777/MTG-Arena-Tool)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+
 ![History Screen](/Readme/screenshot_1.png)
 
 ## Current features
