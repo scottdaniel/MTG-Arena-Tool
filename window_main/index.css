@@ -57,6 +57,10 @@ relative-time, local-time {
     background-image: url(../images/status_black.png);
 }
 
+.status_locked {
+    background-image: url(../images/lock.png);
+}
+
 .top_logo_about {
     cursor: pointer;
     align-self: center;

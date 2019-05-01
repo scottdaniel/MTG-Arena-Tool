@@ -32,8 +32,9 @@ const remote = require("electron").remote;
 require('time-elements');
 
 const open_home_tab = require("./home").open_home_tab;
-const open_tournament = require("./home").open_tournament;
-const set_tou_state = require("./home").set_tou_state;
+const tournamentOpen = require("./tournaments").tournamentOpen;
+const tournamentCreate = require("./tournaments").tournamentCreate;
+const tournamentSetState = require("./tournaments").tournamentSetState;
 const open_deck = require("./deck_details").open_deck;
 const open_decks_tab = require("./decks").open_decks_tab;
 const open_history_tab = require("./history").open_history_tab;
@@ -1020,7 +1021,7 @@ function addHover(_match, tileGrpid) {
 //
 ipc.on("tou_set", function(event, arg) {
   document.body.style.cursor = "auto";
-  open_tournament(arg);
+  tournamentOpen(arg);
   $(".moving_ux").animate({ left: "-100%" }, 250, "easeInOutCubic");
 });
 
