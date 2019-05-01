@@ -1078,6 +1078,10 @@ function drawCardList(div, cards) {
 
 //
 function drawDeckVisual(_div, _stats, deck) {
+  // PLACEHOLDER
+  if (!(_div instanceof jQuery)) {
+    _div = $(_div);
+  }
   // attempt at sorting visually..
   var newMainDeck = [];
 

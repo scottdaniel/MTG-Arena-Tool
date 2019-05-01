@@ -157,10 +157,10 @@ function showTournamentRegister(mainDiv, tou) {
     let deckvisual = createDivision(["decklist"]);
     deckContainer.appendChild(deckvisual);
 
+    mainDiv.appendChild(deckContainer);
     if (tou.deck) {
       drawDeckVisual(deckvisual, undefined, tou.deck);
     }
-    mainDiv.appendChild(deckContainer);
 
     if (tou.state !== 4) {
       buttonDrop = createDivision(["button_simple", "but_drop"], "Drop");
