@@ -258,17 +258,6 @@ var wcMythic = 0;
 
 var lastDeckUpdate = new Date();
 
-let formats = {
-  Standard: "Standard",
-  TraditionalStandard: "Traditional Standard",
-  Pauper: "Pauper",
-  Singleton: "Singleton",
-  NoInstants: "No Instants",
-  Ravnica: "Ravnica Constructed",
-  XLN: "Ixalan Constructed",
-  Pandemonium: "Pandemonium"
-};
-
 // Begin of IPC messages recievers
 function ipc_send(method, arg, to = windowRenderer) {
   if (method == "ipc_log") {

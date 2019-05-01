@@ -6,6 +6,7 @@ global
 	sort_decks,
 	cards,
 	getDeckWinrate,
+  getReadableFormat,
 	open_deck,
 	tags_colors,
 	ipc_send,
@@ -33,30 +34,44 @@ function open_decks_tab() {
     let decks_top_filter = document.createElement("div");
     decks_top_filter.classList.add("decks_top_filter");
 
-    let tags_list = [];
-    decks.forEach(function(deck) {
+    const tagSet = new Set();
+    const formatSet = new Set();
+    const counts = {};
+    decks.forEach(deck => {
       if (deck.tags) {
         deck.tags.forEach(tag => {
-          if (tags_list.indexOf(tag) == -1) {
-            tags_list.push(tag);
-          }
+          tagSet.add(tag);
+          counts[tag] = (counts[tag] || 0) + 1;
         });
       }
+      if (deck.format) {
+        formatSet.add(deck.format);
+        counts[deck.format] = (counts[deck.format] || 0) + 1;
+      }
     });
+    const tagList = [...tagSet].filter(
+      tag => tag !== filterTag && !formatSet.has(tag)
+    );
+    tagList.sort(); // alpha sort instead of counts for now
+    const formatList = [...formatSet].filter(format => format !== filterTag);
+    formatList.sort((a, b) => counts[b] - counts[a]);
 
     var select = $('<select id="query_select"></select>');
-    if (filterTag != "All") {
+    if (filterTag !== "All") {
       select.append('<option value="All">All</option>');
     }
-    tags_list.forEach(tag => {
-      if (tag !== filterTag) {
-        select.append('<option value="' + tag + '">' + tag + "</option>");
-      }
-      //reateTag(tag, decks_top, false);
-    });
+    tagList.forEach(tag =>
+      select.append('<option value="' + tag + '">' + tag + "</option>")
+    );
+    formatList.forEach(f =>
+      select.append(
+        '<option value="' + f + '">' + getReadableFormat(f) + "</option>"
+      )
+    );
+
     decks_top_filter.appendChild(select[0]);
     selectAdd(select, filterDecks);
-    select.next("div.select-styled").text(filterTag);
+    select.next("div.select-styled").text(getReadableFormat(filterTag));
 
     let decks_top_winrate = document.createElement("div");
     decks_top_winrate.classList.add("decks_top_winrate");
@@ -71,18 +86,18 @@ function open_decks_tab() {
     decks.forEach(function(deck, index) {
       var tileGrpid = deck.deckTileId;
 
-      var filter = false;
-      if (filterTag !== "All") {
-        if (deck.tags) {
-          if (deck.tags.indexOf(filterTag) == -1) {
-            filter = true;
-          }
-        } else {
-          filter = true;
-        }
+      let showDeck = false;
+      if (filterTag === "All") {
+        showDeck = true;
+      }
+      if (deck.tags) {
+        showDeck = showDeck || deck.tags.indexOf(filterTag) !== -1;
+      }
+      if (deck.format) {
+        showDeck = showDeck || deck.format === filterTag;
       }
 
-      if (!filter) {
+      if (showDeck) {
         if (cardsDb.get(tileGrpid).set == undefined) {
           tileGrpid = 67003;
         }
@@ -119,12 +134,20 @@ function open_decks_tab() {
         flcfwc.style.marginRight = "8px";
         flcfwc.classList.add("flex_item");
 
-        let t = createTag(null, flcf, false);
+        const t = createTag(null, flcf, false);
         jQuery.data(t, "deck", deck.id);
+        if (deck.format) {
+          const fText = getReadableFormat(deck.format);
+          const t = createTag(fText, flcf, false);
+          t.style.fontStyle = "italic";
+          jQuery.data(t, "deck", deck.id);
+        }
         if (deck.tags) {
           deck.tags.forEach(tag => {
-            t = createTag(tag, flcf);
-            jQuery.data(t, "deck", deck.id);
+            if (tag !== deck.format) {
+              const t = createTag(tag, flcf);
+              jQuery.data(t, "deck", deck.id);
+            }
           });
         }
 
@@ -400,7 +423,7 @@ function createTag(tag, div, showClose = true) {
 
 function addTag(deckid, tag, div) {
   decks.forEach(function(deck) {
-    if (deck.id == deckid) {
+    if (deck.id === deckid && deck.format !== tag) {
       if (deck.tags) {
         if (deck.tags.indexOf(tag) == -1) {
           deck.tags.push(tag);
