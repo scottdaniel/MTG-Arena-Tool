@@ -492,7 +492,6 @@ ipc.on("set_status", function(event, arg) {
 
 //
 ipc.on("set_home", function(event, arg) {
-  document.body.style.cursor = "auto";
   hideLoadingBars();
   deck_tags = arg.tags;
 
@@ -755,7 +754,6 @@ ipc.on("offline", function() {
 });
 
 function showOfflineSplash() {
-  document.body.style.cursor = "auto";
   $("#ux_0").html(
     '<div class="message_center" style="display: flex; position: fixed;"><div class="message_unlink"></div><div class="message_big red">Oops, you are offline!</div><div class="message_sub_16 white">You can <a class="signup_link">sign up</a> to access online features.</div></div>'
   );
@@ -927,7 +925,6 @@ $(document).ready(function() {
           if (discordTag == null) {
             open_home_tab(null, true);
           } else {
-            document.body.style.cursor = "progress";
             ipc_send("request_home", filteredWildcardsSet);
           }
         }
@@ -972,6 +969,7 @@ $(document).ready(function() {
 
 function showLoadingBars() {
   $$(".main_loading")[0].style.display = "block";
+  document.body.style.cursor = "progress";
 }
 
 //
@@ -979,6 +977,7 @@ ipc.on("show_loading", () => showLoadingBars());
 
 function hideLoadingBars() {
   $$(".main_loading")[0].style.display = "none";
+  document.body.style.cursor = "auto";
 }
 
 //
