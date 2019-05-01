@@ -754,6 +754,7 @@ ipc.on("offline", function() {
 });
 
 function showOfflineSplash() {
+  hideLoadingBars();
   $("#ux_0").html(
     '<div class="message_center" style="display: flex; position: fixed;"><div class="message_unlink"></div><div class="message_big red">Oops, you are offline!</div><div class="message_sub_16 white">You can <a class="signup_link">sign up</a> to access online features.</div></div>'
   );
@@ -2001,6 +2002,7 @@ function add_checkbox(div, label, iid, def, func = "updateUserSettings()") {
 function open_settings(openSection) {
   lastSettingsSection = openSection;
   change_background("default");
+  hideLoadingBars();
   $("#ux_0").off();
   $("#history_column").off();
   $("#ux_0").html("");

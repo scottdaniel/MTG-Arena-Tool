@@ -11,6 +11,7 @@ globals
   addHover,
   compare_cards,
   getReadableEvent,
+  hideLoadingBars,
   createDivision,
   eventsHistory,
   compare_courses,
@@ -24,6 +25,7 @@ function openEventsTab(loadMore) {
     loadMore = 25;
     eventsHistory.courses.sort(compare_courses);
 
+    hideLoadingBars();
     mainDiv.classList.remove("flex_item");
     mainDiv.innerHTML = "";
 

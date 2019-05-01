@@ -15,6 +15,7 @@ globals
   economyHistory,
   getWinrateClass,
   get_rank_index_16,
+  hideLoadingBars,
   createDivision,
   removeDuplicates,
   compare_cards,
@@ -43,8 +44,7 @@ const open_deck = require("./deck_details").open_deck;
 let raritySort = { c: "common", u: "uncommon", r: "rare", m: "mythic" };
 
 function openExploreTab() {
-  document.body.style.cursor = "auto";
-
+  hideLoadingBars();
   var mainDiv = document.getElementById("ux_0");
   var dateNow, d;
   ownedWildcards = {
