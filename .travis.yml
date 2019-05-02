@@ -22,7 +22,7 @@ jobs:
   include:
     - stage: Windows build
       os: windows
-      node_js: latest
+      env: YARN_GPG=no
       script:
         - npm run dist
       deploy:
