@@ -1,5 +1,7 @@
 /*
 global
+  $$,
+  addCardHover,
   addCardTile,
   cardsDb,
   compare_cards,
@@ -393,12 +395,15 @@ function updateView() {
       deckListDiv.scrollTop(deckListDiv[0].scrollHeight);
     }
 
-    $(".card_link").each(function() {
-      $(this).click(function() {
-        return false;
-      });
-      var grpId = $(this).attr("href");
-      addCardHover($(this), cardsDb.get(grpId));
+    $$("log-card").forEach(obj => {
+      let grpId = obj.getAttribute("id");
+      addCardHover(obj, cardsDb.get(grpId));
+    });
+
+    $$("log-ability").forEach(obj => {
+      let grpId = obj.getAttribute("id");
+      let abilityText = cardsDb.getAbility(grpId);
+      obj.title = abilityText;
     });
 
     return;
@@ -896,17 +901,13 @@ $(document).ready(function() {
   );
 });
 
-class cardProto extends HTMLElement {
+class htmlProto extends HTMLElement {
   constructor() {
     super();
-    let grpId = this.getAttribute("id");
-    // This does not work
-    console.log(">> "+grpId);
-    addCardHover(this, cardsDb.get(grpId));
   }
 }
 
 function addLogProtos() {
-  document.registerElement("log-card", cardProto);
-  document.registerElement("log-ability");
+  document.registerElement("log-card", htmlProto);
+  document.registerElement("log-ability", htmlProto);
 }
