@@ -794,7 +794,6 @@ function change_background(arg) {
 }
 
 $(document).ready(function() {
-  addLogProtos();
   $(".overlay_draft_container").hide();
   recreateClock();
   //
@@ -900,14 +899,3 @@ $(document).ready(function() {
     }
   );
 });
-
-class htmlProto extends HTMLElement {
-  constructor() {
-    super();
-  }
-}
-
-function addLogProtos() {
-  document.registerElement("log-card", htmlProto);
-  document.registerElement("log-ability", htmlProto);
-}
