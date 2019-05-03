@@ -17,6 +17,7 @@ globals
   sort_decks,
   getReadableEvent,
   getWinrateClass,
+  hideLoadingBars,
   createDivision,
   playerData,
   tags_colors,
@@ -63,6 +64,7 @@ function open_history_tab(loadMore) {
   if (sidebarActive != 1 || decks == null) return;
 
   sort_decks();
+  hideLoadingBars();
   var mainDiv = document.getElementById("ux_0");
   var div, d;
   mainDiv.classList.add("flex_item");

@@ -13,6 +13,7 @@ global
   get_card_image,
   get_set_scryfall,
   getReadableEvent,
+  hideLoadingBars,
   localDateFormat,
   setsList,
   shell
@@ -88,6 +89,7 @@ function getPrettyContext(context, full = true) {
 function openEconomyTab(loadMore) {
   var mainDiv = document.getElementById("ux_0");
   if (loadMore <= 0) {
+    hideLoadingBars();
     createEconomyUI(mainDiv);
     loadMore = 25;
   }

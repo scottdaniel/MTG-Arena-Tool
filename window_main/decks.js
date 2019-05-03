@@ -7,6 +7,7 @@ global
 	cards,
 	getDeckWinrate,
   getReadableFormat,
+  hideLoadingBars,
 	open_deck,
 	tags_colors,
 	ipc_send,
@@ -20,6 +21,7 @@ let filterTag = "All";
 function open_decks_tab() {
   if (sidebarActive == 0 && decks != null) {
     sort_decks();
+    hideLoadingBars();
     var mainDiv = document.getElementById("ux_0");
     mainDiv.classList.remove("flex_item");
     mainDiv.innerHTML = "";

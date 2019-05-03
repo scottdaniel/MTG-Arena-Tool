@@ -492,7 +492,6 @@ ipc.on("set_status", function(event, arg) {
 
 //
 ipc.on("set_home", function(event, arg) {
-  document.body.style.cursor = "auto";
   hideLoadingBars();
   deck_tags = arg.tags;
 
@@ -755,7 +754,7 @@ ipc.on("offline", function() {
 });
 
 function showOfflineSplash() {
-  document.body.style.cursor = "auto";
+  hideLoadingBars();
   $("#ux_0").html(
     '<div class="message_center" style="display: flex; position: fixed;"><div class="message_unlink"></div><div class="message_big red">Oops, you are offline!</div><div class="message_sub_16 white">You can <a class="signup_link">sign up</a> to access online features.</div></div>'
   );
@@ -916,34 +915,31 @@ $(document).ready(function() {
       });
 
       $(this).addClass("item_selected");
+      $("#ux_0").html("");
+      showLoadingBars();
 
       if ($(this).hasClass("ith")) {
         sidebarActive = -1;
         if (offlineMode) {
           showOfflineSplash();
         } else {
-          showLoadingBars();
           if (discordTag == null) {
             open_home_tab(null, true);
           } else {
-            document.body.style.cursor = "progress";
             ipc_send("request_home", filteredWildcardsSet);
           }
         }
       }
       if ($(this).hasClass("it0")) {
         sidebarActive = 0;
-        $("#ux_0").html("");
         open_decks_tab();
       }
       if ($(this).hasClass("it1")) {
         sidebarActive = 1;
-        $("#ux_0").html("");
         ipc_send("request_history", 1);
       }
       if ($(this).hasClass("it2")) {
         sidebarActive = 2;
-        $("#ux_0").html("");
         ipc_send("request_events", 1);
       }
       if ($(this).hasClass("it3")) {
@@ -974,6 +970,7 @@ $(document).ready(function() {
 
 function showLoadingBars() {
   $$(".main_loading")[0].style.display = "block";
+  document.body.style.cursor = "progress";
 }
 
 //
@@ -981,6 +978,7 @@ ipc.on("show_loading", () => showLoadingBars());
 
 function hideLoadingBars() {
   $$(".main_loading")[0].style.display = "none";
+  document.body.style.cursor = "auto";
 }
 
 //
@@ -2004,6 +2002,7 @@ function add_checkbox(div, label, iid, def, func = "updateUserSettings()") {
 function open_settings(openSection) {
   lastSettingsSection = openSection;
   change_background("default");
+  hideLoadingBars();
   $("#ux_0").off();
   $("#history_column").off();
   $("#ux_0").html("");

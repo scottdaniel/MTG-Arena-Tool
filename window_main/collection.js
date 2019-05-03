@@ -16,6 +16,7 @@ global
   get_collection_export,
   get_collection_stats,
   get_set_scryfall,
+  hideLoadingBars,
   orderedColorCodesCommon,
   setsList,
   cardSize,
@@ -50,6 +51,7 @@ function openCollectionTab() {
     return 0;
   });
 
+  hideLoadingBars();
   document.getElementById("ux_1").innerHTML = "";
   let mainDiv = document.getElementById("ux_0");
   mainDiv.innerHTML = "";
