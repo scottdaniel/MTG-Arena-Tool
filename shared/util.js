@@ -28,6 +28,7 @@ const cardsDb = new Database();
 const Deck = require("../shared/deck.js");
 const CardsList = require("../shared/cards-list.js");
 const Colors = require("../shared/colors.js");
+const Aggregator = require("../shared/Aggregator.js");
 
 const enums = {
   CounterType: {
