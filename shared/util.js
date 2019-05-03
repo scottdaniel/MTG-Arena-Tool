@@ -28,6 +28,7 @@ const cardsDb = new Database();
 const Deck = require("../shared/deck.js");
 const CardsList = require("../shared/cards-list.js");
 const Colors = require("../shared/colors.js");
+const Aggregator = require("../shared/Aggregator.js");
 
 const enums = {
   CounterType: {
@@ -638,6 +639,8 @@ const formats = {
 var rankedEvents = cardsDb.get("ranked_events");
 var renderer = 0;
 var rarities = ["common", "uncommon", "rare", "mythic"];
+const orderedColorCodes = ["w", "u", "b", "r", "g", "c"];
+const orderedColorCodesCommon = ["w", "u", "b", "r", "g"];
 
 var draftRanks = [];
 draftRanks[12] = "A+";
@@ -1158,6 +1161,23 @@ function isNumber(n) {
   return !isNaN(parseFloat(n)) && isFinite(n);
 }
 
+function getDeck(deckId) {
+  const matches = decks.filter(deck => deck.id === deckId);
+  if (!matches.length) return null;
+  return matches[0];
+}
+
+function doesDeckStillExist(deckId) {
+  return decks.filter(deck => deck.id === deckId).length > 0;
+}
+
+function getRecentDeckName(deckId) {
+  if (doesDeckStillExist(deckId)) {
+    return getDeck(deckId).name;
+  }
+  return deckId;
+}
+
 //
 function getReadableEvent(arg) {
   if (eventsList[arg] != undefined) {
@@ -1327,6 +1347,15 @@ function compare_chances(a, b) {
   }
 
   return 0;
+}
+
+function compare_decks(a, b) {
+  const aName = getRecentDeckName(a.id);
+  const aExists = doesDeckStillExist(a.id) ? 1 : 0;
+  const bName = getRecentDeckName(b.id);
+  const bExists = doesDeckStillExist(b.id) ? 1 : 0;
+  // sort by existence, then name
+  return bExists - aExists || aName.localeCompare(bName);
 }
 
 //

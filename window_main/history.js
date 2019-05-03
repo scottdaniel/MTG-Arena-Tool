@@ -1,68 +1,54 @@
 /*
 globals
-  ipc_send,
-  matchesHistory,
-  get_rank_index,
-  cardsDb,
-  mana,
-  get_rank_index_16,
-  timeSince,
-  toMMSS,
-  get_deck_colors,
-  setsList,
   addHover,
-  selectAdd,
-  createSelect,
+  Aggregator,
+  cardsDb,
   compare_cards,
-  sort_decks,
+  compare_decks,
+  createDivision,
+  currentId,
+  deck_tags,
+  decks,
+  eventsToFormat,
+  FilterPanel,
+  get_deck_colors,
+  get_rank_index,
+  get_rank_index_16,
   getReadableEvent,
+  getTagColor,
   getWinrateClass,
   hideLoadingBars,
-  createDivision,
+  ipc_send,
+  makeId,
+  mana,
+  matchesHistory,
   playerData,
-  tags_colors,
+  selectAdd,
+  setsList,
+  setTagColor,
   showLoadingBars,
   sidebarActive,
-  decks,
-  orderedColorCodes,
-  eventsList,
+  sort_decks,
+  StatsPanel,
+  timeSince,
+  toMMSS,
   $$
 */
 
 const RANKS = ["Bronze", "Silver", "Gold", "Platinum", "Diamond", "Mythic"];
-const DEFAULT_FORMAT = "All Formats";
-const ALL_DRAFTS_FORMAT = "All Draft Modes";
-const DRAFT_REPLAYS_FORMAT = "Draft Replays";
-const DEFAULT_DECK = "All Decks";
+const { DEFAULT_DECK, DEFAULT_TAG } = Aggregator;
+let filters = Aggregator.getDefaultFilters();
+let filteredMatches;
 
 let loadHistory = 0;
-let filterEvent = DEFAULT_FORMAT;
-let filterDeck = DEFAULT_DECK;
-let filteredDecks = null;
-let filteredSampleSize = 0;
 let viewingLimitSeason = false;
 
 const autocomplete = require("../shared/autocomplete.js");
 
-function isDraftMatch(match) {
-  return match.eventId && match.eventId.includes("Draft");
-}
-
-function filterMatch(match) {
-  let passesEventFilter =
-    filterEvent == DEFAULT_FORMAT ||
-    match.eventId == filterEvent ||
-    (filterEvent == ALL_DRAFTS_FORMAT && isDraftMatch(match)) ||
-    (filterEvent == DRAFT_REPLAYS_FORMAT && match.type == "draft");
-  let passesDeckFilter =
-    filterDeck == DEFAULT_DECK ||
-    (match.playerDeck && match.playerDeck.id == filterDeck);
-  return passesEventFilter && passesDeckFilter;
-}
-
 function open_history_tab(loadMore) {
   if (sidebarActive != 1 || decks == null) return;
 
+  let allMatches;
   sort_decks();
   hideLoadingBars();
   var mainDiv = document.getElementById("ux_0");
@@ -71,14 +57,24 @@ function open_history_tab(loadMore) {
   if (loadMore <= 0) {
     loadMore = 25;
     sort_history();
+    allMatches = new Aggregator();
     mainDiv.innerHTML = "";
     loadHistory = 0;
 
     let wrap_r = createDivision(["wrapper_column", "sidebar_column_l"]);
 
     div = createDivision(["ranks_history"]);
+    div.style.padding = "12px";
 
-    renderRanksStats(div);
+    filteredMatches = new Aggregator(filters);
+    const statsPanel = new StatsPanel("history_top", filteredMatches.stats);
+    const historyTopWinrate = statsPanel.render();
+    div.appendChild(historyTopWinrate);
+
+    const rankStats = createDivision(["ranks_stats"]);
+    rankStats.style.paddingTop = "16px";
+    renderRanksStats(rankStats);
+    div.appendChild(rankStats);
 
     let wrap_l = createDivision(["wrapper_column"]);
     wrap_l.setAttribute("id", "history_column");
@@ -102,139 +98,35 @@ function open_history_tab(loadMore) {
   //       .list_match_time
 
   // Event ID filter
-  if (loadHistory == 0) {
-    let eventsList = [];
-    let wins = 0;
-    let losses = 0;
-    let totalMatchTime = 0;
-
-    filteredSampleSize = 0;
-    let validMatches = matchesHistory.matches
-      .map(matchId => matchesHistory[matchId])
-      .filter(match => match !== undefined && match.eventId && match.eventId != "AIBotMatch");
-
-    // construct list of all events we have matches for
-    validMatches.forEach(match => {
-      if (!eventsList.includes(match.eventId)) {
-        eventsList.push(match.eventId);
-      }
-    });
-
-    // count matches which match the current filter
-    let getFilteredDecks = false;
-    if (filteredDecks == null) {
-      filteredDecks = {};
-      filteredDecks[DEFAULT_DECK] = { id: DEFAULT_DECK, name: DEFAULT_DECK };
-      getFilteredDecks = true;
-    }
-    validMatches.filter(filterMatch).forEach(match => {
-      wins += match.player.win;
-      losses += match.opponent.win;
-
-      if (getFilteredDecks && !(match.playerDeck.id in filteredDecks)) {
-        filteredDecks[match.playerDeck.id] = match.playerDeck;
-      }
-
-      // some of the data is wierd. Games which last years or have no data.
-      if (match.duration !== undefined && match.duration < 3600) {
-        totalMatchTime += match.duration;
-      }
-      filteredSampleSize++;
-    });
-
-    if (filteredSampleSize == 0) {
-      filteredSampleSize = matchesHistory.matches.length;
-    }
-
+  if (loadHistory === 0) {
     let historyTop = createDivision(["history_top"]);
 
-    let historyTopFilter = createDivision(["history_top_filter"]);
-    historyTopFilter.style.display = "flex";
+    const eventFilter = { eventId: filters.eventId };
+    const matchesInEvent = new Aggregator(eventFilter);
+
+    const handler = selected => {
+      filters = { ...filters, ...selected };
+      if (selected.eventId) {
+        filters.tag = DEFAULT_TAG;
+        filters.deckId = DEFAULT_DECK;
+      }
+      open_history_tab(0);
+    };
+
+    const filterPanel = new FilterPanel(
+      "history_top",
+      handler,
+      filters,
+      allMatches.events,
+      matchesInEvent.tags,
+      matchesInEvent.decks,
+      true
+    );
+    const historyTopFilter = filterPanel.render();
     historyTop.appendChild(historyTopFilter);
-
-    let historyTopWinrate = createDivision(["history_top_winrate"]);
-
-    let wrTotal = (1 / (wins + losses)) * wins;
-    let colClass = getWinrateClass(wrTotal);
-    let winrateContainer = createDivision(
-      ["list_deck_winrate"],
-      `${wins}:${losses} (<span class="${colClass}_bright">${Math.round(
-        wrTotal * 100
-      )}%</span>)`
-    );
-    historyTopWinrate.appendChild(winrateContainer);
-
-    let matchTimeContainer = createDivision(
-      ["list_match_time", "list_match_time_top"],
-      toMMSS(totalMatchTime)
-    );
-    historyTopWinrate.appendChild(matchTimeContainer);
-
-    historyTop.appendChild(historyTopWinrate);
-
-    let formatSelect = createSelect(
-      historyTopFilter,
-      [DEFAULT_FORMAT, ALL_DRAFTS_FORMAT, DRAFT_REPLAYS_FORMAT, ...eventsList],
-      filterEvent,
-      filterHistoryByEvent,
-      "history_query_format",
-      getReadableEvent
-    );
-    formatSelect.style.margin = "12px auto auto auto";
-
-    const doesDeckStillExist = deck_id => {
-      return decks.filter(deck => deck.id == deck_id).length > 0;
-    };
-
-    const getRecentDeckName = deck => {
-      if (doesDeckStillExist(deck.id)) {
-        return decks.filter(_deck => _deck.id == deck.id)[0].name;
-      }
-      return deck.name;
-    };
-
-    const filterDeckList = Object.values(filteredDecks);
-    filterDeckList.sort((a, b) => {
-      const aName = getRecentDeckName(filteredDecks[a.id]);
-      const aExists = doesDeckStillExist(a.id) ? 1 : 0;
-      const bName = getRecentDeckName(filteredDecks[b.id]);
-      const bExists = doesDeckStillExist(b.id) ? 1 : 0;
-      // sort by existence, then name
-      return bExists - aExists || aName.localeCompare(bName);
-    });
-
-    const getReadableDeckNameWithCost = deck_id => {
-      if (!(deck_id in filteredDecks)) return deck_id;
-      const deck = filteredDecks[deck_id];
-
-      let deckName = getRecentDeckName(deck);
-      if (doesDeckStillExist(deck_id)) {
-        deckName = decks.filter(deck => deck.id == deck_id)[0].name;
-      } else if (deck_id != DEFAULT_DECK) {
-        deckName += "<small><i> (deleted)</i></small>";
-      }
-      let colorsString = "";
-      if (deck.colors) {
-        deck.colors.forEach(color => {
-          colorsString += `<div class="mana_s16 mana_${orderedColorCodes[color - 1]}"></div>`;
-        });
-      }
-      return `${deckName}<div class="flex_item">${colorsString}</div>`;
-    };
-
-    const deckSelect = createSelect(
-      historyTopFilter,
-      filterDeckList.map(deck => deck.id),
-      filterDeck,
-      filterHistoryByDeck,
-      "history_query_deck",
-      getReadableDeckNameWithCost
-    );
-    deckSelect.style.width = "300px";
-    deckSelect.style.margin = "12px 4px auto 16px";
-
     historyColumn.appendChild(historyTop);
   }
+  const filteredSampleSize = filteredMatches.matches.length;
 
   //console.log("loadHistory: ", loadHistory, "loadMore: ", loadMore, "matches.length: ", matchesHistory.matches.length, "filteredSampleSize: ", filteredSampleSize);
   // loadMore = The ammount of items we want to load
@@ -274,7 +166,7 @@ function open_history_tab(loadMore) {
       continue;
     }
 
-    if (!filterMatch(match)) {
+    if (!filteredMatches.filterMatch(match)) {
       continue;
     }
 
@@ -406,7 +298,7 @@ function open_history_tab(loadMore) {
       );
       flr.appendChild(d);
     } else if (match.type == "draft") {
-      console.log("Draft: ", match);
+      // console.log("Draft: ", match);
       try {
         tileGrpid = setsList[match.set].tile;
       } catch (e) {
@@ -620,11 +512,11 @@ function createTag(tag, div, showClose = true) {
         let tag = $(this).text();
         let col = color.toRgbString();
         ipc_send("edit_tag", { tag: tag, color: col });
-        tags_colors[tag] = col;
+        setTagColor(tag, col);
 
         $(".deck_tag").each((index, obj) => {
           let tag = $(obj).text();
-          $(obj).css("background-color", tags_colors[tag]);
+          $(obj).css("background-color", getTagColor(tag));
         });
       });
 
@@ -762,20 +654,6 @@ function deleteTag(matchid, tag) {
 
   let obj = { match: matchid, name: tag };
   ipc_send("delete_history_tag", obj);
-}
-
-function filterHistoryByEvent(filter) {
-  filterEvent = filter;
-  // automatically clear deck filter upon changing format filter
-  // helps prevent user confusion caused by invalid filter combinations
-  filteredDecks = null;
-  filterDeck = DEFAULT_DECK;
-  open_history_tab(0);
-}
-
-function filterHistoryByDeck(filter) {
-  filterDeck = filter;
-  open_history_tab(0);
 }
 
 function getNextRank(currentRank) {
