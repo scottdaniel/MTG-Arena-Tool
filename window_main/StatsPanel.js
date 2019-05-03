@@ -3,11 +3,12 @@
 globals
   compare_winrates,
   createDivision,
+  formatPercent,
   getWinrateClass,
   getTagColor,
   mana,
-  toMMSS,
-  $
+  toDDHHMMSS,
+  toMMSS
 */
 
 class StatsPanel {
@@ -23,138 +24,105 @@ class StatsPanel {
     const colClass = getWinrateClass(wrTotal);
 
     const container = createDivision([this.prefixId + "_winrate"]);
-    const winrateContainer = createDivision(
+    const winrateContainer = createDivision([]);
+    winrateContainer.style.display = "flex";
+    winrateContainer.style.justifyContent = "space-between";
+    const winrateLabel = createDivision(["list_deck_winrate"], "Overall:");
+    winrateLabel.style.margin = "0 auto 0 0";
+    winrateContainer.appendChild(winrateLabel);
+    const wrSpan = `<span class="${colClass}_bright">${formatPercent(total)}</span>`;
+    const winrateDiv = createDivision(
       ["list_deck_winrate"],
-      `${wins}:${losses} (<span class="${colClass}_bright">${Math.round(
-        wrTotal * 100
-      )}%</span>)`
+      `${wins}:${losses} (${wrSpan})`
     );
+    winrateDiv.title = `${wins} matches won : ${losses} matches lost`;
+    winrateDiv.style.margin = "0 0 0 auto";
+    winrateContainer.appendChild(winrateDiv);
     container.appendChild(winrateContainer);
 
-    const matchTimeContainer = createDivision(
-      ["list_match_time", "list_match_time_top"],
-      toMMSS(duration)
-    );
+    const matchTimeContainer = createDivision();
+    matchTimeContainer.style.display = "flex";
+    matchTimeContainer.style.justifyContent = "space-between";
+    const timeLabel = createDivision(["list_match_time"], "Duration:");
+    timeLabel.style.margin = "0 auto 0 0";
+    matchTimeContainer.appendChild(timeLabel);
+    const timeDiv = createDivision(["list_match_time"], toMMSS(duration));
+    timeDiv.title = toDDHHMMSS(duration);
+    timeDiv.style.margin = "0 0 0 auto";
+    matchTimeContainer.appendChild(timeDiv);
     container.appendChild(matchTimeContainer);
 
-    let curveMax;
-
+    // Frequent Matchups
+    const frequencySort = (a, b) => b.wins + b.losses - a.wins - a.losses;
     // Archetypes
-    const jCont = $(container);
-
     let tagsWinrates = [...tags];
-    tagsWinrates.sort((a, b) => b.wins + b.losses - a.wins - a.losses);
+    tagsWinrates.sort(frequencySort);
     tagsWinrates = tagsWinrates.slice(0, 5);
-    curveMax = 0;
-    tagsWinrates.forEach(wr => {
-      curveMax = Math.max(curveMax, wr.wins || 0, wr.losses || 0);
-    });
+    const curveMaxTags = Math.max(
+      ...tagsWinrates.map(cwr => Math.max(cwr.wins || 0, cwr.losses || 0)),
+      0
+    );
     tagsWinrates.sort(compare_winrates);
-
-    let curveTags = $('<div class="mana_curve"></div>');
-    let numbersTags = $('<div class="mana_curve_costs"></div>');
-
-    tagsWinrates.forEach(cwr => {
-      if (
-        tagsWinrates.length < 15 ||
-        (cwr.wins + cwr.losses > 1 && tagsWinrates.length > 15)
-      ) {
-        curveTags.append(
-          $(
-            `<div class="mana_curve_column back_green" style="height: ${(cwr.wins /
-              curveMax) *
-              100}%"></div>`
-          )
-        );
-        curveTags.append(
-          $(
-            `<div class="mana_curve_column back_red" style="height: ${(cwr.losses /
-              curveMax) *
-              100}%"></div>`
-          )
-        );
-
-        let curveNumber = $(`<div class="mana_curve_column_number">
-                  ${cwr.wins}/${cwr.losses}
-                  <div style="margin: 0 auto !important" class=""></div>
-              </div>`);
-
-        let colors = cwr.colors;
-        curveNumber.append(
-          $(
-            `<div class="mana_curve_tag" style="background-color: ${getTagColor(
-              cwr.tag
-            )};">${cwr.tag}</div>`
-          )
-        );
-        colors.forEach(function(color) {
-          curveNumber.append(
-            $(
-              `<div style="margin: 0 auto !important" class="mana_s16 mana_${
-                mana[color]
-              }"></div>`
-            )
-          );
-        });
-        numbersTags.append(curveNumber);
-      }
-    });
-
-    jCont.append(curveTags, numbersTags);
-
     // Colors
     let colorsWinrates = [...colors];
-    colorsWinrates.sort((a, b) => b.wins + b.losses - a.wins - a.losses);
+    colorsWinrates.sort(frequencySort);
     colorsWinrates = colorsWinrates.slice(0, 5);
-    curveMax = 0;
-    colorsWinrates.forEach(wr => {
-      curveMax = Math.max(curveMax, wr.wins || 0, wr.losses || 0);
-    });
+    const curveMax = Math.max(
+      ...colorsWinrates.map(cwr => Math.max(cwr.wins || 0, cwr.losses || 0)),
+      0
+    );
     colorsWinrates.sort(compare_winrates);
 
-    let curve = $('<div class="mana_curve"></div>');
-    let numbers = $('<div class="mana_curve_costs"></div>');
+    if (curveMaxTags || curveMax) {
+      const chartTitle = createDivision(["ranks_history_title"]);
+      chartTitle.innerHTML = "Frequent Matchups";
+      chartTitle.style.marginTop = "24px";
+      container.appendChild(chartTitle);
+    }
 
-    colorsWinrates.forEach(cwr => {
-      if (
-        colorsWinrates.length < 15 ||
-        (cwr.wins + cwr.losses > 1 && colorsWinrates.length > 15)
-      ) {
-        curve.append(
-          $(
-            `<div class="mana_curve_column back_green" style="height: ${(cwr.wins /
-              curveMax) *
-              100}%"></div>`
-          )
-        );
-        curve.append(
-          $(
-            `<div class="mana_curve_column back_red" style="height: ${(cwr.losses /
-              curveMax) *
-              100}%"></div>`
-          )
-        );
+    const appendChart = (winrates, _curveMax, showTags) => {
+      const curve = createDivision(["mana_curve"]);
+      const numbers = createDivision(["mana_curve_costs"]);
 
-        let curveNumber = $(`<div class="mana_curve_column_number">
-                  ${cwr.wins}/${cwr.losses}
-                  <div style="margin: 0 auto !important" class=""></div>
-              </div>`);
+      winrates.forEach(cwr => {
+        const winCol = createDivision(["mana_curve_column", "back_green"]);
+        winCol.style.height = formatPercent(cwr.wins / _curveMax);
+        curve.appendChild(winCol);
 
-        let colors = cwr.colors;
-        colors.forEach(function(color) {
-          curveNumber.append(
-            $(
-              `<div style="margin: 0 auto !important" class="mana_s16 mana_${
-                mana[color]
-              }"></div>`
-            )
-          );
+        const lossCol = createDivision(["mana_curve_column", "back_red"]);
+        lossCol.style.height = formatPercent(cwr.losses / _curveMax);
+        curve.appendChild(lossCol);
+
+        const curveNumber = createDivision(["mana_curve_column_number"]);
+        curveNumber.innerHTML = `${cwr.wins}/${cwr.losses}`;
+
+        if (showTags) {
+          const curveTag = createDivision(["mana_curve_tag"], cwr.tag);
+          curveTag.style.backgroundColor = getTagColor(cwr.tag);
+          curveNumber.appendChild(curveTag);
+        }
+
+        cwr.colors.forEach(color => {
+          const tagColor = createDivision(["mana_s16", "mana_" + mana[color]]);
+          tagColor.style.margin = "margin: 0 auto !important";
+          curveNumber.appendChild(tagColor);
         });
         numbers.append(curveNumber);
-      }
-    });
+      });
 
-    jCont.append(curve, numbers);
+      container.appendChild(curve);
+      container.appendChild(numbers);
+    };
+
+    // Archetypes
+    if (curveMaxTags) {
+      appendChart(tagsWinrates, curveMaxTags, true);
+    }
+
+    // Colors
+    if (curveMax) {
+      appendChart(colorsWinrates, curveMax, false);
+    }
 
     return container;
   }
