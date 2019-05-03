@@ -962,6 +962,11 @@ let settingsLogUri = settingsStore.get("logUri");
 if (settingsLogUri) {
   logUri = settingsLogUri;
 }
+
+if(typeof process.env.LOGFILE !== 'undefined') {
+    logUri = process.env.LOGFILE;
+}
+
 console.log(logUri);
 const ArenaLogWatcher = require("./arena-log-watcher");
 
