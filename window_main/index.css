@@ -821,6 +821,7 @@ a:hover {
     font-family: var(--sub-font-name);
     color: #FAE5D2;
     font-weight: 300;
+    text-align: right;
 }
 
 .list_deck_record {
