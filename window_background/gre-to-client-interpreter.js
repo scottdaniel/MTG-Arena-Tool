@@ -285,7 +285,7 @@ annotationFunctions.AnnotationType_ResolutionStart = function(ann, details) {
       false,
       `${actionLogGenerateLink(
         affected.objectSourceGrpId
-      )} 's ${actionLogGenerateAbilityLink(grpId)}`
+      )}'s ${actionLogGenerateAbilityLink(grpId)}`
     );
   }
 };
