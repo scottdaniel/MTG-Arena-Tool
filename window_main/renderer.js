@@ -31,6 +31,7 @@ const remote = require("electron").remote;
 
 require('time-elements');
 
+const FilterPanel = require("./FilterPanel.js");
 const StatsPanel = require("./StatsPanel.js");
 const open_home_tab = require("./home").open_home_tab;
 const tournamentOpen = require("./tournaments").tournamentOpen;
