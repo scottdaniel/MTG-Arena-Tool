@@ -60,8 +60,6 @@ var orderedCardTypesDesc = [
   "Planeswalkers"
 ];
 var orderedCardRarities = ["common", "uncommon", "rare", "mythic"];
-var orderedColorCodes = ["w", "u", "b", "r", "g", "c"];
-var orderedColorCodesCommon = ["w", "u", "b", "r", "g"];
 var orderedManaColors = [
   "#E7CA8E",
   "#AABEDF",
@@ -220,6 +218,11 @@ function getTagColor(tag) {
   if (tc) return tc;
 
   return "#FAE5D2";
+}
+
+//
+function setTagColor(tag, color) {
+  tags_colors[tag] = color;
 }
 
 //
