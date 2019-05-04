@@ -45,7 +45,7 @@ if (!remote.app.isPackaged) {
   });
 }
 
-require('time-elements');
+require("time-elements");
 
 const FilterPanel = require("./FilterPanel.js");
 const StatsPanel = require("./StatsPanel.js");
@@ -297,7 +297,10 @@ ipc.on("set_player_data", (event, _data) => {
     rankOffset = get_rank_index(constructed.rank, constructed.tier);
     let constructedRankIcon = $$(".top_constructed_rank")[0];
     constructedRankIcon.style.backgroundPosition = rankOffset * -48 + "px 0px";
-    constructedRankIcon.setAttribute("title", constructed.rank + " " + constructed.tier);
+    constructedRankIcon.setAttribute(
+      "title",
+      constructed.rank + " " + constructed.tier
+    );
 
     let limited = playerData.rank.limited;
     rankOffset = get_rank_index(limited.rank, limited.tier);
@@ -1070,6 +1073,40 @@ ipc.on("tou_set", function(event, arg) {
 });
 
 //
+function makeResizable(div) {
+  var m_pos;
+
+  let resize = function(e) {
+    var parent = div.parentNode;
+    var dx = m_pos - e.x;
+    console.log("mousemove", m_pos, e.x, dx, parent.style.width);
+    m_pos = e.x;
+    let newWidth = Math.max(10, parseInt(parent.style.width) + dx);
+    parent.style.width = `${newWidth}px`;
+    parent.style.flex = `0 0 ${newWidth}px`;
+  };
+
+  div.addEventListener(
+    "mousedown",
+    event => {
+      console.log("mousedown", event);
+      m_pos = event.x;
+      document.addEventListener("mousemove", resize, false);
+    },
+    false
+  );
+
+  document.addEventListener(
+    "mouseup",
+    event => {
+      console.log("mouseup", event);
+      document.removeEventListener("mousemove", resize, false);
+    },
+    false
+  );
+}
+
+//
 function drawDeck(div, deck, showWildcards = false) {
   var unique = makeId(4);
   div.html("");
@@ -1089,7 +1126,15 @@ function drawDeck(div, deck, showWildcards = false) {
     }
 
     if (card.quantity > 0) {
-      addCardTile(grpId, unique + "a", card.quantity, div, showWildcards, deck, false);
+      addCardTile(
+        grpId,
+        unique + "a",
+        card.quantity,
+        div,
+        showWildcards,
+        deck,
+        false
+      );
     }
 
     prevIndex = grpId;
@@ -1103,7 +1148,15 @@ function drawDeck(div, deck, showWildcards = false) {
         var grpId = card.id;
         //var type = cardsDb.get(grpId).type;
         if (card.quantity > 0) {
-          addCardTile(grpId, unique + "b", card.quantity, div, showWildcards, deck, true);
+          addCardTile(
+            grpId,
+            unique + "b",
+            card.quantity,
+            div,
+            showWildcards,
+            deck,
+            true
+          );
         }
       });
     }
@@ -2374,7 +2427,7 @@ function open_settings(openSection) {
       "</div>"
   );
 
-  about.append('<div class="message_updates green">'+ updateState +'.</div>');
+  about.append('<div class="message_updates green">' + updateState + ".</div>");
   button = $(
     '<div class="button_simple centered update_link_about">Check for updates</div>'
   );
