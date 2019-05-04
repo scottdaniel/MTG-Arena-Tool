@@ -79,19 +79,19 @@ class StatsPanel {
       container.appendChild(chartTitle);
     }
 
+    const getStyleHeight = frac => Math.round(frac * 100) + "%";
+
     const appendChart = (winrates, _curveMax, showTags) => {
       const curve = createDivision(["mana_curve"]);
       const numbers = createDivision(["mana_curve_costs"]);
 
       winrates.forEach(cwr => {
         const winCol = createDivision(["mana_curve_column", "back_green"]);
-        winCol.style.height = formatPercent(cwr.wins / _curveMax);
-        winCol.title = `${cwr.wins} matches won`;
+        winCol.style.height = getStyleHeight(cwr.wins / _curveMax);
         curve.appendChild(winCol);
 
         const lossCol = createDivision(["mana_curve_column", "back_red"]);
-        lossCol.style.height = formatPercent(cwr.losses / _curveMax);
-        lossCol.title = `${cwr.losses} matches lost`;
+        lossCol.style.height = getStyleHeight(cwr.losses / _curveMax);
         curve.appendChild(lossCol);
 
         const curveNumber = createDivision(["mana_curve_column_number"]);
