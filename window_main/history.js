@@ -143,7 +143,7 @@ function open_history_tab(loadMore, _filters = {}) {
   if (loadHistory === 0) {
     let historyTop = createDivision(["history_top"]);
 
-    const eventFilter = { eventId: filters.eventId };
+    const eventFilter = { eventId: filters.eventId, date: filters.date };
     const matchesInEvent = new Aggregator(eventFilter);
 
     const handler = selected => {
