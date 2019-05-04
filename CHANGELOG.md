@@ -1,3 +1,10 @@
+## 2.3.0 (2019-05-04)
+
+* electron-unhandled ([b91f83a](https://github.com/Manuel-777/MTG-Arena-Tool/commit/b91f83a)), closes [#218](https://github.com/Manuel-777/MTG-Arena-Tool/issues/218)
+* Make stats column resizable ([71c4119](https://github.com/Manuel-777/MTG-Arena-Tool/commit/71c4119))
+
+
+
 ## <small>2.2.28 (2019-05-04)</small>
 
 * Aggregator logic component ([2aaa81b](https://github.com/Manuel-777/MTG-Arena-Tool/commit/2aaa81b))
