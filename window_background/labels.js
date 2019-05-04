@@ -179,33 +179,6 @@ function onLabelClientToMatchServiceMessageTypeClientToGREMessage(entry, json) {
   }
 }
 
-function onLabelInEventGetPlayerCourse(entry, json) {
-  if (!json) return;
-
-  if (json.Id != "00000000-0000-0000-0000-000000000000") {
-    json.date = parseWotcTime(entry.timestamp);
-    json._id = json.Id;
-    delete json.Id;
-
-    if (json.CourseDeck) {
-      json.CourseDeck.colors = get_deck_colors(json.CourseDeck);
-      //json.date = timestamp();
-      //console.log(json.CourseDeck, json.CourseDeck.colors)
-      httpApi.httpSubmitCourse(json);
-      saveCourse(json);
-    }
-    select_deck(json);
-  }
-}
-
-function onLabelInEventGetPlayerCourseV2(entry, json) {
-  if (!json) return;
-  if (json.CourseDeck) {
-    json.CourseDeck = convert_deck_from_v3(json.CourseDeck);
-  }
-  onLabelInEventGetPlayerCourse(entry, json);
-}
-
 function onLabelInEventGetCombinedRankInfo(entry, json) {
   if (!json) return;
 
@@ -283,13 +256,7 @@ function onLabelInEventGetPlayerCourses(entry, json) {
   json.forEach(course => {
     if (course.CurrentEventState != "PreMatch") {
       if (course.CourseDeck != null) {
-        if (decks.index.indexOf(course.CourseDeck.id) == -1) {
-          decks.index.push(course.CourseDeck.id);
-        }
-        decks[course.CourseDeck.id] = course.CourseDeck;
-        updateCustomDecks();
-        store.set("decks_index", decks.index);
-        store.set("decks." + course.CourseDeck.id, course.CourseDeck);
+        addCustomDeck(course.CourseDeck)
       }
     }
   });
@@ -303,6 +270,34 @@ function onLabelInEventGetPlayerCoursesV2(entry, json) {
     }
   });
   onLabelInEventGetPlayerCourses(entry, json);
+}
+
+function onLabelInEventGetPlayerCourse(entry, json) {
+  if (!json) return;
+
+  if (json.Id != "00000000-0000-0000-0000-000000000000") {
+    json.date = parseWotcTime(entry.timestamp);
+    json._id = json.Id;
+    delete json.Id;
+
+    if (json.CourseDeck) {
+      json.CourseDeck.colors = get_deck_colors(json.CourseDeck);
+      addCustomDeck(json.CourseDeck);
+      //json.date = timestamp();
+      //console.log(json.CourseDeck, json.CourseDeck.colors)
+      httpApi.httpSubmitCourse(json);
+      saveCourse(json);
+    }
+    select_deck(json);
+  }
+}
+
+function onLabelInEventGetPlayerCourseV2(entry, json) {
+  if (!json) return;
+  if (json.CourseDeck) {
+    json.CourseDeck = convert_deck_from_v3(json.CourseDeck);
+  }
+  onLabelInEventGetPlayerCourse(entry, json);
 }
 
 function onLabelInDeckUpdateDeck(entry, json) {

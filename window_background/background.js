@@ -1458,6 +1458,17 @@ function getNameBySeat(seat) {
 }
 
 //
+function addCustomDeck(customDeck) {
+  if (decks.index.indexOf(customDeck.id) == -1) {
+    decks.index.push(customDeck.id);
+  }
+  decks[customDeck.id] = customDeck;
+  updateCustomDecks();
+  store.set("decks_index", decks.index);
+  store.set("decks." + customDeck.id, customDeck);
+}
+
+//
 function updateCustomDecks() {
   decks.index.forEach(_deckid => {
     let _deck = decks[_deckid];
