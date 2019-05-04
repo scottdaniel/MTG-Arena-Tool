@@ -86,12 +86,12 @@ class StatsPanel {
       winrates.forEach(cwr => {
         const winCol = createDivision(["mana_curve_column", "back_green"]);
         winCol.style.height = formatPercent(cwr.wins / _curveMax);
-        winCol.title = `${wins} matches won`;
+        winCol.title = `${cwr.wins} matches won`;
         curve.appendChild(winCol);
 
         const lossCol = createDivision(["mana_curve_column", "back_red"]);
         lossCol.style.height = formatPercent(cwr.losses / _curveMax);
-        lossCol.title = `${losses} matches lost`;
+        lossCol.title = `${cwr.losses} matches lost`;
         curve.appendChild(lossCol);
 
         const curveNumber = createDivision(["mana_curve_column_number"]);
@@ -101,7 +101,7 @@ class StatsPanel {
         }
         const colClass = getWinrateClass(winRate);
         curveNumber.innerHTML = `<span class="${colClass}_bright">${formatPercent(winRate)}</span>`;
-        curveNumber.title = `${wins} matches won : ${losses} matches lost`;
+        curveNumber.title = `${cwr.wins} matches won : ${cwr.losses} matches lost`;
 
         if (showTags) {
           const curveTag = createDivision(["mana_curve_tag"], cwr.tag);
