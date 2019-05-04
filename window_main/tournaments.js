@@ -17,6 +17,7 @@ global
   playerData,
   timestamp,
   toHHMMSS,
+  urlDecode,
   userName,
 */
 
@@ -285,12 +286,12 @@ function showTournamentStarted(mainDiv, tou) {
     if (tou.state !== 4) {
       $(
         `<div class="tou_opp"><span>On MTGA: </span><span style="margin-left: 10px; color: rgb(250, 229, 210);">${
-          tou.current_opponent
+          urlDecode(tou.current_opponent)
         }</span><div class="copy_button copy_mtga"></div></div>`
       ).appendTo(mainDiv);
       $(
         `<div class="tou_opp"><span>On Discord: </span><span style="margin-left: 10px; color: rgb(250, 229, 210);">${
-          tou.current_opponent_discord
+          urlDecode(tou.current_opponent_discord)
         }</span><div class="copy_button copy_discord"></div></div>`
       ).appendTo(mainDiv);
       $(

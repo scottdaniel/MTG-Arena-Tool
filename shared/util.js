@@ -2376,6 +2376,11 @@ function stripTags(html) {
 }
 
 //
+function urlDecode(url) {
+  return decodeURIComponent(url.replace(/\+/g, ' '));
+}
+
+//
 function makeId(length) {
   var ret = "";
   var possible =
