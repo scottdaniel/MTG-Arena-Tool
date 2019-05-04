@@ -320,12 +320,12 @@ function showTournamentStarted(mainDiv, tou) {
 
     $(".copy_mtga").click(() => {
       pop("Copied to clipboard", 1000);
-      ipc_send("set_clipboard", tou.current_opponent);
+      ipc_send("set_clipboard", urlDecode(tou.current_opponent));
     });
 
     $(".copy_discord").click(() => {
       pop("Copied to clipboard", 1000);
-      ipc_send("set_clipboard", tou.current_opponent_discord);
+      ipc_send("set_clipboard", urlDecode(tou.current_opponent_discord));
     });
   }
 
