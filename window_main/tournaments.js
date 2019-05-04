@@ -92,20 +92,23 @@ function tournamentOpen(t) {
     state = "";
     stateClockInterval = window.setInterval(() => {
       let tst = timestamp();
-      $$(".state_clock")[0].innerHTML =
-        "Registration begin in " + toHHMMSS(tst - tou.starts);
+      let clockDiv = $$(".state_clock")[0];
+      if (clockDiv == undefined) clearInterval(stateClockInterval);
+      else
+        clockDiv.innerHTML =
+          "Registration begin in " + toHHMMSS(tst - tou.starts);
     }, 1000);
   }
   if (tou.state == 0) {
     state = "";
     stateClockInterval = window.setInterval(() => {
       let tst = timestamp();
-      if (joined) {
-        $$(".state_clock")[0].innerHTML =
-          "Starts in " + toHHMMSS(roundsStart - tst);
+      let clockDiv = $$(".state_clock")[0];
+      if (clockDiv == undefined) clearInterval(stateClockInterval);
+      else if (joined) {
+        clockDiv.innerHTML = "Starts in " + toHHMMSS(roundsStart - tst);
       } else {
-        $$(".state_clock")[0].innerHTML =
-          toHHMMSS(roundsStart - tst) + " left to register.";
+        clockDiv.innerHTML = toHHMMSS(roundsStart - tst) + " left to register.";
       }
     }, 1000);
   }
@@ -113,8 +116,12 @@ function tournamentOpen(t) {
     state = "";
     stateClockInterval = window.setInterval(() => {
       let tst = timestamp();
-      $$(".state_clock")[0].innerHTML = `Round ${tou.currentRound +
-        1} ends in ${toHHMMSS(roundEnd - tst)}`;
+      let clockDiv = $$(".state_clock")[0];
+      if (clockDiv == undefined) clearInterval(stateClockInterval);
+      else
+        clockDiv.innerHTML = `Round ${tou.currentRound + 1} ends in ${toHHMMSS(
+          roundEnd - tst
+        )}`;
     }, 1000);
   }
   if (tou.state == 3) {
