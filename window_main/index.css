@@ -419,6 +419,7 @@ span.top_nav_item_text {
     height: 100%;
     overflow-x: hidden;
     overflow-y: visible;
+    align-items: stretch;
 }
 
 .moving_ux {
@@ -2036,11 +2037,11 @@ a:hover {
 }
 
 .sidebar_column_l {
-    width: 30% !important;
-    max-width: 220px;
     border-width: 2px;
     border-style: none none none solid;
+    /*
     border-image: linear-gradient(to bottom, rgba(250, 229, 210, 0) 10px, rgba(250, 229, 210, 0.5) 10px, rgba(250, 229, 210, 0)) 1 100%;
+    */
 }
 
 .ranks_history {
@@ -3124,9 +3125,10 @@ a:hover {
     margin: 4px auto;
 }
 
-
-/*
-
-
-
-    */
+.dragger {
+    background-color: rgba(250, 229, 210, 0.75);
+    position: absolute;
+    width: 3px;
+    height: 100%;
+    cursor: w-resize;
+}

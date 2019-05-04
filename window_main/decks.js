@@ -13,6 +13,7 @@ global
   hideLoadingBars,
   getWinrateClass,
 	ipc_send,
+  makeResizable,
   mana,
 	open_deck,
   orderedCardRarities,
@@ -36,7 +37,8 @@ function open_decks_tab() {
     mainDiv.innerHTML = "";
 
     const wrap_r = createDivision(["wrapper_column", "sidebar_column_l"]);
-
+    wrap_r.style.width = "300px";
+    wrap_r.style.flex = "0 0 300px";
     const aggregator = new Aggregator(filters);
     const statsPanel = new StatsPanel("decks_top", aggregator.stats);
     const decks_top_winrate = statsPanel.render();
@@ -44,6 +46,10 @@ function open_decks_tab() {
     decks_top_winrate.style.flexDirection = "column";
     decks_top_winrate.style.marginTop = "16px";
     decks_top_winrate.style.padding = "12px";
+
+    let drag = createDivision(["dragger"]);
+    wrap_r.appendChild(drag);
+    makeResizable(drag);
 
     wrap_r.appendChild(decks_top_winrate);
 
@@ -266,8 +272,6 @@ function open_decks_tab() {
         deleteDeck(deck);
       }
     });
-
-    $("#ux_0").append('<div class="list_fill"></div>');
 
     $(".delete_item").hover(
       function() {

@@ -19,6 +19,7 @@ globals
   getWinrateClass,
   hideLoadingBars,
   ipc_send,
+  makeResizable,
   makeId,
   mana,
   matchesHistory,
@@ -62,6 +63,8 @@ function open_history_tab(loadMore) {
     loadHistory = 0;
 
     let wrap_r = createDivision(["wrapper_column", "sidebar_column_l"]);
+    wrap_r.style.width = "300px";
+    wrap_r.style.flex = "0 0 300px";
 
     div = createDivision(["ranks_history"]);
     div.style.padding = "12px";
@@ -80,6 +83,10 @@ function open_history_tab(loadMore) {
     wrap_l.setAttribute("id", "history_column");
 
     d = createDivision(["list_fill"]);
+
+    let drag = createDivision(["dragger"]);
+    wrap_r.appendChild(drag);
+    makeResizable(drag);
 
     wrap_r.appendChild(div);
     mainDiv.appendChild(wrap_l);
