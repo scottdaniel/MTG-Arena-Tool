@@ -23,7 +23,6 @@ global
   StatsPanel
 */
 
-const { DEFAULT_TAG } = Aggregator;
 let filters = Aggregator.getDefaultFilters();
 filters.onlyCurrentDecks = true;
 
@@ -259,7 +258,6 @@ function open_decks_tab() {
       });
 
       $("." + deck.id).on("click", function() {
-        var deck = decks[index];
         open_deck(deck, 2);
         $(".moving_ux").animate({ left: "-100%" }, 250, "easeInOutCubic");
       });
