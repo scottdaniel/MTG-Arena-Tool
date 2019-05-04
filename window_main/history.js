@@ -145,7 +145,8 @@ function open_history_tab(loadMore) {
     actuallyLoaded - begin < filteredSampleSize;
     loadHistory++
   ) {
-    var match_id = matchesHistory.matches[loadHistory];
+    const revIndex = matchesHistory.matches.length - loadHistory - 1;
+    var match_id = matchesHistory.matches[revIndex];
     var match = matchesHistory[match_id];
 
     //console.log("match: ", match_id, match);
@@ -849,20 +850,16 @@ function sort_history() {
 }
 
 function compare_matches(a, b) {
-  if (a == undefined) return -1;
-  if (b == undefined) return 1;
+  if (a === undefined) return 0;
+  if (b === undefined) return 0;
 
   a = matchesHistory[a];
   b = matchesHistory[b];
 
-  if (a == undefined) return -1;
-  if (b == undefined) return 1;
+  if (a === undefined) return 0;
+  if (b === undefined) return 0;
 
-  a = Date.parse(a.date);
-  b = Date.parse(b.date);
-  if (a < b) return 1;
-  if (a > b) return -1;
-  return 0;
+  return Date.parse(a.date) - Date.parse(b.date);
 }
 
 module.exports = { open_history_tab: open_history_tab };

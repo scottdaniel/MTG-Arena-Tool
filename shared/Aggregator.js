@@ -152,7 +152,7 @@ class Aggregator {
         this._eventIds.push(match.eventId);
         eventSet.add(match.eventId);
       }
-      if (match.playerDeck && !(match.playerDeck.id in deckMap)) {
+      if (match.playerDeck) {
         deckMap[match.playerDeck.id] = match.playerDeck;
       }
       // some of the data is wierd. Games which last years or have no data.
