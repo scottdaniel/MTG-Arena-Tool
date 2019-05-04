@@ -6,9 +6,9 @@ global
 	decks,
   economyHistory,
   FilterPanel,
+  formatPercent,
   get_deck_missing,
   getBoosterCountEstimate,
-	getDeckWinrate,
   getReadableFormat,
   hideLoadingBars,
   getWinrateClass,
@@ -62,7 +62,16 @@ function open_decks_tab() {
     decks_top.classList.add("decks_top");
 
     const handler = selected => {
-      filters = { ...filters, ...selected };
+      if (selected.tag) {
+        // tag resets colors
+        filters = {
+          ...filters,
+          colors: Aggregator.getDefaultColorFilter(),
+          ...selected
+        };
+      } else {
+        filters = { ...filters, ...selected };
+      }
       open_decks_tab();
     };
     const tags = Aggregator.gatherTags(decks);
@@ -197,31 +206,31 @@ function open_decks_tab() {
         flb.appendChild(d);
       });
 
-      var wr = getDeckWinrate(deck.id, deck.lastUpdated);
-
-      if (wr != 0) {
+      const dwr = aggregator.deckWinrates[deck.id];
+      if (dwr && dwr.total > 0) {
         var d = document.createElement("div");
         d.classList.add("list_deck_winrate");
 
-        let colClass = getWinrateClass(wr.total);
-        d.innerHTML = `${wr.wins}:${
-          wr.losses
-        } <span class="${colClass}_bright">(${Math.round(
-          wr.total * 100
-        )}%)</span>`;
+        let colClass = getWinrateClass(dwr.winrate);
+        d.innerHTML = `${dwr.wins}:${
+          dwr.losses
+        } <span class="${colClass}_bright">(${formatPercent(dwr.winrate)})</span>`;
+        d.title = `${dwr.wins} matches won : ${dwr.losses} matches lost`;
         flr.appendChild(d);
 
         d = document.createElement("div");
         d.classList.add("list_deck_winrate");
         d.style.opacity = 0.6;
 
-        colClass = getWinrateClass(wr.lastEdit);
-        if (wr.lastEdit == 0) {
-          d.innerHTML = `Since last edit: -</span>`;
+        d.innerHTML = "Since last edit: ";
+        const drwr = aggregator.deckRecentWinrates[deck.id];
+        if (drwr && drwr.total > 0) {
+          colClass = getWinrateClass(drwr.winrate);
+          d.innerHTML += `<span class="${colClass}_bright">${formatPercent(drwr.winrate)}</span>`;
+          d.title = `${drwr.wins} matches won : ${drwr.losses} matches lost`;
         } else {
-          d.innerHTML = `Since last edit: <span class="${colClass}_bright">${Math.round(
-            wr.lastEdit * 100
-          )}%</span>`;
+          d.innerHTML += "<span>--</span>";
+          d.title = "no data yet";
         }
         flr.appendChild(d);
       }
