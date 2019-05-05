@@ -6,6 +6,7 @@ const {
   app,
   globalShortcut,
   Menu,
+  MenuItem,
   Tray,
   clipboard
 } = require("electron");

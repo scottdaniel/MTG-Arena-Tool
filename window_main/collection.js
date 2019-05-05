@@ -5,6 +5,7 @@ global
   cards,
   cardsDb,
   cardsNew,
+  cardSize,
   collectionSortSet,
   collectionSortName,
   collectionSortCmc,
@@ -17,11 +18,12 @@ global
   get_collection_stats,
   get_set_scryfall,
   hideLoadingBars,
-  orderedColorCodesCommon,
-  setsList,
-  cardSize,
-  insertAfter,
   ipc_send,
+  orderedColorCodesCommon,
+  remote,
+  setsList,
+  Menu,
+  MenuItem,
   shell
 */
 let collectionPage = 0;
@@ -883,6 +885,8 @@ function printCards() {
       );
     });
 
+    addCardMenu(img, card);
+
     div.appendChild(cardDiv);
   }
 
@@ -945,6 +949,28 @@ function printCards() {
   setTimeout(() => {
     mainDiv.removeAttribute("style");
   }, 1000);
+}
+
+function addCardMenu(div, card) {
+  let arenaCode = `1 ${card.name} (${setsList[card.set].arenacode}) ${
+    card.cid
+  }`;
+  div.addEventListener(
+    "contextmenu",
+    e => {
+      e.preventDefault();
+      let menu = new Menu();
+      let menuItem = new MenuItem({
+        label: "Copy Arena code",
+        click: () => {
+          remote.clipboard.writeText(arenaCode);
+        }
+      });
+      menu.append(menuItem);
+      menu.popup(remote.getCurrentWindow());
+    },
+    false
+  );
 }
 
 //

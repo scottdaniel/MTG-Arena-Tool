@@ -45,6 +45,9 @@ if (!remote.app.isPackaged) {
   });
 }
 
+const Menu = remote.Menu;
+const MenuItem = remote.MenuItem;
+
 require("time-elements");
 
 const FilterPanel = require("./FilterPanel.js");
