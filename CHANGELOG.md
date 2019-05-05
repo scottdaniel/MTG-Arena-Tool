@@ -1,3 +1,18 @@
+## 2.4.0 (2019-05-05)
+
+* Aggregator upgrades ([90414a0](https://github.com/Manuel-777/MTG-Arena-Tool/commit/90414a0))
+* decks page upgrades ([54ca85e](https://github.com/Manuel-777/MTG-Arena-Tool/commit/54ca85e))
+* dependent history filters respect date ([4ed9a2a](https://github.com/Manuel-777/MTG-Arena-Tool/commit/4ed9a2a))
+* FilterPanel upgrades ([4a6f0b4](https://github.com/Manuel-777/MTG-Arena-Tool/commit/4a6f0b4))
+* history.compare_matches mostly preserves matchesHistory.matches default order ([b08a31c](https://github.com/Manuel-777/MTG-Arena-Tool/commit/b08a31c))
+* Menu to copy arena code ([22366a5](https://github.com/Manuel-777/MTG-Arena-Tool/commit/22366a5))
+* ranked icons link to history page ([c376413](https://github.com/Manuel-777/MTG-Arena-Tool/commit/c376413))
+* StatsPanel uses updated Aggregator stats ([47c21dc](https://github.com/Manuel-777/MTG-Arena-Tool/commit/47c21dc))
+* travis mark builds as prerelease ([25fe10b](https://github.com/Manuel-777/MTG-Arena-Tool/commit/25fe10b))
+* upgrade history page ([6abbb06](https://github.com/Manuel-777/MTG-Arena-Tool/commit/6abbb06))
+
+
+
 ## 2.3.0 (2019-05-04)
 
 * electron-unhandled ([b91f83a](https://github.com/Manuel-777/MTG-Arena-Tool/commit/b91f83a)), closes [#218](https://github.com/Manuel-777/MTG-Arena-Tool/issues/218)
