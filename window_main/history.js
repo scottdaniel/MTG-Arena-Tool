@@ -37,16 +37,51 @@ globals
 */
 
 const RANKS = ["Bronze", "Silver", "Gold", "Platinum", "Diamond", "Mythic"];
-const { DEFAULT_DECK, DEFAULT_TAG } = Aggregator;
+const { DEFAULT_TAG, RANKED_CONST, RANKED_DRAFT, DATE_SEASON } = Aggregator;
 let filters = Aggregator.getDefaultFilters();
 let filteredMatches;
 
 let loadHistory = 0;
-let viewingLimitSeason = false;
 
 const autocomplete = require("../shared/autocomplete.js");
 
-function open_history_tab(loadMore) {
+function setFilters(_filters = {}) {
+  if (_filters.eventId) {
+    // clear all dependent filters
+    filters = {
+      ...Aggregator.getDefaultFilters(),
+      date: filters.date, // independent filter
+      ..._filters
+    };
+  } else if (_filters.deckId) {
+    // clear other deck filters
+    filters = {
+      ...filters,
+      tag: DEFAULT_TAG,
+      colors: Aggregator.getDefaultColorFilter(),
+      ..._filters
+    };
+  } else if (_filters.tag) {
+    // tag resets colors
+    filters = {
+      ...filters,
+      colors: Aggregator.getDefaultColorFilter(),
+      ..._filters
+    };
+  } else if (_filters.arch) {
+    // archetype resets opp colors
+    filters = {
+      ...filters,
+      oppColors: Aggregator.getDefaultColorFilter(),
+      ..._filters
+    };
+  } else {
+    // default case
+    filters = { ...filters, ..._filters };
+  }
+}
+
+function open_history_tab(loadMore, _filters = {}) {
   if (sidebarActive != 1 || decks == null) return;
 
   let allMatches;
@@ -67,17 +102,24 @@ function open_history_tab(loadMore) {
     wrap_r.style.flex = "0 0 300px";
 
     div = createDivision(["ranks_history"]);
-    div.style.padding = "12px";
+    div.style.padding = "0 12px";
+
+    setFilters(_filters);
+
+    const showingRanked =
+      filters.date === DATE_SEASON &&
+      (filters.eventId === RANKED_CONST || filters.eventId === RANKED_DRAFT);
+    if (showingRanked) {
+      const rankStats = createDivision(["ranks_stats"]);
+      renderRanksStats(rankStats);
+      rankStats.style.paddingBottom = "16px";
+      div.appendChild(rankStats);
+    }
 
     filteredMatches = new Aggregator(filters);
     const statsPanel = new StatsPanel("history_top", filteredMatches.stats);
     const historyTopWinrate = statsPanel.render();
     div.appendChild(historyTopWinrate);
-
-    const rankStats = createDivision(["ranks_stats"]);
-    rankStats.style.paddingTop = "16px";
-    renderRanksStats(rankStats);
-    div.appendChild(rankStats);
 
     let wrap_l = createDivision(["wrapper_column"]);
     wrap_l.setAttribute("id", "history_column");
@@ -108,16 +150,11 @@ function open_history_tab(loadMore) {
   if (loadHistory === 0) {
     let historyTop = createDivision(["history_top"]);
 
-    const eventFilter = { eventId: filters.eventId };
+    const eventFilter = { eventId: filters.eventId, date: filters.date };
     const matchesInEvent = new Aggregator(eventFilter);
 
     const handler = selected => {
-      filters = { ...filters, ...selected };
-      if (selected.eventId) {
-        filters.tag = DEFAULT_TAG;
-        filters.deckId = DEFAULT_DECK;
-      }
-      open_history_tab(0);
+      open_history_tab(0, selected);
     };
 
     const filterPanel = new FilterPanel(
@@ -127,9 +164,11 @@ function open_history_tab(loadMore) {
       allMatches.events,
       matchesInEvent.tags,
       matchesInEvent.decks,
+      true,
+      matchesInEvent.archs,
       true
     );
-    const historyTopFilter = filterPanel.render();
+    const historyTopFilter = filterPanel.renderTheBeastThatShallNotBeNamed();
     historyTop.appendChild(historyTopFilter);
     historyColumn.appendChild(historyTop);
   }
@@ -152,7 +191,8 @@ function open_history_tab(loadMore) {
     actuallyLoaded - begin < filteredSampleSize;
     loadHistory++
   ) {
-    var match_id = matchesHistory.matches[loadHistory];
+    const revIndex = matchesHistory.matches.length - loadHistory - 1;
+    var match_id = matchesHistory.matches[revIndex];
     var match = matchesHistory[match_id];
 
     //console.log("match: ", match_id, match);
@@ -393,7 +433,6 @@ function formatPercent(percent, precision) {
 function renderRanksStats(container) {
   /*
     globals:
-      viewingLimitSeason
       matchesHistory
       get_rank_index
       getStepsUntilNextRank
@@ -402,9 +441,14 @@ function renderRanksStats(container) {
       playerData
   */
   container.innerHTML = "";
-
+  const viewingLimitSeason = filters.eventId === RANKED_DRAFT;
   let seasonName = !viewingLimitSeason ? "constructed" : "limited";
   let switchSeasonName = viewingLimitSeason ? "constructed" : "limited";
+  let switchSeasonFilters = {
+    ...Aggregator.getDefaultFilters(),
+    date: DATE_SEASON,
+    eventId: viewingLimitSeason ? RANKED_CONST : RANKED_DRAFT
+  };
 
   let seasonToggleButton = createDivision(
     ["button_simple", "button_thin", "season_toggle"],
@@ -422,7 +466,6 @@ function renderRanksStats(container) {
 
   // Add ranks matchup history here
   let rc = matchesHistory.rankwinrates[seasonName];
-  var lastWinrate; // used later
 
   Object.values(rc).forEach(object => {
     // object is either rank win/loss data OR metadata
@@ -462,8 +505,6 @@ function renderRanksStats(container) {
     rowContainer.appendChild(rankSpecificWinrate);
 
     container.appendChild(rowContainer);
-
-    lastWinrate = wonGames / totalGames;
   });
 
   let totalWon = rc.total.w;
@@ -489,9 +530,8 @@ function renderRanksStats(container) {
   title.title = `Using ${formatPercent(totalWinrate)}% winrate`;
   container.appendChild(title);
 
-  seasonToggleButton.addEventListener("click", event => {
-    viewingLimitSeason = !viewingLimitSeason;
-    renderRanksStats(container);
+  seasonToggleButton.addEventListener("click", () => {
+    open_history_tab(0, switchSeasonFilters);
   });
 }
 
@@ -856,20 +896,16 @@ function sort_history() {
 }
 
 function compare_matches(a, b) {
-  if (a == undefined) return -1;
-  if (b == undefined) return 1;
+  if (a === undefined) return 0;
+  if (b === undefined) return 0;
 
   a = matchesHistory[a];
   b = matchesHistory[b];
 
-  if (a == undefined) return -1;
-  if (b == undefined) return 1;
+  if (a === undefined) return 0;
+  if (b === undefined) return 0;
 
-  a = Date.parse(a.date);
-  b = Date.parse(b.date);
-  if (a < b) return 1;
-  if (a > b) return -1;
-  return 0;
+  return Date.parse(a.date) - Date.parse(b.date);
 }
 
-module.exports = { open_history_tab: open_history_tab };
+module.exports = { open_history_tab, setFilters };

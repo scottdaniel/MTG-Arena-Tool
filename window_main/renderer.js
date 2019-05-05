@@ -1,5 +1,6 @@
 /*
 global
+  Aggregator,
   setsList,
   cardsDb,
   makeId,
@@ -54,7 +55,7 @@ const tournamentCreate = require("./tournaments").tournamentCreate;
 const tournamentSetState = require("./tournaments").tournamentSetState;
 const open_deck = require("./deck_details").open_deck;
 const open_decks_tab = require("./decks").open_decks_tab;
-const open_history_tab = require("./history").open_history_tab;
+const { open_history_tab, setFilters } = require("./history");
 const openExploreTab = require("./explore").openExploreTab;
 const setExploreDecks = require("./explore").setExploreDecks;
 const updateExploreCheckbox = require("./explore").updateExploreCheckbox;
@@ -64,6 +65,8 @@ const expandEvent = require("./events").expandEvent;
 
 const open_economy_tab = require("./economy").open_economy_tab;
 const set_economy_history = require("./economy").set_economy_history;
+
+const { RANKED_CONST, RANKED_DRAFT, DATE_SEASON } = Aggregator;
 
 var orderedCardTypes = ["cre", "lan", "ins", "sor", "enc", "art", "pla"];
 var orderedCardTypesDesc = [
@@ -983,6 +986,30 @@ $(document).ready(function() {
       if ($(this).hasClass("it6")) {
         sidebarActive = 6;
         open_settings(lastSettingsSection);
+      }
+      if ($(this).hasClass("it7")) {
+        sidebarActive = 1;
+        setFilters({
+          ...Aggregator.getDefaultFilters(),
+          date: DATE_SEASON,
+          eventId: RANKED_CONST,
+          rankedMode: true
+        });
+        ipc_send("request_history", 1);
+        $(this).removeClass("item_selected");
+        $(".it1").addClass("item_selected");
+      }
+      if ($(this).hasClass("it8")) {
+        sidebarActive = 1;
+        setFilters({
+          ...Aggregator.getDefaultFilters(),
+          date: DATE_SEASON,
+          eventId: RANKED_DRAFT,
+          rankedMode: true
+        });
+        ipc_send("request_history", 1);
+        $(this).removeClass("item_selected");
+        $(".it1").addClass("item_selected");
       }
     } else {
       $(".moving_ux").animate({ left: "0px" }, 250, "easeInOutCubic");
