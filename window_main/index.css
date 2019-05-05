@@ -762,14 +762,14 @@ a:hover {
 
 .decks_top {
     display: flex;
-    height: 64px;
+    min-height: 64px;
     margin: 0 16px;
     justify-content: space-between;
 }
 
 .history_top {
     display: flex;
-    height: 64px;
+    min-height: 64px;
     margin-left: 16px;
     justify-content: space-between;
 }
