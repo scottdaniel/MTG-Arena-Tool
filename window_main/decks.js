@@ -40,7 +40,7 @@ function open_decks_tab() {
     wrap_r.style.width = sidebarSize+"px";
     wrap_r.style.flex = `0 0 ${sidebarSize}px`;
     const aggregator = new Aggregator(filters);
-    const statsPanel = new StatsPanel("decks_top", aggregator.stats);
+    const statsPanel = new StatsPanel("decks_top", aggregator.stats, sidebarSize);
     const decks_top_winrate = statsPanel.render();
     decks_top_winrate.style.display = "flex";
     decks_top_winrate.style.flexDirection = "column";
@@ -49,7 +49,10 @@ function open_decks_tab() {
 
     let drag = createDivision(["dragger"]);
     wrap_r.appendChild(drag);
-    makeResizable(drag);
+    const finalCallback = width => {
+      ipc_send("save_user_settings", { right_panel_width: width });
+    };
+    makeResizable(drag, statsPanel.handleResize, finalCallback);
 
     wrap_r.appendChild(decks_top_winrate);
 
