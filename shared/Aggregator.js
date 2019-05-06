@@ -40,6 +40,7 @@ class Aggregator {
     this.filterDeck = this.filterDeck.bind(this);
     this.filterMatch = this.filterMatch.bind(this);
     this.updateFilters = this.updateFilters.bind(this);
+    this.compareDecks = this.compareDecks.bind(this);
     this.updateFilters(filters);
   }
 
@@ -199,6 +200,7 @@ class Aggregator {
     const eventSet = new Set();
     this._decks = [];
     const deckMap = {};
+    const deckLastPlayed = {};
     const deckWinrates = {};
     const deckRecentWinrates = {};
     const archSet = new Set();
@@ -214,7 +216,15 @@ class Aggregator {
         eventSet.add(match.eventId);
       }
       if (match.playerDeck) {
-        deckMap[match.playerDeck.id] = match.playerDeck;
+        const id = match.playerDeck.id;
+        let deckIsMoreRecent = true;
+        if (id in deckLastPlayed) {
+          deckIsMoreRecent = match.date > deckLastPlayed[id];
+        }
+        if (deckIsMoreRecent) {
+          deckMap[id] = match.playerDeck;
+          deckLastPlayed[id] = match.date;
+        }
       }
       // some of the data is wierd. Games which last years or have no data.
       if (match.duration && match.duration < 3600) {
@@ -301,6 +311,8 @@ class Aggregator {
         }
       }
     });
+    this.deckLastPlayed = deckLastPlayed;
+    this._eventIds.reverse();
     this._stats = {
       wins,
       losses: loss,
