@@ -29,6 +29,7 @@ globals
   setTagColor,
   showLoadingBars,
   sidebarActive,
+  sidebarSize,
   sort_decks,
   StatsPanel,
   timeSince,
@@ -85,7 +86,6 @@ function open_history_tab(loadMore, _filters = {}) {
   if (sidebarActive != 1 || decks == null) return;
 
   let allMatches;
-  sort_decks();
   hideLoadingBars();
   var mainDiv = document.getElementById("ux_0");
   var div, d;
@@ -120,6 +120,7 @@ function open_history_tab(loadMore, _filters = {}) {
     const statsPanel = new StatsPanel("history_top", filteredMatches.stats);
     const historyTopWinrate = statsPanel.render();
     div.appendChild(historyTopWinrate);
+    sort_decks(filteredMatches);
 
     let wrap_l = createDivision(["wrapper_column"]);
     wrap_l.setAttribute("id", "history_column");
