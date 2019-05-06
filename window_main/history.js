@@ -98,8 +98,8 @@ function open_history_tab(loadMore, _filters = {}) {
     loadHistory = 0;
 
     let wrap_r = createDivision(["wrapper_column", "sidebar_column_l"]);
-    wrap_r.style.width = "300px";
-    wrap_r.style.flex = "0 0 300px";
+    wrap_r.style.width = sidebarSize+"px";
+    wrap_r.style.flex = `0 0 ${sidebarSize}px`;
 
     div = createDivision(["ranks_history"]);
     div.style.padding = "0 12px";

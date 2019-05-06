@@ -37,8 +37,8 @@ function open_decks_tab() {
     mainDiv.innerHTML = "";
 
     const wrap_r = createDivision(["wrapper_column", "sidebar_column_l"]);
-    wrap_r.style.width = "300px";
-    wrap_r.style.flex = "0 0 300px";
+    wrap_r.style.width = sidebarSize+"px";
+    wrap_r.style.flex = `0 0 ${sidebarSize}px`;
     const aggregator = new Aggregator(filters);
     const statsPanel = new StatsPanel("decks_top", aggregator.stats);
     const decks_top_winrate = statsPanel.render();

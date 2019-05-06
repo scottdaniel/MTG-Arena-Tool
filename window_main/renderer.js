@@ -139,6 +139,8 @@ let tags_colors = {};
 let authToken = null;
 let discordTag = null;
 
+let sidebarSize = 200;
+
 const sha1 = require("js-sha1");
 const fs = require("fs");
 const path = require("path");
@@ -1085,6 +1087,7 @@ function makeResizable(div) {
     console.log("mousemove", m_pos, e.x, dx, parent.style.width);
     m_pos = e.x;
     let newWidth = Math.max(10, parseInt(parent.style.width) + dx);
+    sidebarSize = newWidth;
     parent.style.width = `${newWidth}px`;
     parent.style.flex = `0 0 ${newWidth}px`;
   };
