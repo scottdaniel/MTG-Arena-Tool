@@ -120,7 +120,7 @@ function open_history_tab(loadMore, _filters = {}) {
     const statsPanel = new StatsPanel("history_top", filteredMatches.stats);
     const historyTopWinrate = statsPanel.render();
     div.appendChild(historyTopWinrate);
-    sort_decks(filteredMatches);
+    sort_decks(filteredMatches.compareDecks);
 
     let wrap_l = createDivision(["wrapper_column"]);
     wrap_l.setAttribute("id", "history_column");

@@ -95,7 +95,7 @@ function open_decks_tab() {
     decks_top.appendChild(decks_top_filter);
     wrap_l.appendChild(decks_top);
 
-    sort_decks(aggregator);
+    sort_decks(aggregator.compareDecks);
     decks.filter(aggregator.filterDeck).forEach(function(deck, index) {
       var tileGrpid = deck.deckTileId;
 

@@ -2982,11 +2982,7 @@ function compare_color_winrates(a, b) {
 }
 
 //
-function sort_decks(aggregator = null) {
-  let compareFunc = compare_decks;
-  if (aggregator) {
-    compareFunc = aggregator.compareDecks;
-  }
+function sort_decks(compareFunc = compare_decks) {
   decks.sort(compareFunc);
   decks.forEach(function(deck) {
     deck.colors = [];
