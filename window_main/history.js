@@ -2,6 +2,7 @@
 globals
   addHover,
   Aggregator,
+  allMatches,
   cardsDb,
   compare_cards,
   compare_decks,
@@ -85,7 +86,6 @@ function setFilters(_filters = {}) {
 function open_history_tab(loadMore, _filters = {}) {
   if (sidebarActive != 1 || decks == null) return;
 
-  let allMatches;
   hideLoadingBars();
   var mainDiv = document.getElementById("ux_0");
   var div, d;
@@ -93,7 +93,6 @@ function open_history_tab(loadMore, _filters = {}) {
   if (loadMore <= 0) {
     loadMore = 25;
     sort_history();
-    allMatches = new Aggregator();
     mainDiv.innerHTML = "";
     loadHistory = 0;
 
@@ -172,7 +171,7 @@ function open_history_tab(loadMore, _filters = {}) {
       matchesInEvent.archs,
       true
     );
-    const historyTopFilter = filterPanel.renderTheBeastThatShallNotBeNamed();
+    const historyTopFilter = filterPanel.render();
     historyTop.appendChild(historyTopFilter);
     historyColumn.appendChild(historyTop);
   }
