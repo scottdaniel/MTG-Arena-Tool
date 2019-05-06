@@ -66,23 +66,33 @@ class FilterPanel {
     if (matches.length === 0) return deckId;
     const deck = matches[0];
 
-    let deckName = deck.name;
-    if (doesDeckStillExist(deckId)) {
-      deckName = getRecentDeckName(deckId);
+    const deckExists = doesDeckStillExist(deckId);
+
+    let deckName = deckExists ? getRecentDeckName(deckId) : deck.name;
+    let maxChars = 10;
+    if (deckExists && deck.colors) {
+      maxChars = 16 - 2 * deck.colors.length;
+    }
+
+    if (deckName.length > maxChars) {
+      deckName = `<abbr title="${deckName}">${deckName.slice(0, maxChars)}...</abbr>`;
+    }
+
+    if (deckExists) {
+      let colorsString = "";
+      if (deck.colors) {
+        deck.colors.forEach(color => {
+          colorsString += `<div class="mana_s16 mana_${
+            orderedColorCodes[color - 1]
+          }"></div>`;
+        });
+      }
+      deckName += `<div class="flex_item">${colorsString}</div>`;
     } else {
       deckName += "<small><i> (deleted)</i></small>";
     }
 
-    let colorsString = "";
-    if (deck.colors) {
-      deck.colors.forEach(color => {
-        colorsString += `<div class="mana_s16 mana_${
-          orderedColorCodes[color - 1]
-        }"></div>`;
-      });
-    }
-
-    return `${deckName}<div class="flex_item">${colorsString}</div>`;
+    return deckName;
   }
 
   render() {
