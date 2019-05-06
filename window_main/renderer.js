@@ -1079,8 +1079,9 @@ ipc.on("tou_set", function(event, arg) {
 });
 
 //
-function makeResizable(div) {
+function makeResizable(div, resizeCallback, finalCallback) {
   var m_pos;
+  let finalWidth;
 
   let resize = function(e) {
     var parent = div.parentNode;
@@ -1090,6 +1091,8 @@ function makeResizable(div) {
     sidebarSize = newWidth;
     parent.style.width = `${newWidth}px`;
     parent.style.flex = `0 0 ${newWidth}px`;
+    if (resizeCallback instanceof Function) resizeCallback(newWidth);
+    finalWidth = newWidth;
   };
 
   div.addEventListener(
@@ -1105,6 +1108,10 @@ function makeResizable(div) {
     "mouseup",
     event => {
       document.removeEventListener("mousemove", resize, false);
+      if (finalWidth && finalCallback instanceof Function) {
+        finalCallback(finalWidth);
+        finalWidth = null;
+      }
     },
     false
   );
