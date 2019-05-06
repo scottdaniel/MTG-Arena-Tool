@@ -350,14 +350,19 @@ class Aggregator {
         this._decks.push(deck);
       }
     }
-    this._decks.sort((a, b) => {
-      const aName = getRecentDeckName(a.id);
-      const aExists = doesDeckStillExist(a.id) ? 1 : 0;
-      const bName = getRecentDeckName(b.id);
-      const bExists = doesDeckStillExist(b.id) ? 1 : 0;
-      // sort by existence, then name
-      return bExists - aExists || aName.localeCompare(bName);
-    });
+    this._decks.sort(this.compareDecks);
+  }
+
+  compareDecks(a, b) {
+    const dateMax = (a, b) => (a > b) ? a : b;
+    const aDate = dateMax(this.deckLastPlayed[a.id], a.lastUpdated);
+    const bDate = dateMax(this.deckLastPlayed[b.id], b.lastUpdated);
+    if (aDate && bDate && aDate !== bDate) {
+      return new Date(bDate) - new Date(aDate);
+    }
+    const aName = getRecentDeckName(a.id);
+    const bName = getRecentDeckName(b.id);
+    return aName.localeCompare(bName);
   }
 
   get matches() {
