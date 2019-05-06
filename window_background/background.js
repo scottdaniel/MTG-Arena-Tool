@@ -1548,7 +1548,7 @@ function createMatch(arg) {
   );
 
   if (currentMatch.eventId == "DirectGame" && currentDeck) {
-    let str = JSON.stringify(currentDeck.getSave());
+    let str = currentDeck.getSave();
     httpApi.httpTournamentCheck(str, currentMatch.opponent.name, true);
   }
 
