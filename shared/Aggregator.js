@@ -97,19 +97,20 @@ class Aggregator {
   _filterDeckByColors(deck, _colors) {
     if (!deck) return true;
 
+    // All decks pass when no colors are selected
+    if (Object.values(_colors).every(val => val === false)) return true;
+
+    // Normalize deck colors into matching data format
+    let deckColorCodes = Aggregator.getDefaultColorFilter();
     if (deck.colors instanceof Array) {
-      const deckColorCodes = deck.colors.map(i => orderedColorCodes[i - 1]);
-      for (const code in _colors) {
-        if (_colors[code]) {
-          if (!deckColorCodes.includes(code)) return false;
-        }
-      }
+      deck.colors.forEach(i => (deckColorCodes[orderedColorCodes[i - 1]] = true));
     } else if (deck.colors instanceof Object) {
-      for (const code in _colors) {
-        if (_colors[code] && code in deck.colors) {
-          if (!deckColorCodes.includes(code)) return false;
-        }
-      }
+      deckColorCodes = deck.colors;
+    }
+
+    // If at least one color is selected, deck must match exactly
+    for (const code in _colors) {
+      if (_colors[code] !== deckColorCodes[code]) return false;
     }
 
     return true;
