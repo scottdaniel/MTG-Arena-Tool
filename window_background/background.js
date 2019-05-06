@@ -120,7 +120,8 @@ const defaultCfg = {
     overlay_ontop: true,
     export_format: "$Name,$Count,$Rarity,$SetName,$Collector",
     back_color: "rgba(0,0,0,0.3)",
-    back_url: ""
+    back_url: "",
+    right_panel_width: 200
   },
   economy_index: [],
   economy: [],

@@ -597,6 +597,7 @@ ipc.on("set_settings", function(event, arg) {
   overlayAlpha = settings.overlay_alpha;
   overlayAlphaBack = settings.overlay_alpha_back;
   overlayScale = settings.overlay_scale;
+  sidebarSize = settings.right_panel_width;
   if (overlayScale == undefined) {
     overlayScale = 100;
   }
