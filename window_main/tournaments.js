@@ -441,6 +441,9 @@ function showTournamentStarted(mainDiv, tou) {
           d2}<div class="${p2wc} tou_match_score">${match.p2w}</div></div>`
       );
 
+      p1.css("border-left", match.check[0] ? "solid 4px #b7c89e" : "solid 4px #dd8263");
+      p2.css("border-left", match.check[1] ? "solid 4px #b7c89e" : "solid 4px #dd8263");
+
       p1.appendTo(cont);
       p2.appendTo(cont);
     });
@@ -492,6 +495,9 @@ function showTournamentStarted(mainDiv, tou) {
           `<div ${s} class="tou_match_p ${match.p2}pn">${match.p2.slice(0, -6) +
             d2}<div class="${p2wc} tou_match_score">${match.p2w}</div></div>`
         );
+
+        p1.css("border-left", match.check[0] ? "solid 4px #b7c89e" : "solid 4px #dd8263");
+        p2.css("border-left", match.check[1] ? "solid 4px #b7c89e" : "solid 4px #dd8263");
 
         p1.appendTo(cont);
         p2.appendTo(cont);
