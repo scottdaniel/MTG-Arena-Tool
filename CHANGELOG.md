@@ -1,3 +1,10 @@
+## <small>2.4.1 (2019-05-06)</small>
+
+* remember sidebar size ([22c6aad](https://github.com/Manuel-777/MTG-Arena-Tool/commit/22c6aad))
+* travis, dont make drafts ([100c013](https://github.com/Manuel-777/MTG-Arena-Tool/commit/100c013))
+
+
+
 ## 2.4.0 (2019-05-05)
 
 * Aggregator upgrades ([90414a0](https://github.com/Manuel-777/MTG-Arena-Tool/commit/90414a0))
