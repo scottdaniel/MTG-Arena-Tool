@@ -2352,7 +2352,7 @@ function open_settings(openSection) {
   });
   colorPick.spectrum("set", settings.back_color);
 
-  colorPick.on("move.spectrum", function(e, color) {
+  colorPick.on("dragstop.spectrum", function(e, color) {
     $(".main_wrapper").css("background-color", color.toRgbString());
     updateUserSettings();
   });
