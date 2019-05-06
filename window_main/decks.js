@@ -18,6 +18,7 @@ global
 	open_deck,
   orderedCardRarities,
 	sidebarActive,
+  sidebarSize,
 	sort_decks,
 	getTagColor,
   setTagColor,
@@ -30,7 +31,6 @@ filters.onlyCurrentDecks = true;
 //
 function open_decks_tab() {
   if (sidebarActive == 0 && decks != null) {
-    sort_decks();
     hideLoadingBars();
     var mainDiv = document.getElementById("ux_0");
     mainDiv.classList.add("flex_item");
@@ -98,6 +98,7 @@ function open_decks_tab() {
     decks_top.appendChild(decks_top_filter);
     wrap_l.appendChild(decks_top);
 
+    sort_decks(aggregator.compareDecks);
     decks.filter(aggregator.filterDeck).forEach(function(deck, index) {
       var tileGrpid = deck.deckTileId;
 

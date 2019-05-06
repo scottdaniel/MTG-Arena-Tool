@@ -2990,8 +2990,8 @@ function compare_color_winrates(a, b) {
 }
 
 //
-function sort_decks() {
-  decks.sort(compare_decks);
+function sort_decks(compareFunc = compare_decks) {
+  decks.sort(compareFunc);
   decks.forEach(function(deck) {
     deck.colors = [];
     deck.colors = get_deck_colors(deck);
