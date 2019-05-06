@@ -12,17 +12,29 @@ globals
 */
 
 class StatsPanel {
-  constructor(prefixId, stats) {
+  constructor(prefixId, stats, width) {
     this.prefixId = prefixId;
     this.stats = stats || {};
+    this.container = createDivision([this.prefixId + "_winrate"]);
+    this.handleResize = this.handleResize.bind(this);
+    this.handleResize(width);
     return this;
   }
 
-  render() {
-    const { winrate, wins, losses, duration, colors, tags } = this.stats;
-    const colClass = getWinrateClass(winrate);
+  handleResize(width) {
+    this.width = width || 200;
+    this.container.innerHTML = "";
+    this.doRender();
+  }
 
-    const container = createDivision([this.prefixId + "_winrate"]);
+  render() {
+    return this.container;
+  }
+
+  doRender() {
+    const { winrate, wins, losses, duration, colors, tags } = this.stats;
+    const barsToShow = Math.max(3, Math.round(this.width / 40));
+    const colClass = getWinrateClass(winrate);
     const winrateContainer = createDivision([]);
     winrateContainer.style.display = "flex";
     winrateContainer.style.justifyContent = "space-between";
@@ -37,7 +49,7 @@ class StatsPanel {
     winrateDiv.title = `${wins} matches won : ${losses} matches lost`;
     winrateDiv.style.margin = "0 0 0 auto";
     winrateContainer.appendChild(winrateDiv);
-    container.appendChild(winrateContainer);
+    this.container.appendChild(winrateContainer);
 
     const matchTimeContainer = createDivision();
     matchTimeContainer.style.display = "flex";
@@ -49,14 +61,14 @@ class StatsPanel {
     timeDiv.title = toDDHHMMSS(duration);
     timeDiv.style.margin = "0 0 0 auto";
     matchTimeContainer.appendChild(timeDiv);
-    container.appendChild(matchTimeContainer);
+    this.container.appendChild(matchTimeContainer);
 
     // Frequent Matchups
     const frequencySort = (a, b) => b.wins + b.losses - a.wins - a.losses;
     // Archetypes
     let tagsWinrates = [...tags];
     tagsWinrates.sort(frequencySort);
-    tagsWinrates = tagsWinrates.slice(0, 5);
+    tagsWinrates = tagsWinrates.slice(0, barsToShow);
     const curveMaxTags = Math.max(
       ...tagsWinrates.map(cwr => Math.max(cwr.wins || 0, cwr.losses || 0)),
       0
@@ -65,7 +77,7 @@ class StatsPanel {
     // Colors
     let colorsWinrates = [...colors];
     colorsWinrates.sort(frequencySort);
-    colorsWinrates = colorsWinrates.slice(0, 5);
+    colorsWinrates = colorsWinrates.slice(0, barsToShow);
     const curveMax = Math.max(
       ...colorsWinrates.map(cwr => Math.max(cwr.wins || 0, cwr.losses || 0)),
       0
@@ -76,7 +88,7 @@ class StatsPanel {
       const chartTitle = createDivision(["ranks_history_title"]);
       chartTitle.innerHTML = "Frequent Matchups";
       chartTitle.style.marginTop = "24px";
-      container.appendChild(chartTitle);
+      this.container.appendChild(chartTitle);
     }
 
     const getStyleHeight = frac => Math.round(frac * 100) + "%";
@@ -119,8 +131,8 @@ class StatsPanel {
         numbers.append(curveNumber);
       });
 
-      container.appendChild(curve);
-      container.appendChild(numbers);
+      this.container.appendChild(curve);
+      this.container.appendChild(numbers);
     };
 
     // Archetypes
@@ -132,8 +144,6 @@ class StatsPanel {
     if (curveMax) {
       appendChart(colorsWinrates, curveMax, false);
     }
-
-    return container;
   }
 }
 

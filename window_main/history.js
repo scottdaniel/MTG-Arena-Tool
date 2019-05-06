@@ -117,7 +117,7 @@ function open_history_tab(loadMore, _filters = {}) {
     }
 
     filteredMatches = new Aggregator(filters);
-    const statsPanel = new StatsPanel("history_top", filteredMatches.stats);
+    const statsPanel = new StatsPanel("history_top", filteredMatches.stats, sidebarSize);
     const historyTopWinrate = statsPanel.render();
     div.appendChild(historyTopWinrate);
 
@@ -128,7 +128,10 @@ function open_history_tab(loadMore, _filters = {}) {
 
     let drag = createDivision(["dragger"]);
     wrap_r.appendChild(drag);
-    makeResizable(drag);
+    const finalCallback = width => {
+      ipc_send("save_user_settings", { right_panel_width: width });
+    };
+    makeResizable(drag, statsPanel.handleResize, finalCallback);
 
     wrap_r.appendChild(div);
     mainDiv.appendChild(wrap_l);
