@@ -1084,7 +1084,6 @@ function makeResizable(div) {
   let resize = function(e) {
     var parent = div.parentNode;
     var dx = m_pos - e.x;
-    console.log("mousemove", m_pos, e.x, dx, parent.style.width);
     m_pos = e.x;
     let newWidth = Math.max(10, parseInt(parent.style.width) + dx);
     sidebarSize = newWidth;
@@ -1095,7 +1094,6 @@ function makeResizable(div) {
   div.addEventListener(
     "mousedown",
     event => {
-      console.log("mousedown", event);
       m_pos = event.x;
       document.addEventListener("mousemove", resize, false);
     },
@@ -1105,7 +1103,6 @@ function makeResizable(div) {
   document.addEventListener(
     "mouseup",
     event => {
-      console.log("mouseup", event);
       document.removeEventListener("mousemove", resize, false);
     },
     false
