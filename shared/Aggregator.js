@@ -223,7 +223,7 @@ class Aggregator {
           eventLastPlayed[match.eventId] = match.date;
         }
       }
-      if (match.playerDeck) {
+      if (match.playerDeck && match.playerDeck.id) {
         const id = match.playerDeck.id;
         let deckIsMoreRecent = true;
         if (id in deckLastPlayed) {
