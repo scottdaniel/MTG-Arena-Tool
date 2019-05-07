@@ -218,12 +218,6 @@ class FilterPanel {
 
     const showColumnC = this.archs.length || this.showOppManaFilter;
     if (showColumnC) {
-      const vsLabel = createDivision(["vs_label", "white"], "VS");
-      vsLabel.style.width = "40px";
-      vsLabel.style.margin = "0 8px";
-      vsLabel.style.textAlign = "center";
-      container.appendChild(vsLabel);
-
       const columnC = createDivision([]);
 
       if (this.archs.length) {
@@ -273,10 +267,7 @@ class FilterPanel {
       }
       container.appendChild(columnC);
     } else {
-      // spacers
-      const vsSpacer = createDivision([]);
-      vsSpacer.style.width = "40px";
-      container.appendChild(vsSpacer);
+      // spacer
       const opSpacer = createDivision([]);
       opSpacer.style.width = "180px";
       container.appendChild(opSpacer);
