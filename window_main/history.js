@@ -39,7 +39,7 @@ globals
 */
 
 const RANKS = ["Bronze", "Silver", "Gold", "Platinum", "Diamond", "Mythic"];
-const { DEFAULT_TAG, RANKED_CONST, RANKED_DRAFT, DATE_SEASON } = Aggregator;
+const { DEFAULT_DECK, RANKED_CONST, RANKED_DRAFT, DATE_SEASON } = Aggregator;
 let filters = Aggregator.getDefaultFilters();
 let filteredMatches;
 
@@ -47,39 +47,25 @@ let loadHistory = 0;
 
 const autocomplete = require("../shared/autocomplete.js");
 
-function setFilters(_filters = {}) {
-  if (_filters.eventId) {
+function setFilters(selected = {}) {
+  if (selected.eventId || selected.date) {
     // clear all dependent filters
     filters = {
       ...Aggregator.getDefaultFilters(),
-      date: filters.date, // independent filter
-      ..._filters
+      date: filters.date,
+      eventId: filters.eventId,
+      ...selected
     };
-  } else if (_filters.deckId) {
-    // clear other deck filters
+  } else if (selected.tag || selected.colors) {
+    // tag or colors filters resets deck filter
     filters = {
       ...filters,
-      tag: DEFAULT_TAG,
-      colors: Aggregator.getDefaultColorFilter(),
-      ..._filters
-    };
-  } else if (_filters.tag) {
-    // tag resets colors
-    filters = {
-      ...filters,
-      colors: Aggregator.getDefaultColorFilter(),
-      ..._filters
-    };
-  } else if (_filters.arch) {
-    // archetype resets opp colors
-    filters = {
-      ...filters,
-      oppColors: Aggregator.getDefaultColorFilter(),
-      ..._filters
+      deckId: DEFAULT_DECK,
+      ...selected
     };
   } else {
     // default case
-    filters = { ...filters, ..._filters };
+    filters = { ...filters, ...selected };
   }
 }
 
@@ -155,6 +141,11 @@ function open_history_tab(loadMore, _filters = {}) {
 
     const eventFilter = { eventId: filters.eventId, date: filters.date };
     const matchesInEvent = new Aggregator(eventFilter);
+    const matchesInPartialDeckFilters = new Aggregator({
+      ...eventFilter,
+      tag: filters.tag,
+      colors: filters.colors
+    });
 
     const handler = selected => {
       open_history_tab(0, selected);
@@ -166,7 +157,7 @@ function open_history_tab(loadMore, _filters = {}) {
       filters,
       allMatches.events,
       matchesInEvent.tags,
-      matchesInEvent.decks,
+      matchesInPartialDeckFilters.decks,
       true,
       matchesInEvent.archs,
       true,

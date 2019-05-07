@@ -72,21 +72,16 @@ function open_decks_tab() {
     decks_top.classList.add("decks_top");
 
     const handler = selected => {
-      if (selected.eventId) {
+      if (selected.eventId || selected.date) {
         // clear all dependent filters
         filters = {
           ...Aggregator.getDefaultFilters(),
-          date: filters.date, // independent filter
-          ...selected
-        };
-      } else if (selected.tag) {
-        // tag resets colors
-        filters = {
-          ...filters,
-          colors: Aggregator.getDefaultColorFilter(),
+          date: filters.date,
+          eventId: filters.eventId,
           ...selected
         };
       } else {
+        // default case
         filters = { ...filters, ...selected };
       }
       open_decks_tab();
