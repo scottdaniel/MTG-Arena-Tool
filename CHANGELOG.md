@@ -1,3 +1,30 @@
+## <small>2.4.3 (2019-05-07)</small>
+
+* Aggregator color filtering now requires exact match ([a4b833d](https://github.com/Manuel-777/MTG-Arena-Tool/commit/a4b833d))
+* Aggregator.compareDecks to apply new sort ([34705e7](https://github.com/Manuel-777/MTG-Arena-Tool/commit/34705e7))
+* archive economy entries ([681effc](https://github.com/Manuel-777/MTG-Arena-Tool/commit/681effc))
+* compute Aggregator.deckLastPlayed during aggregation ([016ecc6](https://github.com/Manuel-777/MTG-Arena-Tool/commit/016ecc6))
+* consolidate FilterPanel.render and update to layout v2 ([d153bd6](https://github.com/Manuel-777/MTG-Arena-Tool/commit/d153bd6))
+* Decks and History page use aggregator deck sort ([8a83ea6](https://github.com/Manuel-777/MTG-Arena-Tool/commit/8a83ea6))
+* FilterPanel deck short names ([8802697](https://github.com/Manuel-777/MTG-Arena-Tool/commit/8802697))
+* FilterPanel shows sample size on archetypes ([d41deab](https://github.com/Manuel-777/MTG-Arena-Tool/commit/d41deab))
+* history and decks page panel resize callbacks ([184ecaf](https://github.com/Manuel-777/MTG-Arena-Tool/commit/184ecaf))
+* neverending settings save stack ([6cca1f6](https://github.com/Manuel-777/MTG-Arena-Tool/commit/6cca1f6))
+* new user setting right_panel_width ([f75b11e](https://github.com/Manuel-777/MTG-Arena-Tool/commit/f75b11e))
+* remove debug logs ([459b69c](https://github.com/Manuel-777/MTG-Arena-Tool/commit/459b69c))
+* remove sort_decks dependency on aggregator ([451a496](https://github.com/Manuel-777/MTG-Arena-Tool/commit/451a496))
+* remove VS label from FilterPanel ([d12c244](https://github.com/Manuel-777/MTG-Arena-Tool/commit/d12c244))
+* renderer maintains global singleton allMatches ([a109054](https://github.com/Manuel-777/MTG-Arena-Tool/commit/a109054))
+* renderer.makeResizable callbacks ([bf01181](https://github.com/Manuel-777/MTG-Arena-Tool/commit/bf01181))
+* renderer.sort_decks accepts optional aggregator argument ([1f05368](https://github.com/Manuel-777/MTG-Arena-Tool/commit/1f05368))
+* Revise filter dependency logic on Decks and History pages ([00115b5](https://github.com/Manuel-777/MTG-Arena-Tool/commit/00115b5))
+* season toggle centered ([3955dfa](https://github.com/Manuel-777/MTG-Arena-Tool/commit/3955dfa))
+* show tourney checks ([6c913b4](https://github.com/Manuel-777/MTG-Arena-Tool/commit/6c913b4))
+* StatsPanel.handleResize ([2a9e618](https://github.com/Manuel-777/MTG-Arena-Tool/commit/2a9e618))
+* tournament checks bug ([686b7a6](https://github.com/Manuel-777/MTG-Arena-Tool/commit/686b7a6))
+
+
+
 ## <small>2.4.1 (2019-05-06)</small>
 
 * remember sidebar size ([22c6aad](https://github.com/Manuel-777/MTG-Arena-Tool/commit/22c6aad))
