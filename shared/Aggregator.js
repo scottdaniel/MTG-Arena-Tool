@@ -97,19 +97,20 @@ class Aggregator {
   _filterDeckByColors(deck, _colors) {
     if (!deck) return true;
 
+    // All decks pass when no colors are selected
+    if (Object.values(_colors).every(val => val === false)) return true;
+
+    // Normalize deck colors into matching data format
+    let deckColorCodes = Aggregator.getDefaultColorFilter();
     if (deck.colors instanceof Array) {
-      const deckColorCodes = deck.colors.map(i => orderedColorCodes[i - 1]);
-      for (const code in _colors) {
-        if (_colors[code]) {
-          if (!deckColorCodes.includes(code)) return false;
-        }
-      }
+      deck.colors.forEach(i => (deckColorCodes[orderedColorCodes[i - 1]] = true));
     } else if (deck.colors instanceof Object) {
-      for (const code in _colors) {
-        if (_colors[code] && code in deck.colors) {
-          if (!deckColorCodes.includes(code)) return false;
-        }
-      }
+      deckColorCodes = deck.colors;
+    }
+
+    // If at least one color is selected, deck must match exactly
+    for (const code in _colors) {
+      if (_colors[code] !== deckColorCodes[code]) return false;
     }
 
     return true;
@@ -203,7 +204,7 @@ class Aggregator {
     const deckLastPlayed = {};
     const deckWinrates = {};
     const deckRecentWinrates = {};
-    const archSet = new Set();
+    const archCounts = {};
     let wins = 0;
     let loss = 0;
     let winrate = 0;
@@ -291,7 +292,7 @@ class Aggregator {
         // tag win/loss
         if (match.tags !== undefined && match.tags.length > 0) {
           const tag = match.tags[0] || "Unknown";
-          archSet.add(tag);
+          archCounts[tag] = (archCounts[tag] || 0) + 1;
           let added = -1;
           tagsWinrates.forEach((wr, index) => {
             if (wr.tag === tag) {
@@ -340,9 +341,10 @@ class Aggregator {
     colorsWinrates.sort(compare_winrates);
     tagsWinrates.sort(compare_winrates);
 
-    const tagList = [...archSet];
-    tagList.sort();
-    this.archs = [DEFAULT_ARCH, ...tagList];
+    this.archCounts = archCounts;
+    const archList = [...Object.keys(archCounts)];
+    archList.sort();
+    this.archs = [DEFAULT_ARCH, ...archList];
 
     for (const deckId in deckMap) {
       const deck = getDeck(deckId) || deckMap[deckId];

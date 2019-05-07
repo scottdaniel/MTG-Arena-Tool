@@ -1,6 +1,7 @@
 /*
 global
   Aggregator,
+  allMatches,
 	cardsDb,
   createDivision,
 	decks,
@@ -71,14 +72,16 @@ function open_decks_tab() {
     decks_top.classList.add("decks_top");
 
     const handler = selected => {
-      if (selected.tag) {
-        // tag resets colors
+      if (selected.eventId || selected.date) {
+        // clear all dependent filters
         filters = {
-          ...filters,
-          colors: Aggregator.getDefaultColorFilter(),
+          ...Aggregator.getDefaultFilters(),
+          date: filters.date,
+          eventId: filters.eventId,
           ...selected
         };
       } else {
+        // default case
         filters = { ...filters, ...selected };
       }
       open_decks_tab();
@@ -87,8 +90,8 @@ function open_decks_tab() {
     const filterPanel = new FilterPanel(
       "decks_top",
       handler,
-      aggregator.filters,
-      [],
+      filters,
+      allMatches.events,
       tags,
       [],
       true
@@ -99,7 +102,13 @@ function open_decks_tab() {
     wrap_l.appendChild(decks_top);
 
     sort_decks(aggregator.compareDecks);
-    decks.filter(aggregator.filterDeck).forEach(function(deck, index) {
+
+    const isDeckVisible = deck =>
+      aggregator.filterDeck(deck) &&
+      (filters.eventId === Aggregator.DEFAULT_EVENT ||
+        aggregator.deckLastPlayed[deck.id]);
+
+    decks.filter(isDeckVisible).forEach(deck => {
       var tileGrpid = deck.deckTileId;
 
       if (cardsDb.get(tileGrpid).set == undefined) {
