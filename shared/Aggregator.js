@@ -204,7 +204,7 @@ class Aggregator {
     const deckLastPlayed = {};
     const deckWinrates = {};
     const deckRecentWinrates = {};
-    const archSet = new Set();
+    const archCounts = {};
     let wins = 0;
     let loss = 0;
     let winrate = 0;
@@ -292,7 +292,7 @@ class Aggregator {
         // tag win/loss
         if (match.tags !== undefined && match.tags.length > 0) {
           const tag = match.tags[0] || "Unknown";
-          archSet.add(tag);
+          archCounts[tag] = (archCounts[tag] || 0) + 1;
           let added = -1;
           tagsWinrates.forEach((wr, index) => {
             if (wr.tag === tag) {
@@ -341,9 +341,10 @@ class Aggregator {
     colorsWinrates.sort(compare_winrates);
     tagsWinrates.sort(compare_winrates);
 
-    const tagList = [...archSet];
-    tagList.sort();
-    this.archs = [DEFAULT_ARCH, ...tagList];
+    this.archCounts = archCounts;
+    const archList = [...Object.keys(archCounts)];
+    archList.sort();
+    this.archs = [DEFAULT_ARCH, ...archList];
 
     for (const deckId in deckMap) {
       const deck = getDeck(deckId) || deckMap[deckId];

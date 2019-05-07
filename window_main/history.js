@@ -169,7 +169,8 @@ function open_history_tab(loadMore, _filters = {}) {
       matchesInEvent.decks,
       true,
       matchesInEvent.archs,
-      true
+      true,
+      matchesInEvent.archCounts
     );
     const historyTopFilter = filterPanel.render();
     historyTop.appendChild(historyTopFilter);

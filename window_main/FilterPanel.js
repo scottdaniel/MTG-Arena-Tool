@@ -32,7 +32,8 @@ class FilterPanel {
     decks,
     showManaFilter,
     archs,
-    showOppManaFilter
+    showOppManaFilter,
+    archCounts
   ) {
     this.prefixId = prefixId;
     this.onFilterChange = onFilterChange;
@@ -46,18 +47,23 @@ class FilterPanel {
     this.showManaFilter = showManaFilter || false;
     this.archs = archs || [];
     this.showOppManaFilter = showOppManaFilter || false;
+    this.archCounts = archCounts;
     this.getTagString = this.getTagString.bind(this);
     this.getDeckString = this.getDeckString.bind(this);
     return this;
   }
 
-  getTagString(tag) {
+  getTagString(tag, showCount = false) {
     if (tag === DEFAULT_TAG) return tag;
     if (tag === DEFAULT_ARCH) return tag;
     const color = getTagColor(tag);
     const margins = "margin: 5px; margin-right: 30px;";
-    const style = `background-color:${color}; color: black; padding-right: 12px; ${margins}`;
-    return `<div class="deck_tag" style="${style}">${getReadableFormat(tag)}</div>`;
+    const style = `white-space: nowrap; background-color:${color}; color: black; padding-right: 12px; ${margins}`;
+    let tagString = getReadableFormat(tag);
+    if (showCount && tag in this.archCounts) {
+      tagString += ` (${this.archCounts[tag]})`;
+    }
+    return `<div class="deck_tag" style="${style}">${tagString}</div>`;
   }
 
   getDeckString(deckId) {
@@ -230,7 +236,7 @@ class FilterPanel {
             this.onFilterChange({ arch: filter }, this.filters);
           },
           this.prefixId + "_query_optag",
-          this.getTagString
+          tag => this.getTagString(tag, true)
         );
         archSelect.style.width = "180px";
         archSelect.style.marginBottom = "8px";
