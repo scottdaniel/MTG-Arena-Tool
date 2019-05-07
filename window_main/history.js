@@ -449,7 +449,7 @@ function renderRanksStats(container) {
     ["button_simple", "button_thin", "season_toggle"],
     `Show ${switchSeasonName}`
   );
-  seasonToggleButton.style.marginTop = "32px !important;";
+  seasonToggleButton.style.margin = "8px auto";
 
   container.appendChild(seasonToggleButton);
 
