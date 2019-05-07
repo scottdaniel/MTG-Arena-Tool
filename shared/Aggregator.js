@@ -4,6 +4,7 @@ globals
   compare_decks,
   doesDeckStillExist,
   getDeck,
+  getReadableEvent,
   getRecentDeckName,
   matchesHistory,
   orderedColorCodes,
@@ -41,6 +42,7 @@ class Aggregator {
     this.filterMatch = this.filterMatch.bind(this);
     this.updateFilters = this.updateFilters.bind(this);
     this.compareDecks = this.compareDecks.bind(this);
+    this.compareEvents = this.compareEvents.bind(this);
     this.updateFilters(filters);
   }
 
@@ -198,7 +200,7 @@ class Aggregator {
       .filter(this.filterMatch);
 
     this._eventIds = [];
-    const eventSet = new Set();
+    const eventLastPlayed = {};
     this._decks = [];
     const deckMap = {};
     const deckLastPlayed = {};
@@ -212,11 +214,16 @@ class Aggregator {
     const colorsWinrates = [];
     const tagsWinrates = [];
     this._matches.forEach(match => {
-      if (match.eventId && !eventSet.has(match.eventId)) {
-        this._eventIds.push(match.eventId);
-        eventSet.add(match.eventId);
+      if (match.eventId) {
+        let eventIsMoreRecent = true;
+        if (match.eventId in eventLastPlayed) {
+          eventIsMoreRecent = match.date > eventLastPlayed[match.eventId];
+        } 
+        if (eventIsMoreRecent) {
+          eventLastPlayed[match.eventId] = match.date;
+        }
       }
-      if (match.playerDeck) {
+      if (match.playerDeck && match.playerDeck.id) {
         const id = match.playerDeck.id;
         let deckIsMoreRecent = true;
         if (id in deckLastPlayed) {
@@ -313,7 +320,9 @@ class Aggregator {
       }
     });
     this.deckLastPlayed = deckLastPlayed;
-    this._eventIds.reverse();
+    this.eventLastPlayed = eventLastPlayed;
+    this._eventIds = [...Object.keys(eventLastPlayed)];
+    this._eventIds.sort(this.compareEvents);
     this._stats = {
       wins,
       losses: loss,
@@ -364,7 +373,30 @@ class Aggregator {
     }
     const aName = getRecentDeckName(a.id);
     const bName = getRecentDeckName(b.id);
-    return aName.localeCompare(bName);
+    if (aName) {
+      return aName.localeCompare(bName);
+    }
+    // a is invalid, sort b first
+    if (bName) return 1;
+    // neither valid, leave in place
+    return 0;
+  }
+
+  compareEvents(a, b) {
+    const aDate = this.eventLastPlayed[a];
+    const bDate = this.eventLastPlayed[b];
+    if (aDate && bDate && aDate !== bDate) {
+      return new Date(bDate) - new Date(aDate);
+    }
+    const aName = getReadableEvent(a);
+    const bName = getReadableEvent(b);
+    if (aName) {
+      return aName.localeCompare(bName);
+    }
+    // a is invalid, sort b first
+    if (bName) return 1;
+    // neither valid, leave in place
+    return 0;
   }
 
   get matches() {
