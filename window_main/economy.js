@@ -14,6 +14,7 @@ global
   get_set_scryfall,
   getReadableEvent,
   hideLoadingBars,
+  ipc_send,
   localDateFormat,
   setsList,
   shell
@@ -106,6 +107,7 @@ function openEconomyTab(loadMore) {
     let change = economyHistory[economyId];
 
     if (change == undefined) continue;
+    if (change.archived && change.archived == true) continue;
 
     // print out daily summaries but no sub-events
     if (
@@ -617,6 +619,28 @@ function createChangeRow(change, economyId) {
   var changeRow = createDivision([economyId, "list_economy"]);
   changeRow.appendChild(flexLeft);
   changeRow.appendChild(flexRight);
+
+  var deleteButton = document.createElement("div");
+  deleteButton.classList.add("flex_item");
+  deleteButton.classList.add(economyId + "_del");
+  deleteButton.classList.add("delete_item");
+
+  changeRow.appendChild(deleteButton);
+
+  deleteButton.addEventListener("mouseenter", () => {
+    deleteButton.style.width = "32px";
+  });
+
+  deleteButton.addEventListener("mouseleave", () => {
+    deleteButton.style.width = "4px";
+  });
+
+  deleteButton.addEventListener("click", e => {
+    e.stopPropagation();
+    ipc_send("archive_economy", economyId);
+    changeRow.style.height = "0px";
+    changeRow.style.overflow = "hidden";
+  });
 
   return changeRow;
 }

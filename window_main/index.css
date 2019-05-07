@@ -627,7 +627,7 @@ font-family:  var(--main-font-name);
 }
 
 .list_economy_awarded {
-    margin: 0 24px;
+    margin: 0 8px 0 auto;
     align-items: center;
     overflow: -webkit-paged-x;
     display: flex;
