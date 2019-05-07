@@ -373,7 +373,13 @@ class Aggregator {
     }
     const aName = getRecentDeckName(a.id);
     const bName = getRecentDeckName(b.id);
-    return aName.localeCompare(bName);
+    if (aName) {
+      return aName.localeCompare(bName);
+    }
+    // a is invalid, sort b first
+    if (bName) return 1;
+    // neither valid, leave in place
+    return 0;
   }
 
   compareEvents(a, b) {
@@ -384,7 +390,13 @@ class Aggregator {
     }
     const aName = getReadableEvent(a);
     const bName = getReadableEvent(b);
-    return aName.localeCompare(bName);
+    if (aName) {
+      return aName.localeCompare(bName);
+    }
+    // a is invalid, sort b first
+    if (bName) return 1;
+    // neither valid, leave in place
+    return 0;
   }
 
   get matches() {
