@@ -389,8 +389,10 @@ ipc.on("overlayBounds", function(event, obj) {
 //
 ipc.on("save_user_settings", function(event, settings) {
   ipc_send("show_loading");
-  loadSettings(settings);
-  store.set("settings", settings);
+  const oldSettings = store.get("settings");
+  const updated = { ...oldSettings, ...settings };
+  loadSettings(updated);
+  store.set("settings", updated);
   ipc_send("hide_loading");
 });
 
