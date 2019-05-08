@@ -158,6 +158,8 @@ function open_history_tab(_deprecated, _filters = {}) {
 
 // return val = how many rows it rendered into container
 function renderData(container, index) {
+  // for performance reasons, we leave matches order mostly alone
+  // to display most-recent-first, we use a reverse index
   const revIndex = matchesHistory.matches.length - index - 1;
   var match_id = matchesHistory.matches[revIndex];
   var match = matchesHistory[match_id];
