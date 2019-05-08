@@ -45,7 +45,10 @@ function openEventsTab() {
 
 // return val = how many rows it rendered into container
 function renderData(container, index) {
-  var course_id = eventsHistory.courses[index];
+  // for performance reasons, we leave events order mostly alone
+  // to display most-recent-first, we use a reverse index
+  const revIndex = eventsHistory.courses.length - index - 1;
+  var course_id = eventsHistory.courses[revIndex];
   var course = eventsHistory[course_id];
 
   if (course === undefined || course.CourseDeck === undefined) {
