@@ -46,6 +46,10 @@ class Aggregator {
     this.updateFilters(filters);
   }
 
+  static createAllMatches() {
+    return new Aggregator({ date: DATE_ALL_TIME });
+  }
+
   static getDefaultColorFilter() {
     const colorFilters = {};
     orderedColorCodesCommon.forEach(code => (colorFilters[code] = false));
@@ -61,7 +65,7 @@ class Aggregator {
       onlyCurrentDecks: false,
       arch: DEFAULT_ARCH,
       oppColors: Aggregator.getDefaultColorFilter(),
-      date: DATE_ALL_TIME
+      date: DATE_LAST_30
     };
   }
 

@@ -362,7 +362,7 @@ ipc.on("set_decks", function(event, arg) {
     delete arg.index;
     decks = Object.values(arg);
     if (matchesHistory.length) {
-      allMatches = new Aggregator();
+      allMatches = Aggregator.createAllMatches();
     }
   }
   open_decks_tab();
@@ -385,7 +385,7 @@ ipc.on("set_history", function(event, arg) {
     try {
       matchesHistory = JSON.parse(arg);
       if (decks) {
-        allMatches = new Aggregator();
+        allMatches = Aggregator.createAllMatches();
       }
     } catch (e) {
       console.log("Error parsing JSON:", arg);
@@ -401,7 +401,7 @@ ipc.on("set_history_data", function(event, arg) {
   if (arg != null) {
     matchesHistory = JSON.parse(arg);
     if (decks) {
-      allMatches = new Aggregator();
+      allMatches = Aggregator.createAllMatches();
     }
   }
 });
