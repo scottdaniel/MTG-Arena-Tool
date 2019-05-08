@@ -151,6 +151,7 @@ class Aggregator {
 
   filterMatch(match) {
     if (!match) return false;
+    if (match.archived && match.archived == true) return false;
     const { eventId, oppColors, arch, date } = this.filters;
 
     const passesEventFilter =

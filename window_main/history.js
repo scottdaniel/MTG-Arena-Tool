@@ -388,8 +388,9 @@ function open_history_tab(loadMore, _filters = {}) {
     if (match.type == "draft") {
       addShare(match);
     }
-    deleteMatch(match);
     addHover(match, tileGrpid);
+
+    archiveMatch(match, fldel, div);
   }
 
   $(this).off();
@@ -414,6 +415,15 @@ function open_history_tab(loadMore, _filters = {}) {
   });
 
   //loadHistory = actuallyLoaded;
+}
+
+function archiveMatch(match, fldel, div) {
+  fldel.addEventListener("click", e => {
+    e.stopPropagation();
+    ipc_send("archive_match", match.id);
+    div.style.height = "0px";
+    div.style.overflow = "hidden";
+  });
 }
 
 function formatPercent(percent, precision) {
@@ -850,17 +860,6 @@ function draftShareLink() {
   };
   showLoadingBars();
   ipc_send("request_draft_link", obj);
-}
-
-function deleteMatch(_match) {
-  $("." + _match.id + "_del").on("click", function(e) {
-    let currentId = _match.id;
-    e.stopPropagation();
-    ipc_send("delete_match", currentId);
-    let deleteButton = $$("." + currentId)[0];
-    deleteButton.style.height = "0px";
-    deleteButton.style.overflow = "hidden";
-  });
 }
 
 function sort_history() {

@@ -432,20 +432,10 @@ ipc.on("delete_deck", function(event, arg) {
 });
 
 //
-ipc.on("delete_match", function(event, arg) {
+ipc.on("archive_match", function(event, arg) {
   ipc_send("show_loading");
-  var i = history.matches.indexOf(arg);
-  if (i > -1) {
-    history.matches.splice(i, 1);
-    store.set("matches_index", history.matches);
-    store.delete(arg);
-  }
-  i = drafts.matches.indexOf(arg);
-  if (i > -1) {
-    drafts.matches.splice(i, 1);
-    store.set("draft_index", drafts.matches);
-    store.delete(arg);
-  }
+  history[arg].archived = true;
+  store.set(arg, history[arg]);
   ipc_send("hide_loading");
 });
 
