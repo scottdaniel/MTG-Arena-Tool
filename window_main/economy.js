@@ -94,7 +94,10 @@ function openEconomyTab() {
 
 // return val = how many rows it rendered into container
 function renderData(container, index) {
-  let economyId = economyHistory.changes[index];
+  // for performance reasons, we leave changes order mostly alone
+  // to display most-recent-first, we use a reverse index
+  const revIndex = economyHistory.changes.length - index - 1;
+  let economyId = economyHistory.changes[revIndex];
   let change = economyHistory[economyId];
 
   if (change == undefined) return;
@@ -771,20 +774,16 @@ function createEconomyUI(mainDiv) {
 // If two IDs are specified then events are retrieved from `economyHistory`
 function compare_economy(a, b) {
   /* global economyHistory */
-  if (a == undefined) return -1;
-  if (b == undefined) return 1;
+  if (a === undefined) return 0;
+  if (b === undefined) return 0;
 
   a = economyHistory[a];
   b = economyHistory[b];
 
-  if (a == undefined) return -1;
-  if (b == undefined) return 1;
+  if (a === undefined) return 0;
+  if (b === undefined) return 0;
 
-  a = Date.parse(a.date);
-  b = Date.parse(b.date);
-  if (a < b) return 1;
-  if (a > b) return -1;
-  return 0;
+  return Date.parse(a.date) - Date.parse(b.date);
 }
 
 module.exports = {
