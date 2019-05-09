@@ -6,21 +6,22 @@ global
   collectionSortRarity,
   createDivision
   createSelect,
+  DataScroller,
   economyHistory,
   formatNumber,
   formatPercent,
   get_colation_set,
+  get_card_art,
   get_card_image,
   get_set_scryfall,
   getReadableEvent,
-  hideLoadingBars,
   ipc_send,
   localDateFormat,
+  localDayDateFormat,
   setsList,
   shell
 */
 
-var loadEconomy = 0;
 var filterEconomy = "All";
 var daysago = 0;
 var dayList = [];
@@ -62,7 +63,6 @@ const economyTransactionContextsMap = {
   "PlayerReward.OnMatchCompletedWeekly": "Weekly rewards"
 };
 
-
 function getPrettyContext(context, full = true) {
   if (context.startsWith("Event.Prize")) {
     var eventCode = context.substring(12);
@@ -80,75 +80,57 @@ function getPrettyContext(context, full = true) {
   return pretty || context;
 }
 
-// creates the economy tab.
-// if loadMore is 0 then:
-//   the UI is created and the top 25 results are
-//   loaded based on the current filter.
-// if loadMore is >0 then a further loadMore are added
-//   to the current UI.
-//
-function openEconomyTab(loadMore) {
-  var mainDiv = document.getElementById("ux_0");
-  if (loadMore <= 0) {
-    hideLoadingBars();
-    createEconomyUI(mainDiv);
-    loadMore = 25;
-  }
+function openEconomyTab() {
+  const mainDiv = document.getElementById("ux_0");
+  createEconomyUI(mainDiv);
+  const dataScroller = new DataScroller(
+    mainDiv,
+    renderData,
+    20,
+    economyHistory.changes.length
+  );
+  dataScroller.render(25);
+}
 
-  //console.log("Load more: ", loadEconomy, loadMore, loadEconomy+loadMore);
+// return val = how many rows it rendered into container
+function renderData(container, index) {
+  let economyId = economyHistory.changes[index];
+  let change = economyHistory[economyId];
 
-  // Loop round economyHistory changes and print out 1 row per change
-  for (
-    var loadEnd = loadEconomy + loadMore;
-    loadEconomy < loadEnd;
-    loadEconomy++
+  if (change == undefined) return;
+  if (change.archived && change.archived == true) return;
+
+  // print out daily summaries but no sub-events
+  if (
+    filterEconomy === "Day Summaries" &&
+    daysago !== differenceInCalendarDays(new Date(), change.date)
   ) {
-    let economyId = economyHistory.changes[loadEconomy];
-    let change = economyHistory[economyId];
-
-    if (change == undefined) continue;
-    if (change.archived && change.archived == true) continue;
-
-    // print out daily summaries but no sub-events
-    if (
-      filterEconomy === "Day Summaries" &&
-      daysago != differenceInCalendarDays(new Date(), change.date)
-    ) {
-      mainDiv.appendChild(createDayHeader(change));
-      loadEnd++;
-      continue;
-    }
-
-    if (filterEconomy !== "All" && change.context !== filterEconomy) {
-      loadEnd++;
-      continue;
-    }
-
-    if (daysago != differenceInCalendarDays(new Date(), change.date)) {
-      mainDiv.appendChild(createDayHeader(change));
-    }
-
-    var div = createChangeRow(change, economyId);
-    mainDiv.appendChild(div);
-
-    $(".list_economy_awarded").on("mousewheel", function(e) {
-      var delta = parseInt(e.originalEvent.deltaY) / 40;
-      this.scrollLeft += delta;
-      e.preventDefault();
-    });
+    container.appendChild(createDayHeader(change));
+    return 1;
   }
 
-  $(this).off();
-  $("#ux_0").on("scroll", function() {
-    if (
-      Math.round($(this).scrollTop() + $(this).innerHeight()) >=
-      $(this)[0].scrollHeight
-    ) {
-      openEconomyTab(20);
-    }
+  if (filterEconomy !== "All" && change.context !== filterEconomy) {
+    return 0;
+  }
+
+  let rowsAdded = 0;
+
+  if (daysago != differenceInCalendarDays(new Date(), change.date)) {
+    container.appendChild(createDayHeader(change));
+    rowsAdded++;
+  }
+
+  var div = createChangeRow(change, economyId);
+  container.appendChild(div);
+  rowsAdded++;
+
+  $(".list_economy_awarded").on("mousewheel", function(e) {
+    var delta = parseInt(e.originalEvent.deltaY) / 40;
+    this.scrollLeft += delta;
+    e.preventDefault();
   });
 
-  loadEconomy = loadEnd;
+  return rowsAdded;
 }
 
 function createDayHeader(change) {
@@ -661,9 +643,8 @@ function createEconomyUI(mainDiv) {
     if (daysago != differenceInCalendarDays(new Date(), change.date)) {
       daysago = differenceInCalendarDays(new Date(), change.date);
       dayList[daysago] = new economyDay();
-      console.log("new day", change.date);
+      // console.log("new day", change.date);
     }
-
 
     // IMPORTANT:
     // Some old data stores the raw original context in ".originalContext"
@@ -783,11 +764,6 @@ function createEconomyUI(mainDiv) {
   div.appendChild(ntx);
 
   mainDiv.appendChild(div);
-
-  var d = createDivision(["list_fill"]);
-  mainDiv.appendChild(d);
-
-  loadEconomy = 0;
   daysago = -1;
 }
 

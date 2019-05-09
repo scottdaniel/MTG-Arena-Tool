@@ -1,72 +1,35 @@
 /*
 globals
+  addHover,
+  cardsDb,
+  compare_cards,
+  compare_courses,
+  createDivision,
+  currentId,
+  DataScroller,
+  eventsHistory,
+  get_deck_colors,
+  get_rank_index_16,
+  getReadableEvent,
   ipc_send,
   matchesHistory,
-  cardsDb,
   mana,
-  get_rank_index_16,
   timeSince,
-  toMMSS,
-  get_deck_colors,
-  addHover,
-  compare_cards,
-  getReadableEvent,
-  hideLoadingBars,
-  createDivision,
-  eventsHistory,
-  compare_courses,
-  loadEvents,
-  currentId
+  toMMSS
 */
 
-function openEventsTab(loadMore) {
-  var mainDiv = document.getElementById("ux_0");
-  if (loadMore <= 0) {
-    loadMore = 25;
-    eventsHistory.courses.sort(compare_courses);
-
-    hideLoadingBars();
-    mainDiv.classList.remove("flex_item");
-    mainDiv.innerHTML = "";
-
-    var d = createDivision(["list_fill"]);
-    mainDiv.appendChild(d);
-
-    loadEvents = 0;
-  }
-
-  //console.log("Load more: ", loadEvents, loadMore, loadEvents+loadMore);
-  for (
-    var loadEnd = loadEvents + loadMore;
-    loadEvents < loadEnd;
-    loadEvents++
-  ) {
-    var course_id = eventsHistory.courses[loadEvents];
-    var course = eventsHistory[course_id];
-
-    if (course == undefined || course.CourseDeck == undefined) {
-      continue;
-    }
-
-    var eventRow = createEventRow(course);
-    var divExp = createDivision([course.id + "exp", "list_event_expand"]);
-
-    mainDiv.appendChild(eventRow);
-    mainDiv.appendChild(divExp);
-
-    attachDeleteCourseButton(course);
-    addHover(course, divExp);
-  }
-
-  $(this).off();
-  $("#ux_0").on("scroll", function() {
-    if (
-      Math.round($(this).scrollTop() + $(this).innerHeight()) >=
-      $(this)[0].scrollHeight
-    ) {
-      openEventsTab(20);
-    }
-  });
+function openEventsTab() {
+  const mainDiv = document.getElementById("ux_0");
+  mainDiv.classList.remove("flex_item");
+  mainDiv.innerHTML = "";
+  const dataScroller = new DataScroller(
+    mainDiv,
+    renderData,
+    20,
+    eventsHistory.courses.length
+  );
+  eventsHistory.courses.sort(compare_courses);
+  dataScroller.render(25);
 
   $(".delete_item").hover(
     function() {
@@ -78,8 +41,26 @@ function openEventsTab(loadMore) {
       $(this).css("width", "4px");
     }
   );
+}
 
-  loadEvents = loadEnd;
+// return val = how many rows it rendered into container
+function renderData(container, index) {
+  var course_id = eventsHistory.courses[index];
+  var course = eventsHistory[course_id];
+
+  if (course === undefined || course.CourseDeck === undefined) {
+    return 0;
+  }
+
+  var eventRow = createEventRow(course);
+  var divExp = createDivision([course.id + "exp", "list_event_expand"]);
+
+  container.appendChild(eventRow);
+  container.appendChild(divExp);
+
+  attachDeleteCourseButton(course);
+  addHover(course, divExp);
+  return 1;
 }
 
 // converts a match index from a courses
