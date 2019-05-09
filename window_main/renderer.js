@@ -362,7 +362,7 @@ ipc.on("set_decks", function(event, arg) {
     delete arg.index;
     decks = Object.values(arg);
     if (matchesHistory.length) {
-      allMatches = new Aggregator();
+      allMatches = Aggregator.createAllMatches();
     }
   }
   open_decks_tab();
@@ -385,7 +385,7 @@ ipc.on("set_history", function(event, arg) {
     try {
       matchesHistory = JSON.parse(arg);
       if (decks) {
-        allMatches = new Aggregator();
+        allMatches = Aggregator.createAllMatches();
       }
     } catch (e) {
       console.log("Error parsing JSON:", arg);
@@ -401,7 +401,7 @@ ipc.on("set_history_data", function(event, arg) {
   if (arg != null) {
     matchesHistory = JSON.parse(arg);
     if (decks) {
-      allMatches = new Aggregator();
+      allMatches = Aggregator.createAllMatches();
     }
   }
 });
@@ -3060,18 +3060,14 @@ function compare_changes_inner(a, b) {
 
 //
 function compare_courses(a, b) {
-  if (a == undefined) return -1;
-  if (b == undefined) return 1;
+  if (a === undefined) return 0;
+  if (b === undefined) return 0;
 
   a = eventsHistory[a];
   b = eventsHistory[b];
 
-  if (a == undefined) return -1;
-  if (b == undefined) return 1;
+  if (a === undefined) return 0;
+  if (b === undefined) return 0;
 
-  a = Date.parse(a.date);
-  b = Date.parse(b.date);
-  if (a < b) return 1;
-  if (a > b) return -1;
-  return 0;
+  return Date.parse(a.date) - Date.parse(b.date);
 }

@@ -1,6 +1,8 @@
 /*
 globals
   addHover,
+  Aggregator,
+  allMatches,
   cardsDb,
   compare_cards,
   compare_courses,
@@ -8,35 +10,75 @@ globals
   currentId,
   DataScroller,
   eventsHistory,
+  FilterPanel,
   get_deck_colors,
   get_rank_index_16,
   getReadableEvent,
   ipc_send,
   matchesHistory,
   mana,
+  StatsPanel,
   timeSince,
   toMMSS
 */
 
-function openEventsTab() {
+let filters = Aggregator.getDefaultFilters();
+filters.eventId = Aggregator.ALL_EVENT_TRACKS;
+let filteredMatches;
+
+function openEventsTab(_filters) {
   const mainDiv = document.getElementById("ux_0");
   mainDiv.classList.remove("flex_item");
   mainDiv.innerHTML = "";
+  const d = createDivision(["list_fill"]);
+  mainDiv.appendChild(d);
+
+  eventsHistory.courses.sort(compare_courses);
+  filters = { ...filters, ..._filters };
+  filteredMatches = new Aggregator(filters);
+
+  const eventsTop = createDivision(["events_top"]);
+  eventsTop.style.display = "flex";
+  eventsTop.style.width = "100%";
+  eventsTop.style.alignItems = "center";
+  eventsTop.style.justifyContent = "space-between";
+
+  const filterPanel = new FilterPanel(
+    "events_top",
+    selected => openEventsTab(selected),
+    filters,
+    allMatches.trackEvents
+  );
+
+  const eventsTopFilter = filterPanel.render();
+  eventsTop.appendChild(eventsTopFilter);
+
+  const partialStats = {
+    ...filteredMatches.stats,
+    colors: [],
+    tags: []
+  };
+  const statsPanel = new StatsPanel("events_top", partialStats);
+  const eventsTopWinrate = statsPanel.render();
+  eventsTopWinrate.style.width = "300px";
+  eventsTopWinrate.style.marginRight = "16px";
+  eventsTop.appendChild(eventsTopWinrate);
+
+  mainDiv.appendChild(eventsTop);
   const dataScroller = new DataScroller(
     mainDiv,
     renderData,
     20,
     eventsHistory.courses.length
   );
-  eventsHistory.courses.sort(compare_courses);
   dataScroller.render(25);
 
   $(".delete_item").hover(
-    function() {
+    () => {
       // in
       $(this).css("width", "32px");
     },
-    function() {
+    () => {
       // out
       $(this).css("width", "4px");
     }
@@ -45,10 +87,19 @@ function openEventsTab() {
 
 // return val = how many rows it rendered into container
 function renderData(container, index) {
-  var course_id = eventsHistory.courses[index];
+  // for performance reasons, we leave events order mostly alone
+  // to display most-recent-first, we use a reverse index
+  const revIndex = eventsHistory.courses.length - index - 1;
+  var course_id = eventsHistory.courses[revIndex];
   var course = eventsHistory[course_id];
 
   if (course === undefined || course.CourseDeck === undefined) {
+    return 0;
+  }
+
+  if (!filteredMatches) return 0;
+  if (!filteredMatches.filterDate(course.date)) return 0;
+  if (!filteredMatches.filterEvent(course.InternalEventName)) {
     return 0;
   }
 
