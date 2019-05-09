@@ -24,6 +24,15 @@ const RANKED_DRAFT = "Ranked Limited (Current)";
 // Draft-related constants
 const ALL_DRAFTS = "All Drafts";
 const DRAFT_REPLAYS = "Draft Replays";
+// Event-related constant
+const ALL_EVENT_TRACKS = "All Event Tracks";
+const SINGLE_MATCH_EVENTS = [
+  "AIBotMatch",
+  "DirectGame",
+  "Play",
+  "Ladder",
+  "Traditional_Ladder"
+];
 // Date constants
 const DATE_LAST_30 = "Last 30 Days";
 const DATE_SEASON = "Current Season";
@@ -38,7 +47,9 @@ const CONSTRUCTED_EVENTS = ["Ladder", "Traditional_Ladder"];
 
 class Aggregator {
   constructor(filters) {
+    this.filterDate = this.filterDate.bind(this);
     this.filterDeck = this.filterDeck.bind(this);
+    this.filterEvent = this.filterEvent.bind(this);
     this.filterMatch = this.filterMatch.bind(this);
     this.updateFilters = this.updateFilters.bind(this);
     this.compareDecks = this.compareDecks.bind(this);
@@ -100,6 +111,23 @@ class Aggregator {
     return [DEFAULT_TAG, ...tagList, ...formatList];
   }
 
+  filterDate(_date) {
+    const { date } = this.filters;
+    let dateFilter = null;
+    if (date === DATE_SEASON) {
+      dateFilter = season_starts;
+    } else if (date === DATE_LAST_30) {
+      dateFilter = DAYS_AGO_30;
+    } else {
+      dateFilter = date;
+    }
+    return (
+      date === DATE_ALL_TIME ||
+      dateFilter === null ||
+      new Date(_date) >= new Date(dateFilter)
+    );
+  }
+
   _filterDeckByColors(deck, _colors) {
     if (!deck) return true;
 
@@ -153,18 +181,26 @@ class Aggregator {
     return true;
   }
 
+  filterEvent(_eventId) {
+    const { eventId } = this.filters;
+    return (
+      (eventId === DEFAULT_EVENT && _eventId !== "AIBotMatch") ||
+      (eventId === ALL_EVENT_TRACKS && !SINGLE_MATCH_EVENTS.includes(_eventId)) ||
+      (eventId === RANKED_CONST && CONSTRUCTED_EVENTS.includes(_eventId)) ||
+      (eventId === RANKED_DRAFT && rankedEvents.includes(_eventId)) ||
+      eventId === _eventId
+    );
+  }
+
   filterMatch(match) {
     if (!match) return false;
     if (match.archived && match.archived == true) return false;
     const { eventId, oppColors, arch, date } = this.filters;
 
     const passesEventFilter =
-      (eventId === DEFAULT_EVENT && match.eventId !== "AIBotMatch") ||
-      (eventId === RANKED_CONST && CONSTRUCTED_EVENTS.includes(match.eventId)) ||
-      (eventId === RANKED_DRAFT && rankedEvents.includes(match.eventId)) ||
+      this.filterEvent(match.eventId) ||
       (eventId === ALL_DRAFTS && Aggregator.isDraftMatch(match)) ||
-      (eventId === DRAFT_REPLAYS && match.type === "draft") ||
-      eventId === match.eventId;
+      (eventId === DRAFT_REPLAYS && match.type === "draft");
     if (!passesEventFilter) return false;
 
     const passesPlayerDeckFilter = this.filterDeck(match.playerDeck);
@@ -178,20 +214,7 @@ class Aggregator {
       arch === DEFAULT_ARCH || (matchTags.length && arch === matchTags[0]);
     if (!passesArchFilter) return false;
 
-    let dateFilter = null;
-    if (date === DATE_SEASON) {
-      dateFilter = season_starts;
-    } else if (date === DATE_LAST_30) {
-      dateFilter = DAYS_AGO_30;
-    } else {
-      dateFilter = date;
-    }
-    const passesDateFilter =
-      date === DATE_ALL_TIME ||
-      dateFilter === null ||
-      new Date (match.date) >= new Date(dateFilter);
-
-    return passesDateFilter;
+    return this.filterDate(match.date);
   }
 
   updateFilters(filters = {}) {
@@ -419,6 +442,14 @@ class Aggregator {
     ];
   }
 
+  get trackEvents() {
+    return [
+      ALL_EVENT_TRACKS,
+      RANKED_DRAFT,
+      ...this._eventIds.filter(eventId => !SINGLE_MATCH_EVENTS.includes(eventId))
+    ];
+  }
+
   get decks() {
     return [{ id: DEFAULT_DECK, name: DEFAULT_DECK }, ...this._decks];
   }
@@ -440,6 +471,7 @@ Aggregator.RANKED_CONST = RANKED_CONST;
 Aggregator.RANKED_DRAFT = RANKED_DRAFT;
 Aggregator.ALL_DRAFTS = ALL_DRAFTS;
 Aggregator.DRAFT_REPLAYS = DRAFT_REPLAYS;
+Aggregator.ALL_EVENT_TRACKS = ALL_EVENT_TRACKS;
 Aggregator.DATE_LAST_30 = DATE_LAST_30;
 Aggregator.DATE_SEASON = DATE_SEASON;
 Aggregator.DATE_ALL_TIME = DATE_ALL_TIME;
