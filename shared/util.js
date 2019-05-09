@@ -2240,7 +2240,9 @@ function convert_deck_from_v3(deck) {
     if (key === "mainDeck" || key === "sideboard") {
       let ret = [];
       for (let i = 0; i < value.length; i += 2) {
-        ret.push({ id: value[i], quantity: value[i + 1] });
+        if (value[i + 1] > 0) {
+            ret.push({ id: value[i], quantity: value[i + 1] });
+        }
       }
       return ret;
     }
