@@ -100,7 +100,7 @@ function openExploreTab() {
   mainDiv.appendChild(d);
 
   $(this).off();
-  mainDiv.addEventListener("scroll", () => {
+  $(this).on("scroll", () => {
     if (Math.round(mainDiv.scrollTop + mainDiv.offsetHeight) >= mainDiv.scrollHeight) {
       queryExplore(filterSkip);
     }
