@@ -490,7 +490,7 @@ function updateView() {
     sortFunc = compare_chances;
   }
 
-  const mainCards = new CardsList(deckToDraw.mainboard.get());
+  let mainCards = deckToDraw.mainboard;
   mainCards.removeDuplicates();
   mainCards.get().sort(sortFunc);
 
@@ -510,7 +510,7 @@ function updateView() {
   if (showSideboard && deckToDraw.sideboard.count() > 0) {
     deckListDiv.append('<div class="card_tile_separator">Sideboard</div>');
 
-    const sideCards = new CardsList(deckToDraw.sideboard.get());
+    let sideCards = deckToDraw.sideboard;
     sideCards.removeDuplicates();
     sideCards.get().sort(sortFunc);
 
