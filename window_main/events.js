@@ -23,7 +23,7 @@ globals
 */
 
 let filters = Aggregator.getDefaultFilters();
-filters.onlyEvents = true;
+filters.eventId = Aggregator.ALL_EVENT_TRACKS;
 let filteredMatches;
 
 function openEventsTab(_filters) {
@@ -50,7 +50,6 @@ function openEventsTab(_filters) {
     allMatches.trackEvents
   );
 
-  console.log(allMatches);
   const eventsTopFilter = filterPanel.render();
   eventsTop.appendChild(eventsTopFilter);
 
