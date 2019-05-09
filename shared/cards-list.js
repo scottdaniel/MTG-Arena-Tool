@@ -247,11 +247,13 @@ class CardsList {
     let colors = new Colors();
     this._list.forEach(card => {
       let cardData = cardsDb.get(card.id);
-      let isLand = cardData.type.indexOf("Land") !== -1;
-      if (isLand && cardData.frame.length < 3) {
-        colors.addFromArray(cardData.frame);
+      if (cardData) {
+        let isLand = cardData.type.indexOf("Land") !== -1;
+        if (isLand && cardData.frame.length < 3) {
+          colors.addFromArray(cardData.frame);
+        }
+        colors.addFromCost(cardData.cost);
       }
-      colors.addFromCost(cardData.cost);
     });
 
     return colors;

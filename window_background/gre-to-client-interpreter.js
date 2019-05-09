@@ -471,7 +471,8 @@ function getOppUsedCards() {
           ) {
             grpId = obj.grpId;
             //cardsUsed.push(cardsDb.get(grpId).name+" - "+zone.type);
-            cardsUsed.push(grpId);
+            // 3 is the code for "Face down card", apparently
+            if (grpId !== 3) cardsUsed.push(grpId);
           }
         } catch (e) {
           //
@@ -502,7 +503,7 @@ function getPlayerUsedCards() {
           ) {
             grpId = obj.grpId;
             //cardsUsed.push(cardsDb.get(grpId).name+" - "+zone.type);
-            cardsUsed.push(grpId);
+            if (grpId !== 3) cardsUsed.push(grpId);
           }
         } catch (e) {
           //
