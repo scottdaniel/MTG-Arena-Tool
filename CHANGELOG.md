@@ -1,3 +1,28 @@
+## <small>2.4.6 (2019-05-09)</small>
+
+* Aggregator defaults to last 30 days ([144ef19](https://github.com/Manuel-777/MTG-Arena-Tool/commit/144ef19))
+* Aggregator filterDate, filterEvent, trackEvents ([2547319](https://github.com/Manuel-777/MTG-Arena-Tool/commit/2547319))
+* Aggregator skips decks without IDs ([c9ea682](https://github.com/Manuel-777/MTG-Arena-Tool/commit/c9ea682))
+* Aggregator.compareEvents and guaranteed eventlist order ([8071a66](https://github.com/Manuel-777/MTG-Arena-Tool/commit/8071a66))
+* archive matches ([6c25fe8](https://github.com/Manuel-777/MTG-Arena-Tool/commit/6c25fe8))
+* bugfix Events page initial event filter setting ([ad89e45](https://github.com/Manuel-777/MTG-Arena-Tool/commit/ad89e45))
+* Bugfix save_user_settings ([157e4af](https://github.com/Manuel-777/MTG-Arena-Tool/commit/157e4af))
+* comment ([7b8c10c](https://github.com/Manuel-777/MTG-Arena-Tool/commit/7b8c10c))
+* Create data-scroller logic component ([bd08bb8](https://github.com/Manuel-777/MTG-Arena-Tool/commit/bd08bb8))
+* Do not track face down cards ([953230b](https://github.com/Manuel-777/MTG-Arena-Tool/commit/953230b))
+* Events page filters and stats ([7024a38](https://github.com/Manuel-777/MTG-Arena-Tool/commit/7024a38))
+* Filter empty cards in V3 ([3e1980c](https://github.com/Manuel-777/MTG-Arena-Tool/commit/3e1980c))
+* harden Aggregator compare functions ([c32bdb4](https://github.com/Manuel-777/MTG-Arena-Tool/commit/c32bdb4))
+* import DataScroller logic component ([6473517](https://github.com/Manuel-777/MTG-Arena-Tool/commit/6473517))
+* Optimize economy sorting ([0d3a293](https://github.com/Manuel-777/MTG-Arena-Tool/commit/0d3a293))
+* Optimize event sorting ([ed74309](https://github.com/Manuel-777/MTG-Arena-Tool/commit/ed74309))
+* Refactor economy page to use DataScroller ([dc28c54](https://github.com/Manuel-777/MTG-Arena-Tool/commit/dc28c54))
+* Refactor events page to use DataScroller ([2681c70](https://github.com/Manuel-777/MTG-Arena-Tool/commit/2681c70))
+* Refactor history page to use DataScroller ([93d96b9](https://github.com/Manuel-777/MTG-Arena-Tool/commit/93d96b9))
+* Zero-quantity cards not being cleared ([b67e4bb](https://github.com/Manuel-777/MTG-Arena-Tool/commit/b67e4bb))
+
+
+
 ## <small>2.4.3 (2019-05-07)</small>
 
 * Aggregator color filtering now requires exact match ([a4b833d](https://github.com/Manuel-777/MTG-Arena-Tool/commit/a4b833d))
