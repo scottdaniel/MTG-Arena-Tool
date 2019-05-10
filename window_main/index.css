@@ -425,7 +425,7 @@ span.top_nav_item_text {
 .moving_ux {
     position: relative;
     display: flex;
-    width: calc(200%);
+    width: calc(300%);
     height: 100%;
     -webkit-transition: left .1s ease-in-out-expo;
 }

@@ -58,6 +58,7 @@ const Menu = remote.Menu;
 const MenuItem = remote.MenuItem;
 
 require("time-elements");
+const striptags = require("striptags");
 
 const FilterPanel = require("./FilterPanel.js");
 const StatsPanel = require("./StatsPanel.js");
@@ -2072,7 +2073,7 @@ function open_match(id) {
   }
 
   $(".openLog").click(function() {
-    shell.openItem(path.join(actionLogDir, id + ".txt"));
+    openActionLog(id, $("#ux_1"));
   });
 
   $(".exportDeckPlayer").click(function() {
@@ -2099,6 +2100,54 @@ function open_match(id) {
   $(".back").click(function() {
     change_background("default");
     $(".moving_ux").animate({ left: "0px" }, 250, "easeInOutCubic");
+  });
+}
+
+function openActionLog(actionLogId) {
+  $("#ux_2").html("");
+  let top = $(
+    `<div class="decklist_top"><div class="button back actionlog_back"></div><div class="deck_name">Action Log</div><div class="deck_name"></div></div>`
+  );
+
+  let actionLogContainer = $(`<div class="action_log_container"></div>`);
+
+  let actionLogFile = path.join(actionLogDir, actionLogId + ".txt");
+  let str = fs.readFileSync(actionLogFile).toString();
+
+  let actionLog = str.split("\n");
+  for (let line = 1; line < actionLog.length; line += 3) {
+    let seat = actionLog[line];
+    let time = actionLog[line + 1];
+    let str = actionLog[line + 2];
+    str = striptags(str, ["log-card", "log-ability"]);
+
+    var boxDiv = $('<div class="actionlog log_p' + seat + '"></div>');
+    var timeDiv = $('<div class="actionlog_time">' + time + "</div>");
+    var strDiv = $('<div class="actionlog_text">' + str + "</div>");
+
+    boxDiv.append(timeDiv);
+    boxDiv.append(strDiv);
+    actionLogContainer.append(boxDiv);
+  }
+
+  $("#ux_2").append(top);
+  $("#ux_2").append(actionLogContainer);
+
+  $$("log-card").forEach(obj => {
+    let grpId = obj.getAttribute("id");
+    addCardHover(obj, cardsDb.get(grpId));
+  });
+
+  $$("log-ability").forEach(obj => {
+    let grpId = obj.getAttribute("id");
+    let abilityText = cardsDb.getAbility(grpId);
+    obj.title = abilityText;
+  });
+
+  $(".moving_ux").animate({ left: "-200%" }, 250, "easeInOutCubic");
+
+  $(".actionlog_back").click(() => {
+    $(".moving_ux").animate({ left: "-100%" }, 250, "easeInOutCubic");
   });
 }
 

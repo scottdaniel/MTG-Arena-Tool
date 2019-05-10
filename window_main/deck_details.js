@@ -382,6 +382,28 @@ function openDeck(deck, deck_type) {
   });
 }
 
+function openActionLog(actionLog) {
+  actionLog.sort(compare_logs);
+
+  actionLog.forEach(function(log) {
+    log.str = striptags(log.str, ["log-card", "log-ability"]);
+    var d = new Date(log.time);
+    var hh = ("0" + d.getHours()).slice(-2);
+    var mm = ("0" + d.getMinutes()).slice(-2);
+    var ss = ("0" + d.getSeconds()).slice(-2);
+
+    var box = $('<div class="actionlog log_p' + log.seat + '"></div>');
+    var time = $(
+      '<div class="actionlog_time">' + hh + ":" + mm + ":" + ss + "</div>"
+    );
+    var str = $('<div class="actionlog_text">' + log.str + "</div>");
+
+    box.append(time);
+    box.append(str);
+    deckListDiv.append(box);
+  });
+}
+
 module.exports = {
   open_deck: openDeck
 };
