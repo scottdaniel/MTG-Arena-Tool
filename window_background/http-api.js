@@ -1,5 +1,7 @@
 /*
 global
+  eventsList,
+  eventsToFormat,
   tokenAuth,
   decks,
   rstore,
@@ -11,6 +13,8 @@ global
   store,
   makeId,
   debugLog,
+  ranked_events,
+  setsList,
   syncUserData,
   sha1
 */

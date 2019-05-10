@@ -20,6 +20,7 @@ global
   hideLoadingBars,
   ipc_send,
   orderedColorCodesCommon,
+  orderedCardRarities,
   remote,
   setsList,
   Menu,

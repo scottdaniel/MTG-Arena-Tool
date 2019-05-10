@@ -5,6 +5,7 @@ global
   addCardTile,
   change_background,
   createDivision,
+  createSelect,
   compare_cards,
   decks,
   drawDeck,

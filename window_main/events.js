@@ -13,10 +13,12 @@ globals
   FilterPanel,
   get_deck_colors,
   get_rank_index_16,
+  getEventWinLossClass,
   getReadableEvent,
   ipc_send,
   matchesHistory,
   mana,
+  playerData,
   StatsPanel,
   timeSince,
   toMMSS
