@@ -50,6 +50,7 @@
   "scripts": {
     "start": "electron .",
     "postinstall": "install-app-deps",
+    "predist": "npx eslint . --quiet",
     "dist": "build --x64",
     "version": "node -p \"require('./package.json').version\""
   },
