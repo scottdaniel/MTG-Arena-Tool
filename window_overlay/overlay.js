@@ -754,6 +754,12 @@ function setDraft(_packN = -1, _pickN = -1) {
   }
 }
 
+function compare_logs(a, b) {
+  if (a.time < b.time) return -1;
+  if (a.time > b.time) return 1;
+  return 0;
+}
+
 function compare_draft_picks(a, b) {
   var arank = cardsDb.get(a).rank;
   var brank = cardsDb.get(b).rank;
