@@ -142,6 +142,12 @@ function startApp() {
     updaterWindow = undefined;
   }
 
+  //
+  let updateState = null;
+  ipc.on("set_update_state", function(event, arg) {
+    updateState = arg;
+  });
+
   ipc.on("ipc_switch", function(event, method, from, arg, to) {
     if (debugIPC && method != "log_read") {
       if (

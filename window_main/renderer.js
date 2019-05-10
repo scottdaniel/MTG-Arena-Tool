@@ -103,6 +103,7 @@ var orderedManaColors = [
 
 let shell = electron.shell;
 let ipc = electron.ipcRenderer;
+let deck = null;
 let decks = null;
 let changes = null;
 let matchesHistory = [];
