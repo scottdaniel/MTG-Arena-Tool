@@ -18,7 +18,7 @@
     "no-console": "off",
     "no-unused-vars": "warn",
     "no-redeclare": "warn",
-    "no-undef": "warn",
+    "no-undef": "error",
     "no-global-assign": "warn",
     "no-empty": "warn",
     "complexity": ["warn", 20],
