@@ -691,83 +691,6 @@ function checkTurnDiff(turnInfo) {
   }
 }
 
-GREMessages.GREMessageType_MulliganReq = function() {};
-
-GREMessages.GREMessageType_ActionsAvailableReq = function() {};
-
-GREMessages.GREMessageType_ChooseStartingPlayerReq = function() {};
-
-GREMessages.GREMessageType_ConnectResp = function() {};
-
-GREMessages.GREMessageType_MulliganReq = function() {};
-
-GREMessages.GREMessageType_OrderReq = function() {};
-
-GREMessages.GREMessageType_PromptReq = function() {};
-
-GREMessages.GREMessageType_Revealhandreq = function() {};
-
-GREMessages.GREMessageType_Selectnreq = function() {};
-/*
-GREMessages.GREMessageType_DeclareAttackersReq = function(msg) {
-  msg.declareAttackersReq.attackers.forEach(attacker => {
-    let obj = currentMatch.gameObjs[attacker.attackerInstanceId];
-    let recipient = "";
-    if (attacker.legalDamageRecipients) {
-      if (attacker.legalDamageRecipients[0].type == "DamageRecType_Player") {
-          recipient = getNameBySeat(
-            attacker.legalDamageRecipients[0].playerSystemSeatId
-          );
-        }
-        if (attacker.legalDamageRecipients[0].type == "DamageRecType_Planeswalker") {
-          recipient = actionLogGenerateLink(
-            attacker.legalDamageRecipients[0].planeswalkerinstanceid
-          );
-        }
-    }
-    else {
-      if (attacker.selectedDamageRecipient.type == "DamageRecType_Player") {
-        recipient = getNameBySeat(
-          attacker.selectedDamageRecipient.playerSystemSeatId
-        );
-      }
-      if (attacker.selectedDamageRecipient.type == "DamageRecType_Planeswalker") {
-        recipient = actionLogGenerateLink(
-          attacker.selectedDamageRecipient.planeswalkerinstanceid
-        );
-      }
-    }
-    actionLog(
-      obj.controllerSeatId,
-      false,
-      `${actionLogGenerateLink(obj.grpId)} attacked ${recipient}`
-    );
-  });
-};
-*/
-
-GREMessages.GREMessageType_Submitattackersresp = function() {};
-
-GREMessages.GREMessageType_Declareblockersreq = function() {};
-
-GREMessages.GREMessageType_Submitblockersresp = function() {};
-
-GREMessages.GREMessageType_Assigndamagereq = function() {};
-
-GREMessages.GREMessageType_Assigndamageconfirmation = function() {};
-
-GREMessages.GREMessageType_Ordercombatdamagereq = function() {};
-
-GREMessages.GREMessageType_Orderdamageconfirmation = function() {};
-
-GREMessages.GREMessageType_Selecttargetsreq = function() {};
-
-GREMessages.GREMessageType_Submittargetsresp = function() {};
-
-GREMessages.GREMessageType_Paycostsreq = function() {};
-
-GREMessages.GREMessageType_Intermissionreq = function() {};
-
 GREMessages.GREMessageType_DieRollResultsResp = function(msg) {
   if (msg.dieRollResultsResp) {
     let highest = msg.dieRollResultsResp.playerDieRolls.reduce((a, b) => {
@@ -781,40 +704,6 @@ GREMessages.GREMessageType_DieRollResultsResp = function(msg) {
   }
   return true;
 };
-
-GREMessages.GREMessageType_Selectreplacementreq = function() {};
-
-GREMessages.GREMessageType_Selectngroupreq = function() {};
-
-GREMessages.GREMessageType_Alternativecostreq = function() {};
-
-GREMessages.GREMessageType_Distributionreq = function() {};
-
-GREMessages.GREMessageType_Numericinputreq = function() {};
-
-GREMessages.GREMessageType_Searchreq = function() {};
-
-GREMessages.GREMessageType_Optionalactionmessage = function() {};
-
-GREMessages.GREMessageType_Castingtimeoptionsreq = function() {};
-
-GREMessages.GREMessageType_Selectmanatypereq = function() {};
-
-GREMessages.GREMessageType_Selectfromgroupsreq = function() {};
-
-GREMessages.GREMessageType_Searchfromgroupsreq = function() {};
-
-GREMessages.GREMessageType_Gatherreq = function() {};
-
-GREMessages.GREMessageType_Queuedgamestatemessage = function() {};
-
-GREMessages.GREMessageType_Uimessage = function() {};
-
-GREMessages.GREMessageType_Submitdeckreq = function() {};
-
-GREMessages.GREMessageType_Edictalmessage = function() {};
-
-GREMessages.GREMessageType_Timeoutmessage = function() {};
 
 module.exports = {
   GREMessage,
