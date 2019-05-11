@@ -8,6 +8,18 @@ function onLabelOutLogInfo(entry, json) {
     currentMatch.opponent.cards = currentMatch.oppCardsUsed;
 
     var payload = json.params.payloadObject;
+
+    let loserName = getNameBySeat(payload.winningTeamId == 1 ? 2 : 1);
+    if (payload.winningReason == "ResultReason_Concede") {
+      actionLog(-1, false, `${loserName} Conceded`);
+    }
+    if (payload.winningReason == "ResultReason_Timeout") {
+      actionLog(-1, false, `${loserName} Timed out`);
+    }
+
+    let playerName = getNameBySeat(payload.winningTeamId);
+    actionLog(-1, false, `${playerName} Wins!`);
+
     var mid = payload.matchId + "-" + playerData.arenaId;
     var time = payload.secondsCount;
     if (mid == currentMatch.matchId) {
