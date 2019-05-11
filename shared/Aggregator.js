@@ -237,6 +237,10 @@ class Aggregator {
     const archCounts = {};
     let wins = 0;
     let loss = 0;
+    let playWins = 0;
+	  let playLoss = 0;
+    let drawWins = 0;
+    let drawLoss = 0;
     let winrate = 0;
     let duration = 0;
     const colorsWinrates = [];
@@ -282,6 +286,11 @@ class Aggregator {
         }
         if (match.player.win > match.opponent.win) {
           wins++;
+          if (match.onThePlay) {
+          	let onThePlay = match.onThePlay == match.player.seat ? true : false;
+          	if (onThePlay) playWins++;
+          	else drawWins++;
+          }
           if (computeDeckWinrate) {
             deckWinrates[dId].wins++;
             if (lastEdit && match.date > lastEdit) {
@@ -291,6 +300,11 @@ class Aggregator {
         }
         if (match.player.win < match.opponent.win) {
           loss++;
+          if (match.onThePlay) {
+          	let onThePlay = match.onThePlay == match.player.seat ? true : false;
+          	if (onThePlay) playLoss++;
+          	else drawLoss++;
+          }
           if (computeDeckWinrate) {
             deckWinrates[dId].losses++;
             if (lastEdit && match.date > lastEdit) {
@@ -356,7 +370,11 @@ class Aggregator {
       losses: loss,
       duration,
       colors: colorsWinrates,
-      tags: tagsWinrates
+      tags: tagsWinrates,
+      playWins: playWins,
+      playLosses: playLoss,
+      drawWins: drawWins,
+      drawLosses: drawLoss,
     };
     const finishStats = stats => {
       const wins = stats.wins;
@@ -366,6 +384,26 @@ class Aggregator {
       if (total) {
         winrate = winrate = Math.round((wins / total) * 100) / 100;
       }
+
+      const playWins = stats.playWins;
+      const playLoss = stats.playLosses;
+      const playTotal = playWins + playLoss;
+      let playWinrate = 0;
+      if (playTotal) {
+        playWinrate = Math.round((playWins / playTotal) * 100) / 100;
+      }
+
+      const drawWins = stats.drawWins;
+      const drawLoss = stats.drawLosses;
+      const drawTotal = drawWins + drawLoss;
+      let drawWinrate = 0;
+      if (drawTotal) {
+        drawWinrate = Math.round((drawWins / drawTotal) * 100) / 100;
+      }
+
+      stats.playWinrate = playWinrate;
+      stats.drawWinrate = drawWinrate;
+
       stats.winrate = winrate;
       stats.total = total;
     };
