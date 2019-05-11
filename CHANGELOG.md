@@ -1,3 +1,26 @@
+## <small>2.4.7 (2019-05-11)</small>
+
+* "casted" ([b552152](https://github.com/Manuel-777/MTG-Arena-Tool/commit/b552152))
+* action log viewer ([c734baf](https://github.com/Manuel-777/MTG-Arena-Tool/commit/c734baf))
+* action log viewer fixes ([2218e4e](https://github.com/Manuel-777/MTG-Arena-Tool/commit/2218e4e))
+* action log win/loss/concede ([ae5af16](https://github.com/Manuel-777/MTG-Arena-Tool/commit/ae5af16))
+* basic git pre-push validator ([0ea5303](https://github.com/Manuel-777/MTG-Arena-Tool/commit/0ea5303))
+* Bugfix explore scroll handler ([e5048a5](https://github.com/Manuel-777/MTG-Arena-Tool/commit/e5048a5))
+* clean unused GRE Message types ([b164ff8](https://github.com/Manuel-777/MTG-Arena-Tool/commit/b164ff8))
+* convert all current eslint lint errors into warnings ([b621946](https://github.com/Manuel-777/MTG-Arena-Tool/commit/b621946))
+* ensure eslint passes before building ([47b3273](https://github.com/Manuel-777/MTG-Arena-Tool/commit/47b3273))
+* finally admit to my part in this ([6af154c](https://github.com/Manuel-777/MTG-Arena-Tool/commit/6af154c))
+* hook up eslint to npm test ([8ae1608](https://github.com/Manuel-777/MTG-Arena-Tool/commit/8ae1608))
+* ignore tests and 3rd party files ([5307711](https://github.com/Manuel-777/MTG-Arena-Tool/commit/5307711))
+* missing globals lint declarations ([05aa3e2](https://github.com/Manuel-777/MTG-Arena-Tool/commit/05aa3e2))
+* remove unused function ([a0684c6](https://github.com/Manuel-777/MTG-Arena-Tool/commit/a0684c6))
+* remove unused updater codes ([a99d526](https://github.com/Manuel-777/MTG-Arena-Tool/commit/a99d526))
+* scoping violation bugfixes ([7e5e162](https://github.com/Manuel-777/MTG-Arena-Tool/commit/7e5e162))
+* travis test - this should fail ([c6bf2c3](https://github.com/Manuel-777/MTG-Arena-Tool/commit/c6bf2c3))
+* Update overlay.js ([7889da2](https://github.com/Manuel-777/MTG-Arena-Tool/commit/7889da2))
+
+
+
 ## <small>2.4.6 (2019-05-09)</small>
 
 * Aggregator defaults to last 30 days ([144ef19](https://github.com/Manuel-777/MTG-Arena-Tool/commit/144ef19))
