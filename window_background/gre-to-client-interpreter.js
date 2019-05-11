@@ -155,7 +155,7 @@ annotationFunctions.AnnotationType_ZoneTransfer = function(ann, details) {
     actionLog(
       seat,
       false,
-      `${playerName} casted ${actionLogGenerateLink(grpId)}`
+      `${playerName} cast ${actionLogGenerateLink(grpId)}`
     );
   }
 
