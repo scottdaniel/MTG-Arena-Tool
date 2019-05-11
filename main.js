@@ -13,6 +13,12 @@ const {
 const path = require("path");
 const fs = require("fs");
 const {autoUpdater} = require("electron-updater");
+const Store = require("./store.js");
+
+var rememberStore = new Store({
+  configName: "remember",
+  defaults: {}
+});
 
 app.setAppUserModelId("com.github.manuel777.mtgatool");
 
@@ -73,15 +79,14 @@ function startUpdater() {
     updaterWindow.show();
   });
 
+  let betaChannel = rememberStore.get("settings.beta_channel");
+  if (betaChannel) {
+    autoUpdater.allowPrerelease = true;
+  }
+
   autoUpdater.checkForUpdatesAndNotify();
 }
 
-/*
-autoUpdater.on("checking-for-update", () => {
-});
-autoUpdater.on("update-available", info => {
-});
-*/
 autoUpdater.on("update-not-available", info => {
   console.log("Update not available", info);
   if (mainWindow) {

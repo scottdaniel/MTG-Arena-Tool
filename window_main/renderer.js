@@ -2210,6 +2210,13 @@ function open_settings(openSection) {
 
   add_checkbox(
     section,
+    "Beta updates channel",
+    "settings_betachannel",
+    settings.beta_channel,
+    "updateAppSettings()"
+  );
+  add_checkbox(
+    section,
     "Login automatically",
     "settings_autologin",
     settings.auto_login,
@@ -2875,9 +2882,11 @@ function updateUserSettings() {
 function updateAppSettings() {
   const auto_login = document.getElementById("settings_autologin").checked;
   let launch_to_tray = document.getElementById("settings_launchtotray").checked;
+  let beta_channel = document.getElementById("settings_betachannel").checked;
   const rSettings = {
     auto_login,
-    launch_to_tray
+    launch_to_tray,
+    beta_channel
   };
   ipc_send("save_app_settings", rSettings);
 }

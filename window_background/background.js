@@ -86,7 +86,8 @@ const rememberCfg = {
   settings: {
     auto_login: false,
     launch_to_tray: false,
-    remember_me: true
+    remember_me: true,
+    beta_channel: false
   }
 };
 
