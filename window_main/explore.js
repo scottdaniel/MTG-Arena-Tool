@@ -39,7 +39,7 @@ let ownedWildcards = { c: 0, u: 0, r: 0, m: 0 };
 
 let ranks_list = ["Bronze", "Silver", "Gold", "Platinum", "Diamond", "Mythic"];
 
-const open_deck = require("./deck_details").open_deck;
+const openDeck = require("./deck-details").openDeck;
 
 let raritySort = { c: "common", u: "uncommon", r: "rare", m: "mythic" };
 
@@ -574,7 +574,7 @@ function deckLoad(_deck, index) {
   $("." + index).on("click", function() {
     _deck.mainDeck = removeDuplicates(_deck.mainDeck).sort(compare_cards);
     _deck.sideboard = removeDuplicates(_deck.sideboard).sort(compare_cards);
-    open_deck(_deck, 1);
+    openDeck(_deck, 1);
     $(".moving_ux").animate({ left: "-100%" }, 250, "easeInOutCubic");
   });
 }

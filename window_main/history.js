@@ -65,7 +65,7 @@ function setFilters(selected = {}) {
   }
 }
 
-function open_history_tab(_deprecated, _filters = {}) {
+function openHistoryTab(_deprecated, _filters = {}) {
   if (sidebarActive != 1 || decks == null) return;
 
   var mainDiv = document.getElementById("ux_0");
@@ -134,7 +134,7 @@ function open_history_tab(_deprecated, _filters = {}) {
 
   const filterPanel = new FilterPanel(
     "history_top",
-    selected => open_history_tab(0, selected),
+    selected => openHistoryTab(0, selected),
     filters,
     allMatches.events,
     matchesInEvent.tags,
@@ -498,7 +498,7 @@ function renderRanksStats(container) {
   container.appendChild(title);
 
   seasonToggleButton.addEventListener("click", () => {
-    open_history_tab(0, switchSeasonFilters);
+    openHistoryTab(0, switchSeasonFilters);
   });
 }
 
@@ -864,4 +864,4 @@ function compare_matches(a, b) {
   return Date.parse(a.date) - Date.parse(b.date);
 }
 
-module.exports = { open_history_tab, setFilters };
+module.exports = { openHistoryTab, setFilters };

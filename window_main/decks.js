@@ -16,7 +16,7 @@ global
 	ipc_send,
   makeResizable,
   mana,
-	open_deck,
+	openDeck,
   orderedCardRarities,
 	sidebarActive,
   sidebarSize,
@@ -30,7 +30,7 @@ let filters = Aggregator.getDefaultFilters();
 filters.onlyCurrentDecks = true;
 
 //
-function open_decks_tab() {
+function openDecksTab() {
   if (sidebarActive == 0 && decks != null) {
     hideLoadingBars();
     var mainDiv = document.getElementById("ux_0");
@@ -84,7 +84,7 @@ function open_decks_tab() {
         // default case
         filters = { ...filters, ...selected };
       }
-      open_decks_tab();
+      openDecksTab();
     };
     const tags = Aggregator.gatherTags(decks);
     const filterPanel = new FilterPanel(
@@ -286,7 +286,7 @@ function open_decks_tab() {
       });
 
       $("." + deck.id).on("click", function() {
-        open_deck(deck, 2);
+        openDeck(deck, 2);
         $(".moving_ux").animate({ left: "-100%" }, 250, "easeInOutCubic");
       });
 
@@ -454,4 +454,4 @@ function deleteDeck(_deck) {
   });
 }
 
-module.exports = { open_decks_tab: open_decks_tab };
+module.exports = { openDecksTab: openDecksTab };

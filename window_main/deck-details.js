@@ -383,5 +383,5 @@ function openDeck(deck, deck_type) {
 }
 
 module.exports = {
-  open_deck: openDeck
+  openDeck: openDeck
 };

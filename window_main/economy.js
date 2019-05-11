@@ -788,5 +788,5 @@ function compare_economy(a, b) {
 }
 
 module.exports = {
-  open_economy_tab: openEconomyTab
+  openEconomyTab: openEconomyTab
 };

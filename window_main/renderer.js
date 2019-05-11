@@ -60,16 +60,16 @@ const MenuItem = remote.MenuItem;
 require("time-elements");
 const striptags = require("striptags");
 
-const FilterPanel = require("./FilterPanel.js");
-const StatsPanel = require("./StatsPanel.js");
+const FilterPanel = require("./filter-panel.js");
+const StatsPanel = require("./stats-panel.js");
 const DataScroller = require("./data-scroller.js");
-const open_home_tab = require("./home").open_home_tab;
+const openHomeTab = require("./home").openHomeTab;
 const tournamentOpen = require("./tournaments").tournamentOpen;
 const tournamentCreate = require("./tournaments").tournamentCreate;
 const tournamentSetState = require("./tournaments").tournamentSetState;
-const open_deck = require("./deck_details").open_deck;
-const open_decks_tab = require("./decks").open_decks_tab;
-const { open_history_tab, setFilters } = require("./history");
+const openDeck = require("./deck-details").openDeck;
+const openDecksTab = require("./decks").openDecksTab;
+const { openHistoryTab, setFilters } = require("./history");
 const openExploreTab = require("./explore").openExploreTab;
 const setExploreDecks = require("./explore").setExploreDecks;
 const updateExploreCheckbox = require("./explore").updateExploreCheckbox;
@@ -77,8 +77,7 @@ const openCollectionTab = require("./collection").openCollectionTab;
 const openEventsTab = require("./events").openEventsTab;
 const expandEvent = require("./events").expandEvent;
 
-const open_economy_tab = require("./economy").open_economy_tab;
-const set_economy_history = require("./economy").set_economy_history;
+const openEconomyTab = require("./economy").openEconomyTab;
 
 const { RANKED_CONST, RANKED_DRAFT, DATE_SEASON } = Aggregator;
 
@@ -224,7 +223,7 @@ ipc.on("auth", function(event, arg) {
 ipc.on("set_discord_tag", (event, arg) => {
   discordTag = arg;
   if (sidebarActive == -1) {
-    open_home_tab(null, true);
+    openHomeTab(null, true);
   }
 });
 
@@ -376,7 +375,7 @@ ipc.on("set_decks", function(event, arg) {
       allMatches = Aggregator.createAllMatches();
     }
   }
-  open_decks_tab();
+  openDecksTab();
 });
 
 //
@@ -404,7 +403,7 @@ ipc.on("set_history", function(event, arg) {
     }
   }
 
-  open_history_tab(0);
+  openHistoryTab(0);
 });
 
 //
@@ -454,7 +453,7 @@ ipc.on("set_economy", function(event, arg) {
   }
 
   if (sidebarActive == 4) {
-    open_economy_tab(0);
+    openEconomyTab(0);
   }
 });
 
@@ -553,7 +552,7 @@ ipc.on("set_home", function(event, arg) {
   ipc_send("set_deck_archetypes", arg.tags);
   if (sidebarActive == -1) {
     console.log("Home", arg);
-    open_home_tab(arg);
+    openHomeTab(arg);
   }
 });
 
@@ -607,7 +606,7 @@ ipc.on("open_course_deck", function(event, arg) {
 
   arg.mainDeck = removeDuplicates(arg.mainDeck);
   arg.sideboard = removeDuplicates(arg.sideboard);
-  open_deck(arg, 1);
+  openDeck(arg, 1);
   hideLoadingBars();
 });
 
@@ -973,7 +972,7 @@ $(document).ready(function() {
           showOfflineSplash();
         } else {
           if (discordTag == null) {
-            open_home_tab(null, true);
+            openHomeTab(null, true);
           } else {
             ipc_send("request_home", filteredWildcardsSet);
           }
@@ -981,7 +980,7 @@ $(document).ready(function() {
       }
       if ($(this).hasClass("it0")) {
         sidebarActive = 0;
-        open_decks_tab();
+        openDecksTab();
       }
       if ($(this).hasClass("it1")) {
         sidebarActive = 1;
@@ -1293,7 +1292,7 @@ function drawDeckVisual(_div, _stats, deck) {
     );
 
     $(".openDeck").click(function() {
-      open_deck(-1, 2);
+      openDeck(-1, 2);
     });
   }
 
@@ -1580,7 +1579,7 @@ function setChangesTimeline() {
   $('<div class="button_simple openDeck">View stats</div>').appendTo(cont);
 
   $(".openDeck").click(function() {
-    open_deck(-1, 2);
+    openDeck(-1, 2);
   });
   time.appendTo(cont);
 }

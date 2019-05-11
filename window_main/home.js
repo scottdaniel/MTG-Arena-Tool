@@ -27,7 +27,7 @@ let topWildcards = null;
 let homeInterval = null;
 
 // Should separate these two into smaller functions
-function open_home_tab(arg, opentab = true) {
+function openHomeTab(arg, opentab = true) {
   let mainDiv = document.getElementById("ux_0");
   mainDiv.classList.remove("flex_item");
   mainDiv.innerHTML = "";
@@ -351,5 +351,5 @@ function open_home_tab(arg, opentab = true) {
 }
 
 module.exports = {
-  open_home_tab: open_home_tab
+  openHomeTab: openHomeTab
 };
