@@ -10,7 +10,10 @@ global
   CardsList,
   Deck,
   draftRanks,
+  eventsList,
+  eventsToFormat,
   get_ids_colors,
+  setsList,
   windowBackground,
   windowOverlay,
 */

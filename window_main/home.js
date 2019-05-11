@@ -1,5 +1,6 @@
 /*
 global
+  addCardHover,
   authToken,
   cardsDb,
   discordTag,

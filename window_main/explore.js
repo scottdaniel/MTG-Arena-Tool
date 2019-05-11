@@ -35,7 +35,7 @@ let filterSortDir = "";
 let onlyOwned = false;
 let filteredMana = [];
 let filteredranks = [];
-//let ownedWildcards = { c: 0, u: 0, r: 0, m: 0 };
+let ownedWildcards = { c: 0, u: 0, r: 0, m: 0 };
 
 let ranks_list = ["Bronze", "Silver", "Gold", "Platinum", "Diamond", "Mythic"];
 

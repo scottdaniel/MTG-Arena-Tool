@@ -199,13 +199,6 @@ function startApp() {
         overlay.webContents.send("set_cards", arg.cards);
         break;
 
-      case "renderer_update_install":
-        if (updateState == 3) {
-          autoUpdater.quitAndInstall();
-        }
-        background.webContents.send("update_install", 1);
-        break;
-
       case "set_opponent_rank":
         overlay.webContents.send("set_opponent_rank", arg.rank, arg.str);
         break;

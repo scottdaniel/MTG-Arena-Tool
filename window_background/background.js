@@ -40,6 +40,7 @@ global
   onLabelMatchGameRoomStateChangedEvent,
   onLabelInEventGetSeasonAndRankDetail,
   onLabelGetPlayerInventoryGetRewardSchedule,
+  onLabelRankUpdated,
   HIDDEN_PW
 */
 var electron = require("electron");

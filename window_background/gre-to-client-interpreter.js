@@ -13,6 +13,7 @@ globals
   gameStage,
   getNameBySeat,
   idChanges,
+  initialLibraryInstanceIds,
   instanceToCardIdMap,
   ipc,
   update_deck

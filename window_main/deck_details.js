@@ -1,23 +1,29 @@
 /*
 global
+    add,
+    cardsDb,
+    ConicGradient,
     change_background,
     drawDeck,
     drawDeckVisual,
-    ipc_send,
-    change_background,
-    get_deck_types_ammount,
-    get_deck_curve,
+    economyHistory,
     get_deck_colors_ammount,
-    get_deck_lands_ammount,
-    get_deck_missing,
+    get_deck_curve,
     get_deck_export,
     get_deck_export_txt,
+    get_deck_lands_ammount,
+    get_deck_missing,
+    get_deck_types_ammount,
+    ipc_send,
     mana,
-    ConicGradient,
+    orderedCardRarities,
+    orderedCardTypes,
+    orderedCardTypesDesc,
+    orderedColorCodes,
+    orderedManaColors,
+    pop,
     getDeckWinrate,
-    economyHistory,
-    cardsDb,
-    add,
+    getTagColor,
     getBoosterCountEstimate
 */
 
@@ -373,28 +379,6 @@ function openDeck(deck, deck_type) {
   $(".back").click(() => {
     change_background("default");
     $(".moving_ux").animate({ left: "0px" }, 250, "easeInOutCubic");
-  });
-}
-
-function openActionLog(actionLog) {
-  actionLog.sort(compare_logs);
-
-  actionLog.forEach(function(log) {
-    log.str = striptags(log.str, ["log-card", "log-ability"]);
-    var d = new Date(log.time);
-    var hh = ("0" + d.getHours()).slice(-2);
-    var mm = ("0" + d.getMinutes()).slice(-2);
-    var ss = ("0" + d.getSeconds()).slice(-2);
-
-    var box = $('<div class="actionlog log_p' + log.seat + '"></div>');
-    var time = $(
-      '<div class="actionlog_time">' + hh + ":" + mm + ":" + ss + "</div>"
-    );
-    var str = $('<div class="actionlog_text">' + log.str + "</div>");
-
-    box.append(time);
-    box.append(str);
-    deckListDiv.append(box);
   });
 }
 

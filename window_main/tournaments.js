@@ -5,6 +5,7 @@ global
   addCardTile,
   change_background,
   createDivision,
+  createSelect,
   compare_cards,
   decks,
   drawDeck,
@@ -52,6 +53,8 @@ function tournamentCreate() {
   });
 }
 
+let stats;
+let record = "-";
 function tournamentOpen(t) {
   //console.log(t);
   tou = t;
@@ -70,8 +73,6 @@ function tournamentOpen(t) {
   }
 
   let joined = false;
-  let record = "-";
-  let stats;
   if (tou.players.indexOf(playerData.name) !== -1) {
     joined = true;
     stats = tou.playerStats[playerData.name];
@@ -84,7 +85,7 @@ function tournamentOpen(t) {
   top.appendChild(topButtonBack);
   top.appendChild(topDeckName);
 
-  flr = createDivision(["tou_top_status", "state_clock"]);
+  let flr = createDivision(["tou_top_status", "state_clock"]);
   flr.style.alignSelf = "center";
 
   let state = "";

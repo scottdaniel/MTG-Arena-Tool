@@ -1,29 +1,38 @@
 /*
 global
-  Aggregator,
-  setsList,
-  cardsDb,
-  makeId,
-  timeSince,
   addCardHover,
   addCardSeparator,
   addCardTile,
-  getReadableEvent,
+  Aggregator,
+  cardsDb,
+  compare_archetypes,
+  compare_cards,
+  compare_colors,
+  deck_count_types,
+  draftRanks,
+  eventsList,
+  eventsToFormat,
+  get_card_image,
+  get_card_type_sort,
   get_deck_colors,
-  get_deck_types_ammount,
   get_deck_export,
   get_deck_export_txt,
-  get_rank_index_16,
+  get_deck_types_ammount,
   get_rank_index,
-  draftRanks
-  get_card_type_sort,
-  compare_colors,
-  compare_cards,
+  get_rank_index_16,
+  getReadableEvent,
+  HIDDEN_PW,
+  hypergeometricSignificance,
+  hypergeometricRange,
+  makeId,
+  playerDataDefault,
+  rankedEvents,
+  removeDuplicates,
+  set_tou_state,
+  setsList,
+  timeSince,
   windowBackground,
   windowRenderer,
-  deck_count_types,
-  removeDuplicates,
-  HIDDEN_PW,
   $$
 */
 
@@ -95,6 +104,7 @@ var orderedManaColors = [
 
 let shell = electron.shell;
 let ipc = electron.ipcRenderer;
+let deck = null;
 let decks = null;
 let changes = null;
 let matchesHistory = [];
@@ -839,10 +849,6 @@ function pop(str, timeout) {
       popTimeout = null;
     }, timeout);
   }
-}
-
-function installUpdate() {
-  ipc_send("renderer_update_install", 1);
 }
 
 function force_open_settings() {

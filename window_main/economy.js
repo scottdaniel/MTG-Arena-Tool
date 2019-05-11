@@ -15,6 +15,7 @@ global
   get_card_image,
   get_set_scryfall,
   getReadableEvent,
+  getReadableQuest,
   ipc_send,
   localDateFormat,
   localDayDateFormat,
