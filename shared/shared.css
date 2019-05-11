@@ -848,7 +848,7 @@ span {
 }
 
 .action_log_container {
-    margin: 0 auto;
+    margin: 16px auto 48px auto;
     max-width: 600px;
 }
 

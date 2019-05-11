@@ -2111,7 +2111,7 @@ function openActionLog(actionLogId) {
   let str = fs.readFileSync(actionLogFile).toString();
 
   let actionLog = str.split("\n");
-  for (let line = 1; line < actionLog.length; line += 3) {
+  for (let line = 1; line < actionLog.length-1; line += 3) {
     let seat = actionLog[line];
     let time = actionLog[line + 1];
     let str = actionLog[line + 2];
