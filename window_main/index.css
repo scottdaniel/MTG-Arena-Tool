@@ -495,6 +495,20 @@ span.top_nav_item_text {
     color: rgba(183, 200, 158, 1);
 }
 
+.ontheplay {
+    width: 24px;
+    height: 24px;
+    margin: auto 6px auto -6px;
+    background: url(../images/ontheplay.png);
+}
+
+.onthedraw {
+    width: 24px;
+    height: 24px;
+    margin: auto 6px auto -6px;
+    background: url(../images/onthedraw.png);
+}
+
 .list_draft_share {
     cursor: pointer;
     opacity: 0.75;

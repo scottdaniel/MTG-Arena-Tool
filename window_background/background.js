@@ -1823,6 +1823,7 @@ function saveMatch(matchId) {
   });
 
   var match = {};
+  match.onThePlay = currentMatch.onThePlay;
   match.id = currentMatch.matchId;
   match.duration = currentMatch.matchTime;
   match.opponent = {

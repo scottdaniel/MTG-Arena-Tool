@@ -300,6 +300,16 @@ function renderData(container, index) {
       jQuery.data(t, "autocomplete", tags);
     }
 
+    if (match.onThePlay) {
+      let onThePlay = false;
+      if (match.player.seat == match.onThePlay) {
+        onThePlay = true;
+      }
+      let div = createDivision([onThePlay ? "ontheplay" : "onthedraw"]);
+      div.title = onThePlay ? "On the play" : "On the draw";
+      flr.appendChild(div);
+    }
+
     d = createDivision(
       [
         "list_match_result",
