@@ -1,3 +1,13 @@
+## 2.5.0 (2019-05-11)
+
+* Add on the play/draw winrates ([c3d5c04](https://github.com/Manuel-777/MTG-Arena-Tool/commit/c3d5c04))
+* Allow prerelease updates ([e310d6e](https://github.com/Manuel-777/MTG-Arena-Tool/commit/e310d6e))
+* classes files and function style ([9efa14b](https://github.com/Manuel-777/MTG-Arena-Tool/commit/9efa14b))
+* reverse sets ([d627a65](https://github.com/Manuel-777/MTG-Arena-Tool/commit/d627a65))
+* Show on the play / draw ([ee3fdba](https://github.com/Manuel-777/MTG-Arena-Tool/commit/ee3fdba))
+
+
+
 ## <small>2.4.7 (2019-05-11)</small>
 
 * "casted" ([b552152](https://github.com/Manuel-777/MTG-Arena-Tool/commit/b552152))
