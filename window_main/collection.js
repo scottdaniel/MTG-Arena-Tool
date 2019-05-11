@@ -470,7 +470,7 @@ function printStats() {
   mainstats.appendChild(rs);
 
   // each set stats
-  orderedSets.forEach(set => {
+  orderedSets.slice().reverse().forEach(set => {
     let rs = renderSetStats(stats[set], setsList[set].code, set);
     mainstats.appendChild(rs);
   });
