@@ -496,16 +496,16 @@ span.top_nav_item_text {
 }
 
 .ontheplay {
-    width: 24px;
-    height: 24px;
-    margin: auto 6px auto -6px;
+    width: 16px;
+    height: 16px;
+    margin: auto 8px auto -6px;
     background: url(../images/ontheplay.png);
 }
 
 .onthedraw {
-    width: 24px;
-    height: 24px;
-    margin: auto 6px auto -6px;
+    width: 16px;
+    height: 16px;
+    margin: auto 8px auto -6px;
     background: url(../images/onthedraw.png);
 }
 
