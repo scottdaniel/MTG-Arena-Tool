@@ -851,10 +851,6 @@ function pop(str, timeout) {
   }
 }
 
-function installUpdate() {
-  ipc_send("renderer_update_install", 1);
-}
-
 function force_open_settings() {
   sidebarActive = 6;
   $(".top_nav_item").each(function() {

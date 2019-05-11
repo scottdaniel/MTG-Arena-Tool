@@ -142,12 +142,6 @@ function startApp() {
     updaterWindow = undefined;
   }
 
-  //
-  let updateState = null;
-  ipc.on("set_update_state", function(event, arg) {
-    updateState = arg;
-  });
-
   ipc.on("ipc_switch", function(event, method, from, arg, to) {
     if (debugIPC && method != "log_read") {
       if (
@@ -203,13 +197,6 @@ function startApp() {
       case "set_cards":
         mainWindow.webContents.send("set_cards", arg.cards, arg.new);
         overlay.webContents.send("set_cards", arg.cards);
-        break;
-
-      case "renderer_update_install":
-        if (updateState == 3) {
-          autoUpdater.quitAndInstall();
-        }
-        background.webContents.send("update_install", 1);
         break;
 
       case "set_opponent_rank":
