@@ -128,7 +128,7 @@ function tournamentOpen(t) {
   }
   if (tou.state == 3) {
     state = "";
-    $$(".state_clock")[0].innerHTML = "Top " + tou.top;
+    //$$(".state_clock")[0].innerHTML = "Top " + tou.top;
   }
   if (tou.state == 4) {
     state = "Tournament finish.";
@@ -425,7 +425,7 @@ function showTournamentStarted(mainDiv, tou) {
       }
 
       let s = "";
-      if (match.p1 == userName) s = 'style="color: rgba(183, 200, 158, 1);"';
+      if (match.p1 == playerData.name) s = 'style="color: rgba(183, 200, 158, 1);"';
       if (match.p1 == "TBD#00000")
         s = 'style="color: rgba(250, 229, 210, 0.65);"';
 
@@ -434,7 +434,7 @@ function showTournamentStarted(mainDiv, tou) {
           d1}<div class="${p1wc} tou_match_score">${match.p1w}</div></div>`
       );
       s = "";
-      if (match.p2 == userName) s = 'style="color: rgba(183, 200, 158, 1);"';
+      if (match.p2 == playerData.name) s = 'style="color: rgba(183, 200, 158, 1);"';
       if (match.p2 == "TBD#00000")
         s = 'style="color: rgba(250, 229, 210, 0.65);"';
       let p2 = $(
