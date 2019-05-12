@@ -1,9 +1,7 @@
 /*
 globals
-  addHover,
   Aggregator,
   allMatches,
-  cardsDb,
   compare_cards,
   createDivision,
   currentId,
@@ -22,6 +20,8 @@ globals
   makeId,
   mana,
   matchesHistory,
+  open_match,
+  open_draft,
   ListItem,
   playerData,
   selectAdd,
