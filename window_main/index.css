@@ -3183,7 +3183,7 @@ a:hover {
 }
 
 .list_item_image {
-    width: 128px;
+    min-width: 128px;
     height: 64px;
     margin: 0px 16px 0px 0px;
     opacity: 0.66;
