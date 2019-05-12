@@ -1,3 +1,11 @@
+## <small>2.5.1 (2019-05-12)</small>
+
+* fix top 4 view ([0eec484](https://github.com/Manuel-777/MTG-Arena-Tool/commit/0eec484))
+* smaller play/draw icons ([04d5ce9](https://github.com/Manuel-777/MTG-Arena-Tool/commit/04d5ce9))
+* Update .bumpedrc ([c0cd765](https://github.com/Manuel-777/MTG-Arena-Tool/commit/c0cd765))
+
+
+
 ## 2.5.0 (2019-05-11)
 
 * Add on the play/draw winrates ([c3d5c04](https://github.com/Manuel-777/MTG-Arena-Tool/commit/c3d5c04))
