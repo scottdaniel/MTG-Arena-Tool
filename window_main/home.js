@@ -1,5 +1,6 @@
 /*
 global
+  $$,
   addCardHover,
   authToken,
   cardsDb,
@@ -69,11 +70,11 @@ function openHomeTab(arg, opentab = true) {
     homeInterval = window.setInterval(() => {
       let dd = new Date(rewards_daily_ends);
       let timeleft = dd.getTime() / 1000 - timestamp();
-      $(".daily_left").html("Daily rewards end: " + toDDHHMMSS(timeleft));
+      daily.innerHTML = "Daily rewards end: " + toDDHHMMSS(timeleft);
 
       dd = new Date(rewards_weekly_ends);
       timeleft = dd.getTime() / 1000 - timestamp();
-      $(".weekly_left").html("Weekly rewards end: " + toDDHHMMSS(timeleft));
+      weekly.innerHTML = "Weekly rewards end: " + toDDHHMMSS(timeleft);
     }, 250);
 
     mainDiv.appendChild(users);
@@ -88,8 +89,8 @@ function openHomeTab(arg, opentab = true) {
   let cont = createDivision(["tournament_list_cont"]);
 
   if (discordTag == null) {
-    let but = $('<div class="discord_but"></div>');
-    but.click(() => {
+    let but = createDivision(["discord_but"]);
+    but.addEventListener("click", () => {
       let url =
         "https://discordapp.com/api/oauth2/authorize?client_id=531626302004789280&redirect_uri=http%3A%2F%2Fmtgatool.com%2Fdiscord%2F&response_type=code&scope=identify%20email&state=" +
         authToken;
@@ -154,9 +155,8 @@ function openHomeTab(arg, opentab = true) {
           listInterval.push(
             window.setInterval(() => {
               let now = timestamp();
-              $(".list_state_" + index).html(
-                "Registration begins in " + toHHMMSS(now - tou.starts)
-              );
+              $$(".list_state_" + index)[0].innerHTML =
+                "Registration begins in " + toHHMMSS(now - tou.starts);
             }, 250)
           );
         }
@@ -166,9 +166,8 @@ function openHomeTab(arg, opentab = true) {
           listInterval.push(
             window.setInterval(() => {
               let now = timestamp();
-              $(".list_stateb_" + index).html(
-                toHHMMSS(roundsStart - now) + " left"
-              );
+              $$(".list_stateb_" + index)[0].innerHTML =
+                toHHMMSS(roundsStart - now) + " left";
             }, 250)
           );
         }
@@ -183,9 +182,8 @@ function openHomeTab(arg, opentab = true) {
           listInterval.push(
             window.setInterval(() => {
               let now = timestamp();
-              $(".list_stateb_" + index).html(
-                toHHMMSS(roundEnd - now) + " left"
-              );
+              $$(".list_stateb_" + index)[0].innerHTML =
+                toHHMMSS(roundEnd - now) + " left";
             }, 250)
           );
         }
@@ -220,14 +218,13 @@ function openHomeTab(arg, opentab = true) {
 
   mainDiv.appendChild(cont);
 
-  $(".tou_container").each(function() {
-    $(this).on("click", function() {
-      let ti = $(this).attr("id");
-      if (ti == "create") {
+  $$(".tou_container").forEach(cont => {
+    cont.addEventListener("click", () => {
+      if (cont.id == "create") {
         tournamentCreate();
       } else {
         document.body.style.cursor = "progress";
-        ipc_send("tou_get", ti);
+        ipc_send("tou_get", cont.id);
       }
     });
   });
