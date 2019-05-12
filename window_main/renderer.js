@@ -60,6 +60,7 @@ const MenuItem = remote.MenuItem;
 require("time-elements");
 const striptags = require("striptags");
 
+const ListItem = require("./list-item.js");
 const FilterPanel = require("./filter-panel.js");
 const StatsPanel = require("./stats-panel.js");
 const DataScroller = require("./data-scroller.js");
@@ -1585,10 +1586,11 @@ function setChangesTimeline() {
 }
 
 //
-function open_draft(id, tileGrpid, set) {
+function open_draft(id) {
   console.log("OPEN DRAFT", id, draftPosition);
   $("#ux_1").html("");
-  var draft = matchesHistory[id];
+  let draft = matchesHistory[id];
+  let tileGrpid = setsList[draft.set].tile;
 
   if (draftPosition < 1) draftPosition = 1;
   if (draftPosition > packSize * 6) draftPosition = packSize * 6;
@@ -1607,7 +1609,7 @@ function open_draft(id, tileGrpid, set) {
 
   var top = $(
     '<div class="decklist_top"><div class="button back"></div><div class="deck_name">' +
-      set +
+      draft.set +
       " Draft</div></div>"
   );
   let flr = $('<div class="deck_top_colors"></div>');
@@ -1689,17 +1691,17 @@ function open_draft(id, tileGrpid, set) {
 
   $(".slider").on("click mouseup", function() {
     draftPosition = parseInt(qSel.value);
-    open_draft(id, tileGrpid, set);
+    open_draft(id, tileGrpid, draft.set);
   });
 
   $(".draft_nav_prev").on("click mouseup", function() {
     draftPosition -= 1;
-    open_draft(id, tileGrpid, set);
+    open_draft(id, tileGrpid, draft.set);
   });
 
   $(".draft_nav_next").on("click mouseup", function() {
     draftPosition += 1;
-    open_draft(id, tileGrpid, set);
+    open_draft(id, tileGrpid, draft.set);
   });
   //
   $(".back").click(function() {

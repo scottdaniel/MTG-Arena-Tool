@@ -498,14 +498,14 @@ span.top_nav_item_text {
 .ontheplay {
     width: 16px;
     height: 16px;
-    margin: auto 8px auto -6px;
+    margin: auto 6px auto 6px;
     background: url(../images/ontheplay.png);
 }
 
 .onthedraw {
     width: 16px;
     height: 16px;
-    margin: auto 8px auto -6px;
+    margin: auto 6px auto 6px;
     background: url(../images/onthedraw.png);
 }
 
@@ -3150,4 +3150,60 @@ a:hover {
     width: 3px;
     height: 100%;
     cursor: w-resize;
+}
+
+.list_item_container {
+    white-space: nowrap;
+    cursor: pointer;
+    padding-left: 16px;
+    height: 64px;
+    display: flex;
+    justify-content: space-between;
+    background-color: rgba(0, 0, 0, 0);
+    -webkit-transition: all .2s ease-in;
+}
+
+.list_item_container:hover {
+    background-color: rgba(0, 0, 0, 0.25);
+}
+
+.list_item_left {
+    overflow: hidden;
+    flex-shrink: 1;
+    display: flex;
+}
+
+.list_item_center {
+    flex-grow: 1;
+    display: flex;
+}
+
+.list_item_right {
+    display: flex;
+}
+
+.list_item_image {
+    width: 128px;
+    height: 64px;
+    margin: 0px 16px 0px 0px;
+    opacity: 0.66;
+    background-image: url('');
+    background-size: 200px;
+    background-position-x: center;
+    background-position-y: -10px;
+    -webkit-transition: .2s ease-out;
+    transition: width opacity;
+}
+
+.list_item_image:hover {
+    opacity: 1;
+    width: 200px;
+}
+
+.list_item_delete {
+    width: 4px;
+    margin-left: 8px;
+    overflow: hidden;
+    background: #DD8263 url(../images/delete.png) no-repeat left;
+    -webkit-transition: all .25s cubic-bezier(0.2, 0.5, 0.35, 1);
 }

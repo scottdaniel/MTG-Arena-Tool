@@ -22,6 +22,7 @@ globals
   makeId,
   mana,
   matchesHistory,
+  ListItem,
   playerData,
   selectAdd,
   setsList,
@@ -157,12 +158,14 @@ function openHistoryTab(_deprecated, _filters = {}) {
 }
 
 // return val = how many rows it rendered into container
+let listItems = [];
+
 function renderData(container, index) {
   // for performance reasons, we leave matches order mostly alone
   // to display most-recent-first, we use a reverse index
   const revIndex = matchesHistory.matches.length - index - 1;
-  var match_id = matchesHistory.matches[revIndex];
-  var match = matchesHistory[match_id];
+  let match_id = matchesHistory.matches[revIndex];
+  let match = matchesHistory[match_id];
 
   //console.log("match: ", match_id, match);
   if (match == undefined) {
@@ -186,206 +189,161 @@ function renderData(container, index) {
     return 0;
   }
 
-  //console.log("Load match: ", match_id, match);
-  //console.log("Match: ", match.type, match);
-
-  let div = createDivision([match.id, "list_match"]);
-  let fltl = createDivision(["flex_item"]);
-  let fll = createDivision(["flex_item"]);
-  fll.style.flexDirection = "column";
-
-  let flt = createDivision(["flex_top"]);
-  let flb = createDivision(["flex_bottom"]);
-  fll.appendChild(flt);
-  fll.appendChild(flb);
-  let fct = createDivision(["flex_top"]);
-
-  let flc = createDivision(["flex_item"]);
-  flc.style.flexDirection = "column";
-  flc.style.flexGrow = 2;
-  flc.appendChild(fct);
-
-  let fcb = createDivision(["flex_bottom"]);
-  fcb.style.marginRight = "14px";
-  flc.appendChild(fcb);
-
-  let flr = createDivision(["rightmost", "flex_item"]);
-
-  var tileGrpid, tile;
-  let d;
+  let tileGrpid, clickCallback, deleteCallback;
   if (match.type == "match") {
-    let t;
     tileGrpid = match.playerDeck.deckTileId;
-    try {
-      t = cardsDb.get(tileGrpid).images["art_crop"];
-    } catch (e) {
-      tileGrpid = 67003;
-    }
-
-    tile = createDivision([match.id + "t", "deck_tile"]);
-
-    try {
-      tile.style.backgroundImage =
-        "url(https://img.scryfall.com/cards" +
-        cardsDb.get(tileGrpid).images["art_crop"] +
-        ")";
-    } catch (e) {
-      console.error(e, tileGrpid);
-    }
-    fltl.appendChild(tile);
-
-    d = createDivision(["list_deck_name"], match.playerDeck.name);
-    flt.appendChild(d);
-
-    d = createDivision(["list_deck_name_it"], getReadableEvent(match.eventId));
-    flt.appendChild(d);
-
-    match.playerDeck.colors.forEach(function(color) {
-      var m = createDivision(["mana_s20", "mana_" + mana[color]]);
-      flb.appendChild(m);
-    });
-
-    if (match.opponent.name == null) {
-      match.opponent.name = "-";
-    }
-    d = createDivision(
-      ["list_match_title"],
-      "vs " + match.opponent.name.slice(0, -6)
-    );
-    fct.appendChild(d);
-
-    var or = createDivision(["ranks_16"]);
-    or.style.backgroundPosition =
-      get_rank_index_16(match.opponent.rank) * -16 + "px 0px";
-    or.title = match.opponent.rank + " " + match.opponent.tier;
-    fct.appendChild(or);
-
-    d = createDivision(
-      ["list_match_time"],
-      timeSince(new Date(match.date)) + " ago - " + toMMSS(match.duration)
-    );
-    fcb.appendChild(d);
-
-    var cc = get_deck_colors(match.oppDeck);
-    cc.forEach(function(color) {
-      var m = createDivision(["mana_s20", "mana_" + mana[color]]);
-      fcb.appendChild(m);
-    });
-
-    let tags_div = createDivision(["history_tags"]);
-    fcb.appendChild(tags_div);
-
-    // set archetype
-    t = eventsToFormat[match.eventId];
-    let tags = [];
-    if (t && deck_tags[t]) {
-      deck_tags[t].forEach(val => {
-        tags.push({ tag: val.tag, q: val.average });
-      });
-    }
-    if (match.tags) {
-      match.tags.forEach(tag => {
-        let t = createTag(tag, tags_div, true);
-        jQuery.data(t, "match", match_id);
-        jQuery.data(t, "autocomplete", tags);
-      });
-      if (match.tags.length == 0) {
-        let t = createTag(null, tags_div, false);
-        jQuery.data(t, "match", match_id);
-        jQuery.data(t, "autocomplete", tags);
-      }
-    } else {
-      let t = createTag(null, tags_div, false);
-      jQuery.data(t, "match", match_id);
-      jQuery.data(t, "autocomplete", tags);
-    }
-
-    if (match.onThePlay) {
-      let onThePlay = false;
-      if (match.player.seat == match.onThePlay) {
-        onThePlay = true;
-      }
-      let div = createDivision([onThePlay ? "ontheplay" : "onthedraw"]);
-      div.title = onThePlay ? "On the play" : "On the draw";
-      flr.appendChild(div);
-    }
-
-    d = createDivision(
-      [
-        "list_match_result",
-        match.player.win > match.opponent.win ? "green" : "red"
-      ],
-      `${match.player.win}:${match.opponent.win}`
-    );
-    flr.appendChild(d);
-  } else if (match.type == "draft") {
-    // console.log("Draft: ", match);
-    try {
-      tileGrpid = setsList[match.set].tile;
-    } catch (e) {
-      tileGrpid = 67003;
-    }
-
-    tile = createDivision([match.id + "t", "deck_tile"]);
-
-    try {
-      tile.style.backgroundImage =
-        "url(https://img.scryfall.com/cards" +
-        cardsDb.get(tileGrpid).images["art_crop"] +
-        ")";
-    } catch (e) {
-      console.error(e);
-    }
-    fltl.appendChild(tile);
-
-    d = createDivision(["list_deck_name"], match.set + " draft");
-    flt.appendChild(d);
-
-    d = createDivision(
-      ["list_match_time"],
-      timeSince(new Date(match.date)) + " ago."
-    );
-    fcb.appendChild(d);
-
-    d = createDivision(["list_match_replay"], "See replay");
-    fct.appendChild(d);
-
-    d = createDivision(["list_draft_share", match.id + "dr"]);
-    flr.appendChild(d);
+    clickCallback = openMatch;
+    deleteCallback = archiveMatch;
+  } else {
+    tileGrpid = setsList[match.set].tile;
+    clickCallback = openDraft;
+    deleteCallback = archiveMatch;
   }
 
-  var fldel = createDivision(["flex_item", match.id + "_del", "delete_item"]);
-  fldel.addEventListener("mouseover", () => {
-    fldel.style.width = "32px";
-  });
-  fldel.addEventListener("mouseout", () => {
-    fldel.style.width = "4px";
-  });
+  let listItem = new ListItem(tileGrpid, match.id, clickCallback, deleteCallback);
+  listItem.divideLeft();
+  listItem.divideRight();
 
-  div.appendChild(fltl);
-  div.appendChild(fll);
-  div.appendChild(flc);
-  div.appendChild(flr);
-  div.appendChild(fldel);
+  if (match.type == "match") {
+    attachMatchData(listItem, match);
+  } else {
+    attachDraftData(listItem, match);
+  }
 
-  container.appendChild(div);
+  container.appendChild(listItem.container);
 
   if (match.type == "draft") {
     addShare(match);
   }
-  addHover(match, tileGrpid);
-
-  archiveMatch(match, fldel, div);
+  //console.log("Load match: ", match_id, match);
+  //console.log("Match: ", match.type, match);
   return 1;
 }
 
-function archiveMatch(match, fldel, div) {
-  fldel.addEventListener("click", e => {
-    e.stopPropagation();
-    ipc_send("archive_match", match.id);
-    div.style.height = "0px";
-    div.style.overflow = "hidden";
+function archiveMatch(id) {
+  ipc_send("archive_match", id);
+}
+
+function openMatch(id) {
+  open_match(id);
+  $(".moving_ux").animate({ left: "-100%" }, 250, "easeInOutCubic");
+}
+
+function openDraft(id) {
+  open_draft(id);
+  $(".moving_ux").animate({ left: "-100%" }, 250, "easeInOutCubic");
+}
+
+function attachMatchData(listItem, match) {
+  // Deck name
+  let deckNameDiv = createDivision(["list_deck_name"], match.playerDeck.name);
+  listItem.leftTop.appendChild(deckNameDiv);
+
+  // Event name
+  let eventNameDiv = createDivision(["list_deck_name_it"], getReadableEvent(match.eventId));
+  listItem.leftTop.appendChild(eventNameDiv);
+
+  match.playerDeck.colors.forEach(color => {
+    let m = createDivision(["mana_s20", "mana_" + mana[color]]);
+    listItem.leftBottom.appendChild(m);
   });
+
+  // Opp name
+  if (match.opponent.name == null) match.opponent.name = "-#000000";
+  let oppNameDiv = createDivision(
+    ["list_match_title"],
+    "vs " + match.opponent.name.slice(0, -6)
+  );
+  listItem.rightTop.appendChild(oppNameDiv);
+
+  // Opp rank
+  let oppRank = createDivision(["ranks_16"]);
+  oppRank.style.marginRight = "0px";
+  oppRank.style.backgroundPosition =
+    get_rank_index_16(match.opponent.rank) * -16 + "px 0px";
+  oppRank.title = match.opponent.rank + " " + match.opponent.tier;
+  listItem.rightTop.appendChild(oppRank);
+
+  // Match time
+  let matchTime = createDivision(
+    ["list_match_time"],
+    timeSince(new Date(match.date)) + " ago - " + toMMSS(match.duration)
+  );
+  listItem.rightBottom.appendChild(matchTime);
+
+  // Opp colors
+  get_deck_colors(match.oppDeck).forEach(color => {
+    var m = createDivision(["mana_s20", "mana_" + mana[color]]);
+    listItem.rightBottom.appendChild(m);
+  });
+
+  let tags_div = createDivision(["history_tags"]);
+  listItem.rightBottom.appendChild(tags_div);
+
+  // Set tag
+  let t = eventsToFormat[match.eventId];
+  let tags = [];
+  if (t && deck_tags[t]) {
+    deck_tags[t].forEach(val => {
+      tags.push({ tag: val.tag, q: val.average });
+    });
+  }
+  if (match.tags) {
+    match.tags.forEach(tag => {
+      let t = createTag(tag, tags_div, true);
+      jQuery.data(t, "match", match.id);
+      jQuery.data(t, "autocomplete", tags);
+    });
+    if (match.tags.length == 0) {
+      let t = createTag(null, tags_div, false);
+      jQuery.data(t, "match", match.id);
+      jQuery.data(t, "autocomplete", tags);
+    }
+  } else {
+    let t = createTag(null, tags_div, false);
+    jQuery.data(t, "match", match.id);
+    jQuery.data(t, "autocomplete", tags);
+  }
+
+  // Result
+  let resultDiv = createDivision(
+    [
+      "list_match_result",
+      match.player.win > match.opponent.win ? "green" : "red"
+    ],
+    `${match.player.win}:${match.opponent.win}`
+  );
+  listItem.right.after(resultDiv);
+
+  // On the play/draw
+  if (match.onThePlay) {
+    let onThePlay = false;
+    if (match.player.seat == match.onThePlay) {
+      onThePlay = true;
+    }
+    let div = createDivision([onThePlay ? "ontheplay" : "onthedraw"]);
+    div.title = onThePlay ? "On the play" : "On the draw";
+    listItem.right.after(div);
+  }
+}
+
+function attachDraftData(listItem, draft) {
+  // console.log("Draft: ", match);
+
+  let draftSetDiv = createDivision(["list_deck_name"], draft.set + " draft");
+  listItem.leftTop.appendChild(draftSetDiv);
+
+  let draftTimeDiv = createDivision(
+    ["list_match_time"],
+    timeSince(new Date(draft.date)) + " ago."
+  );
+  listItem.rightBottom.appendChild(draftTimeDiv);
+
+  let replayDiv = createDivision(["list_match_replay"], "See replay");
+  listItem.rightTop.appendChild(replayDiv);
+
+  let replayShareButton = createDivision(["list_draft_share", draft.id + "dr"]);
+  listItem.right.after(replayShareButton);
 }
 
 function formatPercent(percent, precision) {
