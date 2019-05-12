@@ -490,10 +490,9 @@ function createChangeRow(change, economyId) {
       d.appendChild(img);
 
       flexRight.appendChild(d);
-      var imgDom = $(img);
-      addCardHover(imgDom, card);
+      addCardHover(img, card);
 
-      imgDom.on("click", function() {
+      img.addEventListener("click", () => {
         if (cardsDb.get(grpId).dfc == "SplitHalf") {
           card = cardsDb.get(card.dfcId);
         }
@@ -544,10 +543,9 @@ function createChangeRow(change, economyId) {
         d.appendChild(img);
         flexRight.appendChild(d);
 
-        var imgDom = $(img);
-        addCardHover(imgDom, card);
+        addCardHover(img, card);
 
-        imgDom.on("click", function() {
+        img.addEventListener("click", () => {
           if (cardsDb.get(grpId).dfc == "SplitHalf") {
             card = cardsDb.get(card.dfcId);
           }
