@@ -103,7 +103,7 @@ function openHomeTab(arg, opentab = true) {
       shell.openExternal(url);
     });
 
-    but.appendTo(cont);
+    cont.appendChild(but);
   } else {
     let dname = discordTag.split("#")[0];
     let fl = createDivision(
