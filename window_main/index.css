@@ -2848,7 +2848,7 @@ a:hover {
 }
 
 .tou_stand_line {
-	display: flex;
+    display: grid;
     justify-content: start;
     font-size: 14px;
     height: 28px;
@@ -2856,10 +2856,11 @@ a:hover {
     margin: 0 auto;
     color: #fae5d2;
     background-color: rgba(145, 121, 97, 0.4);
+    grid-template-columns: 5% 5% 20% 7% 1fr 9% 1fr 1fr 1fr 1fr 1fr;
 }
 
 .tou_stand_line_title {
-	display: flex;
+    display: grid;
     justify-content: start;
     height: 32px;
     max-width: 800px;
@@ -2867,7 +2868,8 @@ a:hover {
     color: #fae5d2;
     background-color: rgba(145, 121, 97, 0.4);
     margin-top: 32px;
-    border-bottom: solid 1px rgba(250, 229, 210, 0.6);
+    border-bottom: solid 1px rgba(250, 229, 210, 0.8);
+    grid-template-columns: 5% 5% 20% 7% 1fr 9% 1fr 1fr 1fr 1fr 1fr;
 }
 
 .tou_top_cont {
@@ -2878,12 +2880,12 @@ a:hover {
 }
 
 .tou_top {
+    width: -webkit-fill-available;
     margin: 0 auto;
     flex-wrap: wrap;
     display: flex;
-    justify-content: center;
-    max-width: 800px;
-    margin-bottom: 42px;
+    justify-content: space-around;
+    margin-bottom: 16px;
 }
 
 .tou_list_player_name_title {
@@ -2902,7 +2904,7 @@ a:hover {
 .tou_flag {
     margin-left: 6px;
     align-self: center;
-    width: 19px !important;
+    width: 16px !important;
 }
 
 .swap_icon {
@@ -2933,9 +2935,12 @@ a:hover {
 }
 
 .tou_stand_cell {
-    width: 100px;
     text-indent: 8px;
     line-height: 28px;
+}
+
+.tou_center {
+    text-align: center;
 }
 
 .tou_stand_small {
