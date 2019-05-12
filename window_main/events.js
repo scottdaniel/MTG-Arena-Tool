@@ -74,17 +74,6 @@ function openEventsTab(_filters) {
     eventsHistory.courses.length
   );
   dataScroller.render(25);
-
-  $(".delete_item").hover(
-    () => {
-      // in
-      $(this).css("width", "32px");
-    },
-    () => {
-      // out
-      $(this).css("width", "4px");
-    }
-  );
 }
 
 // return val = how many rows it rendered into container
@@ -95,7 +84,7 @@ function renderData(container, index) {
   var course_id = eventsHistory.courses[revIndex];
   var course = eventsHistory[course_id];
 
-  if (course === undefined || course.CourseDeck === undefined) {
+  if (course === undefined || course.CourseDeck === undefined || course.archived) {
     return 0;
   }
 
@@ -111,7 +100,6 @@ function renderData(container, index) {
   container.appendChild(eventRow);
   container.appendChild(divExp);
 
-  attachDeleteCourseButton(course);
   addHover(course, divExp);
   return 1;
 }
@@ -186,6 +174,15 @@ function createEventRow(course) {
 
   flexDeleteEvent.style.marginRight = "10px";
 
+  flexDeleteEvent.addEventListener("mouseover", () => {
+    flexDeleteEvent.style.width = "32px";
+  });
+  flexDeleteEvent.addEventListener("mouseout", () => {
+    flexDeleteEvent.style.width = "4px";
+  });
+
+  archiveEvent(course, flexDeleteEvent, eventContainer);
+
   eventContainer.appendChild(flexTopLeft);
   eventContainer.appendChild(flexLeft);
   eventContainer.appendChild(flexCenter);
@@ -256,14 +253,12 @@ function createEventRow(course) {
   return eventContainer;
 }
 
-function attachDeleteCourseButton(course) {
-  $(`.${course.id}_del`).on("click", function(e) {
-    // This is a global. It's used in other parts of the code.
-    currentId = course.id;
+function archiveEvent(course, fldel, div) {
+  fldel.addEventListener("click", e => {
     e.stopPropagation();
-    ipc_send("delete_course", currentId);
-    $("." + currentId).css("height", "0px");
-    $("." + currentId).css("overflow", "hidden");
+    ipc_send("archive_course", course.id);
+    div.style.height = "0px";
+    div.style.overflow = "hidden";
   });
 }
 

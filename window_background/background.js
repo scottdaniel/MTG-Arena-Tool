@@ -404,19 +404,6 @@ ipc.on("delete_data", function() {
 });
 
 //
-ipc.on("delete_course", function(event, arg) {
-  ipc_send("show_loading");
-  var i = events.courses.indexOf(arg);
-  if (i > -1) {
-    events.courses.splice(i, 1);
-    store.set("courses_index", events.courses);
-    store.delete(arg);
-  }
-  ipc_send("hide_loading");
-  //console.log("Delete ", arg);
-});
-
-//
 ipc.on("delete_deck", function(event, arg) {
   ipc_send("show_loading");
   var i = decks.index.indexOf(arg);
@@ -431,6 +418,14 @@ ipc.on("delete_deck", function(event, arg) {
     ipc_send("set_decks", JSON.stringify(decks));
     ipc_send("hide_loading");
   }, 200);
+});
+
+//
+ipc.on("archive_course", function(event, arg) {
+  ipc_send("show_loading");
+  events[arg].archived = true;
+  store.set(arg, events[arg]);
+  ipc_send("hide_loading");
 });
 
 //
