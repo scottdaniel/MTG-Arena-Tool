@@ -27,6 +27,12 @@ let topWildcards = null;
 
 let homeInterval = null;
 
+function clearHomeInverals() {
+  listInterval.forEach(_id => {
+    clearInterval(_id);
+  });
+}
+
 // Should separate these two into smaller functions
 function openHomeTab(arg, opentab = true) {
   let mainDiv = document.getElementById("ux_0");
@@ -108,9 +114,7 @@ function openHomeTab(arg, opentab = true) {
     fl.style.width = "fit-content";
     mainDiv.appendChild(fl);
 
-    listInterval.forEach(_id => {
-      clearInterval(_id);
-    });
+    clearHomeInverals();
     listInterval = [];
     if (tournaments_list) {
       // Create tournament button
@@ -155,8 +159,12 @@ function openHomeTab(arg, opentab = true) {
           listInterval.push(
             window.setInterval(() => {
               let now = timestamp();
-              $$(".list_state_" + index)[0].innerHTML =
-                "Registration begins in " + toHHMMSS(now - tou.starts);
+              try {
+                $$(".list_state_" + index)[0].innerHTML =
+                  "Registration begins in " + toHHMMSS(now - tou.starts);
+              } catch (e) {
+                clearHomeInverals();
+              }
             }, 250)
           );
         }
@@ -166,8 +174,12 @@ function openHomeTab(arg, opentab = true) {
           listInterval.push(
             window.setInterval(() => {
               let now = timestamp();
-              $$(".list_stateb_" + index)[0].innerHTML =
-                toHHMMSS(roundsStart - now) + " left";
+              try {
+                $$(".list_stateb_" + index)[0].innerHTML =
+                  toHHMMSS(roundsStart - now) + " left";
+              } catch (e) {
+                clearHomeInverals();
+              }
             }, 250)
           );
         }
@@ -182,8 +194,12 @@ function openHomeTab(arg, opentab = true) {
           listInterval.push(
             window.setInterval(() => {
               let now = timestamp();
-              $$(".list_stateb_" + index)[0].innerHTML =
-                toHHMMSS(roundEnd - now) + " left";
+              try {
+                $$(".list_stateb_" + index)[0].innerHTML =
+                  toHHMMSS(roundEnd - now) + " left";
+              } catch (e) {
+                clearHomeInverals();
+              }
             }, 250)
           );
         }
