@@ -1,5 +1,6 @@
 /*
 globals
+  $$,
   addHover,
   Aggregator,
   allMatches,
@@ -7,7 +8,6 @@ globals
   compare_cards,
   compare_courses,
   createDivision,
-  currentId,
   DataScroller,
   eventsHistory,
   FilterPanel,
@@ -18,7 +18,9 @@ globals
   ipc_send,
   matchesHistory,
   mana,
+  ListItem,
   playerData,
+  queryElementsByClass,
   StatsPanel,
   timeSince,
   toMMSS
@@ -94,13 +96,17 @@ function renderData(container, index) {
     return 0;
   }
 
-  var eventRow = createEventRow(course);
+  var tileGrpid = course.CourseDeck.deckTileId;
+
+  let listItem = new ListItem(tileGrpid, course.id, expandEvent, archiveEvent);
+  listItem.divideLeft();
+  listItem.divideRight();
+  attachEventData(listItem, course);
+
   var divExp = createDivision([course.id + "exp", "list_event_expand"]);
 
-  container.appendChild(eventRow);
+  container.appendChild(listItem.container);
   container.appendChild(divExp);
-
-  addHover(course, divExp);
   return 1;
 }
 
@@ -137,95 +143,23 @@ function getCourseMatches(course) {
   return matches;
 }
 
-function createEventRow(course) {
-  // create the DOM structure
-
-  var eventContainer = createDivision([course.id, "list_match"]);
-
-  var flexTopLeft = createDivision(["flex_item"]);
-
-  var flexLeft = createDivision(["flex_item"]);
-  flexLeft.style.flexDirection = "column";
-
-  var flexTop = createDivision(["flex_top"]);
-  flexLeft.appendChild(flexTop);
-
-  var flexBottom = createDivision(["flex_bottom"]);
-  flexLeft.appendChild(flexBottom);
-
-  var flexCenter = createDivision(["flex_item"]);
-  flexCenter.style.flexDirection = "column";
-  flexCenter.style.flexGrow = 2;
-
-  var flexCenterTop = createDivision(["flex_top"]);
-  flexCenter.appendChild(flexCenterTop);
-
-  var flexCenterBottom = createDivision(["flex_bottom"]);
-  flexCenterBottom.style.marginRight = "14px";
-  flexCenter.appendChild(flexCenterBottom);
-
-  var flexRight = createDivision(["flex_item"]);
-
-  var flexDeleteEvent = createDivision([
-    "flex_item",
-    course.id + "_del",
-    "delete_item"
-  ]);
-
-  flexDeleteEvent.style.marginRight = "10px";
-
-  flexDeleteEvent.addEventListener("mouseover", () => {
-    flexDeleteEvent.style.width = "32px";
-  });
-  flexDeleteEvent.addEventListener("mouseout", () => {
-    flexDeleteEvent.style.width = "4px";
-  });
-
-  archiveEvent(course, flexDeleteEvent, eventContainer);
-
-  eventContainer.appendChild(flexTopLeft);
-  eventContainer.appendChild(flexLeft);
-  eventContainer.appendChild(flexCenter);
-  eventContainer.appendChild(flexRight);
-  eventContainer.appendChild(flexDeleteEvent);
-
-  var tileGrpid = course.CourseDeck.deckTileId;
-  try {
-    cardsDb.get(tileGrpid).set;
-  } catch (e) {
-    tileGrpid = 67003;
-  }
-
-  var tile = createDivision([course.id + "t", "deck_tile"]);
-
-  try {
-    tile.style.backgroundImage =
-      "url(https://img.scryfall.com/cards" +
-      cardsDb.get(tileGrpid).images["art_crop"] +
-      ")";
-  } catch (e) {
-    console.error(e, tileGrpid);
-  }
-  flexTopLeft.appendChild(tile);
-
-  flexTop.appendChild(
-    createDivision(
-      ["list_deck_name"],
-      getReadableEvent(course.InternalEventName)
-    )
-  );
+function attachEventData(listItem, course) {
+  let deckName = getReadableEvent(course.InternalEventName);
+  let deckNameDiv = createDivision(["list_deck_name"], deckName);
+  listItem.leftTop.appendChild(deckNameDiv);
 
   course.CourseDeck.colors.forEach(color => {
-    flexBottom.appendChild(createDivision(["mana_s20", `mana_${mana[color]}`]));
+    let m = createDivision(["mana_s20", `mana_${mana[color]}`]);
+    listItem.leftBottom.appendChild(m);
   });
 
   var eventState = course.CurrentEventState;
   if (eventState == "DoneWithMatches" || eventState == 2) {
-    flexCenterTop.appendChild(
+    listItem.rightTop.appendChild(
       createDivision(["list_event_phase"], "Completed")
     );
   } else {
-    flexCenterTop.appendChild(
+    listItem.rightTop.appendChild(
       createDivision(["list_event_phase_red"], "In progress")
     );
   }
@@ -233,33 +167,27 @@ function createEventRow(course) {
   var matches = getCourseMatches(course);
   var totalDuration = matches.reduce((acc, match) => acc + match.duration, 0);
 
-  flexCenterBottom.appendChild(
+  listItem.rightBottom.appendChild(
     createDivision(
       ["list_match_time"],
       timeSince(new Date(course.date)) + " ago - " + toMMSS(totalDuration)
     )
   );
 
-  var winLossText = "0:0";
-  var matchResultClass = "list_match_result";
+  var wl = "0:0";
   var wlGate = course.ModuleInstanceData.WinLossGate;
   if (wlGate !== undefined) {
-    winLossText = wlGate.CurrentWins + ":" + wlGate.CurrentLosses;
+    wl = wlGate.CurrentWins + ":" + wlGate.CurrentLosses;
   }
   var winLossClass = getEventWinLossClass(wlGate);
 
-  flexRight.appendChild(createDivision([matchResultClass, winLossClass], winLossText));
-
-  return eventContainer;
+  let resultDiv = createDivision(["list_match_result", winLossClass], wl);
+  resultDiv.style.marginLeft = "8px";
+  listItem.right.after(resultDiv);
 }
 
-function archiveEvent(course, fldel, div) {
-  fldel.addEventListener("click", e => {
-    e.stopPropagation();
-    ipc_send("archive_course", course.id);
-    div.style.height = "0px";
-    div.style.overflow = "hidden";
-  });
+function archiveEvent(id) {
+  ipc_send("archive_course", id);
 }
 
 // Given the data of a match will return a data row to be
@@ -390,7 +318,10 @@ function createMatchRow(match) {
 
 // This code is executed when an event row is clicked and adds
 // rows below the event for every match in that event.
-function expandEvent(course, expandDiv) {
+function expandEvent(id) {
+  let course = eventsHistory[id];
+  let expandDiv = queryElementsByClass(id + "exp")[0];
+
   if (expandDiv.hasAttribute("style")) {
     expandDiv.removeAttribute("style");
     setTimeout(function() {

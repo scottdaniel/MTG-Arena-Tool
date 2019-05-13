@@ -698,6 +698,10 @@ function queryElements(selectors, parentNode = document) {
   return [...parentNode.querySelectorAll(selectors)];
 }
 
+function queryElementsByClass(selectors, parentNode = document) {
+  return [...parentNode.getElementsByClassName(selectors)];
+}
+
 // useful alias
 window.$$ = queryElements;
 
