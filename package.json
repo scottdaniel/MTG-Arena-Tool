@@ -30,6 +30,7 @@
   "main": "main.js",
   "build": {
     "appId": "com.github.manuel777.mtgatool",
+    "files": ["!**/__tests__/**"],
     "win": {
       "target": "NSIS",
       "icon": "icon.ico",
@@ -50,8 +51,10 @@
   "scripts": {
     "start": "electron .",
     "postinstall": "install-app-deps",
-    "test": "npx eslint . --quiet",
-    "predist": "npx eslint . --quiet",
+    "lint": "npx eslint . --quiet",
+    "pretest": "npm run lint",
+    "test": "npx jest",
+    "predist": "npm test",
     "dist": "build --x64",
     "version": "node -p \"require('./package.json').version\""
   },
@@ -86,6 +89,7 @@
     "eslint": "^5.16.0",
     "eslint-config-prettier": "^4.2.0",
     "eslint-plugin-prettier": "^3.0.1",
+    "jest": "^24.8.0",
     "prettier": "1.16.4"
   }
 }
