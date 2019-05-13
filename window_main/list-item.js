@@ -52,6 +52,8 @@ class ListItem {
       });
     }
 
+    this.imageContainer.style.opacity = 0.66;
+    this.imageContainer.style.width = "128px";
     this.container.addEventListener("mouseover", () => {
       this.imageContainer.style.opacity = 1;
       this.imageContainer.style.width = "200px";
