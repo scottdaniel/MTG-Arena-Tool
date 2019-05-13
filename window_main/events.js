@@ -1,10 +1,8 @@
 /*
 globals
   $$,
-  addHover,
   Aggregator,
-  allMatches,
-  cardsDb,
+  allMatches
   compare_cards,
   compare_courses,
   createDivision,
@@ -19,6 +17,7 @@ globals
   matchesHistory,
   mana,
   ListItem,
+  open_match,
   playerData,
   queryElementsByClass,
   StatsPanel,
@@ -86,7 +85,11 @@ function renderData(container, index) {
   var course_id = eventsHistory.courses[revIndex];
   var course = eventsHistory[course_id];
 
-  if (course === undefined || course.CourseDeck === undefined || course.archived) {
+  if (
+    course === undefined ||
+    course.CourseDeck === undefined ||
+    course.archived
+  ) {
     return 0;
   }
 
@@ -192,128 +195,69 @@ function archiveEvent(id) {
 
 // Given the data of a match will return a data row to be
 // inserted into one of the screens.
-
-// DOM should be consistent across all screens. Use CSS to style the row and hide elements.
-//
-// Used by events.js and potentially other screens.
 function createMatchRow(match) {
   //  if (match.opponent == undefined) continue;
   //  if (match.opponent.userid.indexOf("Familiar") !== -1) continue;
   match.playerDeck.mainDeck.sort(compare_cards);
   match.oppDeck.mainDeck.sort(compare_cards);
 
-  // Create the DOM structure
-  // rowContainer
-  //   flexTopLeft
-  //   flexLeft
-  //     flexTop
-  //     flexBottom
-  //   flexCenter
-  //     flexCenterTop
-  //     flexCenterBottom
-  //   flexRight
-
-  var rowContainer = createDivision([match.id, "list_match"]);
-
-  var flexTopLeft = createDivision(["flex_item"]);
-
-  var flexLeft = createDivision(["flex_item"]);
-  flexLeft.style.flexDirection = "column";
-
-  var flexTop = createDivision(["flex_top"]);
-  flexLeft.appendChild(flexTop);
-
-  var flexBottom = createDivision(["flex_bottom"]);
-  flexLeft.appendChild(flexBottom);
-
-  var flexCenter = createDivision(["flex_item"]);
-  flexCenter.style.flexDirection = "column";
-  flexCenter.style.flexGrow = 2;
-
-  var flexCenterTop = createDivision(["flex_top"]);
-  flexCenter.appendChild(flexCenterTop);
-
-  var flexCenterBottom = createDivision(["flex_bottom"]);
-  flexCenterBottom.style.marginRight = "14px";
-  flexCenter.appendChild(flexCenterBottom);
-
-  var flexRight = createDivision(["flex_item"]);
-
-  rowContainer.appendChild(flexTopLeft);
-  rowContainer.appendChild(flexLeft);
-  rowContainer.appendChild(flexCenter);
-  rowContainer.appendChild(flexRight);
-
-  // Insert contents of flexTopLeft
-
   var tileGrpid = match.playerDeck.deckTileId;
-  try {
-    cardsDb.get(tileGrpid).images["art_crop"];
-  } catch (e) {
-    tileGrpid = 67003;
-  }
 
-  var tile = createDivision([match.id + "t", "deck_tile"]);
-  try {
-    let backgroundFile = cardsDb.get(tileGrpid).images["art_crop"];
-    tile.style.backgroundImage = `url(https://img.scryfall.com/cards${backgroundFile})`;
-  } catch (e) {
-    timeSince(new Date(match.date)) + " ago - " + toMMSS(match.duration);
-    console.error(e);
-  }
-  flexTopLeft.appendChild(tile);
+  let matchRow = new ListItem(tileGrpid, match.id, openMatch);
+  matchRow.divideLeft();
+  matchRow.divideRight();
 
-  // Insert contents of flexTop
-  flexTop.appendChild(
-    createDivision(["list_deck_name"], match.playerDeck.name)
-  );
+  let deckNameDiv = createDivision(["list_deck_name"], match.playerDeck.name);
+  matchRow.leftTop.appendChild(deckNameDiv);
 
-  // Insert contents of flexBottom
-  match.playerDeck.colors.forEach(function(color) {
+  match.playerDeck.colors.forEach(color => {
     var m = createDivision(["mana_s20", "mana_" + mana[color]]);
-    flexBottom.appendChild(m);
+    matchRow.leftBottom.appendChild(m);
   });
 
   // Insert contents of flexCenterTop
   if (match.opponent.name == null) {
-    match.opponent.name = "-";
+    match.opponent.name = "-#000000";
   }
-
-  flexCenterTop.appendChild(
-    createDivision(
-      ["list_match_title"],
-      "vs " + match.opponent.name.slice(0, -6)
-    )
+  let oppNameDiv = createDivision(
+    ["list_match_title"],
+    "vs " + match.opponent.name.slice(0, -6)
   );
+  matchRow.rightTop.appendChild(oppNameDiv);
 
-  var or = createDivision(["ranks_16"]);
-  or.style.backgroundPosition = `${get_rank_index_16(match.opponent.rank) *
-    -16}px 0px`;
-  or.title = match.opponent.rank + " " + match.opponent.tier;
-  flexCenterTop.appendChild(or);
+  var oppRankDiv = createDivision(["ranks_16"]);
+  oppRankDiv.style.backgroundPosition = `${get_rank_index_16(
+    match.opponent.rank
+  ) * -16}px 0px`;
+  oppRankDiv.title = match.opponent.rank + " " + match.opponent.tier;
+  matchRow.rightTop.appendChild(oppRankDiv);
 
-  // insert contents of flexCenterBottom
-  flexCenterBottom.appendChild(
-    createDivision(
-      ["list_match_time"],
-      timeSince(new Date(match.date)) + " ago - " + toMMSS(match.duration)
-    )
+  let timeDiv = createDivision(
+    ["list_match_time"],
+    timeSince(new Date(match.date)) + " ago - " + toMMSS(match.duration)
   );
+  matchRow.rightBottom.appendChild(timeDiv);
 
   get_deck_colors(match.oppDeck).forEach(function(color) {
     var m = createDivision(["mana_s20", "mana_" + mana[color]]);
-    flexCenterBottom.appendChild(m);
+    matchRow.rightBottom.appendChild(m);
   });
 
-  // insert contents of flexRight
+  matchRow.rightBottom.style.marginRight = "16px";
 
-  var resultClass = "list_match_result";
-  var winLossClass =  match.player.win > match.opponent.win ? "green" : "red";
-  flexRight.appendChild(
-    createDivision([resultClass, winLossClass], match.player.win + ":" + match.opponent.win)
+  var winLossClass = match.player.win > match.opponent.win ? "green" : "red";
+  let resultDiv = createDivision(
+    ["list_match_result", winLossClass],
+    match.player.win + ":" + match.opponent.win
   );
+  matchRow.right.after(resultDiv);
 
-  return rowContainer;
+  return matchRow.container;
+}
+
+function openMatch(id) {
+  open_match(id);
+  $(".moving_ux").animate({ left: "-100%" }, 250, "easeInOutCubic");
 }
 
 // This code is executed when an event row is clicked and adds
@@ -347,7 +291,6 @@ function expandEvent(id) {
     .map(match => {
       let row = createMatchRow(match);
       expandDiv.appendChild(row);
-      addHover(match, expandDiv);
       return row;
     });
 
