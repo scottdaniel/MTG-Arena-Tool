@@ -99,8 +99,8 @@ function openExploreTab() {
   d.classList.add("list_fill");
   mainDiv.appendChild(d);
 
-  $(this).off();
-  $(this).on("scroll", () => {
+  $(mainDiv).off();
+  $(mainDiv).on("scroll", () => {
     if (Math.round(mainDiv.scrollTop + mainDiv.offsetHeight) >= mainDiv.scrollHeight) {
       queryExplore(filterSkip);
     }
