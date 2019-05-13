@@ -15,6 +15,7 @@ relative-time, local-time {
 .top_status, .top_status_span {
     width: 24px;
     height: 24px;
+    margin-right: 4px;
     align-self: center;
 }
 
@@ -240,7 +241,6 @@ relative-time, local-time {
 .top_constructed_rank {
     -webkit-app-region: no-drag;
     align-self: center;
-    margin-left: 8px;
     width: 48px;
     height: 48px;
     background: url(../images/ranks_constructed_48.png);
@@ -250,7 +250,6 @@ relative-time, local-time {
 .top_limited_rank {
     -webkit-app-region: no-drag;
     align-self: center;
-    margin-left: 8px;
     width: 48px;
     height: 48px;
     background: url(../images/ranks_limited_48.png);
