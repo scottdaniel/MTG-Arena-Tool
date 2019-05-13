@@ -470,10 +470,13 @@ function printStats() {
   mainstats.appendChild(rs);
 
   // each set stats
-  orderedSets.slice().reverse().forEach(set => {
-    let rs = renderSetStats(stats[set], setsList[set].code, set);
-    mainstats.appendChild(rs);
-  });
+  orderedSets
+    .slice()
+    .reverse()
+    .forEach(set => {
+      let rs = renderSetStats(stats[set], setsList[set].code, set);
+      mainstats.appendChild(rs);
+    });
 
   const substats = createDivision(["main_stats", "sub_stats"]);
 

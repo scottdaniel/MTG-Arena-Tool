@@ -51,7 +51,8 @@
   "scripts": {
     "start": "electron .",
     "postinstall": "install-app-deps",
-    "test": "npm run --silent test:eslint && npm run --silent test:prettier && npm run --siltent test:jest",
+    "format": "prettier --write \"**/*.js\"",
+    "test": "npm run --silent test:eslint && npm run --silent test:prettier && npm run --silent test:jest",
     "test:eslint": "eslint . --quiet",
     "test:prettier": "prettier --list-different \"**/*.js\"",
     "test:jest": "jest",

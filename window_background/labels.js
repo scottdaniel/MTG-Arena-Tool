@@ -268,7 +268,7 @@ function onLabelInEventGetPlayerCourses(entry, json) {
   json.forEach(course => {
     if (course.CurrentEventState != "PreMatch") {
       if (course.CourseDeck != null) {
-        addCustomDeck(course.CourseDeck)
+        addCustomDeck(course.CourseDeck);
       }
     }
   });
@@ -413,7 +413,6 @@ function minifiedDelta(delta) {
 function onLabelInventoryUpdated(entry, transaction) {
   // if (!transaction) return;
 
-
   // Store this in case there are any future date parsing issues
   transaction.timestamp = entry.timestamp;
 
@@ -424,7 +423,9 @@ function onLabelInventoryUpdated(entry, transaction) {
   // FIXME: Sort out the parseWotcTime2 parsing
   let dateIsInvalid = !transaction.date || isNaN(transaction.date.getTime());
   if (dateIsInvalid) {
-    console.log(`Invalid date ('${entry.timestamp}') - using current date as backup.`);
+    console.log(
+      `Invalid date ('${entry.timestamp}') - using current date as backup.`
+    );
     transaction.date = new Date();
   }
 
@@ -529,7 +530,13 @@ function onLabelOutDirectGameChallenge(entry, json) {
   deck = JSON.parse(deck);
   select_deck(deck);
 
-  httpApi.httpTournamentCheck(deck, json.params.opponentDisplayName, false, json.params.playFirst, json.params.bo3);
+  httpApi.httpTournamentCheck(
+    deck,
+    json.params.opponentDisplayName,
+    false,
+    json.params.playFirst,
+    json.params.bo3
+  );
 }
 
 function onLabelOutEventAIPractice(entry, json) {

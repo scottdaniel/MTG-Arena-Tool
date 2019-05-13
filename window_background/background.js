@@ -976,8 +976,8 @@ if (settingsLogUri) {
   logUri = settingsLogUri;
 }
 
-if(typeof process.env.LOGFILE !== 'undefined') {
-    logUri = process.env.LOGFILE;
+if (typeof process.env.LOGFILE !== "undefined") {
+  logUri = process.env.LOGFILE;
 }
 
 console.log(logUri);

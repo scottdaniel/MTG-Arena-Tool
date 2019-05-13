@@ -725,7 +725,15 @@ function wrap(element, wrapper) {
   return element;
 }
 
-function addCardTile(grpId, indent, quantity, element, showWildcards = false, deck = null, isSideboard = false) {
+function addCardTile(
+  grpId,
+  indent,
+  quantity,
+  element,
+  showWildcards = false,
+  deck = null,
+  isSideboard = false
+) {
   // if element is a jquery object convert to bare DOM element
   // TODO: Remove this once jQuery is removed.
   if (element instanceof jQuery) {
@@ -833,7 +841,7 @@ function addCardTile(grpId, indent, quantity, element, showWildcards = false, de
       if (card.type.indexOf("Basic Land") == -1) {
         let missing = 0;
         if (deck) {
-            missing = get_wc_missing(deck, grpId, isSideboard);
+          missing = get_wc_missing(deck, grpId, isSideboard);
         }
 
         let xoff = rarities.indexOf(card.rarity) * -24;
@@ -866,13 +874,20 @@ function addCardTile(grpId, indent, quantity, element, showWildcards = false, de
  * Creates a select box
  * This is a "fixed" version of SelectAdd and should replace it.
  **/
-function createSelect(parent, options, current, callback, divClass, optionFormatter) {
+function createSelect(
+  parent,
+  options,
+  current,
+  callback,
+  divClass,
+  optionFormatter
+) {
   let selectContainer = createDivision(["select_container", divClass]);
   selectContainer.id = divClass;
   if (!options.includes(current)) current = options[0];
   selectContainer.value = current;
   let currentDisplay = current;
-  if (typeof optionFormatter === 'function') {
+  if (typeof optionFormatter === "function") {
     currentDisplay = optionFormatter(current);
   }
   let selectButton = createDivision(["select_button"], currentDisplay);
@@ -890,7 +905,7 @@ function createSelect(parent, options, current, callback, divClass, optionFormat
       for (let i = 0; i < options.length; i++) {
         if (options[i] !== current) {
           let optionDisplay = options[i];
-          if (typeof optionFormatter === 'function') {
+          if (typeof optionFormatter === "function") {
             optionDisplay = optionFormatter(optionDisplay);
           }
 
@@ -1053,7 +1068,7 @@ function attachOwnerhipStars(card, starContainer) {
     let color = "gray";
 
     if (i < owned) color = "green";
-    if (aquired && i >= owned-aquired && i < owned) color = "orange";
+    if (aquired && i >= owned - aquired && i < owned) color = "orange";
 
     starContainer.appendChild(
       createDivision([`inventory_card_quantity_${color}`])
@@ -1202,7 +1217,7 @@ function getReadableFormat(format) {
 function getReadableQuest(questCode) {
   // FIXME: Can we get a human readable quest name?
   // For now lets just use a small portion of the ID.
-  return `#${questCode.substring(0, 6)}`
+  return `#${questCode.substring(0, 6)}`;
 }
 
 //
@@ -1533,7 +1548,9 @@ function get_collection_stats() {
         }
 
         // count cards we know we want across decks
-        let deckWantedCounts = decks.map(deck => getCardsMissingCount(deck, grpId));
+        let deckWantedCounts = decks.map(deck =>
+          getCardsMissingCount(deck, grpId)
+        );
         let wanted = Math.max(...deckWantedCounts);
         stats[card.set][card.rarity].wanted += wanted;
         stats.complete[card.rarity].wanted += wanted;
@@ -1836,7 +1853,7 @@ function get_wc_missing(deck, grpid, isSideboard) {
   if (isSideboard) {
     copiesLeft = Math.max(0, copiesLeft - mainQuantity);
 
-    let infiniteCards = [ 67306, 69172 ] // petitioners, rat colony, etc
+    let infiniteCards = [67306, 69172]; // petitioners, rat colony, etc
     if (have >= 4 && infiniteCards.indexOf(grpid) >= 0) {
       copiesLeft = 4;
     }
@@ -1855,7 +1872,7 @@ function get_deck_missing(deck) {
     let grpid = card.id;
     // process each card at most once
     if (alreadySeenIds.has(grpid)) {
-        return;
+      return;
     }
     let rarity = cardsDb.get(grpid).rarity;
     missing[rarity] += getCardsMissingCount(deck, grpid);
@@ -1875,15 +1892,17 @@ function getCardsMissingCount(deck, grpid) {
 //
 function getBoosterCountEstimate(wildcards) {
   let boosterCost = 0;
-  let boosterEstimates = { common: 3.36, uncommon: 2.6, rare: 5.72, mythic: 13.24 };
+  let boosterEstimates = {
+    common: 3.36,
+    uncommon: 2.6,
+    rare: 5.72,
+    mythic: 13.24
+  };
   for (let rarity in boosterEstimates) {
     // accept either short or long form of keys in argument
     let shortForm = rarity[0]; // grab first letter
     let missing = wildcards[rarity] || wildcards[shortForm] || 0;
-    boosterCost = Math.max(
-        boosterCost,
-        boosterEstimates[rarity] * missing
-    );
+    boosterCost = Math.max(boosterCost, boosterEstimates[rarity] * missing);
   }
   return Math.round(boosterCost);
 }
@@ -2245,7 +2264,7 @@ function convert_deck_from_v3(deck) {
       let ret = [];
       for (let i = 0; i < value.length; i += 2) {
         if (value[i + 1] > 0) {
-            ret.push({ id: value[i], quantity: value[i + 1] });
+          ret.push({ id: value[i], quantity: value[i + 1] });
         }
       }
       return ret;
@@ -2383,7 +2402,7 @@ function stripTags(html) {
 
 //
 function urlDecode(url) {
-  return decodeURIComponent(url.replace(/\+/g, ' '));
+  return decodeURIComponent(url.replace(/\+/g, " "));
 }
 
 //
@@ -2515,7 +2534,7 @@ function createDivision(classNames, innerHTML) {
 
 //
 function objectClone(originalObject) {
-    return JSON.parse(JSON.stringify(originalObject));
+  return JSON.parse(JSON.stringify(originalObject));
 }
 
 //

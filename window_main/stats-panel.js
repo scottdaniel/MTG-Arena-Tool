@@ -72,7 +72,10 @@ class StatsPanel {
     winrateContainer = createDivision([]);
     winrateContainer.style.display = "flex";
     winrateContainer.style.justifyContent = "space-between";
-    const playWinrateLabel = createDivision(["list_deck_winrate"], "On the play:");
+    const playWinrateLabel = createDivision(
+      ["list_deck_winrate"],
+      "On the play:"
+    );
     playWinrateLabel.style.margin = "0 auto 0 0";
     winrateContainer.appendChild(playWinrateLabel);
     const playWrSpan = `<span class="${colClass}_bright">${formatPercent(
@@ -91,7 +94,10 @@ class StatsPanel {
     winrateContainer = createDivision([]);
     winrateContainer.style.display = "flex";
     winrateContainer.style.justifyContent = "space-between";
-    const drawWinrateLabel = createDivision(["list_deck_winrate"], "On the draw:");
+    const drawWinrateLabel = createDivision(
+      ["list_deck_winrate"],
+      "On the draw:"
+    );
     drawWinrateLabel.style.margin = "0 auto 0 0";
     winrateContainer.appendChild(drawWinrateLabel);
     const drawWrSpan = `<span class="${colClass}_bright">${formatPercent(

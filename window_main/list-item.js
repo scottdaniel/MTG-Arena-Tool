@@ -24,7 +24,9 @@ class ListItem {
     let cardObj = cardsDb.get(_grpId);
     this.imageContainer = createDivision(["list_item_image"]);
     try {
-      this.imageContainer.style.backgroundImage =`url(https://img.scryfall.com/cards${cardObj.images["art_crop"]})`;
+      this.imageContainer.style.backgroundImage = `url(https://img.scryfall.com/cards${
+        cardObj.images["art_crop"]
+      })`;
     } catch (e) {
       console.log(e, _grpId);
     }
