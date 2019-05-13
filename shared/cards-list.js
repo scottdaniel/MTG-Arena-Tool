@@ -29,7 +29,7 @@ class CardsList {
 
   /**
    * Adds a card to the list
-  **/
+   **/
   add(grpId, quantity = 1, merge = false) {
     if (typeof quantity !== "number") {
       throw new Error("quantity must be a number");
@@ -48,12 +48,12 @@ class CardsList {
       id: grpId,
       measurable: true
     });
-    return this._list[this._list.length-1];
+    return this._list[this._list.length - 1];
   }
 
   /**
    * Removes a card from the list.
-  **/
+   **/
   remove(grpId, quantity = 1, byName = false) {
     if (typeof quantity !== "number") {
       throw new Error("quantity must be a number");
@@ -69,8 +69,7 @@ class CardsList {
           quantity -= remove;
         }
       });
-    }
-    else {
+    } else {
       let removed = 0;
       this._list.forEach(function(card) {
         if (grpId == card.id) {

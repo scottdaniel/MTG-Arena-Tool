@@ -617,7 +617,8 @@ function checkForStartingLibrary() {
   let hand = zoneHand.objectInstanceIds || [];
   let library = zoneLibrary.objectInstanceIds || [];
   // Check that a post-mulligan scry hasn't been done
-  if (library.length == 0 || library[library.length - 1] < library[0]) return -4;
+  if (library.length == 0 || library[library.length - 1] < library[0])
+    return -4;
 
   if (hand.length + library.length == currentDeck.mainboard.count()) {
     if (hand.length >= 2 && hand[0] == hand[1] + 1) hand.reverse();

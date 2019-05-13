@@ -72,7 +72,9 @@ function getPrettyContext(context, full = true) {
 
   if (context.startsWith("Quest.Completed")) {
     var questCode = context.substring(16);
-    return full ? `Quest Completed: ${getReadableQuest(questCode)}` : "Quest Completed";
+    return full
+      ? `Quest Completed: ${getReadableQuest(questCode)}`
+      : "Quest Completed";
   }
 
   var pretty = economyTransactionContextsMap[context];

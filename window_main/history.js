@@ -200,7 +200,12 @@ function renderData(container, index) {
     deleteCallback = archiveMatch;
   }
 
-  let listItem = new ListItem(tileGrpid, match.id, clickCallback, deleteCallback);
+  let listItem = new ListItem(
+    tileGrpid,
+    match.id,
+    clickCallback,
+    deleteCallback
+  );
   listItem.divideLeft();
   listItem.divideRight();
 
@@ -240,7 +245,10 @@ function attachMatchData(listItem, match) {
   listItem.leftTop.appendChild(deckNameDiv);
 
   // Event name
-  let eventNameDiv = createDivision(["list_deck_name_it"], getReadableEvent(match.eventId));
+  let eventNameDiv = createDivision(
+    ["list_deck_name_it"],
+    getReadableEvent(match.eventId)
+  );
   listItem.leftTop.appendChild(eventNameDiv);
 
   match.playerDeck.colors.forEach(color => {

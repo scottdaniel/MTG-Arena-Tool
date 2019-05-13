@@ -12,7 +12,7 @@ const {
 } = require("electron");
 const path = require("path");
 const fs = require("fs");
-const {autoUpdater} = require("electron-updater");
+const { autoUpdater } = require("electron-updater");
 const Store = require("./store.js");
 
 var rememberStore = new Store({

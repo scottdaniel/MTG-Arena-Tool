@@ -81,7 +81,10 @@ class FilterPanel {
     }
 
     if (deckName.length > maxChars) {
-      deckName = `<abbr title="${deckName}">${deckName.slice(0, maxChars)}...</abbr>`;
+      deckName = `<abbr title="${deckName}">${deckName.slice(
+        0,
+        maxChars
+      )}...</abbr>`;
     }
 
     if (deckExists) {

@@ -31,8 +31,8 @@ class Deck {
     this.tags = mtgaDeck.tags || [mtgaDeck.format];
     this.custom = mtgaDeck.custom || false;
 
-   //this.sortMainboard(compare_cards);
-   //this.sortSideboard(compare_cards);
+    //this.sortMainboard(compare_cards);
+    //this.sortSideboard(compare_cards);
 
     return this;
   }
@@ -52,7 +52,6 @@ class Deck {
   sortSideboard(func) {
     this.sideboard.get().sort(func);
   }
-
 
   /**
    * returns a clone of this deck, not referenced to this instance.
