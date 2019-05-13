@@ -30,6 +30,7 @@
   "main": "main.js",
   "build": {
     "appId": "com.github.manuel777.mtgatool",
+    "files": ["!**/__tests__/**"],
     "win": {
       "target": "NSIS",
       "icon": "icon.ico",
