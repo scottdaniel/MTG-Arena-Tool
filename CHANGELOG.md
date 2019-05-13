@@ -1,3 +1,23 @@
+## <small>2.5.2 (2019-05-13)</small>
+
+* archive events ([8c74622](https://github.com/Manuel-777/MTG-Arena-Tool/commit/8c74622))
+* home remove jquery ([d642bd8](https://github.com/Manuel-777/MTG-Arena-Tool/commit/d642bd8))
+* intervals fix ([a056792](https://github.com/Manuel-777/MTG-Arena-Tool/commit/a056792))
+* list-item class ([b6b8edb](https://github.com/Manuel-777/MTG-Arena-Tool/commit/b6b8edb))
+* list-item in decks ([06c9673](https://github.com/Manuel-777/MTG-Arena-Tool/commit/06c9673))
+* list-item in events ([c82a67d](https://github.com/Manuel-777/MTG-Arena-Tool/commit/c82a67d))
+* remove jquery from touneys ([4c4c896](https://github.com/Manuel-777/MTG-Arena-Tool/commit/4c4c896))
+* remove jquery in economy ([0af0658](https://github.com/Manuel-777/MTG-Arena-Tool/commit/0af0658))
+* top nav ranks ([8f3b852](https://github.com/Manuel-777/MTG-Arena-Tool/commit/8f3b852))
+* Update events.js ([bd9f5d2](https://github.com/Manuel-777/MTG-Arena-Tool/commit/bd9f5d2))
+* Update explore.js ([fd424a4](https://github.com/Manuel-777/MTG-Arena-Tool/commit/fd424a4))
+* Update history.js ([1a62077](https://github.com/Manuel-777/MTG-Arena-Tool/commit/1a62077))
+* Update home.js ([dd0386b](https://github.com/Manuel-777/MTG-Arena-Tool/commit/dd0386b)), closes [#331](https://github.com/Manuel-777/MTG-Arena-Tool/issues/331)
+* Update index.css ([f5a99dc](https://github.com/Manuel-777/MTG-Arena-Tool/commit/f5a99dc))
+* Update TROUBLESHOOTING.md ([ff18703](https://github.com/Manuel-777/MTG-Arena-Tool/commit/ff18703))
+
+
+
 ## <small>2.5.1 (2019-05-12)</small>
 
 * fix top 4 view ([0eec484](https://github.com/Manuel-777/MTG-Arena-Tool/commit/0eec484))
