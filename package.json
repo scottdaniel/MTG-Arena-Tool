@@ -50,8 +50,10 @@
   "scripts": {
     "start": "electron .",
     "postinstall": "install-app-deps",
-    "test": "npx eslint . --quiet",
-    "predist": "npx eslint . --quiet",
+    "lint": "npx eslint . --quiet",
+    "pretest": "npm run lint",
+    "test": "npx jest",
+    "predist": "npm test",
     "dist": "build --x64",
     "version": "node -p \"require('./package.json').version\""
   },
