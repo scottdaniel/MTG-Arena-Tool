@@ -158,8 +158,11 @@ class Aggregator {
     if (!passesDeckFilter) return false;
 
     const currentDeck = getDeck(deck.id);
-    if (!showArchived && currentDeck && currentDeck.archived) return false;
-    
+    const passesArchiveFilter =
+      !onlyCurrentDecks ||
+      (currentDeck && (showArchived || !currentDeck.archived));
+    if (!passesArchiveFilter) return false;
+
     const deckTags = [deck.format];
     if (deck.tags) {
       deckTags.push(...deck.tags);
@@ -176,10 +179,6 @@ class Aggregator {
 
     const passesColorFilter = this._filterDeckByColors(deck, colors);
     if (!passesColorFilter) return false;
-
-    if (onlyCurrentDecks) {
-      return doesDeckStillExist(deck.id);
-    }
 
     return true;
   }
