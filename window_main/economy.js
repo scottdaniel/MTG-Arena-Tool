@@ -653,7 +653,8 @@ function createEconomyUI(mainDiv) {
   for (var n = 0; n < economyHistory.changes.length; n++) {
     let economyId = economyHistory.changes[n];
     let change = economyHistory[economyId];
-    if (change == undefined) continue;
+    if (change === undefined) continue;
+    if (change.archived && !showArchived) continue;
 
     if (daysago != differenceInCalendarDays(new Date(), change.date)) {
       daysago = differenceInCalendarDays(new Date(), change.date);
