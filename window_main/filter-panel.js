@@ -33,7 +33,8 @@ class FilterPanel {
     showManaFilter,
     archs,
     showOppManaFilter,
-    archCounts
+    archCounts,
+    showArchivedFilter
   ) {
     this.prefixId = prefixId;
     this.onFilterChange = onFilterChange;
@@ -48,6 +49,7 @@ class FilterPanel {
     this.archs = archs || [];
     this.showOppManaFilter = showOppManaFilter || false;
     this.archCounts = archCounts;
+    this.showArchivedFilter = showArchivedFilter || false;
     this.getTagString = this.getTagString.bind(this);
     this.getDeckString = this.getDeckString.bind(this);
     return this;
@@ -97,6 +99,8 @@ class FilterPanel {
         });
       }
       deckName += `<div class="flex_item">${colorsString}</div>`;
+    } else if (deck.archived) {
+      deckName += "<small><i> (archived)</i></small>";
     } else {
       deckName += "<small><i> (deleted)</i></small>";
     }
@@ -112,8 +116,12 @@ class FilterPanel {
     container.style.justifyContent = "space-between";
 
     const columnA = createDivision([]);
+
+    const dataCont = createDivision([]);
+
+    dataCont.style.display = "flex";
     const dateSelect = createSelect(
-      columnA,
+      dataCont,
       [DATE_ALL_TIME, DATE_SEASON, DATE_LAST_30],
       this.filters.date,
       filter => {
@@ -123,6 +131,30 @@ class FilterPanel {
       this.prefixId + "_query_date"
     );
     dateSelect.style.marginBottom = "8px";
+
+    if (this.showArchivedFilter) {
+      const archiveCont = document.createElement("label");
+      archiveCont.style.marginTop = "4px";
+      archiveCont.classList.add("check_container", "hover_label");
+      archiveCont.innerHTML = "archived";
+      const archiveCheckbox = document.createElement("input");
+      archiveCheckbox.type = "checkbox";
+      archiveCheckbox.id = this.prefixId + "_query_archived";
+      archiveCheckbox.addEventListener("click", () => {
+        const showArchived = archiveCheckbox.checked;
+        this.filters.showArchived = showArchived;
+        this.onFilterChange({ showArchived }, this.filters);
+      });
+      archiveCheckbox.checked = this.filters.showArchived;
+      archiveCont.appendChild(archiveCheckbox);
+      const archiveSpan = document.createElement("span");
+      archiveSpan.classList.add("checkmark");
+      archiveCont.appendChild(archiveSpan);
+      dataCont.appendChild(archiveCont);
+    }
+
+    columnA.appendChild(dataCont);
+
     if (this.events.length) {
       const eventSelect = createSelect(
         columnA,

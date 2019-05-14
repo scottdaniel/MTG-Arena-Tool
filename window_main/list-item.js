@@ -7,7 +7,7 @@ globals
 */
 
 class ListItem {
-  constructor(_grpId, _id, _onClick, _onDelete = false) {
+  constructor(_grpId, _id, _onClick, _onDelete = false, isArchived = false) {
     this.onClickCallback = _onClick;
     if (typeof _onDelete == "function") {
       this.onDeleteCallback = _onDelete;
@@ -19,10 +19,13 @@ class ListItem {
     this.left = createDivision(["list_item_left"]);
     this.center = createDivision(["list_item_center"]);
     this.right = createDivision(["list_item_right"]);
-    this.deleteButton = createDivision(["list_item_delete"]);
-    this.deleteButton.title = `will archive this and hide from most areas of the tool
-(no undo yet, but will not delete data)`;
-
+    const archiveClass = isArchived
+      ? "list_item_unarchive"
+      : "list_item_archive";
+    this.deleteButton = createDivision([archiveClass]);
+    this.deleteButton.title = isArchived
+      ? "restore"
+      : "archive (will not delete data)";
     let cardObj = cardsDb.get(_grpId);
     this.imageContainer = createDivision(["list_item_image"]);
     try {

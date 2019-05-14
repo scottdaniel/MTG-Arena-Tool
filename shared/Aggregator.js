@@ -76,7 +76,8 @@ class Aggregator {
       onlyCurrentDecks: false,
       arch: DEFAULT_ARCH,
       oppColors: Aggregator.getDefaultColorFilter(),
-      date: DATE_LAST_30
+      date: DATE_LAST_30,
+      showArchived: false
     };
   }
 
@@ -151,8 +152,9 @@ class Aggregator {
   }
 
   filterDeck(deck) {
-    const { tag, colors, deckId, onlyCurrentDecks } = this.filters;
+    const { tag, colors, deckId, onlyCurrentDecks, showArchived } = this.filters;
     if (!deck) return deckId === DEFAULT_DECK;
+    if (!showArchived && deck.archived && deck.archived) return false;
     const passesDeckFilter = deckId === DEFAULT_DECK || deckId === deck.id;
     if (!passesDeckFilter) return false;
 
@@ -194,8 +196,8 @@ class Aggregator {
 
   filterMatch(match) {
     if (!match) return false;
-    if (match.archived && match.archived == true) return false;
-    const { eventId, oppColors, arch, date } = this.filters;
+    const { eventId, oppColors, arch, date, showArchived } = this.filters;
+    if (!showArchived && match.archived && match.archived) return false;
 
     const passesEventFilter =
       this.filterEvent(match.eventId) ||

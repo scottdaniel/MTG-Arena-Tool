@@ -3199,10 +3199,18 @@ a:hover {
     width: 200px;
 }
 
-.list_item_delete {
+.list_item_archive {
     width: 4px;
     margin-left: 8px;
     overflow: hidden;
-    background: #DD8263 url(../images/delete.png) no-repeat left;
+    background: #DD8263 url(../images/hide.png) no-repeat left;
+    -webkit-transition: all .25s cubic-bezier(0.2, 0.5, 0.35, 1);
+}
+
+.list_item_unarchive {
+    width: 4px;
+    margin-left: 8px;
+    overflow: hidden;
+    background: #B7C89E url(../images/show.png) no-repeat left;
     -webkit-transition: all .25s cubic-bezier(0.2, 0.5, 0.35, 1);
 }

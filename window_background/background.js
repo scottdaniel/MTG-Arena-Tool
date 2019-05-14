@@ -437,6 +437,14 @@ ipc.on("archive_match", function(event, arg) {
 });
 
 //
+ipc.on("unarchive_match", function(event, arg) {
+  ipc_send("show_loading");
+  history[arg].archived = false;
+  store.set(arg, history[arg]);
+  ipc_send("hide_loading");
+});
+
+//
 ipc.on("archive_economy", function(event, _id) {
   ipc_send("show_loading");
   economy[_id].archived = true;
