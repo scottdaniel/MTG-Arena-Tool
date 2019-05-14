@@ -620,11 +620,17 @@ font-family:  var(--main-font-name);
     background-color: rgba(0, 0, 0, 0);
     -webkit-transition: all .2s ease-out;
 }
+.list_economy .list_item_archive, .list_economy .list_item_unarchive {
+    width: 4px;
+}
 
 .list_economy:hover {
     opacity: 1;
     padding-left: 48px;
     background-color: rgba(0, 0, 0, 0.25);
+}
+.list_economy:hover .list_item_archive, .list_economy:hover .list_item_unarchive {
+    width: 32px;
 }
 
 .list_economy_title {
