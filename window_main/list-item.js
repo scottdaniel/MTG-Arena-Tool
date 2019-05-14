@@ -20,6 +20,8 @@ class ListItem {
     this.center = createDivision(["list_item_center"]);
     this.right = createDivision(["list_item_right"]);
     this.deleteButton = createDivision(["list_item_delete"]);
+    this.deleteButton.title = `will archive this and hide from most areas of the tool
+(no undo yet, but will not delete data)`;
 
     let cardObj = cardsDb.get(_grpId);
     this.imageContainer = createDivision(["list_item_image"]);
@@ -40,12 +42,6 @@ class ListItem {
     // All of these should be stored and removed when we 'unmount' the class
     if (_onDelete) {
       this.container.appendChild(this.deleteButton);
-      this.deleteButton.addEventListener("mouseover", () => {
-        this.deleteButton.style.width = "32px";
-      });
-      this.deleteButton.addEventListener("mouseout", () => {
-        this.deleteButton.style.width = "4px";
-      });
       this.deleteButton.addEventListener("click", e => {
         e.stopPropagation();
         this.onDeleteCallback(this.id);
@@ -59,10 +55,16 @@ class ListItem {
     this.container.addEventListener("mouseover", () => {
       this.imageContainer.style.opacity = 1;
       this.imageContainer.style.width = "200px";
+      if (_onDelete) {
+        this.deleteButton.style.width = "32px";
+      }
     });
     this.container.addEventListener("mouseout", () => {
       this.imageContainer.style.opacity = 0.66;
       this.imageContainer.style.width = "128px";
+      if (_onDelete) {
+        this.deleteButton.style.width = "4px";
+      }
     });
     this.container.addEventListener("click", () => {
       this.onClickCallback(this.id);
