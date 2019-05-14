@@ -143,7 +143,8 @@ function openHistoryTab(_deprecated, _filters = {}) {
     true,
     matchesInEvent.archs,
     true,
-    matchesInEvent.archCounts
+    matchesInEvent.archCounts,
+    true
   );
   const historyTopFilter = filterPanel.render();
   historyTop.appendChild(historyTopFilter);
@@ -199,12 +200,16 @@ function renderData(container, index) {
     clickCallback = openDraft;
     deleteCallback = archiveMatch;
   }
+  if (match.archived) {
+    deleteCallback = unarchiveMatch;
+  }
 
   let listItem = new ListItem(
     tileGrpid,
     match.id,
     clickCallback,
-    deleteCallback
+    deleteCallback,
+    match.archived
   );
   listItem.divideLeft();
   listItem.divideRight();
@@ -227,6 +232,14 @@ function renderData(container, index) {
 
 function archiveMatch(id) {
   ipc_send("archive_match", id);
+  matchesHistory[id].archived = true;
+  openHistoryTab();
+}
+
+function unarchiveMatch(id) {
+  ipc_send("unarchive_match", id);
+  matchesHistory[id].archived = false;
+  openHistoryTab();
 }
 
 function openMatch(id) {
