@@ -62,7 +62,7 @@ if (!remote.app.isPackaged) {
 }
 
 const path = require("path");
-const Store = require("../store.js");
+const Store = require("electron-store");
 const fs = require("fs");
 const sha1 = require("js-sha1");
 const ipc = electron.ipcRenderer;
@@ -143,17 +143,17 @@ const defaultCfg = {
 };
 
 var rstore = new Store({
-  configName: "remember",
+  name: "remember",
   defaults: rememberCfg
 });
 
 var store = new Store({
-  configName: "default",
+  name: "default",
   defaults: defaultCfg
 });
 
 var settingsStore = new Store({
-  configName: "settings",
+  name: "settings",
   defaults: settingsCfg
 });
 
@@ -707,7 +707,7 @@ function sendEconomy() {
 function loadPlayerConfig(playerId, serverData = undefined) {
   ipc_send("ipc_log", "Load player ID: " + playerId);
   store = new Store({
-    configName: playerId,
+    name: playerId,
     defaults: defaultCfg
   });
 
