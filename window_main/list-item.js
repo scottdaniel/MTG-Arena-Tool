@@ -21,7 +21,7 @@ class ListItem {
     this.right = createDivision(["list_item_right"]);
     const archiveClass = isArchived
       ? "list_item_unarchive"
-      : "list_item_delete";
+      : "list_item_archive";
     this.deleteButton = createDivision([archiveClass]);
     this.deleteButton.title = isArchived
       ? "restore"
