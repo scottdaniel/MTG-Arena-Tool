@@ -429,6 +429,14 @@ ipc.on("archive_course", function(event, arg) {
 });
 
 //
+ipc.on("unarchive_course", function(event, arg) {
+  ipc_send("show_loading");
+  events[arg].archived = false;
+  store.set(arg, events[arg]);
+  ipc_send("hide_loading");
+});
+
+//
 ipc.on("archive_match", function(event, arg) {
   ipc_send("show_loading");
   history[arg].archived = true;
