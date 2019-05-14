@@ -4,6 +4,7 @@ global
   compare_archetypes,
   Deck,
   eventsToFormat,
+  getDeck,
   stripTags,
   windowBackground,
   windowRenderer,
@@ -404,26 +405,33 @@ ipc.on("delete_data", function() {
 });
 
 //
-ipc.on("delete_deck", function(event, arg) {
+ipc.on("archive_deck", function(event, arg) {
   ipc_send("show_loading");
-  var i = decks.index.indexOf(arg);
-  if (i > -1) {
-    decks.index.splice(i, 1);
-    delete decks[arg];
-    store.set("decks_index", decks.index);
-    store.delete("decks." + arg);
-  }
-  // If we do it imediately it looks awful
-  setTimeout(() => {
-    ipc_send("set_decks", JSON.stringify(decks));
-    ipc_send("hide_loading");
-  }, 200);
+  decks[arg].archived = true;
+  store.set("decks." + arg, decks[arg]);
+  ipc_send("hide_loading");
+});
+
+//
+ipc.on("unarchive_deck", function(event, arg) {
+  ipc_send("show_loading");
+  decks[arg].archived = false;
+  store.set("decks." + arg, decks[arg]);
+  ipc_send("hide_loading");
 });
 
 //
 ipc.on("archive_course", function(event, arg) {
   ipc_send("show_loading");
   events[arg].archived = true;
+  store.set(arg, events[arg]);
+  ipc_send("hide_loading");
+});
+
+//
+ipc.on("unarchive_course", function(event, arg) {
+  ipc_send("show_loading");
+  events[arg].archived = false;
   store.set(arg, events[arg]);
   ipc_send("hide_loading");
 });

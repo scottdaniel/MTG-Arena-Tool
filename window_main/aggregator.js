@@ -164,15 +164,19 @@ class Aggregator {
       showArchived
     } = this.filters;
     if (!deck) return deckId === DEFAULT_DECK;
-    if (!showArchived && deck.archived && deck.archived) return false;
     const passesDeckFilter = deckId === DEFAULT_DECK || deckId === deck.id;
     if (!passesDeckFilter) return false;
+
+    const currentDeck = getDeck(deck.id);
+    const passesArchiveFilter =
+      !onlyCurrentDecks ||
+      (currentDeck && (showArchived || !currentDeck.archived));
+    if (!passesArchiveFilter) return false;
 
     const deckTags = [deck.format];
     if (deck.tags) {
       deckTags.push(...deck.tags);
     }
-    const currentDeck = getDeck(deck.id);
     if (currentDeck) {
       deckTags.push(currentDeck.format);
       if (currentDeck.tags) {
@@ -184,10 +188,6 @@ class Aggregator {
 
     const passesColorFilter = this._filterDeckByColors(deck, colors);
     if (!passesColorFilter) return false;
-
-    if (onlyCurrentDecks) {
-      return doesDeckStillExist(deck.id);
-    }
 
     return true;
   }
