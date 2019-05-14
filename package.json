@@ -77,6 +77,8 @@
     "google-protobuf": "^3.7.1",
     "gunzip-file": "^0.1.1",
     "howler": "^2.1.2",
+    "jquery": "^3.4.1",
+    "jquery.easing": "^1.4.1",
     "js-sha1": "^0.6.0",
     "lodash.clonedeep": "^4.5.0",
     "lodash.transform": "^4.6.0",

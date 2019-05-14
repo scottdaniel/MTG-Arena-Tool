@@ -23,6 +23,7 @@ const math = require("mathjs");
 math.config({ precision: 2000 });
 
 require("conic-gradient");
+
 const Database = require("../shared/database.js");
 const cardsDb = new Database();
 
