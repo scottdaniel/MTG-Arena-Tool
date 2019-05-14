@@ -7,7 +7,7 @@ globals
 */
 
 class ListItem {
-  constructor(_grpId, _id, _onClick, _onDelete = false) {
+  constructor(_grpId, _id, _onClick, _onDelete = false, isArchived = false) {
     this.onClickCallback = _onClick;
     if (typeof _onDelete == "function") {
       this.onDeleteCallback = _onDelete;
@@ -19,8 +19,13 @@ class ListItem {
     this.left = createDivision(["list_item_left"]);
     this.center = createDivision(["list_item_center"]);
     this.right = createDivision(["list_item_right"]);
-    this.deleteButton = createDivision(["list_item_delete"]);
-
+    const archiveClass = isArchived
+      ? "list_item_unarchive"
+      : "list_item_delete";
+    this.deleteButton = createDivision([archiveClass]);
+    this.deleteButton.title = isArchived
+      ? "restore"
+      : "archive (will not delete data)";
     let cardObj = cardsDb.get(_grpId);
     this.imageContainer = createDivision(["list_item_image"]);
     try {
@@ -40,12 +45,6 @@ class ListItem {
     // All of these should be stored and removed when we 'unmount' the class
     if (_onDelete) {
       this.container.appendChild(this.deleteButton);
-      this.deleteButton.addEventListener("mouseover", () => {
-        this.deleteButton.style.width = "32px";
-      });
-      this.deleteButton.addEventListener("mouseout", () => {
-        this.deleteButton.style.width = "4px";
-      });
       this.deleteButton.addEventListener("click", e => {
         e.stopPropagation();
         this.onDeleteCallback(this.id);
@@ -59,10 +58,16 @@ class ListItem {
     this.container.addEventListener("mouseover", () => {
       this.imageContainer.style.opacity = 1;
       this.imageContainer.style.width = "200px";
+      if (_onDelete) {
+        this.deleteButton.style.width = "32px";
+      }
     });
     this.container.addEventListener("mouseout", () => {
       this.imageContainer.style.opacity = 0.66;
       this.imageContainer.style.width = "128px";
+      if (_onDelete) {
+        this.deleteButton.style.width = "4px";
+      }
     });
     this.container.addEventListener("click", () => {
       this.onClickCallback(this.id);
