@@ -461,6 +461,14 @@ ipc.on("archive_economy", function(event, _id) {
 });
 
 //
+ipc.on("unarchive_economy", function(event, _id) {
+  ipc_send("show_loading");
+  economy[_id].archived = false;
+  store.set(_id, economy[_id]);
+  ipc_send("hide_loading");
+});
+
+//
 ipc.on("request_events", () => {
   ipc_send("set_events", JSON.stringify(events));
 });

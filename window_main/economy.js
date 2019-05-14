@@ -24,6 +24,7 @@ global
 */
 
 var filterEconomy = "All";
+let showArchived = false;
 var daysago = 0;
 var dayList = [];
 
@@ -103,8 +104,8 @@ function renderData(container, index) {
   let economyId = economyHistory.changes[revIndex];
   let change = economyHistory[economyId];
 
-  if (change == undefined) return;
-  if (change.archived && change.archived == true) return;
+  if (change === undefined) return 0;
+  if (change.archived && !showArchived) return 0;
 
   // print out daily summaries but no sub-events
   if (
@@ -609,24 +610,34 @@ function createChangeRow(change, economyId) {
   var deleteButton = document.createElement("div");
   deleteButton.classList.add("flex_item");
   deleteButton.classList.add(economyId + "_del");
-  deleteButton.classList.add("delete_item");
+  const archiveClass = change.archived
+    ? "list_item_unarchive"
+    : "list_item_archive";
+  deleteButton.title = change.archived
+    ? "restore"
+    : "archive (will not delete data)";
+  deleteButton.classList.add(archiveClass);
 
   changeRow.appendChild(deleteButton);
 
-  deleteButton.addEventListener("mouseenter", () => {
-    deleteButton.style.width = "32px";
-  });
-
-  deleteButton.addEventListener("mouseleave", () => {
-    deleteButton.style.width = "4px";
-  });
-
-  deleteButton.addEventListener("click", e => {
+  let archiveCallback = e => {
     e.stopPropagation();
     ipc_send("archive_economy", economyId);
-    changeRow.style.height = "0px";
-    changeRow.style.overflow = "hidden";
-  });
+    change.archived = true;
+    economyHistory[economyId] = change;
+    openEconomyTab();
+  };
+  if (change.archived) {
+    archiveCallback = e => {
+      e.stopPropagation();
+      ipc_send("unarchive_economy", economyId);
+      change.archived = false;
+      economyHistory[economyId] = change;
+      openEconomyTab();
+    };
+  }
+
+  deleteButton.addEventListener("click", archiveCallback);
 
   return changeRow;
 }
@@ -642,7 +653,8 @@ function createEconomyUI(mainDiv) {
   for (var n = 0; n < economyHistory.changes.length; n++) {
     let economyId = economyHistory.changes[n];
     let change = economyHistory[economyId];
-    if (change == undefined) continue;
+    if (change === undefined) continue;
+    if (change.archived && !showArchived) continue;
 
     if (daysago != differenceInCalendarDays(new Date(), change.date)) {
       daysago = differenceInCalendarDays(new Date(), change.date);
@@ -673,7 +685,7 @@ function createEconomyUI(mainDiv) {
         dayList[daysago].goldEarned += change.delta.goldDelta;
       else dayList[daysago].goldSpent += Math.abs(change.delta.goldDelta);
 
-      console.log(economyId, "> ", change.date, " > ", change.delta.goldDelta);
+      // console.log(economyId, "> ", change.date, " > ", change.delta.goldDelta);
     }
 
     if (change.delta && change.delta.cardsAdded) {
@@ -692,19 +704,39 @@ function createEconomyUI(mainDiv) {
   //
   var selectdiv = createDivision();
   selectdiv.style.margin = "auto 64px auto 0px";
+  selectdiv.style.display = "flex";
   let options = [...topSelectItems, ...selectItems];
 
-  console.log("filterEconomy", filterEconomy);
+  // console.log("filterEconomy", filterEconomy);
   let select = createSelect(
     selectdiv,
     options,
     filterEconomy,
     res => {
       filterEconomy = res;
-      openEconomyTab(0);
+      openEconomyTab();
     },
     "query_select"
   );
+
+  const archiveCont = document.createElement("label");
+  archiveCont.style.marginTop = "4px";
+  archiveCont.classList.add("check_container", "hover_label");
+  archiveCont.innerHTML = "archived";
+  const archiveCheckbox = document.createElement("input");
+  archiveCheckbox.type = "checkbox";
+  archiveCheckbox.id = "economy_query_archived";
+  archiveCheckbox.addEventListener("click", () => {
+    showArchived = archiveCheckbox.checked;
+    openEconomyTab();
+  });
+  archiveCheckbox.checked = showArchived;
+  archiveCont.appendChild(archiveCheckbox);
+  const archiveSpan = document.createElement("span");
+  archiveSpan.classList.add("checkmark");
+  archiveCont.appendChild(archiveSpan);
+  selectdiv.appendChild(archiveCont);
+
   //$$("#query_select.select_button")[0].innerHTML = filterEconomy;
   div.appendChild(selectdiv);
 
