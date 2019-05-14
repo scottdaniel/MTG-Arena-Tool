@@ -51,6 +51,7 @@ function setFilters(selected = {}) {
       ...Aggregator.getDefaultFilters(),
       date: filters.date,
       eventId: filters.eventId,
+      showArchived: filters.showArchived,
       ...selected
     };
   } else if (selected.tag || selected.colors) {

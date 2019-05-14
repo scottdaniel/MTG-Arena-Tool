@@ -30,13 +30,31 @@ global
 let filters = Aggregator.getDefaultFilters();
 filters.onlyCurrentDecks = true;
 
+function setFilters(selected = {}) {
+  if (selected.eventId || selected.date) {
+    // clear all dependent filters
+    filters = {
+      ...Aggregator.getDefaultFilters(),
+      date: filters.date,
+      eventId: filters.eventId,
+      onlyCurrentDecks: true,
+      showArchived: filters.showArchived,
+      ...selected
+    };
+  } else {
+    // default case
+    filters = { ...filters, ...selected };
+  }
+}
+
 //
-function openDecksTab() {
+function openDecksTab(_filters = {}) {
   if (sidebarActive == 0 && decks != null) {
     hideLoadingBars();
     var mainDiv = document.getElementById("ux_0");
     mainDiv.classList.add("flex_item");
     mainDiv.innerHTML = "";
+    setFilters(_filters);
 
     const wrap_r = createDivision(["wrapper_column", "sidebar_column_l"]);
     wrap_r.style.width = sidebarSize + "px";
@@ -76,25 +94,10 @@ function openDecksTab() {
     let decks_top = document.createElement("div");
     decks_top.classList.add("decks_top");
 
-    const handler = selected => {
-      if (selected.eventId || selected.date) {
-        // clear all dependent filters
-        filters = {
-          ...Aggregator.getDefaultFilters(),
-          date: filters.date,
-          eventId: filters.eventId,
-          ...selected
-        };
-      } else {
-        // default case
-        filters = { ...filters, ...selected };
-      }
-      openDecksTab();
-    };
     const tags = Aggregator.gatherTags(decks);
     const filterPanel = new FilterPanel(
       "decks_top",
-      handler,
+      selected => openDecksTab(selected),
       filters,
       allMatches.events,
       tags,
