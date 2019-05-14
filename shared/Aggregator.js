@@ -154,15 +154,16 @@ class Aggregator {
   filterDeck(deck) {
     const { tag, colors, deckId, onlyCurrentDecks, showArchived } = this.filters;
     if (!deck) return deckId === DEFAULT_DECK;
-    if (!showArchived && deck.archived && deck.archived) return false;
     const passesDeckFilter = deckId === DEFAULT_DECK || deckId === deck.id;
     if (!passesDeckFilter) return false;
 
+    const currentDeck = getDeck(deck.id);
+    if (!showArchived && currentDeck && currentDeck.archived) return false;
+    
     const deckTags = [deck.format];
     if (deck.tags) {
       deckTags.push(...deck.tags);
     }
-    const currentDeck = getDeck(deck.id);
     if (currentDeck) {
       deckTags.push(currentDeck.format);
       if (currentDeck.tags) {
