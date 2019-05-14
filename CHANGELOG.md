@@ -1,3 +1,37 @@
+## <small>2.5.3 (2019-05-14)</small>
+
+*  update history page to support archive filter and unarchive ([e1e8725](https://github.com/Manuel-777/MTG-Arena-Tool/commit/e1e8725))
+* add jest as dev dependency ([59b9436](https://github.com/Manuel-777/MTG-Arena-Tool/commit/59b9436))
+* add output_log.txt ([34018ac](https://github.com/Manuel-777/MTG-Arena-Tool/commit/34018ac))
+* aggregator archived filter respects decks.archived ([1b13a48](https://github.com/Manuel-777/MTG-Arena-Tool/commit/1b13a48))
+* Aggregator.showArchived setting ([da34874](https://github.com/Manuel-777/MTG-Arena-Tool/commit/da34874))
+* background ipc unarchive_match ([83719c1](https://github.com/Manuel-777/MTG-Arena-Tool/commit/83719c1))
+* daily summary stats respect archived filter ([ddb6d5e](https://github.com/Manuel-777/MTG-Arena-Tool/commit/ddb6d5e))
+* Decks page archive and unarchive ([ab00b31](https://github.com/Manuel-777/MTG-Arena-Tool/commit/ab00b31))
+* economy page unarchive and archived filter ([0895506](https://github.com/Manuel-777/MTG-Arena-Tool/commit/0895506))
+* eslint prettier rule now set to error ([c1fb8f6](https://github.com/Manuel-777/MTG-Arena-Tool/commit/c1fb8f6))
+* Events page archive and unarchive ([a531d92](https://github.com/Manuel-777/MTG-Arena-Tool/commit/a531d92))
+* events page ignores deck.archived ([333b2c3](https://github.com/Manuel-777/MTG-Arena-Tool/commit/333b2c3))
+* Exclide __tests__ from build artifacts ([24bde4f](https://github.com/Manuel-777/MTG-Arena-Tool/commit/24bde4f))
+* extract conic-gradient ([a3dad8d](https://github.com/Manuel-777/MTG-Arena-Tool/commit/a3dad8d))
+* extract electron-store ([1b699cb](https://github.com/Manuel-777/MTG-Arena-Tool/commit/1b699cb))
+* extract jquery and jquery.easing ([ff7eeb6](https://github.com/Manuel-777/MTG-Arena-Tool/commit/ff7eeb6))
+* extract spectrum-colorpicker ([92f37b9](https://github.com/Manuel-777/MTG-Arena-Tool/commit/92f37b9))
+* eye icons ([0a93317](https://github.com/Manuel-777/MTG-Arena-Tool/commit/0a93317))
+* FilterPanel correctly handles deck.archive ([287a029](https://github.com/Manuel-777/MTG-Arena-Tool/commit/287a029))
+* Format source code with prettier ([5b5faf9](https://github.com/Manuel-777/MTG-Arena-Tool/commit/5b5faf9))
+* list item animation start ([eba6964](https://github.com/Manuel-777/MTG-Arena-Tool/commit/eba6964))
+* move and format Aggregator ([54ec1e8](https://github.com/Manuel-777/MTG-Arena-Tool/commit/54ec1e8))
+* StatsPanel brief play vs draw stats and color ([9299e28](https://github.com/Manuel-777/MTG-Arena-Tool/commit/9299e28))
+* tweak archive hover style ([2d12fcb](https://github.com/Manuel-777/MTG-Arena-Tool/commit/2d12fcb))
+* Update arena-log-decoder-spec.js ([c25aede](https://github.com/Manuel-777/MTG-Arena-Tool/commit/c25aede))
+* Update FilterPanel to handle archived ([fd1f034](https://github.com/Manuel-777/MTG-Arena-Tool/commit/fd1f034))
+* update ListItem to handle archived ([0018ab4](https://github.com/Manuel-777/MTG-Arena-Tool/commit/0018ab4))
+* Update package.json npm scripts ([a0ec72d](https://github.com/Manuel-777/MTG-Arena-Tool/commit/a0ec72d))
+* CI: Validate source formatting with prettier ([93e8086](https://github.com/Manuel-777/MTG-Arena-Tool/commit/93e8086))
+
+
+
 ## <small>2.5.2 (2019-05-13)</small>
 
 * archive events ([8c74622](https://github.com/Manuel-777/MTG-Arena-Tool/commit/8c74622))
