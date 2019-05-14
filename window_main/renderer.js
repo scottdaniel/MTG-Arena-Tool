@@ -60,6 +60,7 @@ const MenuItem = remote.MenuItem;
 require("time-elements");
 const striptags = require("striptags");
 
+const Aggregator = require("./aggregator.js");
 const ListItem = require("./list-item.js");
 const FilterPanel = require("./filter-panel.js");
 const StatsPanel = require("./stats-panel.js");
