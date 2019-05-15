@@ -150,18 +150,35 @@ function getMatchesHistoryIndex(matchIndex) {
 }
 
 // Given a courses object returns all of the matches
-function getCourseMatches(course) {
+function getCourseStats(course) {
   let wlGate = course.ModuleInstanceData.WinLossGate;
   let matchesList = wlGate ? wlGate.ProcessedMatchIds : undefined;
-  if (!matchesList) {
-    return [];
-  }
+  const stats = { wins: 0, losses: 0, duration: 0 };
+  if (!matchesList) return stats;
 
-  let matches = matchesList
+  matchesList
     .map(getMatchesHistoryIndex)
     .map(index => matchesHistory[index])
-    .filter(match => match !== undefined && match.type === "match");
-  return matches;
+    .filter(
+      match =>
+        match !== undefined &&
+        match.type === "match" &&
+        (!match.archived || filters.showArchived)
+    )
+    .forEach(match => {
+      // some of the data is wierd. Games which last years or have no data.
+      if (match.duration && match.duration < 3600) {
+        stats.duration += match.duration;
+      }
+      stats.duration += match.duration || 0;
+      if (match.player.win > match.opponent.win) {
+        stats.wins++;
+      }
+      if (match.player.win < match.opponent.win) {
+        stats.losses++;
+      }
+    });
+  return stats;
 }
 
 function attachEventData(listItem, course) {
@@ -185,22 +202,28 @@ function attachEventData(listItem, course) {
     );
   }
 
-  var matches = getCourseMatches(course);
-  var totalDuration = matches.reduce((acc, match) => acc + match.duration, 0);
+  const stats = getCourseStats(course);
 
   listItem.rightBottom.appendChild(
     createDivision(
       ["list_match_time"],
-      timeSince(new Date(course.date)) + " ago - " + toMMSS(totalDuration)
+      timeSince(new Date(course.date)) + " ago - " + toMMSS(stats.duration)
     )
   );
 
-  var wl = "0:0";
-  var wlGate = course.ModuleInstanceData.WinLossGate;
-  if (wlGate !== undefined) {
-    wl = wlGate.CurrentWins + ":" + wlGate.CurrentLosses;
+  let { wins, losses } = stats;
+  const wlGate = course.ModuleInstanceData.WinLossGate;
+  if (filters.showArchived && wlGate) {
+    wins = wlGate.CurrentWins;
+    losses = wlGate.CurrentLosses;
   }
-  var winLossClass = getEventWinLossClass(wlGate);
+  wins = wins || 0;
+  losses = losses || 0;
+  const wl = `${wins}:${losses}`;
+  const winLossClass = getEventWinLossClass({
+    CurrentWins: wins,
+    CurrentLosses: losses
+  });
 
   let resultDiv = createDivision(["list_match_result", winLossClass], wl);
   resultDiv.style.marginLeft = "8px";
@@ -313,7 +336,12 @@ function expandEvent(id) {
         matchesHistory[index] ||
         matchesHistory[index + "-" + playerData.arenaId]
     )
-    .filter(match => match !== undefined && match.type === "match")
+    .filter(
+      match =>
+        match !== undefined &&
+        match.type === "match" &&
+        (!match.archived || filters.showArchived)
+    )
     .map(match => {
       let row = createMatchRow(match);
       expandDiv.appendChild(row);
