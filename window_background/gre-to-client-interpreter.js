@@ -659,6 +659,13 @@ function checkGameInfo(gameInfo) {
 }
 
 function checkTurnDiff(turnInfo) {
+  if (
+    turnInfo.turnNumber &&
+    turnInfo.turnNumber == 1 &&
+    turnInfo.activePlayer
+  ) {
+    currentMatch.onThePlay = turnInfo.activePlayer;
+  }
   if (currentMatch.turnInfo.turnNumber !== turnInfo.turnNumber) {
     if (turnInfo.priorityPlayer !== currentMatch.turnInfo.currentPriority) {
       changePriority(
