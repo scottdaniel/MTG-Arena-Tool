@@ -830,11 +830,11 @@ function addCardTile(
 
     let prevc = true;
     const hasSplitCost = card.dfc === "SplitHalf";
-    
+
     card.cost.forEach(cost => {
       if (hasSplitCost) {
         if (/^(x|\d)+$/.test(cost) && prevc === false) {
-            fl2.innerHTML += "//";
+          fl2.innerHTML += "//";
         }
         prevc = /^\d+$/.test(cost);
       }
