@@ -45,7 +45,7 @@ let matchBeginTime = Date.now();
 let priorityTimers = [];
 let clockMode = 0;
 let draftMode = 1;
-let deckMode = 4;
+let deckMode = 0;
 let overlayMode = 0;
 var renderer = 1;
 
