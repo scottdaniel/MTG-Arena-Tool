@@ -1549,9 +1549,11 @@ function get_collection_stats() {
         }
 
         // count cards we know we want across decks
-        const wanted = Math.max(...decks.filter(deck => deck && !deck.archived).map(deck =>
-          getCardsMissingCount(deck, grpId)
-        ));
+        const wanted = Math.max(
+          ...decks
+            .filter(deck => deck && !deck.archived)
+            .map(deck => getCardsMissingCount(deck, grpId))
+        );
         stats[card.set][card.rarity].wanted += wanted;
         stats.complete[card.rarity].wanted += wanted;
 
