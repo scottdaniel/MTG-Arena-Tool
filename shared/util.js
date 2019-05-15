@@ -828,14 +828,17 @@ function addCardTile(
 
     if (!card) return cont;
 
-    var prevc = true;
-    card.cost.forEach(function(cost) {
-      if (/^(x|\d)+$/.test(cost) && prevc == false) {
-        fl2.innerHTML += "//";
+    let prevc = true;
+    const hasSplitCost = card.dfc === "SplitHalf";
+    
+    card.cost.forEach(cost => {
+      if (hasSplitCost) {
+        if (/^(x|\d)+$/.test(cost) && prevc === false) {
+            fl2.innerHTML += "//";
+        }
+        prevc = /^\d+$/.test(cost);
       }
       fl2.appendChild(createDivision(["mana_s16", "flex_end", `mana_${cost}`]));
-
-      prevc = /^\d+$/.test(cost);
     });
 
     if (showWildcards && renderer == 0) {
