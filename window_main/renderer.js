@@ -1677,7 +1677,6 @@ function open_draft(id) {
   $("#draftPosRange").off();
 
   $("#draftPosRange").on("click mousemove", function() {
-    console.log(posRange.value);
     var pa = Math.floor((posRange.value - 1) / 2 / packSize);
     var pi = Math.floor(((posRange.value - 1) / 2) % packSize);
     $(".draft_title").html("Pack " + (pa + 1) + ", Pick " + (pi + 1));
