@@ -1632,7 +1632,7 @@ function open_draft(id) {
       packSize * 6 +
       '" value="' +
       draftPosition +
-      '" class="slider" id="myRange">'
+      '" class="slider" id="draftPosRange">'
   );
   sliderInput.appendTo(slider);
 
@@ -1670,20 +1670,21 @@ function open_draft(id) {
   $("#ux_1").append(top);
   $("#ux_1").append(cont);
 
-  var qSel = document.querySelector("input");
+  var posRange = $("#draftPosRange")[0];
 
   $(".draft_nav_prev").off();
   $(".draft_nav_next").off();
-  $(".slider").off();
+  $("#draftPosRange").off();
 
-  $(".slider").on("click mousemove", function() {
-    var pa = Math.floor((qSel.value - 1) / 2 / packSize);
-    var pi = Math.floor(((qSel.value - 1) / 2) % packSize);
+  $("#draftPosRange").on("click mousemove", function() {
+    console.log(posRange.value);
+    var pa = Math.floor((posRange.value - 1) / 2 / packSize);
+    var pi = Math.floor(((posRange.value - 1) / 2) % packSize);
     $(".draft_title").html("Pack " + (pa + 1) + ", Pick " + (pi + 1));
   });
 
-  $(".slider").on("click mouseup", function() {
-    draftPosition = parseInt(qSel.value);
+  $("#draftPosRange").on("click mouseup", function() {
+    draftPosition = parseInt(posRange.value);
     open_draft(id, tileGrpid, draft.set);
   });
 
