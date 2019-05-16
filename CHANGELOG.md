@@ -1,3 +1,16 @@
+## <small>2.5.4 (2019-05-16)</small>
+
+* bugfix cards starting with XX appearing as split cost ([d755676](https://github.com/Manuel-777/MTG-Arena-Tool/commit/d755676))
+* default overlay mode ([65a1d43](https://github.com/Manuel-777/MTG-Arena-Tool/commit/65a1d43)), closes [#345](https://github.com/Manuel-777/MTG-Arena-Tool/issues/345)
+* events page respects match.archived ([c9eefc2](https://github.com/Manuel-777/MTG-Arena-Tool/commit/c9eefc2))
+* fallback on the play to first turn player ([ac20da2](https://github.com/Manuel-777/MTG-Arena-Tool/commit/ac20da2))
+* prettier ([604893f](https://github.com/Manuel-777/MTG-Arena-Tool/commit/604893f))
+* prettier ([6fb8cb8](https://github.com/Manuel-777/MTG-Arena-Tool/commit/6fb8cb8))
+* showArchived filter independence ([6d4f41f](https://github.com/Manuel-777/MTG-Arena-Tool/commit/6d4f41f))
+* wanted card counts respect deck.archived ([9c1c698](https://github.com/Manuel-777/MTG-Arena-Tool/commit/9c1c698))
+
+
+
 ## <small>2.5.3 (2019-05-14)</small>
 
 *  update history page to support archive filter and unarchive ([e1e8725](https://github.com/Manuel-777/MTG-Arena-Tool/commit/e1e8725))
