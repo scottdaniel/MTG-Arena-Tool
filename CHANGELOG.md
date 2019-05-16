@@ -1,3 +1,21 @@
+## <small>2.5.5 (2019-05-16)</small>
+
+* bugfix background.saveMatch to handle limited rank ([eb9688a](https://github.com/Manuel-777/MTG-Arena-Tool/commit/eb9688a))
+* bugfix history.getStepsUntilNextRank ([6c90495](https://github.com/Manuel-777/MTG-Arena-Tool/commit/6c90495))
+* draft silder fix ([94fd3fa](https://github.com/Manuel-777/MTG-Arena-Tool/commit/94fd3fa))
+* draft viewer arrows ([33ac04c](https://github.com/Manuel-777/MTG-Arena-Tool/commit/33ac04c))
+* Generalize Aggregator stats processing ([3052170](https://github.com/Manuel-777/MTG-Arena-Tool/commit/3052170))
+* History page shows constructed ranked stats for any time period ([b6b88cd](https://github.com/Manuel-777/MTG-Arena-Tool/commit/b6b88cd))
+* move ranked stats to StatsPanel ([361a4f2](https://github.com/Manuel-777/MTG-Arena-Tool/commit/361a4f2))
+* raise eslint complexity limit ([f84fc2a](https://github.com/Manuel-777/MTG-Arena-Tool/commit/f84fc2a))
+* Refactor addCardTile and addCardSeparator out of global scope ([4e5b1d1](https://github.com/Manuel-777/MTG-Arena-Tool/commit/4e5b1d1))
+* Remove unused code ([3763e3c](https://github.com/Manuel-777/MTG-Arena-Tool/commit/3763e3c))
+* Remove unused code ([2b5d539](https://github.com/Manuel-777/MTG-Arena-Tool/commit/2b5d539))
+* StatsPanel shows limited rank icons ([59f9afa](https://github.com/Manuel-777/MTG-Arena-Tool/commit/59f9afa))
+* util.RANKS constant ([63ce321](https://github.com/Manuel-777/MTG-Arena-Tool/commit/63ce321))
+
+
+
 ## <small>2.5.4 (2019-05-16)</small>
 
 * bugfix cards starting with XX appearing as split cost ([d755676](https://github.com/Manuel-777/MTG-Arena-Tool/commit/d755676))
