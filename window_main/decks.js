@@ -62,8 +62,9 @@ function openDecksTab(_filters = {}) {
     const aggregator = new Aggregator(filters);
     const statsPanel = new StatsPanel(
       "decks_top",
-      aggregator.stats,
-      sidebarSize
+      aggregator,
+      sidebarSize,
+      true
     );
     const decks_top_winrate = statsPanel.render();
     decks_top_winrate.style.display = "flex";
@@ -208,7 +209,7 @@ function openDecksTab(_filters = {}) {
         listItem.leftBottom.appendChild(m);
       });
 
-      const dwr = aggregator.deckWinrates[deck.id];
+      const dwr = aggregator.deckStats[deck.id];
       if (dwr && dwr.total > 0) {
         let deckWinrateDiv = createDivision(["list_deck_winrate"]);
         let colClass = getWinrateClass(dwr.winrate);
@@ -225,7 +226,7 @@ function openDecksTab(_filters = {}) {
         let deckWinrateLastDiv = createDivision(["list_deck_winrate"]);
         deckWinrateLastDiv.style.opacity = 0.6;
         deckWinrateLastDiv.innerHTML = "Since last edit: ";
-        const drwr = aggregator.deckRecentWinrates[deck.id];
+        const drwr = aggregator.deckRecentStats[deck.id];
         if (drwr && drwr.total > 0) {
           colClass = getWinrateClass(drwr.winrate);
           deckWinrateLastDiv.innerHTML += `<span class="${colClass}_bright">${formatPercent(

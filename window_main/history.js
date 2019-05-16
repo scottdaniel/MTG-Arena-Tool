@@ -13,6 +13,7 @@ globals
   get_deck_colors,
   get_rank_index,
   get_rank_index_16,
+  getNextRank,
   getReadableEvent,
   getTagColor,
   ipc_send,
@@ -37,7 +38,6 @@ globals
   $$
 */
 
-const RANKS = ["Bronze", "Silver", "Gold", "Platinum", "Diamond", "Mythic"];
 const { DEFAULT_DECK, RANKED_CONST, RANKED_DRAFT, DATE_SEASON } = Aggregator;
 let filters = Aggregator.getDefaultFilters();
 let filteredMatches;
@@ -85,7 +85,9 @@ function openHistoryTab(_deprecated, _filters = {}) {
   div.style.padding = "0 12px";
 
   setFilters(_filters);
+  filteredMatches = new Aggregator(filters);
 
+  let rankedStats;
   const showingRanked =
     filters.date === DATE_SEASON &&
     (filters.eventId === RANKED_CONST || filters.eventId === RANKED_DRAFT);
@@ -94,13 +96,22 @@ function openHistoryTab(_deprecated, _filters = {}) {
     renderRanksStats(rankStats);
     rankStats.style.paddingBottom = "16px";
     div.appendChild(rankStats);
+    rankedStats =
+      filters.eventId === RANKED_CONST
+        ? filteredMatches.constructedStats
+        : filteredMatches.limitedStats;
+  }
+  if (filters.eventId === RANKED_CONST) {
+    rankedStats = filteredMatches.constructedStats;
   }
 
-  filteredMatches = new Aggregator(filters);
   const statsPanel = new StatsPanel(
     "history_top",
-    filteredMatches.stats,
-    sidebarSize
+    filteredMatches,
+    sidebarSize,
+    true,
+    rankedStats,
+    filters.eventId === RANKED_DRAFT
   );
   const historyTopWinrate = statsPanel.render();
   div.appendChild(historyTopWinrate);
@@ -160,8 +171,6 @@ function openHistoryTab(_deprecated, _filters = {}) {
 }
 
 // return val = how many rows it rendered into container
-let listItems = [];
-
 function renderData(container, index) {
   // for performance reasons, we leave matches order mostly alone
   // to display most-recent-first, we use a reverse index
@@ -413,63 +422,12 @@ function renderRanksStats(container) {
 
   // Add ranks matchup history here
   let rc = matchesHistory.rankwinrates[seasonName];
-
-  Object.values(rc).forEach(object => {
-    // object is either rank win/loss data OR metadata
-    // See function calculateRankWins() in background.js
-    var rankName = object.r;
-    var totalGames = object.t;
-    var wonGames = object.w;
-    var lostGames = object.l;
-
-    if (!rankName || totalGames <= 0) {
-      // this is a not winrate object OR
-      // we have no data for this rank so don't display it
-      return;
-    }
-
-    var rowContainer = createDivision(["flex_item"]);
-    //rowContainer.style.flexDirection = "column";
-    rowContainer.style.justifyContent = "center";
-
-    var versusPrefix = createDivision(["ranks_history_title"], "Vs.");
-    rowContainer.appendChild(versusPrefix);
-
-    var rankBadge = createDivision(["ranks_history_badge"]);
-    rankBadge.title = rankName;
-    rankBadge.style.backgroundPosition = `${get_rank_index(rankName, 1) *
-      -48}px 0px`;
-    rowContainer.appendChild(rankBadge);
-
-    var rankSpecificWinrate = createDivision(
-      ["ranks_history_title"],
-      `${wonGames}:${lostGames} (${formatPercent(wonGames / totalGames)}%)`
-    );
-
-    // let sampleSize = `Sample size: ${totalGames}`;
-    // rankSpecificWinrate.title = sampleSize;
-
-    rowContainer.appendChild(rankSpecificWinrate);
-
-    container.appendChild(rowContainer);
-  });
-
   let totalWon = rc.total.w;
-  let totalLost = rc.total.l;
   let totalWinrate = totalWon / rc.total.t;
-  title = createDivision(
-    ["ranks_history_title"],
-    `Total: ${totalWon}:${totalLost} (${formatPercent(totalWinrate)}%)`
-  );
-  // let sampleSize = `Sample size: ${rc.total.t}`;
-  // title.title = sampleSize;
-  container.appendChild(title);
-
   let currentRank = viewingLimitSeason
     ? playerData.rank.limited.rank
     : playerData.rank.constructed.rank;
   let expected = getStepsUntilNextRank(viewingLimitSeason, totalWinrate);
-
   title = createDivision(
     ["ranks_history_title"],
     `Games until ${getNextRank(currentRank)}: ${expected}`
@@ -648,18 +606,6 @@ function deleteTag(matchid, tag) {
 
   let obj = { match: matchid, name: tag };
   ipc_send("delete_history_tag", obj);
-}
-
-function getNextRank(currentRank) {
-  /*
-    Globals used: RANKS
-  */
-  var rankIndex = RANKS.indexOf(currentRank);
-  if (rankIndex < RANKS.length - 1) {
-    return RANKS[rankIndex + 1];
-  } else {
-    return undefined;
-  }
 }
 
 function getStepsUntilNextRank(mode, winrate) {

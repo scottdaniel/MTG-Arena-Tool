@@ -4,17 +4,29 @@ globals
   compare_winrates,
   createDivision,
   formatPercent,
-  getWinrateClass,
+  get_rank_index,
   getTagColor,
+  getWinrateClass,
   mana,
+  RANKS,
   toDDHHMMSS,
   toMMSS
 */
 
 class StatsPanel {
-  constructor(prefixId, stats, width) {
+  constructor(
+    prefixId,
+    aggregation,
+    width,
+    showCharts,
+    rankedStats,
+    isLimited
+  ) {
     this.prefixId = prefixId;
-    this.stats = stats || {};
+    this.data = aggregation || {};
+    this.showCharts = showCharts;
+    this.rankedStats = rankedStats;
+    this.isLimited = isLimited;
     this.container = createDivision([this.prefixId + "_winrate"]);
     this.handleResize = this.handleResize.bind(this);
     this.handleResize(width);
@@ -31,43 +43,33 @@ class StatsPanel {
     return this.container;
   }
 
-  doRender() {
-    const {
-      playWins,
-      playLosses,
-      drawWins,
-      drawLosses,
-      playWinrate,
-      drawWinrate,
-      winrate,
-      wins,
-      losses,
-      duration,
-      colors,
-      tags
-    } = this.stats;
-    const barsToShow = Math.max(3, Math.round(this.width / 40));
-    let colClass;
-    colClass = getWinrateClass(winrate);
+  static getWinrateString(stats) {
+    const colClass = getWinrateClass(stats.winrate);
+    const title = `${stats.wins} matches won : ${stats.losses} matches lost`;
+    return `<span class="${colClass}_bright" title="${title}">${formatPercent(
+      stats.winrate
+    )}</span>`;
+  }
 
+  doRender() {
     // Overall winrate
-    let winrateContainer = createDivision([]);
+    const winrateContainer = createDivision([]);
     winrateContainer.style.display = "flex";
     winrateContainer.style.justifyContent = "space-between";
     const winrateLabel = createDivision(["list_deck_winrate"], "Overall:");
     winrateLabel.style.margin = "0 auto 0 0";
     winrateContainer.appendChild(winrateLabel);
-    const wrSpan = `<span class="${colClass}_bright">${formatPercent(
-      winrate
-    )}</span>`;
+    const wrString = StatsPanel.getWinrateString(this.data.stats);
     const winrateDiv = createDivision(
       ["list_deck_winrate"],
-      `${wins}:${losses} (${wrSpan})`
+      `${this.data.stats.wins}:${this.data.stats.losses} (${wrString})`
     );
-    winrateDiv.title = `${wins} matches won : ${losses} matches lost`;
     winrateDiv.style.margin = "0 0 0 auto";
     winrateContainer.appendChild(winrateDiv);
     this.container.appendChild(winrateContainer);
+
+    // Ranked Stats
+    if (this.rankedStats) this.renderRanked();
 
     // On the play Winrate
     const playDrawContainer = createDivision([]);
@@ -79,17 +81,11 @@ class StatsPanel {
     );
     playDrawRateLabel.style.margin = "0 auto 0 0";
     playDrawContainer.appendChild(playDrawRateLabel);
-    colClass = getWinrateClass(playWinrate);
-    const playWrSpan = `<span class="${colClass}_bright" title="${playWins} matches won : ${playLosses} matches lost">${formatPercent(
-      playWinrate
-    )}</span>`;
-    colClass = getWinrateClass(drawWinrate);
-    const drawWrSpan = `<span class="${colClass}_bright" title="${drawWins} matches won : ${drawLosses} matches lost">${formatPercent(
-      drawWinrate
-    )}</span>`;
+    const playWrString = StatsPanel.getWinrateString(this.data.playStats);
+    const drawWrString = StatsPanel.getWinrateString(this.data.drawStats);
     const playDrawRateDiv = createDivision(
       ["list_deck_winrate"],
-      `${playWrSpan}/${drawWrSpan}`
+      `${playWrString}/${drawWrString}`
     );
     playDrawRateDiv.style.margin = "0 0 0 auto";
     playDrawContainer.appendChild(playDrawRateDiv);
@@ -101,16 +97,53 @@ class StatsPanel {
     const timeLabel = createDivision(["list_match_time"], "Duration:");
     timeLabel.style.margin = "0 auto 0 0";
     matchTimeContainer.appendChild(timeLabel);
-    const timeDiv = createDivision(["list_match_time"], toMMSS(duration));
-    timeDiv.title = toDDHHMMSS(duration);
+    const timeDiv = createDivision(
+      ["list_match_time"],
+      toMMSS(this.data.stats.duration)
+    );
+    timeDiv.title = toDDHHMMSS(this.data.stats.duration);
     timeDiv.style.margin = "0 0 0 auto";
     matchTimeContainer.appendChild(timeDiv);
     this.container.appendChild(matchTimeContainer);
 
     // Frequent Matchups
-    const frequencySort = (a, b) => b.wins + b.losses - a.wins - a.losses;
+    if (this.showCharts) this.renderCharts();
+  }
+
+  renderRanked() {
+    RANKS.forEach(rank => {
+      const stats = this.rankedStats[rank.toLowerCase()];
+      if (!stats || !stats.total) return;
+
+      const winrateContainer = createDivision([]);
+      winrateContainer.style.display = "flex";
+      winrateContainer.style.justifyContent = "space-between";
+      winrateContainer.style.alignItems = "center";
+      const rankClass = this.isLimited
+        ? "top_limited_rank"
+        : "top_constructed_rank";
+      const rankBadge = createDivision([rankClass]);
+      rankBadge.style.margin = "0 auto 0 0";
+      rankBadge.title = rank;
+      rankBadge.style.backgroundPosition = `${get_rank_index(rank, 1) *
+        -48}px 0px`;
+      winrateContainer.appendChild(rankBadge);
+      const wrString = StatsPanel.getWinrateString(stats);
+      const winrateDiv = createDivision(
+        ["list_deck_winrate"],
+        `${stats.wins}:${stats.losses} (${wrString})`
+      );
+      winrateDiv.style.margin = "0 0 0 auto";
+      winrateContainer.appendChild(winrateDiv);
+      this.container.appendChild(winrateContainer);
+    });
+  }
+
+  renderCharts() {
+    const barsToShow = Math.max(3, Math.round(this.width / 40));
+    const frequencySort = (a, b) => b.total - a.total;
     // Archetypes
-    let tagsWinrates = [...tags];
+    let tagsWinrates = [...Object.values(this.data.tagStats)];
     tagsWinrates.sort(frequencySort);
     tagsWinrates = tagsWinrates.slice(0, barsToShow);
     const curveMaxTags = Math.max(
@@ -119,7 +152,7 @@ class StatsPanel {
     );
     tagsWinrates.sort(compare_winrates);
     // Colors
-    let colorsWinrates = [...colors];
+    let colorsWinrates = [...Object.values(this.data.colorStats)];
     colorsWinrates.sort(frequencySort);
     colorsWinrates = colorsWinrates.slice(0, barsToShow);
     const curveMax = Math.max(

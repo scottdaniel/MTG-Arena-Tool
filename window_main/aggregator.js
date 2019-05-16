@@ -1,8 +1,6 @@
 "use strict";
 /*
 globals
-  compare_colors,
-  compare_winrates,
   doesDeckStillExist,
   get_deck_colors,
   getDeck,
@@ -54,9 +52,23 @@ class Aggregator {
     this.filterEvent = this.filterEvent.bind(this);
     this.filterMatch = this.filterMatch.bind(this);
     this.updateFilters = this.updateFilters.bind(this);
+    this._processMatch = this._processMatch.bind(this);
     this.compareDecks = this.compareDecks.bind(this);
     this.compareEvents = this.compareEvents.bind(this);
     this.updateFilters(filters);
+  }
+
+  static getDefaultStats() {
+    return { wins: 0, losses: 0, total: 0, duration: 0 };
+  }
+
+  static finishStats(stats) {
+    const { wins, total } = stats;
+    let winrate = 0;
+    if (total) {
+      winrate = Math.round((wins / total) * 100) / 100;
+    }
+    stats.winrate = winrate;
   }
 
   static createAllMatches() {
@@ -206,7 +218,7 @@ class Aggregator {
 
   filterMatch(match) {
     if (!match) return false;
-    const { eventId, oppColors, arch, date, showArchived } = this.filters;
+    const { eventId, oppColors, arch, showArchived } = this.filters;
     if (!showArchived && match.archived && match.archived) return false;
 
     const passesEventFilter =
@@ -238,212 +250,162 @@ class Aggregator {
       ...this.filters,
       ...filters
     };
+    this._eventIds = [];
+    this.eventLastPlayed = {};
+    this._decks = [];
+    this.deckMap = {};
+    this.deckLastPlayed = {};
+    this.eventLastPlayed = {};
+    this.archCounts = {};
+    this.stats = Aggregator.getDefaultStats();
+    this.playStats = Aggregator.getDefaultStats();
+    this.drawStats = Aggregator.getDefaultStats();
+    this.deckStats = {};
+    this.deckRecentStats = {};
+    this.colorStats = {};
+    this.tagStats = {};
+    this.constructedStats = {};
+    this.limitedStats = {};
+
     this._matches = matchesHistory.matches
       .map(matchId => matchesHistory[matchId])
       .filter(this.filterMatch);
+    this._matches.forEach(this._processMatch);
 
-    this._eventIds = [];
-    const eventLastPlayed = {};
-    this._decks = [];
-    const deckMap = {};
-    const deckLastPlayed = {};
-    const deckWinrates = {};
-    const deckRecentWinrates = {};
-    const archCounts = {};
-    let wins = 0;
-    let loss = 0;
-    let playWins = 0;
-    let playLoss = 0;
-    let drawWins = 0;
-    let drawLoss = 0;
-    let winrate = 0;
-    let duration = 0;
-    const colorsWinrates = [];
-    const tagsWinrates = [];
-    this._matches.forEach(match => {
-      if (match.eventId) {
-        let eventIsMoreRecent = true;
-        if (match.eventId in eventLastPlayed) {
-          eventIsMoreRecent = match.date > eventLastPlayed[match.eventId];
-        }
-        if (eventIsMoreRecent) {
-          eventLastPlayed[match.eventId] = match.date;
-        }
-      }
-      if (match.playerDeck && match.playerDeck.id) {
-        const id = match.playerDeck.id;
-        let deckIsMoreRecent = true;
-        if (id in deckLastPlayed) {
-          deckIsMoreRecent = match.date > deckLastPlayed[id];
-        }
-        if (deckIsMoreRecent) {
-          deckMap[id] = match.playerDeck;
-          deckLastPlayed[id] = match.date;
-        }
-      }
-      // some of the data is wierd. Games which last years or have no data.
-      if (match.duration && match.duration < 3600) {
-        duration += match.duration;
-      }
-      if (match.player && match.opponent) {
-        const computeDeckWinrate =
-          match.playerDeck && doesDeckStillExist(match.playerDeck.id);
-        let lastEdit, dId;
-        if (computeDeckWinrate) {
-          const currentDeck = getDeck(match.playerDeck.id);
-          lastEdit = currentDeck.lastUpdated;
-          dId = match.playerDeck.id;
-          if (!(dId in deckWinrates)) {
-            deckWinrates[dId] = { wins: 0, losses: 0, winrate: 0 };
-          }
-          if (!(dId in deckRecentWinrates)) {
-            deckRecentWinrates[dId] = { wins: 0, losses: 0, winrate: 0 };
-          }
-        }
-        if (match.player.win > match.opponent.win) {
-          wins++;
-          if (match.onThePlay) {
-            let onThePlay = match.onThePlay == match.player.seat ? true : false;
-            if (onThePlay) playWins++;
-            else drawWins++;
-          }
-          if (computeDeckWinrate) {
-            deckWinrates[dId].wins++;
-            if (lastEdit && match.date > lastEdit) {
-              deckRecentWinrates[dId].wins++;
-            }
-          }
-        }
-        if (match.player.win < match.opponent.win) {
-          loss++;
-          if (match.onThePlay) {
-            let onThePlay = match.onThePlay == match.player.seat ? true : false;
-            if (onThePlay) playLoss++;
-            else drawLoss++;
-          }
-          if (computeDeckWinrate) {
-            deckWinrates[dId].losses++;
-            if (lastEdit && match.date > lastEdit) {
-              deckRecentWinrates[dId].losses++;
-            }
-          }
-        }
-      }
-      // color win/loss
-      if (match.oppDeck) {
-        const oppDeckColors = get_deck_colors(match.oppDeck);
-        if (oppDeckColors && oppDeckColors.length > 0) {
-          let added = -1;
-          colorsWinrates.forEach((wr, index) => {
-            if (compare_colors(wr.colors, oppDeckColors)) {
-              added = index;
-            }
-          });
-          if (added === -1) {
-            added =
-              colorsWinrates.push({
-                colors: oppDeckColors,
-                wins: 0,
-                losses: 0
-              }) - 1;
-          }
-          if (match.player.win > match.opponent.win) {
-            colorsWinrates[added].wins++;
-          }
-          if (match.player.win < match.opponent.win) {
-            colorsWinrates[added].losses++;
-          }
-        }
-        // tag win/loss
-        if (match.tags !== undefined && match.tags.length > 0) {
-          const tag = match.tags[0] || "Unknown";
-          archCounts[tag] = (archCounts[tag] || 0) + 1;
-          let added = -1;
-          tagsWinrates.forEach((wr, index) => {
-            if (wr.tag === tag) {
-              added = index;
-            }
-          });
-          if (added === -1) {
-            added = tagsWinrates.push({ tag: tag, wins: 0, losses: 0 }) - 1;
-          }
-          tagsWinrates[added].colors = oppDeckColors;
-          if (match.player.win > match.opponent.win) {
-            tagsWinrates[added].wins += 1;
-          }
-          if (match.player.win < match.opponent.win) {
-            tagsWinrates[added].losses += 1;
-          }
-        }
-      }
-    });
-    this.deckLastPlayed = deckLastPlayed;
-    this.eventLastPlayed = eventLastPlayed;
-    this._eventIds = [...Object.keys(eventLastPlayed)];
+    [
+      this.stats,
+      this.playStats,
+      this.drawStats,
+      ...Object.values(this.deckStats),
+      ...Object.values(this.deckRecentStats),
+      ...Object.values(this.colorStats),
+      ...Object.values(this.tagStats),
+      ...Object.values(this.constructedStats),
+      ...Object.values(this.limitedStats)
+    ].forEach(Aggregator.finishStats);
+
+    this._eventIds = [...Object.keys(this.eventLastPlayed)];
     this._eventIds.sort(this.compareEvents);
-    this._stats = {
-      wins,
-      losses: loss,
-      duration,
-      colors: colorsWinrates,
-      tags: tagsWinrates,
-      playWins: playWins,
-      playLosses: playLoss,
-      drawWins: drawWins,
-      drawLosses: drawLoss
-    };
-    const finishStats = stats => {
-      const wins = stats.wins;
-      const loss = stats.losses;
-      const total = wins + loss;
-      let winrate = 0;
-      if (total) {
-        winrate = winrate = Math.round((wins / total) * 100) / 100;
-      }
 
-      const playWins = stats.playWins;
-      const playLoss = stats.playLosses;
-      const playTotal = playWins + playLoss;
-      let playWinrate = 0;
-      if (playTotal) {
-        playWinrate = Math.round((playWins / playTotal) * 100) / 100;
-      }
-
-      const drawWins = stats.drawWins;
-      const drawLoss = stats.drawLosses;
-      const drawTotal = drawWins + drawLoss;
-      let drawWinrate = 0;
-      if (drawTotal) {
-        drawWinrate = Math.round((drawWins / drawTotal) * 100) / 100;
-      }
-
-      stats.playWinrate = playWinrate;
-      stats.drawWinrate = drawWinrate;
-
-      stats.winrate = winrate;
-      stats.total = total;
-    };
-    finishStats(this._stats);
-    Object.values(deckWinrates).forEach(finishStats);
-    this.deckWinrates = deckWinrates;
-    Object.values(deckRecentWinrates).forEach(finishStats);
-    this.deckRecentWinrates = deckRecentWinrates;
-
-    colorsWinrates.sort(compare_winrates);
-    tagsWinrates.sort(compare_winrates);
-
-    this.archCounts = archCounts;
-    const archList = [...Object.keys(archCounts)];
+    const archList = [...Object.keys(this.archCounts)];
     archList.sort();
     this.archs = [DEFAULT_ARCH, ...archList];
 
-    for (const deckId in deckMap) {
-      const deck = getDeck(deckId) || deckMap[deckId];
+    for (const deckId in this.deckMap) {
+      const deck = getDeck(deckId) || this.deckMap[deckId];
       if (deck) {
         this._decks.push(deck);
       }
     }
     this._decks.sort(this.compareDecks);
+  }
+
+  _processMatch(match) {
+    const statsToUpdate = [this.stats];
+    // on play vs draw
+    if (match.onThePlay && match.player) {
+      statsToUpdate.push(
+        match.onThePlay === match.player.seat ? this.playStats : this.drawStats
+      );
+    }
+    // process event data
+    if (match.eventId) {
+      let eventIsMoreRecent = true;
+      if (match.eventId in this.eventLastPlayed) {
+        eventIsMoreRecent = match.date > this.eventLastPlayed[match.eventId];
+      }
+      if (eventIsMoreRecent) {
+        this.eventLastPlayed[match.eventId] = match.date;
+      }
+      // process rank data
+      if (match.player && match.player.rank) {
+        const rank = match.player.rank.toLowerCase();
+        if (!(rank in this.constructedStats)) {
+          this.constructedStats[rank] = {
+            ...Aggregator.getDefaultStats(),
+            rank
+          };
+        }
+        if (!(rank in this.limitedStats)) {
+          this.limitedStats[rank] = {
+            ...Aggregator.getDefaultStats(),
+            rank
+          };
+        }
+        if (CONSTRUCTED_EVENTS.includes(match.eventId)) {
+          statsToUpdate.push(this.constructedStats[rank]);
+        } else if (rankedEvents.includes(match.eventId)) {
+          statsToUpdate.push(this.limitedStats[rank]);
+        }
+      }
+    }
+    // process deck data
+    if (match.playerDeck && match.playerDeck.id) {
+      const id = match.playerDeck.id;
+      let deckIsMoreRecent = true;
+      if (id in this.deckLastPlayed) {
+        deckIsMoreRecent = match.date > this.deckLastPlayed[id];
+      }
+      if (deckIsMoreRecent) {
+        this.deckMap[id] = match.playerDeck;
+        this.deckLastPlayed[id] = match.date;
+      }
+      if (doesDeckStillExist(id)) {
+        const currentDeck = getDeck(match.playerDeck.id);
+        if (!(id in this.deckStats)) {
+          this.deckStats[id] = Aggregator.getDefaultStats();
+        }
+        statsToUpdate.push(this.deckStats[id]);
+        if (!(id in this.deckRecentStats)) {
+          this.deckRecentStats[id] = Aggregator.getDefaultStats();
+        }
+        if (currentDeck.lastUpdated && match.date > currentDeck.lastUpdated) {
+          statsToUpdate.push(this.deckRecentStats[id]);
+        }
+      }
+    }
+    // process opponent data
+    if (match.oppDeck) {
+      const colors = get_deck_colors(match.oppDeck);
+      if (colors && colors.length) {
+        colors.sort();
+        if (!(colors in this.colorStats)) {
+          this.colorStats[colors] = {
+            ...Aggregator.getDefaultStats(),
+            colors
+          };
+        }
+        statsToUpdate.push(this.colorStats[colors]);
+      }
+      // process archetype
+      if (match.tags && match.tags.length) {
+        const tag = match.tags[0] || "Unknown";
+        this.archCounts[tag] = (this.archCounts[tag] || 0) + 1;
+        if (!(tag in this.tagStats)) {
+          this.tagStats[tag] = {
+            ...Aggregator.getDefaultStats(),
+            colors,
+            tag
+          };
+        }
+        statsToUpdate.push(this.tagStats[tag]);
+      }
+    }
+    // update relevant stats
+    statsToUpdate.forEach(stats => {
+      stats.total++;
+      // some of the data is wierd. Games which last years or have no data.
+      if (match.duration && match.duration < 3600) {
+        stats.duration += match.duration;
+      }
+      if (match.player && match.opponent) {
+        if (match.player.win > match.opponent.win) {
+          stats.wins++;
+        } else if (match.player.win < match.opponent.win) {
+          stats.losses++;
+        }
+      }
+    });
   }
 
   compareDecks(a, b) {
@@ -508,10 +470,6 @@ class Aggregator {
 
   get decks() {
     return [{ id: DEFAULT_DECK, name: DEFAULT_DECK }, ...this._decks];
-  }
-
-  get stats() {
-    return this._stats;
   }
 
   get tags() {
