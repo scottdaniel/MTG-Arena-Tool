@@ -2,10 +2,6 @@
 /*
 globals
   cardsDb,
-  makeId,
-  get_card_type_sort,
-  addCardSeparator,
-  addCardTile,
   compare_cards,
   getWildcardsMissing,
   setsList,
@@ -133,49 +129,6 @@ class Deck {
     }
 
     return missing;
-  }
-
-  /**
-   * Draws this deck on the specified DOM object
-   **/
-  draw(div) {
-    var unique = makeId(4);
-    div.html("");
-    var prevIndex = 0;
-
-    let mainBoard = this.mainboard;
-    mainBoard.get().forEach(function(card) {
-      let grpId = card.id;
-      let type = cardsDb.get(grpId).type;
-      let cardTypeSort = get_card_type_sort(type);
-      if (prevIndex == 0) {
-        let q = mainBoard.countType(type);
-        addCardSeparator(cardTypeSort, div, q);
-      } else if (prevIndex != 0) {
-        if (cardTypeSort != get_card_type_sort(cardsDb.get(prevIndex).type)) {
-          let q = mainBoard.countType(type);
-          addCardSeparator(cardTypeSort, div, q);
-        }
-      }
-
-      if (card.quantity > 0) {
-        addCardTile(grpId, unique + "a", card.quantity, div);
-      }
-
-      prevIndex = grpId;
-    });
-
-    let sideBoard = this.sideboard;
-    if (sideBoard._list.length > 0) {
-      addCardSeparator(99, div, sideBoard.count());
-      prevIndex = 0;
-      sideBoard.get().forEach(card => {
-        var grpId = card.id;
-        if (card.quantity > 0) {
-          addCardTile(grpId, unique + "b", card.quantity, div);
-        }
-      });
-    }
   }
 
   /**
