@@ -101,6 +101,9 @@ function openHistoryTab(_deprecated, _filters = {}) {
         ? filteredMatches.constructedStats
         : filteredMatches.limitedStats;
   }
+  if (filters.eventId === RANKED_CONST) {
+    rankedStats = filteredMatches.constructedStats;
+  }
 
   const statsPanel = new StatsPanel(
     "history_top",
