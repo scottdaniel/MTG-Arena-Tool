@@ -14,11 +14,19 @@ globals
 */
 
 class StatsPanel {
-  constructor(prefixId, aggregation, width, showCharts, rankedStats) {
+  constructor(
+    prefixId,
+    aggregation,
+    width,
+    showCharts,
+    rankedStats,
+    isLimited
+  ) {
     this.prefixId = prefixId;
     this.data = aggregation || {};
     this.showCharts = showCharts;
     this.rankedStats = rankedStats;
+    this.isLimited = isLimited;
     this.container = createDivision([this.prefixId + "_winrate"]);
     this.handleResize = this.handleResize.bind(this);
     this.handleResize(width);
@@ -60,6 +68,9 @@ class StatsPanel {
     winrateContainer.appendChild(winrateDiv);
     this.container.appendChild(winrateContainer);
 
+    // Ranked Stats
+    if (this.rankedStats) this.renderRanked();
+
     // On the play Winrate
     const playDrawContainer = createDivision([]);
     playDrawContainer.style.display = "flex";
@@ -79,9 +90,6 @@ class StatsPanel {
     playDrawRateDiv.style.margin = "0 0 0 auto";
     playDrawContainer.appendChild(playDrawRateDiv);
     this.container.appendChild(playDrawContainer);
-
-    // Ranked Stats
-    if (this.rankedStats) this.renderRanked();
 
     const matchTimeContainer = createDivision();
     matchTimeContainer.style.display = "flex";
@@ -111,7 +119,10 @@ class StatsPanel {
       winrateContainer.style.display = "flex";
       winrateContainer.style.justifyContent = "space-between";
       winrateContainer.style.alignItems = "center";
-      const rankBadge = createDivision(["ranks_history_badge"]);
+      const rankClass = this.isLimited
+        ? "top_limited_rank"
+        : "top_constructed_rank";
+      const rankBadge = createDivision([rankClass]);
       rankBadge.style.margin = "0 auto 0 0";
       rankBadge.title = rank;
       rankBadge.style.backgroundPosition = `${get_rank_index(rank, 1) *

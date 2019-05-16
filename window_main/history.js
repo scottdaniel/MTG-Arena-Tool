@@ -107,7 +107,8 @@ function openHistoryTab(_deprecated, _filters = {}) {
     filteredMatches,
     sidebarSize,
     true,
-    rankedStats
+    rankedStats,
+    filters.eventId === RANKED_DRAFT
   );
   const historyTopWinrate = statsPanel.render();
   div.appendChild(historyTopWinrate);
