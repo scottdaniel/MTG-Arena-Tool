@@ -1992,7 +1992,7 @@ a:hover {
     display: flex;
     justify-content: space-between;
     bottom: 0;
-    width: calc(50% - 32px);
+    width: calc(33% - 32px);
     height: 100%;
     top: 64px;
     z-index: 40;
