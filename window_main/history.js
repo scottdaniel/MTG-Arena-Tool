@@ -639,20 +639,21 @@ function getStepsUntilNextRank(mode, winrate) {
     stl = 1;
   }
   if (cr == "Diamond") {
-    st = 1;
+    st = 7;
     stw = 1;
     stl = 1;
   }
 
-  let stepsNeeded = st * ct - cs;
+  const expectedValue = winrate * stw - (1 - winrate) * stl;
+  if (expectedValue <= 0) return "&#x221e";
 
-  if (winrate <= 0.5) return "&#x221e";
+  let stepsNeeded = st * ct - cs;
   let expected = 0;
   let n = 0;
-  console.log("stepsNeeded", stepsNeeded);
+  // console.log("stepsNeeded", stepsNeeded);
   while (expected <= stepsNeeded) {
-    expected = n * winrate * stw - n * (1 - winrate) * stl;
-    //console.log("stepsNeeded:", stepsNeeded, "expected:", expected, "N:", n);
+    expected = n * expectedValue;
+    // console.log("stepsNeeded:", stepsNeeded, "expected:", expected, "N:", n);
     n++;
   }
 
