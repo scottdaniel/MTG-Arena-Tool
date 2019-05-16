@@ -13,6 +13,7 @@ globals
   get_deck_colors,
   get_rank_index,
   get_rank_index_16,
+  getNextRank,
   getReadableEvent,
   getTagColor,
   ipc_send,
@@ -37,7 +38,6 @@ globals
   $$
 */
 
-const RANKS = ["Bronze", "Silver", "Gold", "Platinum", "Diamond", "Mythic"];
 const { DEFAULT_DECK, RANKED_CONST, RANKED_DRAFT, DATE_SEASON } = Aggregator;
 let filters = Aggregator.getDefaultFilters();
 let filteredMatches;
@@ -648,18 +648,6 @@ function deleteTag(matchid, tag) {
 
   let obj = { match: matchid, name: tag };
   ipc_send("delete_history_tag", obj);
-}
-
-function getNextRank(currentRank) {
-  /*
-    Globals used: RANKS
-  */
-  var rankIndex = RANKS.indexOf(currentRank);
-  if (rankIndex < RANKS.length - 1) {
-    return RANKS[rankIndex + 1];
-  } else {
-    return undefined;
-  }
 }
 
 function getStepsUntilNextRank(mode, winrate) {

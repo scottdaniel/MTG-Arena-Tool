@@ -642,6 +642,7 @@ var renderer = 0;
 var rarities = ["common", "uncommon", "rare", "mythic"];
 const orderedColorCodes = ["w", "u", "b", "r", "g", "c"];
 const orderedColorCodesCommon = ["w", "u", "b", "r", "g"];
+const RANKS = ["Bronze", "Silver", "Gold", "Platinum", "Diamond", "Mythic"];
 
 var draftRanks = [];
 draftRanks[12] = "A+";
@@ -2664,4 +2665,16 @@ function hypergeometricSignificance(
   );
   let retVal = math.subtract(1, math.multiply(weightedAverage, 2));
   return returnBig ? retVal : math.number(retVal);
+}
+
+function getNextRank(currentRank) {
+  /*
+    Globals used: RANKS
+  */
+  var rankIndex = RANKS.indexOf(currentRank);
+  if (rankIndex < RANKS.length - 1) {
+    return RANKS[rankIndex + 1];
+  } else {
+    return undefined;
+  }
 }
