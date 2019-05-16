@@ -1853,10 +1853,18 @@ function saveMatch(matchId) {
     seat: currentMatch.opponent.seat,
     win: ow
   };
+  let rank, tier;
+  if (ranked_events.includes(currentMatch.eventId)) {
+    rank = playerData.rank.limited.rank;
+    tier = playerData.rank.limited.tier;
+  } else {
+    rank = playerData.rank.constructed.rank;
+    tier = playerData.rank.constructed.tier;
+  }
   match.player = {
     name: playerData.name,
-    rank: playerData.rank.constructed.rank,
-    tier: playerData.rank.constructed.tier,
+    rank,
+    tier,
     userid: playerData.arenaId,
     seat: currentMatch.player.seat,
     win: pw
