@@ -4,18 +4,21 @@ globals
   compare_winrates,
   createDivision,
   formatPercent,
-  getWinrateClass,
+  get_rank_index,
   getTagColor,
+  getWinrateClass,
   mana,
+  RANKS,
   toDDHHMMSS,
   toMMSS
 */
 
 class StatsPanel {
-  constructor(prefixId, aggregation, width, showCharts) {
+  constructor(prefixId, aggregation, width, showCharts, rankedStats) {
     this.prefixId = prefixId;
     this.data = aggregation || {};
     this.showCharts = showCharts;
+    this.rankedStats = rankedStats;
     this.container = createDivision([this.prefixId + "_winrate"]);
     this.handleResize = this.handleResize.bind(this);
     this.handleResize(width);
@@ -32,25 +35,23 @@ class StatsPanel {
     return this.container;
   }
 
+  static getWinrateString(stats) {
+    const colClass = getWinrateClass(stats.winrate);
+    const title = `${stats.wins} matches won : ${stats.losses} matches lost`;
+    return `<span class="${colClass}_bright" title="${title}">${formatPercent(
+      stats.winrate
+    )}</span>`;
+  }
+
   doRender() {
-    const barsToShow = Math.max(3, Math.round(this.width / 40));
-
-    const getWinrateString = stats => {
-      const colClass = getWinrateClass(stats.winrate);
-      const title = `${stats.wins} matches won : ${stats.losses} matches lost`;
-      return `<span class="${colClass}_bright" title="${title}">${formatPercent(
-        stats.winrate
-      )}</span>`;
-    };
-
     // Overall winrate
-    let winrateContainer = createDivision([]);
+    const winrateContainer = createDivision([]);
     winrateContainer.style.display = "flex";
     winrateContainer.style.justifyContent = "space-between";
     const winrateLabel = createDivision(["list_deck_winrate"], "Overall:");
     winrateLabel.style.margin = "0 auto 0 0";
     winrateContainer.appendChild(winrateLabel);
-    const wrString = getWinrateString(this.data.stats);
+    const wrString = StatsPanel.getWinrateString(this.data.stats);
     const winrateDiv = createDivision(
       ["list_deck_winrate"],
       `${this.data.stats.wins}:${this.data.stats.losses} (${wrString})`
@@ -69,8 +70,8 @@ class StatsPanel {
     );
     playDrawRateLabel.style.margin = "0 auto 0 0";
     playDrawContainer.appendChild(playDrawRateLabel);
-    const playWrString = getWinrateString(this.data.playStats);
-    const drawWrString = getWinrateString(this.data.drawStats);
+    const playWrString = StatsPanel.getWinrateString(this.data.playStats);
+    const drawWrString = StatsPanel.getWinrateString(this.data.drawStats);
     const playDrawRateDiv = createDivision(
       ["list_deck_winrate"],
       `${playWrString}/${drawWrString}`
@@ -78,6 +79,9 @@ class StatsPanel {
     playDrawRateDiv.style.margin = "0 0 0 auto";
     playDrawContainer.appendChild(playDrawRateDiv);
     this.container.appendChild(playDrawContainer);
+
+    // Ranked Stats
+    if (this.rankedStats) this.renderRanked();
 
     const matchTimeContainer = createDivision();
     matchTimeContainer.style.display = "flex";
@@ -94,9 +98,38 @@ class StatsPanel {
     matchTimeContainer.appendChild(timeDiv);
     this.container.appendChild(matchTimeContainer);
 
-    if (!this.showCharts) return;
-
     // Frequent Matchups
+    if (this.showCharts) this.renderCharts();
+  }
+
+  renderRanked() {
+    RANKS.forEach(rank => {
+      const stats = this.rankedStats[rank.toLowerCase()];
+      if (!stats || !stats.total) return;
+
+      const winrateContainer = createDivision([]);
+      winrateContainer.style.display = "flex";
+      winrateContainer.style.justifyContent = "space-between";
+      winrateContainer.style.alignItems = "center";
+      const rankBadge = createDivision(["ranks_history_badge"]);
+      rankBadge.style.margin = "0 auto 0 0";
+      rankBadge.title = rank;
+      rankBadge.style.backgroundPosition = `${get_rank_index(rank, 1) *
+        -48}px 0px`;
+      winrateContainer.appendChild(rankBadge);
+      const wrString = StatsPanel.getWinrateString(stats);
+      const winrateDiv = createDivision(
+        ["list_deck_winrate"],
+        `${stats.wins}:${stats.losses} (${wrString})`
+      );
+      winrateDiv.style.margin = "0 0 0 auto";
+      winrateContainer.appendChild(winrateDiv);
+      this.container.appendChild(winrateContainer);
+    });
+  }
+
+  renderCharts() {
+    const barsToShow = Math.max(3, Math.round(this.width / 40));
     const frequencySort = (a, b) => b.total - a.total;
     // Archetypes
     let tagsWinrates = [...Object.values(this.data.tagStats)];
