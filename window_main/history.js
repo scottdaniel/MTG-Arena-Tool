@@ -99,8 +99,9 @@ function openHistoryTab(_deprecated, _filters = {}) {
   filteredMatches = new Aggregator(filters);
   const statsPanel = new StatsPanel(
     "history_top",
-    filteredMatches.stats,
-    sidebarSize
+    filteredMatches,
+    sidebarSize,
+    true
   );
   const historyTopWinrate = statsPanel.render();
   div.appendChild(historyTopWinrate);

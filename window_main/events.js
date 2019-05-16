@@ -63,12 +63,7 @@ function openEventsTab(_filters) {
   const eventsTopFilter = filterPanel.render();
   eventsTop.appendChild(eventsTopFilter);
 
-  const partialStats = {
-    ...filteredMatches.stats,
-    colors: [],
-    tags: []
-  };
-  const statsPanel = new StatsPanel("events_top", partialStats);
+  const statsPanel = new StatsPanel("events_top", filteredMatches);
   const eventsTopWinrate = statsPanel.render();
   eventsTopWinrate.style.width = "300px";
   eventsTopWinrate.style.marginRight = "16px";
