@@ -390,7 +390,6 @@ function updateView() {
     doscroll = true;
   }
 
-
   $(".overlay_archetype").remove();
   $(".overlay_deck_container").show();
   $(".overlay_draft_container").hide();
