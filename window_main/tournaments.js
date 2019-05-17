@@ -749,7 +749,7 @@ function drawSideboardDeck(div) {
     size += card.quantity;
   });
   let mainboardDraw = new DeckDrawer(mainboardDiv);
-  mainboardDraw.separator(`Mainboard (${size})`);
+  mainboardDraw.separator(98, size);
   currentDeck.mainDeck.forEach(function(card) {
     let grpId = card.id;
 
@@ -766,8 +766,8 @@ function drawSideboardDeck(div) {
       currentDeck.sideboard.forEach(function(card) {
         size += card.quantity;
       });
-      let sideboardDraw = new DeckDrawer();
-      sideboardDraw.separator(`Sideboard (${size})`);
+      let sideboardDraw = new DeckDrawer(sideboardDiv);
+      sideboardDraw.separator(99, size);
 
       currentDeck.sideboard.forEach(function(card) {
         let grpId = card.id;
