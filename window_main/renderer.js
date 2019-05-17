@@ -1124,7 +1124,7 @@ function drawDeck(div, deck, showWildcards = false) {
   var unique = makeId(4);
   div.html("");
   var prevIndex = 0;
-  let draw = new DeckDrawer(div, deck);
+  let draw = new DeckDrawer(div);
   deck.mainDeck.forEach(function(card) {
     let grpId = card.id;
     let type = cardsDb.get(grpId).type;
@@ -1140,7 +1140,7 @@ function drawDeck(div, deck, showWildcards = false) {
     }
 
     if (card.quantity > 0) {
-      draw.card(grpId, unique + "a", card.quantity, showWildcards, false);
+      draw.card(grpId, unique + "a", card.quantity, showWildcards, deck, false);
     }
 
     prevIndex = grpId;
@@ -1154,7 +1154,14 @@ function drawDeck(div, deck, showWildcards = false) {
         var grpId = card.id;
         //var type = cardsDb.get(grpId).type;
         if (card.quantity > 0) {
-          draw.card(grpId, unique + "b", card.quantity, showWildcards, true);
+          draw.card(
+            grpId,
+            unique + "b",
+            card.quantity,
+            showWildcards,
+            deck,
+            true
+          );
         }
       });
     }

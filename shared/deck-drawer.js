@@ -106,9 +106,8 @@ function get_rank_class(ranking) {
 }
 
 class DeckDrawer {
-  constructor(div, deck) {
+  constructor(div) {
     this.div = div;
-    this.deck = deck;
   }
 
   separator(i, number = 0) {
@@ -156,9 +155,15 @@ class DeckDrawer {
     element.appendChild(createDivision(["card_tile_separator"], str));
   }
 
-  card(grpId, indent, quantity, showWildcards = false, isSideboard = false) {
+  card(
+    grpId,
+    indent,
+    quantity,
+    showWildcards = false,
+    deck = null,
+    isSideboard = false
+  ) {
     let element = this.div;
-    let deck = this.deck || null;
 
     // if element is a jquery object convert to bare DOM element
     // TODO: Remove this once jQuery is removed.
