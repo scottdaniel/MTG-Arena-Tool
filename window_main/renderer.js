@@ -1121,6 +1121,16 @@ function makeResizable(div, resizeCallback, finalCallback) {
 
 //
 function drawDeck(div, deck, showWildcards = false) {
+  const categories = [
+    "Creature",
+    "Planeswalker",
+    "Instant",
+    "Sorcery",
+    "Artifact",
+    "Enchantment",
+    "Land"
+  ];
+
   var unique = makeId(4);
   div.html("");
   var prevIndex = 0;
@@ -1130,11 +1140,17 @@ function drawDeck(div, deck, showWildcards = false) {
     let cardTypeSort = get_card_type_sort(type);
     if (prevIndex == 0) {
       let q = deck_count_types(deck, type, false);
-      deckDrawer.addCardSeparator(cardTypeSort, div, q);
+      deckDrawer.addCardSeparator(
+        `${categories[cardTypeSort - 1]} (${q})`,
+        div
+      );
     } else if (prevIndex != 0) {
       if (cardTypeSort != get_card_type_sort(cardsDb.get(prevIndex).type)) {
         let q = deck_count_types(deck, type, false);
-        deckDrawer.addCardSeparator(cardTypeSort, div, q);
+        deckDrawer.addCardSeparator(
+          `${categories[cardTypeSort - 1]} (${q})`,
+          div
+        );
       }
     }
 
@@ -1155,7 +1171,10 @@ function drawDeck(div, deck, showWildcards = false) {
 
   if (deck.sideboard != undefined) {
     if (deck.sideboard.length > 0) {
-      deckDrawer.addCardSeparator(99, div, deck.sideboard.sum("quantity"));
+      deckDrawer.addCardSeparator(
+        `Sideboard (${deck.sideboard.sum("quantity")})`,
+        div
+      );
       prevIndex = 0;
       deck.sideboard.forEach(function(card) {
         var grpId = card.id;
@@ -1474,7 +1493,7 @@ function setChangesTimeline() {
     let nc = 0;
     if (change.changesMain.length > 0) {
       let dd = $('<div class="change_item_box"></div>');
-      deckDrawer.addCardSeparator(98, dd);
+      deckDrawer.addCardSeparator("Mainboard", dd);
       dd.appendTo(data);
     }
 
@@ -1496,7 +1515,7 @@ function setChangesTimeline() {
 
     if (change.changesSide.length > 0) {
       let dd = $('<div class="change_item_box"></div>');
-      deckDrawer.addCardSeparator(99, dd);
+      deckDrawer.addCardSeparator("Sideboard", dd);
       innherH += 30;
       dd.appendTo(data);
     }

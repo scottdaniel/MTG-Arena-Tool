@@ -105,44 +105,7 @@ function get_rank_class(ranking) {
   }
 }
 
-exports.addCardSeparator = function(i, element, number = 0) {
-  var str = "";
-  switch (i) {
-    case 1:
-      str = "Creature";
-      break;
-    case 2:
-      str = "Planeswalker";
-      break;
-    case 3:
-      str = "Instant";
-      break;
-    case 4:
-      str = "Sorcery";
-      break;
-    case 5:
-      str = "Artifact";
-      break;
-    case 6:
-      str = "Enchantment";
-      break;
-    case 7:
-      str = "Land";
-      break;
-    case 98:
-      str = "Mainboard";
-      break;
-    case 99:
-      str = "Sideboard";
-      break;
-    default:
-      str = i;
-      break;
-  }
-  if (number > 0) {
-    str += ` (${number})`;
-  }
-
+exports.addCardSeparator = function(str, element) {
   if (element instanceof jQuery) {
     element = element[0];
   }
