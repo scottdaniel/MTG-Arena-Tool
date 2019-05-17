@@ -1,4 +1,5 @@
 shared/*
+!shared/deck-drawer.js
 images/*
 sounds/*
 fonts/*
