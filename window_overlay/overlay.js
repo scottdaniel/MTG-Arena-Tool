@@ -499,7 +499,7 @@ function updateView() {
   mainCards.removeDuplicates();
   mainCards.get().sort(sortFunc);
 
-  let deckListDraw = new DeckDrawer();
+  let deckListDraw = new DeckDrawer(deckListDiv);
   mainCards.get().forEach(card => {
     var grpId = card.id;
     if (deckMode == 2) {
