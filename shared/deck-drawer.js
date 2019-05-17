@@ -105,199 +105,187 @@ function get_rank_class(ranking) {
   }
 }
 
-class DeckDrawer {
-  constructor(div) {
-    this.div = div;
+exports.addCardSeparator = function(i, element, number = 0) {
+  var str = "";
+  switch (i) {
+    case 1:
+      str = "Creature";
+      break;
+    case 2:
+      str = "Planeswalker";
+      break;
+    case 3:
+      str = "Instant";
+      break;
+    case 4:
+      str = "Sorcery";
+      break;
+    case 5:
+      str = "Artifact";
+      break;
+    case 6:
+      str = "Enchantment";
+      break;
+    case 7:
+      str = "Land";
+      break;
+    case 98:
+      str = "Mainboard";
+      break;
+    case 99:
+      str = "Sideboard";
+      break;
+    default:
+      str = i;
+      break;
+  }
+  if (number > 0) {
+    str += ` (${number})`;
   }
 
-  separator(i, number = 0) {
-    var str = "";
-    switch (i) {
-      case 1:
-        str = "Creature";
-        break;
-      case 2:
-        str = "Planeswalker";
-        break;
-      case 3:
-        str = "Instant";
-        break;
-      case 4:
-        str = "Sorcery";
-        break;
-      case 5:
-        str = "Artifact";
-        break;
-      case 6:
-        str = "Enchantment";
-        break;
-      case 7:
-        str = "Land";
-        break;
-      case 98:
-        str = "Mainboard";
-        break;
-      case 99:
-        str = "Sideboard";
-        break;
-      default:
-        str = i;
-        break;
-    }
-    if (number > 0) {
-      str += ` (${number})`;
-    }
+  if (element instanceof jQuery) {
+    element = element[0];
+  }
+  element.appendChild(createDivision(["card_tile_separator"], str));
+};
 
-    let element = this.div;
-    if (element instanceof jQuery) {
-      element = element[0];
-    }
-    element.appendChild(createDivision(["card_tile_separator"], str));
+exports.addCardTile = function(
+  grpId,
+  indent,
+  quantity,
+  element,
+  showWildcards = false,
+  deck = null,
+  isSideboard = false
+) {
+  // if element is a jquery object convert to bare DOM element
+  // TODO: Remove this once jQuery is removed.
+  if (element instanceof jQuery) {
+    element = element[0];
   }
 
-  card(
-    grpId,
-    indent,
-    quantity,
-    showWildcards = false,
-    deck = null,
-    isSideboard = false
-  ) {
-    let element = this.div;
+  if (quantity !== 0) {
+    var cont = createDivision(["card_tile_container", "click-on"]);
 
-    // if element is a jquery object convert to bare DOM element
-    // TODO: Remove this once jQuery is removed.
-    if (element instanceof jQuery) {
-      element = element[0];
-    }
+    cont.dataset["grpId"] = grpId;
+    cont.dataset["id"] = indent;
+    cont.dataset["quantity"] = quantity;
 
-    if (quantity !== 0) {
-      var cont = createDivision(["card_tile_container", "click-on"]);
-
-      cont.dataset["grpId"] = grpId;
-      cont.dataset["id"] = indent;
-      cont.dataset["quantity"] = quantity;
-
-      var ww, ll;
-      if (!isNumber(quantity)) {
-        ww = 64;
-        ll = 48;
-        let col = get_rank_class(quantity);
-        cont.appendChild(
-          createDivision(["card_tile_odds", col], `<span>${quantity}</span>`)
-        );
-      } else if (quantity == 9999) {
-        quantity = 1;
-        ww = 32;
-        ll = 17;
-
-        let quantityDiv = createDivision(
-          ["card_tile_quantity"],
-          `<span>${quantity}</span>`
-        );
-        quantityDiv.style.cssText =
-          "color: rgba(255, 255, 255, 0); min-width: 0px; width: 0px;";
-        cont.appendChild(quantityDiv);
-      } else {
-        ww = 64;
-        ll = 49;
-        let quantityDiv = createDivision(
-          ["card_tile_quantity"],
-          `<span>${quantity}</span>`
-        );
-        cont.appendChild(quantityDiv);
-      }
-      element.appendChild(cont);
-      var card = cardsDb.get(grpId);
-      var cardTile = createDivision([
-        "card_tile",
-        get_frame_class(card ? card.frame : [])
-      ]);
-      cardTile.id = `t${grpId + indent}`;
-      cardTile.style.cssText = `min-width: calc(100% - ${ww}px);`;
-      // cardTile.style.minWidth = `calc(100% - ${ww}px)`;
-      cont.appendChild(cardTile);
-
-      // Glow hover
-      var glow = createDivision(["card_tile_glow"]);
-      glow.id = `t${grpId + indent}`;
-      glow.style.cssText = `min-width: calc(100% - ${ww}px); left: calc(0px - 100% + ${ll}px)`;
-      cont.appendChild(glow);
-
-      if (card) {
-        addCardHover(glow, card);
-        glow.addEventListener("mouseenter", () => {
-          cardTile.style.marginTop = "0";
-        });
-        glow.addEventListener("mouseleave", () => {
-          cardTile.style.marginTop = "3px";
-        });
-
-        glow.addEventListener("click", () => {
-          if (card.dfc == "SplitHalf") {
-            card = cardsDb.get(card.dfcId);
-          }
-          shell.openExternal(
-            `https://scryfall.com/card/${get_set_scryfall(card.set)}/${
-              card.cid
-            }/${card.name}`
-          );
-        });
-      }
-
-      //
-      var fl = createDivision(["flex_item"]);
-      fl.appendChild(
-        createDivision(["card_tile_name"], card ? card.name : "Unknown")
+    var ww, ll;
+    if (!isNumber(quantity)) {
+      ww = 64;
+      ll = 48;
+      let col = get_rank_class(quantity);
+      cont.appendChild(
+        createDivision(["card_tile_odds", col], `<span>${quantity}</span>`)
       );
-      cardTile.appendChild(fl);
+    } else if (quantity == 9999) {
+      quantity = 1;
+      ww = 32;
+      ll = 17;
 
-      var fl2 = createDivision(["flex_item"]);
-      fl2.style.lineHeight = "26px";
-      cardTile.appendChild(fl2);
+      let quantityDiv = createDivision(
+        ["card_tile_quantity"],
+        `<span>${quantity}</span>`
+      );
+      quantityDiv.style.cssText =
+        "color: rgba(255, 255, 255, 0); min-width: 0px; width: 0px;";
+      cont.appendChild(quantityDiv);
+    } else {
+      ww = 64;
+      ll = 49;
+      let quantityDiv = createDivision(
+        ["card_tile_quantity"],
+        `<span>${quantity}</span>`
+      );
+      cont.appendChild(quantityDiv);
+    }
+    element.appendChild(cont);
+    var card = cardsDb.get(grpId);
+    var cardTile = createDivision([
+      "card_tile",
+      get_frame_class(card ? card.frame : [])
+    ]);
+    cardTile.id = `t${grpId + indent}`;
+    cardTile.style.cssText = `min-width: calc(100% - ${ww}px);`;
+    // cardTile.style.minWidth = `calc(100% - ${ww}px)`;
+    cont.appendChild(cardTile);
 
-      if (!card) return cont;
+    // Glow hover
+    var glow = createDivision(["card_tile_glow"]);
+    glow.id = `t${grpId + indent}`;
+    glow.style.cssText = `min-width: calc(100% - ${ww}px); left: calc(0px - 100% + ${ll}px)`;
+    cont.appendChild(glow);
 
-      let prevc = true;
-      const hasSplitCost = card.dfc === "SplitHalf";
-
-      card.cost.forEach(cost => {
-        if (hasSplitCost) {
-          if (/^(x|\d)+$/.test(cost) && prevc === false) {
-            fl2.innerHTML += "//";
-          }
-          prevc = /^\d+$/.test(cost);
-        }
-        fl2.appendChild(
-          createDivision(["mana_s16", "flex_end", `mana_${cost}`])
-        );
+    if (card) {
+      addCardHover(glow, card);
+      glow.addEventListener("mouseenter", () => {
+        cardTile.style.marginTop = "0";
+      });
+      glow.addEventListener("mouseleave", () => {
+        cardTile.style.marginTop = "3px";
       });
 
-      if (showWildcards) {
-        if (card.type.indexOf("Basic Land") == -1) {
-          let missing = 0;
-          if (deck) {
-            missing = get_wc_missing(deck, grpId, isSideboard);
-          }
+      glow.addEventListener("click", () => {
+        if (card.dfc == "SplitHalf") {
+          card = cardsDb.get(card.dfcId);
+        }
+        shell.openExternal(
+          `https://scryfall.com/card/${get_set_scryfall(card.set)}/${
+            card.cid
+          }/${card.name}`
+        );
+      });
+    }
 
-          let xoff = rarities.indexOf(card.rarity) * -24;
+    //
+    var fl = createDivision(["flex_item"]);
+    fl.appendChild(
+      createDivision(["card_tile_name"], card ? card.name : "Unknown")
+    );
+    cardTile.appendChild(fl);
 
-          if (missing > 0) {
-            let yoff = missing * -24;
+    var fl2 = createDivision(["flex_item"]);
+    fl2.style.lineHeight = "26px";
+    cardTile.appendChild(fl2);
 
-            var asasdf = createDivision(["not_owned_sprite"]);
-            asasdf.style.cssText = `background-position: ${xoff}px ${yoff}px; left: calc(0px - 100% + ${ww -
-              14}px);`;
-            asasdf.title = `${missing} missing`;
-            cont.appendChild(asasdf);
-          }
+    if (!card) return cont;
+
+    let prevc = true;
+    const hasSplitCost = card.dfc === "SplitHalf";
+
+    card.cost.forEach(cost => {
+      if (hasSplitCost) {
+        if (/^(x|\d)+$/.test(cost) && prevc === false) {
+          fl2.innerHTML += "//";
+        }
+        prevc = /^\d+$/.test(cost);
+      }
+      fl2.appendChild(createDivision(["mana_s16", "flex_end", `mana_${cost}`]));
+    });
+
+    if (showWildcards) {
+      if (card.type.indexOf("Basic Land") == -1) {
+        let missing = 0;
+        if (deck) {
+          missing = get_wc_missing(deck, grpId, isSideboard);
+        }
+
+        let xoff = rarities.indexOf(card.rarity) * -24;
+
+        if (missing > 0) {
+          let yoff = missing * -24;
+
+          var asasdf = createDivision(["not_owned_sprite"]);
+          asasdf.style.cssText = `background-position: ${xoff}px ${yoff}px; left: calc(0px - 100% + ${ww -
+            14}px);`;
+          asasdf.title = `${missing} missing`;
+          cont.appendChild(asasdf);
         }
       }
-
-      return cont;
     }
-    return false;
-  }
-}
 
-module.exports = DeckDrawer;
+    return cont;
+  }
+  return false;
+};
