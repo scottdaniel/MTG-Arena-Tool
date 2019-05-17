@@ -8,6 +8,8 @@ global
   get_set_scryfall,
 */
 
+const _ = require("lodash");
+
 //
 function isNumber(n) {
   return !isNaN(parseFloat(n)) && isFinite(n);
@@ -15,63 +17,25 @@ function isNumber(n) {
 
 var rarities = ["common", "uncommon", "rare", "mythic"];
 
-//
-function get_frame_class(frame) {
-  if (frame.length == 0) {
-    return "tile_c";
-  }
-  if (frame.length == 1) {
-    if (frame.includes(1)) {
-      return "tile_w";
-    }
-    if (frame.includes(2)) {
-      return "tile_u";
-    }
-    if (frame.includes(3)) {
-      return "tile_b";
-    }
-    if (frame.includes(4)) {
-      return "tile_r";
-    }
-    if (frame.includes(5)) {
-      return "tile_g";
-    }
-  }
-  if (frame.length == 2) {
-    if (frame.includes(4) && frame.includes(1)) {
-      return "tile_wr";
-    }
-    if (frame.includes(1) && frame.includes(3)) {
-      return "tile_wb";
-    }
-    if (frame.includes(1) && frame.includes(2)) {
-      return "tile_uw";
-    }
-    if (frame.includes(2) && frame.includes(4)) {
-      return "tile_ur";
-    }
-    if (frame.includes(2) && frame.includes(5)) {
-      return "tile_ug";
-    }
-    if (frame.includes(2) && frame.includes(3)) {
-      return "tile_ub";
-    }
-    if (frame.includes(4) && frame.includes(5)) {
-      return "tile_rg";
-    }
-    if (frame.includes(5) && frame.includes(1)) {
-      return "tile_gw";
-    }
-    if (frame.includes(3) && frame.includes(4)) {
-      return "tile_br";
-    }
-    if (frame.includes(3) && frame.includes(5)) {
-      return "tile_bg";
-    }
-  }
-  if (frame.length > 2) {
-    return "tile_multi";
-  }
+function frameClassName(card) {
+  const frame = card ? card.frame.concat().sort() : [];
+  if (_.isEqual(frame, [])) return "tile_c";
+  if (_.isEqual(frame, [1])) return "tile_w";
+  if (_.isEqual(frame, [2])) return "tile_u";
+  if (_.isEqual(frame, [3])) return "tile_b";
+  if (_.isEqual(frame, [4])) return "tile_r";
+  if (_.isEqual(frame, [5])) return "tile_g";
+  if (_.isEqual(frame, [1, 2])) return "tile_uw";
+  if (_.isEqual(frame, [1, 3])) return "tile_wb";
+  if (_.isEqual(frame, [1, 4])) return "tile_wr";
+  if (_.isEqual(frame, [1, 5])) return "tile_gw";
+  if (_.isEqual(frame, [2, 3])) return "tile_ub";
+  if (_.isEqual(frame, [2, 4])) return "tile_ur";
+  if (_.isEqual(frame, [2, 5])) return "tile_ug";
+  if (_.isEqual(frame, [3, 4])) return "tile_br";
+  if (_.isEqual(frame, [3, 5])) return "tile_bg";
+  if (_.isEqual(frame, [4, 5])) return "tile_rg";
+  if (frame.length > 2) return "tile_multi";
 }
 
 function rankingClassName(ranking) {
@@ -159,10 +123,7 @@ exports.addCardTile = function(
     }
     element.appendChild(cont);
     var card = cardsDb.get(grpId);
-    var cardTile = createDivision([
-      "card_tile",
-      get_frame_class(card ? card.frame : [])
-    ]);
+    var cardTile = createDivision(["card_tile", frameClassName(card)]);
     cardTile.id = `t${grpId + indent}`;
     cardTile.style.cssText = `min-width: calc(100% - ${ww}px);`;
     // cardTile.style.minWidth = `calc(100% - ${ww}px)`;
