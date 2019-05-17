@@ -74,29 +74,23 @@ function get_frame_class(frame) {
   }
 }
 
-function get_rank_class(ranking) {
+function rankingClassName(ranking) {
   switch (ranking) {
     case "A+":
-      return "blue";
     case "A":
       return "blue";
 
     case "A-":
-      return "green";
     case "B+":
-      return "green";
     case "B":
       return "green";
 
     case "C-":
-      return "orange";
     case "D+":
-      return "orange";
-
     case "D":
       return "orange";
+
     case "D-":
-      return "red";
     case "F":
       return "red";
 
@@ -138,7 +132,7 @@ exports.addCardTile = function(
     if (!isNumber(quantity)) {
       ww = 64;
       ll = 48;
-      let col = get_rank_class(quantity);
+      let col = rankingClassName(quantity);
       cont.appendChild(
         createDivision(["card_tile_odds", col], `<span>${quantity}</span>`)
       );
