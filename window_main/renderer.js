@@ -186,26 +186,6 @@ function ipc_send(method, arg, to = windowBackground) {
   ipc.send("ipc_switch", method, windowRenderer, arg, to);
 }
 
-window.onerror = (msg, url, line, col, err) => {
-  var error = {
-    msg: err.msg,
-    stack: err.stack,
-    line: line,
-    col: col
-  };
-  ipc_send("ipc_error", error);
-  console.log("Error: ", error);
-};
-
-process.on("uncaughtException", function(err) {
-  ipc_send("ipc_log", "Exception: " + err);
-});
-
-process.on("warning", warning => {
-  ipc_send("ipc_log", "Warning: " + warning.message);
-  ipc_send("ipc_log", "> " + warning.stack);
-});
-
 //
 ipc.on("clear_pwd", function() {
   document.getElementById("signin_pass").value = "";

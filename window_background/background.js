@@ -483,38 +483,6 @@ ipc.on("set_deck_archetypes", (event, arg) => {
   deck_archetypes = arg;
 });
 
-window.onerror = (msg, url, line, col, err) => {
-  var error = {
-    msg: err.msg,
-    stack: err.stack,
-    line: line,
-    col: col
-  };
-  error.id = sha1(error.msg + playerData.arenaId);
-  httpApi.httpSendError(error);
-  ipc_send("ipc_log", "Background Error:" + error);
-};
-
-process.on("uncaughtException", function(err) {
-  var error = {
-    msg: err,
-    stack: "uncaughtException",
-    line: 0,
-    col: 0
-  };
-  console.log("ERROR: ", error);
-  error.id = sha1(error.msg + playerData.arenaId);
-  httpApi.httpSendError(error);
-  ipc_send("ipc_log", `Background ${error.stack}: ${error.join(" - ")}`);
-});
-
-//
-ipc.on("error", function(event, err) {
-  err.id = sha1(err.msg + playerData.arenaId);
-  httpApi.httpSendError(err);
-  ipc_send("ipc_log", "Background error:" + err);
-});
-
 //
 function requestHistorySend(state) {
   if (history.matches != undefined) {

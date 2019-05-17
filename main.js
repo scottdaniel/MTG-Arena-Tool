@@ -169,7 +169,6 @@ function startApp() {
 
       case "ipc_error":
         console.log("IPC ERROR: ", arg);
-        background.webContents.send("error", arg);
         break;
 
       case "set_settings":

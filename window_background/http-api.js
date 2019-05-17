@@ -547,17 +547,6 @@ function httpSetEconomy(change) {
   });
 }
 
-function httpSendError(error) {
-  var _id = makeId(6);
-  error = JSON.stringify(error);
-  httpAsync.push({
-    reqId: _id,
-    method: "send_error",
-    method_path: "/api/send_error.php",
-    error: error
-  });
-}
-
 function httpDeleteData() {
   var _id = makeId(6);
   httpAsync.push({
@@ -696,7 +685,6 @@ module.exports = {
   httpSetMatch,
   httpSetDraft,
   httpSetEconomy,
-  httpSendError,
   httpDeleteData,
   httpGetDatabase,
   htttpGetStatus,
