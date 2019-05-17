@@ -405,15 +405,18 @@ function updateView() {
   if (deckMode == 4) {
     $(".overlay_deckname").html("Action Log");
 
-    actionLog.forEach(function(log) {
-      var d = new Date(log.time);
-      var hh = ("0" + d.getHours()).slice(-2);
-      var mm = ("0" + d.getMinutes()).slice(-2);
-      var ss = ("0" + d.getSeconds()).slice(-2);
+    let initalTime = actionLog[0] ? new Date(actionLog[0].time) : new Date();
+    actionLog.forEach(log => {
+      var _date = new Date(log.time);
+      var hh = ("0" + _date.getHours()).slice(-2);
+      var mm = ("0" + _date.getMinutes()).slice(-2);
+      var ss = ("0" + _date.getSeconds()).slice(-2);
+
+      let secondsPast = Math.round((_date - initalTime) / 1000);
 
       var box = $('<div class="actionlog log_p' + log.seat + '"></div>');
       var time = $(
-        '<div class="actionlog_time">' + hh + ":" + mm + ":" + ss + "</div>"
+        `<div title="${hh}:${mm}:${ss}" class="actionlog_time">${secondsPast}s</div>`
       );
       var str = $('<div class="actionlog_text">' + log.str + "</div>");
 
@@ -518,7 +521,7 @@ function updateView() {
         deckListDiv
       );
     } else {
-      deckDrawer.addCardTile.card(grpId, "a", card.quantity, deckListDiv);
+      deckDrawer.addCardTile(grpId, "a", card.quantity, deckListDiv);
     }
   });
   if (showSideboard && deckToDraw.sideboard.count() > 0) {
