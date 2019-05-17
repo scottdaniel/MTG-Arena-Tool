@@ -19,7 +19,7 @@ global
 */
 const electron = require("electron");
 const { webFrame, remote } = require("electron");
-const DeckDrawer = require("../shared/deck-drawer");
+const deckDrawer = require("../shared/deck-drawer");
 
 if (!remote.app.isPackaged) {
   const { openNewGitHubIssue, debugInfo } = require("electron-util");
@@ -508,18 +508,17 @@ function updateView() {
   let mainCards = deckToDraw.mainboard;
   mainCards.removeDuplicates();
   mainCards.get().sort(sortFunc);
-
-  let deckListDraw = new DeckDrawer(deckListDiv);
   mainCards.get().forEach(card => {
     var grpId = card.id;
     if (deckMode == 2) {
-      deckListDraw.card(
+      deckDrawer.addCardTile(
         grpId,
         "a",
-        (card.chance != undefined ? card.chance : "0") + "%"
+        (card.chance != undefined ? card.chance : "0") + "%",
+        deckListDiv
       );
     } else {
-      deckListDraw.card(grpId, "a", card.quantity);
+      deckDrawer.addCardTile.card(grpId, "a", card.quantity, deckListDiv);
     }
   });
   if (showSideboard && deckToDraw.sideboard.count() > 0) {
@@ -532,9 +531,9 @@ function updateView() {
     sideCards.get().forEach(function(card) {
       var grpId = card.id;
       if (deckMode == 2) {
-        deckListDraw.card(grpId, "a", "0%");
+        deckDrawer.addCardTile(grpId, "a", "0%", deckListDiv);
       } else {
-        deckListDraw.card(grpId, "a", card.quantity);
+        deckDrawer.addCardTile(grpId, "a", card.quantity, deckListDiv);
       }
     });
   }
@@ -711,9 +710,8 @@ function setDraft(_packN = -1, _pickN = -1) {
 
     currentDraft.pickedCards.sort(compare_draft_cards);
 
-    let overlayDecklistDraw = new DeckDrawer($(".overlay_decklist"));
     currentDraft.pickedCards.forEach(function(grpId) {
-      overlayDecklistDraw.card(grpId, "a", 1);
+      deckDrawer.addCardTile(grpId, "a", 1, $(".overlay_decklist"));
     });
   } else if (draftMode == 1) {
     let key = "pack_" + packN + "pick_" + pickN;
@@ -762,8 +760,7 @@ function setDraft(_packN = -1, _pickN = -1) {
       }
 
       cont.appendTo(od);
-      let odDraw = new DeckDrawer(od);
-      let tile = odDraw.card(grpId, "a", draftRanks[rank]);
+      let tile = deckDrawer.addCardTile(grpId, "a", draftRanks[rank], od);
       if (grpId == pick) {
         tile.style.backgroundColor = "rgba(250, 229, 210, 0.66)";
       }

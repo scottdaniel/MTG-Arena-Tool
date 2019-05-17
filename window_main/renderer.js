@@ -80,7 +80,7 @@ const updateExploreCheckbox = require("./explore").updateExploreCheckbox;
 const openCollectionTab = require("./collection").openCollectionTab;
 const openEventsTab = require("./events").openEventsTab;
 const expandEvent = require("./events").expandEvent;
-const DeckDrawer = require("../shared/deck-drawer");
+const deckDrawer = require("../shared/deck-drawer");
 
 const openEconomyTab = require("./economy").openEconomyTab;
 
@@ -1121,26 +1121,49 @@ function makeResizable(div, resizeCallback, finalCallback) {
 
 //
 function drawDeck(div, deck, showWildcards = false) {
+  const categories = [
+    "Creature",
+    "Planeswalker",
+    "Instant",
+    "Sorcery",
+    "Artifact",
+    "Enchantment",
+    "Land"
+  ];
+
   var unique = makeId(4);
   div.html("");
   var prevIndex = 0;
-  let draw = new DeckDrawer(div, deck);
   deck.mainDeck.forEach(function(card) {
     let grpId = card.id;
     let type = cardsDb.get(grpId).type;
     let cardTypeSort = get_card_type_sort(type);
     if (prevIndex == 0) {
       let q = deck_count_types(deck, type, false);
-      draw.separator(cardTypeSort, q);
+      deckDrawer.addCardSeparator(
+        `${categories[cardTypeSort - 1]} (${q})`,
+        div
+      );
     } else if (prevIndex != 0) {
       if (cardTypeSort != get_card_type_sort(cardsDb.get(prevIndex).type)) {
         let q = deck_count_types(deck, type, false);
-        draw.separator(cardTypeSort, q);
+        deckDrawer.addCardSeparator(
+          `${categories[cardTypeSort - 1]} (${q})`,
+          div
+        );
       }
     }
 
     if (card.quantity > 0) {
-      draw.card(grpId, unique + "a", card.quantity, showWildcards, false);
+      deckDrawer.addCardTile(
+        grpId,
+        unique + "a",
+        card.quantity,
+        div,
+        showWildcards,
+        deck,
+        false
+      );
     }
 
     prevIndex = grpId;
@@ -1148,13 +1171,24 @@ function drawDeck(div, deck, showWildcards = false) {
 
   if (deck.sideboard != undefined) {
     if (deck.sideboard.length > 0) {
-      draw.separator(99, deck.sideboard.sum("quantity"));
+      deckDrawer.addCardSeparator(
+        `Sideboard (${deck.sideboard.sum("quantity")})`,
+        div
+      );
       prevIndex = 0;
       deck.sideboard.forEach(function(card) {
         var grpId = card.id;
         //var type = cardsDb.get(grpId).type;
         if (card.quantity > 0) {
-          draw.card(grpId, unique + "b", card.quantity, showWildcards, true);
+          deckDrawer.addCardTile(
+            grpId,
+            unique + "b",
+            card.quantity,
+            div,
+            showWildcards,
+            deck,
+            true
+          );
         }
       });
     }
@@ -1162,12 +1196,12 @@ function drawDeck(div, deck, showWildcards = false) {
 }
 
 //
-function drawCardList(draw, cards) {
+function drawCardList(div, cards) {
   let unique = makeId(4);
   let counts = {};
   cards.forEach(cardId => (counts[cardId] = (counts[cardId] || 0) + 1));
   Object.keys(counts).forEach(cardId =>
-    draw.card(cardId, unique, counts[cardId])
+    deckDrawer.addCardTile(cardId, unique, counts[cardId], div)
   );
 }
 
@@ -1459,8 +1493,7 @@ function setChangesTimeline() {
     let nc = 0;
     if (change.changesMain.length > 0) {
       let dd = $('<div class="change_item_box"></div>');
-      let draw = new DeckDrawer(dd);
-      draw.separator(98);
+      deckDrawer.addCardSeparator("Mainboard", dd);
       dd.appendTo(data);
     }
 
@@ -1476,15 +1509,13 @@ function setChangesTimeline() {
         ic.appendTo(dd);
       }
 
-      let draw = new DeckDrawer(dd);
-      draw.card(c.id, "chm" + cn, Math.abs(c.quantity));
+      deckDrawer.addCardTile(c.id, "chm" + cn, Math.abs(c.quantity), dd);
       dd.appendTo(data);
     });
 
     if (change.changesSide.length > 0) {
       let dd = $('<div class="change_item_box"></div>');
-      let draw = new DeckDrawer(dd);
-      draw.separator(99);
+      deckDrawer.addCardSeparator("Sideboard", dd);
       innherH += 30;
       dd.appendTo(data);
     }
@@ -1501,8 +1532,7 @@ function setChangesTimeline() {
         ic.appendTo(dd);
       }
 
-      let draw = new DeckDrawer(dd);
-      draw.card(c.id, "chs" + cn, Math.abs(c.quantity));
+      deckDrawer.addCardTile(c.id, "chs" + cn, Math.abs(c.quantity), dd);
       dd.appendTo(data);
     });
 
@@ -1829,36 +1859,39 @@ function open_match(id) {
   $("#ux_1").append(top);
   $("#ux_1").append(flc);
   $("#ux_1").append(fld);
-  let ux_1Draw = new DeckDrawer($("#ux_1"));
 
   if (match.gameStats) {
     match.gameStats.forEach((game, gameIndex) => {
       if (game.sideboardChanges) {
-        ux_1Draw.seperator(`Game ${gameIndex + 1} Sideboard Changes`);
+        deckDrawer.addCardSeparator(
+          `Game ${gameIndex + 1} Sideboard Changes`,
+          $("#ux_1")
+        );
         let sideboardDiv = $('<div class="card_lists_list"></div>');
         let additionsDiv = $('<div class="cardlist"></div>');
-        let additionsDraw = new DeckDrawer(additionsDiv);
         if (
           game.sideboardChanges.added.length == 0 &&
           game.sideboardChanges.removed.length == 0
         ) {
-          additionsDraw.separator("No changes");
+          deckDrawer.addCardSeparator("No changes", additionsDiv);
           additionsDiv.appendTo(sideboardDiv);
         } else {
-          additionsDraw.separator("Sideboarded In");
-          drawCardList(additionsDraw, game.sideboardChanges.added);
+          deckDrawer.addCardSeparator("Sideboarded In", additionsDiv);
+          drawCardList(additionsDiv, game.sideboardChanges.added);
           additionsDiv.appendTo(sideboardDiv);
           let removalsDiv = $('<div class="cardlist"></div>');
-          let removalsDraw = new DeckDrawer(removalsDiv);
-          removalsDraw.separator("Sideboarded Out");
-          drawCardList(removalsDraw, game.sideboardChanges.removed);
+          deckDrawer.addCardSeparator("Sideboarded Out", removalsDiv);
+          drawCardList(removalsDiv, game.sideboardChanges.removed);
           removalsDiv.appendTo(sideboardDiv);
         }
 
         $("#ux_1").append(sideboardDiv);
       }
 
-      ux_1Draw.separator(`Game ${gameIndex + 1} Hands Drawn`);
+      deckDrawer.addCardSeparator(
+        `Game ${gameIndex + 1} Hands Drawn`,
+        $("#ux_1")
+      );
 
       let handsDiv = $('<div class="card_lists_list"></div>');
       if (game.handsDrawn.length > 3) {
@@ -1869,8 +1902,7 @@ function open_match(id) {
 
       game.handsDrawn.forEach((hand, i) => {
         let handDiv = $('<div class="cardlist"></div>');
-        let handDraw = new DeckDrawer(handDiv);
-        drawCardList(handDraw, hand);
+        drawCardList(handDiv, hand);
         handDiv.appendTo(handsDiv);
         if (game.bestOf == 1 && i == 0) {
           let landDiv = $(
@@ -1899,7 +1931,10 @@ function open_match(id) {
 
       $("#ux_1").append(handsDiv);
 
-      ux_1Draw.separator(`Game ${gameIndex + 1} Shuffled Order`);
+      deckDrawer.addCardSeparator(
+        `Game ${gameIndex + 1} Shuffled Order`,
+        $("#ux_1")
+      );
       let libraryDiv = $('<div class="library_list"></div>');
       let unique = makeId(4);
       let handSize = 8 - game.handsDrawn.length;
@@ -1914,15 +1949,23 @@ function open_match(id) {
             ? "line_light"
             : "line_dark";
         let cardDiv = $(`<div class="library_card ${rowShade}"></div>`);
-        let draw = new DeckDrawer(cardDiv);
-        draw.card(cardId, unique + libraryIndex, "#" + (libraryIndex + 1));
+        deckDrawer.addCardTile(
+          cardId,
+          unique + libraryIndex,
+          "#" + (libraryIndex + 1),
+          cardDiv
+        );
         cardDiv.appendTo(libraryDiv);
       });
       let unknownCards = game.deckSize - game.shuffledOrder.length;
       if (unknownCards > 0) {
         let cardDiv = $('<div class="library_card"></div>');
-        let draw = new DeckDrawer(cardDiv);
-        draw.card(null, unique + game.deckSize, unknownCards + "x");
+        deckDrawer.addCardTile(
+          null,
+          unique + game.deckSize,
+          unknownCards + "x",
+          cardDiv
+        );
         cardDiv.appendTo(libraryDiv);
       }
 
