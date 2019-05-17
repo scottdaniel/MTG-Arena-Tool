@@ -15,7 +15,12 @@ function isNumber(n) {
   return !isNaN(parseFloat(n)) && isFinite(n);
 }
 
-var rarities = ["common", "uncommon", "rare", "mythic"];
+const rarities = {
+  common: 0,
+  uncommon: 1,
+  rare: 2,
+  mythic: 3
+};
 
 function frameClassName(card) {
   const frame = card ? card.frame.concat().sort() : [];
@@ -189,7 +194,7 @@ exports.addCardTile = function(
           missing = get_wc_missing(deck, grpId, isSideboard);
         }
 
-        let xoff = rarities.indexOf(card.rarity) * -24;
+        let xoff = rarities[card.rarity] * -24;
 
         if (missing > 0) {
           let yoff = missing * -24;
