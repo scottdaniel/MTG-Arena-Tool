@@ -87,7 +87,7 @@ function openCollectionTab() {
   icd.appendChild(input);
   fllt.appendChild(icd);
 
-  input.addEventListener("keydown", function (e) {
+  input.addEventListener("keydown", function(e) {
     if (e.keyCode == 13) {
       printCollectionPage();
     }
@@ -185,7 +185,7 @@ function openCollectionTab() {
     let setbutton = createDivision(["set_filter", "set_filter_on"]);
     setbutton.style.backgroundImage = `url(../images/sets/${
       setsList[set].code
-      }.png)`;
+    }.png)`;
     setbutton.title = set;
 
     sets.appendChild(setbutton);
@@ -204,7 +204,7 @@ function openCollectionTab() {
 
   let manas = createDivision(["sets_container"]);
   let ms = ["w", "u", "b", "r", "g"];
-  ms.forEach(function (s, i) {
+  ms.forEach(function(s, i) {
     let mi = [1, 2, 3, 4, 5];
     let manabutton = createDivision(["mana_filter_search", "mana_filter_on"]);
     manabutton.style.backgroundImage = `url(../images/${s}64.png)`;
@@ -382,7 +382,7 @@ function expandFilters() {
   } else {
     div.style.height = "calc(100% - 122px)";
     div.style.opacity = 1;
-    setTimeout(function () {
+    setTimeout(function() {
       $$(".inventory")[0].style.display = "none";
     }, 200);
   }
@@ -686,7 +686,8 @@ function printCards() {
   let filterUncommon = document.getElementById("query_uncommon").checked;
   let filterRare = document.getElementById("query_rare").checked;
   let filterMythic = document.getElementById("query_mythic").checked;
-  let filterAnyRarityChecked = filterCommon || filterUncommon || filterRare || filterMythic;
+  let filterAnyRarityChecked =
+    filterCommon || filterUncommon || filterRare || filterMythic;
 
   let filterCMC = document.getElementById("query_cmc").value;
   let filterCmcLower = document.getElementById("query_cmclower").checked;
@@ -792,7 +793,8 @@ function printCards() {
 
     if (rarity == "land" && filterAnyRarityChecked && !filterCommon) continue;
     if (rarity == "common" && filterAnyRarityChecked && !filterCommon) continue;
-    if (rarity == "uncommon" && filterAnyRarityChecked && !filterUncommon) continue;
+    if (rarity == "uncommon" && filterAnyRarityChecked && !filterUncommon)
+      continue;
     if (rarity == "rare" && filterAnyRarityChecked && !filterRare) continue;
     if (rarity == "mythic" && filterAnyRarityChecked && !filterMythic) continue;
 
@@ -823,7 +825,7 @@ function printCards() {
       }
       if (filteredMana.length > 0) {
         let su = 0;
-        filteredMana.forEach(function (m) {
+        filteredMana.forEach(function(m) {
           if (s[m] == 1) {
             su++;
           }
@@ -885,7 +887,7 @@ function printCards() {
       //let newname = card.name.split(' ').join('-');
       shell.openExternal(
         `https://scryfall.com/card/${get_set_scryfall(card.set)}/${card.cid}/${
-        card.name
+          card.name
         }`
       );
     });
@@ -959,7 +961,7 @@ function printCards() {
 function addCardMenu(div, card) {
   let arenaCode = `1 ${card.name} (${setsList[card.set].arenacode}) ${
     card.cid
-    }`;
+  }`;
   div.addEventListener(
     "contextmenu",
     e => {
