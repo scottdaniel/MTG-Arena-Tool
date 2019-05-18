@@ -258,25 +258,25 @@ function openCollectionTab() {
     cont,
     '<div class="wc_common wc_search_icon"></div>Common',
     "query_common",
-    true
+    false
   );
   addCheckboxSearch(
     cont,
     '<div class="wc_uncommon wc_search_icon"></div>Uncommon',
     "query_uncommon",
-    true
+    false
   );
   addCheckboxSearch(
     cont,
     '<div class="wc_rare wc_search_icon"></div>Rare',
     "query_rare",
-    true
+    false
   );
   addCheckboxSearch(
     cont,
     '<div class="wc_mythic wc_search_icon"></div>Mythic Rare',
     "query_mythic",
-    true
+    false
   );
   main_but_cont.appendChild(cont);
 
@@ -409,10 +409,10 @@ function resetFilters() {
   document.getElementById("query_multicolor").checked = false;
   document.getElementById("query_exclude").checked = false;
 
-  document.getElementById("query_common").checked = true;
-  document.getElementById("query_uncommon").checked = true;
-  document.getElementById("query_rare").checked = true;
-  document.getElementById("query_mythic").checked = true;
+  document.getElementById("query_common").checked = false;
+  document.getElementById("query_uncommon").checked = false;
+  document.getElementById("query_rare").checked = false;
+  document.getElementById("query_mythic").checked = false;
 
   document.getElementById("query_cmc").value = "";
   document.getElementById("query_cmclower").checked = false;
@@ -682,10 +682,12 @@ function printCards() {
   let filterMulti = document.getElementById("query_multicolor");
   let filterExclude = document.getElementById("query_exclude");
 
-  let filterCommon = document.getElementById("query_common");
-  let filterUncommon = document.getElementById("query_uncommon");
-  let filterRare = document.getElementById("query_rare");
-  let filterMythic = document.getElementById("query_mythic");
+  let filterCommon = document.getElementById("query_common").checked;
+  let filterUncommon = document.getElementById("query_uncommon").checked;
+  let filterRare = document.getElementById("query_rare").checked;
+  let filterMythic = document.getElementById("query_mythic").checked;
+  let filterAnyRarityChecked =
+    filterCommon || filterUncommon || filterRare || filterMythic;
 
   let filterCMC = document.getElementById("query_cmc").value;
   let filterCmcLower = document.getElementById("query_cmclower").checked;
@@ -789,11 +791,12 @@ function printCards() {
       }
     }
 
-    if (rarity == "land" && !filterCommon.checked) continue;
-    if (rarity == "common" && !filterCommon.checked) continue;
-    if (rarity == "uncommon" && !filterUncommon.checked) continue;
-    if (rarity == "rare" && !filterRare.checked) continue;
-    if (rarity == "mythic" && !filterMythic.checked) continue;
+    if (rarity == "land" && filterAnyRarityChecked && !filterCommon) continue;
+    if (rarity == "common" && filterAnyRarityChecked && !filterCommon) continue;
+    if (rarity == "uncommon" && filterAnyRarityChecked && !filterUncommon)
+      continue;
+    if (rarity == "rare" && filterAnyRarityChecked && !filterRare) continue;
+    if (rarity == "mythic" && filterAnyRarityChecked && !filterMythic) continue;
 
     if (filterExclude.checked && cost.length == 0) {
       continue;
