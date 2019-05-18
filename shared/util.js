@@ -1080,38 +1080,6 @@ function get_card_type_sort(a) {
 }
 
 //
-function deck_count_types(deck, type, side) {
-  if (type.includes("Land", 0)) type = "Land";
-  else if (type.includes("Creature", 0)) type = "Creature";
-  else if (type.includes("Artifact", 0)) type = "Artifact";
-  else if (type.includes("Enchantment", 0)) type = "Enchantment";
-  else if (type.includes("Instant", 0)) type = "Instant";
-  else if (type.includes("Sorcery", 0)) type = "Sorcery";
-  else if (type.includes("Planeswalker", 0)) type = "Planeswalker";
-
-  let count = 0;
-  deck.mainDeck.forEach(card => {
-    let c = cardsDb.get(card.id);
-    if (c.type.includes(type, 0)) {
-      if (card.quantity == 9999) count += 1;
-      else count += card.quantity;
-    }
-  });
-
-  if (side) {
-    deck.sideboard.forEach(card => {
-      let c = cardsDb.get(card.id);
-      if (c.type.includes(type, 0)) {
-        if (card.quantity == 9999) count += 1;
-        else count += card.quantity;
-      }
-    });
-  }
-
-  return count;
-}
-
-//
 function compare_cards(a, b) {
   // Yeah this is lazy.. I know
   a = cardsDb.get(a.id);

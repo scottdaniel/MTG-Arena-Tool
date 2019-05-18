@@ -6,12 +6,10 @@ global
   compare_archetypes,
   compare_cards,
   compare_colors,
-  deck_count_types,
   draftRanks,
   eventsList,
   eventsToFormat,
   get_card_image,
-  get_card_type_sort,
   get_deck_colors,
   get_deck_export,
   get_deck_export_txt,
@@ -36,6 +34,7 @@ global
 
 const electron = require("electron");
 const remote = require("electron").remote;
+const _ = require("lodash");
 
 if (!remote.app.isPackaged) {
   const { openNewGitHubIssue, debugInfo } = require("electron-util");
@@ -81,6 +80,7 @@ const openCollectionTab = require("./collection").openCollectionTab;
 const openEventsTab = require("./events").openEventsTab;
 const expandEvent = require("./events").expandEvent;
 const deckDrawer = require("../shared/deck-drawer");
+const cardTypes = require("../shared/card-types");
 
 const openEconomyTab = require("./economy").openEconomyTab;
 
@@ -1121,77 +1121,87 @@ function makeResizable(div, resizeCallback, finalCallback) {
 
 //
 function drawDeck(div, deck, showWildcards = false) {
-  const categories = [
-    "Creature",
-    "Planeswalker",
-    "Instant",
-    "Sorcery",
-    "Artifact",
-    "Enchantment",
-    "Land"
-  ];
-
-  var unique = makeId(4);
   div.html("");
-  var prevIndex = 0;
-  deck.mainDeck.forEach(function(card) {
-    let grpId = card.id;
-    let type = cardsDb.get(grpId).type;
-    let cardTypeSort = get_card_type_sort(type);
-    if (prevIndex == 0) {
-      let q = deck_count_types(deck, type, false);
-      deckDrawer.addCardSeparator(
-        `${categories[cardTypeSort - 1]} (${q})`,
-        div
-      );
-    } else if (prevIndex != 0) {
-      if (cardTypeSort != get_card_type_sort(cardsDb.get(prevIndex).type)) {
-        let q = deck_count_types(deck, type, false);
-        deckDrawer.addCardSeparator(
-          `${categories[cardTypeSort - 1]} (${q})`,
-          div
-        );
+  const unique = makeId(4);
+
+  // draw maindeck grouped by cardType
+  const cardsByGroup = _(deck.mainDeck)
+    .map(card => ({ data: cardsDb.get(card.id), ...card }))
+    .groupBy(card => {
+      const cardType = cardTypes.cardType(card.data);
+      switch (cardType) {
+        case "Creature":
+          return "Creatures";
+        case "Planeswalker":
+          return "Planeswalkers";
+        case "Instant":
+        case "Sorcery":
+          return "Spells";
+        case "Enchantment":
+          return "Enchantements";
+        case "Artifact":
+          return "Artifacts";
+        case "Land":
+          return "Lands";
+        default:
+          throw new Error(`Unexpected card type: ${cardType}`);
       }
-    }
+    })
+    .value();
 
-    if (card.quantity > 0) {
-      deckDrawer.addCardTile(
-        grpId,
-        unique + "a",
-        card.quantity,
-        div,
-        showWildcards,
-        deck,
-        false
-      );
-    }
+  _([
+    "Creatures",
+    "Planeswalkers",
+    "Spells",
+    "Enchantments",
+    "Artifacts",
+    "Lands"
+  ])
+    .filter(group => !_.isEmpty(cardsByGroup[group]))
+    .forEach(group => {
+      // draw a separator for the group
+      const cards = cardsByGroup[group];
+      const count = _.sumBy(cards, "quantity");
+      deckDrawer.addCardSeparator(`${group} (${count})`, div);
 
-    prevIndex = grpId;
-  });
-
-  if (deck.sideboard != undefined) {
-    if (deck.sideboard.length > 0) {
-      deckDrawer.addCardSeparator(
-        `Sideboard (${deck.sideboard.sum("quantity")})`,
-        div
-      );
-      prevIndex = 0;
-      deck.sideboard.forEach(function(card) {
-        var grpId = card.id;
-        //var type = cardsDb.get(grpId).type;
-        if (card.quantity > 0) {
+      // draw the cards
+      _(cards)
+        .filter(card => card.quantity > 0)
+        .orderBy(["data.cmc", "data.name"])
+        .forEach(card => {
           deckDrawer.addCardTile(
-            grpId,
-            unique + "b",
+            card.id,
+            unique + "a",
             card.quantity,
             div,
             showWildcards,
             deck,
-            true
+            false
           );
-        }
+        });
+    });
+
+  const sideboardSize = _.sumBy(deck.sideboard, "quantity");
+  if (sideboardSize) {
+    // draw a separator for the sideboard
+    deckDrawer.addCardSeparator(`Sideboard (${sideboardSize})`, div);
+
+    // draw the cards
+    _(deck.sideboard)
+      .filter(card => card.quantity > 0)
+      .map(card => ({ data: cardsDb.get(card.id), ...card }))
+      .orderBy(["data.cmc", "data.name"])
+      .forEach(card => {
+        deckDrawer.addCardTile(
+          card.id,
+          unique + "b",
+          card.quantity,
+          div,
+          showWildcards,
+          deck,
+          true
+        );
       });
-    }
   }
 }
 

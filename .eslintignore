@@ -1,5 +1,7 @@
 shared/*
 !shared/deck-drawer.js
+!shared/card-types.js
+!shared/__tests__
 images/*
 sounds/*
 fonts/*
