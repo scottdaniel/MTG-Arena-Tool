@@ -3,7 +3,6 @@ global
   cards
   decks
   shell
-  settings
 */
 const windowBackground = 0;
 const windowRenderer = 1;
@@ -1403,10 +1402,10 @@ function collectionSortCmc(a, b) {
 }
 
 //
-function get_collection_export() {
+function get_collection_export(exportFormat) {
   var list = "";
   Object.keys(cards).forEach(function(key) {
-    var add = settings.export_format + "";
+    var add = exportFormat + "";
     var card = cardsDb.get(key);
     if (card) {
       let name = card.name;

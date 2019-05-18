@@ -18,6 +18,7 @@ global
   get_collection_stats,
   get_set_scryfall,
   hideLoadingBars,
+  ipc,
   ipc_send,
   orderedColorCodesCommon,
   orderedCardRarities,
@@ -422,9 +423,18 @@ function resetFilters() {
   printCollectionPage();
 }
 
+let exportFormat = "";
+
+//
+ipc.on("set_settings", (_event, arg) => {
+  if (arg.export_format) {
+    exportFormat = arg.export_format;
+  }
+});
+
 //
 function exportCollection() {
-  let list = get_collection_export();
+  let list = get_collection_export(exportFormat);
   ipc_send("export_csvtxt", { str: list, name: "collection" });
 }
 

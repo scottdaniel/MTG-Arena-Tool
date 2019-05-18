@@ -33,8 +33,10 @@ global
 */
 
 const electron = require("electron");
-const remote = require("electron").remote;
 const _ = require("lodash");
+const remote = electron.remote;
+const shell = electron.shell;
+const ipc = electron.ipcRenderer;
 
 if (!remote.app.isPackaged) {
   const { openNewGitHubIssue, debugInfo } = require("electron-util");
@@ -75,10 +77,10 @@ const openDecksTab = require("./decks").openDecksTab;
 const { openHistoryTab, setFilters } = require("./history");
 const openExploreTab = require("./explore").openExploreTab;
 const setExploreDecks = require("./explore").setExploreDecks;
-const updateExploreCheckbox = require("./explore").updateExploreCheckbox;
 const openCollectionTab = require("./collection").openCollectionTab;
 const openEventsTab = require("./events").openEventsTab;
 const expandEvent = require("./events").expandEvent;
+const openSettingsTab = require("./settings").openSettingsTab;
 const deckDrawer = require("../shared/deck-drawer");
 const cardTypes = require("../shared/card-types");
 
@@ -106,8 +108,6 @@ var orderedManaColors = [
   "#E3E3E3"
 ];
 
-let shell = electron.shell;
-let ipc = electron.ipcRenderer;
 let deck = null;
 let decks = null;
 let changes = null;
@@ -119,22 +119,16 @@ let explore = null;
 let ladder = null;
 let cards = {};
 let cardsNew = {};
-let settings = null;
-let updateState = "";
+
 let sidebarActive = -1;
 let filterEvent = "All";
 let filterSort = "By Winrate";
 
 let draftPosition = 1;
-let overlayAlpha = 1;
-let overlayAlphaBack = 1;
-let overlayScale = 1;
-let cardSizePos = 4;
 let cardSize = 140;
 let cardQuality = "normal";
 let loadEvents = 0;
 let defaultBackground = "";
-let lastSettingsSection = 1;
 let loggedIn = false;
 let canLogin = false;
 let offlineMode = false;
@@ -597,38 +591,25 @@ ipc.on("open_course_deck", function(event, arg) {
 
 //
 ipc.on("set_settings", function(event, arg) {
-  console.log(arg);
-  settings = arg;
-  cardSizePos = settings.cards_size;
-  overlayAlpha = settings.overlay_alpha;
-  overlayAlphaBack = settings.overlay_alpha_back;
-  overlayScale = settings.overlay_scale;
-  sidebarSize = settings.right_panel_width;
-  if (overlayScale == undefined) {
-    overlayScale = 100;
+  sidebarSize = arg.right_panel_width;
+  if (arg.cards_quality) {
+    cardQuality = arg.cards_quality;
   }
-  if (settings.cards_quality != undefined) {
-    cardQuality = settings.cards_quality;
+  if (arg.back_url) {
+    defaultBackground = arg.back_url;
   }
-  if (settings.back_color == undefined) {
-    settings.back_color = "rgba(0,0,0,0.3)";
-  }
-  if (settings.back_url == undefined) {
-    settings.back_url = "";
-  } else {
-    defaultBackground = settings.back_url;
-  }
-  $(".main_wrapper").css("background-color", settings.back_color);
+  $(".main_wrapper").css("background-color", arg.back_color);
   change_background("default");
-  cardSize = 100 + cardSizePos * 10;
+  cardSize = 100 + arg.cards_size * 10;
+  if (sidebarActive === 6) {
+    openSettingsTab();
+  }
 });
 
 //
 ipc.on("set_update_state", function(event, arg) {
-  updateState = arg;
-
   if (sidebarActive == 9) {
-    open_settings(5);
+    openSettingsTab(5);
   }
 });
 
@@ -844,7 +825,7 @@ function force_open_settings() {
     }
   });
   $(".moving_ux").animate({ left: "0px" }, 250, "easeInOutCubic");
-  open_settings(lastSettingsSection);
+  openSettingsTab();
 }
 
 function force_open_about() {
@@ -856,7 +837,7 @@ function force_open_about() {
     }
   });
   $(".moving_ux").animate({ left: "0px" }, 250, "easeInOutCubic");
-  open_settings(5);
+  openSettingsTab(5);
 }
 
 let top_compact = false;
@@ -993,7 +974,7 @@ $(document).ready(function() {
       }
       if ($(this).hasClass("it6")) {
         sidebarActive = 6;
-        open_settings(lastSettingsSection);
+        openSettingsTab();
       }
       if ($(this).hasClass("it7")) {
         sidebarActive = 1;
@@ -2182,574 +2163,17 @@ function toggleVisibility(...ids) {
 }
 
 //
-function add_checkbox(div, label, iid, def, func = "updateUserSettings()") {
+function add_checkbox(div, label, iid, def, func) {
   label = $('<label class="check_container hover_label">' + label + "</label>");
   label.appendTo(div);
-  var check_new = $(
-    '<input type="checkbox" id="' + iid + '" onclick="' + func + '" />'
-  );
+  var check_new = $('<input type="checkbox" id="' + iid + '" />');
+  check_new.on("click", func);
   check_new.appendTo(label);
   check_new.prop("checked", def);
 
   var span = $('<span class="checkmark"></span>');
   span.appendTo(label);
   return label;
-}
-
-//
-function open_settings(openSection) {
-  lastSettingsSection = openSection;
-  change_background("default");
-  hideLoadingBars();
-  $("#ux_0").off();
-  $("#history_column").off();
-  $("#ux_0").html("");
-  $("#ux_0").addClass("flex_item");
-
-  var wrap_l = $('<div class="wrapper_column sidebar_column_r"></div>');
-  $(
-    '<div class="settings_nav sn1" style="margin-top: 28px;" >Behaviour</div>'
-  ).appendTo(wrap_l);
-  $('<div class="settings_nav sn2">Overlay</div>').appendTo(wrap_l);
-  $('<div class="settings_nav sn3">Visual</div>').appendTo(wrap_l);
-  $('<div class="settings_nav sn4">Privacy</div>').appendTo(wrap_l);
-  $('<div class="settings_nav sn5">About</div>').appendTo(wrap_l);
-
-  if (offlineMode) {
-    $('<div class="settings_nav sn6">Login</div>').appendTo(wrap_l);
-  } else {
-    $('<div class="settings_nav sn6">Logout</div>').appendTo(wrap_l);
-  }
-
-  var wrap_r = $('<div class="wrapper_column"></div>');
-  var div = $('<div class="settings_page"></div>');
-  var section;
-
-  //
-  section = $('<div class="settings_section ss1"></div>');
-  section.appendTo(div);
-  section.append('<div class="settings_title">Behaviour</div>');
-
-  add_checkbox(
-    section,
-    "Beta updates channel",
-    "settings_betachannel",
-    settings.beta_channel,
-    "updateAppSettings()"
-  );
-  add_checkbox(
-    section,
-    "Login automatically",
-    "settings_autologin",
-    settings.auto_login,
-    "updateAppSettings()"
-  );
-  const launchToTrayCheckbox = add_checkbox(
-    section,
-    "Launch to tray",
-    "settings_launchtotray",
-    settings.launch_to_tray,
-    "updateAppSettings()"
-  );
-  add_checkbox(
-    section,
-    "Launch on startup",
-    "settings_startup",
-    settings.startup
-  );
-  add_checkbox(
-    section,
-    "Read log on login",
-    "settings_readlogonlogin",
-    !settings.skip_firstpass
-  );
-  section.append(`
-      <div class="settings_note">
-      <i>Reading the log on startup can take a while, disabling this will make mtgatool load instantly, but you may have have to play with Arena to load some data, like Rank, wildcards and decklists. <b>This feature makes mtgatool read games when it was closed.</b></i>
-      </div>`);
-  add_checkbox(
-    section,
-    "Close main window on match found",
-    "settings_closeonmatch",
-    settings.close_on_match
-  );
-  add_checkbox(
-    section,
-    "Close to tray",
-    "settings_closetotray",
-    settings.close_to_tray
-  );
-  add_checkbox(
-    section,
-    "Sound when priority changes",
-    "settings_soundpriority",
-    settings.sound_priority
-  );
-
-  var sliderSoundVolume = $('<div class="slidecontainer_settings"></div>');
-  sliderSoundVolume.appendTo(section);
-  var sliderSoundVolumeLabel = $(
-    `<label style="width: 400px;">Volume: ${Math.round(
-      settings.sound_priority_volume * 100
-    )}%</label>`
-  );
-  sliderSoundVolumeLabel.appendTo(sliderSoundVolume);
-  var sliderSoundVolumeInput = $(
-    '<input type="range" min="0" max="1" step=".001" value="' +
-      settings.sound_priority_volume +
-      '" class="slider sliderSoundVolume" id="settings_soundpriorityvolume">'
-  );
-  sliderSoundVolumeInput.appendTo(sliderSoundVolume);
-
-  var label = $('<label class="but_container_label">Export Format:</label>');
-  label.appendTo(section);
-  var icd = $('<div class="input_container"></div>');
-  var export_input = $(
-    '<input type="search" id="settings_export_format" autocomplete="off" value="' +
-      settings.export_format +
-      '" />'
-  );
-  export_input.appendTo(icd);
-  icd.appendTo(label);
-
-  section.append(`<div class="settings_note">
-      <i>Possible variables: $Name, $Count, $SetName, $SetCode, $Collector, $Rarity, $Type, $Cmc</i>
-      </div>`);
-
-  section = $('<div class="settings_section ss2"></div>');
-  section.appendTo(div);
-  section.append('<div class="settings_title">Overlay</div>');
-
-  add_checkbox(
-    section,
-    "Always on top",
-    "settings_overlay_ontop",
-    settings.overlay_ontop
-  );
-  add_checkbox(
-    section,
-    "Show overlay",
-    "settings_showoverlay",
-    settings.show_overlay
-  );
-  add_checkbox(
-    section,
-    "Persistent overlay&nbsp;<i>(useful for OBS setup)</i>",
-    "settings_showoverlayalways",
-    settings.show_overlay_always
-  );
-
-  add_checkbox(
-    section,
-    "Show top bar",
-    "settings_overlay_top",
-    settings.overlay_top
-  );
-  add_checkbox(
-    section,
-    "Show title",
-    "settings_overlay_title",
-    settings.overlay_title
-  );
-  add_checkbox(
-    section,
-    "Show deck/lists",
-    "settings_overlay_deck",
-    settings.overlay_deck
-  );
-  add_checkbox(
-    section,
-    "Show clock",
-    "settings_overlay_clock",
-    settings.overlay_clock
-  );
-  add_checkbox(
-    section,
-    "Show sideboard",
-    "settings_overlay_sideboard",
-    settings.overlay_sideboard
-  );
-
-  var sliderOpacity = $('<div class="slidecontainer_settings"></div>');
-  sliderOpacity.appendTo(section);
-  var sliderOpacityLabel = $(
-    '<label style="width: 400px; !important" class="card_size_container">Elements transparency: ' +
-      transparencyFromAlpha(overlayAlpha) +
-      "%</label>"
-  );
-  sliderOpacityLabel.appendTo(sliderOpacity);
-  var sliderOpacityInput = $(
-    '<input type="range" min="0" max="100" step="5" value="' +
-      transparencyFromAlpha(overlayAlpha) +
-      '" class="slider sliderB" id="opacityRange">'
-  );
-  sliderOpacityInput.appendTo(sliderOpacity);
-
-  var sliderOpacityBack = $('<div class="slidecontainer_settings"></div>');
-  sliderOpacityBack.appendTo(section);
-  var sliderOpacityBackLabel = $(
-    '<label style="width: 400px; !important" class="card_size_container">Background transparency: ' +
-      transparencyFromAlpha(overlayAlphaBack) +
-      "%</label>"
-  );
-  sliderOpacityBackLabel.appendTo(sliderOpacityBack);
-  var sliderOpacityBackInput = $(
-    '<input type="range" min="0" max="100" step="5" value="' +
-      transparencyFromAlpha(overlayAlphaBack) +
-      '" class="slider sliderC" id="opacityBackRange">'
-  );
-  sliderOpacityBackInput.appendTo(sliderOpacityBack);
-
-  var sliderScale = $('<div class="slidecontainer_settings"></div>');
-  sliderScale.appendTo(section);
-  var sliderScaleLabel = $(
-    '<label style="width: 400px; !important" class="card_size_container">Scale: ' +
-      overlayScale +
-      "%</label>"
-  );
-  sliderScaleLabel.appendTo(sliderScale);
-  var sliderScaleInput = $(
-    '<input type="range" min="10" max="200" step="10" value="' +
-      overlayScale +
-      '" class="slider sliderD" id="scaleRange">'
-  );
-  sliderScaleInput.appendTo(sliderScale);
-
-  $(
-    '<div class="button_simple centered resetOverlayPos">Reset Position</div>'
-  ).appendTo(section);
-
-  //
-  section = $('<div class="settings_section ss3"></div>');
-  section.appendTo(div);
-  section.append('<div class="settings_title">Visual</div>');
-
-  label = $('<label class="but_container_label">Background URL:</label>');
-  label.appendTo(section);
-
-  icd = $('<div class="input_container"></div>');
-  var url_input = $(
-    '<input type="search" id="query_image" autocomplete="off" value="' +
-      settings.back_url +
-      '" />'
-  );
-  url_input.appendTo(icd);
-  icd.appendTo(label);
-
-  label = $('<label class="but_container_label">Background shade:</label>');
-  var colorPick = $('<input type="text" id="flat" class="color_picker" />');
-  colorPick.appendTo(label);
-  label.appendTo(section);
-  colorPick.spectrum({
-    showInitial: true,
-    showAlpha: true,
-    showButtons: false
-  });
-  colorPick.spectrum("set", settings.back_color);
-
-  colorPick.on("dragstop.spectrum", function(e, color) {
-    $(".main_wrapper").css("background-color", color.toRgbString());
-    updateUserSettings();
-  });
-
-  label = $('<label class="but_container_label">Cards quality:</label>');
-  label.appendTo(section);
-  var button = $(
-    '<div class="button_simple button_long" style="margin-left: 32px;" onclick="changeQuality(this)">' +
-      cardQuality +
-      "</div>"
-  );
-  button.appendTo(label);
-
-  var slider = $('<div class="slidecontainer_settings"></div>');
-  slider.appendTo(section);
-  var sliderlabel = $(
-    '<label style="width: 400px; !important" class="card_size_container">Cards size: ' +
-      cardSize +
-      "px</label>"
-  );
-  sliderlabel.appendTo(slider);
-  var sliderInput = $(
-    '<input type="range" min="0" max="20" value="' +
-      cardSizePos +
-      '" class="slider sliderA" id="myRange">'
-  );
-  sliderInput.appendTo(slider);
-
-  var d = $(
-    '<div style="width: ' +
-      cardSize +
-      'px; !important" class="inventory_card_settings"></div>'
-  );
-  var img = $(
-    '<img style="width: ' +
-      cardSize +
-      'px; !important" class="inventory_card_settings_img"></img>'
-  );
-
-  var card = cardsDb.get(67518);
-  img.attr("src", get_card_image(card));
-  img.appendTo(d);
-
-  d.appendTo(slider);
-
-  //
-  section = $('<div class="settings_section ss4"></div>');
-  section.appendTo(div);
-  section.append('<div class="settings_title">Privacy</div>');
-  add_checkbox(
-    section,
-    "Anonymous sharing&nbsp;<i>(makes your username anonymous on Explore)</i>",
-    "settings_anon_explore",
-    settings.anon_explore
-  );
-  add_checkbox(
-    section,
-    "Online sharing&nbsp;<i>(when disabled, blocks any connections with our servers)</i>",
-    "settings_senddata",
-    settings.send_data
-  );
-
-  label = $('<label class="check_container_but"></label>');
-  label.appendTo(section);
-  button = $(
-    '<div class="button_simple button_long" onclick="eraseData()">Erase my shared data</div>'
-  );
-  button.appendTo(label);
-
-  //
-  section = $('<div class="settings_section ss5" style="height: 100%;"></div>');
-  section.appendTo(div);
-  //section.append('<div class="settings_title">About</div>');
-
-  var about = $('<div class="about"></div>');
-  about.append('<div class="top_logo_about"></div>');
-  about.append(
-    '<div class="message_sub_15 white">By Manuel Etchegaray, 2019</div>'
-  );
-  about.append(
-    '<div class="message_sub_15 white">Version ' +
-      remote.app.getVersion() +
-      "</div>"
-  );
-
-  about.append('<div class="message_updates green">' + updateState + ".</div>");
-  button = $(
-    '<div class="button_simple centered update_link_about">Check for updates</div>'
-  );
-  button.appendTo(about);
-
-  about.append(
-    '<div class="flex_item" style="margin: 64px auto 0px auto;"><div class="discord_link"></div><div class="twitter_link"></div><div class="git_link"></div></div>'
-  );
-  about.append(
-    '<div class="message_sub_15 white" style="margin: 24px 0 12px 0;">Support my work!</div><div class="donate_link"><img src="https://www.paypalobjects.com/webstatic/en_US/i/buttons/PP_logo_h_100x26.png" alt="PayPal" /></div>'
-  );
-  about.appendTo(section);
-
-  //
-  section = $('<div class="settings_section ss6" style="height: 100%;"></div>');
-  var login = $('<div class="about"></div>');
-  section.appendTo(div);
-  if (offlineMode) {
-    button = $(
-      '<div class="button_simple centered login_link_about">Login</div>'
-    );
-  } else {
-    button = $(
-      '<div class="button_simple centered login_link_about">Logout</div>'
-    );
-  }
-  button.appendTo(login);
-  login.appendTo(section);
-
-  div.appendTo(wrap_r);
-  $("#ux_0").append(wrap_l);
-  $("#ux_0").append(wrap_r);
-
-  $(".ss" + openSection).show();
-  $(".sn" + openSection).addClass("nav_selected");
-
-  $(".resetOverlayPos").click(function() {
-    ipc_send("reset_overlay_pos", true);
-  });
-
-  $(".top_logo_about").click(function() {
-    shell.openExternal("https://mtgatool.com");
-  });
-
-  $(".twitter_link").click(function() {
-    shell.openExternal("https://twitter.com/MEtchegaray7");
-  });
-
-  $(".discord_link").click(function() {
-    shell.openExternal("https://discord.gg/K9bPkJy");
-  });
-
-  $(".git_link").click(function() {
-    shell.openExternal("https://github.com/Manuel-777/MTG-Arena-Tool");
-  });
-
-  $(".release_notes_link").click(function() {
-    shell.openExternal("https://mtgatool.com/release-notes/");
-  });
-
-  $(".donate_link").click(function() {
-    shell.openExternal("https://www.paypal.me/ManuelEtchegaray/10");
-  });
-
-  $(".login_link_about").click(function() {
-    const clearAppSettings = {
-      remember_me: false,
-      auto_login: false,
-      launch_to_tray: false
-    };
-    ipc_send("save_app_settings", clearAppSettings);
-    remote.app.relaunch();
-    remote.app.exit(0);
-  });
-
-  $(".update_link_about").click(function() {
-    ipc_send("updates_check", true);
-  });
-
-  $(".settings_nav").click(function() {
-    if (!$(this).hasClass("nav_selected")) {
-      $(".settings_nav").each(function() {
-        $(this).removeClass("nav_selected");
-      });
-      $(".settings_section").each(function() {
-        $(this).hide();
-      });
-
-      $(this).addClass("nav_selected");
-
-      if ($(this).hasClass("sn1")) {
-        sidebarActive = 8;
-        lastSettingsSection = 1;
-        $(".ss1").show();
-      }
-      if ($(this).hasClass("sn2")) {
-        sidebarActive = 8;
-        lastSettingsSection = 2;
-        $(".ss2").show();
-      }
-      if ($(this).hasClass("sn3")) {
-        sidebarActive = 8;
-        lastSettingsSection = 3;
-        $(".ss3").show();
-      }
-      if ($(this).hasClass("sn4")) {
-        sidebarActive = 8;
-        lastSettingsSection = 4;
-        $(".ss4").show();
-      }
-      if ($(this).hasClass("sn5")) {
-        sidebarActive = 9;
-        lastSettingsSection = 5;
-        $(".ss5").show();
-      }
-      if ($(this).hasClass("sn6")) {
-        sidebarActive = 8;
-        lastSettingsSection = 6;
-        $(".ss6").show();
-      }
-    }
-  });
-
-  url_input.on("keyup", function(e) {
-    if (e.keyCode == 13) {
-      updateUserSettings();
-    }
-  });
-
-  export_input.on("keyup", function() {
-    updateUserSettings();
-  });
-
-  $(".sliderA").off();
-
-  $(".sliderA").on("click mousemove", function() {
-    cardSizePos = Math.round(parseInt(this.value));
-    cardSize = 100 + cardSizePos * 10;
-    sliderlabel.html("Cards size: " + cardSize + "px");
-
-    $(".inventory_card_settings").css("width", "");
-    var styles = $(".inventory_card_settings").attr("style");
-    styles += "width: " + cardSize + "px !important;";
-    $(".inventory_card_settings").attr("style", styles);
-
-    $(".inventory_card_settings_img").css("width", "");
-    styles = $(".inventory_card_settings_img").attr("style");
-    styles += "width: " + cardSize + "px !important;";
-    $(".inventory_card_settings_img").attr("style", styles);
-  });
-
-  $(".sliderA").on("click mouseup", function() {
-    cardSizePos = Math.round(parseInt(this.value));
-    updateUserSettings();
-  });
-
-  $(".sliderB").off();
-
-  $(".sliderB").on("click mousemove", function() {
-    overlayAlpha = alphaFromTransparency(parseInt(this.value));
-    sliderOpacityLabel.html(
-      "Elements transparency: " + transparencyFromAlpha(overlayAlpha) + "%"
-    );
-  });
-
-  $(".sliderB").on("click mouseup", function() {
-    overlayAlpha = alphaFromTransparency(parseInt(this.value));
-    updateUserSettings();
-  });
-
-  $(".sliderC").on("click mousemove", function() {
-    overlayAlphaBack = alphaFromTransparency(parseInt(this.value));
-    sliderOpacityBackLabel.html(
-      "Background transparency: " +
-        transparencyFromAlpha(overlayAlphaBack) +
-        "%"
-    );
-  });
-
-  $(".sliderC").on("click mouseup", function() {
-    overlayAlphaBack = alphaFromTransparency(parseInt(this.value));
-    updateUserSettings();
-  });
-
-  $(".sliderD").off();
-
-  $(".sliderD").on("click mousemove", function() {
-    overlayScale = parseInt(this.value);
-    sliderScaleLabel.html("Scale: " + overlayScale + "%");
-  });
-
-  $(".sliderD").on("click mouseup", function() {
-    overlayScale = parseInt(this.value);
-    updateUserSettings();
-  });
-
-  $(".sliderSoundVolume").off();
-
-  $(".sliderSoundVolume").on("click mouseup", function() {
-    sliderSoundVolumeLabel.html(
-      `Volume: ${Math.round(settings.sound_priority_volume * 100)}%`
-    );
-    let { Howl, Howler } = require("howler");
-    let sound = new Howl({ src: ["../sounds/blip.mp3"] });
-    updateUserSettings();
-    Howler.volume(settings.sound_priority_volume);
-    sound.play();
-  });
-}
-
-function alphaFromTransparency(transparency) {
-  return 1 - transparency / 100;
-}
-
-function transparencyFromAlpha(alpha) {
-  return Math.round((1 - alpha) * 100);
 }
 
 //
@@ -2803,114 +2227,6 @@ function change_background(arg, grpId = 0) {
       console.log(e);
     }
   }
-}
-
-//
-/* eslint-disable */
-function changeQuality(dom) {
-  if (cardQuality == "normal") {
-    cardQuality = "large";
-  } else if (cardQuality == "large") {
-    cardQuality = "small";
-  } else if (cardQuality == "small") {
-    cardQuality = "normal";
-  }
-  dom.innerHTML = cardQuality;
-  updateUserSettings();
-  open_settings(lastSettingsSection);
-}
-
-//
-function eraseData() {
-  if (
-    confirm(
-      "This will erase all of your decks and events shared online, are you sure?"
-    )
-  ) {
-    ipc_send("delete_data", true);
-  } else {
-    return;
-  }
-}
-/* eslint-enable */
-
-//
-function updateUserSettings() {
-  var startup = document.getElementById("settings_startup").checked;
-  var readonlogin = document.getElementById("settings_readlogonlogin").checked;
-  var showOverlay = document.getElementById("settings_showoverlay").checked;
-  var showOverlayAlways = document.getElementById("settings_showoverlayalways")
-    .checked;
-  var soundPriority = document.getElementById("settings_soundpriority").checked;
-
-  var soundPriorityVolume = document.getElementById(
-    "settings_soundpriorityvolume"
-  ).value;
-
-  var backColor = $(".color_picker")
-    .spectrum("get")
-    .toRgbString();
-  var backUrl = document.getElementById("query_image").value;
-  defaultBackground = backUrl;
-  if (backUrl == "") change_background("default");
-  else change_background(backUrl);
-
-  var overlayOnTop = document.getElementById("settings_overlay_ontop").checked;
-  var closeToTray = document.getElementById("settings_closetotray").checked;
-  var sendData = document.getElementById("settings_senddata").checked;
-  var anonExplore = document.getElementById("settings_anon_explore").checked;
-
-  var closeOnMatch = document.getElementById("settings_closeonmatch").checked;
-
-  var overlayTop = document.getElementById("settings_overlay_top").checked;
-  var overlayTitle = document.getElementById("settings_overlay_title").checked;
-  var overlayDeck = document.getElementById("settings_overlay_deck").checked;
-  var overlayClock = document.getElementById("settings_overlay_clock").checked;
-  var overlaySideboard = document.getElementById("settings_overlay_sideboard")
-    .checked;
-
-  var exportFormat = document.getElementById("settings_export_format").value;
-  settings = {
-    sound_priority: soundPriority,
-    sound_priority_volume: soundPriorityVolume,
-    show_overlay: showOverlay,
-    show_overlay_always: showOverlayAlways,
-    startup: startup,
-    close_to_tray: closeToTray,
-    send_data: sendData,
-    close_on_match: closeOnMatch,
-    cards_size: cardSizePos,
-    cards_quality: cardQuality,
-    overlay_alpha: overlayAlpha,
-    overlay_alpha_back: overlayAlphaBack,
-    overlay_scale: overlayScale,
-    overlay_top: overlayTop,
-    overlay_title: overlayTitle,
-    overlay_deck: overlayDeck,
-    overlay_clock: overlayClock,
-    overlay_sideboard: overlaySideboard,
-    overlay_ontop: overlayOnTop,
-    anon_explore: anonExplore,
-    back_color: backColor,
-    back_url: backUrl,
-    export_format: exportFormat,
-    skip_firstpass: !readonlogin
-  };
-  cardSize = 100 + cardSizePos * 10;
-  ipc_send("save_user_settings", settings);
-}
-
-//
-function updateAppSettings() {
-  const auto_login = document.getElementById("settings_autologin").checked;
-  let launch_to_tray = document.getElementById("settings_launchtotray").checked;
-  let beta_channel = document.getElementById("settings_betachannel").checked;
-  const rSettings = {
-    auto_login,
-    launch_to_tray,
-    beta_channel
-  };
-  ipc_send("save_app_settings", rSettings);
 }
 
 //

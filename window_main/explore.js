@@ -260,7 +260,7 @@ function drawFilters() {
     "Only owned",
     "settings_owned",
     onlyOwned,
-    "updateExploreCheckbox()"
+    updateExploreCheckbox
   );
   lab.css("align-self", "center");
   lab.css("margin-left", "0px");
@@ -714,6 +714,5 @@ function open_course_request(courseId) {
 
 module.exports = {
   openExploreTab,
-  setExploreDecks,
-  updateExploreCheckbox
+  setExploreDecks
 };
