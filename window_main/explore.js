@@ -110,6 +110,10 @@ function openExploreTab() {
   });
 }
 
+function getEventPrettyName(event) {
+  return eventsList[event] ? eventsList[event] : event;
+}
+
 function drawFilters() {
   let buttonsTop = $$(".explore_buttons_top")[0];
   let buttonsMiddle = $$(".explore_buttons_middle")[0];
@@ -174,7 +178,7 @@ function drawFilters() {
   if (filterType == "Events") {
     eventFilters = Object.keys(eventsList)
       .concat(activeEvents)
-      .map(ev => eventsList[ev])
+      .map(ev => getEventPrettyName(ev))
       .filter(
         item =>
           item != undefined &&
@@ -184,12 +188,12 @@ function drawFilters() {
           item != "Play" &&
           item != "Traditional Play" &&
           item != "Traditional Ranked" &&
-          !rankedEvents.map(ev => eventsList[ev]).includes(item)
+          !rankedEvents.map(ev => getEventPrettyName(ev)).includes(item)
       );
 
     eventFilters = [...new Set(eventFilters)];
   } else if (filterType == "Ranked Draft") {
-    eventFilters = rankedEvents.map(ev => eventsList[ev]);
+    eventFilters = rankedEvents.map(ev => getEventPrettyName(ev));
   } else if (filterType == "Ranked Constructed") {
     eventFilters.push("Ladder");
     eventFilters.push("Traditional Ladder");
@@ -201,7 +205,7 @@ function drawFilters() {
     return 0;
   });
 
-  let mappedActive = activeEvents.map(ev => eventsList[ev]);
+  let mappedActive = activeEvents.map(ev => getEventPrettyName(ev));
   eventFilters.forEach(item => {
     if (mappedActive.includes(item)) {
       eventFilters.splice(eventFilters.indexOf(item), 1);
@@ -402,6 +406,7 @@ function queryExplore(skip) {
   let filterEventId = Object.keys(eventsList).filter(
     key => eventsList[key] == filterEvent
   )[0];
+  filterEventId = !filterEventId ? filterEvent : filterEventId;
 
   if (filterEvent == "All") filterEventId = "";
   if (filterEvent == "Ladder") filterEventId = "Ladder";
