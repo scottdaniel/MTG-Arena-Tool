@@ -686,7 +686,8 @@ function printCards() {
   let filterUncommon = document.getElementById("query_uncommon").checked;
   let filterRare = document.getElementById("query_rare").checked;
   let filterMythic = document.getElementById("query_mythic").checked;
-  let filterAnyRarityChecked = filterCommon || filterUncommon || filterRare || filterMythic;
+  let filterAnyRarityChecked =
+    filterCommon || filterUncommon || filterRare || filterMythic;
 
   let filterCMC = document.getElementById("query_cmc").value;
   let filterCmcLower = document.getElementById("query_cmclower").checked;
@@ -792,7 +793,8 @@ function printCards() {
 
     if (rarity == "land" && filterAnyRarityChecked && !filterCommon) continue;
     if (rarity == "common" && filterAnyRarityChecked && !filterCommon) continue;
-    if (rarity == "uncommon" && filterAnyRarityChecked && !filterUncommon) continue;
+    if (rarity == "uncommon" && filterAnyRarityChecked && !filterUncommon)
+      continue;
     if (rarity == "rare" && filterAnyRarityChecked && !filterRare) continue;
     if (rarity == "mythic" && filterAnyRarityChecked && !filterMythic) continue;
 
