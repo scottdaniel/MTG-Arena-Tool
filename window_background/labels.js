@@ -182,8 +182,6 @@ function onLabelClientToMatchServiceMessageTypeClientToGREMessage(entry, json) {
     let newDeck = currentMatch.player.deck.clone();
     newDeck.mainboard = tempMain;
     newDeck.sideboard = tempSide;
-    newDeck.mainboard.removeDuplicates();
-    newDeck.sideboard.removeDuplicates();
     newDeck.getColors();
 
     currentMatch.player.deck = newDeck;

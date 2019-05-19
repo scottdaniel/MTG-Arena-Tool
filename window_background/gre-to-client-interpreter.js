@@ -446,6 +446,32 @@ function GREMessage(message, time) {
   //currentMatch.GREtoClient[message.msgId] = message;
   logTime = time;
 
+  if (
+    !currentMatch.msgId ||
+    message.msgId === 1 ||
+    message.msgId < currentMatch.msgId
+  ) {
+    // New game, reset per-game fields.
+    currentMatch.gameStage = "GameStage_Start";
+    currentMatch.opponent.cards = currentMatch.oppCardsUsed;
+    currentMatch.processedAnnotations = [];
+    currentMatch.timers = {};
+    currentMatch.zones = {};
+    currentMatch.players = {};
+    currentMatch.annotations = [];
+    currentMatch.gameObjs = {};
+    currentMatch.gameInfo = {};
+    currentMatch.turnInfo = {};
+    currentMatch.playerCardsUsed = [];
+    currentMatch.oppCardsUsed = [];
+    initialLibraryInstanceIds = [];
+    idChanges = {};
+    instanceToCardIdMap = {};
+  }
+  if (message.msgId) {
+    currentMatch.msgId = message.msgId;
+  }
+
   var fn = GREMessages[message.type];
   if (typeof fn == "function") {
     fn(message);
@@ -630,23 +656,8 @@ function checkForStartingLibrary() {
 function checkGameInfo(gameInfo) {
   //console.log(`>> GameStage: ${gameInfo.stage} (${currentMatch.gameStage})`);
   //actionLog(-1, false, `>> GameStage: ${gameInfo.stage} (${currentMatch.gameStage})`);
-  if (currentMatch.gameStage !== gameInfo.stage) {
-    currentMatch.gameStage = gameInfo.stage;
-    if (currentMatch.gameStage == "GameStage_GameOver") {
-      currentMatch.opponent.cards = currentMatch.oppCardsUsed;
-      currentMatch.processedAnnotations = [];
-      currentMatch.timers = {};
-      currentMatch.zones = {};
-      currentMatch.players = {};
-      currentMatch.annotations = [];
-      currentMatch.gameObjs = {};
-      currentMatch.gameInfo = {};
-      currentMatch.turnInfo = {};
-      currentMatch.playerCardsUsed = [];
-      currentMatch.oppCardsUsed = [];
-      currentMatch.game = gameInfo.gameNumber;
-    }
-  }
+  currentMatch.gameStage = gameInfo.stage;
+  currentMatch.game = gameInfo.gameNumber;
   if (gameInfo.matchWinCondition) {
     if (gameInfo.matchWinCondition == "MatchWinCondition_SingleElimination") {
       currentMatch.bestOf = 1;
