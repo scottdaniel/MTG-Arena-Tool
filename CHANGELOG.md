@@ -1,3 +1,9 @@
+## <small>2.5.7 (2019-05-19)</small>
+
+* lodash deps ([2cd4b39](https://github.com/Manuel-777/MTG-Arena-Tool/commit/2cd4b39))
+
+
+
 ## <small>2.5.6 (2019-05-19)</small>
 
 * changed Collection rarity filter to default unchecked ([5cf1729](https://github.com/Manuel-777/MTG-Arena-Tool/commit/5cf1729))
