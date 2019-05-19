@@ -68,10 +68,7 @@ const fs = require("fs");
 const sha1 = require("js-sha1");
 const ipc = electron.ipcRenderer;
 
-const {
-  parseWotcTime,
-  normaliseFields
-} = require("./background-util");
+const { parseWotcTime, normaliseFields } = require("./background-util");
 
 const _ = require("lodash");
 
