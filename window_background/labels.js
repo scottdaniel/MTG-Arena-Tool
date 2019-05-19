@@ -4,7 +4,7 @@ function onLabelOutLogInfo(entry, json) {
   if (!json) return;
 
   if (json.params.messageName == "Client.Connected") {
-    logLanguage = json.params.payloadObject.settings.language;
+    logLanguage = json.params.payloadObject.settings.language.language;
   }
   if (skipMatch) return;
   if (json.params.messageName == "DuelScene.GameStop") {
