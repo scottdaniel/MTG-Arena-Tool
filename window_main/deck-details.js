@@ -1,9 +1,11 @@
 /*
 global
     add,
+    Aggregator,
     cardsDb,
     ConicGradient,
     change_background,
+    createDivision,
     drawDeck,
     drawDeckVisual,
     economyHistory,
@@ -14,7 +16,9 @@ global
     get_deck_lands_ammount,
     get_deck_missing,
     get_deck_types_ammount,
+    getBoosterCountEstimate,
     ipc_send,
+    makeResizable,
     mana,
     orderedCardRarities,
     orderedCardTypes,
@@ -22,23 +26,13 @@ global
     orderedColorCodes,
     orderedManaColors,
     pop,
-    getDeckWinrate,
-    getTagColor,
-    getBoosterCountEstimate
+    sidebarSize,
+    StatsPanel
 */
 
 // We need to store a sorted list of card types so we create the card counts in the same order.
-var currentOpenDeck = null;
-
-function deckColorBar(deck) {
-  let deckColors = $(
-    '<div class="deck_top_colors" style="align-self: center;"></div>'
-  );
-  deck.colors.forEach(color => {
-    deckColors.append($(`<div class="mana_s20 mana_${mana[color]}"></div>`));
-  });
-  return deckColors;
-}
+let currentOpenDeck = null;
+let currentFilters = null;
 
 function deckManaCurve(deck) {
   let manaCounts = get_deck_curve(deck);
@@ -51,7 +45,7 @@ function deckManaCurve(deck) {
       .map(v => v[0] || 0)
   );
 
-  console.log("deckManaCurve", manaCounts, curveMax);
+  // console.log("deckManaCurve", manaCounts, curveMax);
 
   let curve = $('<div class="mana_curve"></div>');
   let numbers = $('<div class="mana_curve_numbers"></div>');
@@ -93,7 +87,7 @@ function colorPieChart(colorCounts, title) {
     used for land / card pie charts.
     colorCounts should be object with values for each of the color codes wubrgc and total.
     */
-  console.log("making colorPieChart", colorCounts, title);
+  // console.log("making colorPieChart", colorCounts, title);
 
   var stops = [];
   var start = 0;
@@ -118,131 +112,7 @@ function colorPieChart(colorCounts, title) {
   return chart;
 }
 
-function deckWinrateCurves(deck) {
-  // getDeckWinrate returns
-  // {total: winrate, wins: wins, losses: loss, lastEdit: winrateLastEdit, colors: colorsWinrates};
-  // or 0 if there is no data
-
-  let deckWinrates = getDeckWinrate(deck.id, deck.lastUpdated);
-  if (!deckWinrates) {
-    console.log("no deck winrate data");
-    return;
-  }
-  let container = $("<div>");
-
-  // Archetypes
-  let tagsWinrates = deckWinrates.tags;
-  let curveMaxTags = Math.max(
-    ...tagsWinrates.map(cwr => Math.max(cwr.wins || 0, cwr.losses || 0))
-  );
-  console.log("tags curve", curveMaxTags, tagsWinrates);
-
-  let curveTags = $('<div class="mana_curve"></div>');
-  let numbersTags = $('<div class="mana_curve_costs"></div>');
-
-  tagsWinrates.forEach(cwr => {
-    if (
-      tagsWinrates.length < 15 ||
-      (cwr.wins + cwr.losses > 1 && tagsWinrates.length > 15)
-    ) {
-      curveTags.append(
-        $(
-          `<div class="mana_curve_column back_green" style="height: ${(cwr.wins /
-            curveMaxTags) *
-            100}%"></div>`
-        )
-      );
-      curveTags.append(
-        $(
-          `<div class="mana_curve_column back_red" style="height: ${(cwr.losses /
-            curveMaxTags) *
-            100}%"></div>`
-        )
-      );
-
-      let curveNumber = $(`<div class="mana_curve_column_number">
-                ${cwr.wins}/${cwr.losses}
-                <div style="margin: 0 auto !important" class=""></div>
-            </div>`);
-
-      let colors = cwr.colors;
-      curveNumber.append(
-        $(
-          `<div class="mana_curve_tag" style="background-color: ${getTagColor(
-            cwr.tag
-          )};">${cwr.tag}</div>`
-        )
-      );
-      colors.forEach(function(color) {
-        curveNumber.append(
-          $(
-            `<div style="margin: 0 auto !important" class="mana_s16 mana_${
-              mana[color]
-            }"></div>`
-          )
-        );
-      });
-      numbersTags.append(curveNumber);
-    }
-  });
-
-  container.append(curveTags, numbersTags);
-
-  // Colors
-  let colorsWinrates = deckWinrates.colors;
-  //$('<span>w/l vs Color combinations</span>').appendTo(stats);
-  let curveMax = Math.max(
-    ...colorsWinrates.map(cwr => Math.max(cwr.wins || 0, cwr.losses || 0))
-  );
-  console.log("colors curve", curveMax, colorsWinrates);
-
-  let curve = $('<div class="mana_curve"></div>');
-  let numbers = $('<div class="mana_curve_costs"></div>');
-
-  colorsWinrates.forEach(cwr => {
-    if (
-      colorsWinrates.length < 15 ||
-      (cwr.wins + cwr.losses > 1 && colorsWinrates.length > 15)
-    ) {
-      curve.append(
-        $(
-          `<div class="mana_curve_column back_green" style="height: ${(cwr.wins /
-            curveMax) *
-            100}%"></div>`
-        )
-      );
-      curve.append(
-        $(
-          `<div class="mana_curve_column back_red" style="height: ${(cwr.losses /
-            curveMax) *
-            100}%"></div>`
-        )
-      );
-
-      let curveNumber = $(`<div class="mana_curve_column_number">
-                ${cwr.wins}/${cwr.losses}
-                <div style="margin: 0 auto !important" class=""></div>
-            </div>`);
-
-      let colors = cwr.colors;
-      colors.forEach(function(color) {
-        curveNumber.append(
-          $(
-            `<div style="margin: 0 auto !important" class="mana_s16 mana_${
-              mana[color]
-            }"></div>`
-          )
-        );
-      });
-      numbers.append(curveNumber);
-    }
-  });
-
-  container.append(curve, numbers);
-  return container;
-}
-
-function deckStatsSection(deck, deck_type) {
+function deckStatsSection(deck) {
   let stats = $('<div class="stats"></div>');
 
   $(`<div class="button_simple visualView">Visual View</div>
@@ -280,15 +150,6 @@ function deckStatsSection(deck, deck_type) {
   pieChart = colorPieChart(landCounts, "Mana Sources");
   pieChart.appendTo(pieContainer);
 
-  if (deck_type == 0 || deck_type == 2) {
-    let winrateCurveSection = deckWinrateCurves(deck);
-    if (winrateCurveSection) {
-      winrateCurveSection.appendTo(stats);
-    }
-  } else {
-    console.log("skipping winrate curve. deck_type is", deck_type);
-  }
-
   // Deck crafting cost section
   let ownedWildcards = {
     common: economyHistory.wcCommon,
@@ -298,83 +159,132 @@ function deckStatsSection(deck, deck_type) {
   };
 
   let missingWildcards = get_deck_missing(deck);
-  let costSection = $(
-    '<div class="wildcards_cost"><span>Wildcards you have/need</span></div>'
-  );
   let boosterCost = getBoosterCountEstimate(missingWildcards);
-  orderedCardRarities.forEach(cardRarity => {
+  if (boosterCost) {
+    let costSection = $(
+      '<div class="wildcards_cost"><span>Wildcards you have/need</span></div>'
+    );
+    orderedCardRarities.forEach(cardRarity => {
+      $(
+        `<div title="${cardRarity}" class="wc_cost wc_${cardRarity}">${
+          ownedWildcards[cardRarity] > 0
+            ? ownedWildcards[cardRarity] + " / "
+            : ""
+        }${missingWildcards[cardRarity]}</div>`
+      ).appendTo(costSection);
+    });
     $(
-      `<div title="${cardRarity}" class="wc_cost wc_${cardRarity}">${
-        ownedWildcards[cardRarity] > 0 ? ownedWildcards[cardRarity] + " / " : ""
-      }${missingWildcards[cardRarity]}</div>`
+      `<div title="Aproximate boosters" class="wc_cost wc_booster">${Math.round(
+        boosterCost
+      )}</div>`
     ).appendTo(costSection);
-  });
-  $(
-    `<div title="Aproximate boosters" class="wc_cost wc_booster">${Math.round(
-      boosterCost
-    )}</div>`
-  ).appendTo(costSection);
-
-  costSection.appendTo(stats);
+    costSection.appendTo(stats);
+  }
   return stats;
 }
 
-function openDeck(deck, deck_type) {
-  /*
-        deck_type is either 1 or 2.
-        1 = event deck
-        2 = normal deck
-    */
-
-  if (deck == -1) {
-    deck = currentOpenDeck;
-  } else {
-    currentOpenDeck = deck;
-  }
+function openDeck(deck = currentOpenDeck, filters = currentFilters) {
+  if (!deck) return;
+  currentOpenDeck = deck;
+  if (filters && deck.id !== filters.deckId) filters = null;
+  currentFilters = filters;
 
   // #ux_1 is right side, #ux_0 is left side
-  let container = $("#ux_1");
-  container.empty();
+  const mainDiv = document.getElementById("ux_1");
+  mainDiv.classList.remove("flex_item");
+  mainDiv.innerHTML = "";
 
-  let top = $(
-    `<div class="decklist_top"><div class="button back"></div><div class="deck_name">${
-      deck.name
-    }</div></div>`
-  );
+  let container = mainDiv;
+  let showStatsPanel = false;
+  if (filters) {
+    const aggregator = new Aggregator(filters);
+    showStatsPanel = aggregator.stats.total > 0;
+    if (showStatsPanel) {
+      mainDiv.classList.add("flex_item");
+      const wrap_r = createDivision(["wrapper_column", "sidebar_column_l"]);
+      wrap_r.setAttribute("id", "stats_column");
+      wrap_r.style.width = sidebarSize + "px";
+      wrap_r.style.flex = `0 0 ${sidebarSize}px`;
+      const statsPanel = new StatsPanel(
+        "decks_top",
+        aggregator,
+        sidebarSize,
+        true
+      );
+      const deck_top_winrate = statsPanel.render();
+      deck_top_winrate.style.display = "flex";
+      deck_top_winrate.style.flexDirection = "column";
+      deck_top_winrate.style.marginTop = "16px";
+      deck_top_winrate.style.padding = "12px";
 
-  deckColorBar(deck).appendTo(top);
+      const drag = createDivision(["dragger"]);
+      wrap_r.appendChild(drag);
+      const finalCallback = width => {
+        ipc_send("save_user_settings", { right_panel_width: width });
+      };
+      makeResizable(drag, statsPanel.handleResize, finalCallback);
 
-  let tileGrpId = deck.deckTileId;
+      wrap_r.appendChild(deck_top_winrate);
+
+      const wrap_l = createDivision(["wrapper_column"]);
+      wrap_l.setAttribute("id", "deck_column");
+      mainDiv.appendChild(wrap_l);
+      mainDiv.appendChild(wrap_r);
+      container = wrap_l;
+    }
+  }
+
+  const d = document.createElement("div");
+  d.classList.add("list_fill");
+  container.appendChild(d);
+
+  const top = createDivision(["decklist_top"]);
+  top.appendChild(createDivision(["button", "back"]));
+  top.appendChild(createDivision(["deck_name"], deck.name));
+
+  const deckColors = createDivision(["deck_top_colors"]);
+  deckColors.style.alignSelf = "center";
+  deck.colors.forEach(color => {
+    const m = createDivision(["mana_s20", "mana_" + mana[color]]);
+    deckColors.appendChild(m);
+  });
+  top.appendChild(deckColors);
+
+  const tileGrpId = deck.deckTileId;
   if (cardsDb.get(tileGrpId)) {
     change_background("", tileGrpId);
   }
 
-  let deckListSection = $('<div class="decklist"></div>');
-  drawDeck(deckListSection, deck, true);
+  const deckListSection = createDivision(["decklist"]);
+  drawDeck($(deckListSection), deck, true);
 
-  let statsSection = deckStatsSection(deck, deck_type);
+  const statsSection = deckStatsSection(deck);
 
-  let fld = $('<div class="flex_item"></div>');
-  deckListSection.appendTo(fld);
-  statsSection.appendTo(fld);
-  container.append(top);
-  container.append(fld);
+  const fld = createDivision(["flex_item"]);
+  fld.appendChild(deckListSection);
+  fld.appendChild(statsSection[0]);
+
+  container.appendChild(top);
+  container.appendChild(fld);
 
   // Attach event handlers
-  $(".visualView").click(() =>
-    drawDeckVisual(deckListSection, statsSection, deck)
-  );
+  $(".visualView").click(() => {
+    if (showStatsPanel) {
+      $("#stats_column").hide();
+    }
+    drawDeckVisual(deckListSection, statsSection, deck);
+  });
 
   $(".openHistory").click(() => ipc_send("get_deck_changes", deck.id));
 
   $(".exportDeck").click(() => {
-    let list = get_deck_export(deck);
+    const list = get_deck_export(deck);
     pop("Copied to clipboard", 1000);
     ipc_send("set_clipboard", list);
   });
 
   $(".exportDeckStandard").click(() => {
-    let list = get_deck_export_txt(deck);
+    const list = get_deck_export_txt(deck);
     ipc_send("export_txt", { str: list, name: deck.name });
   });
 
