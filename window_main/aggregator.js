@@ -72,6 +72,27 @@ class Aggregator {
   }
 
   static createAllMatches() {
+    // For legacy reasons, we rely on pre-processing all matches
+    // and normalizing some data irregularities (this can be slow).
+    // This should happen exactly once iff matchesHistory changes.
+    matchesHistory.matches.forEach(mid => {
+      const match = matchesHistory[mid];
+      if (!match || match.type === "draft" || match.type === "Event") return;
+      try {
+        if (match.playerDeck && match.playerDeck.mainDeck) {
+          match.playerDeck.colors = get_deck_colors(match.playerDeck);
+        } else {
+          match.playerDeck = JSON.parse(
+            '{"deckTileId":67003,"description":null,"format":"Standard","colors":[],"id":"00000000-0000-0000-0000-000000000000","isValid":false,"lastUpdated":"2018-05-31T00:06:29.7456958","lockedForEdit":false,"lockedForUse":false,"mainDeck":[],"name":"Undefined","resourceId":"00000000-0000-0000-0000-000000000000","sideboard":[]}'
+          );
+        }
+        if (match.oppDeck && match.oppDeck.mainDeck) {
+          match.oppDeck.colors = get_deck_colors(match.oppDeck);
+        }
+      } catch (e) {
+        console.log(e, match);
+      }
+    });
     return new Aggregator({ date: DATE_ALL_TIME });
   }
 
