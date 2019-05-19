@@ -122,9 +122,7 @@ function renderData(container, index) {
 
   let rowsAdded = 0;
 
-  if (
-    daysago != differenceInCalendarDays(new Date(), new Date(change.date))
-  ) {
+  if (daysago != differenceInCalendarDays(new Date(), new Date(change.date))) {
     container.appendChild(createDayHeader(change));
     rowsAdded++;
   }
@@ -659,13 +657,9 @@ function createEconomyUI(mainDiv) {
     if (change.archived && !showArchived) continue;
 
     if (
-      daysago !=
-      differenceInCalendarDays(new Date(), new Date(change.date))
+      daysago != differenceInCalendarDays(new Date(), new Date(change.date))
     ) {
-      daysago = differenceInCalendarDays(
-        new Date(),
-        new Date(change.date)
-      );
+      daysago = differenceInCalendarDays(new Date(), new Date(change.date));
       dayList[daysago] = new economyDay();
       // console.log("new day", change.date);
     }
