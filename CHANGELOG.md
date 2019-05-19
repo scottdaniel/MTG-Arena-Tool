@@ -1,3 +1,30 @@
+## <small>2.5.6 (2019-05-19)</small>
+
+* changed Collection rarity filter to default unchecked ([5cf1729](https://github.com/Manuel-777/MTG-Arena-Tool/commit/5cf1729))
+* DeckDrawer in tourneys ([c3a8091](https://github.com/Manuel-777/MTG-Arena-Tool/commit/c3a8091))
+* Enable eslint ([1467666](https://github.com/Manuel-777/MTG-Arena-Tool/commit/1467666))
+* extract Settings page from renderer ([5b312a7](https://github.com/Manuel-777/MTG-Arena-Tool/commit/5b312a7))
+* fix draft arrows on persistent mode ([64cd3bb](https://github.com/Manuel-777/MTG-Arena-Tool/commit/64cd3bb))
+* Make deck a parameter of `card` again ([3bd69ea](https://github.com/Manuel-777/MTG-Arena-Tool/commit/3bd69ea))
+* prettier ([8dd4392](https://github.com/Manuel-777/MTG-Arena-Tool/commit/8dd4392))
+* prtettier formatting ([b99c10d](https://github.com/Manuel-777/MTG-Arena-Tool/commit/b99c10d))
+* Refactor addCardTile ([76fc288](https://github.com/Manuel-777/MTG-Arena-Tool/commit/76fc288))
+* Refactor away unnecessary class ([617f88e](https://github.com/Manuel-777/MTG-Arena-Tool/commit/617f88e))
+* Refactor get_frame_class -> frameClassName ([a867380](https://github.com/Manuel-777/MTG-Arena-Tool/commit/a867380))
+* Refactor get_rank_class -> rankingClassName ([9f6f45b](https://github.com/Manuel-777/MTG-Arena-Tool/commit/9f6f45b))
+* Refactor rarities ([64a74c2](https://github.com/Manuel-777/MTG-Arena-Tool/commit/64a74c2))
+* Refactor window_main/renderer.drawDeck ([2ffcb5a](https://github.com/Manuel-777/MTG-Arena-Tool/commit/2ffcb5a))
+* Remove magic numbers from deckDrawer.addCardSeparator ([09d8e4b](https://github.com/Manuel-777/MTG-Arena-Tool/commit/09d8e4b))
+* revert prettier mess ([a9a717e](https://github.com/Manuel-777/MTG-Arena-Tool/commit/a9a717e))
+* show events with no pretty name in explore ([6e0c82d](https://github.com/Manuel-777/MTG-Arena-Tool/commit/6e0c82d))
+* show relative time in overlay ([c34eb71](https://github.com/Manuel-777/MTG-Arena-Tool/commit/c34eb71))
+* unused error stuff ([0a94556](https://github.com/Manuel-777/MTG-Arena-Tool/commit/0a94556))
+* Update overlay.js ([2615c48](https://github.com/Manuel-777/MTG-Arena-Tool/commit/2615c48))
+* Update overlay.js ([fd3a5ad](https://github.com/Manuel-777/MTG-Arena-Tool/commit/fd3a5ad))
+* Update renderer.js ([d4384b2](https://github.com/Manuel-777/MTG-Arena-Tool/commit/d4384b2))
+
+
+
 ## <small>2.5.5 (2019-05-16)</small>
 
 * bugfix background.saveMatch to handle limited rank ([eb9688a](https://github.com/Manuel-777/MTG-Arena-Tool/commit/eb9688a))
