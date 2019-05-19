@@ -1,6 +1,6 @@
 /*
 globals
-  transform
+  _
 */
 // Utility functions that belong only to background
 
