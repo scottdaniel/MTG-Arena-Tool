@@ -81,6 +81,8 @@
     "jquery.easing": "^1.4.1",
     "js-sha1": "^0.6.0",
     "lodash.clonedeep": "^4.5.0",
+    "lodash.isempty": "^4.4.0",
+    "lodash.sumby": "^4.6.0",
     "lodash.transform": "^4.6.0",
     "mathjs": "^5.9.0",
     "npm": "^6.9.0",
