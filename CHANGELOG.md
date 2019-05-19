@@ -1,3 +1,9 @@
+## <small>2.5.8 (2019-05-19)</small>
+
+* use lodash ([55aff7a](https://github.com/Manuel-777/MTG-Arena-Tool/commit/55aff7a))
+
+
+
 ## <small>2.5.7 (2019-05-19)</small>
 
 * lodash deps ([2cd4b39](https://github.com/Manuel-777/MTG-Arena-Tool/commit/2cd4b39))
