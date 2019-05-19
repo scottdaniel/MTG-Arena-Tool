@@ -52,7 +52,7 @@ function parseWotcTime2(dateStr) {
 
 function normaliseFields(iterator) {
   if (typeof iterator == "object") {
-    return transform(iterator, function(result, value, key) {
+    return _.transform(iterator, function(result, value, key) {
       let nkey =
         typeof key == "string" ? key.replace(/List$/, "").toLowerCase() : key;
       result[nkey] = normaliseFields(value);

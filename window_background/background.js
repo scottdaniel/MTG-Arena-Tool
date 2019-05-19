@@ -74,8 +74,7 @@ const {
   normaliseFields
 } = require("./background-util");
 
-const transform = require("lodash.transform");
-const cloneDeep = require("lodash.clonedeep");
+const _ = require("lodash");
 
 const httpApi = require("./http-api");
 const manifestParser = require("./manifest-parser");
@@ -237,7 +236,7 @@ var draftSet = "";
 var draftId = undefined;
 */
 
-var playerData = cloneDeep(playerDataDefault);
+var playerData = _.cloneDeep(playerDataDefault);
 var currentMatch = null;
 
 var renderer_state = 0;
@@ -1495,7 +1494,7 @@ function createMatch(arg) {
   actionLog(-99, new Date(), "");
   var obj = store.get("overlayBounds");
 
-  currentMatch = cloneDeep(currentMatchDefault);
+  currentMatch = _.cloneDeep(currentMatchDefault);
 
   if (!firstPass && store.get("settings").show_overlay == true) {
     if (store.get("settings").close_on_match) {
@@ -1554,8 +1553,8 @@ function createDraft() {
   actionLog(-99, new Date(), "");
   var obj = store.get("overlayBounds");
 
-  currentDraft = cloneDeep(currentDraftDefault);
-  currentMatch = cloneDeep(currentMatchDefault);
+  currentDraft = _.cloneDeep(currentDraftDefault);
+  currentMatch = _.cloneDeep(currentMatchDefault);
 
   if (!firstPass && store.get("settings").show_overlay == true) {
     if (store.get("settings").close_on_match) {
