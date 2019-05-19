@@ -16,15 +16,15 @@ function parseWotcTime(str) {
 // At most some format from date-fns could be wrong;
 // https://date-fns.org/v2.0.0-alpha.7/docs/parse
 let dateLangs = {
-  English: "M/d/YYYY h:MM:SS A", // ex: 5/19/2019 11:08:01 AM
-  German: "DD.MM.YYYY hh:mm:ss", // ex: 19.05.2019 09:59:00
-  French: "DD/MM/YYYY hh:mm:ss", //ex: 19/05/2019 10:39:42
-  Italian: "DD/MM/YYYY hh:mm:ss", //ex: 19/05/2019 10:43:03
-  Japanese: "YYYY/MM/DD hh:mm:ss", //ex: 2019/05/19 10:45:04
-  Korean: "YYYY-MM-DD A hh:mm:ss", //ex: 2019-05-19 AM 10:56:27
-  "Portugese (Brazil)": "DD/MM/YYYY hh:mm:ss", //ex: 19/05/2019 11:02:32
-  Russian: "DD.MM.YYYY hh:mm:ss", //ex: 19.05.2019 11:05:15
-  Spanish: "DD/MM/YYYY hh:mm:ss" //ex: 19/05/2019 11:06:37
+  English: "M/d/YYYY HH:MM:SS A", // ex: 5/19/2019 11:08:01 AM
+  German: "dd.MM.YYYY HH:mm:ss", // ex: 19.05.2019 09:59:00
+  French: "dd/MM/YYYY HH:mm:ss", //ex: 19/05/2019 10:39:42
+  Italian: "dd/MM/YYYY HH:mm:ss", //ex: 19/05/2019 10:43:03
+  Japanese: "YYYY/MM/dd HH:mm:ss", //ex: 2019/05/19 10:45:04
+  Korean: "YYYY-MM-dd A HH:mm:ss", //ex: 2019-05-19 AM 10:56:27
+  "Portugese (Brazil)": "dd/MM/YYYY HH:mm:ss", //ex: 19/05/2019 11:02:32
+  Russian: "dd.MM.YYYY HH:mm:ss", //ex: 19.05.2019 11:05:15
+  Spanish: "dd/MM/yyyy HH:mm:ss" //ex: 19/05/2019 11:06:37
 };
 
 // throws an error if it fails
@@ -48,6 +48,7 @@ function parseWotcTime2(dateStr) {
   if (!date || isNaN(date.getTime())) {
     console.log(`Invalid date ('${dateStr}') - using current date as backup.`);
   }
+  return date;
 }
 
 function normaliseFields(iterator) {
