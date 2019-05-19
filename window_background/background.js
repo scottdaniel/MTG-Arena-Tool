@@ -1004,6 +1004,8 @@ function onLogEntryFound(entry) {
     playerData.arenaVersion = entry.socket.ClientVersion;
     playerData.name = entry.socket.PlayerScreenName;
     ipc_send("set_player_data", playerData);
+  } else if (entry.playerId && entry.playerId !== playerData.arenaId) {
+    return;
   } else {
     //console.log("Entry:", entry.label, entry, entry.json());
     if (firstPass) {

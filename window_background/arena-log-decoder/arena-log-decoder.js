@@ -1,18 +1,16 @@
 const nthLastIndexOf = require("./nth-last-index-of");
 const jsonText = require("./json-text");
 
-const CONNECTION_JSON_PATTERN =
-  "\\[(?:UnityCrossThreadLogger|Client GRE)\\]WebSocketClient (.*) WebSocketSharp\\.WebSocket connecting to .*: (.*)(?:\\r\\n|\\n)";
+const CONNECTION_JSON_PATTERN = /\[(?:UnityCrossThreadLogger|Client GRE)\]WebSocketClient (.*) WebSocketSharp\.WebSocket connecting to .*: (.*)(?:\r\n|\n)/;
 
 const LABEL_JSON_PATTERNS = [
-  "\\[Client GRE\\](.*): .*: (.*)(?:\\r\\n|\\n)\\[Message (.*)\\]",
-  "\\[Client GRE\\](.*): .*: (.*)(?:\\r\\n|\\n)",
-  "\\[UnityCrossThreadLogger\\](.*)[(?:\r\n|\n)]{0,}\\(.*\\) Incoming (.*) ",
-  "\\[UnityCrossThreadLogger\\]Received unhandled GREMessageType:() (.*)(?:\\r\\n|\\n)"
+  /\[Client GRE\](?<timestamp>.*): (?:Match to )?(?<playerId>.*)(?: to Match)?: (?<label>.*)(?:\r\n|\n)\[Message (.*)\]/,
+  /\[Client GRE\](?<timestamp>.*): (?:Match to )?(?<playerId>.*)(?: to Match)?: (?<label>.*)(?:\r\n|\n)/,
+  /\[UnityCrossThreadLogger\](?<timestamp>.*)(?:\r\n|\n){0,}\(.*\) Incoming (?<label>.*) /,
+  /\[UnityCrossThreadLogger\]Received unhandled GREMessageType: (?<label>.*)(?:\r\n|\n)/
 ];
 
-const LABEL_ARROW_JSON_PATTERN =
-  "\\[UnityCrossThreadLogger\\](.*)(?:\\r\\n|\\n)([<=]=[=>]) (.*)\\(.*\\):?(?:\\r\\n|\\n)";
+const LABEL_ARROW_JSON_PATTERN = /\[UnityCrossThreadLogger\](.*)(?:\r\n|\n)([<=]=[=>]) (.*)\(.*\):?(?:\r\n|\n)/;
 
 const ALL_PATTERNS = [
   CONNECTION_JSON_PATTERN,
@@ -21,12 +19,13 @@ const ALL_PATTERNS = [
 ];
 
 const maxLinesOfAnyPattern = Math.max(
-  ...ALL_PATTERNS.map(text => occurrences(text, /\\n/g))
+  ...ALL_PATTERNS.map(regex => occurrences(regex.source, /\\n/g))
 );
 
-const cachedRegExps = {};
-const createRegExp = pattern =>
-  cachedRegExps[pattern] || (cachedRegExps[pattern] = new RegExp(pattern));
+const logEntryPattern = new RegExp(
+  `(${ALL_PATTERNS.map(re => re.source.replace(/\(\?<\w*>/g, "(")).join("|")})`,
+  "g"
+);
 
 function ArenaLogDecoder() {
   let buffer = "";
@@ -34,7 +33,7 @@ function ArenaLogDecoder() {
   return { append };
 
   function append(newText, callback) {
-    const logEntryPattern = new RegExp(`(${ALL_PATTERNS.join("|")})`, "g");
+    logEntryPattern.lastIndex = 0;
 
     buffer = buffer.length ? buffer.concat(newText) : newText;
     let bufferUsed = false;
@@ -76,7 +75,7 @@ function ArenaLogDecoder() {
 
 function parseLogEntry(text, matchText, position) {
   let rematches;
-  if ((rematches = matchText.match(createRegExp(CONNECTION_JSON_PATTERN)))) {
+  if ((rematches = matchText.match(CONNECTION_JSON_PATTERN))) {
     return [
       "full",
       matchText.length,
@@ -88,7 +87,7 @@ function parseLogEntry(text, matchText, position) {
     ];
   }
 
-  if ((rematches = matchText.match(createRegExp(LABEL_ARROW_JSON_PATTERN)))) {
+  if ((rematches = matchText.match(LABEL_ARROW_JSON_PATTERN))) {
     const jsonStart = position + matchText.length;
     if (jsonStart >= text.length) {
       return ["partial"];
@@ -124,7 +123,7 @@ function parseLogEntry(text, matchText, position) {
   }
 
   for (let pattern of LABEL_JSON_PATTERNS) {
-    rematches = matchText.match(createRegExp(pattern));
+    rematches = matchText.match(pattern);
     if (!rematches) continue;
 
     const jsonStart = position + matchText.length;
@@ -153,10 +152,7 @@ function parseLogEntry(text, matchText, position) {
       matchText.length + jsonLen + textAfterJson.length,
       {
         type: "label_json",
-        label: rematches[2],
-        //matchText: matchText,
-        //text: text.substr(jsonStart, jsonLen),
-        timestamp: rematches[1],
+        ...rematches.groups,
         json: () => JSON.parse(text.substr(jsonStart, jsonLen))
       }
     ];
