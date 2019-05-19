@@ -56,8 +56,11 @@ function openCollectionTab() {
   });
 
   hideLoadingBars();
-  document.getElementById("ux_1").innerHTML = "";
-  let mainDiv = document.getElementById("ux_0");
+  let mainDiv;
+  mainDiv = document.getElementById("ux_1");
+  mainDiv.innerHTML = "";
+  mainDiv.classList.remove("flex_item");
+  mainDiv = document.getElementById("ux_0");
   mainDiv.innerHTML = "";
   mainDiv.classList.remove("flex_item");
 
@@ -443,6 +446,7 @@ function printStats() {
   $(".moving_ux").animate({ left: "-100%" }, 250, "easeInOutCubic");
   let mainDiv = document.getElementById("ux_1");
   mainDiv.innerHTML = "";
+  mainDiv.classList.remove("flex_item");
   const stats = get_collection_stats();
 
   let top = createDivision(["decklist_top"]);

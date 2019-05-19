@@ -36,6 +36,7 @@ function tournamentCreate() {
   $(".moving_ux").animate({ left: "-100%" }, 250, "easeInOutCubic");
   let mainDiv = $$("#ux_1")[0];
   mainDiv.innerHTML = "";
+  mainDiv.classList.remove("flex_item");
   // Top navigation stuff
   let top = createDivision(["decklist_top"]);
   let buttonBack = createDivision(["button", "back"]);
@@ -60,6 +61,7 @@ function tournamentOpen(t) {
   tou = t;
   let mainDiv = $$("#ux_1")[0];
   mainDiv.innerHTML = "";
+  mainDiv.classList.remove("flex_item");
 
   let sd = tou.signupDuration;
   let rd = tou.roundDuration;

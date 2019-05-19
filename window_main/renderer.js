@@ -581,11 +581,11 @@ ipc.on("open_course_deck", function(event, arg) {
   arg.colors = get_deck_colors(arg);
   arg.mainDeck.sort(compare_cards);
   arg.sideboard.sort(compare_cards);
-  console.log(arg);
+  // console.log(arg);
 
   arg.mainDeck = removeDuplicates(arg.mainDeck);
   arg.sideboard = removeDuplicates(arg.sideboard);
-  openDeck(arg, 1);
+  openDeck(arg, null);
   hideLoadingBars();
 });
 
@@ -1287,7 +1287,7 @@ function drawDeckVisual(_div, _stats, deck) {
     );
 
     $(".openDeck").click(function() {
-      openDeck(-1, 2);
+      openDeck();
     });
   }
 
@@ -1574,7 +1574,7 @@ function setChangesTimeline() {
   $('<div class="button_simple openDeck">View stats</div>').appendTo(cont);
 
   $(".openDeck").click(function() {
-    openDeck(-1, 2);
+    openDeck();
   });
   time.appendTo(cont);
 }
@@ -1583,6 +1583,7 @@ function setChangesTimeline() {
 function open_draft(id) {
   console.log("OPEN DRAFT", id, draftPosition);
   $("#ux_1").html("");
+  $("#ux_1").removeClass("flex_item");
   let draft = matchesHistory[id];
   let tileGrpid = setsList[draft.set].tile;
 
@@ -1706,6 +1707,7 @@ function open_draft(id) {
 
 function open_match(id) {
   $("#ux_1").html("");
+  $("#ux_1").removeClass("flex_item");
   var match = matchesHistory[id];
 
   let top = $(
