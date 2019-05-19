@@ -2,8 +2,11 @@
 
 function onLabelOutLogInfo(entry, json) {
   if (!json) return;
-  if (skipMatch) return;
 
+  if (json.params.messageName == "Client.Connected") {
+    logLanguage = json.params.payloadObject.settings.language;
+  }
+  if (skipMatch) return;
   if (json.params.messageName == "DuelScene.GameStop") {
     currentMatch.opponent.cards = currentMatch.oppCardsUsed;
 
@@ -416,16 +419,6 @@ function onLabelInventoryUpdated(entry, transaction) {
 
   // Add missing data
   transaction.date = parseWotcTime2(entry.timestamp);
-
-  // hacky work around until date parsing for non-english languages is fixed.
-  // FIXME: Sort out the parseWotcTime2 parsing
-  let dateIsInvalid = !transaction.date || isNaN(transaction.date.getTime());
-  if (dateIsInvalid) {
-    console.log(
-      `Invalid date ('${entry.timestamp}') - using current date as backup.`
-    );
-    transaction.date = new Date();
-  }
 
   // Reduce the size for storage
   transaction.delta = minifiedDelta(transaction.delta);
