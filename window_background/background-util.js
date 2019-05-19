@@ -30,7 +30,7 @@ let dateLangs = {
 
 // throws an error if it fails
 function parseWotcTime2(dateStr) {
-  let date = parse(dateStr, dateLangs[logLanguage], new Date());
+  let date = new Date(dateStr);
 
   // This is to detect language when the one read does not match or logLanguage is not yet set
   // Defaults to current time if none matches

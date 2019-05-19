@@ -238,7 +238,6 @@ var draftId = undefined;
 
 var playerData = _.cloneDeep(playerDataDefault);
 var currentMatch = null;
-var logLanguage = "English";
 
 var renderer_state = 0;
 var originalDeck = {};

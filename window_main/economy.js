@@ -65,6 +65,9 @@ const economyTransactionContextsMap = {
   "PlayerReward.OnMatchCompletedWeekly": "Weekly rewards"
 };
 
+const parseWotcTime = require("../window_background/background-util")
+  .parseWotcTime;
+
 function getPrettyContext(context, full = true) {
   if (context.startsWith("Event.Prize")) {
     var eventCode = context.substring(12);
@@ -110,7 +113,7 @@ function renderData(container, index) {
   // print out daily summaries but no sub-events
   if (
     filterEconomy === "Day Summaries" &&
-    daysago !== differenceInCalendarDays(new Date(), change.date)
+    daysago !== differenceInCalendarDays(new Date(), parseWotcTime(change.date))
   ) {
     container.appendChild(createDayHeader(change));
     return 1;
@@ -122,7 +125,9 @@ function renderData(container, index) {
 
   let rowsAdded = 0;
 
-  if (daysago != differenceInCalendarDays(new Date(), change.date)) {
+  if (
+    daysago != differenceInCalendarDays(new Date(), parseWotcTime(change.date))
+  ) {
     container.appendChild(createDayHeader(change));
     rowsAdded++;
   }
@@ -141,7 +146,7 @@ function renderData(container, index) {
 }
 
 function createDayHeader(change) {
-  daysago = differenceInCalendarDays(new Date(), change.date);
+  daysago = differenceInCalendarDays(new Date(), parseWotcTime(change.date));
   let headerGrid = createDivision(["economy_title"]);
 
   const cont = createDivision(["economy_metric"]);
@@ -656,8 +661,14 @@ function createEconomyUI(mainDiv) {
     if (change === undefined) continue;
     if (change.archived && !showArchived) continue;
 
-    if (daysago != differenceInCalendarDays(new Date(), change.date)) {
-      daysago = differenceInCalendarDays(new Date(), change.date);
+    if (
+      daysago !=
+      differenceInCalendarDays(new Date(), parseWotcTime(change.date))
+    ) {
+      daysago = differenceInCalendarDays(
+        new Date(),
+        parseWotcTime(change.date)
+      );
       dayList[daysago] = new economyDay();
       // console.log("new day", change.date);
     }
