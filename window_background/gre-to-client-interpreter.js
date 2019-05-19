@@ -123,7 +123,7 @@ annotationFunctions.AnnotationType_ZoneTransfer = function(ann, details) {
     let playerName = getNameBySeat(ann.affectorId);
     actionLog(
       ann.affectorId,
-      false,
+      logTime,
       `${playerName} played ${actionLogGenerateLink(grpId)}`
     );
   }
@@ -137,11 +137,11 @@ annotationFunctions.AnnotationType_ZoneTransfer = function(ann, details) {
       let grpId = obj.grpId;
       actionLog(
         zone.ownerSeatId,
-        false,
+        logTime,
         `${playerName} drew ${actionLogGenerateLink(grpId)}`
       );
     } else {
-      actionLog(zone.ownerSeatId, false, `${playerName} drew a card`);
+      actionLog(zone.ownerSeatId, logTime, `${playerName} drew a card`);
     }
   }
 
@@ -154,7 +154,7 @@ annotationFunctions.AnnotationType_ZoneTransfer = function(ann, details) {
 
     actionLog(
       seat,
-      false,
+      logTime,
       `${playerName} cast ${actionLogGenerateLink(grpId)}`
     );
   }
@@ -167,7 +167,7 @@ annotationFunctions.AnnotationType_ZoneTransfer = function(ann, details) {
     let playerName = getNameBySeat(seat);
     actionLog(
       seat,
-      false,
+      logTime,
       `${playerName} discarded ${actionLogGenerateLink(grpId)}`
     );
   }
@@ -190,7 +190,7 @@ annotationFunctions.AnnotationType_ZoneTransfer = function(ann, details) {
     }
     actionLog(
       seat,
-      false,
+      logTime,
       `${text} put ${actionLogGenerateLink(grpId)} in ${zone}`
     );
   }
@@ -214,7 +214,7 @@ annotationFunctions.AnnotationType_ZoneTransfer = function(ann, details) {
     let seat = affected.ownerSeatId;
     actionLog(
       seat,
-      false,
+      logTime,
       `${text} returned ${actionLogGenerateLink(affected.grpId)} to ${zone}`
     );
   }
@@ -237,7 +237,7 @@ annotationFunctions.AnnotationType_ZoneTransfer = function(ann, details) {
     let seat = affector.ownerSeatId;
     actionLog(
       seat,
-      false,
+      logTime,
       `${text} exiled ${actionLogGenerateLink(affected.grpId)}`
     );
   }
@@ -265,7 +265,7 @@ annotationFunctions.AnnotationType_ZoneTransfer = function(ann, details) {
     let seat = affector.ownerSeatId;
     actionLog(
       seat,
-      false,
+      logTime,
       `${text} countered ${actionLogGenerateLink(affected.grpId)}`
     );
   }
@@ -283,7 +283,7 @@ annotationFunctions.AnnotationType_ResolutionStart = function(ann, details) {
   if (affected.type == "GameObjectType_Ability") {
     actionLog(
       affected.controllerSeatId,
-      false,
+      logTime,
       `${actionLogGenerateLink(
         affected.objectSourceGrpId
       )}'s ${actionLogGenerateAbilityLink(grpId)}`
@@ -305,7 +305,7 @@ annotationFunctions.AnnotationType_DamageDealt = function(ann, details) {
 
   actionLog(
     affector.controllerSeatId,
-    false,
+    logTime,
     `${actionLogGenerateLink(
       affector.grpId
     )} dealt ${dmg} damage to ${recipient}`
@@ -320,7 +320,7 @@ annotationFunctions.AnnotationType_ModifiedLife = function(ann, details) {
 
   actionLog(
     affected,
-    false,
+    logTime,
     `${getNameBySeat(affected)} life changed (${details.life}) to ${total}`
   );
 };
@@ -345,7 +345,7 @@ annotationFunctions.AnnotationType_TargetSpec = function(ann) {
   if (affector.type == "GameObjectType_Card") {
     text = actionLogGenerateLink(affector.grpId);
   }
-  actionLog(seat, false, `${text} targetted ${target}`);
+  actionLog(seat, logTime, `${text} targetted ${target}`);
 };
 
 annotationFunctions.AnnotationType_Scry = function(ann, details) {
@@ -369,7 +369,7 @@ annotationFunctions.AnnotationType_Scry = function(ann, details) {
 
   actionLog(
     affector,
-    false,
+    logTime,
     `${player} scry ${scrySize}: ${xtop} top, ${xbottom} bottom`
   );
   if (affector == currentMatch.player.seat) {
@@ -378,7 +378,7 @@ annotationFunctions.AnnotationType_Scry = function(ann, details) {
         let grpId = instanceIdToObject(instanceId).grpId;
         actionLog(
           affector,
-          false,
+          logTime,
           ` ${actionLogGenerateLink(grpId)} to the top`
         );
       });
@@ -388,7 +388,7 @@ annotationFunctions.AnnotationType_Scry = function(ann, details) {
         let grpId = instanceIdToObject(instanceId).grpId;
         actionLog(
           affector,
-          false,
+          logTime,
           ` ${actionLogGenerateLink(grpId)} to the bottom`
         );
       });
@@ -405,7 +405,7 @@ annotationFunctions.AnnotationType_CardRevealed = function(ann, details) {
 
   actionLog(
     owner,
-    false,
+    logTime,
     `revealed ${actionLogGenerateLink(grpId)} from ${zone.type}`
   );
 };
@@ -426,7 +426,7 @@ function processAll() {
   currentMatch.oppCardsUsed = getOppUsedCards();
 }
 
-let logTime;
+let logTime = false;
 function GREMessageByID(msgId, time) {
   let message = currentMatch.GREtoClient[msgId];
   logTime = time;
@@ -655,7 +655,7 @@ function checkForStartingLibrary() {
 
 function checkGameInfo(gameInfo) {
   //console.log(`>> GameStage: ${gameInfo.stage} (${currentMatch.gameStage})`);
-  //actionLog(-1, false, `>> GameStage: ${gameInfo.stage} (${currentMatch.gameStage})`);
+  //actionLog(-1, logTime, `>> GameStage: ${gameInfo.stage} (${currentMatch.gameStage})`);
   currentMatch.gameStage = gameInfo.stage;
   currentMatch.game = gameInfo.gameNumber;
   if (gameInfo.matchWinCondition) {
@@ -688,7 +688,7 @@ function checkTurnDiff(turnInfo) {
 
     actionLog(
       -1,
-      false,
+      logTime,
       getNameBySeat(turnInfo.activePlayer) +
         "'s turn begin. (#" +
         turnInfo.turnNumber +

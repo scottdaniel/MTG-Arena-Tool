@@ -2,6 +2,7 @@
 
 function onLabelOutLogInfo(entry, json) {
   if (!json) return;
+  logTime = parseWotcTime(entry.timestamp);
 
   if (json.params.messageName == "Client.Connected") {
     logLanguage = json.params.payloadObject.settings.language.language;
@@ -14,14 +15,14 @@ function onLabelOutLogInfo(entry, json) {
 
     let loserName = getNameBySeat(payload.winningTeamId == 1 ? 2 : 1);
     if (payload.winningReason == "ResultReason_Concede") {
-      actionLog(-1, false, `${loserName} Conceded`);
+      actionLog(-1, logTime, `${loserName} Conceded`);
     }
     if (payload.winningReason == "ResultReason_Timeout") {
-      actionLog(-1, false, `${loserName} Timed out`);
+      actionLog(-1, logTime, `${loserName} Timed out`);
     }
 
     let playerName = getNameBySeat(payload.winningTeamId);
-    actionLog(-1, false, `${playerName} Wins!`);
+    actionLog(-1, logTime, `${playerName} Wins!`);
 
     var mid = payload.matchId + "-" + playerData.arenaId;
     var time = payload.secondsCount;
