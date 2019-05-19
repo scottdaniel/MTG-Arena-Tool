@@ -419,7 +419,7 @@ function onLabelInventoryUpdated(entry, transaction) {
   transaction.timestamp = entry.timestamp;
 
   // Add missing data
-  transaction.date = parseWotcTime2(entry.timestamp);
+  transaction.date = parseWotcTime(entry.timestamp);
 
   // Reduce the size for storage
   transaction.delta = minifiedDelta(transaction.delta);

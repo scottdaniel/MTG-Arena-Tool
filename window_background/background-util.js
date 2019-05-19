@@ -8,11 +8,6 @@ globals
 const parse = require("date-fns").parse;
 let logLanguage = "English";
 
-//
-function parseWotcTime(str) {
-  return parseWotcTime2(str);
-}
-
 // These were tested briefly , but hey are all taken from actual logs
 // At most some format from date-fns could be wrong;
 // https://date-fns.org/v2.0.0-alpha.7/docs/parse
@@ -29,7 +24,7 @@ let dateLangs = {
 };
 
 // throws an error if it fails
-function parseWotcTime2(dateStr) {
+function parseWotcTime(dateStr) {
   let date = new Date(dateStr);
 
   // This is to detect language when the one read does not match or logLanguage is not yet set
@@ -65,6 +60,5 @@ function normaliseFields(iterator) {
 
 module.exports = {
   parseWotcTime: parseWotcTime,
-  parseWotcTime2: parseWotcTime2,
   normaliseFields: normaliseFields
 };

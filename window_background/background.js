@@ -70,7 +70,6 @@ const ipc = electron.ipcRenderer;
 
 const {
   parseWotcTime,
-  parseWotcTime2,
   normaliseFields
 } = require("./background-util");
 
