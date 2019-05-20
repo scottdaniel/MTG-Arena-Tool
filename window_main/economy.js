@@ -17,7 +17,6 @@ global
   getReadableEvent,
   getReadableQuest,
   ipc_send,
-  localDayDateFormat,
   setsList,
   shell
 */
@@ -71,6 +70,15 @@ function localDateFormat(date) {
     hour="numeric"
     minute="numeric">
     ${date.toString()}
+  </local-time>`;
+}
+
+function localDayDateFormat(date) {
+  return `<local-time datetime="${date.toISOString()}"
+    year="numeric"
+    month="long"
+    day="numeric">
+    ${date.toDateString()}
   </local-time>`;
 }
 
