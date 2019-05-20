@@ -26,7 +26,7 @@ time as the team learns, listens, and refines how we work with the community.
 
 This project adheres to the Contributor Covenant [code of conduct](../CODE_OF_CONDUCT.md).
 By participating, you are expected to uphold this code.
-Please report unacceptable behavior to [manuel.etchegaray7@gmail.com](mailto:manuel.etchegaray7@gmail.com).
+Please report unacceptable behavior to [mtgatool@gmail.com](mailto:mtgatool@gmail.com).
 
 ## How Can I Contribute?
 
