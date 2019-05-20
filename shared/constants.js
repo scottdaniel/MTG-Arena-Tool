@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const windowBackground = 0;
 const windowRenderer = 1;
 const windowOverlay = 2;
