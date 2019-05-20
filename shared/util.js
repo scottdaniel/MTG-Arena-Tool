@@ -1113,46 +1113,6 @@ function get_deck_cost(deck) {
 }
 
 //
-function get_deck_curve(deck) {
-  var curve = [];
-
-  deck.mainDeck.forEach(function(card) {
-    var grpid = card.id;
-    var cmc = cardsDb.get(grpid).cmc;
-    if (curve[cmc] == undefined) curve[cmc] = [0, 0, 0, 0, 0, 0];
-
-    let card_cost = cardsDb.get(grpid).cost;
-
-    if (cardsDb.get(grpid).type.indexOf("Land") == -1) {
-      card_cost.forEach(function(c) {
-        if (c.indexOf("w") !== -1) curve[cmc][1] += card.quantity;
-        if (c.indexOf("u") !== -1) curve[cmc][2] += card.quantity;
-        if (c.indexOf("b") !== -1) curve[cmc][3] += card.quantity;
-        if (c.indexOf("r") !== -1) curve[cmc][4] += card.quantity;
-        if (c.indexOf("g") !== -1) curve[cmc][5] += card.quantity;
-      });
-
-      curve[cmc][0] += card.quantity;
-    }
-  });
-  /*
-  // Do not account sideboard?
-  deck.sideboard.forEach(function(card) {
-    var grpid = card.id;
-    var cmc = cardsDb.get(grpid).cmc;
-    if (curve[cmc] == undefined)  curve[cmc] = 0;
-    curve[cmc] += card.quantity
-
-    if (cardsDb.get(grpid).rarity !== 'land') {
-      curve[cmc] += card.quantity
-    }
-  });
-  */
-  //console.log(curve);
-  return curve;
-}
-
-//
 function get_deck_types_ammount(deck) {
   var types = { art: 0, cre: 0, enc: 0, ins: 0, lan: 0, pla: 0, sor: 0 };
 
