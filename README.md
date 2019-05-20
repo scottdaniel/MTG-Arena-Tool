@@ -46,32 +46,27 @@ An MTG Arena deck tracker and collection manager.
 	- See wildcards and boosters needed
 	- Sort by winrate, boosters required
 
-### Compiling / Run from source
-MTG Arena Tool is developed using Electron JS, To get started simply clone this repo and install:
-
-```
-git clone https://github.com/Manuel-777/MTG-Arena-Tool
-cd MTG-Arena-Tool
-npm install
-npm start
-```
-
-You can toggle developer tools for debugging using `Shift+Alt+D`, or using `F12` if you run from source.
-
 ### Download
 Currently, our releases are hosted [here at GitHub](https://github.com/Manuel-777/MTG-Arena-Tool/releases). You will find all stable and pre-production releases right here.
 
 Once downloaded the installer should simply install and run immediately. The app will read your user data and warn you if anything goes wrong.
 
-### Disclaimer
+If you would like to compile and run the latest source, see [the contribution guidelines on how to set up your machine.](./CONTRIBUTING.md#set-up-your-machine)
 
+### Disclaimer
 Even though no official statement has been made about third party software by MTG Arena developers, I am obliged to put a warning about the use of this software.
 
 It is not stated if it is legal or allowed by Wizards of the Coast to use Deck Trackers and other tools alike while playing MTG Arena, therefore MTG Arena Tool developers are not responsible if your account gets banned, locked or suspended for using this software. `Use at your own risk.`
 
 MtG Arena Tool is unofficial Fan Content permitted under the Fan Content Policy. Not approved/endorsed by Wizards. Portions of the materials used are property of Wizards of the Coast. ©Wizards of the Coast LLC.
 
-Please read about [our Privacy Policy and How we use your data here](https://github.com/Manuel-777/MTG-Arena-Tool/blob/master/PRIVACY.md)
+Please read about [our Privacy Policy and How we use your data here](./PRIVACY.md)
+
+### Troubleshooting
+Please see [our troubleshooting guide.](./TROUBLESHOOTING.md)
+
+### Contributing
+Please see [our contributing guide.](./CONTRIBUTING.md)
 
 ### Credits
 [Electron](https://electronjs.org/)

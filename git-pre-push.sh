@@ -10,21 +10,20 @@ then
 fi
 date "+%Y-%m-%d %T    Comparing to ${REMOTE}"
 
-for FILE in $( git diff --name-only "--diff-filter=ACMR" "${REMOTE}" HEAD )
-do
-    date "+%Y-%m-%d %T    Validating ${FILE}"
+FILES=$(git diff --name-only --diff-filter=ACM "${REMOTE}" HEAD -- "*.js" "*.jsx" | sed 's| |\\ |g')
 
-    if [[ $FILE =~ ^.+jsx?$ ]]
-    then
-        date "+%Y-%m-%d %T      Linting: eslint: ${FILE}"
-        npx eslint "${FILE}" --quiet
-        if [ $? -ne 0 ]
-        then
-            date "+%Y-%m-%d %T    Aborting push due to files with lint"
-            exit 1
-        fi
-    fi
-done
+if [ -z "$FILES" ]
+then
+    date "+%Y-%m-%d %T    No committed JS changes since ${REMOTE}. LGTM!"
+    exit 0
+fi
+
+echo "$FILES" | xargs npx eslint --quiet
+if [ $? -ne 0 ]
+then
+    date "+%Y-%m-%d %T    Aborting push due to invalid files"
+    exit 1
+fi
 
 date "+%Y-%m-%d %T    Finished validating all changes since ${REMOTE}. LGTM!"
 exit 0
