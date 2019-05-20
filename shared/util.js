@@ -572,27 +572,6 @@ function get_deck_colors(deck) {
 }
 
 //
-function get_ids_colors(list) {
-  var colors = [];
-  list.forEach(function(grpid) {
-    var cdb = cardsDb.get(grpid);
-    if (cdb) {
-      //var card_name = cdb.name;
-      var card_cost = cdb.cost;
-      card_cost.forEach(function(c) {
-        if (c.indexOf("w") !== -1 && !colors.includes(1)) colors.push(1);
-        if (c.indexOf("u") !== -1 && !colors.includes(2)) colors.push(2);
-        if (c.indexOf("b") !== -1 && !colors.includes(3)) colors.push(3);
-        if (c.indexOf("r") !== -1 && !colors.includes(4)) colors.push(4);
-        if (c.indexOf("g") !== -1 && !colors.includes(5)) colors.push(5);
-      });
-    }
-  });
-
-  return colors;
-}
-
-//
 function add_deck_colors(colors, deck) {
   var cols = [0, 0, 0, 0, 0, 0];
   deck.forEach(function(card) {
