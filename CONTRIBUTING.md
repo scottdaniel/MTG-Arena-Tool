@@ -120,11 +120,12 @@ working tree. For more information, [see the git hooks documentation.](https://g
 
 ##### Pre-Commit Hook
 This automatically reformats all files with staged changes to match the
-project guidelines. WARNING: this will overwrite any previous custom
-git hook.
+project guidelines.
 
-To install (or update), simply run the script in a terminal:
+To install (or update), run the following commands in a terminal. WARNING: this will overwrite any previous custom
+git hook.
 ```
+rm .git/hooks/pre-commit
 ./git-pre-commit.sh
 ```
 This will run the hook and place a copy in your `.git/hooks/` folder.
@@ -137,11 +138,12 @@ rm .git/hooks/pre-commit
 
 ##### Pre-Push Hook
 This automatically checks all modified files against the project
-guidelines and only allows you to push valid commits. WARNING: this will
-overwrite any previous custom git hook.
+guidelines and only allows you to push valid commits.
 
-To install (or update), simply run the script in a terminal:
+To install (or update), run the following commands in a terminal. WARNING: this will overwrite any previous custom
+git hook.
 ```
+rm .git/hooks/pre-push
 ./git-pre-push.sh
 ```
 This will run the hook and place a copy in your `.git/hooks/` folder.
