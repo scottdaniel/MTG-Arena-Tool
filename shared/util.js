@@ -4,7 +4,6 @@ global
   cardsNew
   cardQuality
   decks
-  ipc_send
   $$
 */
 const math = require("mathjs");
