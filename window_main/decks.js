@@ -132,12 +132,14 @@ function openDecksTab(_filters = {}) {
         listItem = new ListItem(
           tileGrpid,
           deck.id,
-          openDeckCallback,
+          id => openDeckCallback(id, filters),
           archiveCallback,
           deck.archived
         );
       } else {
-        listItem = new ListItem(tileGrpid, deck.id, openDeckCallback);
+        listItem = new ListItem(tileGrpid, deck.id, id =>
+          openDeckCallback(id, filters)
+        );
       }
       listItem.center.classList.add("deck_tags_container");
       listItem.divideLeft();
@@ -247,9 +249,10 @@ function openDecksTab(_filters = {}) {
   }
 }
 
-function openDeckCallback(id) {
-  let deck = decks.filter(deck => deck.id == id)[0];
-  openDeck(deck, 2);
+function openDeckCallback(id, filters) {
+  const deck = getDeck(id);
+  if (!deck) return;
+  openDeck(deck, { ...filters, deckId: id });
   $(".moving_ux").animate({ left: "-100%" }, 250, "easeInOutCubic");
 }
 

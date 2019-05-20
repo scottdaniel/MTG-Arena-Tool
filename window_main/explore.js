@@ -582,7 +582,7 @@ function deckLoad(_deck, index) {
   $("." + index).on("click", function() {
     _deck.mainDeck = removeDuplicates(_deck.mainDeck).sort(compare_cards);
     _deck.sideboard = removeDuplicates(_deck.sideboard).sort(compare_cards);
-    openDeck(_deck, 1);
+    openDeck(_deck, null);
     $(".moving_ux").animate({ left: "-100%" }, 250, "easeInOutCubic");
   });
 }

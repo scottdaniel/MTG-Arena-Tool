@@ -581,11 +581,11 @@ ipc.on("open_course_deck", function(event, arg) {
   arg.colors = get_deck_colors(arg);
   arg.mainDeck.sort(compare_cards);
   arg.sideboard.sort(compare_cards);
-  console.log(arg);
+  // console.log(arg);
 
   arg.mainDeck = removeDuplicates(arg.mainDeck);
   arg.sideboard = removeDuplicates(arg.sideboard);
-  openDeck(arg, 1);
+  openDeck(arg, null);
   hideLoadingBars();
 });
 
@@ -1287,7 +1287,7 @@ function drawDeckVisual(_div, _stats, deck) {
     );
 
     $(".openDeck").click(function() {
-      openDeck(-1, 2);
+      openDeck();
     });
   }
 
@@ -1574,7 +1574,7 @@ function setChangesTimeline() {
   $('<div class="button_simple openDeck">View stats</div>').appendTo(cont);
 
   $(".openDeck").click(function() {
-    openDeck(-1, 2);
+    openDeck();
   });
   time.appendTo(cont);
 }
@@ -1583,6 +1583,7 @@ function setChangesTimeline() {
 function open_draft(id) {
   console.log("OPEN DRAFT", id, draftPosition);
   $("#ux_1").html("");
+  $("#ux_1").removeClass("flex_item");
   let draft = matchesHistory[id];
   let tileGrpid = setsList[draft.set].tile;
 
@@ -1706,6 +1707,7 @@ function open_draft(id) {
 
 function open_match(id) {
   $("#ux_1").html("");
+  $("#ux_1").removeClass("flex_item");
   var match = matchesHistory[id];
 
   let top = $(
@@ -2261,116 +2263,6 @@ function getEventWinLossClass(wlGate) {
   if (wlGate.CurrentWins > wlGate.CurrentLosses) return "green";
   if (wlGate.CurrentWins * 2 > wlGate.CurrentLosses) return "orange";
   return "red";
-}
-
-//
-function getDeckWinrate(deckid, lastEdit) {
-  var wins = 0;
-  var loss = 0;
-  var winsLastEdit = 0;
-  var lossLastEdit = 0;
-  var colorsWinrates = [];
-  var tagsWinrates = [];
-
-  if (matchesHistory == undefined) {
-    return 0;
-  }
-
-  matchesHistory.matches.forEach(function(matchid, index) {
-    let match = matchesHistory[matchid];
-    if (matchid != null && match != undefined) {
-      if (match.type == "match") {
-        if (match.playerDeck.id == deckid) {
-          var oppDeckColors = get_deck_colors(match.oppDeck);
-          if (oppDeckColors.length > 0) {
-            let added = -1;
-
-            colorsWinrates.forEach(function(wr, index) {
-              if (compare_colors(wr.colors, oppDeckColors)) {
-                added = index;
-              }
-            });
-
-            if (added == -1) {
-              added =
-                colorsWinrates.push({
-                  colors: oppDeckColors,
-                  wins: 0,
-                  losses: 0
-                }) - 1;
-            }
-
-            if (match.player.win > match.opponent.win) {
-              if (index > -1) {
-                colorsWinrates[added].wins++;
-              }
-
-              wins++;
-            }
-            if (match.player.win < match.opponent.win) {
-              if (index > -1) {
-                colorsWinrates[added].losses++;
-              }
-              loss++;
-            }
-
-            if (match.date > lastEdit) {
-              if (match.player.win > match.opponent.win) {
-                winsLastEdit++;
-              } else {
-                lossLastEdit++;
-              }
-            }
-          }
-
-          if (match.tags !== undefined && match.tags.length > 0) {
-            let tag = match.tags[0];
-            let added = -1;
-
-            tagsWinrates.forEach(function(wr, index) {
-              if (wr.tag == tag) {
-                added = index;
-              }
-            });
-
-            if (added == -1) {
-              added = tagsWinrates.push({ tag: tag, wins: 0, losses: 0 }) - 1;
-            }
-
-            tagsWinrates[added].colors = oppDeckColors;
-            if (match.player.win > match.opponent.win) {
-              tagsWinrates[added].wins += 1;
-            }
-            if (match.player.win < match.opponent.win) {
-              tagsWinrates[added].losses += 1;
-            }
-          }
-        }
-      }
-    }
-  });
-
-  if (wins == 0 && loss == 0) {
-    return 0;
-  }
-
-  var winrate = Math.round((1 / (wins + loss)) * wins * 100) / 100;
-  var winrateLastEdit =
-    Math.round((1 / (winsLastEdit + lossLastEdit)) * winsLastEdit * 100) / 100;
-  if (winsLastEdit == 0) winrateLastEdit = 0;
-
-  //colorsWinrates.sort(compare_color_winrates);
-  colorsWinrates.sort(compare_winrates);
-  tagsWinrates.sort(compare_winrates);
-
-  return {
-    total: winrate,
-    wins: wins,
-    losses: loss,
-    lastEdit: winrateLastEdit,
-    colors: colorsWinrates,
-    tags: tagsWinrates
-  };
 }
 
 function compare_winrates(a, b) {
