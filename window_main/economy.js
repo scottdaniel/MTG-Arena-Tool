@@ -17,7 +17,6 @@ global
   getReadableEvent,
   getReadableQuest,
   ipc_send,
-  localDateFormat,
   localDayDateFormat,
   setsList,
   shell
@@ -64,6 +63,16 @@ const economyTransactionContextsMap = {
   "Vault.Complete": "Vault Opening",
   "PlayerReward.OnMatchCompletedWeekly": "Weekly rewards"
 };
+
+function localDateFormat(date) {
+  return `<local-time datetime="${date.toISOString()}"
+    month="short"
+    day="numeric"
+    hour="numeric"
+    minute="numeric">
+    ${date.toString()}
+  </local-time>`;
+}
 
 function getPrettyContext(context, full = true) {
   if (context.startsWith("Event.Prize")) {

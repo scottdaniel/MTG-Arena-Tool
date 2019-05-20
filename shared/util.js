@@ -1172,16 +1172,6 @@ function timeSince(_date) {
   return Math.floor(seconds) + " seconds";
 }
 
-function localDateFormat(date) {
-  return `<local-time datetime="${date.toISOString()}"
-    month="short"
-    day="numeric"
-    hour="numeric"
-    minute="numeric">
-    ${date.toString()}
-  </local-time>`;
-}
-
 function localDayDateFormat(date) {
   return `<local-time datetime="${date.toISOString()}"
     year="numeric"
