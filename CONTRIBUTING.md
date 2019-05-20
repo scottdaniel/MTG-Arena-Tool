@@ -125,7 +125,7 @@ git hook.
 
 To install (or update), simply run the script in a terminal:
 ```
-./git-pre-commit
+./git-pre-commit.sh
 ```
 This will run the hook and place a copy in your `.git/hooks/` folder.
 Future commits will always run the hook.
@@ -142,10 +142,10 @@ overwrite any previous custom git hook.
 
 To install (or update), simply run the script in a terminal:
 ```
-./git-pre-push
+./git-pre-push.sh
 ```
 This will run the hook and place a copy in your `.git/hooks/` folder.
-Future commits will always run the hook.
+Future pushes will always run the hook.
 
 To uninstall:
 ```
