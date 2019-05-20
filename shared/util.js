@@ -460,22 +460,6 @@ function compare_cards(a, b) {
   return 0;
 }
 
-//
-function compare_chances(a, b) {
-  // Yeah this is lazy.. I know
-  a = a.chance;
-  b = b.chance;
-
-  if (a > b) {
-    return -1;
-  }
-  if (a < b) {
-    return 1;
-  }
-
-  return 0;
-}
-
 function compare_decks(a, b) {
   const aName = getRecentDeckName(a.id);
   const aExists = doesDeckStillExist(a.id) ? 1 : 0;

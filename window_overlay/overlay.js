@@ -4,7 +4,6 @@ global
   addCardHover,
   cardsDb,
   compare_cards,
-  compare_chances,
   compare_draft_cards,
   CardsList,
   Deck,
@@ -81,6 +80,22 @@ const TransparencyMouseFix = require("electron-transparency-mouse-fix");
 const fix = new TransparencyMouseFix({
   fixPointerEvents: "auto"
 });
+
+//
+function compare_chances(a, b) {
+  // Yeah this is lazy.. I know
+  a = a.chance;
+  b = b.chance;
+
+  if (a > b) {
+    return -1;
+  }
+  if (a < b) {
+    return 1;
+  }
+
+  return 0;
+}
 
 function ipc_send(method, arg, to = IPC_BACKGROUND) {
   if (method == "ipc_log") {
