@@ -24,7 +24,7 @@ time as the team learns, listens, and refines how we work with the community.
 
 ### Code of Conduct
 
-This project adheres to the Contributor Covenant [code of conduct](../CODE_OF_CONDUCT.md).
+This project adheres to the Contributor Covenant [code of conduct](./CODE_OF_CONDUCT.md).
 By participating, you are expected to uphold this code.
 Please report unacceptable behavior to [mtgatool@gmail.com](mailto:mtgatool@gmail.com).
 
