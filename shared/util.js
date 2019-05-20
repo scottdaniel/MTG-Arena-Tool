@@ -1201,14 +1201,6 @@ function makeId(length) {
 }
 
 //
-function debugDeck(deck) {
-  deck.forEach(function(card) {
-    var c = cardsDb.get(card.id);
-    ipc_send("ipc_log", card.quantity + "x " + c.name + " (" + card.id + ")");
-  });
-}
-
-//
 function timestamp() {
   return Math.floor(Date.now() / 1000);
 }
