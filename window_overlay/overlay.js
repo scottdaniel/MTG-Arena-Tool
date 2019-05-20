@@ -12,6 +12,8 @@ global
   eventsList,
   eventsToFormat,
   get_ids_colors,
+  mana,
+  packSizes,
   setsList,
   windowBackground,
   windowOverlay,
@@ -72,19 +74,6 @@ let actionLog = [];
 
 let currentMatch = null;
 let cards = {};
-let mana = {
-  0: "",
-  1: "white",
-  2: "blue",
-  3: "black",
-  4: "red",
-  5: "green",
-  6: "colorless",
-  7: "",
-  8: "x"
-};
-
-const packSizes = { "Ravnica Allegiance": 14, "Guilds of Ravnica": 14 };
 
 const TransparencyMouseFix = require("electron-transparency-mouse-fix");
 const fix = new TransparencyMouseFix({

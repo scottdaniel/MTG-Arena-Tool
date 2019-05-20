@@ -1,11 +1,9 @@
 /*
 global
   addCardHover,
-  Aggregator,
   cardsDb,
   compare_archetypes,
   compare_cards,
-  compare_colors,
   draftRanks,
   eventsList,
   eventsToFormat,
@@ -15,12 +13,11 @@ global
   get_deck_export_txt,
   get_deck_types_ammount,
   get_rank_index,
-  get_rank_index_16,
-  getReadableEvent,
   HIDDEN_PW,
   hypergeometricSignificance,
   hypergeometricRange,
   makeId,
+  mana,
   playerDataDefault,
   rankedEvents,
   removeDuplicates,
@@ -88,26 +85,6 @@ const openEconomyTab = require("./economy").openEconomyTab;
 
 const { RANKED_CONST, RANKED_DRAFT, DATE_SEASON } = Aggregator;
 
-var orderedCardTypes = ["cre", "lan", "ins", "sor", "enc", "art", "pla"];
-var orderedCardTypesDesc = [
-  "Creatures",
-  "Lands",
-  "Instants",
-  "Sorceries",
-  "Enchantments",
-  "Artifacts",
-  "Planeswalkers"
-];
-var orderedCardRarities = ["common", "uncommon", "rare", "mythic"];
-var orderedManaColors = [
-  "#E7CA8E",
-  "#AABEDF",
-  "#A18E87",
-  "#DD8263",
-  "#B7C89E",
-  "#E3E3E3"
-];
-
 let deck = null;
 let decks = null;
 let changes = null;
@@ -160,18 +137,6 @@ const actionLogDir = path.join(
   (electron.app || electron.remote.app).getPath("userData"),
   "actionlogs"
 );
-
-let mana = {
-  0: "",
-  1: "white",
-  2: "blue",
-  3: "black",
-  4: "red",
-  5: "green",
-  6: "colorless",
-  7: "",
-  8: "x"
-};
 
 function ipc_send(method, arg, to = windowBackground) {
   // 0: Main window
