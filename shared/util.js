@@ -572,35 +572,6 @@ function get_deck_colors(deck) {
 }
 
 //
-function add_deck_colors(colors, deck) {
-  var cols = [0, 0, 0, 0, 0, 0];
-  deck.forEach(function(card) {
-    var grpid = card.id;
-    card = cardsDb.get(grpid);
-    if (card) {
-      //var card_name = card.name;
-      var card_cost = card.cost;
-
-      card_cost.forEach(function(c) {
-        if (c.indexOf("w") !== -1) cols[1] += 1;
-        if (c.indexOf("u") !== -1) cols[2] += 1;
-        if (c.indexOf("b") !== -1) cols[3] += 1;
-        if (c.indexOf("r") !== -1) cols[4] += 1;
-        if (c.indexOf("g") !== -1) cols[5] += 1;
-      });
-    }
-  });
-
-  colors.w += cols[1];
-  colors.u += cols[2];
-  colors.b += cols[3];
-  colors.r += cols[4];
-  colors.g += cols[5];
-
-  return colors;
-}
-
-//
 function compare_colors(color_a, color_b) {
   if (color_a.length != color_b.length) return false;
 
