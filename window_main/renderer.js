@@ -1119,7 +1119,7 @@ function drawDeck(div, deck, showWildcards = false) {
         case "Sorcery":
           return "Spells";
         case "Enchantment":
-          return "Enchantements";
+          return "Enchantments";
         case "Artifact":
           return "Artifacts";
         case "Land":

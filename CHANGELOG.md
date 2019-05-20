@@ -1,3 +1,23 @@
+## <small>2.5.9 (2019-05-19)</small>
+
+* action log dates ([0b07e7b](https://github.com/Manuel-777/MTG-Arena-Tool/commit/0b07e7b))
+* attempt to parse all different datetimes ([cb1696d](https://github.com/Manuel-777/MTG-Arena-Tool/commit/cb1696d))
+* bugfix draw deck not showing enchantments ([8be7c72](https://github.com/Manuel-777/MTG-Arena-Tool/commit/8be7c72))
+* Check player id for each log message that gives it. ([da58788](https://github.com/Manuel-777/MTG-Arena-Tool/commit/da58788))
+* date lang fixes ([60d6d33](https://github.com/Manuel-777/MTG-Arena-Tool/commit/60d6d33))
+* Do not merge versions of cards after sideboarding. ([d0cb4ca](https://github.com/Manuel-777/MTG-Arena-Tool/commit/d0cb4ca))
+* economy date parse ([135a958](https://github.com/Manuel-777/MTG-Arena-Tool/commit/135a958))
+* fix-the-build ([808f318](https://github.com/Manuel-777/MTG-Arena-Tool/commit/808f318))
+* remove parseWotcTime2 ([efbed7b](https://github.com/Manuel-777/MTG-Arena-Tool/commit/efbed7b))
+* Reset game state per game, not per match. ([f42b82c](https://github.com/Manuel-777/MTG-Arena-Tool/commit/f42b82c))
+* Update background-util.js ([b1e580f](https://github.com/Manuel-777/MTG-Arena-Tool/commit/b1e580f))
+* Update background-util.js ([a40b35f](https://github.com/Manuel-777/MTG-Arena-Tool/commit/a40b35f))
+* Update background-util.js ([bc9c840](https://github.com/Manuel-777/MTG-Arena-Tool/commit/bc9c840))
+* update date-fns ([b4914fd](https://github.com/Manuel-777/MTG-Arena-Tool/commit/b4914fd))
+* Update economy.js ([2322a41](https://github.com/Manuel-777/MTG-Arena-Tool/commit/2322a41))
+
+
+
 ## <small>2.5.8 (2019-05-19)</small>
 
 * use lodash ([55aff7a](https://github.com/Manuel-777/MTG-Arena-Tool/commit/55aff7a))
