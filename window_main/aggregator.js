@@ -7,11 +7,13 @@ globals
   getReadableEvent,
   getRecentDeckName,
   matchesHistory,
-  orderedColorCodes,
-  orderedColorCodesCommon,
   rankedEvents,
   season_starts
 */
+const {
+  orderedColorCodes,
+  orderedColorCodesCommon
+} = require("../shared/constants.js");
 
 // Default filter values
 const DEFAULT_DECK = "All Decks";

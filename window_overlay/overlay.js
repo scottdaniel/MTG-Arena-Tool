@@ -8,17 +8,19 @@ global
   compare_draft_cards,
   CardsList,
   Deck,
-  draftRanks,
   eventsList,
   eventsToFormat,
   get_ids_colors,
-  mana,
-  packSizes,
-  setsList,
-  windowBackground,
-  windowOverlay,
+  setsList
   $
 */
+const {
+  draftRanks,
+  mana,
+  packSizes,
+  windowBackground,
+  windowOverlay
+} = require("../shared/constants.js");
 const electron = require("electron");
 const { webFrame, remote } = require("electron");
 const deckDrawer = require("../shared/deck-drawer");

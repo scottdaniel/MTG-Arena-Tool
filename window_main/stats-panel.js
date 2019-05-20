@@ -7,11 +7,10 @@ globals
   get_rank_index,
   getTagColor,
   getWinrateClass,
-  mana,
-  RANKS,
   toDDHHMMSS,
   toMMSS
 */
+const { mana, RANKS } = require("../shared/constants.js");
 
 class StatsPanel {
   constructor(

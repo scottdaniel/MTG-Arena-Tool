@@ -15,10 +15,8 @@ global
   getWinrateClass,
   ipc_send,
   makeResizable,
-  mana,
   ListItem,
   openDeck,
-  orderedCardRarities,
   sidebarActive,
   sidebarSize,
   sort_decks,
@@ -26,6 +24,7 @@ global
   setTagColor,
   StatsPanel
 */
+const { mana, orderedCardRarities } = require("../shared/constants.js");
 
 let filters = Aggregator.getDefaultFilters();
 filters.onlyCurrentDecks = true;

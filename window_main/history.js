@@ -19,7 +19,6 @@ globals
   ipc_send,
   makeResizable,
   makeId,
-  mana,
   matchesHistory,
   open_match,
   open_draft,
@@ -37,6 +36,7 @@ globals
   toMMSS,
   $$
 */
+const { mana } = require("../shared/constants.js");
 
 const { DEFAULT_DECK, RANKED_CONST, RANKED_DRAFT, DATE_SEASON } = Aggregator;
 let filters = Aggregator.getDefaultFilters();

@@ -20,14 +20,16 @@ global
   hideLoadingBars,
   ipc,
   ipc_send,
-  orderedColorCodesCommon,
-  orderedCardRarities,
   remote,
   setsList,
   Menu,
   MenuItem,
   shell
 */
+const {
+  orderedColorCodesCommon,
+  orderedCardRarities
+} = require("../shared/constants.js");
 let collectionPage = 0;
 let sortingAlgorithm = "Sort by Set";
 let filteredSets;

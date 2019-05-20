@@ -6,8 +6,6 @@ globals
   getReadableEvent,
   createSelect,
   cardsDb,
-  mana,
-  orderedColorCodesCommon,
   timeSince,
   ipc_send,
   showLoadingBars,
@@ -22,6 +20,7 @@ globals
   getBoosterCountEstimate,
   $$
 */
+const { mana, orderedColorCodesCommon } = require("../shared/constants.js");
 
 let filterWCC = 0;
 let filterWCU = 0;

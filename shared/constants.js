@@ -1,19 +1,18 @@
-/* eslint-disable no-unused-vars */
-const windowBackground = 0;
-const windowRenderer = 1;
-const windowOverlay = 2;
+exports.windowBackground = 0;
+exports.windowRenderer = 1;
+exports.windowOverlay = 2;
 
 // Colour indices
-const WHITE = 1;
-const BLUE = 2;
-const BLACK = 3;
-const RED = 4;
-const GREEN = 5;
+exports.WHITE = 1;
+exports.BLUE = 2;
+exports.BLACK = 3;
+exports.RED = 4;
+exports.GREEN = 5;
 
 // Magic constant to represent auth token in form
-const HIDDEN_PW = "********";
+exports.HIDDEN_PW = "********";
 
-const enums = {
+exports.enums = {
   CounterType: {
     "1": "+1/+1",
     "2": "-1/-1",
@@ -598,7 +597,7 @@ const enums = {
   Color: { "1": "White", "2": "Blue", "3": "Black", "4": "Red", "5": "Green" }
 };
 
-const formats = {
+exports.formats = {
   Standard: "Standard",
   TraditionalStandard: "Traditional Standard",
   Draft: "Draft",
@@ -616,9 +615,9 @@ const formats = {
   XLN: "Ixalan Constructed"
 };
 
-const orderedColorCodes = ["w", "u", "b", "r", "g", "c"];
-const orderedColorCodesCommon = ["w", "u", "b", "r", "g"];
-const RANKS = ["Bronze", "Silver", "Gold", "Platinum", "Diamond", "Mythic"];
+exports.orderedColorCodes = ["w", "u", "b", "r", "g", "c"];
+exports.orderedColorCodesCommon = ["w", "u", "b", "r", "g"];
+exports.RANKS = ["Bronze", "Silver", "Gold", "Platinum", "Diamond", "Mythic"];
 
 const draftRanks = [];
 draftRanks[12] = "A+";
@@ -634,9 +633,10 @@ draftRanks[3] = "D+";
 draftRanks[2] = "D";
 draftRanks[1] = "D-";
 draftRanks[0] = "F";
+exports.draftRanks = draftRanks;
 
-const orderedCardTypes = ["cre", "lan", "ins", "sor", "enc", "art", "pla"];
-const orderedCardTypesDesc = [
+exports.orderedCardTypes = ["cre", "lan", "ins", "sor", "enc", "art", "pla"];
+exports.orderedCardTypesDesc = [
   "Creatures",
   "Lands",
   "Instants",
@@ -645,8 +645,8 @@ const orderedCardTypesDesc = [
   "Artifacts",
   "Planeswalkers"
 ];
-const orderedCardRarities = ["common", "uncommon", "rare", "mythic"];
-const orderedManaColors = [
+exports.orderedCardRarities = ["common", "uncommon", "rare", "mythic"];
+exports.orderedManaColors = [
   "#E7CA8E",
   "#AABEDF",
   "#A18E87",
@@ -655,7 +655,7 @@ const orderedManaColors = [
   "#E3E3E3"
 ];
 
-const mana = {
+exports.mana = {
   0: "",
   1: "white",
   2: "blue",
@@ -667,19 +667,4 @@ const mana = {
   8: "x"
 };
 
-const packSizes = { "Ravnica Allegiance": 14, "Guilds of Ravnica": 14 };
-
-// These were tested briefly , but hey are all taken from actual logs
-// At most some format from date-fns could be wrong;
-// https://date-fns.org/v2.0.0-alpha.7/docs/parse
-const dateLangs = {
-  English: "M/d/yyyy HH:MM:SS A", // ex: 5/19/2019 11:08:01 AM
-  German: "dd.MM.yyyy HH:mm:ss", // ex: 19.05.2019 09:59:00
-  French: "dd/MM/yyyy HH:mm:ss", //ex: 19/05/2019 10:39:42
-  Italian: "dd/MM/yyyy HH:mm:ss", //ex: 19/05/2019 10:43:03
-  Japanese: "yyyy/MM/dd HH:mm:ss", //ex: 2019/05/19 10:45:04
-  Korean: "yyyy-MM-dd A HH:mm:ss", //ex: 2019-05-19 AM 10:56:27
-  "Portugese (Brazil)": "dd/MM/yyyy HH:mm:ss", //ex: 19/05/2019 11:02:32
-  Russian: "dd.MM.yyyy HH:mm:ss", //ex: 19.05.2019 11:05:15
-  Spanish: "dd/MM/yyyy HH:mm:ss" //ex: 19/05/2019 11:06:37
-};
+exports.packSizes = { "Ravnica Allegiance": 14, "Guilds of Ravnica": 14 };

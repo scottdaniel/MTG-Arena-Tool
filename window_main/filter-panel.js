@@ -8,10 +8,12 @@ globals
   getReadableEvent,
   getReadableFormat,
   getRecentDeckName,
-  getTagColor,
+  getTagColor
+*/
+const {
   orderedColorCodes,
   orderedColorCodesCommon
-*/
+} = require("../shared/constants.js");
 
 const {
   DEFAULT_ARCH,

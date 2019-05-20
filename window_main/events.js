@@ -15,7 +15,6 @@ globals
   getReadableEvent,
   ipc_send,
   matchesHistory,
-  mana,
   ListItem,
   open_match,
   playerData,
@@ -24,6 +23,7 @@ globals
   timeSince,
   toMMSS
 */
+const { mana } = require("../shared/constants.js");
 
 let filters = Aggregator.getDefaultFilters();
 filters.eventId = Aggregator.ALL_EVENT_TRACKS;

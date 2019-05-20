@@ -4,11 +4,6 @@ global
   compare_archetypes,
   Deck,
   eventsToFormat,
-  getDeck,
-  stripTags,
-  windowBackground,
-  windowRenderer,
-  windowOverlay,
   get_rank_index,
   playerDataDefault,
   hypergeometricRange,
@@ -41,9 +36,15 @@ global
   onLabelMatchGameRoomStateChangedEvent,
   onLabelInEventGetSeasonAndRankDetail,
   onLabelGetPlayerInventoryGetRewardSchedule,
-  onLabelRankUpdated,
-  HIDDEN_PW
+  onLabelRankUpdated
 */
+const {
+  HIDDEN_PW,
+  windowBackground,
+  windowOverlay,
+  windowRenderer
+} = require("../shared/constants.js");
+
 var electron = require("electron");
 const { remote, app, net, clipboard } = require("electron");
 

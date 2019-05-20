@@ -19,16 +19,18 @@ global
     getBoosterCountEstimate,
     ipc_send,
     makeResizable,
-    mana,
-    orderedCardRarities,
-    orderedCardTypes,
-    orderedCardTypesDesc,
-    orderedColorCodes,
-    orderedManaColors,
     pop,
     sidebarSize,
     StatsPanel
 */
+const {
+  mana,
+  orderedCardRarities,
+  orderedCardTypes,
+  orderedCardTypesDesc,
+  orderedColorCodes,
+  orderedManaColors
+} = require("../shared/constants.js");
 
 // We need to store a sorted list of card types so we create the card counts in the same order.
 let currentOpenDeck = null;

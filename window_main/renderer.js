@@ -4,7 +4,6 @@ global
   cardsDb,
   compare_archetypes,
   compare_cards,
-  draftRanks,
   eventsList,
   eventsToFormat,
   get_card_image,
@@ -13,22 +12,24 @@ global
   get_deck_export_txt,
   get_deck_types_ammount,
   get_rank_index,
-  HIDDEN_PW,
   hypergeometricSignificance,
   hypergeometricRange,
   makeId,
-  mana,
   playerDataDefault,
   rankedEvents,
   removeDuplicates,
   set_tou_state,
   setsList,
   timeSince,
-  windowBackground,
-  windowRenderer,
   $$
 */
-
+const {
+  draftRanks,
+  HIDDEN_PW,
+  mana,
+  windowRenderer,
+  windowBackground
+} = require("../shared/constants.js");
 const electron = require("electron");
 const _ = require("lodash");
 const remote = electron.remote;

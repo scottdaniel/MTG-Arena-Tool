@@ -4,20 +4,23 @@ global
   cardsNew
   cardQuality
   decks
-  formats
   ipc_send
-  BLACK
-  BLUE
-  GREEN
-  RANKS
-  RED
-  WHITE
   $$
 */
 const math = require("mathjs");
 math.config({ precision: 2000 });
 
 require("conic-gradient");
+
+const {
+  formats,
+  BLACK,
+  BLUE,
+  GREEN,
+  RANKS,
+  RED,
+  WHITE
+} = require("../shared/constants.js");
 
 const Database = require("../shared/database.js");
 const cardsDb = new Database();
