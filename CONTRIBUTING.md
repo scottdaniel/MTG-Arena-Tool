@@ -1,6 +1,6 @@
 # Contributing to MTG Arena Tool
 
-:+1: :tada: :sparkling_heart: Thanks for your interest! :sparkling_heart: :tada: :+1:
+:+1: :tada: :heart_eyes_cat: Thanks for your interest! :heart_eyes_cat: :tada: :+1:
 
 The following is a set of guidelines for contributing to MTG Arena Tool, hosted
 [here on GitHub](https://github.com/Manuel-777/MTG-Arena-Tool/). These are just
@@ -24,11 +24,17 @@ time as the team learns, listens, and refines how we work with the community.
 
 ### Code of Conduct
 
-This project adheres to the Contributor Covenant [code of conduct](../CODE_OF_CONDUCT.md).
+This project adheres to the Contributor Covenant [code of conduct](./CODE_OF_CONDUCT.md).
 By participating, you are expected to uphold this code.
 Please report unacceptable behavior to [mtgatool@gmail.com](mailto:mtgatool@gmail.com).
 
 ## How Can I Contribute?
+
+:star: :star2: **[Please join the discussion on our Discord `#devs` channel!](https://discordapp.com/channels/463844727654187020/506793351786266624)**
+:star2: :star:
+
+This is easiest way to get started immediately, and hopefully another contributor
+can help answer questions about set up or current guidelines.
 
 ### Reporting Bugs
 
@@ -37,15 +43,11 @@ Following these guidelines helps maintainers and the community understand your
 report :pencil:, reproduce the behavior :computer: :computer:, and find related
 reports :mag_right:.
 
-Before creating bug reports, please check [this list](#before-submitting-a-bug-report)
-as you might find out that you don't need to create one. When you are creating
-a bug report, please [include as many details as possible](#how-do-i-submit-a-good-bug-report).
-
 #### Before Submitting A Bug Report
 
-**Perform a [cursory search](https://github.com/Manuel-777/MTG-Arena-Tool/issues)**
-to see if the problem has already been reported. If it does exist, add a
-:thumbsup: to the issue to indicate this is also an issue for you, and add a
+Before creating bug reports, **please check [this list](https://github.com/Manuel-777/MTG-Arena-Tool/issues)**
+as you might find out that the problem has already been reported. If it does exist,
+add a :thumbsup: to the issue to indicate this is also an issue for you, and add a
 comment to the existing issue if there is extra information you can contribute.
 
 #### How Do I Submit A (Good) Bug Report?
@@ -56,9 +58,9 @@ Simply create an issue on the [MTG Arena Tool issue tracker](https://github.com/
 
 The information we are interested in includes:
 
- - details about your environment - which build, which operating system
+ - details about your environment - which build, which trackers are running, which operating system
  - details about reproducing the issue - what steps to take, what happens, how
-   often it happens
+   often it happens, what you expect to happen instead
  - other relevant information - log files, screenshots, etc
 
 ### Suggesting Enhancements
@@ -69,15 +71,11 @@ existing functionality. Following these guidelines helps maintainers and the
 community understand your suggestion :pencil: and find related suggestions
 :mag_right:.
 
-Before creating enhancement suggestions, please check [this list](#before-submitting-an-enhancement-suggestion)
-as you might find out that you don't need to create one. When you are creating
-an enhancement suggestion, please [include as many details as possible](#how-do-i-submit-a-good-enhancement-suggestion).
-
 #### Before Submitting An Enhancement Suggestion
 
-**Perform a [cursory search](https://github.com/Manuel-777/MTG-Arena-Tool/labels/enhancement)**
-to see if the enhancement has already been suggested. If it has, add a
-:thumbsup: to indicate your interest in it, or comment if there is additional
+Before creating enhancement suggestions, **please check [this list](https://github.com/Manuel-777/MTG-Arena-Tool/labels/enhancement)**
+as you might find out that the enhancement has already been suggested. If it has,
+add a :thumbsup: to indicate your interest in it, or comment if there is additional
 information you would like to add.
 
 #### How Do I Submit A (Good) Enhancement Suggestion?
