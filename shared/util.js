@@ -13,7 +13,7 @@ math.config({ precision: 2000 });
 require("conic-gradient");
 
 const {
-  formats,
+  FORMATS,
   BLACK,
   BLUE,
   GREEN,
@@ -389,8 +389,8 @@ function getReadableEvent(arg) {
 
 //
 function getReadableFormat(format) {
-  if (format in formats) {
-    return formats[format];
+  if (format in FORMATS) {
+    return FORMATS[format];
   }
   return format || "Unknown";
 }

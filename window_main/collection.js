@@ -26,10 +26,7 @@ global
   MenuItem,
   shell
 */
-const {
-  orderedColorCodesCommon,
-  orderedCardRarities
-} = require("../shared/constants.js");
+const { COLORS_BRIEF, CARD_RARITIES } = require("../shared/constants.js");
 let collectionPage = 0;
 let sortingAlgorithm = "Sort by Set";
 let filteredSets;
@@ -542,7 +539,7 @@ function renderSetStats(setStats, setIconCode, setName) {
 
     let wanted = {};
     let missing = {};
-    orderedCardRarities.forEach(rarity => {
+    CARD_RARITIES.forEach(rarity => {
       const countStats = setStats[rarity];
       if (countStats.total > 0) {
         const capitalizedRarity =
@@ -821,8 +818,8 @@ function printCards() {
       let generic = false;
       for (let i = 0; i < cost.length; i++) {
         let m = cost[i];
-        for (let j = 0; j < orderedColorCodesCommon.length; j++) {
-          let code = orderedColorCodesCommon[j];
+        for (let j = 0; j < COLORS_BRIEF.length; j++) {
+          let code = COLORS_BRIEF[j];
           if (m.indexOf(code) !== -1) {
             if (filterExclude.checked && !filteredMana.includes(j + 1)) {
               continue cardLoop;

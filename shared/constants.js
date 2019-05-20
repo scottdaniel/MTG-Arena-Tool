@@ -1,6 +1,6 @@
-exports.windowBackground = 0;
-exports.windowRenderer = 1;
-exports.windowOverlay = 2;
+exports.IPC_BACKGROUND = 0;
+exports.IPC_MAIN = 1;
+exports.IPC_OVERLAY = 2;
 
 // Colour indices
 exports.WHITE = 1;
@@ -12,7 +12,7 @@ exports.GREEN = 5;
 // Magic constant to represent auth token in form
 exports.HIDDEN_PW = "********";
 
-exports.enums = {
+exports.ENUMS = {
   CounterType: {
     "1": "+1/+1",
     "2": "-1/-1",
@@ -597,7 +597,7 @@ exports.enums = {
   Color: { "1": "White", "2": "Blue", "3": "Black", "4": "Red", "5": "Green" }
 };
 
-exports.formats = {
+exports.FORMATS = {
   Standard: "Standard",
   TraditionalStandard: "Traditional Standard",
   Draft: "Draft",
@@ -615,28 +615,28 @@ exports.formats = {
   XLN: "Ixalan Constructed"
 };
 
-exports.orderedColorCodes = ["w", "u", "b", "r", "g", "c"];
-exports.orderedColorCodesCommon = ["w", "u", "b", "r", "g"];
+exports.COLORS_ALL = ["w", "u", "b", "r", "g", "c"];
+exports.COLORS_BRIEF = ["w", "u", "b", "r", "g"];
 exports.RANKS = ["Bronze", "Silver", "Gold", "Platinum", "Diamond", "Mythic"];
 
-const draftRanks = [];
-draftRanks[12] = "A+";
-draftRanks[11] = "A";
-draftRanks[10] = "A-";
-draftRanks[9] = "B+";
-draftRanks[8] = "B";
-draftRanks[7] = "B-";
-draftRanks[6] = "C+";
-draftRanks[5] = "C";
-draftRanks[4] = "C-";
-draftRanks[3] = "D+";
-draftRanks[2] = "D";
-draftRanks[1] = "D-";
-draftRanks[0] = "F";
-exports.draftRanks = draftRanks;
+const DRAFT_RANKS = [];
+DRAFT_RANKS[12] = "A+";
+DRAFT_RANKS[11] = "A";
+DRAFT_RANKS[10] = "A-";
+DRAFT_RANKS[9] = "B+";
+DRAFT_RANKS[8] = "B";
+DRAFT_RANKS[7] = "B-";
+DRAFT_RANKS[6] = "C+";
+DRAFT_RANKS[5] = "C";
+DRAFT_RANKS[4] = "C-";
+DRAFT_RANKS[3] = "D+";
+DRAFT_RANKS[2] = "D";
+DRAFT_RANKS[1] = "D-";
+DRAFT_RANKS[0] = "F";
+exports.DRAFT_RANKS = DRAFT_RANKS;
 
-exports.orderedCardTypes = ["cre", "lan", "ins", "sor", "enc", "art", "pla"];
-exports.orderedCardTypesDesc = [
+exports.CARD_TYPE_CODES = ["cre", "lan", "ins", "sor", "enc", "art", "pla"];
+exports.CARD_TYPES = [
   "Creatures",
   "Lands",
   "Instants",
@@ -645,8 +645,8 @@ exports.orderedCardTypesDesc = [
   "Artifacts",
   "Planeswalkers"
 ];
-exports.orderedCardRarities = ["common", "uncommon", "rare", "mythic"];
-exports.orderedManaColors = [
+exports.CARD_RARITIES = ["common", "uncommon", "rare", "mythic"];
+exports.MANA_COLORS = [
   "#E7CA8E",
   "#AABEDF",
   "#A18E87",
@@ -655,7 +655,7 @@ exports.orderedManaColors = [
   "#E3E3E3"
 ];
 
-exports.mana = {
+exports.MANA = {
   0: "",
   1: "white",
   2: "blue",
@@ -667,4 +667,4 @@ exports.mana = {
   8: "x"
 };
 
-exports.packSizes = { "Ravnica Allegiance": 14, "Guilds of Ravnica": 14 };
+exports.PACK_SIZES = { "Ravnica Allegiance": 14, "Guilds of Ravnica": 14 };

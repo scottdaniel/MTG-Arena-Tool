@@ -40,9 +40,9 @@ global
 */
 const {
   HIDDEN_PW,
-  windowBackground,
-  windowOverlay,
-  windowRenderer
+  IPC_BACKGROUND,
+  IPC_OVERLAY,
+  IPC_MAIN
 } = require("../shared/constants.js");
 
 var electron = require("electron");
@@ -274,12 +274,12 @@ var wcMythic = 0;
 var lastDeckUpdate = new Date();
 
 // Begin of IPC messages recievers
-function ipc_send(method, arg, to = windowRenderer) {
+function ipc_send(method, arg, to = IPC_MAIN) {
   if (method == "ipc_log") {
     //
   }
   //console.log("IPC SEND", method, arg, to);
-  ipc.send("ipc_switch", method, windowBackground, arg, to);
+  ipc.send("ipc_switch", method, IPC_BACKGROUND, arg, to);
 }
 
 //
@@ -1425,7 +1425,7 @@ function actionLog(seat, time, str, grpId = 0) {
   ipc_send(
     "action_log",
     { seat: seat, time: time, str: str, grpId: grpId },
-    windowOverlay
+    IPC_OVERLAY
   );
 }
 
@@ -1440,7 +1440,7 @@ function changePriority(previous, current, time) {
   currentMatch.currentPriority = current;
   //console.log(priorityTimers);
   //console.log("since match begin:", time - matchBeginTime);
-  ipc_send("set_priority_timer", currentMatch.priorityTimers, windowOverlay);
+  ipc_send("set_priority_timer", currentMatch.priorityTimers, IPC_OVERLAY);
 }
 
 // Get player name by seat in the game
@@ -1526,13 +1526,13 @@ function createMatch(arg) {
   instanceToCardIdMap = {};
 
   ipc_send("ipc_log", "vs " + currentMatch.opponent.name);
-  ipc_send("set_timer", currentMatch.beginTime, windowOverlay);
-  ipc_send("set_opponent", currentMatch.opponent.name, windowOverlay);
+  ipc_send("set_timer", currentMatch.beginTime, IPC_OVERLAY);
+  ipc_send("set_opponent", currentMatch.opponent.name, IPC_OVERLAY);
   ipc_send(
     "set_opponent_rank",
     get_rank_index(currentMatch.opponent.rank, currentMatch.opponent.tier),
     currentMatch.opponent.rank + " " + currentMatch.opponent.tier,
-    windowOverlay
+    IPC_OVERLAY
   );
 
   if (currentMatch.eventId == "DirectGame" && currentDeck) {
@@ -1540,7 +1540,7 @@ function createMatch(arg) {
     httpApi.httpTournamentCheck(str, currentMatch.opponent.name, true);
   }
 
-  ipc_send("set_priority_timer", currentMatch.priorityTimers, windowOverlay);
+  ipc_send("set_priority_timer", currentMatch.priorityTimers, IPC_OVERLAY);
 
   if (history[currentMatch.matchId]) {
     //skipMatch = true;
@@ -1564,9 +1564,9 @@ function createDraft() {
     ipc_send("overlay_set_bounds", obj);
   }
 
-  ipc_send("set_draft", true, windowOverlay);
-  ipc_send("set_timer", -1, windowOverlay);
-  ipc_send("set_opponent", "", windowOverlay);
+  ipc_send("set_draft", true, IPC_OVERLAY);
+  ipc_send("set_timer", -1, IPC_OVERLAY);
+  ipc_send("set_opponent", "", IPC_OVERLAY);
 }
 
 //
@@ -1578,13 +1578,13 @@ function select_deck(arg) {
   }
   console.log("Select deck: ", currentDeck, arg);
   originalDeck = currentDeck.clone();
-  ipc_send("set_deck", currentDeck.getSave(), windowOverlay);
+  ipc_send("set_deck", currentDeck.getSave(), IPC_OVERLAY);
 }
 
 //
 function clear_deck() {
   var deck = { mainDeck: [], sideboard: [], name: "" };
-  ipc_send("set_deck", deck, windowOverlay);
+  ipc_send("set_deck", deck, IPC_OVERLAY);
 }
 
 //
@@ -1608,7 +1608,7 @@ function update_deck(force) {
     delete currentMatchCopy.processedAnnotations;
     delete currentMatchCopy.zones;
     currentMatchCopy = JSON.stringify(currentMatchCopy);
-    ipc_send("set_match", currentMatchCopy, windowOverlay);
+    ipc_send("set_match", currentMatchCopy, IPC_OVERLAY);
   }
 }
 
@@ -1896,7 +1896,7 @@ function saveMatch(matchId) {
     httpApi.httpSetMatch(match);
   }
   requestHistorySend(0);
-  ipc_send("set_timer", 0, windowOverlay);
+  ipc_send("set_timer", 0, IPC_OVERLAY);
   ipc_send("popup", { text: "Match saved!", time: 3000 });
 }
 

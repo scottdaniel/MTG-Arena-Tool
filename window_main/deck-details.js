@@ -24,12 +24,12 @@ global
     StatsPanel
 */
 const {
-  mana,
-  orderedCardRarities,
-  orderedCardTypes,
-  orderedCardTypesDesc,
-  orderedColorCodes,
-  orderedManaColors
+  MANA,
+  CARD_RARITIES,
+  CARD_TYPE_CODES,
+  CARD_TYPES,
+  COLORS_ALL,
+  MANA_COLORS
 } = require("../shared/constants.js");
 
 // We need to store a sorted list of card types so we create the card counts in the same order.
@@ -61,7 +61,7 @@ function deckManaCurve(deck) {
         total > 0 ? total : ""
       }</div></div>`
     );
-    orderedManaColors.forEach((mc, ind) => {
+    MANA_COLORS.forEach((mc, ind) => {
       if (ind < 5 && cost[ind + 1] > 0) {
         let h = Math.round((cost[ind + 1] / manaTotal) * 100);
         let col = $(
@@ -93,8 +93,8 @@ function colorPieChart(colorCounts, title) {
 
   var stops = [];
   var start = 0;
-  orderedColorCodes.forEach((colorCode, i) => {
-    let currentColor = orderedManaColors[i];
+  COLORS_ALL.forEach((colorCode, i) => {
+    let currentColor = MANA_COLORS[i];
     var stop =
       start + ((colorCounts[colorCode] || 0) / colorCounts.total) * 100;
     stops.push(`${currentColor} 0 ${stop}%`);
@@ -126,10 +126,10 @@ function deckStatsSection(deck) {
 
   let cardTypes = get_deck_types_ammount(deck);
   let typesContainer = $('<div class="types_container"></div>');
-  orderedCardTypes.forEach((cardTypeKey, index) => {
+  CARD_TYPE_CODES.forEach((cardTypeKey, index) => {
     $(`<div class="type_icon_cont">
             <div title="${
-              orderedCardTypesDesc[index]
+              CARD_TYPES[index]
             }" class="type_icon type_${cardTypeKey}"></div>
             <span>${cardTypes[cardTypeKey]}</span>
         </div>`).appendTo(typesContainer);
@@ -165,7 +165,7 @@ function deckStatsSection(deck) {
   let costSection = $(
     '<div class="wildcards_cost"><span>Wildcards you have/need</span></div>'
   );
-  orderedCardRarities.forEach(cardRarity => {
+  CARD_RARITIES.forEach(cardRarity => {
     $(
       `<div title="${cardRarity}" class="wc_cost wc_${cardRarity}">${
         ownedWildcards[cardRarity] > 0 ? ownedWildcards[cardRarity] + " / " : ""
@@ -243,7 +243,7 @@ function openDeck(deck = currentOpenDeck, filters = currentFilters) {
   const deckColors = createDivision(["deck_top_colors"]);
   deckColors.style.alignSelf = "center";
   deck.colors.forEach(color => {
-    const m = createDivision(["mana_s20", "mana_" + mana[color]]);
+    const m = createDivision(["mana_s20", "mana_" + MANA[color]]);
     deckColors.appendChild(m);
   });
   top.appendChild(deckColors);

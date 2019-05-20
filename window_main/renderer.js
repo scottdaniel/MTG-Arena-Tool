@@ -24,11 +24,11 @@ global
   $$
 */
 const {
-  draftRanks,
+  DRAFT_RANKS,
   HIDDEN_PW,
-  mana,
-  windowRenderer,
-  windowBackground
+  MANA,
+  IPC_MAIN,
+  IPC_BACKGROUND
 } = require("../shared/constants.js");
 const electron = require("electron");
 const _ = require("lodash");
@@ -139,11 +139,11 @@ const actionLogDir = path.join(
   "actionlogs"
 );
 
-function ipc_send(method, arg, to = windowBackground) {
+function ipc_send(method, arg, to = IPC_BACKGROUND) {
   // 0: Main window
   // 1: background
   // 2: overlay
-  ipc.send("ipc_switch", method, windowRenderer, arg, to);
+  ipc.send("ipc_switch", method, IPC_MAIN, arg, to);
 }
 
 //
@@ -1627,7 +1627,7 @@ function open_draft(id) {
     img.appendTo(d);
     var r = $(
       '<div style="" class="draft_card_rating">' +
-        draftRanks[card.rank] +
+        DRAFT_RANKS[card.rank] +
         "</div>"
     );
     r.appendTo(d);
@@ -1685,7 +1685,7 @@ function open_match(id) {
 
   if (match.playerDeck.colors != undefined) {
     match.playerDeck.colors.forEach(function(color) {
-      var m = $('<div class="mana_s20 mana_' + mana[color] + '"></div>');
+      var m = $('<div class="mana_s20 mana_' + MANA[color] + '"></div>');
       flr.append(m);
     });
   }

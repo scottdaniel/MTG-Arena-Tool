@@ -36,7 +36,7 @@ globals
   toMMSS,
   $$
 */
-const { mana } = require("../shared/constants.js");
+const { MANA } = require("../shared/constants.js");
 
 const { DEFAULT_DECK, RANKED_CONST, RANKED_DRAFT, DATE_SEASON } = Aggregator;
 let filters = Aggregator.getDefaultFilters();
@@ -275,7 +275,7 @@ function attachMatchData(listItem, match) {
   listItem.leftTop.appendChild(eventNameDiv);
 
   match.playerDeck.colors.forEach(color => {
-    let m = createDivision(["mana_s20", "mana_" + mana[color]]);
+    let m = createDivision(["mana_s20", "mana_" + MANA[color]]);
     listItem.leftBottom.appendChild(m);
   });
 
@@ -304,7 +304,7 @@ function attachMatchData(listItem, match) {
 
   // Opp colors
   get_deck_colors(match.oppDeck).forEach(color => {
-    var m = createDivision(["mana_s20", "mana_" + mana[color]]);
+    var m = createDivision(["mana_s20", "mana_" + MANA[color]]);
     listItem.rightBottom.appendChild(m);
   });
 

@@ -23,7 +23,7 @@ globals
   timeSince,
   toMMSS
 */
-const { mana } = require("../shared/constants.js");
+const { MANA } = require("../shared/constants.js");
 
 let filters = Aggregator.getDefaultFilters();
 filters.eventId = Aggregator.ALL_EVENT_TRACKS;
@@ -182,7 +182,7 @@ function attachEventData(listItem, course) {
   listItem.leftTop.appendChild(deckNameDiv);
 
   course.CourseDeck.colors.forEach(color => {
-    let m = createDivision(["mana_s20", `mana_${mana[color]}`]);
+    let m = createDivision(["mana_s20", `mana_${MANA[color]}`]);
     listItem.leftBottom.appendChild(m);
   });
 
@@ -255,7 +255,7 @@ function createMatchRow(match) {
   matchRow.leftTop.appendChild(deckNameDiv);
 
   match.playerDeck.colors.forEach(color => {
-    var m = createDivision(["mana_s20", "mana_" + mana[color]]);
+    var m = createDivision(["mana_s20", "mana_" + MANA[color]]);
     matchRow.leftBottom.appendChild(m);
   });
 
@@ -283,7 +283,7 @@ function createMatchRow(match) {
   matchRow.rightBottom.appendChild(timeDiv);
 
   get_deck_colors(match.oppDeck).forEach(function(color) {
-    var m = createDivision(["mana_s20", "mana_" + mana[color]]);
+    var m = createDivision(["mana_s20", "mana_" + MANA[color]]);
     matchRow.rightBottom.appendChild(m);
   });
 

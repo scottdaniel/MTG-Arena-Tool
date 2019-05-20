@@ -24,7 +24,7 @@ global
   setTagColor,
   StatsPanel
 */
-const { mana, orderedCardRarities } = require("../shared/constants.js");
+const { MANA, CARD_RARITIES } = require("../shared/constants.js");
 
 let filters = Aggregator.getDefaultFilters();
 filters.onlyCurrentDecks = true;
@@ -174,7 +174,7 @@ function openDecksTab(_filters = {}) {
       let wc;
       let n = 0;
       let boosterCost = getBoosterCountEstimate(missingWildcards);
-      orderedCardRarities.forEach(cardRarity => {
+      CARD_RARITIES.forEach(cardRarity => {
         if (missingWildcards[cardRarity]) {
           n++;
           wc = document.createElement("div");
@@ -206,7 +206,7 @@ function openDecksTab(_filters = {}) {
       listItem.leftTop.appendChild(deckNameDiv);
 
       deck.colors.forEach(function(color) {
-        let m = createDivision(["mana_s20", "mana_" + mana[color]]);
+        let m = createDivision(["mana_s20", "mana_" + MANA[color]]);
         listItem.leftBottom.appendChild(m);
       });
 

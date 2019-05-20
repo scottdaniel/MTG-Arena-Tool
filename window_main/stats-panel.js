@@ -10,7 +10,7 @@ globals
   toDDHHMMSS,
   toMMSS
 */
-const { mana, RANKS } = require("../shared/constants.js");
+const { MANA, RANKS } = require("../shared/constants.js");
 
 class StatsPanel {
   constructor(
@@ -204,7 +204,7 @@ class StatsPanel {
         }
 
         cwr.colors.forEach(color => {
-          const tagColor = createDivision(["mana_s16", "mana_" + mana[color]]);
+          const tagColor = createDivision(["mana_s16", "mana_" + MANA[color]]);
           tagColor.style.margin = "margin: 0 auto !important";
           curveNumber.appendChild(tagColor);
         });

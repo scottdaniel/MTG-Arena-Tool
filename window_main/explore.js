@@ -20,7 +20,7 @@ globals
   getBoosterCountEstimate,
   $$
 */
-const { mana, orderedColorCodesCommon } = require("../shared/constants.js");
+const { MANA, COLORS_BRIEF } = require("../shared/constants.js");
 
 let filterWCC = 0;
 let filterWCU = 0;
@@ -299,7 +299,7 @@ function drawFilters() {
    *  Mana filter
    **/
   var manas = $('<div class="mana_filters_explore"></div>');
-  orderedColorCodesCommon.forEach(function(s, i) {
+  COLORS_BRIEF.forEach(function(s, i) {
     var mi = [1, 2, 3, 4, 5];
     var mf = "";
     if (!filteredMana.includes(mi[i])) {
@@ -526,7 +526,7 @@ function deckLoad(_deck, index) {
   flt.appendChild(d);
 
   _deck.colors.forEach(function(color) {
-    let manaIcon = createDivision(["mana_s20", "mana_" + mana[color]]);
+    let manaIcon = createDivision(["mana_s20", "mana_" + MANA[color]]);
     flb.appendChild(manaIcon);
   });
 
@@ -660,7 +660,7 @@ function eventLoad(event, index) {
   flt.appendChild(d);
 
   event.colors.forEach(function(color) {
-    let d = createDivision(["mana_s20", "mana_" + mana[color]]);
+    let d = createDivision(["mana_s20", "mana_" + MANA[color]]);
     flb.appendChild(d);
   });
 
