@@ -484,15 +484,6 @@ function get_set_code(set) {
 }
 
 //
-function collectionSortName(a, b) {
-  a = cardsDb.get(a);
-  b = cardsDb.get(b);
-  if (a.name < b.name) return -1;
-  if (a.name > b.name) return 1;
-  return 0;
-}
-
-//
 function collectionSortSet(a, b) {
   a = cardsDb.get(a);
   b = cardsDb.get(b);

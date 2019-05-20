@@ -7,7 +7,6 @@ global
   cardsNew,
   cardSize,
   collectionSortSet,
-  collectionSortName,
   collectionSortCmc,
   collectionSortRarity,
   change_background,
@@ -67,6 +66,15 @@ class CountStats {
       return 100;
     }
   }
+}
+
+//
+function collectionSortName(a, b) {
+  a = cardsDb.get(a);
+  b = cardsDb.get(b);
+  if (a.name < b.name) return -1;
+  if (a.name > b.name) return 1;
+  return 0;
 }
 
 //
