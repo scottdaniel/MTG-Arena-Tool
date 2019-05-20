@@ -14,7 +14,6 @@ global
   get_card_image,
   get_set_scryfall,
   getReadableEvent,
-  getReadableQuest,
   ipc_send,
   setsList,
   shell
@@ -79,6 +78,12 @@ function localDayDateFormat(date) {
     day="numeric">
     ${date.toDateString()}
   </local-time>`;
+}
+
+function getReadableQuest(questCode) {
+  // FIXME: Can we get a human readable quest name?
+  // For now lets just use a small portion of the ID.
+  return `#${questCode.substring(0, 6)}`;
 }
 
 //

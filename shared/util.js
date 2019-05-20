@@ -382,12 +382,6 @@ function getReadableFormat(format) {
   return format || "Unknown";
 }
 
-function getReadableQuest(questCode) {
-  // FIXME: Can we get a human readable quest name?
-  // For now lets just use a small portion of the ID.
-  return `#${questCode.substring(0, 6)}`;
-}
-
 //
 function getEventId(arg) {
   var ret = arg;
