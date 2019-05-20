@@ -1011,25 +1011,6 @@ function getBoosterCountEstimate(wildcards) {
 }
 
 //
-function get_deck_uniquestring(deck, side = true) {
-  if (!deck) return "";
-  deck.mainDeck.sort(compare_cards);
-
-  let str = "";
-  deck.mainDeck.forEach(card => {
-    str += card.id + "," + card.quantity + ",";
-  });
-
-  if (side) {
-    deck.sideboard.forEach(card => {
-      str += card.id + "," + card.quantity + ",";
-    });
-  }
-
-  return str;
-}
-
-//
 function get_deck_sideboarded(deck_a, deck_b) {
   let _in = [];
   let _out = [];
