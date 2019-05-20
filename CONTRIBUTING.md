@@ -113,6 +113,41 @@ npm start
 You can toggle developer tools for debugging using `Shift+Alt+D`, or using `F12` if you run from source.
 
 #### Optional Git Hooks
+You can optionally install git hooks to help with code formatting and
+ensuring that your commits build successfully. Note that these can
+sometimes take a moment to run and will potentially modify files in your
+working tree. For more information, [see the git hooks documentation.](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks)
 
+##### Pre-Commit Hook
+This automatically reformats all files with staged changes to match the
+project guidelines. WARNING: this will overwrite any previous custom
+git hook.
 
+To install (or update), simply run the script in a terminal:
+```
+./git-pre-commit
+```
+This will run the hook and place a copy in your `.git/hooks/` folder.
+Future commits will always run the hook.
 
+To uninstall:
+```
+rm .git/hooks/pre-commit
+```
+
+##### Pre-Push Hook
+This automatically checks all modified files against the project
+guidelines and only allows you to push valid commits. WARNING: this will
+overwrite any previous custom git hook.
+
+To install (or update), simply run the script in a terminal:
+```
+./git-pre-push
+```
+This will run the hook and place a copy in your `.git/hooks/` folder.
+Future commits will always run the hook.
+
+To uninstall:
+```
+rm .git/hooks/pre-push
+```
