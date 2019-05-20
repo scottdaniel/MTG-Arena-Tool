@@ -483,18 +483,6 @@ function get_set_code(set) {
   return s;
 }
 
-//
-function collectionSortSet(a, b) {
-  a = cardsDb.get(a);
-  b = cardsDb.get(b);
-  if (a.set < b.set) return -1;
-  if (a.set > b.set) return 1;
-
-  if (parseInt(a.cid) < parseInt(b.cid)) return -1;
-  if (parseInt(a.cid) > parseInt(b.cid)) return 1;
-  return 0;
-}
-
 function getRaritySortValue(rarity) {
   rarity = rarity.toLowerCase();
   switch (rarity) {

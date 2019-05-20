@@ -6,7 +6,6 @@ global
   cardsDb,
   cardsNew,
   cardSize,
-  collectionSortSet,
   collectionSortCmc,
   collectionSortRarity,
   change_background,
@@ -38,6 +37,18 @@ const SINGLETONS = "Singletons (at least one)";
 const FULL_SETS = "Full sets (all 4 copies)";
 
 let countMode = ALL_CARDS;
+
+//
+function collectionSortSet(a, b) {
+  a = cardsDb.get(a);
+  b = cardsDb.get(b);
+  if (a.set < b.set) return -1;
+  if (a.set > b.set) return 1;
+
+  if (parseInt(a.cid) < parseInt(b.cid)) return -1;
+  if (parseInt(a.cid) > parseInt(b.cid)) return 1;
+  return 0;
+}
 
 //
 class CountStats {
