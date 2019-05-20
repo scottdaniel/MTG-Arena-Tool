@@ -572,19 +572,6 @@ function get_deck_colors(deck) {
 }
 
 //
-function compare_colors(color_a, color_b) {
-  if (color_a.length != color_b.length) return false;
-
-  for (var i = color_a.length; i--; ) {
-    if (color_a[i] !== color_b[i]) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
-//
 function get_wc_missing(deck, grpid, isSideboard) {
   let mainQuantity = 0;
   let mainMatches = deck.mainDeck.filter(card => card.id == grpid);
