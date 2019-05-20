@@ -4,7 +4,6 @@ global
   cardsNew
   cardQuality
   decks
-  $$
 */
 const math = require("mathjs");
 math.config({ precision: 2000 });
@@ -79,7 +78,7 @@ function queryElementsByClass(selectors, parentNode = document) {
 }
 
 // useful alias
-window.$$ = queryElements;
+const $$ = (window.$$ = queryElements);
 
 // several utility functions to replace useful jQuery methods
 function show(element, mode) {
