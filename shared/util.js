@@ -1011,46 +1011,6 @@ function getBoosterCountEstimate(wildcards) {
 }
 
 //
-function get_deck_sideboarded(deck_a, deck_b) {
-  let _in = [];
-  let _out = [];
-
-  deck_b.mainDeck.forEach(function(card_b) {
-    let found = false;
-    deck_a.mainDeck.forEach(function(card_a) {
-      if (card_a.id == card_b.id) {
-        found = true;
-      }
-    });
-    if (!found) {
-      let c = {
-        id: card_b.id,
-        quantity: card_b.quantity
-      };
-      _in.push(c);
-    }
-  });
-
-  deck_b.sideboard.forEach(function(card_b) {
-    let found = false;
-    deck_a.sideboard.forEach(function(card_a) {
-      if (card_a.id == card_b.id) {
-        found = true;
-      }
-    });
-    if (!found) {
-      let c = {
-        id: card_b.id,
-        quantity: card_b.quantity
-      };
-      _out.push(c);
-    }
-  });
-
-  return { in: _in, out: _out };
-}
-
-//
 function get_deck_cost(deck) {
   var cost = { rare: 0, common: 0, uncommon: 0, mythic: 0 };
 
