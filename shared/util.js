@@ -1172,10 +1172,6 @@ function timeSince(_date) {
   return Math.floor(seconds) + " seconds";
 }
 
-function relativeDateFormat(date) {
-  return `<relative-time datetime="${date.toISOString()}">${date.toString()}</relative-time>`;
-}
-
 function localDateFormat(date) {
   return `<local-time datetime="${date.toISOString()}"
     month="short"
