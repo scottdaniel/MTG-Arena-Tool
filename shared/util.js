@@ -516,21 +516,6 @@ function collectionSortRarity(a, b) {
 }
 
 //
-function collectionSortCmc(a, b) {
-  a = cardsDb.get(a);
-  b = cardsDb.get(b);
-  if (parseInt(a.cmc) < parseInt(b.cmc)) return -1;
-  if (parseInt(a.cmc) > parseInt(b.cmc)) return 1;
-
-  if (a.set < b.set) return -1;
-  if (a.set > b.set) return 1;
-
-  if (parseInt(a.cid) < parseInt(b.cid)) return -1;
-  if (parseInt(a.cid) > parseInt(b.cid)) return 1;
-  return 0;
-}
-
-//
 function get_collection_export(exportFormat) {
   var list = "";
   Object.keys(cards).forEach(function(key) {
