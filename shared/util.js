@@ -1172,17 +1172,6 @@ function timeSince(_date) {
   return Math.floor(seconds) + " seconds";
 }
 
-//
-function daysPast(_date) {
-  var firstDate = new Date();
-  var secondDate = new Date(_date);
-  return Math.round(
-    Math.abs(
-      (firstDate.getTime() - secondDate.getTime()) / (24 * 60 * 60 * 1000)
-    )
-  );
-}
-
 function relativeDateFormat(date) {
   return `<relative-time datetime="${date.toISOString()}">${date.toString()}</relative-time>`;
 }
