@@ -160,26 +160,22 @@ function deckStatsSection(deck) {
 
   let missingWildcards = get_deck_missing(deck);
   let boosterCost = getBoosterCountEstimate(missingWildcards);
-  if (boosterCost) {
-    let costSection = $(
-      '<div class="wildcards_cost"><span>Wildcards you have/need</span></div>'
-    );
-    orderedCardRarities.forEach(cardRarity => {
-      $(
-        `<div title="${cardRarity}" class="wc_cost wc_${cardRarity}">${
-          ownedWildcards[cardRarity] > 0
-            ? ownedWildcards[cardRarity] + " / "
-            : ""
-        }${missingWildcards[cardRarity]}</div>`
-      ).appendTo(costSection);
-    });
+  let costSection = $(
+    '<div class="wildcards_cost"><span>Wildcards you have/need</span></div>'
+  );
+  orderedCardRarities.forEach(cardRarity => {
     $(
-      `<div title="Aproximate boosters" class="wc_cost wc_booster">${Math.round(
-        boosterCost
-      )}</div>`
+      `<div title="${cardRarity}" class="wc_cost wc_${cardRarity}">${
+        ownedWildcards[cardRarity] > 0 ? ownedWildcards[cardRarity] + " / " : ""
+      }${missingWildcards[cardRarity]}</div>`
     ).appendTo(costSection);
-    costSection.appendTo(stats);
-  }
+  });
+  $(
+    `<div title="Aproximate boosters" class="wc_cost wc_booster">${Math.round(
+      boosterCost
+    )}</div>`
+  ).appendTo(costSection);
+  costSection.appendTo(stats);
   return stats;
 }
 
