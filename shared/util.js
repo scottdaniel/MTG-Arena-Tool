@@ -515,32 +515,6 @@ function collectionSortRarity(a, b) {
   return 0;
 }
 
-//
-function get_collection_export(exportFormat) {
-  var list = "";
-  Object.keys(cards).forEach(function(key) {
-    var add = exportFormat + "";
-    var card = cardsDb.get(key);
-    if (card) {
-      let name = card.name;
-      name = replaceAll(name, "///", "//");
-      add = add.replace("$Name", '"' + name + '"');
-
-      add = add.replace("$Count", cards[key] == 9999 ? 1 : cards[key]);
-
-      add = add.replace("$SetName", card.set);
-      add = add.replace("$SetCode", setsList[card.set].code);
-      add = add.replace("$Collector", card.cid);
-      add = add.replace("$Rarity", card.rarity);
-      add = add.replace("$Type", card.type);
-      add = add.replace("$Cmc", card.cmc);
-      list += add + "\r\n";
-    }
-  });
-
-  return list;
-}
-
 // When passed a `deck` object sets `deck.colors` to a sorted array
 // of deck colour indices and returns the array.
 //

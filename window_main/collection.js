@@ -12,13 +12,13 @@ global
   createSelect,
   decks,
   get_card_image,
-  get_collection_export,
   get_set_scryfall,
   getCardsMissingCount,
   hideLoadingBars,
   ipc,
   ipc_send,
   remote,
+  replaceAll,
   setsList,
   Menu,
   MenuItem,
@@ -36,6 +36,32 @@ const SINGLETONS = "Singletons (at least one)";
 const FULL_SETS = "Full sets (all 4 copies)";
 
 let countMode = ALL_CARDS;
+
+//
+function get_collection_export(exportFormat) {
+  var list = "";
+  Object.keys(cards).forEach(function(key) {
+    var add = exportFormat + "";
+    var card = cardsDb.get(key);
+    if (card) {
+      let name = card.name;
+      name = replaceAll(name, "///", "//");
+      add = add.replace("$Name", '"' + name + '"');
+
+      add = add.replace("$Count", cards[key] == 9999 ? 1 : cards[key]);
+
+      add = add.replace("$SetName", card.set);
+      add = add.replace("$SetCode", setsList[card.set].code);
+      add = add.replace("$Collector", card.cid);
+      add = add.replace("$Rarity", card.rarity);
+      add = add.replace("$Type", card.type);
+      add = add.replace("$Cmc", card.cmc);
+      list += add + "\r\n";
+    }
+  });
+
+  return list;
+}
 
 //
 function collectionSortCmc(a, b) {
