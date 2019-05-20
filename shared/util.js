@@ -1011,49 +1011,6 @@ function getBoosterCountEstimate(wildcards) {
 }
 
 //
-function get_deck_cost(deck) {
-  var cost = { rare: 0, common: 0, uncommon: 0, mythic: 0 };
-
-  deck.mainDeck.forEach(function(card) {
-    var grpid = card.id;
-    var rarity = cardsDb.get(grpid).rarity;
-
-    if (rarity == "common") {
-      cost.common += card.quantity;
-    }
-    if (rarity == "uncommon") {
-      cost.uncommon += card.quantity;
-    }
-    if (rarity == "rare") {
-      cost.rare += card.quantity;
-    }
-    if (rarity == "mythic") {
-      cost.mythic += card.quantity;
-    }
-  });
-
-  deck.sideboard.forEach(function(card) {
-    var grpid = card.id;
-    var rarity = cardsDb.get(grpid).rarity;
-
-    if (rarity == "common") {
-      cost.common += card.quantity;
-    }
-    if (rarity == "uncommon") {
-      cost.uncommon += card.quantity;
-    }
-    if (rarity == "rare") {
-      cost.rare += card.quantity;
-    }
-    if (rarity == "mythic") {
-      cost.mythic += card.quantity;
-    }
-  });
-
-  return cost;
-}
-
-//
 function get_deck_types_ammount(deck) {
   var types = { art: 0, cre: 0, enc: 0, ins: 0, lan: 0, pla: 0, sor: 0 };
 
