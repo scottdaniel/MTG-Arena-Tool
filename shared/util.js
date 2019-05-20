@@ -383,18 +383,6 @@ function getReadableFormat(format) {
 }
 
 //
-function getEventId(arg) {
-  var ret = arg;
-  Object.keys(eventsList).forEach(function(key) {
-    if (eventsList[key] == arg) {
-      ret = key;
-    }
-  });
-
-  return ret;
-}
-
-//
 function removeDuplicates(decklist) {
   var newList = [];
   try {
