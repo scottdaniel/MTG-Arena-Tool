@@ -11,7 +11,6 @@ global
   formatNumber,
   formatPercent,
   get_colation_set,
-  get_card_art,
   get_card_image,
   get_set_scryfall,
   getReadableEvent,
@@ -80,6 +79,19 @@ function localDayDateFormat(date) {
     day="numeric">
     ${date.toDateString()}
   </local-time>`;
+}
+
+//
+function get_card_art(cardObj) {
+  if (typeof cardObj !== "object") {
+    cardObj = cardsDb.get(cardObj);
+  }
+
+  if (!cardObj) {
+    return "../images/notfound.png";
+  } else {
+    return "https://img.scryfall.com/cards" + cardObj.images.art_crop;
+  }
 }
 
 function getPrettyContext(context, full = true) {
