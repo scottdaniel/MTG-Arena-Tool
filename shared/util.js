@@ -460,15 +460,6 @@ function compare_cards(a, b) {
   return 0;
 }
 
-function compare_decks(a, b) {
-  const aName = getRecentDeckName(a.id);
-  const aExists = doesDeckStillExist(a.id) ? 1 : 0;
-  const bName = getRecentDeckName(b.id);
-  const bExists = doesDeckStillExist(b.id) ? 1 : 0;
-  // sort by existence, then name
-  return bExists - aExists || aName.localeCompare(bName);
-}
-
 //
 function compare_draft_cards(a, b) {
   // Yeah this is lazy.. I know
