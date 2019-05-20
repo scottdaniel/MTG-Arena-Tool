@@ -1173,51 +1173,6 @@ function get_deck_types_ammount(deck) {
 }
 
 //
-function get_deck_lands_ammount(deck) {
-  var colors = { total: 0, w: 0, u: 0, b: 0, r: 0, g: 0, c: 0 };
-
-  //var mana = {0: "", 1: "white", 2: "blue", 3: "black", 4: "red", 5: "green", 6: "colorless", 7: "", 8: "x"}
-  deck.mainDeck.forEach(function(card) {
-    var quantity = card.quantity;
-    card = cardsDb.get(card.id);
-    if (quantity > 0) {
-      if (card.type.indexOf("Land") != -1 || card.type.indexOf("land") != -1) {
-        if (card.frame.length < 5) {
-          card.frame.forEach(function(c) {
-            if (c == 1) {
-              colors.w += quantity;
-              colors.total += quantity;
-            }
-            if (c == 2) {
-              colors.u += quantity;
-              colors.total += quantity;
-            }
-            if (c == 3) {
-              colors.b += quantity;
-              colors.total += quantity;
-            }
-            if (c == 4) {
-              colors.r += quantity;
-              colors.total += quantity;
-            }
-            if (c == 5) {
-              colors.g += quantity;
-              colors.total += quantity;
-            }
-            if (c == 6) {
-              colors.c += quantity;
-              colors.total += quantity;
-            }
-          });
-        }
-      }
-    }
-  });
-
-  return colors;
-}
-
-//
 function get_deck_export(deck) {
   let str = "";
   deck.mainDeck = removeDuplicates(deck.mainDeck);
