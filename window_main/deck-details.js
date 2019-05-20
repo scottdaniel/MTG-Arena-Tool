@@ -9,7 +9,6 @@ global
     drawDeck,
     drawDeckVisual,
     economyHistory,
-    get_deck_colors_ammount,
     get_deck_curve,
     get_deck_export,
     get_deck_export_txt,
@@ -35,6 +34,45 @@ const {
 // We need to store a sorted list of card types so we create the card counts in the same order.
 let currentOpenDeck = null;
 let currentFilters = null;
+
+//
+function get_deck_colors_ammount(deck) {
+  var colors = { total: 0, w: 0, u: 0, b: 0, r: 0, g: 0, c: 0 };
+
+  //var mana = {0: "", 1: "white", 2: "blue", 3: "black", 4: "red", 5: "green", 6: "colorless", 7: "", 8: "x"}
+  deck.mainDeck.forEach(function(card) {
+    if (card.quantity > 0) {
+      cardsDb.get(card.id).cost.forEach(function(c) {
+        if (c.indexOf("w") !== -1) {
+          colors.w += card.quantity;
+          colors.total += card.quantity;
+        }
+        if (c.indexOf("u") !== -1) {
+          colors.u += card.quantity;
+          colors.total += card.quantity;
+        }
+        if (c.indexOf("b") !== -1) {
+          colors.b += card.quantity;
+          colors.total += card.quantity;
+        }
+        if (c.indexOf("r") !== -1) {
+          colors.r += card.quantity;
+          colors.total += card.quantity;
+        }
+        if (c.indexOf("g") !== -1) {
+          colors.g += card.quantity;
+          colors.total += card.quantity;
+        }
+        if (c.indexOf("c") !== -1) {
+          colors.c += card.quantity;
+          colors.total += card.quantity;
+        }
+      });
+    }
+  });
+
+  return colors;
+}
 
 function deckManaCurve(deck) {
   let manaCounts = get_deck_curve(deck);
