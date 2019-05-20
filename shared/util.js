@@ -17,7 +17,6 @@ const {
   BLACK,
   BLUE,
   GREEN,
-  RANKS,
   RED,
   WHITE
 } = require("../shared/constants.js");
@@ -1092,16 +1091,4 @@ function hypergeometricSignificance(
   );
   let retVal = math.subtract(1, math.multiply(weightedAverage, 2));
   return returnBig ? retVal : math.number(retVal);
-}
-
-function getNextRank(currentRank) {
-  /*
-    Globals used: RANKS
-  */
-  var rankIndex = RANKS.indexOf(currentRank);
-  if (rankIndex < RANKS.length - 1) {
-    return RANKS[rankIndex + 1];
-  } else {
-    return undefined;
-  }
 }
