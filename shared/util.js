@@ -476,18 +476,6 @@ function get_set_scryfall(set) {
 }
 
 //
-function get_colation_set(collationid) {
-  var ret = "";
-  Object.keys(setsList).forEach(function(setName) {
-    if (setsList[setName].collation == collationid) {
-      ret = setName;
-    }
-  });
-
-  return ret;
-}
-
-//
 function get_set_code(set) {
   if (set == undefined) return "";
   let s = setsList[set].code;

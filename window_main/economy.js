@@ -10,7 +10,6 @@ global
   economyHistory,
   formatNumber,
   formatPercent,
-  get_colation_set,
   get_card_image,
   get_set_scryfall,
   getReadableEvent,
@@ -84,6 +83,18 @@ function getReadableQuest(questCode) {
   // FIXME: Can we get a human readable quest name?
   // For now lets just use a small portion of the ID.
   return `#${questCode.substring(0, 6)}`;
+}
+
+//
+function get_colation_set(collationid) {
+  var ret = "";
+  Object.keys(setsList).forEach(function(setName) {
+    if (setsList[setName].collation == collationid) {
+      ret = setName;
+    }
+  });
+
+  return ret;
 }
 
 //
