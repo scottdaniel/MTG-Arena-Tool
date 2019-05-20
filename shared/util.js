@@ -461,41 +461,6 @@ function compare_cards(a, b) {
 }
 
 //
-function compare_draft_cards(a, b) {
-  // Yeah this is lazy.. I know
-  a = cardsDb.get(a);
-  b = cardsDb.get(b);
-  var as = get_card_type_sort(a.type);
-  var bs = get_card_type_sort(b.type);
-
-  // Order by type?
-  if (as < bs) {
-    return -1;
-  }
-  if (as > bs) {
-    return 1;
-  }
-
-  // by cmc
-  if (a.cmc < b.cmc) {
-    return -1;
-  }
-  if (a.cmc > b.cmc) {
-    return 1;
-  }
-
-  // then by name
-  if (a.name < b.name) {
-    return -1;
-  }
-  if (a.name > b.name) {
-    return 1;
-  }
-
-  return 0;
-}
-
-//
 function compare_archetypes(a, b) {
   if (a.average > b.average) return -1;
   if (a.average < b.average) return 1;

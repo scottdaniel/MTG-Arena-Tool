@@ -4,11 +4,11 @@ global
   addCardHover,
   cardsDb,
   compare_cards,
-  compare_draft_cards,
   CardsList,
   Deck,
   eventsList,
   eventsToFormat,
+  get_card_type_sort,
   get_ids_colors,
   setsList
   $
@@ -91,6 +91,41 @@ function compare_chances(a, b) {
     return -1;
   }
   if (a < b) {
+    return 1;
+  }
+
+  return 0;
+}
+
+//
+function compare_draft_cards(a, b) {
+  // Yeah this is lazy.. I know
+  a = cardsDb.get(a);
+  b = cardsDb.get(b);
+  var as = get_card_type_sort(a.type);
+  var bs = get_card_type_sort(b.type);
+
+  // Order by type?
+  if (as < bs) {
+    return -1;
+  }
+  if (as > bs) {
+    return 1;
+  }
+
+  // by cmc
+  if (a.cmc < b.cmc) {
+    return -1;
+  }
+  if (a.cmc > b.cmc) {
+    return 1;
+  }
+
+  // then by name
+  if (a.name < b.name) {
+    return -1;
+  }
+  if (a.name > b.name) {
     return 1;
   }
 
