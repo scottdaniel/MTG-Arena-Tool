@@ -1,12 +1,5 @@
 "use strict";
-/*
-globals
-  WHITE,
-  BLUE,
-  BLACK,
-  RED,
-  GREEN
-*/
+const { WHITE, BLUE, BLACK, RED, GREEN } = require("../shared/constants.js");
 
 class Colors {
   /**

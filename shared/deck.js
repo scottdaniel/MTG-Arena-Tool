@@ -3,9 +3,10 @@
 globals
   cardsDb,
   compare_cards,
+  get_set_code,
   getWildcardsMissing,
-  setsList,
-  get_set_code
+  objectClone
+  setsList
 */
 const CardsList = require("./cards-list.js");
 const Colors = require("./colors.js");

@@ -7,11 +7,10 @@ globals
   getReadableEvent,
   getRecentDeckName,
   matchesHistory,
-  orderedColorCodes,
-  orderedColorCodesCommon,
   rankedEvents,
   season_starts
 */
+const { COLORS_ALL, COLORS_BRIEF } = require("../shared/constants.js");
 
 // Default filter values
 const DEFAULT_DECK = "All Decks";
@@ -98,7 +97,7 @@ class Aggregator {
 
   static getDefaultColorFilter() {
     const colorFilters = {};
-    orderedColorCodesCommon.forEach(code => (colorFilters[code] = false));
+    COLORS_BRIEF.forEach(code => (colorFilters[code] = false));
     return { ...colorFilters };
   }
 
@@ -173,9 +172,7 @@ class Aggregator {
     // Normalize deck colors into matching data format
     let deckColorCodes = Aggregator.getDefaultColorFilter();
     if (deck.colors instanceof Array) {
-      deck.colors.forEach(
-        i => (deckColorCodes[orderedColorCodes[i - 1]] = true)
-      );
+      deck.colors.forEach(i => (deckColorCodes[COLORS_ALL[i - 1]] = true));
     } else if (deck.colors instanceof Object) {
       deckColorCodes = deck.colors;
     }
