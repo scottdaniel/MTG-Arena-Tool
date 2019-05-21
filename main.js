@@ -47,30 +47,30 @@ var firstSettingsRead = true;
 
 const singleLock = app.requestSingleInstanceLock();
 
+app.on("second-instance", () => {
+  if (updaterWindow) {
+    showWindow();
+  } else if (mainWindow.isVisible()) {
+    if (mainWindow.isMinimized()) {
+      showWindow();
+    }
+  } else {
+    showWindow();
+  }
+});
+
 if (!singleLock) {
   console.log("We dont have single instance lock! quitting the app.");
   app.quit();
-} else {
-  app.on("second-instance", () => {
-    if (updaterWindow) {
-      showWindow();
-    } else if (mainWindow.isVisible()) {
-      if (mainWindow.isMinimized()) {
-        showWindow();
-      }
-    } else {
-      showWindow();
-    }
-  });
-
-  app.on("ready", () => {
-    if (app.isPackaged) {
-      startUpdater();
-    } else {
-      startApp();
-    }
-  });
 }
+
+app.on("ready", () => {
+  if (app.isPackaged) {
+    startUpdater();
+  } else {
+    startApp();
+  }
+});
 
 function startUpdater() {
   updaterWindow = createUpdaterWindow();
@@ -484,7 +484,10 @@ function createBackgroundWindow() {
     width: 640,
     height: 480,
     title: "Background",
-    icon: "icon.png"
+    icon: "icon.png",
+    webPreferences: {
+      nodeIntegration: true
+    }
   });
   win.loadURL(`file://${__dirname}/window_background/index.html`);
   win.on("closed", onClosed);
@@ -500,7 +503,10 @@ function createMainWindow() {
     width: 800,
     height: 600,
     title: "MTG Arena Tool",
-    icon: "icon.png"
+    icon: "icon.png",
+    webPreferences: {
+      nodeIntegration: true
+    }
   });
   win.loadURL(`file://${__dirname}/window_main/index.html`);
   win.on("closed", onClosed);
@@ -547,7 +553,10 @@ function createOverlay() {
     height: 600,
     show: false,
     title: "MTG Arena Tool",
-    icon: "iconoverlay.png"
+    icon: "iconoverlay.png",
+    webPreferences: {
+      nodeIntegration: true
+    }
   });
   over.loadURL(`file://${__dirname}/window_overlay/index.html`);
   over.on("closed", onOverlayClosed);
