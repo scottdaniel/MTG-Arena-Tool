@@ -468,7 +468,10 @@ function createUpdaterWindow() {
     width: 320,
     height: 240,
     title: "Updater",
-    icon: "icon.png"
+    icon: "icon.png",
+    webPreferences: {
+      nodeIntegration: true
+    }
   });
   win.loadURL(`file://${__dirname}/window_updater/index.html`);
 
