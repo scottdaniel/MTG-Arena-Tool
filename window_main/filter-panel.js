@@ -8,10 +8,9 @@ globals
   getReadableEvent,
   getReadableFormat,
   getRecentDeckName,
-  getTagColor,
-  orderedColorCodes,
-  orderedColorCodesCommon
+  getTagColor
 */
+const { COLORS_ALL, COLORS_BRIEF } = require("../shared/constants.js");
 
 const {
   DEFAULT_ARCH,
@@ -94,7 +93,7 @@ class FilterPanel {
       if (deck.colors) {
         deck.colors.forEach(color => {
           colorsString += `<div class="mana_s16 mana_${
-            orderedColorCodes[color - 1]
+            COLORS_ALL[color - 1]
           }"></div>`;
         });
       }
@@ -226,7 +225,7 @@ class FilterPanel {
         manas.style.margin = "8px";
         manas.style.width = "150px";
         manas.style.height = "32px";
-        orderedColorCodesCommon.forEach(code => {
+        COLORS_BRIEF.forEach(code => {
           const filterClasses = ["mana_filter"];
           if (!this.filters.colors[code]) {
             filterClasses.push("mana_filter_on");
@@ -278,7 +277,7 @@ class FilterPanel {
         manas.style.margin = "8px";
         manas.style.width = "150px";
         manas.style.height = "32px";
-        orderedColorCodesCommon.forEach(code => {
+        COLORS_BRIEF.forEach(code => {
           const filterClasses = ["mana_filter"];
           if (!this.filters.oppColors[code]) {
             filterClasses.push("mana_filter_on");

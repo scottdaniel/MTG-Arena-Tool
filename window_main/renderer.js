@@ -1,12 +1,9 @@
 /*
 global
   addCardHover,
-  Aggregator,
   cardsDb,
   compare_archetypes,
   compare_cards,
-  compare_colors,
-  draftRanks,
   eventsList,
   eventsToFormat,
   get_card_image,
@@ -15,9 +12,6 @@ global
   get_deck_export_txt,
   get_deck_types_ammount,
   get_rank_index,
-  get_rank_index_16,
-  getReadableEvent,
-  HIDDEN_PW,
   hypergeometricSignificance,
   hypergeometricRange,
   makeId,
@@ -27,11 +21,15 @@ global
   set_tou_state,
   setsList,
   timeSince,
-  windowBackground,
-  windowRenderer,
   $$
 */
-
+const {
+  DRAFT_RANKS,
+  HIDDEN_PW,
+  MANA,
+  IPC_MAIN,
+  IPC_BACKGROUND
+} = require("../shared/constants.js");
 const electron = require("electron");
 const _ = require("lodash");
 const remote = electron.remote;
@@ -88,26 +86,6 @@ const openEconomyTab = require("./economy").openEconomyTab;
 
 const { RANKED_CONST, RANKED_DRAFT, DATE_SEASON } = Aggregator;
 
-var orderedCardTypes = ["cre", "lan", "ins", "sor", "enc", "art", "pla"];
-var orderedCardTypesDesc = [
-  "Creatures",
-  "Lands",
-  "Instants",
-  "Sorceries",
-  "Enchantments",
-  "Artifacts",
-  "Planeswalkers"
-];
-var orderedCardRarities = ["common", "uncommon", "rare", "mythic"];
-var orderedManaColors = [
-  "#E7CA8E",
-  "#AABEDF",
-  "#A18E87",
-  "#DD8263",
-  "#B7C89E",
-  "#E3E3E3"
-];
-
 let deck = null;
 let decks = null;
 let changes = null;
@@ -161,23 +139,11 @@ const actionLogDir = path.join(
   "actionlogs"
 );
 
-let mana = {
-  0: "",
-  1: "white",
-  2: "blue",
-  3: "black",
-  4: "red",
-  5: "green",
-  6: "colorless",
-  7: "",
-  8: "x"
-};
-
-function ipc_send(method, arg, to = windowBackground) {
+function ipc_send(method, arg, to = IPC_BACKGROUND) {
   // 0: Main window
   // 1: background
   // 2: overlay
-  ipc.send("ipc_switch", method, windowRenderer, arg, to);
+  ipc.send("ipc_switch", method, IPC_MAIN, arg, to);
 }
 
 //
@@ -1668,7 +1634,7 @@ function open_draft(id) {
     img.appendTo(d);
     var r = $(
       '<div style="" class="draft_card_rating">' +
-        draftRanks[card.rank] +
+        DRAFT_RANKS[card.rank] +
         "</div>"
     );
     r.appendTo(d);
@@ -1726,7 +1692,7 @@ function open_match(id) {
 
   if (match.playerDeck.colors != undefined) {
     match.playerDeck.colors.forEach(function(color) {
-      var m = $('<div class="mana_s20 mana_' + mana[color] + '"></div>');
+      var m = $('<div class="mana_s20 mana_' + MANA[color] + '"></div>');
       flr.append(m);
     });
   }

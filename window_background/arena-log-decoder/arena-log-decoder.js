@@ -1,5 +1,6 @@
 const nthLastIndexOf = require("./nth-last-index-of");
 const jsonText = require("./json-text");
+const { unleakString } = require("../background-util");
 
 const CONNECTION_JSON_PATTERN = /\[(?:UnityCrossThreadLogger|Client GRE)\]WebSocketClient (.*) WebSocketSharp\.WebSocket connecting to .*: (.*)(?:\r\n|\n)/;
 
@@ -68,7 +69,7 @@ function ArenaLogDecoder() {
 
     if (bufferUsed > 0) {
       bufferDiscarded += bufferUsed;
-      buffer = buffer.substr(bufferUsed);
+      buffer = unleakString(buffer.substr(bufferUsed));
     }
   }
 }

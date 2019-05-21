@@ -8,15 +8,19 @@ global
   compare_draft_cards,
   CardsList,
   Deck,
-  draftRanks,
   eventsList,
   eventsToFormat,
   get_ids_colors,
-  setsList,
-  windowBackground,
-  windowOverlay,
+  setsList
   $
 */
+const {
+  DRAFT_RANKS,
+  MANA,
+  PACK_SIZES,
+  IPC_BACKGROUND,
+  IPC_OVERLAY
+} = require("../shared/constants.js");
 const electron = require("electron");
 const { webFrame, remote } = require("electron");
 const deckDrawer = require("../shared/deck-drawer");
@@ -72,30 +76,17 @@ let actionLog = [];
 
 let currentMatch = null;
 let cards = {};
-let mana = {
-  0: "",
-  1: "white",
-  2: "blue",
-  3: "black",
-  4: "red",
-  5: "green",
-  6: "colorless",
-  7: "",
-  8: "x"
-};
-
-const packSizes = { "Ravnica Allegiance": 14, "Guilds of Ravnica": 14 };
 
 const TransparencyMouseFix = require("electron-transparency-mouse-fix");
 const fix = new TransparencyMouseFix({
   fixPointerEvents: "auto"
 });
 
-function ipc_send(method, arg, to = windowBackground) {
+function ipc_send(method, arg, to = IPC_BACKGROUND) {
   if (method == "ipc_log") {
     //console.log("IPC LOG", arg);
   }
-  ipc.send("ipc_switch", method, windowOverlay, arg, to);
+  ipc.send("ipc_switch", method, IPC_OVERLAY, arg, to);
 }
 
 window.setInterval(() => {
@@ -455,7 +446,7 @@ function updateView() {
 
     currentMatch.oppCards.colors.get().forEach(color => {
       $(".overlay_deckcolors").append(
-        '<div class="mana_s20 mana_' + mana[color] + '"></div>'
+        '<div class="mana_s20 mana_' + MANA[color] + '"></div>'
       );
     });
     deckToDraw = currentMatch.oppCards;
@@ -496,7 +487,7 @@ function updateView() {
     $(".overlay_deckname").html(deckToDraw.name);
     deckToDraw.colors.get().forEach(color => {
       $(".overlay_deckcolors").append(
-        '<div class="mana_s20 mana_' + mana[color] + '"></div>'
+        '<div class="mana_s20 mana_' + MANA[color] + '"></div>'
       );
     });
   }
@@ -707,7 +698,7 @@ function setDraft(_packN = -1, _pickN = -1) {
     colors = get_ids_colors(currentDraft.pickedCards);
     colors.forEach(function(color) {
       $(".overlay_deckcolors").append(
-        '<div class="mana_s20 mana_' + mana[color] + '"></div>'
+        '<div class="mana_s20 mana_' + MANA[color] + '"></div>'
       );
     });
 
@@ -732,7 +723,7 @@ function setDraft(_packN = -1, _pickN = -1) {
     colors = get_ids_colors(draftPack);
     colors.forEach(function(color) {
       $(".overlay_deckcolors").append(
-        '<div class="mana_s20 mana_' + mana[color] + '"></div>'
+        '<div class="mana_s20 mana_' + MANA[color] + '"></div>'
       );
     });
 
@@ -764,7 +755,7 @@ function setDraft(_packN = -1, _pickN = -1) {
       }
 
       cont.appendTo(od);
-      let tile = deckDrawer.cardTile(grpId, "a", draftRanks[rank]);
+      let tile = deckDrawer.cardTile(grpId, "a", DRAFT_RANKS[rank]);
       od.append(tile);
       if (grpId == pick) {
         tile.style.backgroundColor = "rgba(250, 229, 210, 0.66)";
@@ -851,7 +842,7 @@ $(document).ready(function() {
   //
   $(".draft_prev").click(function() {
     pickN -= 1;
-    let packSize = (currentDraft && packSizes[currentDraft.set]) || 14;
+    let packSize = (currentDraft && PACK_SIZES[currentDraft.set]) || 14;
 
     if (pickN < 0) {
       pickN = packSize;
@@ -867,7 +858,7 @@ $(document).ready(function() {
   //
   $(".draft_next").click(function() {
     pickN += 1;
-    let packSize = (currentDraft && packSizes[currentDraft.set]) || 14;
+    let packSize = (currentDraft && PACK_SIZES[currentDraft.set]) || 14;
 
     if (pickN > packSize) {
       pickN = 0;
