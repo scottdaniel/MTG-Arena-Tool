@@ -1991,3 +1991,8 @@ function finishLoading() {
     ipc_send("ipc_log", `Log read in ${logReadElapsed}s`);
   }
 }
+
+// start
+httpApi.httpBasic();
+httpApi.httpGetDatabase();
+httpApi.htttpGetStatus();
