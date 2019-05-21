@@ -18,7 +18,11 @@ time as the team learns, listens, and refines how we work with the community.
 - [How Can I Contribute?](#how-can-i-contribute)
   * [Reporting Bugs](#reporting-bugs)
   * [Suggesting Enhancements](#suggesting-enhancements)
+
+- [Running from Source](#running-from-source)
   * [Set Up Your Machine](#set-up-your-machine)
+  * [Available Scripts](#available-scripts)
+  * [Optional Git Hooks](#optional-git-hooks)
 
 ## What should I know before I get started?
 
@@ -97,6 +101,8 @@ Some additional advice:
   GIFs on macOS and Windows
 * **List some other applications where this enhancement exists, if applicable**
 
+## Running from Source
+
 ### Set Up Your Machine
 
 MTG Arena Tool is developed using Electron JS, To get started simply clone this repo and install:
@@ -108,15 +114,77 @@ npm install
 npm start
 ```
 
+### Electron Developter Tools
+
 You can toggle developer tools for debugging using `Shift+Alt+D`, or using `F12` if you run from source.
 
-#### Optional Git Hooks
+### Available Scripts
+
+In the project directory, you can run:
+
+#### `npm run clean`
+
+Removes all cached local build state and reinstalls all dependencies from scratch.
+This will most likely change your working tree because it requires removing and
+re-creating `package-lock.json`.
+
+##### `npm run clean:modules`
+
+Convenience script to remove `node_modules`.
+
+##### `npm run clean:lock`
+
+Convenience script to remove `package-lock.json`.
+
+#### `npm install`
+
+Installs all required dependencies.
+
+#### `npm run format`
+
+Automatically formats all source code to match project guidelines. We currently use
+`prettier` and `eslint` to keep things looking tidy.
+
+#### `npm test`
+
+Runs all project tests. This includes unit tests run via `jest` and style guidelines
+enforced by `eslint` and `prettier`.
+
+##### `npm run test:eslint`
+
+Tests all source code against project `eslint` style guidelines.
+
+See https://eslint.org/
+
+##### `npm run test:prettier`
+
+Tests all source code against project `prettier` style guidelines.
+
+See https://prettier.io/
+
+##### `npm run test:jest`
+
+Runs all project unit tests via `jest`.
+
+See https://jestjs.io/
+
+#### `npm start`
+
+Launches electron and runs the app in the development mode.
+
+You will also see output from the main electron process in the console.
+
+#### `npm run dist`
+
+Builds a packaged version of the project for potential distribution.
+
+### Optional Git Hooks
 You can optionally install git hooks to help with code formatting and
 ensuring that your commits build successfully. Note that these can
 sometimes take a moment to run and will potentially modify files in your
 working tree. For more information, [see the git hooks documentation.](https://git-scm.com/book/en/v2/Customizing-Git-Git-Hooks)
 
-##### Pre-Commit Hook
+#### Pre-Commit Hook
 This automatically reformats all files with staged changes to match the
 project guidelines.
 
@@ -134,7 +202,7 @@ To uninstall:
 rm .git/hooks/pre-commit
 ```
 
-##### Pre-Push Hook
+#### Pre-Push Hook
 This automatically checks all modified files against the project
 guidelines and only allows you to push valid commits.
 

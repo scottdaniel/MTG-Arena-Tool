@@ -53,7 +53,7 @@
   "scripts": {
     "clean": "npm run clean:modules && npm run clean:lock",
     "clean:modules": "rm -fr node_modules",
-    "clean:lock": "rm package-lock.json",
+    "clean:lock": "rm -f package-lock.json",
     "postclean": "npm install",
     "start": "electron .",
     "postinstall": "install-app-deps",
