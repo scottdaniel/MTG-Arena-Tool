@@ -69,7 +69,11 @@ const fs = require("fs");
 const sha1 = require("js-sha1");
 const ipc = electron.ipcRenderer;
 
-const { parseWotcTime, normaliseFields } = require("./background-util");
+const {
+  unleakString,
+  parseWotcTime,
+  normaliseFields
+} = require("./background-util");
 
 const _ = require("lodash");
 
@@ -1296,13 +1300,13 @@ function processLogUser(rawString) {
     // Get player Id
     let strCheck = '"playerId": "';
     if (value.indexOf(strCheck) > -1) {
-      playerData.arenaId = dataChop(value, strCheck, '"');
+      playerData.arenaId = unleakString(dataChop(value, strCheck, '"'));
     }
 
     // Get User name
     strCheck = '"screenName": "';
     if (value.indexOf(strCheck) > -1) {
-      playerData.name = dataChop(value, strCheck, '"');
+      playerData.name = unleakString(dataChop(value, strCheck, '"'));
       ipc_send("set_player_data", playerData);
       ipc_send("ipc_log", "Arena screen name: " + playerData.name);
     }
@@ -1310,7 +1314,7 @@ function processLogUser(rawString) {
     // Get Client Version
     strCheck = '"clientVersion": "';
     if (value.indexOf(strCheck) > -1) {
-      playerData.arenaVersion = dataChop(value, strCheck, '"');
+      playerData.arenaVersion = unleakString(dataChop(value, strCheck, '"'));
       ipc_send("ipc_log", "Arena version: " + playerData.arenaVersion);
       // We request manifest data here
       //manifestParser.requestManifestData(playerData.arenaVersion);

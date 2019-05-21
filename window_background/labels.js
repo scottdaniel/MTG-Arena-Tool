@@ -416,7 +416,7 @@ function onLabelInventoryUpdated(entry, transaction) {
   // if (!transaction) return;
 
   // Store this in case there are any future date parsing issues
-  transaction.timestamp = entry.timestamp;
+  transaction.timestamp = unleakString(entry.timestamp);
 
   // Add missing data
   transaction.date = parseWotcTime(entry.timestamp);

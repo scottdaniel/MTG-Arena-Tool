@@ -68,7 +68,7 @@ function ArenaLogDecoder() {
 
     if (bufferUsed > 0) {
       bufferDiscarded += bufferUsed;
-      buffer = buffer.substr(bufferUsed);
+      buffer = unleakString(buffer.substr(bufferUsed));
     }
   }
 }

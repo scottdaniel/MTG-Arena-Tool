@@ -58,7 +58,12 @@ function normaliseFields(iterator) {
   return iterator;
 }
 
+function unleakString(s) {
+  return (" " + s).substr(1);
+}
+
 module.exports = {
+  unleakString: unleakString,
   parseWotcTime: parseWotcTime,
   normaliseFields: normaliseFields
 };
