@@ -51,7 +51,7 @@
     }
   },
   "scripts": {
-    "clean": "npm run clean:modules && npm run clean:lock",
+    "clean": "npm run clean:modules || npm run clean:lock",
     "clean:modules": "rm -fr node_modules",
     "clean:lock": "rm -f package-lock.json",
     "postclean": "npm install",
