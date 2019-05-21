@@ -23,9 +23,6 @@ const qs = require("qs");
 let metadataState = false;
 
 var httpAsync = [];
-httpBasic();
-httpGetDatabase();
-htttpGetStatus();
 
 const serverAddress = "mtgatool.com";
 
@@ -676,6 +673,7 @@ function httpSyncRequest(data) {
 
 module.exports = {
   httpAuth,
+  httpBasic,
   httpSubmitCourse,
   httpSetPlayer,
   httpGetExplore,
