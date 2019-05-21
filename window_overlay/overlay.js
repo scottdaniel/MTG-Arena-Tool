@@ -505,14 +505,12 @@ function updateView() {
   mainCards.get().forEach(card => {
     var grpId = card.id;
     if (deckMode == 2) {
-      deckDrawer.addCardTile(
-        grpId,
-        "a",
-        (card.chance != undefined ? card.chance : "0") + "%",
-        deckListDiv
-      );
+      let quantity = (card.chance != undefined ? card.chance : "0") + "%";
+      let tile = deckDrawer.cardTile(grpId, "a", quantity);
+      deckListDiv.append(tile);
     } else {
-      deckDrawer.addCardTile(grpId, "a", card.quantity, deckListDiv);
+      let tile = deckDrawer.cardTile(grpId, "a", card.quantity);
+      deckListDiv.append(tile);
     }
   });
   if (showSideboard && deckToDraw.sideboard.count() > 0) {
@@ -525,9 +523,11 @@ function updateView() {
     sideCards.get().forEach(function(card) {
       var grpId = card.id;
       if (deckMode == 2) {
-        deckDrawer.addCardTile(grpId, "a", "0%", deckListDiv);
+        let tile = deckDrawer.cardTile(grpId, "a", "0%");
+        deckListDiv.append(tile);
       } else {
-        deckDrawer.addCardTile(grpId, "a", card.quantity, deckListDiv);
+        let tile = deckDrawer.cardTile(grpId, "a", card.quantity);
+        deckListDiv.append(tile);
       }
     });
   }
@@ -705,7 +705,8 @@ function setDraft(_packN = -1, _pickN = -1) {
     currentDraft.pickedCards.sort(compare_draft_cards);
 
     currentDraft.pickedCards.forEach(function(grpId) {
-      deckDrawer.addCardTile(grpId, "a", 1, $(".overlay_decklist"));
+      let tile = deckDrawer.cardTile(grpId, "a", 1);
+      $(".overlay_decklist").append(tile);
     });
   } else if (draftMode == 1) {
     let key = "pack_" + packN + "pick_" + pickN;
@@ -754,7 +755,8 @@ function setDraft(_packN = -1, _pickN = -1) {
       }
 
       cont.appendTo(od);
-      let tile = deckDrawer.addCardTile(grpId, "a", DRAFT_RANKS[rank], od);
+      let tile = deckDrawer.cardTile(grpId, "a", DRAFT_RANKS[rank]);
+      od.append(tile);
       if (grpId == pick) {
         tile.style.backgroundColor = "rgba(250, 229, 210, 0.66)";
       }

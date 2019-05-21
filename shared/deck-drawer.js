@@ -68,18 +68,14 @@ function rankingClassName(ranking) {
   }
 }
 
-exports.addCardSeparator = function(str, element) {
-  if (element instanceof jQuery) {
-    element = element[0];
-  }
-  element.appendChild(createDivision(["card_tile_separator"], str));
+exports.cardSeparator = function(str) {
+  return createDivision(["card_tile_separator"], str);
 };
 
-exports.addCardTile = function(
+exports.cardTile = function(
   grpId,
   indent,
   quantity,
-  element,
   showWildcards = false,
   deck = null,
   isSideboard = false
@@ -206,14 +202,5 @@ exports.addCardTile = function(
       }
     }
   }
-
-  // if element is a jquery object convert to bare DOM element
-  // TODO: Remove this once jQuery is removed.
-  if (element instanceof jQuery) {
-    element = element[0];
-  }
-
-  element.appendChild(cont);
-
   return cont;
 };

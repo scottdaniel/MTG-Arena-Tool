@@ -750,17 +750,14 @@ function drawSideboardDeck(div) {
   currentDeck.mainDeck.forEach(function(card) {
     size += card.quantity;
   });
-  deckDrawer.addCardSeparator(`Mainboard (${size})`, mainboardDiv);
+  let separator = deckDrawer.cardSeparator(`Mainboard (${size})`);
+  mainboardDiv.append(separator);
   currentDeck.mainDeck.forEach(function(card) {
     let grpId = card.id;
 
     if (card.quantity > 0) {
-      let tile = deckDrawer.addCardTile(
-        grpId,
-        unique + "a",
-        card.quantity,
-        mainboardDiv
-      );
+      let tile = deckDrawer.cardTile(grpId, unique + "a", card.quantity);
+      mainboardDiv.append(tile);
     }
   });
 
@@ -772,17 +769,14 @@ function drawSideboardDeck(div) {
       currentDeck.sideboard.forEach(function(card) {
         size += card.quantity;
       });
-      deckDrawer.addCardSeparator(`Sideboard (${size})`, sideboardDiv);
+      let separator = deckDrawer.cardSeparator(`Sideboard (${size})`);
+      sideboardDiv.append(separator);
 
       currentDeck.sideboard.forEach(function(card) {
         let grpId = card.id;
         if (card.quantity > 0) {
-          let tile = deckDrawer.addCardTile(
-            grpId,
-            unique + "b",
-            card.quantity,
-            sideboardDiv
-          );
+          let tile = deckDrawer.cardTile(grpId, unique + "b", card.quantity);
+          sideboardDiv.append(tile);
         }
       });
     }
