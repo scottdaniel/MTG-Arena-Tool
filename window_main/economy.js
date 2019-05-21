@@ -10,15 +10,10 @@ global
   economyHistory,
   formatNumber,
   formatPercent,
-  get_colation_set,
-  get_card_art,
   get_card_image,
   get_set_scryfall,
   getReadableEvent,
-  getReadableQuest,
   ipc_send,
-  localDateFormat,
-  localDayDateFormat,
   setsList,
   shell
 */
@@ -64,6 +59,56 @@ const economyTransactionContextsMap = {
   "Vault.Complete": "Vault Opening",
   "PlayerReward.OnMatchCompletedWeekly": "Weekly rewards"
 };
+
+function localDateFormat(date) {
+  return `<local-time datetime="${date.toISOString()}"
+    month="short"
+    day="numeric"
+    hour="numeric"
+    minute="numeric">
+    ${date.toString()}
+  </local-time>`;
+}
+
+function localDayDateFormat(date) {
+  return `<local-time datetime="${date.toISOString()}"
+    year="numeric"
+    month="long"
+    day="numeric">
+    ${date.toDateString()}
+  </local-time>`;
+}
+
+function getReadableQuest(questCode) {
+  // FIXME: Can we get a human readable quest name?
+  // For now lets just use a small portion of the ID.
+  return `#${questCode.substring(0, 6)}`;
+}
+
+//
+function get_colation_set(collationid) {
+  var ret = "";
+  Object.keys(setsList).forEach(function(setName) {
+    if (setsList[setName].collation == collationid) {
+      ret = setName;
+    }
+  });
+
+  return ret;
+}
+
+//
+function get_card_art(cardObj) {
+  if (typeof cardObj !== "object") {
+    cardObj = cardsDb.get(cardObj);
+  }
+
+  if (!cardObj) {
+    return "../images/notfound.png";
+  } else {
+    return "https://img.scryfall.com/cards" + cardObj.images.art_crop;
+  }
+}
 
 function getPrettyContext(context, full = true) {
   if (context.startsWith("Event.Prize")) {

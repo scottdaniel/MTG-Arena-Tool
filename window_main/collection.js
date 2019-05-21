@@ -6,21 +6,19 @@ global
   cardsDb,
   cardsNew,
   cardSize,
-  collectionSortSet,
-  collectionSortName,
-  collectionSortCmc,
   collectionSortRarity,
   change_background,
   createDivision,
   createSelect,
+  decks,
   get_card_image,
-  get_collection_export,
-  get_collection_stats,
   get_set_scryfall,
+  getCardsMissingCount,
   hideLoadingBars,
   ipc,
   ipc_send,
   remote,
+  replaceAll,
   setsList,
   Menu,
   MenuItem,
@@ -38,6 +36,187 @@ const SINGLETONS = "Singletons (at least one)";
 const FULL_SETS = "Full sets (all 4 copies)";
 
 let countMode = ALL_CARDS;
+
+//
+function get_collection_export(exportFormat) {
+  var list = "";
+  Object.keys(cards).forEach(function(key) {
+    var add = exportFormat + "";
+    var card = cardsDb.get(key);
+    if (card) {
+      let name = card.name;
+      name = replaceAll(name, "///", "//");
+      add = add.replace("$Name", '"' + name + '"');
+
+      add = add.replace("$Count", cards[key] == 9999 ? 1 : cards[key]);
+
+      add = add.replace("$SetName", card.set);
+      add = add.replace("$SetCode", setsList[card.set].code);
+      add = add.replace("$Collector", card.cid);
+      add = add.replace("$Rarity", card.rarity);
+      add = add.replace("$Type", card.type);
+      add = add.replace("$Cmc", card.cmc);
+      list += add + "\r\n";
+    }
+  });
+
+  return list;
+}
+
+//
+function collectionSortCmc(a, b) {
+  a = cardsDb.get(a);
+  b = cardsDb.get(b);
+  if (parseInt(a.cmc) < parseInt(b.cmc)) return -1;
+  if (parseInt(a.cmc) > parseInt(b.cmc)) return 1;
+
+  if (a.set < b.set) return -1;
+  if (a.set > b.set) return 1;
+
+  if (parseInt(a.cid) < parseInt(b.cid)) return -1;
+  if (parseInt(a.cid) > parseInt(b.cid)) return 1;
+  return 0;
+}
+
+//
+function collectionSortSet(a, b) {
+  a = cardsDb.get(a);
+  b = cardsDb.get(b);
+  if (a.set < b.set) return -1;
+  if (a.set > b.set) return 1;
+
+  if (parseInt(a.cid) < parseInt(b.cid)) return -1;
+  if (parseInt(a.cid) > parseInt(b.cid)) return 1;
+  return 0;
+}
+
+//
+class CountStats {
+  constructor(
+    owned = 0,
+    total = 0,
+    unique = 0,
+    complete = 0,
+    wanted = 0,
+    uniqueWanted = 0,
+    uniqueOwned = 0
+  ) {
+    this.owned = owned;
+    this.total = total;
+    this.unique = unique;
+    this.complete = complete; // all 4 copies of a card
+    this.wanted = wanted;
+    this.uniqueWanted = uniqueWanted;
+    this.uniqueOwned = uniqueOwned;
+  }
+
+  get percentage() {
+    if (this.total) {
+      return (this.owned / this.total) * 100;
+    } else {
+      return 100;
+    }
+  }
+}
+
+//
+function collectionSortName(a, b) {
+  a = cardsDb.get(a);
+  b = cardsDb.get(b);
+  if (a.name < b.name) return -1;
+  if (a.name > b.name) return 1;
+  return 0;
+}
+
+//
+class SetStats {
+  constructor(set) {
+    this.set = set;
+    this.common = new CountStats();
+    this.uncommon = new CountStats();
+    this.rare = new CountStats();
+    this.mythic = new CountStats();
+  }
+
+  get all() {
+    return [
+      new CountStats(),
+      this.common,
+      this.uncommon,
+      this.rare,
+      this.mythic
+    ].reduce((acc, c) => {
+      acc.owned += c.owned;
+      acc.total += c.total;
+      acc.unique += c.unique;
+      acc.complete += c.complete;
+      acc.wanted += c.wanted;
+      acc.uniqueOwned += c.uniqueOwned;
+      return acc;
+    });
+  }
+}
+
+//
+function get_collection_stats() {
+  const stats = {
+    complete: new SetStats("complete")
+  };
+
+  for (var set in setsList) {
+    stats[set] = new SetStats(set);
+  }
+
+  Object.keys(cardsDb.cards).forEach(function(grpId) {
+    if (
+      grpId != "ok" &&
+      grpId != "abilities" &&
+      grpId != "events" &&
+      grpId != "sets"
+    ) {
+      const card = cardsDb.get(grpId);
+      //var split = card.dfc == "SplitCard" && card.dfcId != 0;
+      //if (card.rarity !== "token" && card.rarity !== "land" && card.set !== "Oath of the Gatewatch" && card.dfc != "DFC_Front" && !split) {
+      if (card.collectible && card.rarity !== "land") {
+        // add to totals
+        stats[card.set][card.rarity].total += 4;
+        stats.complete[card.rarity].total += 4;
+        stats[card.set][card.rarity].unique += 1;
+        stats.complete[card.rarity].unique += 1;
+
+        // add cards we own
+        if (cards[grpId] !== undefined) {
+          var owned = cards[grpId];
+          stats[card.set][card.rarity].owned += owned;
+          stats.complete[card.rarity].owned += owned;
+          stats[card.set][card.rarity].uniqueOwned += 1;
+          stats.complete[card.rarity].uniqueOwned += 1;
+
+          // count complete sets we own
+          if (owned == 4) {
+            stats[card.set][card.rarity].complete += 1;
+            stats.complete[card.rarity].complete += 1;
+          }
+        }
+
+        // count cards we know we want across decks
+        const wanted = Math.max(
+          ...decks
+            .filter(deck => deck && !deck.archived)
+            .map(deck => getCardsMissingCount(deck, grpId))
+        );
+        stats[card.set][card.rarity].wanted += wanted;
+        stats.complete[card.rarity].wanted += wanted;
+
+        // count unique cards we know we want across decks
+        stats[card.set][card.rarity].uniqueWanted += Math.min(1, wanted);
+        stats.complete[card.rarity].uniqueWanted += Math.min(1, wanted);
+      }
+    }
+  });
+
+  return stats;
+}
 
 //
 function openCollectionTab() {

@@ -4,13 +4,11 @@ global
   addCardHover,
   cardsDb,
   compare_cards,
-  compare_chances,
-  compare_draft_cards,
   CardsList,
   Deck,
   eventsList,
   eventsToFormat,
-  get_ids_colors,
+  get_card_type_sort,
   setsList
   $
 */
@@ -81,6 +79,78 @@ const TransparencyMouseFix = require("electron-transparency-mouse-fix");
 const fix = new TransparencyMouseFix({
   fixPointerEvents: "auto"
 });
+
+//
+function get_ids_colors(list) {
+  var colors = [];
+  list.forEach(function(grpid) {
+    var cdb = cardsDb.get(grpid);
+    if (cdb) {
+      //var card_name = cdb.name;
+      var card_cost = cdb.cost;
+      card_cost.forEach(function(c) {
+        if (c.indexOf("w") !== -1 && !colors.includes(1)) colors.push(1);
+        if (c.indexOf("u") !== -1 && !colors.includes(2)) colors.push(2);
+        if (c.indexOf("b") !== -1 && !colors.includes(3)) colors.push(3);
+        if (c.indexOf("r") !== -1 && !colors.includes(4)) colors.push(4);
+        if (c.indexOf("g") !== -1 && !colors.includes(5)) colors.push(5);
+      });
+    }
+  });
+
+  return colors;
+}
+
+//
+function compare_chances(a, b) {
+  // Yeah this is lazy.. I know
+  a = a.chance;
+  b = b.chance;
+
+  if (a > b) {
+    return -1;
+  }
+  if (a < b) {
+    return 1;
+  }
+
+  return 0;
+}
+
+//
+function compare_draft_cards(a, b) {
+  // Yeah this is lazy.. I know
+  a = cardsDb.get(a);
+  b = cardsDb.get(b);
+  var as = get_card_type_sort(a.type);
+  var bs = get_card_type_sort(b.type);
+
+  // Order by type?
+  if (as < bs) {
+    return -1;
+  }
+  if (as > bs) {
+    return 1;
+  }
+
+  // by cmc
+  if (a.cmc < b.cmc) {
+    return -1;
+  }
+  if (a.cmc > b.cmc) {
+    return 1;
+  }
+
+  // then by name
+  if (a.name < b.name) {
+    return -1;
+  }
+  if (a.name > b.name) {
+    return 1;
+  }
+
+  return 0;
+}
 
 function ipc_send(method, arg, to = IPC_BACKGROUND) {
   if (method == "ipc_log") {

@@ -9,11 +9,8 @@ global
     drawDeck,
     drawDeckVisual,
     economyHistory,
-    get_deck_colors_ammount,
-    get_deck_curve,
     get_deck_export,
     get_deck_export_txt,
-    get_deck_lands_ammount,
     get_deck_missing,
     get_deck_types_ammount,
     getBoosterCountEstimate,
@@ -35,6 +32,130 @@ const {
 // We need to store a sorted list of card types so we create the card counts in the same order.
 let currentOpenDeck = null;
 let currentFilters = null;
+
+//
+function get_deck_colors_ammount(deck) {
+  var colors = { total: 0, w: 0, u: 0, b: 0, r: 0, g: 0, c: 0 };
+
+  //var mana = {0: "", 1: "white", 2: "blue", 3: "black", 4: "red", 5: "green", 6: "colorless", 7: "", 8: "x"}
+  deck.mainDeck.forEach(function(card) {
+    if (card.quantity > 0) {
+      cardsDb.get(card.id).cost.forEach(function(c) {
+        if (c.indexOf("w") !== -1) {
+          colors.w += card.quantity;
+          colors.total += card.quantity;
+        }
+        if (c.indexOf("u") !== -1) {
+          colors.u += card.quantity;
+          colors.total += card.quantity;
+        }
+        if (c.indexOf("b") !== -1) {
+          colors.b += card.quantity;
+          colors.total += card.quantity;
+        }
+        if (c.indexOf("r") !== -1) {
+          colors.r += card.quantity;
+          colors.total += card.quantity;
+        }
+        if (c.indexOf("g") !== -1) {
+          colors.g += card.quantity;
+          colors.total += card.quantity;
+        }
+        if (c.indexOf("c") !== -1) {
+          colors.c += card.quantity;
+          colors.total += card.quantity;
+        }
+      });
+    }
+  });
+
+  return colors;
+}
+
+//
+function get_deck_lands_ammount(deck) {
+  var colors = { total: 0, w: 0, u: 0, b: 0, r: 0, g: 0, c: 0 };
+
+  //var mana = {0: "", 1: "white", 2: "blue", 3: "black", 4: "red", 5: "green", 6: "colorless", 7: "", 8: "x"}
+  deck.mainDeck.forEach(function(card) {
+    var quantity = card.quantity;
+    card = cardsDb.get(card.id);
+    if (quantity > 0) {
+      if (card.type.indexOf("Land") != -1 || card.type.indexOf("land") != -1) {
+        if (card.frame.length < 5) {
+          card.frame.forEach(function(c) {
+            if (c == 1) {
+              colors.w += quantity;
+              colors.total += quantity;
+            }
+            if (c == 2) {
+              colors.u += quantity;
+              colors.total += quantity;
+            }
+            if (c == 3) {
+              colors.b += quantity;
+              colors.total += quantity;
+            }
+            if (c == 4) {
+              colors.r += quantity;
+              colors.total += quantity;
+            }
+            if (c == 5) {
+              colors.g += quantity;
+              colors.total += quantity;
+            }
+            if (c == 6) {
+              colors.c += quantity;
+              colors.total += quantity;
+            }
+          });
+        }
+      }
+    }
+  });
+
+  return colors;
+}
+
+//
+function get_deck_curve(deck) {
+  var curve = [];
+
+  deck.mainDeck.forEach(function(card) {
+    var grpid = card.id;
+    var cmc = cardsDb.get(grpid).cmc;
+    if (curve[cmc] == undefined) curve[cmc] = [0, 0, 0, 0, 0, 0];
+
+    let card_cost = cardsDb.get(grpid).cost;
+
+    if (cardsDb.get(grpid).type.indexOf("Land") == -1) {
+      card_cost.forEach(function(c) {
+        if (c.indexOf("w") !== -1) curve[cmc][1] += card.quantity;
+        if (c.indexOf("u") !== -1) curve[cmc][2] += card.quantity;
+        if (c.indexOf("b") !== -1) curve[cmc][3] += card.quantity;
+        if (c.indexOf("r") !== -1) curve[cmc][4] += card.quantity;
+        if (c.indexOf("g") !== -1) curve[cmc][5] += card.quantity;
+      });
+
+      curve[cmc][0] += card.quantity;
+    }
+  });
+  /*
+  // Do not account sideboard?
+  deck.sideboard.forEach(function(card) {
+    var grpid = card.id;
+    var cmc = cardsDb.get(grpid).cmc;
+    if (curve[cmc] == undefined)  curve[cmc] = 0;
+    curve[cmc] += card.quantity
+
+    if (cardsDb.get(grpid).rarity !== 'land') {
+      curve[cmc] += card.quantity
+    }
+  });
+  */
+  //console.log(curve);
+  return curve;
+}
 
 function deckManaCurve(deck) {
   let manaCounts = get_deck_curve(deck);

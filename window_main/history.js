@@ -13,7 +13,6 @@ globals
   get_deck_colors,
   get_rank_index,
   get_rank_index_16,
-  getNextRank,
   getReadableEvent,
   getTagColor,
   ipc_send,
@@ -36,13 +35,25 @@ globals
   toMMSS,
   $$
 */
-const { MANA } = require("../shared/constants.js");
+const { MANA, RANKS } = require("../shared/constants.js");
 
 const { DEFAULT_DECK, RANKED_CONST, RANKED_DRAFT, DATE_SEASON } = Aggregator;
 let filters = Aggregator.getDefaultFilters();
 let filteredMatches;
 
 const autocomplete = require("../shared/autocomplete.js");
+
+function getNextRank(currentRank) {
+  /*
+    Globals used: RANKS
+  */
+  var rankIndex = RANKS.indexOf(currentRank);
+  if (rankIndex < RANKS.length - 1) {
+    return RANKS[rankIndex + 1];
+  } else {
+    return undefined;
+  }
+}
 
 function setFilters(selected = {}) {
   if (selected.eventId || selected.date) {
