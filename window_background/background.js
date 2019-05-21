@@ -7,8 +7,6 @@ global
   get_rank_index,
   playerDataDefault,
   hypergeometricRange,
-  onLabelOutLogInfo,
-  onLabelGreToClient,
   objectClone,
 */
 const {
@@ -54,6 +52,8 @@ const httpApi = require("./http-api");
 const manifestParser = require("./manifest-parser");
 const greToClientInterpreter = require("./gre-to-client-interpreter");
 const {
+  onLabelOutLogInfo,
+  onLabelGreToClient,
   onLabelClientToMatchServiceMessageTypeClientToGREMessage,
   onLabelInEventGetPlayerCourse,
   onLabelInEventGetPlayerCourseV2,

@@ -726,6 +726,8 @@ function onLabelGetPlayerInventoryGetRewardSchedule(entry, json) {
 }
 
 module.exports = {
+  onLabelOutLogInfo,
+  onLabelGreToClient,
   onLabelClientToMatchServiceMessageTypeClientToGREMessage,
   onLabelInEventGetPlayerCourse,
   onLabelInEventGetPlayerCourseV2,
