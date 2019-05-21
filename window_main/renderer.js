@@ -562,7 +562,11 @@ ipc.on("set_settings", function(event, arg) {
     cardQuality = arg.cards_quality;
   }
   if (arg.back_url) {
+    let oldBack = defaultBackground;
     defaultBackground = arg.back_url;
+    if (oldBack == "") {
+      change_background();
+    }
   }
   $(".main_wrapper").css("background-color", arg.back_color);
   cardSize = 100 + arg.cards_size * 10;
