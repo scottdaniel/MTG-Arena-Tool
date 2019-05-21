@@ -1,4 +1,5 @@
 /* eslint-disable */
+const { unleakString, parseWotcTime } = require("./background-util");
 
 function onLabelOutLogInfo(entry, json) {
   if (!json) return;
