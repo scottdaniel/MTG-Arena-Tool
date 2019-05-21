@@ -724,3 +724,33 @@ function onLabelGetPlayerInventoryGetRewardSchedule(entry, json) {
     weekly: json.weeklyReset
   });
 }
+
+module.exports = {
+  onLabelClientToMatchServiceMessageTypeClientToGREMessage,
+  onLabelInEventGetPlayerCourse,
+  onLabelInEventGetPlayerCourseV2,
+  onLabelInEventGetCombinedRankInfo,
+  onLabelInDeckGetDeckLists,
+  onLabelInDeckGetDeckListsV3,
+  onLabelInEventGetPlayerCourses,
+  onLabelInEventGetPlayerCoursesV2,
+  onLabelInDeckUpdateDeck,
+  onLabelInDeckUpdateDeckV3,
+  onLabelInventoryUpdated,
+  onLabelInPlayerInventoryGetPlayerInventory,
+  onLabelInPlayerInventoryGetPlayerCardsV3,
+  onLabelInEventDeckSubmit,
+  onLabelInEventDeckSubmitV3,
+  onLabelInEventGetActiveEvents,
+  onLabelEventMatchCreated,
+  onLabelOutDirectGameChallenge,
+  onLabelOutEventAIPractice,
+  onLabelInDraftDraftStatus,
+  onLabelInDraftMakePick,
+  onLabelOutDraftMakePick,
+  onLabelInEventCompleteDraft,
+  onLabelMatchGameRoomStateChangedEvent,
+  onLabelInEventGetSeasonAndRankDetail,
+  onLabelGetPlayerInventoryGetRewardSchedule,
+  onLabelRankUpdated
+};
