@@ -565,7 +565,6 @@ ipc.on("set_settings", function(event, arg) {
     defaultBackground = arg.back_url;
   }
   $(".main_wrapper").css("background-color", arg.back_color);
-  change_background("default");
   cardSize = 100 + arg.cards_size * 10;
   if (sidebarActive === 6) {
     openSettingsTab();
@@ -2155,12 +2154,12 @@ function add_checkbox(div, label, iid, def, func) {
 }
 
 //
-function change_background(arg, grpId = 0) {
-  var artistLine = "";
-  var _card = cardsDb.get(grpId);
+function change_background(arg = "default", grpId = 0) {
+  let artistLine = "";
+  const _card = cardsDb.get(grpId);
 
   //console.log(arg, grpId, _card);
-  if (arg == "default") {
+  if (arg === "default") {
     $(".top_artist").html("Ghitu Lavarunner by Jesper Ejsing");
     if (defaultBackground == "") {
       $(".main_wrapper").css(
@@ -2174,12 +2173,18 @@ function change_background(arg, grpId = 0) {
         "url(" + defaultBackground + ")"
       );
     }
-  } else if (_card != false) {
-    console.log(_card.images["art_crop"]);
+  } else if (_card) {
+    // console.log(_card.images["art_crop"]);
     $(".main_wrapper").css(
       "background-image",
       "url(https://img.scryfall.com/cards" + _card.images["art_crop"] + ")"
     );
+    try {
+      artistLine = _card.name + " by " + _card.artist;
+      $(".top_artist").html(artistLine);
+    } catch (e) {
+      console.log(e);
+    }
   } else if (fs.existsSync(arg)) {
     $(".top_artist").html("");
     $(".main_wrapper").css("background-image", "url(" + arg + ")");
@@ -2195,15 +2200,6 @@ function change_background(arg, grpId = 0) {
         $(".main_wrapper").css("background-image", "url(" + arg + ")");
       }
     });
-  }
-
-  if (_card) {
-    try {
-      artistLine = _card.name + " by " + _card.artist;
-      $(".top_artist").html(artistLine);
-    } catch (e) {
-      console.log(e);
-    }
   }
 }
 
