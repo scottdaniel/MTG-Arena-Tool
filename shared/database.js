@@ -22,6 +22,10 @@ class Database {
     return true;
   }
 
+  setCard(grpId, obj) {
+    this.cards[grpId] = obj;
+  }
+
   get(grpId) {
     let ret = this.cards[grpId];
     return ret ? ret : false;

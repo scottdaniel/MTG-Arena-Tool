@@ -123,6 +123,7 @@ const defaultCfg = {
     overlay_deck: true,
     overlay_clock: true,
     overlay_ontop: true,
+    overlay_lands: true,
     export_format: "$Name,$Count,$Rarity,$SetName,$Collector",
     back_color: "rgba(0,0,0,0.3)",
     back_url: "",

@@ -213,6 +213,13 @@ function openSettingsTab(openSection = lastSettingsSection) {
     settings.overlay_sideboard,
     updateUserSettings
   );
+  add_checkbox(
+    section,
+    "Compact lands",
+    "settings_overlay_lands",
+    settings.overlay_lands,
+    updateUserSettings
+  );
 
   const sliderOpacity = $('<div class="slidecontainer_settings"></div>');
   sliderOpacity.appendTo(section);
@@ -651,6 +658,8 @@ function updateUserSettings(_settings = {}) {
     .checked;
   const overlaySideboard = document.getElementById("settings_overlay_sideboard")
     .checked;
+  const overlayLands = document.getElementById("settings_overlay_lands")
+    .checked;
 
   const exportFormat = document.getElementById("settings_export_format").value;
   settings = {
@@ -673,6 +682,7 @@ function updateUserSettings(_settings = {}) {
     overlay_clock: overlayClock,
     overlay_sideboard: overlaySideboard,
     overlay_ontop: overlayOnTop,
+    overlay_lands: overlayLands,
     anon_explore: anonExplore,
     back_color: backColor,
     back_url: backUrl,

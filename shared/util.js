@@ -419,6 +419,7 @@ function get_card_type_sort(a) {
   if (a.includes("Artifact", 0)) return 5;
   if (a.includes("Enchantment", 0)) return 6;
   if (a.includes("Land", 0)) return 7;
+  if (a.includes("Special", 0)) return 8;
   return 0;
 }
 

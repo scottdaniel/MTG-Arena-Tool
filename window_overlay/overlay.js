@@ -5,6 +5,7 @@ global
   cardsDb,
   compare_cards,
   CardsList,
+  Colors,
   Deck,
   eventsList,
   eventsToFormat,
@@ -63,6 +64,7 @@ let oppName = "";
 let turnPriority = 0;
 let soundPriority = false;
 let soundPriorityVolume = 1;
+let overlayLands = true;
 let overlayAlpha = 1;
 let overlayAlphaBack = 1;
 let oddsSampleSize = 1;
@@ -301,6 +303,7 @@ ipc.on("set_settings", function(event, settings) {
   */
   overlayAlpha = settings.overlay_alpha;
   overlayAlphaBack = settings.overlay_alpha_back;
+  overlayLands = settings.overlay_lands;
   change_background(settings.back_url);
 
   webFrame.setZoomFactor(settings.overlay_scale / 100);
@@ -571,13 +574,42 @@ function updateView() {
 
   let mainCards = deckToDraw.mainboard;
   mainCards.removeDuplicates();
+  // group lands
+  if (overlayLands && deckMode !== 3) {
+    let landsNumber = 0;
+    let landsChance = 0;
+    let landsColors = new Colors();
+    mainCards.get().forEach(card => {
+      let cardObj = cardsDb.get(card.id);
+      if (cardObj && cardObj.type.includes("Land", 0)) {
+        landsNumber += card.quantity;
+        landsChance += card.chance !== undefined ? card.chance : 0;
+        delete card.chance;
+        card.quantity = 0;
+        if (cardObj.frame) {
+          landsColors.addFromArray(cardObj.frame);
+        }
+      }
+    });
+    let lands = mainCards.add(100, landsNumber, true);
+    if (landsChance > 0) {
+      lands.chance = landsChance;
+    }
+
+    // Set lands frame colors
+    let landsObj = cardsDb.get(100);
+    landsObj.frame = landsColors.get();
+    cardsDb.setCard(100, landsObj);
+  }
   mainCards.get().sort(sortFunc);
   mainCards.get().forEach(card => {
     var grpId = card.id;
     if (deckMode == 2) {
-      let quantity = (card.chance != undefined ? card.chance : "0") + "%";
-      let tile = deckDrawer.cardTile(grpId, "a", quantity);
-      deckListDiv.append(tile);
+      let quantity = (card.chance !== undefined ? card.chance : "0") + "%";
+      if (!overlayLands || (overlayLands && quantity !== "0%")) {
+        let tile = deckDrawer.cardTile(grpId, "a", quantity);
+        deckListDiv.append(tile);
+      }
     } else {
       let tile = deckDrawer.cardTile(grpId, "a", card.quantity);
       deckListDiv.append(tile);
