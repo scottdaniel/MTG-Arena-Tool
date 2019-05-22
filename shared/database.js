@@ -1,50 +1,71 @@
 const electron = require("electron");
 const fs = require("fs");
+const ipc = electron.ipcRenderer;
 
-// Made a singleton class for this
-// Makes it simpler to update ;)
+const otherKeys = [
+  "sets",
+  "events",
+  "events_format",
+  "ranked_events",
+  "abilities",
+  "ok"
+];
+
+let singleton = null;
 // Some other things should go here later, like updating from MTGA Servers themselves.
 class Database {
   constructor() {
-    let json = JSON.parse(
-      fs.readFileSync(`${__dirname}/../resources/database.json`, "utf8")
-    );
-    this.cards = json;
+    this.handleSetDb = this.handleSetDb.bind(this);
+    if (ipc) ipc.on("set_db", this.handleSetDb);
+    const dbUri = `${__dirname}/../resources/database.json`;
+    const defaultDb = fs.readFileSync(dbUri, "utf8");
+    this.handleSetDb(null, defaultDb);
   }
 
-  set(arg) {
-    try {
-      this.cards = JSON.parse(arg);
-    } catch (e) {
-      this.cards = arg;
+  static getDb() {
+    if (!singleton) {
+      singleton = new Database();
     }
+    return singleton;
+  }
 
-    return true;
+  handleSetDb(_event, arg) {
+    try {
+      this.data = JSON.parse(arg);
+    } catch (e) {
+      console.log("Error parsing metadata", e);
+    }
+  }
+
+  get cardIds() {
+    return Object.keys(this.data).filter(key => !otherKeys.includes(key));
+  }
+
+  get cardList() {
+    return this.cardIds.map(id => this.data[id]);
+  }
+
+  get cardMap() {
+    const clone = { ...this.data };
+    otherKeys.forEach(key => delete clone[key]);
+    return clone;
   }
 
   setCard(grpId, obj) {
-    this.cards[grpId] = obj;
+    this.data[grpId] = obj;
   }
 
-  get(grpId) {
-    let ret = this.cards[grpId];
-    return ret ? ret : false;
+  get(key) {
+    return this.data[key] || false;
   }
 
   getByArt(artId) {
-    let list = Object.keys(this.cards);
-    let ret = list.filter(grpid => this.cards[grpid].artid == artId)[0];
-    return ret ? this.cards[ret] : false;
+    const matches = this.cardList.filter(card => card.artid === artId);
+    return matches.length ? matches[0] : false;
   }
 
   getAbility(abId) {
-    let ret = this.cards["abilities"][abId];
-    return ret ? ret : "";
-  }
-
-  getAll() {
-    let ret = this.cards;
-    return ret;
+    return this.data["abilities"][abId] || "";
   }
 }
 
