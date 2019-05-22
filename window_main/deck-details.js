@@ -2,10 +2,10 @@
 global
     add,
     Aggregator,
-    cardsDb,
     ConicGradient,
     change_background,
     createDivision,
+    Database,
     drawDeck,
     drawDeckVisual,
     economyHistory,
@@ -36,6 +36,7 @@ let currentFilters = null;
 //
 function get_deck_colors_ammount(deck) {
   var colors = { total: 0, w: 0, u: 0, b: 0, r: 0, g: 0, c: 0 };
+  const cardsDb = Database.getDb();
 
   //var mana = {0: "", 1: "white", 2: "blue", 3: "black", 4: "red", 5: "green", 6: "colorless", 7: "", 8: "x"}
   deck.mainDeck.forEach(function(card) {
@@ -75,6 +76,7 @@ function get_deck_colors_ammount(deck) {
 //
 function get_deck_lands_ammount(deck) {
   var colors = { total: 0, w: 0, u: 0, b: 0, r: 0, g: 0, c: 0 };
+  const cardsDb = Database.getDb();
 
   //var mana = {0: "", 1: "white", 2: "blue", 3: "black", 4: "red", 5: "green", 6: "colorless", 7: "", 8: "x"}
   deck.mainDeck.forEach(function(card) {
@@ -120,6 +122,7 @@ function get_deck_lands_ammount(deck) {
 //
 function get_deck_curve(deck) {
   var curve = [];
+  const cardsDb = Database.getDb();
 
   deck.mainDeck.forEach(function(card) {
     var grpid = card.id;
@@ -370,6 +373,7 @@ function openDeck(deck = currentOpenDeck, filters = currentFilters) {
   top.appendChild(deckColors);
 
   const tileGrpId = deck.deckTileId;
+  const cardsDb = Database.getDb();
   if (cardsDb.get(tileGrpId)) {
     change_background("", tileGrpId);
   }
