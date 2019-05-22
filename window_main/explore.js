@@ -1,11 +1,9 @@
 /*
 globals
   activeEvents,
-  eventsList,
-  rankedEvents,
+  Database,
   getReadableEvent,
   createSelect,
-  cardsDb,
   timeSince,
   ipc_send,
   showLoadingBars,
@@ -110,6 +108,8 @@ function openExploreTab() {
 }
 
 function getEventPrettyName(event) {
+  const cardsDb = Database.getDb();
+  const eventsList = cardsDb.get("events");
   return eventsList[event] ? eventsList[event] : event;
 }
 
@@ -174,6 +174,9 @@ function drawFilters() {
    *  Event filter
    **/
   let eventFilters = [];
+  const cardsDb = Database.getDb();
+  const eventsList = cardsDb.get("events");
+  const rankedEvents = cardsDb.get("ranked_events");
   if (filterType == "Events") {
     eventFilters = Object.keys(eventsList)
       .concat(activeEvents)
@@ -402,6 +405,8 @@ function queryExplore(skip) {
   filterSkip = skip;
   let sortDir = filterSortDir == "Descending" ? -1 : 1;
 
+  const cardsDb = Database.getDb();
+  const eventsList = cardsDb.get("events");
   let filterEventId = Object.keys(eventsList).filter(
     key => eventsList[key] == filterEvent
   )[0];
@@ -448,6 +453,7 @@ function setExploreDecks(data) {
 }
 
 function deckLoad(_deck, index) {
+  const cardsDb = Database.getDb();
   var mainDiv = document.getElementById("explore_list");
   index = "ladder_" + index;
 
@@ -543,6 +549,7 @@ function deckLoad(_deck, index) {
   let rcont = createDivision(["flex_item"]);
   rcont.style.marginLeft = "auto";
 
+  const eventsList = cardsDb.get("events");
   let eventName = createDivision(
     ["list_deck_name_it"],
     eventsList[_deck.event]
@@ -587,6 +594,7 @@ function deckLoad(_deck, index) {
 }
 
 function eventLoad(event, index) {
+  const cardsDb = Database.getDb();
   var mainDiv = document.getElementById("explore_list");
   index = "events_" + index;
 
