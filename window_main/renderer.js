@@ -1,11 +1,9 @@
 /*
 global
   addCardHover,
-  cardsDb,
   compare_archetypes,
   compare_cards,
-  eventsList,
-  eventsToFormat,
+  Database,
   get_card_image,
   get_deck_colors,
   get_deck_export,
@@ -16,10 +14,8 @@ global
   hypergeometricRange,
   makeId,
   playerDataDefault,
-  rankedEvents,
   removeDuplicates,
   set_tou_state,
-  setsList,
   timeSince,
   $$
 */
@@ -212,25 +208,9 @@ ipc.on("set_tags_colors", function(event, arg) {
 });
 
 //
-ipc.on("set_db", function(event, arg) {
-  try {
-    arg = JSON.parse(arg);
-    setsList = arg.sets;
-    eventsList = arg.events;
-    eventsToFormat = arg.events_format;
-    rankedEvents = arg.ranked_events;
-    delete arg.sets;
-    delete arg.events;
-    delete arg.events_format;
-    delete arg.ranked_events;
-    cardsDb.set(arg);
-    canLogin = true;
-    showLogin();
-  } catch (e) {
-    pop("Error parsing metadata", null);
-    console.log("Error parsing metadata", e);
-    return false;
-  }
+ipc.on("set_db", () => {
+  canLogin = true;
+  showLogin();
 });
 
 ipc.on("show_login", () => {
@@ -1071,6 +1051,7 @@ function makeResizable(div, resizeCallback, finalCallback) {
 
 //
 function drawDeck(div, deck, showWildcards = false) {
+  const cardsDb = Database.getDb();
   div.html("");
   const unique = makeId(4);
 
@@ -1170,6 +1151,7 @@ function drawCardList(div, cards) {
 
 //
 function drawDeckVisual(_div, _stats, deck) {
+  const cardsDb = Database.getDb();
   // PLACEHOLDER
   if (!(_div instanceof jQuery)) {
     _div = $(_div);
@@ -1561,6 +1543,8 @@ function open_draft(id) {
   $("#ux_1").html("");
   $("#ux_1").removeClass("flex_item");
   let draft = matchesHistory[id];
+  const cardsDb = Database.getDb();
+  const setsList = cardsDb.get("sets");
   let tileGrpid = setsList[draft.set].tile;
 
   if (draftPosition < 1) draftPosition = 1;
@@ -1684,6 +1668,7 @@ function open_draft(id) {
 function open_match(id) {
   $("#ux_1").html("");
   $("#ux_1").removeClass("flex_item");
+  const cardsDb = Database.getDb();
   var match = matchesHistory[id];
 
   let top = $(
@@ -2084,6 +2069,7 @@ function open_match(id) {
 }
 
 function openActionLog(actionLogId) {
+  const cardsDb = Database.getDb();
   $("#ux_2").html("");
   let top = $(
     `<div class="decklist_top"><div class="button back actionlog_back"></div><div class="deck_name">Action Log</div><div class="deck_name"></div></div>`
@@ -2160,6 +2146,7 @@ function add_checkbox(div, label, iid, def, func) {
 //
 function change_background(arg = "default", grpId = 0) {
   let artistLine = "";
+  const cardsDb = Database.getDb();
   const _card = cardsDb.get(grpId);
 
   //console.log(arg, grpId, _card);
