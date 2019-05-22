@@ -3,7 +3,6 @@ globals
   actionLog,
   actionLogGenerateAbilityLink,
   actionLogGenerateLink,
-  cardsDb,
   currentDeck,
   currentMatch,
   cloneDeep,
