@@ -3,13 +3,13 @@ global
   $$,
   addCardHover,
   cards,
-  cardsDb,
   cardsNew,
   cardSize,
   collectionSortRarity,
   change_background,
   createDivision,
   createSelect,
+  Database,
   decks,
   get_card_image,
   get_set_scryfall,
@@ -19,7 +19,6 @@ global
   ipc_send,
   remote,
   replaceAll,
-  setsList,
   Menu,
   MenuItem,
   shell
@@ -40,6 +39,8 @@ let countMode = ALL_CARDS;
 //
 function get_collection_export(exportFormat) {
   var list = "";
+  const cardsDb = Database.getDb();
+  const setsList = cardsDb.get("sets");
   Object.keys(cards).forEach(function(key) {
     var add = exportFormat + "";
     var card = cardsDb.get(key);
@@ -65,6 +66,7 @@ function get_collection_export(exportFormat) {
 
 //
 function collectionSortCmc(a, b) {
+  const cardsDb = Database.getDb();
   a = cardsDb.get(a);
   b = cardsDb.get(b);
   if (parseInt(a.cmc) < parseInt(b.cmc)) return -1;
@@ -80,6 +82,7 @@ function collectionSortCmc(a, b) {
 
 //
 function collectionSortSet(a, b) {
+  const cardsDb = Database.getDb();
   a = cardsDb.get(a);
   b = cardsDb.get(b);
   if (a.set < b.set) return -1;
@@ -121,6 +124,7 @@ class CountStats {
 
 //
 function collectionSortName(a, b) {
+  const cardsDb = Database.getDb();
   a = cardsDb.get(a);
   b = cardsDb.get(b);
   if (a.name < b.name) return -1;
@@ -159,6 +163,8 @@ class SetStats {
 
 //
 function get_collection_stats() {
+  const cardsDb = Database.getDb();
+  const setsList = cardsDb.get("sets");
   const stats = {
     complete: new SetStats("complete")
   };
@@ -220,6 +226,8 @@ function get_collection_stats() {
 
 //
 function openCollectionTab() {
+  const cardsDb = Database.getDb();
+  const setsList = cardsDb.get("sets");
   filteredSets = [];
   filteredMana = [];
   orderedSets = [];
@@ -661,6 +669,8 @@ function printStats() {
   let rs = renderSetStats(stats.complete, "PW", "Complete collection");
   mainstats.appendChild(rs);
 
+  const cardsDb = Database.getDb();
+  const setsList = cardsDb.get("sets");
   // each set stats
   orderedSets
     .slice()
@@ -736,6 +746,8 @@ function renderSetStats(setStats, setIconCode, setName) {
     });
 
     // If the set has a collationId, it means boosters for it exists
+    const cardsDb = Database.getDb();
+    const setsList = cardsDb.get("sets");
     if (setsList[setName] && setsList[setName].collation) {
       let chanceBoosterHasMythic = 0.125; // assume 1/8 of packs have a mythic
       let chanceBoosterHasRare = 1 - chanceBoosterHasMythic;
@@ -888,27 +900,19 @@ function printCards() {
 
   let totalCards = 0;
   let list;
+  const cardsDb = Database.getDb();
   if (filterUnown) {
-    list = cardsDb.getAll();
-    delete list.abilities;
-    delete list.events;
-    delete list.events_format;
-    delete list.sets;
-    delete list.ranked_events;
-    delete list.ok;
+    list = cardsDb.cardList;
   } else {
-    list = cards;
+    list = Object.keys(cards);
   }
 
-  let keysSorted;
-  if (sortingAlgorithm == "Sort by Set")
-    keysSorted = Object.keys(list).sort(collectionSortSet);
-  if (sortingAlgorithm == "Sort by Name")
-    keysSorted = Object.keys(list).sort(collectionSortName);
+  let keysSorted = [...list];
+  if (sortingAlgorithm == "Sort by Set") keysSorted.sort(collectionSortSet);
+  if (sortingAlgorithm == "Sort by Name") keysSorted.sort(collectionSortName);
   if (sortingAlgorithm == "Sort by Rarity")
-    keysSorted = Object.keys(list).sort(collectionSortRarity);
-  if (sortingAlgorithm == "Sort by CMC")
-    keysSorted = Object.keys(list).sort(collectionSortCmc);
+    keysSorted.sort(collectionSortRarity);
+  if (sortingAlgorithm == "Sort by CMC") keysSorted.sort(collectionSortCmc);
 
   cardLoop: for (let n = 0; n < keysSorted.length; n++) {
     let key = keysSorted[n];
@@ -1151,6 +1155,8 @@ function printCards() {
 }
 
 function addCardMenu(div, card) {
+  const cardsDb = Database.getDb();
+  const setsList = cardsDb.get("sets");
   let arenaCode = `1 ${card.name} (${setsList[card.set].arenacode}) ${
     card.cid
   }`;
