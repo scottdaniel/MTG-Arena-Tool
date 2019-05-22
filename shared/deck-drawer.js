@@ -1,13 +1,12 @@
 /*
 global
   createDivision,
-  cardsDb,
   addCardHover,
   shell,
   get_wc_missing,
   get_set_scryfall,
 */
-
+const Database = require("./database.js");
 const _ = require("lodash");
 
 //
@@ -81,6 +80,7 @@ exports.cardTile = function(
   isSideboard = false
 ) {
   if (quantity === 0) return false;
+  const cardsDb = Database.getDb();
 
   let card;
   if (typeof grpId == "object" && grpId.name) {
