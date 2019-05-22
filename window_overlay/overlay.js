@@ -39,6 +39,24 @@ if (!remote.app.isPackaged) {
   });
 }
 
+let landsCard = {
+  id: 100,
+  name: "Lands",
+  set: "",
+  artid: 0,
+  type: "Special",
+  cost: [],
+  cmc: 0,
+  rarity: "",
+  cid: 0,
+  frame: [1, 2, 3, 4, 5],
+  artist: "",
+  dfc: "None",
+  collectible: false,
+  craftable: false,
+  dfcId: 0
+};
+
 let shell = electron.shell;
 const fs = require("fs");
 const ipc = electron.ipcRenderer;
@@ -591,15 +609,13 @@ function updateView() {
         }
       }
     });
-    let lands = mainCards.add(100, landsNumber, true);
+    let lands = mainCards.add(landsCard, landsNumber, true);
     if (landsChance > 0) {
       lands.chance = landsChance;
     }
 
     // Set lands frame colors
-    let landsObj = cardsDb.get(100);
-    landsObj.frame = landsColors.get();
-    cardsDb.setCard(100, landsObj);
+    landsCard.frame = landsColors.get();
   }
   mainCards.get().sort(sortFunc);
   mainCards.get().forEach(card => {
