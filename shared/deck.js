@@ -1,13 +1,12 @@
 "use strict";
 /*
 globals
-  cardsDb,
   compare_cards,
   get_set_code,
   getWildcardsMissing,
   objectClone
-  setsList
 */
+const Database = require("./database.js");
 const CardsList = require("./cards-list.js");
 const Colors = require("./colors.js");
 
@@ -104,6 +103,7 @@ class Deck {
       token: 0,
       land: 0
     };
+    const cardsDb = Database.getDb();
 
     if (countMainboard) {
       this.mainboard.get().forEach(card => {
@@ -136,6 +136,7 @@ class Deck {
    * Returns a txt format string of this deck.
    **/
   getExportTxt() {
+    const cardsDb = Database.getDb();
     let str = "";
     let mainList = this.mainboard.removeDuplicates(false);
     mainList.forEach(function(card) {
@@ -159,6 +160,8 @@ class Deck {
   }
 
   getExportArena() {
+    const cardsDb = Database.getDb();
+    const setsList = cardsDb.get("sets");
     let str = "";
     let listMain = this.mainboard.removeDuplicates(false);
     listMain.forEach(function(card) {
