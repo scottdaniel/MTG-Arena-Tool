@@ -2,10 +2,10 @@
 global
   $,
   addCardHover,
-  cardsDb,
   collectionSortRarity,
   createDivision
   createSelect,
+  Database,
   DataScroller,
   economyHistory,
   formatNumber,
@@ -14,7 +14,6 @@ global
   get_set_scryfall,
   getReadableEvent,
   ipc_send,
-  setsList,
   shell
 */
 
@@ -88,6 +87,8 @@ function getReadableQuest(questCode) {
 //
 function get_colation_set(collationid) {
   var ret = "";
+  const cardsDb = Database.getDb();
+  const setsList = cardsDb.get("sets");
   Object.keys(setsList).forEach(function(setName) {
     if (setsList[setName].collation == collationid) {
       ret = setName;
@@ -100,6 +101,7 @@ function get_colation_set(collationid) {
 //
 function get_card_art(cardObj) {
   if (typeof cardObj !== "object") {
+    const cardsDb = Database.getDb();
     cardObj = cardsDb.get(cardObj);
   }
 
@@ -309,6 +311,9 @@ function createChangeRow(change, economyId) {
   let checkSkinsAdded = false;
 
   var bon, bos;
+
+  const cardsDb = Database.getDb();
+  const setsList = cardsDb.get("sets");
 
   if (change.contextPretty == "Booster Open") {
     change.delta.boosterDelta.forEach(function(booster) {
