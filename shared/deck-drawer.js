@@ -83,7 +83,7 @@ exports.cardTile = function(
   const cardsDb = Database.getDb();
 
   let card;
-  if (typeof grpId == "object" && grpId.name) {
+  if (grpId && grpId.name) {
     card = grpId;
     grpId = grpId.id;
   } else {
