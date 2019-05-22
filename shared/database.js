@@ -51,10 +51,6 @@ class Database {
     return clone;
   }
 
-  setCard(grpId, obj) {
-    this.data[grpId] = obj;
-  }
-
   get(key) {
     return this.data[key] || false;
   }
