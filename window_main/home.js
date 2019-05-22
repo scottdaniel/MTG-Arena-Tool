@@ -3,7 +3,7 @@ global
   $$,
   addCardHover,
   authToken,
-  cardsDb,
+  Database,
   discordTag,
   filteredWildcardsSet,
   ipc_send,
@@ -11,7 +11,6 @@ global
   rewards_daily_ends,
   rewards_weekly_ends,
   shell,
-  setsList,
   showLoadingBars,
   toHHMMSS,
   toDDHHMMSS,
@@ -245,6 +244,8 @@ function openHomeTab(arg, opentab = true) {
     });
   });
 
+  const cardsDb = Database.getDb();
+  const setsList = cardsDb.get("sets");
   let orderedSets = Object.keys(setsList).filter(
     set => setsList[set].collation > 0
   );
