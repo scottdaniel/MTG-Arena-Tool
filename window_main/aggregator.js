@@ -7,10 +7,10 @@ globals
   getReadableEvent,
   getRecentDeckName,
   matchesHistory,
-  rankedEvents,
   season_starts
 */
 const { COLORS_ALL, COLORS_BRIEF } = require("../shared/constants.js");
+const Database = require("../shared/database.js");
 
 // Default filter values
 const DEFAULT_DECK = "All Decks";
@@ -224,6 +224,8 @@ class Aggregator {
 
   filterEvent(_eventId) {
     const { eventId } = this.filters;
+    const cardsDb = Database.getDb();
+    const rankedEvents = cardsDb.get("ranked_events");
     return (
       (eventId === DEFAULT_EVENT && _eventId !== "AIBotMatch") ||
       (eventId === ALL_EVENT_TRACKS &&
@@ -320,6 +322,8 @@ class Aggregator {
 
   _processMatch(match) {
     const statsToUpdate = [this.stats];
+    const cardsDb = Database.getDb();
+    const rankedEvents = cardsDb.get("ranked_events");
     // on play vs draw
     if (match.onThePlay && match.player) {
       statsToUpdate.push(
