@@ -3,6 +3,7 @@
 function onLabelOutLogInfo(entry, json) {
   if (!json) return;
   logTime = parseWotcTime(entry.timestamp);
+  const cardsDb = Database.getDb();
 
   if (json.params.messageName == "Client.Connected") {
     logLanguage = json.params.payloadObject.settings.language.language;
@@ -317,6 +318,7 @@ function onLabelInEventGetPlayerCourseV2(entry, json) {
 function onLabelInDeckUpdateDeck(entry, json) {
   if (!json) return;
   logTime = parseWotcTime(entry.timestamp);
+  const cardsDb = Database.getDb();
 
   decks.index.forEach(function(_deckid) {
     if (_deckid == json.id) {
@@ -543,6 +545,9 @@ function onLabelOutEventAIPractice(entry, json) {
 
 function onLabelInDraftDraftStatus(entry, json) {
   if (!json) return;
+
+  const cardsDb = Database.getDb();
+  const setsList = cardsDb.get("sets");
 
   if (json.eventName != undefined) {
     for (let set in setsList) {
