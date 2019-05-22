@@ -5,10 +5,10 @@ globals
   compare_cards,
   createDivision,
   currentId,
+  Database,
   DataScroller,
   deck_tags,
   decks,
-  eventsToFormat,
   FilterPanel,
   get_deck_colors,
   get_rank_index,
@@ -24,7 +24,6 @@ globals
   ListItem,
   playerData,
   selectAdd,
-  setsList,
   setTagColor,
   showLoadingBars,
   sidebarActive,
@@ -211,6 +210,9 @@ function renderData(container, index) {
     return 0;
   }
 
+  const cardsDb = Database.getDb();
+  const setsList = cardsDb.get("sets");
+
   let tileGrpid, clickCallback, deleteCallback;
   if (match.type == "match") {
     tileGrpid = match.playerDeck.deckTileId;
@@ -323,6 +325,8 @@ function attachMatchData(listItem, match) {
   listItem.rightBottom.appendChild(tags_div);
 
   // Set tag
+  const cardsDb = Database.getDb();
+  const eventsToFormat = cardsDb.get("events_format");
   let t = eventsToFormat[match.eventId];
   let tags = [];
   if (t && deck_tags[t]) {
