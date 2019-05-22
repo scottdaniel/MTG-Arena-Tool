@@ -103,7 +103,7 @@ function httpBasic() {
           protocol: "https:",
           port: 443,
           hostname: serverAddress,
-          path: "/database/database.json",
+          path: "/database",
           method: "GET"
         };
       } else if (_headers.method == "get_ladder_decks") {
