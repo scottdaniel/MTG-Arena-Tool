@@ -428,14 +428,18 @@ function compare_cards(a, b) {
   // Yeah this is lazy.. I know
   a = cardsDb.get(a.id);
   b = cardsDb.get(b.id);
-  var as = get_card_type_sort(a.type);
-  var bs = get_card_type_sort(b.type);
+
+  if (!a) return 1;
+  if (!b) return -1;
+
+  var _as = get_card_type_sort(a.type);
+  var _bs = get_card_type_sort(b.type);
 
   // Order by type?
-  if (as < bs) {
+  if (_as < _bs) {
     return -1;
   }
-  if (as > bs) {
+  if (_as > _bs) {
     return 1;
   }
 
