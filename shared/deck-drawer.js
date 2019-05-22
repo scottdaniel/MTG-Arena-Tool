@@ -82,14 +82,20 @@ exports.cardTile = function(
 ) {
   if (quantity === 0) return false;
 
-  //
+  let card;
+  if (typeof grpId == "object" && grpId.name) {
+    card = grpId;
+    grpId = grpId.id;
+  } else {
+    card = cardsDb.get(grpId);
+  }
+
   const cont = createDivision(["card_tile_container", "click-on"]);
 
   cont.dataset["grpId"] = grpId;
   cont.dataset["id"] = indent;
   cont.dataset["quantity"] = quantity;
 
-  let card = cardsDb.get(grpId);
   let ww, ll;
 
   if (!isNumber(quantity)) {
