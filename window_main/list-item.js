@@ -2,9 +2,9 @@
 /*
 globals
   $$,
-  cardsDb,
   createDivision
 */
+const Database = require("../shared/database.js");
 
 class ListItem {
   constructor(_grpId, _id, _onClick, _onDelete = false, isArchived = false) {
@@ -26,6 +26,7 @@ class ListItem {
     this.deleteButton.title = isArchived
       ? "restore"
       : "archive (will not delete data)";
+    const cardsDb = Database.getDb();
     let cardObj = cardsDb.get(_grpId);
     this.imageContainer = createDivision(["list_item_image"]);
     try {
