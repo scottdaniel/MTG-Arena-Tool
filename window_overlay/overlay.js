@@ -2,15 +2,12 @@
 global
   $$,
   addCardHover,
-  cardsDb,
   compare_cards,
   CardsList,
   Colors,
+  Database,
   Deck,
-  eventsList,
-  eventsToFormat,
   get_card_type_sort,
-  setsList
   $
 */
 const {
@@ -103,6 +100,7 @@ const fix = new TransparencyMouseFix({
 //
 function get_ids_colors(list) {
   var colors = [];
+  const cardsDb = Database.getDb();
   list.forEach(function(grpid) {
     var cdb = cardsDb.get(grpid);
     if (cdb) {
@@ -140,6 +138,7 @@ function compare_chances(a, b) {
 //
 function compare_draft_cards(a, b) {
   // Yeah this is lazy.. I know
+  const cardsDb = Database.getDb();
   a = cardsDb.get(a);
   b = cardsDb.get(b);
   var as = get_card_type_sort(a.type);
@@ -263,24 +262,6 @@ function recreateClock() {
 
   updateClock();
 }
-
-//
-ipc.on("set_db", function(event, arg) {
-  try {
-    arg = JSON.parse(arg);
-    setsList = arg.sets;
-    eventsList = arg.events;
-    eventsToFormat = arg.events_format;
-    delete arg.sets;
-    delete arg.events;
-    delete arg.events_format;
-    delete arg.ranked_events;
-    cardsDb.set(arg);
-  } catch (e) {
-    console.log("Error parsing metadata", e);
-    return false;
-  }
-});
 
 //
 ipc.on("set_timer", function(event, arg) {
@@ -483,6 +464,7 @@ function updateView() {
   //
   // Action Log Mode
   //
+  const cardsDb = Database.getDb();
   deckListDiv = $(".overlay_decklist");
   if (deckMode == 4) {
     $(".overlay_deckname").html("Action Log");
@@ -827,6 +809,7 @@ function setDraft(_packN = -1, _pickN = -1) {
       $(".overlay_decklist").append(tile);
     });
   } else if (draftMode == 1) {
+    const cardsDb = Database.getDb();
     let key = "pack_" + packN + "pick_" + pickN;
     let draftPack = currentDraft[key];
     let pick = "";
@@ -889,6 +872,7 @@ function compare_logs(a, b) {
 }
 
 function compare_draft_picks(a, b) {
+  const cardsDb = Database.getDb();
   var arank = cardsDb.get(a).rank;
   var brank = cardsDb.get(b).rank;
 
@@ -902,6 +886,7 @@ function hoverCard(grpId) {
   if (grpId == undefined) {
     $(".overlay_hover").css("opacity", 0);
   } else {
+    const cardsDb = Database.getDb();
     //let dfc = '';
     //if (cardsDb.get(grpId).dfc == 'DFC_Back') dfc = 'a';
     //if (cardsDb.get(grpId).dfc == 'DFC_Front')  dfc = 'b';
