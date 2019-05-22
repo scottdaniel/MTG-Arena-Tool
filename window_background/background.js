@@ -1,9 +1,8 @@
 /*
 global
-  cardsDb,
   compare_archetypes,
+  Database,
   Deck,
-  eventsToFormat,
   get_rank_index,
   playerDataDefault,
   hypergeometricRange,
@@ -1390,6 +1389,7 @@ function setDraftCards(json) {
 }
 
 function actionLogGenerateLink(grpId) {
+  const cardsDb = Database.getDb();
   var card = cardsDb.get(grpId);
   return '<log-card id="' + grpId + '">' + card.name + "</log-card>";
 }
@@ -1624,6 +1624,8 @@ function getOppDeck() {
   _deck.mainboard.removeDuplicates(true);
   _deck.getColors();
 
+  const cardsDb = Database.getDb();
+  const eventsToFormat = cardsDb.get("events_format");
   let format = eventsToFormat[currentMatch.eventId];
   currentMatch.opponent.deck.archetype = "-";
   let bestMatch = "-";
