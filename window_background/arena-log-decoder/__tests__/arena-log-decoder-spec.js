@@ -1,3 +1,5 @@
+/* eslint-env jest */
+
 const fs = require("fs");
 const ArenaLogDecoder = require("../arena-log-decoder");
 
