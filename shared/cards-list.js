@@ -9,18 +9,33 @@ class CardsList {
   /**
    * Creates a list of cards based on an array of objects with the form
    * {quantity, id}
-   * If an array of IDs is given it defaults all quantities to 1
+   * If an array of IDs is given it sets each quantity to the number of adjacent
+   * repetitions
    **/
   constructor(list = []) {
-    if (!list) list = [];
-    this._list = list.map(obj => {
-      return {
-        ...obj,
-        quantity: obj.quantity || 1,
-        id: obj.id || obj,
-        measurable: true
-      };
-    });
+    if (!list || list.length === 0) {
+      this._list = [];
+    } else if (typeof list[0] === "object") {
+      this._list = list.map(obj => {
+        return {
+          ...obj,
+          quantity: obj.quantity || 1,
+          id: obj.id || obj,
+          measurable: true
+        };
+      });
+    } else {
+      this._list = [];
+      let lastId = null;
+      list.forEach(id => {
+        if (id === lastId) {
+          this._list[this._list.length - 1].quantity++;
+        } else {
+          lastId = id;
+          this._list.push({ quantity: 1, id: id, measurable: true });
+        }
+      });
+    }
   }
 
   get() {
