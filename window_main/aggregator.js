@@ -411,12 +411,14 @@ class Aggregator {
     }
     // update relevant stats
     statsToUpdate.forEach(stats => {
-      stats.total++;
       // some of the data is wierd. Games which last years or have no data.
       if (match.duration && match.duration < 3600) {
         stats.duration += match.duration;
       }
       if (match.player && match.opponent) {
+        if (match.player.win || match.opponent.win) {
+          stats.total++;
+        }
         if (match.player.win > match.opponent.win) {
           stats.wins++;
         } else if (match.player.win < match.opponent.win) {
