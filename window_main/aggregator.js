@@ -10,7 +10,11 @@ globals
   rankedEvents,
   season_starts
 */
-const { COLORS_ALL, COLORS_BRIEF } = require("../shared/constants.js");
+const {
+  COLORS_ALL,
+  COLORS_BRIEF,
+  DEFAULT_TILE
+} = require("../shared/constants.js");
 
 // Default filter values
 const DEFAULT_DECK = "All Decks";
@@ -82,7 +86,9 @@ class Aggregator {
           match.playerDeck.colors = get_deck_colors(match.playerDeck);
         } else {
           match.playerDeck = JSON.parse(
-            '{"deckTileId":67003,"description":null,"format":"Standard","colors":[],"id":"00000000-0000-0000-0000-000000000000","isValid":false,"lastUpdated":"2018-05-31T00:06:29.7456958","lockedForEdit":false,"lockedForUse":false,"mainDeck":[],"name":"Undefined","resourceId":"00000000-0000-0000-0000-000000000000","sideboard":[]}'
+            '{"deckTileId":' +
+              DEFAULT_TILE +
+              ',"description":null,"format":"Standard","colors":[],"id":"00000000-0000-0000-0000-000000000000","isValid":false,"lastUpdated":"2018-05-31T00:06:29.7456958","lockedForEdit":false,"lockedForUse":false,"mainDeck":[],"name":"Undefined","resourceId":"00000000-0000-0000-0000-000000000000","sideboard":[]}'
           );
         }
         if (match.oppDeck && match.oppDeck.mainDeck) {
