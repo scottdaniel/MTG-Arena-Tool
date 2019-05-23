@@ -144,9 +144,17 @@ function getMatchesHistoryIndex(matchIndex) {
   return undefined;
 }
 
+function getWlGate(course) {
+  // quick hack to handle new War of the Spark Lore Events
+  const wlGate =
+    course.ModuleInstanceData.WinLossGate ||
+    course.ModuleInstanceData.WinNoGate;
+  return wlGate;
+}
+
 // Given a courses object returns all of the matches
 function getCourseStats(course) {
-  let wlGate = course.ModuleInstanceData.WinLossGate;
+  const wlGate = getWlGate(course);
   let matchesList = wlGate ? wlGate.ProcessedMatchIds : undefined;
   const stats = { wins: 0, losses: 0, duration: 0 };
   if (!matchesList) return stats;
@@ -207,7 +215,7 @@ function attachEventData(listItem, course) {
   );
 
   let { wins, losses } = stats;
-  const wlGate = course.ModuleInstanceData.WinLossGate;
+  const wlGate = getWlGate(course);
   if (filters.showArchived && wlGate) {
     wins = wlGate.CurrentWins;
     losses = wlGate.CurrentLosses;
@@ -318,12 +326,11 @@ function expandEvent(id) {
     return;
   }
 
-  var matchesList = course.ModuleInstanceData.WinLossGate.ProcessedMatchIds;
   expandDiv.innerHTML = "";
-
-  if (!matchesList) {
-    return;
-  }
+  const wlGate = getWlGate(course);
+  if (!wlGate) return;
+  const matchesList = wlGate.ProcessedMatchIds;
+  if (!matchesList) return;
 
   var matchRows = matchesList
     .map(
