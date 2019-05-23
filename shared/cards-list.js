@@ -32,7 +32,7 @@ class CardsList {
           this._list[this._list.length - 1].quantity++;
         } else {
           lastId = id;
-          this._list.push({ quantity: 1, id: id, measurable: true});
+          this._list.push({ quantity: 1, id: id, measurable: true });
         }
       });
     }
