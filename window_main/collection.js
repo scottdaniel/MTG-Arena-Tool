@@ -9,7 +9,7 @@ global
   change_background,
   createDivision,
   createSelect,
-  Database,
+  db,
   decks,
   get_card_image,
   get_set_scryfall,
@@ -39,11 +39,9 @@ let countMode = ALL_CARDS;
 //
 function get_collection_export(exportFormat) {
   var list = "";
-  const cardsDb = Database.getDb();
-  const setsList = cardsDb.get("sets");
   Object.keys(cards).forEach(function(key) {
     var add = exportFormat + "";
-    var card = cardsDb.get(key);
+    var card = db.card(key);
     if (card) {
       let name = card.name;
       name = replaceAll(name, "///", "//");
@@ -52,7 +50,7 @@ function get_collection_export(exportFormat) {
       add = add.replace("$Count", cards[key] == 9999 ? 1 : cards[key]);
 
       add = add.replace("$SetName", card.set);
-      add = add.replace("$SetCode", setsList[card.set].code);
+      add = add.replace("$SetCode", db.sets[card.set].code);
       add = add.replace("$Collector", card.cid);
       add = add.replace("$Rarity", card.rarity);
       add = add.replace("$Type", card.type);
@@ -66,9 +64,8 @@ function get_collection_export(exportFormat) {
 
 //
 function collectionSortCmc(a, b) {
-  const cardsDb = Database.getDb();
-  a = cardsDb.get(a);
-  b = cardsDb.get(b);
+  a = db.card(a);
+  b = db.card(b);
   if (parseInt(a.cmc) < parseInt(b.cmc)) return -1;
   if (parseInt(a.cmc) > parseInt(b.cmc)) return 1;
 
@@ -82,9 +79,8 @@ function collectionSortCmc(a, b) {
 
 //
 function collectionSortSet(a, b) {
-  const cardsDb = Database.getDb();
-  a = cardsDb.get(a);
-  b = cardsDb.get(b);
+  a = db.card(a);
+  b = db.card(b);
   if (a.set < b.set) return -1;
   if (a.set > b.set) return 1;
 
@@ -124,9 +120,8 @@ class CountStats {
 
 //
 function collectionSortName(a, b) {
-  const cardsDb = Database.getDb();
-  a = cardsDb.get(a);
-  b = cardsDb.get(b);
+  a = db.card(a);
+  b = db.card(b);
   if (a.name < b.name) return -1;
   if (a.name > b.name) return 1;
   return 0;
@@ -163,62 +158,49 @@ class SetStats {
 
 //
 function get_collection_stats() {
-  const cardsDb = Database.getDb();
-  const setsList = cardsDb.get("sets");
   const stats = {
     complete: new SetStats("complete")
   };
 
-  for (var set in setsList) {
+  for (var set in db.sets) {
     stats[set] = new SetStats(set);
   }
 
-  Object.keys(cardsDb.cards).forEach(function(grpId) {
-    if (
-      grpId != "ok" &&
-      grpId != "abilities" &&
-      grpId != "events" &&
-      grpId != "sets"
-    ) {
-      const card = cardsDb.get(grpId);
-      //var split = card.dfc == "SplitCard" && card.dfcId != 0;
-      //if (card.rarity !== "token" && card.rarity !== "land" && card.set !== "Oath of the Gatewatch" && card.dfc != "DFC_Front" && !split) {
-      if (card.collectible && card.rarity !== "land") {
-        // add to totals
-        stats[card.set][card.rarity].total += 4;
-        stats.complete[card.rarity].total += 4;
-        stats[card.set][card.rarity].unique += 1;
-        stats.complete[card.rarity].unique += 1;
+  db.cardList.forEach(card => {
+    if (!card.collectible || card.rarity === "land") return;
+    // add to totals
+    stats[card.set][card.rarity].total += 4;
+    stats.complete[card.rarity].total += 4;
+    stats[card.set][card.rarity].unique += 1;
+    stats.complete[card.rarity].unique += 1;
 
-        // add cards we own
-        if (cards[grpId] !== undefined) {
-          var owned = cards[grpId];
-          stats[card.set][card.rarity].owned += owned;
-          stats.complete[card.rarity].owned += owned;
-          stats[card.set][card.rarity].uniqueOwned += 1;
-          stats.complete[card.rarity].uniqueOwned += 1;
+    // add cards we own
+    if (cards[card.id] !== undefined) {
+      var owned = cards[card.id];
+      stats[card.set][card.rarity].owned += owned;
+      stats.complete[card.rarity].owned += owned;
+      stats[card.set][card.rarity].uniqueOwned += 1;
+      stats.complete[card.rarity].uniqueOwned += 1;
 
-          // count complete sets we own
-          if (owned == 4) {
-            stats[card.set][card.rarity].complete += 1;
-            stats.complete[card.rarity].complete += 1;
-          }
-        }
-
-        // count cards we know we want across decks
-        const wanted = Math.max(
-          ...decks
-            .filter(deck => deck && !deck.archived)
-            .map(deck => getCardsMissingCount(deck, grpId))
-        );
-        stats[card.set][card.rarity].wanted += wanted;
-        stats.complete[card.rarity].wanted += wanted;
-
-        // count unique cards we know we want across decks
-        stats[card.set][card.rarity].uniqueWanted += Math.min(1, wanted);
-        stats.complete[card.rarity].uniqueWanted += Math.min(1, wanted);
+      // count complete sets we own
+      if (owned == 4) {
+        stats[card.set][card.rarity].complete += 1;
+        stats.complete[card.rarity].complete += 1;
       }
     }
+
+    // count cards we know we want across decks
+    const wanted = Math.max(
+      ...decks
+        .filter(deck => deck && !deck.archived)
+        .map(deck => getCardsMissingCount(deck, card.id))
+    );
+    stats[card.set][card.rarity].wanted += wanted;
+    stats.complete[card.rarity].wanted += wanted;
+
+    // count unique cards we know we want across decks
+    stats[card.set][card.rarity].uniqueWanted += Math.min(1, wanted);
+    stats.complete[card.rarity].uniqueWanted += Math.min(1, wanted);
   });
 
   return stats;
@@ -226,12 +208,10 @@ function get_collection_stats() {
 
 //
 function openCollectionTab() {
-  const cardsDb = Database.getDb();
-  const setsList = cardsDb.get("sets");
   filteredSets = [];
   filteredMana = [];
   orderedSets = [];
-  for (let set in setsList) {
+  for (let set in db.sets) {
     orderedSets.push(set);
   }
 
@@ -374,7 +354,7 @@ function openCollectionTab() {
   orderedSets.forEach(set => {
     let setbutton = createDivision(["set_filter", "set_filter_on"]);
     setbutton.style.backgroundImage = `url(../images/sets/${
-      setsList[set].code
+      db.sets[set].code
     }.png)`;
     setbutton.title = set;
 
@@ -669,14 +649,12 @@ function printStats() {
   let rs = renderSetStats(stats.complete, "PW", "Complete collection");
   mainstats.appendChild(rs);
 
-  const cardsDb = Database.getDb();
-  const setsList = cardsDb.get("sets");
   // each set stats
   orderedSets
     .slice()
     .reverse()
     .forEach(set => {
-      let rs = renderSetStats(stats[set], setsList[set].code, set);
+      let rs = renderSetStats(stats[set], db.sets[set].code, set);
       mainstats.appendChild(rs);
     });
 
@@ -746,9 +724,7 @@ function renderSetStats(setStats, setIconCode, setName) {
     });
 
     // If the set has a collationId, it means boosters for it exists
-    const cardsDb = Database.getDb();
-    const setsList = cardsDb.get("sets");
-    if (setsList[setName] && setsList[setName].collation) {
+    if (db.sets[setName] && db.sets[setName].collation) {
       let chanceBoosterHasMythic = 0.125; // assume 1/8 of packs have a mythic
       let chanceBoosterHasRare = 1 - chanceBoosterHasMythic;
       let wantedText =
@@ -900,9 +876,8 @@ function printCards() {
 
   let totalCards = 0;
   let list;
-  const cardsDb = Database.getDb();
   if (filterUnown) {
-    list = cardsDb.cardList;
+    list = db.cardIds;
   } else {
     list = Object.keys(cards);
   }
@@ -918,7 +893,7 @@ function printCards() {
     let key = keysSorted[n];
 
     let grpId = key;
-    let card = cardsDb.get(grpId);
+    let card = db.card(grpId);
     let name = card.name.toLowerCase();
     let type = card.type.toLowerCase();
     let rarity = card.rarity;
@@ -1077,8 +1052,8 @@ function printCards() {
     addCardHover(img, card);
 
     img.addEventListener("click", () => {
-      if (cardsDb.get(grpId).dfc == "SplitHalf") {
-        card = cardsDb.get(card.dfcId);
+      if (db.card(grpId).dfc == "SplitHalf") {
+        card = db.card(card.dfcId);
       }
       //let newname = card.name.split(' ').join('-');
       shell.openExternal(
@@ -1155,11 +1130,7 @@ function printCards() {
 }
 
 function addCardMenu(div, card) {
-  const cardsDb = Database.getDb();
-  const setsList = cardsDb.get("sets");
-  let arenaCode = `1 ${card.name} (${setsList[card.set].arenacode}) ${
-    card.cid
-  }`;
+  let arenaCode = `1 ${card.name} (${db.sets[card.set].arenacode}) ${card.cid}`;
   div.addEventListener(
     "contextmenu",
     e => {

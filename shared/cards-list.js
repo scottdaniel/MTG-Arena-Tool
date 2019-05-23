@@ -1,5 +1,5 @@
 "use strict";
-const Database = require("./database.js");
+const db = require("./database.js");
 const Colors = require("./colors.js");
 
 class CardsList {
@@ -56,11 +56,10 @@ class CardsList {
       throw new Error("quantity must be a number");
     }
     if (byName) {
-      const cardsDb = Database.getDb();
       let removed = 0;
-      let cardToFind = cardsDb.get(grpId);
+      let cardToFind = db.card(grpId);
       this._list.forEach(function(card) {
-        let cardInList = cardsDb.get(card.id);
+        let cardInList = db.card(card.id);
         if (cardToFind.name == cardInList.name) {
           let remove = Math.min(card.quantity, quantity);
           card.quantity -= remove;
@@ -99,10 +98,9 @@ class CardsList {
    **/
   countTypesAll() {
     let types = { art: 0, cre: 0, enc: 0, ins: 0, lan: 0, pla: 0, sor: 0 };
-    const cardsDb = Database.getDb();
 
     this._list.forEach(function(card) {
-      let c = cardsDb.get(card.id);
+      let c = db.card(card.id);
       if (c) {
         if (c.type.includes("Land", 0))
           types.lan += card.measurable ? card.quantity : 1;
@@ -145,11 +143,10 @@ class CardsList {
    **/
   getColorsAmmounts() {
     let colors = { total: 0, w: 0, u: 0, b: 0, r: 0, g: 0, c: 0 };
-    const cardsDb = Database.getDb();
 
     this._list.forEach(function(card) {
       if (card.quantity > 0) {
-        cardsDb.get(card.id).cost.forEach(function(c) {
+        db.card(card.id).cost.forEach(function(c) {
           if (c.indexOf("w") !== -1) {
             colors.w += card.quantity;
             colors.total += card.quantity;
@@ -186,11 +183,10 @@ class CardsList {
    **/
   getLandsAmounts() {
     var colors = { total: 0, w: 0, u: 0, b: 0, r: 0, g: 0, c: 0 };
-    const cardsDb = Database.getDb();
 
     this._list.forEach(function(card) {
       var quantity = card.quantity;
-      card = cardsDb.get(card.id);
+      card = db.card(card.id);
       if (quantity > 0) {
         if (
           card.type.indexOf("Land") != -1 ||
@@ -244,10 +240,9 @@ class CardsList {
    * Get all colors in the list as a Colors object.
    **/
   getColors() {
-    const cardsDb = Database.getDb();
     let colors = new Colors();
     this._list.forEach(card => {
-      let cardData = cardsDb.get(card.id);
+      let cardData = db.card(card.id);
       if (cardData) {
         let isLand = cardData.type.indexOf("Land") !== -1;
         if (isLand && cardData.frame.length < 3) {
@@ -266,12 +261,11 @@ class CardsList {
    * Returns the new list (not a cardsList object)
    **/
   removeDuplicates(replaceList = true) {
-    const cardsDb = Database.getDb();
     var newList = [];
 
     this._list.forEach(function(card) {
-      let cardObj = cardsDb.get(card.id);
-      let found = newList.find(c => cardsDb.get(c.id).name === cardObj.name);
+      let cardObj = db.card(card.id);
+      let found = newList.find(c => db.card(c.id).name === cardObj.name);
       if (found) {
         if (found.measurable) {
           found.quantity += card.quantity;

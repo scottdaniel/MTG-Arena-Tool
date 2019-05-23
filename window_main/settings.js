@@ -5,7 +5,7 @@ global
   cardSize,
   change_background,
   createSelect,
-  Database,
+  db,
   get_card_image,
   hideLoadingBars,
   ipc_send,
@@ -342,8 +342,7 @@ function openSettingsTab(openSection = lastSettingsSection) {
       'px; !important" class="inventory_card_settings_img"></img>'
   );
 
-  const cardsDb = Database.getDb();
-  const card = cardsDb.get(67518);
+  const card = db.card(67518);
   img.attr("src", get_card_image(card));
   img.appendTo(d);
 

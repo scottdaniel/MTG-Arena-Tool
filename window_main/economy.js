@@ -5,7 +5,7 @@ global
   collectionSortRarity,
   createDivision
   createSelect,
-  Database,
+  db,
   DataScroller,
   economyHistory,
   formatNumber,
@@ -87,10 +87,8 @@ function getReadableQuest(questCode) {
 //
 function get_colation_set(collationid) {
   var ret = "";
-  const cardsDb = Database.getDb();
-  const setsList = cardsDb.get("sets");
-  Object.keys(setsList).forEach(function(setName) {
-    if (setsList[setName].collation == collationid) {
+  Object.keys(db.sets).forEach(function(setName) {
+    if (db.sets[setName].collation == collationid) {
       ret = setName;
     }
   });
@@ -101,8 +99,7 @@ function get_colation_set(collationid) {
 //
 function get_card_art(cardObj) {
   if (typeof cardObj !== "object") {
-    const cardsDb = Database.getDb();
-    cardObj = cardsDb.get(cardObj);
+    cardObj = db.card(cardObj);
   }
 
   if (!cardObj) {
@@ -312,16 +309,13 @@ function createChangeRow(change, economyId) {
 
   var bon, bos;
 
-  const cardsDb = Database.getDb();
-  const setsList = cardsDb.get("sets");
-
   if (change.contextPretty == "Booster Open") {
     change.delta.boosterDelta.forEach(function(booster) {
       var set = get_colation_set(booster.collationId);
 
       var bos = createDivision(["set_logo"]);
       bos.style.backgroundImage =
-        "url(../images/sets/" + setsList[set].code + ".png)";
+        "url(../images/sets/" + db.sets[set].code + ".png)";
       bos.title = set;
 
       var bon = createDivision();
@@ -465,7 +459,7 @@ function createChangeRow(change, economyId) {
 
       var bos = createDivision(["set_logo_med"]);
       bos.style.backgroundImage =
-        "url(../images/sets/" + setsList[set].code + ".png)";
+        "url(../images/sets/" + db.sets[set].code + ".png)";
       bos.title = set;
 
       var bon = createDivision();
@@ -530,7 +524,7 @@ function createChangeRow(change, economyId) {
   if (checkCardsAdded && change.delta.cardsAdded != undefined) {
     change.delta.cardsAdded.sort(collectionSortRarity);
     change.delta.cardsAdded.forEach(function(grpId) {
-      var card = cardsDb.get(grpId);
+      var card = db.card(grpId);
 
       var d = createDivision(["inventory_card"]);
       d.style.width = "39px";
@@ -546,8 +540,8 @@ function createChangeRow(change, economyId) {
       addCardHover(img, card);
 
       img.addEventListener("click", () => {
-        if (cardsDb.get(grpId).dfc == "SplitHalf") {
-          card = cardsDb.get(card.dfcId);
+        if (db.card(grpId).dfc == "SplitHalf") {
+          card = db.card(card.dfcId);
         }
         //let newname = card.name.split(' ').join('-');
         shell.openExternal(
@@ -565,7 +559,7 @@ function createChangeRow(change, economyId) {
   if (checkAetherized && change.aetherizedCards != undefined) {
     change.aetherizedCards.forEach(function(obj) {
       var grpId = obj.grpId;
-      var card = cardsDb.get(grpId);
+      var card = db.card(grpId);
       let draw = false;
       if (card) {
         if (change.delta.cardsAdded) {
@@ -599,8 +593,8 @@ function createChangeRow(change, economyId) {
         addCardHover(img, card);
 
         img.addEventListener("click", () => {
-          if (cardsDb.get(grpId).dfc == "SplitHalf") {
-            card = cardsDb.get(card.dfcId);
+          if (db.card(grpId).dfc == "SplitHalf") {
+            card = db.card(card.dfcId);
           }
           //let newname = card.name.split(' ').join('-');
           shell.openExternal(
@@ -618,7 +612,7 @@ function createChangeRow(change, economyId) {
 
   if (checkSkinsAdded && change.delta.artSkinsAdded != undefined) {
     change.delta.artSkinsAdded.forEach(obj => {
-      let card = cardsDb.getByArt(obj.artId);
+      let card = db.cardFromArt(obj.artId);
 
       bos = createDivision(["economy_skin_art"]);
       bos.title = card.name + " Skin";

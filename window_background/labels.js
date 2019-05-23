@@ -3,7 +3,6 @@
 function onLabelOutLogInfo(entry, json) {
   if (!json) return;
   logTime = parseWotcTime(entry.timestamp);
-  const cardsDb = Database.getDb();
 
   if (json.params.messageName == "Client.Connected") {
     logLanguage = json.params.payloadObject.settings.language.language;
@@ -37,13 +36,13 @@ function onLabelOutLogInfo(entry, json) {
         let instance = initialLibraryInstanceIds[i];
         while (
           (!instanceToCardIdMap[instance] ||
-            !cardsDb.get(instanceToCardIdMap[instance])) &&
+            !db.card(instanceToCardIdMap[instance])) &&
           idChanges[instance]
         ) {
           instance = idChanges[instance];
         }
         let cardId = instanceToCardIdMap[instance];
-        if (cardsDb.get(cardId)) {
+        if (db.card(cardId)) {
           game.shuffledOrder.push(cardId);
         } else {
           break;
@@ -95,8 +94,7 @@ function onLabelOutLogInfo(entry, json) {
       }
 
       game.handLands = game.handsDrawn.map(
-        hand =>
-          hand.filter(card => cardsDb.get(card).type.includes("Land")).length
+        hand => hand.filter(card => db.card(card).type.includes("Land")).length
       );
       let handSize = 8 - game.handsDrawn.length;
       let deckSize = 0;
@@ -109,7 +107,7 @@ function onLabelOutLogInfo(entry, json) {
         if (card.quantity >= 2 && card.quantity <= 4) {
           multiCardPositions[card.quantity][card.id] = [];
         }
-        let cardObj = cardsDb.get(card.id);
+        let cardObj = db.card(card.id);
         if (cardObj && cardObj.type.includes("Land")) {
           landsInDeck += card.quantity;
         }
@@ -125,7 +123,7 @@ function onLabelOutLogInfo(entry, json) {
           multiCardPositions[cardCount][cardId].push(i + 1);
         }
         if (i >= handSize) {
-          let card = cardsDb.get(cardId);
+          let card = db.card(cardId);
           if (card && card.type.includes("Land")) {
             landsSoFar++;
           }
@@ -318,7 +316,6 @@ function onLabelInEventGetPlayerCourseV2(entry, json) {
 function onLabelInDeckUpdateDeck(entry, json) {
   if (!json) return;
   logTime = parseWotcTime(entry.timestamp);
-  const cardsDb = Database.getDb();
 
   decks.index.forEach(function(_deckid) {
     if (_deckid == json.id) {
@@ -336,11 +333,11 @@ function onLabelInDeckUpdateDeck(entry, json) {
 
       // Check Mainboard
       _deck.mainDeck.forEach(function(card) {
-        var cardObj = cardsDb.get(card.id);
+        var cardObj = db.card(card.id);
 
         var diff = 0 - card.quantity;
         json.mainDeck.forEach(function(cardB) {
-          var cardObjB = cardsDb.get(cardB.id);
+          var cardObjB = db.card(cardB.id);
           if (cardObj.name == cardObjB.name) {
             cardB.existed = true;
             diff = cardB.quantity - card.quantity;
@@ -354,17 +351,17 @@ function onLabelInDeckUpdateDeck(entry, json) {
 
       json.mainDeck.forEach(function(card) {
         if (card.existed == undefined) {
-          let cardObj = cardsDb.get(card.id);
+          let cardObj = db.card(card.id);
           deltaDeck.changesMain.push({ id: card.id, quantity: card.quantity });
         }
       });
       // Check sideboard
       _deck.sideboard.forEach(function(card) {
-        var cardObj = cardsDb.get(card.id);
+        var cardObj = db.card(card.id);
 
         var diff = 0 - card.quantity;
         json.sideboard.forEach(function(cardB) {
-          var cardObjB = cardsDb.get(cardB.id);
+          var cardObjB = db.card(cardB.id);
           if (cardObj.name == cardObjB.name) {
             cardB.existed = true;
             diff = cardB.quantity - card.quantity;
@@ -378,7 +375,7 @@ function onLabelInDeckUpdateDeck(entry, json) {
 
       json.sideboard.forEach(function(card) {
         if (card.existed == undefined) {
-          let cardObj = cardsDb.get(card.id);
+          let cardObj = db.card(card.id);
           deltaDeck.changesSide.push({ id: card.id, quantity: card.quantity });
         }
       });
@@ -546,12 +543,9 @@ function onLabelOutEventAIPractice(entry, json) {
 function onLabelInDraftDraftStatus(entry, json) {
   if (!json) return;
 
-  const cardsDb = Database.getDb();
-  const setsList = cardsDb.get("sets");
-
   if (json.eventName != undefined) {
-    for (let set in setsList) {
-      let setCode = setsList[set]["code"];
+    for (let set in db.sets) {
+      let setCode = db.sets[set]["code"];
       if (json.eventName.indexOf(setCode) !== -1) {
         draftSet = set;
       }
@@ -575,8 +569,8 @@ function onLabelInDraftMakePick(entry, json) {
   if (!json) return;
   // store pack in recording
   if (json.eventName != undefined) {
-    for (let set in setsList) {
-      let setCode = setsList[set]["code"];
+    for (let set in db.sets) {
+      let setCode = db.sets[set]["code"];
       if (json.eventName.indexOf(setCode) !== -1) {
         currentDraft.set = set;
       }

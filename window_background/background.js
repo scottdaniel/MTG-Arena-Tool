@@ -1,7 +1,7 @@
 /*
 global
   compare_archetypes,
-  Database,
+  db,
   Deck,
   get_rank_index,
   playerDataDefault,
@@ -1389,8 +1389,7 @@ function setDraftCards(json) {
 }
 
 function actionLogGenerateLink(grpId) {
-  const cardsDb = Database.getDb();
-  var card = cardsDb.get(grpId);
+  var card = db.card(grpId);
   return '<log-card id="' + grpId + '">' + card.name + "</log-card>";
 }
 
@@ -1624,9 +1623,7 @@ function getOppDeck() {
   _deck.mainboard.removeDuplicates(true);
   _deck.getColors();
 
-  const cardsDb = Database.getDb();
-  const eventsToFormat = cardsDb.get("events_format");
-  let format = eventsToFormat[currentMatch.eventId];
+  let format = db.events_format[currentMatch.eventId];
   currentMatch.opponent.deck.archetype = "-";
   let bestMatch = "-";
   if (format && deck_archetypes[format]) {
@@ -1637,10 +1634,10 @@ function getOppDeck() {
     possible.forEach(arch => {
       let found = 0;
       arch.cards.forEach(card => {
-        let cName = cardsDb.get(card.id).name;
+        let cName = db.card(card.id).name;
 
         _deck.mainboard.get().forEach(oppCard => {
-          let oName = cardsDb.get(oppCard.id).name;
+          let oName = db.card(oppCard.id).name;
           if (cName == oName) {
             found += card.quantity / arch.average;
           }

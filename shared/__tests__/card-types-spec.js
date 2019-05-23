@@ -3,9 +3,8 @@
 const { cardType } = require("../card-types");
 
 const _ = require("lodash");
-const Database = require("../database.js");
-const cardsDb = Database.getDb();
-const cardsByName = _.keyBy(cardsDb.cardMap, "name");
+const db = require("../database.js");
+const cardsByName = _.keyBy(db.cards, "name");
 
 describe("card-types", () => {
   describe("cardType", () => {
@@ -24,7 +23,7 @@ describe("card-types", () => {
     });
 
     it("can determine the card type of any card except City's Blessing", () => {
-      cardsDb.cardList.forEach(card => {
+      db.cardList.forEach(card => {
         if (!_.has(card, "name")) return; // some properties are not cards :(
         if (card.name === "City's Blessing") return; // has no type
         if (card.id === 100) return; // has invalid type

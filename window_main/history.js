@@ -5,7 +5,7 @@ globals
   compare_cards,
   createDivision,
   currentId,
-  Database,
+  db,
   DataScroller,
   deck_tags,
   decks,
@@ -210,16 +210,13 @@ function renderData(container, index) {
     return 0;
   }
 
-  const cardsDb = Database.getDb();
-  const setsList = cardsDb.get("sets");
-
   let tileGrpid, clickCallback, deleteCallback;
   if (match.type == "match") {
     tileGrpid = match.playerDeck.deckTileId;
     clickCallback = openMatch;
     deleteCallback = archiveMatch;
   } else {
-    tileGrpid = setsList[match.set].tile;
+    tileGrpid = db.sets[match.set].tile;
     clickCallback = openDraft;
     deleteCallback = archiveMatch;
   }
@@ -325,9 +322,7 @@ function attachMatchData(listItem, match) {
   listItem.rightBottom.appendChild(tags_div);
 
   // Set tag
-  const cardsDb = Database.getDb();
-  const eventsToFormat = cardsDb.get("events_format");
-  let t = eventsToFormat[match.eventId];
+  let t = db.events_format[match.eventId];
   let tags = [];
   if (t && deck_tags[t]) {
     deck_tags[t].forEach(val => {

@@ -1,7 +1,7 @@
 /*
 globals
   activeEvents,
-  Database,
+  db,
   getReadableEvent,
   createSelect,
   timeSince,
@@ -108,9 +108,7 @@ function openExploreTab() {
 }
 
 function getEventPrettyName(event) {
-  const cardsDb = Database.getDb();
-  const eventsList = cardsDb.get("events");
-  return eventsList[event] ? eventsList[event] : event;
+  return db.events[event] || event;
 }
 
 function drawFilters() {
@@ -174,11 +172,8 @@ function drawFilters() {
    *  Event filter
    **/
   let eventFilters = [];
-  const cardsDb = Database.getDb();
-  const eventsList = cardsDb.get("events");
-  const rankedEvents = cardsDb.get("ranked_events");
   if (filterType == "Events") {
-    eventFilters = Object.keys(eventsList)
+    eventFilters = db.eventIds
       .concat(activeEvents)
       .map(ev => getEventPrettyName(ev))
       .filter(
@@ -190,12 +185,12 @@ function drawFilters() {
           item != "Play" &&
           item != "Traditional Play" &&
           item != "Traditional Ranked" &&
-          !rankedEvents.map(ev => getEventPrettyName(ev)).includes(item)
+          !db.ranked_events.map(ev => getEventPrettyName(ev)).includes(item)
       );
 
     eventFilters = [...new Set(eventFilters)];
   } else if (filterType == "Ranked Draft") {
-    eventFilters = rankedEvents.map(ev => getEventPrettyName(ev));
+    eventFilters = db.ranked_events.map(ev => getEventPrettyName(ev));
   } else if (filterType == "Ranked Constructed") {
     eventFilters.push("Ladder");
     eventFilters.push("Traditional Ladder");
@@ -405,10 +400,8 @@ function queryExplore(skip) {
   filterSkip = skip;
   let sortDir = filterSortDir == "Descending" ? -1 : 1;
 
-  const cardsDb = Database.getDb();
-  const eventsList = cardsDb.get("events");
-  let filterEventId = Object.keys(eventsList).filter(
-    key => eventsList[key] == filterEvent
+  let filterEventId = db.eventIds.filter(
+    key => db.events[key] === filterEvent
   )[0];
   filterEventId = !filterEventId ? filterEvent : filterEventId;
 
@@ -453,7 +446,6 @@ function setExploreDecks(data) {
 }
 
 function deckLoad(_deck, index) {
-  const cardsDb = Database.getDb();
   var mainDiv = document.getElementById("explore_list");
   index = "ladder_" + index;
 
@@ -495,7 +487,7 @@ function deckLoad(_deck, index) {
 
   var tileGrpid = _deck.tile;
   try {
-    let a = cardsDb.get(tileGrpid).images["art_crop"];
+    let a = db.card(tileGrpid).images["art_crop"];
   } catch (e) {
     tileGrpid = 67003;
   }
@@ -503,7 +495,7 @@ function deckLoad(_deck, index) {
   var tile = createDivision([index + "t", "deck_tile"]);
   tile.style.backgroundImage =
     "url(https://img.scryfall.com/cards" +
-    cardsDb.get(tileGrpid).images["art_crop"] +
+    db.card(tileGrpid).images["art_crop"] +
     ")";
 
   var div = createDivision([index, "list_deck"]);
@@ -549,11 +541,7 @@ function deckLoad(_deck, index) {
   let rcont = createDivision(["flex_item"]);
   rcont.style.marginLeft = "auto";
 
-  const eventsList = cardsDb.get("events");
-  let eventName = createDivision(
-    ["list_deck_name_it"],
-    eventsList[_deck.event]
-  );
+  let eventName = createDivision(["list_deck_name_it"], db.events[_deck.event]);
 
   var playerRank = createDivision(["ranks_16"]);
   playerRank.style.marginTop = "4px";
@@ -594,7 +582,6 @@ function deckLoad(_deck, index) {
 }
 
 function eventLoad(event, index) {
-  const cardsDb = Database.getDb();
   var mainDiv = document.getElementById("explore_list");
   index = "events_" + index;
 
@@ -632,7 +619,7 @@ function eventLoad(event, index) {
 
   var tileGrpid = event.tile;
   try {
-    let a = cardsDb.get(tileGrpid).images["art_crop"];
+    let a = db.card(tileGrpid).images["art_crop"];
   } catch (e) {
     tileGrpid = 67003;
   }
@@ -640,7 +627,7 @@ function eventLoad(event, index) {
   var tile = createDivision([index + "t", "deck_tile"]);
   tile.style.backgroundImage =
     "url(https://img.scryfall.com/cards" +
-    cardsDb.get(tileGrpid).images["art_crop"] +
+    db.card(tileGrpid).images["art_crop"] +
     ")";
 
   var div = createDivision([index, "list_deck"]);

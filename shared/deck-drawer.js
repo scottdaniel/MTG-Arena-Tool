@@ -6,7 +6,7 @@ global
   get_wc_missing,
   get_set_scryfall,
 */
-const Database = require("./database.js");
+const db = require("./database.js");
 const _ = require("lodash");
 
 //
@@ -80,14 +80,13 @@ exports.cardTile = function(
   isSideboard = false
 ) {
   if (quantity === 0) return false;
-  const cardsDb = Database.getDb();
 
   let card;
   if (grpId && grpId.name) {
     card = grpId;
     grpId = grpId.id;
   } else {
-    card = cardsDb.get(grpId);
+    card = db.card(grpId);
   }
 
   const cont = createDivision(["card_tile_container", "click-on"]);
@@ -182,7 +181,7 @@ exports.cardTile = function(
 
     glow.addEventListener("click", () => {
       if (card.dfc == "SplitHalf") {
-        card = cardsDb.get(card.dfcId);
+        card = db.card(card.dfcId);
       }
       shell.openExternal(
         `https://scryfall.com/card/${get_set_scryfall(card.set)}/${card.cid}/${

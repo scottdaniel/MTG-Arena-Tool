@@ -45,16 +45,24 @@ class Database {
     return clone;
   }
 
-  get cardList() {
+  get cardIds() {
     return Object.keys(this.cards);
+  }
+
+  get cardList() {
+    return Object.values(this.cards);
   }
 
   get events() {
     return this.data.events;
   }
 
+  get eventIds() {
+    return Object.keys(this.data.events);
+  }
+
   get eventList() {
-    return Object.keys(this.events);
+    return Object.values(this.events);
   }
 
   get events_format() {

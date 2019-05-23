@@ -10,7 +10,7 @@ globals
   season_starts
 */
 const { COLORS_ALL, COLORS_BRIEF } = require("../shared/constants.js");
-const Database = require("../shared/database.js");
+const db = require("../shared/database.js");
 
 // Default filter values
 const DEFAULT_DECK = "All Decks";
@@ -224,14 +224,12 @@ class Aggregator {
 
   filterEvent(_eventId) {
     const { eventId } = this.filters;
-    const cardsDb = Database.getDb();
-    const rankedEvents = cardsDb.get("ranked_events");
     return (
       (eventId === DEFAULT_EVENT && _eventId !== "AIBotMatch") ||
       (eventId === ALL_EVENT_TRACKS &&
         !SINGLE_MATCH_EVENTS.includes(_eventId)) ||
       (eventId === RANKED_CONST && CONSTRUCTED_EVENTS.includes(_eventId)) ||
-      (eventId === RANKED_DRAFT && rankedEvents.includes(_eventId)) ||
+      (eventId === RANKED_DRAFT && db.ranked_events.includes(_eventId)) ||
       eventId === _eventId
     );
   }
@@ -322,8 +320,6 @@ class Aggregator {
 
   _processMatch(match) {
     const statsToUpdate = [this.stats];
-    const cardsDb = Database.getDb();
-    const rankedEvents = cardsDb.get("ranked_events");
     // on play vs draw
     if (match.onThePlay && match.player) {
       statsToUpdate.push(
@@ -356,7 +352,7 @@ class Aggregator {
         }
         if (CONSTRUCTED_EVENTS.includes(match.eventId)) {
           statsToUpdate.push(this.constructedStats[rank]);
-        } else if (rankedEvents.includes(match.eventId)) {
+        } else if (db.ranked_events.includes(match.eventId)) {
           statsToUpdate.push(this.limitedStats[rank]);
         }
       }

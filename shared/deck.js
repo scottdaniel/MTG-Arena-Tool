@@ -6,7 +6,7 @@ globals
   getWildcardsMissing,
   objectClone
 */
-const Database = require("./database.js");
+const db = require("./database.js");
 const CardsList = require("./cards-list.js");
 const Colors = require("./colors.js");
 
@@ -103,13 +103,12 @@ class Deck {
       token: 0,
       land: 0
     };
-    const cardsDb = Database.getDb();
 
     if (countMainboard) {
       this.mainboard.get().forEach(card => {
         var grpid = card.id;
         var quantity = card.quantity;
-        var rarity = cardsDb.get(grpid).rarity;
+        var rarity = db.card(grpid).rarity;
 
         let add = getWildcardsMissing(grpid, quantity);
 
@@ -121,7 +120,7 @@ class Deck {
       this.sideboard.get().forEach(card => {
         var grpid = card.id;
         var quantity = card.quantity;
-        var rarity = cardsDb.get(grpid).rarity;
+        var rarity = db.card(grpid).rarity;
 
         let add = getWildcardsMissing(grpid, quantity);
 
@@ -136,12 +135,11 @@ class Deck {
    * Returns a txt format string of this deck.
    **/
   getExportTxt() {
-    const cardsDb = Database.getDb();
     let str = "";
     let mainList = this.mainboard.removeDuplicates(false);
     mainList.forEach(function(card) {
       let grpid = card.id;
-      let card_name = cardsDb.get(grpid).name;
+      let card_name = db.card(grpid).name;
 
       str += (card.measurable ? card.quantity : 1) + " " + card_name + "\r\n";
     });
@@ -151,7 +149,7 @@ class Deck {
     let sideList = this.sideboard.removeDuplicates(false);
     sideList.forEach(function(card) {
       let grpid = card.id;
-      let card_name = cardsDb.get(grpid).name;
+      let card_name = db.card(grpid).name;
 
       str += (card.measurable ? card.quantity : 1) + " " + card_name + "\r\n";
     });
@@ -160,17 +158,15 @@ class Deck {
   }
 
   getExportArena() {
-    const cardsDb = Database.getDb();
-    const setsList = cardsDb.get("sets");
     let str = "";
     let listMain = this.mainboard.removeDuplicates(false);
     listMain.forEach(function(card) {
       let grpid = card.id;
-      let cardObj = cardsDb.get(grpid);
+      let cardObj = db.card(grpid);
 
       if (cardObj.set == "Mythic Edition") {
         grpid = cardObj.reprints[0];
-        cardObj = cardsDb.get(grpid);
+        cardObj = db.card(grpid);
       }
 
       let card_name = cardObj.name;
@@ -178,7 +174,7 @@ class Deck {
       let card_cn = cardObj.cid;
       let card_q = card.measurable ? card.quantity : 1;
 
-      let set_code = setsList[card_set].arenacode || get_set_code(card_set);
+      let set_code = db.sets[card_set].arenacode || get_set_code(card_set);
       str += `${card_q} ${card_name} (${set_code}) ${card_cn} \r\n`;
     });
 
@@ -187,11 +183,11 @@ class Deck {
     let listSide = this.sideboard.removeDuplicates(false);
     listSide.forEach(function(card) {
       let grpid = card.id;
-      let cardObj = cardsDb.get(grpid);
+      let cardObj = db.card(grpid);
 
       if (cardObj.set == "Mythic Edition") {
         grpid = cardObj.reprints[0];
-        cardObj = cardsDb.get(grpid);
+        cardObj = db.card(grpid);
       }
 
       let card_name = cardObj.name;
@@ -199,7 +195,7 @@ class Deck {
       let card_cn = cardObj.cid;
       let card_q = card.measurable ? card.quantity : 1;
 
-      let set_code = setsList[card_set].arenacode || get_set_code(card_set);
+      let set_code = db.sets[card_set].arenacode || get_set_code(card_set);
       str += `${card_q} ${card_name} (${set_code}) ${card_cn} \r\n`;
     });
 

@@ -3,7 +3,7 @@ global
   addCardHover,
   compare_archetypes,
   compare_cards,
-  Database,
+  db,
   get_card_image,
   get_deck_colors,
   get_deck_export,
@@ -1051,13 +1051,12 @@ function makeResizable(div, resizeCallback, finalCallback) {
 
 //
 function drawDeck(div, deck, showWildcards = false) {
-  const cardsDb = Database.getDb();
   div.html("");
   const unique = makeId(4);
 
   // draw maindeck grouped by cardType
   const cardsByGroup = _(deck.mainDeck)
-    .map(card => ({ data: cardsDb.get(card.id), ...card }))
+    .map(card => ({ data: db.card(card.id), ...card }))
     .groupBy(card => {
       const cardType = cardTypes.cardType(card.data);
       switch (cardType) {
@@ -1122,7 +1121,7 @@ function drawDeck(div, deck, showWildcards = false) {
     // draw the cards
     _(deck.sideboard)
       .filter(card => card.quantity > 0)
-      .map(card => ({ data: cardsDb.get(card.id), ...card }))
+      .map(card => ({ data: db.card(card.id), ...card }))
       .orderBy(["data.cmc", "data.name"])
       .forEach(card => {
         const tile = deckDrawer.cardTile(
@@ -1151,7 +1150,6 @@ function drawCardList(div, cards) {
 
 //
 function drawDeckVisual(_div, _stats, deck) {
-  const cardsDb = Database.getDb();
   // PLACEHOLDER
   if (!(_div instanceof jQuery)) {
     _div = $(_div);
@@ -1163,7 +1161,7 @@ function drawDeckVisual(_div, _stats, deck) {
     for (var qq = 4; qq > -1; qq--) {
       deck.mainDeck.forEach(function(c) {
         var grpId = c.id;
-        var card = cardsDb.get(grpId);
+        var card = db.card(grpId);
         var quantity;
         if (card.type.indexOf("Land") == -1 && grpId != 67306) {
           if (card.cmc == cmc) {
@@ -1260,7 +1258,7 @@ function drawDeckVisual(_div, _stats, deck) {
   var _n = 0;
   newMainDeck.forEach(function(c) {
     var grpId = c.id;
-    var card = cardsDb.get(grpId);
+    var card = db.card(grpId);
 
     if (c.quantity > 0) {
       let dfc = "";
@@ -1316,7 +1314,7 @@ function drawDeckVisual(_div, _stats, deck) {
     _n = 0;
     deck.sideboard.forEach(function(c) {
       var grpId = c.id;
-      var card = cardsDb.get(grpId);
+      var card = db.card(grpId);
       if (c.quantity > 0) {
         let dfc = "";
         if (card.dfc == "DFC_Back") dfc = "a";
@@ -1543,9 +1541,7 @@ function open_draft(id) {
   $("#ux_1").html("");
   $("#ux_1").removeClass("flex_item");
   let draft = matchesHistory[id];
-  const cardsDb = Database.getDb();
-  const setsList = cardsDb.get("sets");
-  let tileGrpid = setsList[draft.set].tile;
+  let tileGrpid = db.sets[draft.set].tile;
 
   if (draftPosition < 1) draftPosition = 1;
   if (draftPosition > packSize * 6) draftPosition = packSize * 6;
@@ -1570,7 +1566,7 @@ function open_draft(id) {
   let flr = $('<div class="deck_top_colors"></div>');
   top.append(flr);
 
-  if (cardsDb.get(tileGrpid)) {
+  if (db.card(tileGrpid)) {
     change_background("", tileGrpid);
   }
 
@@ -1615,7 +1611,7 @@ function open_draft(id) {
     if (grpId == pick && draftPosition % 2 == 0) {
       img.addClass("draft_card_picked");
     }
-    var card = cardsDb.get(grpId);
+    var card = db.card(grpId);
     img.attr("src", get_card_image(card));
 
     img.appendTo(d);
@@ -1668,7 +1664,6 @@ function open_draft(id) {
 function open_match(id) {
   $("#ux_1").html("");
   $("#ux_1").removeClass("flex_item");
-  const cardsDb = Database.getDb();
   var match = matchesHistory[id];
 
   let top = $(
@@ -1694,7 +1689,7 @@ function open_match(id) {
   }
 
   var tileGrpid = match.playerDeck.deckTileId;
-  if (cardsDb.get(tileGrpid)) {
+  if (db.card(tileGrpid)) {
     change_background("", tileGrpid);
   }
   var fld = $('<div class="flex_item"></div>');
@@ -2069,7 +2064,6 @@ function open_match(id) {
 }
 
 function openActionLog(actionLogId) {
-  const cardsDb = Database.getDb();
   $("#ux_2").html("");
   let top = $(
     `<div class="decklist_top"><div class="button back actionlog_back"></div><div class="deck_name">Action Log</div><div class="deck_name"></div></div>`
@@ -2101,12 +2095,12 @@ function openActionLog(actionLogId) {
 
   $$("log-card").forEach(obj => {
     let grpId = obj.getAttribute("id");
-    addCardHover(obj, cardsDb.get(grpId));
+    addCardHover(obj, db.card(grpId));
   });
 
   $$("log-ability").forEach(obj => {
     let grpId = obj.getAttribute("id");
-    let abilityText = cardsDb.getAbility(grpId);
+    let abilityText = db.abilities[grpId] || "";
     obj.title = abilityText;
   });
 
@@ -2146,8 +2140,7 @@ function add_checkbox(div, label, iid, def, func) {
 //
 function change_background(arg = "default", grpId = 0) {
   let artistLine = "";
-  const cardsDb = Database.getDb();
-  const _card = cardsDb.get(grpId);
+  const _card = db.card(grpId);
 
   //console.log(arg, grpId, _card);
   if (arg === "default") {

@@ -19,7 +19,7 @@ const {
   WHITE
 } = require("../shared/constants.js");
 
-const Database = require("../shared/database.js");
+const db = require("../shared/database.js");
 
 const Deck = require("../shared/deck.js");
 const CardsList = require("../shared/cards-list.js");
@@ -243,7 +243,6 @@ function addCardHover(element, card) {
   }
 
   element.addEventListener("mouseover", evt => {
-    const cardsDb = Database.getDb();
     $$(".loader, .main_hover").forEach(element => (element.style.opacity = 1));
 
     // Split cards are readable both halves, no problem
@@ -253,7 +252,7 @@ function addCardHover(element, card) {
         el.style.opacity = 1;
       });
 
-      var dfcCard = cardsDb.get(card.dfcId);
+      var dfcCard = db.card(card.dfcId);
       var dfcCardImage = get_card_image(dfcCard);
 
       var dfcImageElement = $$(".main_hover_dfc")[0];
@@ -305,8 +304,7 @@ function attachOwnerhipStars(card, starContainer) {
 //
 function get_card_image(cardObj) {
   if (typeof cardObj !== "object") {
-    const cardsDb = Database.getDb();
-    cardObj = cardsDb.get(cardObj);
+    cardObj = db.card(cardObj);
   }
 
   if (!cardObj) {
@@ -361,10 +359,8 @@ function getRecentDeckName(deckId) {
 
 //
 function getReadableEvent(arg) {
-  const cardsDb = Database.getDb();
-  const eventsList = cardsDb.get("events");
-  if (eventsList[arg] != undefined) {
-    return eventsList[arg];
+  if (db.events[arg] != undefined) {
+    return db.events[arg];
   }
 
   return arg;
@@ -382,12 +378,11 @@ function getReadableFormat(format) {
 function removeDuplicates(decklist) {
   var newList = [];
   try {
-    const cardsDb = Database.getDb();
     decklist.forEach(function(card) {
-      var cname = cardsDb.get(card.id).name;
+      var cname = db.card(card.id).name;
       var added = false;
       newList.forEach(function(c) {
-        var cn = cardsDb.get(c.id).name;
+        var cn = db.card(c.id).name;
         if (cn == cname) {
           if (c.quantity !== 9999) {
             c.quantity += card.quantity;
@@ -426,9 +421,8 @@ function get_card_type_sort(a) {
 //
 function compare_cards(a, b) {
   // Yeah this is lazy.. I know
-  const cardsDb = Database.getDb();
-  a = cardsDb.get(a.id);
-  b = cardsDb.get(b.id);
+  a = db.card(a.id);
+  b = db.card(b.id);
 
   if (!a) return 1;
   if (!b) return -1;
@@ -473,9 +467,7 @@ function compare_archetypes(a, b) {
 //
 function get_set_scryfall(set) {
   if (set == undefined) return "";
-  const cardsDb = Database.getDb();
-  const setsList = cardsDb.get("sets");
-  let s = setsList[set].scryfall;
+  let s = db.sets[set].scryfall;
   if (s == undefined) s = set;
   return s;
 }
@@ -483,9 +475,7 @@ function get_set_scryfall(set) {
 //
 function get_set_code(set) {
   if (set == undefined) return "";
-  const cardsDb = Database.getDb();
-  const setsList = cardsDb.get("sets");
-  let s = setsList[set].code;
+  let s = db.sets[set].code;
   if (s == undefined) s = set;
   return s;
 }
@@ -509,9 +499,8 @@ function getRaritySortValue(rarity) {
 }
 //
 function collectionSortRarity(a, b) {
-  const cardsDb = Database.getDb();
-  a = cardsDb.get(a);
-  b = cardsDb.get(b);
+  a = db.card(a);
+  b = db.card(b);
   if (getRaritySortValue(a.rarity) < getRaritySortValue(b.rarity)) return -1;
   if (getRaritySortValue(a.rarity) > getRaritySortValue(b.rarity)) return 1;
 
@@ -533,13 +522,12 @@ function collectionSortRarity(a, b) {
 function get_deck_colors(deck) {
   var colorIndices = [];
   try {
-    const cardsDb = Database.getDb();
     deck.mainDeck.forEach(card => {
       if (card.quantity < 1) {
         return;
       }
 
-      let cardData = cardsDb.get(card.id);
+      let cardData = db.card(card.id);
 
       if (!cardData) {
         return;
@@ -601,8 +589,7 @@ function get_wc_missing(deck, grpid, isSideboard) {
   // cap at 4 copies to handle petitioners, rat colony, etc
   needed = Math.min(4, needed);
 
-  const cardsDb = Database.getDb();
-  let card = cardsDb.get(grpid);
+  let card = db.card(grpid);
   let arr = card.reprints;
   if (!arr) arr = [grpid];
   else arr.push(grpid);
@@ -631,7 +618,6 @@ function get_wc_missing(deck, grpid, isSideboard) {
 //
 function get_deck_missing(deck) {
   let missing = { rare: 0, common: 0, uncommon: 0, mythic: 0 };
-  const cardsDb = Database.getDb();
   let alreadySeenIds = new Set(); // prevents double counting cards across main/sideboard
   let entireDeck = [...deck.mainDeck, ...deck.sideboard];
 
@@ -641,7 +627,7 @@ function get_deck_missing(deck) {
     if (alreadySeenIds.has(grpid)) {
       return;
     }
-    let rarity = cardsDb.get(grpid).rarity;
+    let rarity = db.card(grpid).rarity;
     missing[rarity] += getCardsMissingCount(deck, grpid);
     alreadySeenIds.add(grpid); // remember this card
   });
@@ -677,10 +663,9 @@ function getBoosterCountEstimate(wildcards) {
 //
 function get_deck_types_ammount(deck) {
   var types = { art: 0, cre: 0, enc: 0, ins: 0, lan: 0, pla: 0, sor: 0 };
-  const cardsDb = Database.getDb();
 
   deck.mainDeck.forEach(function(card) {
-    var c = cardsDb.get(card.id);
+    var c = db.card(card.id);
     if (c) {
       if (c.type.includes("Land", 0)) types.lan += card.quantity;
       else if (c.type.includes("Creature", 0)) types.cre += card.quantity;
@@ -698,16 +683,14 @@ function get_deck_types_ammount(deck) {
 //
 function get_deck_export(deck) {
   let str = "";
-  const cardsDb = Database.getDb();
-  const setsList = cardsDb.get("sets");
   deck.mainDeck = removeDuplicates(deck.mainDeck);
   deck.mainDeck.forEach(function(card) {
     let grpid = card.id;
-    let cardObj = cardsDb.get(grpid);
+    let cardObj = db.card(grpid);
 
     if (cardObj.set == "Mythic Edition") {
       grpid = cardObj.reprints[0];
-      cardObj = cardsDb.get(grpid);
+      cardObj = db.card(grpid);
     }
 
     let card_name = cardObj.name;
@@ -717,7 +700,7 @@ function get_deck_export(deck) {
     if (card_q == 9999) card_q = 1;
 
     try {
-      card_set = setsList[card_set].arenacode;
+      card_set = db.sets[card_set].arenacode;
       str +=
         card_q + " " + card_name + " (" + card_set + ") " + card_cn + "\r\n";
     } catch (e) {
@@ -738,11 +721,11 @@ function get_deck_export(deck) {
   deck.sideboard = removeDuplicates(deck.sideboard);
   deck.sideboard.forEach(function(card) {
     let grpid = card.id;
-    let cardObj = cardsDb.get(grpid);
+    let cardObj = db.card(grpid);
 
     if (cardObj.set == "Mythic Edition") {
       grpid = cardObj.reprints[0];
-      cardObj = cardsDb.get(grpid);
+      cardObj = db.card(grpid);
     }
 
     let card_name = cardObj.name;
@@ -752,7 +735,7 @@ function get_deck_export(deck) {
     if (card_q == 9999) card_q = 1;
 
     try {
-      card_set = setsList[card_set].arenacode;
+      card_set = db.sets[card_set].arenacode;
       str +=
         card_q + " " + card_name + " (" + card_set + ") " + card_cn + "\r\n";
     } catch (e) {
@@ -774,13 +757,12 @@ function get_deck_export(deck) {
 //
 function get_deck_export_txt(deck) {
   var str = "";
-  const cardsDb = Database.getDb();
   deck.mainDeck = removeDuplicates(deck.mainDeck);
   deck.mainDeck.forEach(function(card) {
     var grpid = card.id;
-    var card_name = cardsDb.get(grpid).name;
-    //var card_set = cardsDb.get(grpid).set;
-    //var card_cn = cardsDb.get(grpid).cid;
+    var card_name = db.card(grpid).name;
+    //var card_set = db.card(grpid).set;
+    //var card_cn = db.card(grpid).cid;
 
     str +=
       (card.quantity == 9999 ? 1 : card.quantity) + " " + card_name + "\r\n";
@@ -791,9 +773,9 @@ function get_deck_export_txt(deck) {
   deck.sideboard = removeDuplicates(deck.sideboard);
   deck.sideboard.forEach(function(card) {
     var grpid = card.id;
-    var card_name = cardsDb.get(grpid).name;
-    //var card_set = cardsDb.get(grpid).set;
-    //var card_cn = cardsDb.get(grpid).cid;
+    var card_name = db.card(grpid).name;
+    //var card_set = db.card(grpid).set;
+    //var card_cn = db.card(grpid).cid;
 
     str +=
       (card.quantity == 9999 ? 1 : card.quantity) + " " + card_name + "\r\n";
