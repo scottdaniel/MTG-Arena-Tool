@@ -82,7 +82,7 @@ exports.cardTile = function(
   if (quantity === 0) return false;
 
   let card;
-  if (grpId && grpId.name) {
+  if (grpId && typeof grpId == "object" && grpId.name) {
     card = grpId;
     grpId = grpId.id;
   } else {

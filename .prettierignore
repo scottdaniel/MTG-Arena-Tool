@@ -1,2 +1,21 @@
+# See https://prettier.io/docs/en/ignore.html for more about ignoring files.
+
+# dependencies
 shared/autocomplete.js
 window_background/messages_pb.js
+
+# assets
+images/*
+sounds/*
+fonts/*
+
+# development
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+
+# production
+/build
+/dist
