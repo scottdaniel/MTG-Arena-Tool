@@ -6,27 +6,24 @@ const otherKeys = [
   "sets",
   "events",
   "events_format",
+  "cards",
   "ranked_events",
   "abilities",
   "ok"
 ];
 
-let singleton = null;
 // Some other things should go here later, like updating from MTGA Servers themselves.
 class Database {
   constructor() {
+    if (Database.instance) return Database.instance;
+
     this.handleSetDb = this.handleSetDb.bind(this);
     if (ipc) ipc.on("set_db", this.handleSetDb);
     const dbUri = `${__dirname}/../resources/database.json`;
     const defaultDb = fs.readFileSync(dbUri, "utf8");
     this.handleSetDb(null, defaultDb);
-  }
 
-  static getDb() {
-    if (!singleton) {
-      singleton = new Database();
-    }
-    return singleton;
+    Database.instance = this;
   }
 
   handleSetDb(_event, arg) {
@@ -37,32 +34,58 @@ class Database {
     }
   }
 
-  get cardIds() {
-    return Object.keys(this.data).filter(key => !otherKeys.includes(key));
+  get abilities() {
+    return this.data.abilities;
   }
 
-  get cardList() {
-    return this.cardIds.map(id => this.data[id]);
-  }
-
-  get cardMap() {
+  get cards() {
+    if (this.data.cards) return this.data.cards;
     const clone = { ...this.data };
     otherKeys.forEach(key => delete clone[key]);
     return clone;
+  }
+
+  get cardList() {
+    return Object.keys(this.cards);
+  }
+
+  get events() {
+    return this.data.events;
+  }
+
+  get eventList() {
+    return Object.keys(this.events);
+  }
+
+  get events_format() {
+    return this.data.events_format;
+  }
+
+  get ranked_events() {
+    return this.data.ranked_events;
+  }
+
+  get sets() {
+    return this.data.sets;
+  }
+
+  card(id) {
+    if (this.data.cards) return this.data.cards[id] || false;
+    return this.data[id] || false;
+  }
+
+  event(id) {
+    return this.events[id] || false;
   }
 
   get(key) {
     return this.data[key] || false;
   }
 
-  getByArt(artId) {
+  cardFromArt(artId) {
     const matches = this.cardList.filter(card => card.artid === artId);
     return matches.length ? matches[0] : false;
   }
-
-  getAbility(abId) {
-    return this.data["abilities"][abId] || "";
-  }
 }
 
-module.exports = Database;
+module.exports = new Database();
