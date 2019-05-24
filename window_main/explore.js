@@ -18,7 +18,7 @@ globals
   getBoosterCountEstimate,
   $$
 */
-const { MANA, COLORS_BRIEF } = require("../shared/constants.js");
+const { MANA, COLORS_BRIEF, DEFAULT_TILE } = require("../shared/constants.js");
 
 let filterWCC = 0;
 let filterWCU = 0;
@@ -489,7 +489,7 @@ function deckLoad(_deck, index) {
   try {
     let a = db.card(tileGrpid).images["art_crop"];
   } catch (e) {
-    tileGrpid = 67003;
+    tileGrpid = DEFAULT_TILE;
   }
 
   var tile = createDivision([index + "t", "deck_tile"]);
@@ -621,7 +621,7 @@ function eventLoad(event, index) {
   try {
     let a = db.card(tileGrpid).images["art_crop"];
   } catch (e) {
-    tileGrpid = 67003;
+    tileGrpid = DEFAULT_TILE;
   }
 
   var tile = createDivision([index + "t", "deck_tile"]);

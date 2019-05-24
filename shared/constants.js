@@ -668,3 +668,5 @@ exports.MANA = {
 };
 
 exports.PACK_SIZES = { "Ravnica Allegiance": 14, "Guilds of Ravnica": 14 };
+
+exports.DEFAULT_TILE = 67003;

@@ -9,7 +9,11 @@ globals
   matchesHistory,
   season_starts
 */
-const { COLORS_ALL, COLORS_BRIEF } = require("../shared/constants.js");
+const {
+  COLORS_ALL,
+  COLORS_BRIEF,
+  DEFAULT_TILE
+} = require("../shared/constants.js");
 const db = require("../shared/database.js");
 
 // Default filter values
@@ -82,7 +86,9 @@ class Aggregator {
           match.playerDeck.colors = get_deck_colors(match.playerDeck);
         } else {
           match.playerDeck = JSON.parse(
-            '{"deckTileId":67003,"description":null,"format":"Standard","colors":[],"id":"00000000-0000-0000-0000-000000000000","isValid":false,"lastUpdated":"2018-05-31T00:06:29.7456958","lockedForEdit":false,"lockedForUse":false,"mainDeck":[],"name":"Undefined","resourceId":"00000000-0000-0000-0000-000000000000","sideboard":[]}'
+            '{"deckTileId":' +
+              DEFAULT_TILE +
+              ',"description":null,"format":"Standard","colors":[],"id":"00000000-0000-0000-0000-000000000000","isValid":false,"lastUpdated":"2018-05-31T00:06:29.7456958","lockedForEdit":false,"lockedForUse":false,"mainDeck":[],"name":"Undefined","resourceId":"00000000-0000-0000-0000-000000000000","sideboard":[]}'
           );
         }
         if (match.oppDeck && match.oppDeck.mainDeck) {
@@ -411,12 +417,14 @@ class Aggregator {
     }
     // update relevant stats
     statsToUpdate.forEach(stats => {
-      stats.total++;
       // some of the data is wierd. Games which last years or have no data.
       if (match.duration && match.duration < 3600) {
         stats.duration += match.duration;
       }
       if (match.player && match.opponent) {
+        if (match.player.win || match.opponent.win) {
+          stats.total++;
+        }
         if (match.player.win > match.opponent.win) {
           stats.wins++;
         } else if (match.player.win < match.opponent.win) {

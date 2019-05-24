@@ -163,7 +163,7 @@ label {
     width: calc(100% - 4px);
     height: 4px;
     position: absolute;
-    top: 91px;
+    top: 99px;
     animation-name: color;
     animation-duration: 2s;
     animation-iteration-count: infinite;

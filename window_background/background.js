@@ -243,9 +243,9 @@ var playerData = _.cloneDeep(playerDataDefault);
 var currentMatch = null;
 
 var renderer_state = 0;
-var originalDeck = {};
+var originalDeck = new Deck();
 
-var currentDeck = null;
+var currentDeck = new Deck();
 var duringMatch = false;
 var matchBeginTime = 0;
 var matchGameStats = [];
