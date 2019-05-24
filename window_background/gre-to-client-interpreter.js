@@ -446,32 +446,6 @@ function GREMessage(message, time) {
   //currentMatch.GREtoClient[message.msgId] = message;
   logTime = time;
 
-  if (
-    !currentMatch.msgId ||
-    message.msgId === 1 ||
-    message.msgId < currentMatch.msgId
-  ) {
-    // New game, reset per-game fields.
-    currentMatch.gameStage = "GameStage_Start";
-    currentMatch.opponent.cards = currentMatch.oppCardsUsed;
-    currentMatch.processedAnnotations = [];
-    currentMatch.timers = {};
-    currentMatch.zones = {};
-    currentMatch.players = {};
-    currentMatch.annotations = [];
-    currentMatch.gameObjs = {};
-    currentMatch.gameInfo = {};
-    currentMatch.turnInfo = {};
-    currentMatch.playerCardsUsed = [];
-    currentMatch.oppCardsUsed = [];
-    initialLibraryInstanceIds = [];
-    idChanges = {};
-    instanceToCardIdMap = {};
-  }
-  if (message.msgId) {
-    currentMatch.msgId = message.msgId;
-  }
-
   var fn = GREMessages[message.type];
   if (typeof fn == "function") {
     fn(message);
@@ -549,10 +523,36 @@ GREMessages.GREMessageType_QueuedGameStateMessage = function(msg) {
 };
 
 GREMessages.GREMessageType_GameStateMessage = function(msg) {
+  if (
+    !currentMatch.msgId ||
+    msg.msgId === 1 ||
+    msg.msgId < currentMatch.msgId
+  ) {
+    // New game, reset per-game fields.
+    currentMatch.gameStage = "GameStage_Start";
+    currentMatch.opponent.cards = currentMatch.oppCardsUsed;
+    currentMatch.processedAnnotations = [];
+    currentMatch.timers = {};
+    currentMatch.zones = {};
+    currentMatch.players = {};
+    currentMatch.annotations = [];
+    currentMatch.gameObjs = {};
+    currentMatch.gameInfo = {};
+    currentMatch.turnInfo = {};
+    currentMatch.playerCardsUsed = [];
+    currentMatch.oppCardsUsed = [];
+    initialLibraryInstanceIds = [];
+    idChanges = {};
+    instanceToCardIdMap = {};
+  }
+  if (msg.msgId) {
+    currentMatch.msgId = msg.msgId;
+  }
+
   let gameState = msg.gameStateMessage;
 
   if (gameState.gameInfo) {
-    checkGameInfo(currentMatch.gameInfo);
+    checkGameInfo(gameState.gameInfo);
     currentMatch.gameInfo = gameState.gameInfo;
   }
 
