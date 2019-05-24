@@ -8,6 +8,7 @@ globals
   objectClone
   setsList
 */
+const { DEFAULT_TILE } = require("../shared/constants.js");
 const CardsList = require("./cards-list.js");
 const Colors = require("./colors.js");
 
@@ -23,7 +24,7 @@ class Deck {
     this.name = mtgaDeck.name || "";
     this.id = mtgaDeck.id || "";
     this.lastUpdated = mtgaDeck.lastUpdated || "";
-    this.tile = mtgaDeck.deckTileId ? mtgaDeck.deckTileId : 67003;
+    this.tile = mtgaDeck.deckTileId ? mtgaDeck.deckTileId : DEFAULT_TILE;
     this._colors = undefined;
     this.tags = mtgaDeck.tags || [mtgaDeck.format];
     this.custom = mtgaDeck.custom || false;
