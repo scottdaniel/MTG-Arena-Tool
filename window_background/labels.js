@@ -289,10 +289,7 @@ function onLabelInEventGetPlayerCoursesV2(entry, json) {
 function onLabelInEventGetPlayerCourse(entry, json) {
   if (!json) return;
 
-  if (
-    json.Id !== "00000000-0000-0000-0000-000000000000" ||
-    json.InternalEventName === "Lore_WAR1_Momir"
-  ) {
+  if (json.Id != "00000000-0000-0000-0000-000000000000") {
     json.date = parseWotcTime(entry.timestamp);
     json._id = json.Id;
     delete json.Id;
@@ -311,15 +308,20 @@ function onLabelInEventGetPlayerCourse(entry, json) {
 
 function onLabelInEventGetPlayerCourseV2(entry, json) {
   if (!json) return;
-  if (json.InternalEventName === "Lore_WAR1_Momir" && !json.CourseDeck) {
-    json.CourseDeck = JSON.parse(
-      fs.readFileSync(`${__dirname}/../resources/Lore_WAR1_Momir.json`, "utf8")
-    );
-  }
   if (json.CourseDeck) {
     json.CourseDeck = convert_deck_from_v3(json.CourseDeck);
   }
   onLabelInEventGetPlayerCourse(entry, json);
+}
+
+function onLabelInEventJoin(entry, json) {
+  if (!json) return;
+
+  if (json.CourseDeck) {
+    json.CourseDeck.colors = get_deck_colors(json.CourseDeck);
+    addCustomDeck(json.CourseDeck);
+    select_deck(json);
+  }
 }
 
 function onLabelInDeckUpdateDeck(entry, json) {
@@ -739,6 +741,7 @@ module.exports = {
   onLabelClientToMatchServiceMessageTypeClientToGREMessage,
   onLabelInEventGetPlayerCourse,
   onLabelInEventGetPlayerCourseV2,
+  onLabelInEventJoin,
   onLabelInEventGetCombinedRankInfo,
   onLabelInDeckGetDeckLists,
   onLabelInDeckGetDeckListsV3,
