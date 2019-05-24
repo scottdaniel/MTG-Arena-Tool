@@ -111,8 +111,6 @@ let playerData = playerDataDefault;
 
 let economyHistory = [];
 
-let season_starts = new Date();
-let season_ends = new Date();
 let rewards_daily_ends = new Date();
 let rewards_weekly_ends = new Date();
 let activeEvents = [];
@@ -207,12 +205,6 @@ ipc.on("set_tags_colors", function(event, arg) {
   tags_colors = arg;
 });
 
-//
-ipc.on("set_db", () => {
-  canLogin = true;
-  showLogin();
-});
-
 ipc.on("show_login", () => {
   canLogin = true;
   showLogin();
@@ -272,12 +264,6 @@ ipc.on("set_player_data", (event, _data) => {
 //
 ipc.on("set_decks_last_used", (event, arg) => {
   playerData.decks_last_used = arg;
-});
-
-//
-ipc.on("set_season", function(event, arg) {
-  season_starts = arg.starts;
-  season_ends = arg.ends;
 });
 
 ipc.on("set_reward_resets", function(event, arg) {

@@ -685,30 +685,7 @@ function onLabelMatchGameRoomStateChangedEvent(entry, json) {
 
 function onLabelInEventGetSeasonAndRankDetail(entry, json) {
   if (!json) return;
-
-  season_starts = new Date(json.currentSeason.seasonStartTime);
-  season_ends = new Date(json.currentSeason.seasonEndTime);
-
-  json.constructedRankInfo.forEach(rank => {
-    if (
-      rank.rankClass == playerData.rank.constructed.rank &&
-      rank.level == playerData.rank.constructed.tier
-    ) {
-      playerData.rank.constructed.steps = rank.steps;
-    }
-  });
-
-  json.limitedRankInfo.forEach(rank => {
-    if (
-      rank.rankClass == playerData.rank.limited.rank &&
-      rank.level == playerData.rank.limited.tier
-    ) {
-      playerData.rank.limited.steps = rank.steps;
-    }
-  });
-
-  ipc_send("set_season", { starts: season_starts, ends: season_ends });
-  updateRank();
+  ipc_send("set_season", json);
 }
 
 function onLabelGetPlayerInventoryGetRewardSchedule(entry, json) {

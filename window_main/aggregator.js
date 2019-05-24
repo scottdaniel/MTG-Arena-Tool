@@ -6,8 +6,7 @@ globals
   getDeck,
   getReadableEvent,
   getRecentDeckName,
-  matchesHistory,
-  season_starts
+  matchesHistory
 */
 const {
   COLORS_ALL,
@@ -156,7 +155,7 @@ class Aggregator {
     const { date } = this.filters;
     let dateFilter = null;
     if (date === DATE_SEASON) {
-      dateFilter = season_starts;
+      dateFilter = db.season_starts;
     } else if (date === DATE_LAST_30) {
       dateFilter = DAYS_AGO_30;
     } else {
