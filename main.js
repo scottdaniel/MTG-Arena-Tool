@@ -186,6 +186,12 @@ function startApp() {
         }
         break;
 
+      case "set_player_data":
+        mainWindow.webContents.send("set_player_data", arg);
+        overlay.webContents.send("set_player_data", arg);
+        background.webContents.send("set_player_data", arg);
+        break;
+
       case "set_season":
         mainWindow.webContents.send("set_season", arg);
         background.webContents.send("set_season", arg);
