@@ -495,7 +495,7 @@ ipc.on("set_home", function(event, arg) {
   Object.keys(deck_tags).forEach(function(format) {
     deck_tags[format].sort(compare_archetypes);
   });
-  ipc_send("set_deck_archetypes", arg.tags);
+  ipc_send("set_deck_archetypes", arg.archetypes);
   if (sidebarActive == -1) {
     console.log("Home", arg);
     openHomeTab(arg);
@@ -691,6 +691,7 @@ ipc.on("initialize", function() {
   $(".top_username_id").html(playerData.name.slice(-6));
 
   sidebarActive = lastTab;
+  ipc_send("request_home", filteredWildcardsSet);
   openTab(sidebarActive);
 
   $(".top_nav").removeClass("hidden");
