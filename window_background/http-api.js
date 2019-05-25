@@ -4,7 +4,7 @@ global
   decks
   rstore
   loadPlayerConfig
-  playerData
+  pd,
   ipc_send
   debugNet
   store
@@ -259,10 +259,11 @@ function httpBasic() {
                 //ipc_send("auth", parsedResult.arenaids);
                 if (rstore.get("settings").remember_me) {
                   rstore.set("token", tokenAuth);
-                  rstore.set("email", playerData.userName);
+                  rstore.set("email", pd.userName);
                 }
-                playerData.patreon = parsedResult.patreon;
-                playerData.patreon_tier = parsedResult.patreon_tier;
+                const data = {};
+                data.patreon = parsedResult.patreon;
+                data.patreon_tier = parsedResult.patreon_tier;
 
                 let serverData = {
                   matches: [],
@@ -270,14 +271,15 @@ function httpBasic() {
                   drafts: [],
                   economy: []
                 };
-                if (playerData.patreon) {
+                if (data.patreon) {
                   serverData.matches = parsedResult.matches;
                   serverData.courses = parsedResult.courses;
                   serverData.drafts = parsedResult.drafts;
                   serverData.economy = parsedResult.economy;
                 }
-                ipc_send("set_player_data", playerData);
-                loadPlayerConfig(playerData.arenaId, serverData);
+                ipc_send("set_player_data", data);
+                ipc_send("player_data_updated");
+                loadPlayerConfig(pd.arenaId, serverData);
                 ipc_send("set_discord_tag", parsedResult.discord_tag);
                 beginSSE();
               }
@@ -422,16 +424,16 @@ function removeFromHttp(req) {
 
 function httpAuth(user, pass) {
   var _id = makeId(6);
-  playerData.userName = user;
+  ipc_send("set_player_data", { userName: user });
   httpAsync.push({
     reqId: _id,
     method: "auth",
     method_path: "/api/login.php",
     email: user,
     password: pass,
-    playerid: playerData.arenaId,
-    playername: encodeURIComponent(playerData.name),
-    mtgaversion: playerData.arenaVersion,
+    playerid: pd.arenaId,
+    playername: encodeURIComponent(pd.name),
+    mtgaversion: pd.arenaVersion,
     version: electron.remote.app.getVersion()
   });
 }
@@ -442,7 +444,7 @@ function httpSubmitCourse(course) {
     course.PlayerId = "000000000000000";
     course.PlayerName = "Anonymous";
   }
-  course.playerRank = playerData.rank.limited.rank;
+  course.playerRank = pd.rank.limited.rank;
   course = JSON.stringify(course);
   httpAsync.push({
     reqId: _id,

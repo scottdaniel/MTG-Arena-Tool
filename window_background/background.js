@@ -27,6 +27,7 @@ const manifestParser = require("./manifest-parser");
 const greToClientInterpreter = require("./gre-to-client-interpreter");
 const Deck = require("../shared/deck.js");
 const db = require("../shared/database");
+const pd = require("../shared/player-data.js");
 const { hypergeometricRange } = require("../shared/stats-fns");
 const {
   compare_archetypes,
@@ -239,7 +240,6 @@ var draftSet = "";
 var draftId = undefined;
 */
 
-var playerData = playerDataDefault();
 var currentMatch = null;
 
 var renderer_state = 0;
@@ -341,8 +341,7 @@ ipc.on("set_renderer_state", function(event, arg) {
 function offlineLogin() {
   ipc_send("auth", { ok: true, user: -1 });
   ipc_send("set_offline", true);
-  loadPlayerConfig(playerData.arenaId);
-  playerData.userName = "";
+  loadPlayerConfig(pd.arenaId);
 }
 
 //
@@ -367,15 +366,14 @@ ipc.on("auto_login", () => {
 ipc.on("login", function(event, arg) {
   if (arg.password == HIDDEN_PW) {
     tokenAuth = rstore.get("token");
-    playerData.userName = arg.username;
     httpApi.httpAuth(arg.username, arg.password);
   } else if (arg.username == "" && arg.password == "") {
     offlineLogin();
   } else {
-    playerData.userName = arg.username;
     tokenAuth = "";
     httpApi.httpAuth(arg.username, arg.password);
   }
+  ipc_send("set_player_data", { userName: arg.username });
 });
 
 //
@@ -529,16 +527,16 @@ function calculateRankWins() {
       platinum: { w: 0, l: 0, t: 0, r: "Platinum" },
       diamond: { w: 0, l: 0, t: 0, r: "Diamond" },
       mythic: { w: 0, l: 0, t: 0, r: "Mythic" },
-      step: playerData.rank.constructed.step,
+      step: pd.rank.constructed.step,
       steps: db.getRankSteps(
-        playerData.rank.constructed.rank,
-        playerData.rank.constructed.tier,
+        pd.rank.constructed.rank,
+        pd.rank.constructed.tier,
         false
       ),
       total: {
-        w: playerData.rank.constructed.won,
-        l: playerData.rank.constructed.lost,
-        t: playerData.rank.constructed.won + playerData.rank.constructed.lost
+        w: pd.rank.constructed.won,
+        l: pd.rank.constructed.lost,
+        t: pd.rank.constructed.won + pd.rank.constructed.lost
       }
     },
     limited: {
@@ -548,16 +546,12 @@ function calculateRankWins() {
       platinum: { w: 0, l: 0, t: 0, r: "Platinum" },
       diamond: { w: 0, l: 0, t: 0, r: "Diamond" },
       mythic: { w: 0, l: 0, t: 0, r: "Mythic" },
-      step: playerData.rank.limited.step,
-      steps: db.getRankSteps(
-        playerData.rank.limited.rank,
-        playerData.rank.limited.tier,
-        true
-      ),
+      step: pd.rank.limited.step,
+      steps: db.getRankSteps(pd.rank.limited.rank, pd.rank.limited.tier, true),
       total: {
-        w: playerData.rank.limited.won,
-        l: playerData.rank.limited.lost,
-        t: playerData.rank.limited.won + playerData.rank.limited.lost
+        w: pd.rank.limited.won,
+        l: pd.rank.limited.lost,
+        t: pd.rank.limited.won + pd.rank.limited.lost
       }
     }
   };
@@ -600,7 +594,7 @@ function calculateRankWins() {
 }
 
 ipc.on("request_explore", function(event, arg) {
-  if (playerData.userName == "") {
+  if (pd.userName === "") {
     ipc_send("offline", 1);
   } else {
     let cards = store.get("cards.cards");
@@ -617,7 +611,7 @@ ipc.on("request_course", function(event, arg) {
 });
 
 ipc.on("request_home", (event, set) => {
-  if (playerData.userName == "") {
+  if (pd.userName === "") {
     ipc_send("offline", 1);
   } else {
     httpApi.httpHomeGet(set);
@@ -725,8 +719,9 @@ function loadPlayerConfig(playerId, serverData = undefined) {
   var id, item;
   history.matches = entireConfig["matches_index"];
 
-  if (entireConfig["decks_last_used"]) {
-    playerData.decks_last_used = entireConfig["decks_last_used"];
+  const decks_last_used = entireConfig["decks_last_used"];
+  if (decks_last_used) {
+    ipc_send("set_player_data", { decks_last_used });
   }
 
   for (let i = 0; i < history.matches.length; i++) {
@@ -1031,11 +1026,14 @@ function onLogEntryFound(entry) {
   }
   let json;
   if (entry.type == "connection") {
-    playerData.arenaId = entry.socket.PlayerId;
-    playerData.arenaVersion = entry.socket.ClientVersion;
-    playerData.name = entry.socket.PlayerScreenName;
-    ipc_send("set_player_data", playerData);
-  } else if (entry.playerId && entry.playerId !== playerData.arenaId) {
+    const data = {
+      arenaId: entry.socket.PlayerId,
+      arenaVersion: entry.socket.ClientVersion,
+      name: entry.socket.PlayerScreenName
+    };
+    ipc_send("set_player_data", data);
+    ipc_send("player_data_updated");
+  } else if (entry.playerId && entry.playerId !== pd.arenaId) {
     return;
   } else {
     //console.log("Entry:", entry.label, entry, entry.json());
@@ -1318,43 +1316,33 @@ async function logLoop() {
       : await mtgaLog.readSegment(logUri, 0, size);
 
   // We are looping only to get user data (processLogUser)
-  processLogUser(logSegment);
-
-  if (playerData.arenaId) {
-    clearInterval(logLoopInterval);
-  }
-  prevLogSize = size;
-}
-
-// Process only the user data for initial loading (prior to log in)
-// Same logic as processLog() but without the processLogData() function
-function processLogUser(rawString) {
+  // Process only the user data for initial loading (prior to log in)
+  // Same logic as processLog() but without the processLogData() function
+  const rawString = logSegment;
   var splitString = rawString.split("[UnityCrossThread");
+  const parsedData = {};
 
   splitString.forEach(value => {
     //ipc_send("ipc_log", "Async: ("+index+")");
 
     // Get player Id
     let strCheck = '"playerId": "';
-    if (value.indexOf(strCheck) > -1) {
-      playerData.arenaId = unleakString(dataChop(value, strCheck, '"'));
+    if (value.includes(strCheck)) {
+      parsedData.arenaId = unleakString(dataChop(value, strCheck, '"'));
     }
 
     // Get User name
     strCheck = '"screenName": "';
-    if (value.indexOf(strCheck) > -1) {
-      playerData.name = unleakString(dataChop(value, strCheck, '"'));
-      ipc_send("set_player_data", playerData);
-      ipc_send("ipc_log", "Arena screen name: " + playerData.name);
+    if (value.includes(strCheck)) {
+      parsedData.name = unleakString(dataChop(value, strCheck, '"'));
     }
 
     // Get Client Version
     strCheck = '"clientVersion": "';
-    if (value.indexOf(strCheck) > -1) {
-      playerData.arenaVersion = unleakString(dataChop(value, strCheck, '"'));
-      ipc_send("ipc_log", "Arena version: " + playerData.arenaVersion);
+    if (value.includes(strCheck)) {
+      parsedData.arenaVersion = unleakString(dataChop(value, strCheck, '"'));
       // We request manifest data here
-      //manifestParser.requestManifestData(playerData.arenaVersion);
+      //manifestParser.requestManifestData(pd.arenaVersion);
     }
     /*
     if (firstPass) {
@@ -1363,7 +1351,18 @@ function processLogUser(rawString) {
     */
   });
 
-  if (firstPass && playerData.name == null) {
+  for (let key in parsedData) {
+    ipc_send("ipc_log", `Initial log parse: ${key}=${parsedData[key]}`);
+  }
+  ipc_send("set_player_data", parsedData);
+  ipc_send("player_data_updated");
+
+  if (pd.arenaId) {
+    clearInterval(logLoopInterval);
+  }
+  prevLogSize = size;
+
+  if (firstPass && pd.name === null) {
     ipc_send("popup", { text: "output_log contains no player data", time: 0 });
   }
 }
@@ -1488,7 +1487,7 @@ function changePriority(previous, current, time) {
 function getNameBySeat(seat) {
   try {
     if (seat == currentMatch.player.seat) {
-      return playerData.name.slice(0, -6);
+      return pd.name.slice(0, -6);
     } else {
       let oppName = currentMatch.opponent.name;
       if (oppName && oppName !== "Sparky") {
@@ -1553,7 +1552,7 @@ function createMatch(arg) {
   currentMatch.opponent.tier = arg.opponentRankingTier;
   currentMatch.opponent.cards = [];
   currentMatch.eventId = arg.eventId;
-  currentMatch.matchId = arg.matchId + "-" + playerData.arenaId;
+  currentMatch.matchId = arg.matchId + "-" + pd.arenaId;
   currentMatch.gameStage = "";
 
   currentMatch.beginTime = matchBeginTime;
@@ -1885,17 +1884,17 @@ function saveMatch(matchId) {
   };
   let rank, tier;
   if (ranked_events.includes(currentMatch.eventId)) {
-    rank = playerData.rank.limited.rank;
-    tier = playerData.rank.limited.tier;
+    rank = pd.rank.limited.rank;
+    tier = pd.rank.limited.tier;
   } else {
-    rank = playerData.rank.constructed.rank;
-    tier = playerData.rank.constructed.tier;
+    rank = pd.rank.constructed.rank;
+    tier = pd.rank.constructed.tier;
   }
   match.player = {
-    name: playerData.name,
+    name: pd.name,
     rank,
     tier,
-    userid: playerData.arenaId,
+    userid: pd.arenaId,
     seat: currentMatch.player.seat,
     win: pw
   };
@@ -1942,7 +1941,7 @@ function saveMatch(matchId) {
     }
     decks_last_used.push(deckId);
     store.set("decks_last_used", decks_last_used);
-    playerData.decks_last_used = decks_last_used;
+    ipc_send("set_player_data", { decks_last_used });
     ipc_send("set_decks_last_used", decks_last_used);
   }
 
@@ -1971,7 +1970,7 @@ function saveDraft() {
 
     currentDraft.id = currentDraft.draftId;
     currentDraft.date = new Date();
-    currentDraft.owner = playerData.name;
+    currentDraft.owner = pd.name;
 
     console.log("Save draft:", currentDraft);
 
@@ -2012,11 +2011,6 @@ function updateLoading(entry) {
   }
 }
 
-//
-function updateRank() {
-  ipc_send("set_player_data", playerData);
-}
-
 ///
 function finishLoading() {
   if (firstPass) {
@@ -2036,13 +2030,13 @@ function finishLoading() {
     obj = store.get("windowBounds");
     ipc_send("renderer_set_bounds", obj);
 
-    if (playerData.name != null) {
+    if (pd.name) {
       httpApi.httpSetPlayer(
-        playerData.name,
-        playerData.rank.constructed.rank,
-        playerData.rank.constructed.tier,
-        playerData.rank.limited.rank,
-        playerData.rank.limited.tier
+        pd.name,
+        pd.rank.constructed.rank,
+        pd.rank.constructed.tier,
+        pd.rank.limited.rank,
+        pd.rank.limited.tier
       );
     }
     ipc_send("popup", { text: `Reading log: 100%`, time: 1000, progress: -1 });

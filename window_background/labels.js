@@ -6,7 +6,6 @@
     currentMatch
     getNameBySeat
     logLanguage
-    playerData
     gameNumberCompleted
     initialLibraryInstanceIds
     instanceToCardIdMap
@@ -53,6 +52,7 @@
     oppWin
     matchCompletedOnGameNumber
     oppId
+    pd
 */
 
 const db = require("../shared/database");
@@ -113,7 +113,7 @@ function onLabelOutLogInfo(entry, json) {
     let playerName = getNameBySeat(payload.winningTeamId);
     actionLog(-1, logTime, `${playerName} Wins!`);
 
-    var mid = payload.matchId + "-" + playerData.arenaId;
+    var mid = payload.matchId + "-" + pd.arenaId;
     var time = payload.secondsCount;
     if (mid == currentMatch.matchId) {
       gameNumberCompleted = payload.gameNumber;
@@ -283,24 +283,26 @@ function onLabelClientToMatchServiceMessageTypeClientToGREMessage(entry, json) {
 
 function onLabelInEventGetCombinedRankInfo(entry, json) {
   if (!json) return;
+  const rank = { constructed: {}, limited: {} };
 
-  playerData.rank.constructed.rank = json.constructedClass;
-  playerData.rank.constructed.tier = json.constructedLevel;
-  playerData.rank.constructed.step = json.constructedStep;
+  rank.constructed.rank = json.constructedClass;
+  rank.constructed.tier = json.constructedLevel;
+  rank.constructed.step = json.constructedStep;
 
-  playerData.rank.limited.rank = json.limitedClass;
-  playerData.rank.limited.tier = json.limitedLevel;
-  playerData.rank.limited.step = json.limitedStep;
+  rank.limited.rank = json.limitedClass;
+  rank.limited.tier = json.limitedLevel;
+  rank.limited.step = json.limitedStep;
 
-  playerData.rank.constructed.won = json.constructedMatchesWon;
-  playerData.rank.constructed.lost = json.constructedMatchesLost;
-  playerData.rank.constructed.drawn = json.constructedMatchesDrawn;
+  rank.constructed.won = json.constructedMatchesWon;
+  rank.constructed.lost = json.constructedMatchesLost;
+  rank.constructed.drawn = json.constructedMatchesDrawn;
 
-  playerData.rank.limited.won = json.limitedMatchesWon;
-  playerData.rank.limited.lost = json.limitedMatchesLost;
-  playerData.rank.limited.drawn = json.limitedMatchesDrawn;
+  rank.limited.won = json.limitedMatchesWon;
+  rank.limited.lost = json.limitedMatchesLost;
+  rank.limited.drawn = json.limitedMatchesDrawn;
 
-  updateRank();
+  ipc_send("set_player_data", { rank });
+  ipc_send("player_data_updated");
 }
 
 function onLabelInEventGetActiveEvents(entry, json) {
@@ -312,18 +314,19 @@ function onLabelInEventGetActiveEvents(entry, json) {
 
 function onLabelRankUpdated(entry, json) {
   if (!json) return;
+  const rank = { constructed: {}, limited: {} };
 
   if (json.rankUpdateType == "Constructed") {
-    playerData.rank.constructed.rank = json.newClass;
-    playerData.rank.constructed.tier = json.newLevel;
-    playerData.rank.constructed.step = json.newStep;
+    rank.constructed.rank = json.newClass;
+    rank.constructed.tier = json.newLevel;
+    rank.constructed.step = json.newStep;
   } else {
-    playerData.rank.limited.rank = json.newClass;
-    playerData.rank.limited.tier = json.newLevel;
-    playerData.rank.limited.step = json.newStep;
+    rank.limited.rank = json.newClass;
+    rank.limited.tier = json.newLevel;
+    rank.limited.step = json.newStep;
   }
-
-  updateRank();
+  ipc_send("set_player_data", { rank });
+  ipc_send("player_data_updated");
 }
 
 function onLabelInDeckGetDeckLists(entry, json) {
@@ -734,7 +737,7 @@ function onLabelMatchGameRoomStateChangedEvent(entry, json) {
 
   if (json.stateType == "MatchGameRoomStateType_Playing") {
     json.gameRoomConfig.reservedPlayers.forEach(player => {
-      if (player.userId == playerData.arenaId) {
+      if (player.userId == pd.arenaId) {
         currentMatch.player.seat = player.systemSeatId;
       } else {
         currentMatch.opponent.name = player.playerName;
@@ -774,12 +777,12 @@ function onLabelMatchGameRoomStateChangedEvent(entry, json) {
       ipc_send("overlay_close", 1);
     }
     matchCompletedOnGameNumber = json.finalMatchResult.resultList.length - 1;
-    saveMatch(json.finalMatchResult.matchId + "-" + playerData.arenaId);
+    saveMatch(json.finalMatchResult.matchId + "-" + pd.arenaId);
   }
 
   if (json.players) {
     json.players.forEach(function(player) {
-      if (player.userId == playerData.arenaId) {
+      if (player.userId == pd.arenaId) {
         currentMatch.player.seat = player.systemSeatId;
       } else {
         oppId = player.userId;
