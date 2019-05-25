@@ -1633,7 +1633,7 @@ function getBestArchetype(deck) {
 
   // Calculate worst possible deviation for this deck
   let mainDeviations = [];
-  if (deck.mainDeck.length == 0)  return bestMatch;
+  if (deck.mainDeck.length == 0) return bestMatch;
   deck.mainDeck.forEach(card => {
     let deviation = card.quantity;
     mainDeviations.push(deviation * deviation);
@@ -1651,7 +1651,7 @@ function getBestArchetype(deck) {
       let name = cardsDb.get(card.id).name;
       let archMain = arch.average.mainDeck;
 
-      let deviation = q - (archMain[name] ? 1 : 0);// archMain[name] ? archMain[name] : 0 // for full data
+      let deviation = q - (archMain[name] ? 1 : 0); // archMain[name] ? archMain[name] : 0 // for full data
       mainDeviations.push(deviation * deviation);
       //console.log(name, deviation, q, archMain[name]);
     });
