@@ -128,7 +128,8 @@ const defaultCfg = {
     export_format: "$Name,$Count,$Rarity,$SetName,$Collector",
     back_color: "rgba(0,0,0,0.3)",
     back_url: "",
-    right_panel_width: 200
+    right_panel_width: 200,
+    last_open_tab: -1
   },
   economy_index: [],
   economy: [],
