@@ -1,3 +1,18 @@
+## <small>2.5.11 (2019-05-25)</small>
+
+* bugfix aggregator winrate total ([20774ad](https://github.com/Manuel-777/MTG-Arena-Tool/commit/20774ad))
+* bugfix background handles mormir events ([e314f05](https://github.com/Manuel-777/MTG-Arena-Tool/commit/e314f05))
+* bugfix events page handles lore events ([54f4253](https://github.com/Manuel-777/MTG-Arena-Tool/commit/54f4253))
+* bugfix list-item falls back on DEFAULT_TILE ([755e30d](https://github.com/Manuel-777/MTG-Arena-Tool/commit/755e30d))
+* Fix parsing of sideboarding and playerId in client GRE messages ([2789212](https://github.com/Manuel-777/MTG-Arena-Tool/commit/2789212))
+* loading bar offset ([e966eeb](https://github.com/Manuel-777/MTG-Arena-Tool/commit/e966eeb))
+* Momir and shuffledOrder fixes. ([5abf9f3](https://github.com/Manuel-777/MTG-Arena-Tool/commit/5abf9f3))
+* Prettier ([38a8166](https://github.com/Manuel-777/MTG-Arena-Tool/commit/38a8166))
+* Read deck from Event.Join. ([1df203d](https://github.com/Manuel-777/MTG-Arena-Tool/commit/1df203d))
+* replace 67003 with constants.DEFAULT_TILE ([b06ffde](https://github.com/Manuel-777/MTG-Arena-Tool/commit/b06ffde))
+
+
+
 ## <small>2.5.10 (2019-05-23)</small>
 
 * add clean scripts ([bc71d0a](https://github.com/Manuel-777/MTG-Arena-Tool/commit/bc71d0a))
