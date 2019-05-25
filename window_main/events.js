@@ -11,7 +11,7 @@ global
   matchesHistory
   ListItem
   open_match
-  playerData
+  pd,
   StatsPanel
 */
 
@@ -136,7 +136,7 @@ function getMatchesHistoryIndex(matchIndex) {
     return matchIndex;
   }
 
-  let newStyleMatchIndex = `${matchIndex}-${playerData.arenaId}`;
+  let newStyleMatchIndex = `${matchIndex}-${pd.arenaId}`;
   if (matchesHistory.hasOwnProperty(newStyleMatchIndex)) {
     return newStyleMatchIndex;
   }
@@ -336,9 +336,7 @@ function expandEvent(id) {
 
   var matchRows = matchesList
     .map(
-      index =>
-        matchesHistory[index] ||
-        matchesHistory[index + "-" + playerData.arenaId]
+      index => matchesHistory[index] || matchesHistory[index + "-" + pd.arenaId]
     )
     .filter(
       match =>

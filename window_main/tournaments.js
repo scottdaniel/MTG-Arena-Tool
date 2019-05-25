@@ -6,8 +6,8 @@ global
   drawDeck
   drawDeckVisual
   ipc_send
+  pd
   pop
-  playerData
 */
 
 const { queryElements: $$, createDivision } = require("../shared/dom-fns");
@@ -76,9 +76,9 @@ function tournamentOpen(t) {
   }
 
   let joined = false;
-  if (tou.players.indexOf(playerData.name) !== -1) {
+  if (tou.players.indexOf(pd.name) !== -1) {
     joined = true;
-    stats = tou.playerStats[playerData.name];
+    stats = tou.playerStats[pd.name];
     record = stats.w + " - " + stats.d + " - " + stats.l;
   }
 
@@ -159,7 +159,7 @@ function tournamentOpen(t) {
 
 function showTournamentRegister(mainDiv, tou) {
   let joined = false;
-  if (tou.players.indexOf(playerData.name) !== -1) {
+  if (tou.players.indexOf(pd.name) !== -1) {
     joined = true;
   }
 
@@ -276,9 +276,9 @@ function tournamentJoin(_id, _deck, _pass) {
 
 function showTournamentStarted(mainDiv, tou) {
   let joined = false;
-  if (tou.players.indexOf(playerData.name) !== -1) {
+  if (tou.players.indexOf(pd.name) !== -1) {
     joined = true;
-    stats = tou.playerStats[playerData.name];
+    stats = tou.playerStats[pd.name];
     record = stats.w + " - " + stats.d + " - " + stats.l;
   }
 

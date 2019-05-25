@@ -27,6 +27,7 @@ require("spectrum-colorpicker");
 require("time-elements");
 const striptags = require("striptags");
 
+const pd = require("../shared/player-data.js");
 const Aggregator = require("./aggregator.js");
 const ListItem = require("./list-item.js");
 const FilterPanel = require("./filter-panel.js");
@@ -109,8 +110,6 @@ let loggedIn = false;
 let canLogin = false;
 let offlineMode = false;
 let lastTab = -1;
-
-let playerData = playerDataDefault();
 
 let economyHistory = [];
 
@@ -221,15 +220,13 @@ function showLogin() {
 }
 
 //
-ipc.on("set_player_data", (event, _data) => {
-  playerData = _data;
-
+ipc.on("player_data_updated", () => {
   if (sidebarActive != -99) {
-    $(".top_username").html(playerData.name.slice(0, -6));
-    $(".top_username_id").html(playerData.name.slice(-6));
+    $(".top_username").html(pd.name.slice(0, -6));
+    $(".top_username_id").html(pd.name.slice(-6));
 
     let rankOffset;
-    let constructed = playerData.rank.constructed;
+    let constructed = pd.rank.constructed;
     rankOffset = get_rank_index(constructed.rank, constructed.tier);
     let constructedRankIcon = $$(".top_constructed_rank")[0];
     constructedRankIcon.style.backgroundPosition = rankOffset * -48 + "px 0px";
@@ -238,21 +235,21 @@ ipc.on("set_player_data", (event, _data) => {
       constructed.rank + " " + constructed.tier
     );
 
-    let limited = playerData.rank.limited;
+    let limited = pd.rank.limited;
     rankOffset = get_rank_index(limited.rank, limited.tier);
     let limitedRankIcon = $$(".top_limited_rank")[0];
     limitedRankIcon.style.backgroundPosition = rankOffset * -48 + "px 0px";
     limitedRankIcon.setAttribute("title", limited.rank + " " + limited.tier);
 
     let patreonIcon = $$(".top_patreon")[0];
-    if (playerData.patreon) {
-      let xoff = -40 * playerData.patreon_tier;
+    if (pd.patreon) {
+      let xoff = -40 * pd.patreon_tier;
       let title = "Patreon Basic Tier";
 
-      if (playerData.patreon_tier == 1) title = "Patreon Standard Tier";
-      if (playerData.patreon_tier == 2) title = "Patreon Modern Tier";
-      if (playerData.patreon_tier == 3) title = "Patreon Legacy Tier";
-      if (playerData.patreon_tier == 4) title = "Patreon Vintage Tier";
+      if (pd.patreon_tier == 1) title = "Patreon Standard Tier";
+      if (pd.patreon_tier == 2) title = "Patreon Modern Tier";
+      if (pd.patreon_tier == 3) title = "Patreon Legacy Tier";
+      if (pd.patreon_tier == 4) title = "Patreon Vintage Tier";
 
       patreonIcon.style.backgroundPosition = xoff + "px 0px";
       patreonIcon.setAttribute("title", title);
@@ -261,11 +258,6 @@ ipc.on("set_player_data", (event, _data) => {
       patreonIcon.style.display = "none";
     }
   }
-});
-
-//
-ipc.on("set_decks_last_used", (event, arg) => {
-  playerData.decks_last_used = arg;
 });
 
 ipc.on("set_reward_resets", function(event, arg) {
@@ -653,9 +645,9 @@ function openTab(tab) {
 
 //
 ipc.on("initialize", function() {
-  if (playerData.name) {
-    $(".top_username").html(playerData.name.slice(0, -6));
-    $(".top_username_id").html(playerData.name.slice(-6));
+  if (pd.name) {
+    $(".top_username").html(pd.name.slice(0, -6));
+    $(".top_username_id").html(pd.name.slice(-6));
   }
 
   sidebarActive = lastTab;
@@ -2282,8 +2274,8 @@ function sort_decks(compareFunc = compare_decks) {
 
 //
 function compare_decks(a, b) {
-  a = playerData.decks_last_used.indexOf(a.id);
-  b = playerData.decks_last_used.indexOf(b.id);
+  a = pd.decks_last_used.indexOf(a.id);
+  b = pd.decks_last_used.indexOf(b.id);
 
   if (a == b) {
     a = Date.parse(a.lastUpdated);

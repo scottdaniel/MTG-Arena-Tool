@@ -14,7 +14,7 @@ global
   open_match
   open_draft
   ListItem
-  playerData
+  pd,
   setTagColor
   showLoadingBars
   sidebarActive
@@ -429,8 +429,8 @@ function renderRanksStats(container) {
   let totalWon = rc.total.w;
   let totalWinrate = totalWon / rc.total.t;
   let currentRank = viewingLimitSeason
-    ? playerData.rank.limited.rank
-    : playerData.rank.constructed.rank;
+    ? pd.rank.limited.rank
+    : pd.rank.constructed.rank;
   let expected = getStepsUntilNextRank(viewingLimitSeason, totalWinrate);
   title = createDivision(
     ["ranks_history_title"],
@@ -613,7 +613,7 @@ function deleteTag(matchid, tag) {
 }
 
 function getStepsUntilNextRank(mode, winrate) {
-  let rr = mode ? playerData.rank.limited : playerData.rank.constructed;
+  let rr = mode ? pd.rank.limited : pd.rank.constructed;
 
   let cr = rr.rank;
   let cs = rr.step;
