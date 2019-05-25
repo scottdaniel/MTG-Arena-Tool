@@ -57,6 +57,7 @@ const {
   onLabelClientToMatchServiceMessageTypeClientToGREMessage,
   onLabelInEventGetPlayerCourse,
   onLabelInEventGetPlayerCourseV2,
+  onLabelInEventJoin,
   onLabelInEventGetCombinedRankInfo,
   onLabelInDeckGetDeckLists,
   onLabelInDeckGetDeckListsV3,
@@ -1049,6 +1050,13 @@ function onLogEntryFound(entry) {
             if (entry.arrow == "<==") {
               json = entry.json();
               onLabelInEventGetPlayerCourseV2(entry, json);
+            }
+            break;
+
+          case "Event.Join":
+            if (entry.arrow == "<==") {
+              json = entry.json();
+              onLabelInEventJoin(entry, json);
             }
             break;
 
