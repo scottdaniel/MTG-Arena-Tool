@@ -399,6 +399,22 @@ ipc.on("save_user_settings", function(event, settings) {
   ipc_send("show_loading");
   const oldSettings = store.get("settings");
   const updated = { ...oldSettings, ...settings };
+
+  // clean up garbage jQuery data that slipped into some configs
+  // TODO remove this after it has a chance to run everywhere
+  const jQueryGarbageKeys = [
+    "currentTarget",
+    "delegateTarget",
+    "handleObj",
+    "originalEvent",
+    "relatedTarget",
+    "target",
+    "timeStamp",
+    "type",
+    ...Object.keys(updated).filter(key => key.slice(0, 6) === "jQuery")
+  ];
+  jQueryGarbageKeys.forEach(key => delete updated[key]);
+
   loadSettings(updated);
   store.set("settings", updated);
   ipc_send("hide_loading");
