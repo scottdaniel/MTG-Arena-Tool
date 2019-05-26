@@ -269,7 +269,7 @@ var deck_changes_index = [];
 var deck_changes = {};
 var decks_tags = {};
 var tags_colors = {};
-var deck_archetypes = {};
+var deck_archetypes = [];
 
 var gold = 0;
 var gems = 0;
