@@ -999,7 +999,7 @@ function showLoadingBars() {
 }
 
 //
-ipc.on("show_loading", () => showLoadingBars());
+//ipc.on("show_loading", () => showLoadingBars());
 
 function hideLoadingBars() {
   $$(".main_loading")[0].style.display = "none";
@@ -1007,7 +1007,7 @@ function hideLoadingBars() {
 }
 
 //
-ipc.on("hide_loading", () => hideLoadingBars());
+//ipc.on("hide_loading", () => hideLoadingBars());
 
 //
 ipc.on("set_draft_link", function(event, arg) {
