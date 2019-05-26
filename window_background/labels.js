@@ -395,7 +395,10 @@ function onLabelInDeckUpdateDeck(entry, json) {
       });
 
       if (!deck_changes_index.includes(changeId)) {
-        if (deltaDeck.changesMain.length > 0 || deltaDeck.changesSide.length > 0) {
+        if (
+          deltaDeck.changesMain.length > 0 ||
+          deltaDeck.changesSide.length > 0
+        ) {
           deck_changes_index.push(changeId);
           deck_changes[changeId] = deltaDeck;
 
