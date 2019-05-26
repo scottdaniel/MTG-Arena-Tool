@@ -40,13 +40,13 @@ function onLabelOutLogInfo(entry, json) {
         let instance = initialLibraryInstanceIds[i];
         while (
           (!instanceToCardIdMap[instance] ||
-            !cardsDb.get(instanceToCardIdMap[instance])) &&
+            !db.card(instanceToCardIdMap[instance])) &&
           idChanges[instance]
         ) {
           instance = idChanges[instance];
         }
         let cardId = instanceToCardIdMap[instance];
-        if (cardsDb.get(cardId)) {
+        if (db.card(cardId)) {
           game.shuffledOrder.push(cardId);
         } else {
           break;
@@ -98,8 +98,7 @@ function onLabelOutLogInfo(entry, json) {
       }
 
       game.handLands = game.handsDrawn.map(
-        hand =>
-          hand.filter(card => cardsDb.get(card).type.includes("Land")).length
+        hand => hand.filter(card => db.card(card).type.includes("Land")).length
       );
       let handSize = 8 - game.handsDrawn.length;
       let deckSize = 0;
@@ -112,7 +111,7 @@ function onLabelOutLogInfo(entry, json) {
         if (card.quantity >= 2 && card.quantity <= 4) {
           multiCardPositions[card.quantity][card.id] = [];
         }
-        let cardObj = cardsDb.get(card.id);
+        let cardObj = db.card(card.id);
         if (cardObj && cardObj.type.includes("Land")) {
           landsInDeck += card.quantity;
         }
@@ -128,7 +127,7 @@ function onLabelOutLogInfo(entry, json) {
           multiCardPositions[cardCount][cardId].push(i + 1);
         }
         if (i >= handSize) {
-          let card = cardsDb.get(cardId);
+          let card = db.card(cardId);
           if (card && card.type.includes("Land")) {
             landsSoFar++;
           }
@@ -348,11 +347,11 @@ function onLabelInDeckUpdateDeck(entry, json) {
 
       // Check Mainboard
       _deck.mainDeck.forEach(function(card) {
-        var cardObj = cardsDb.get(card.id);
+        var cardObj = db.card(card.id);
 
         var diff = 0 - card.quantity;
         json.mainDeck.forEach(function(cardB) {
-          var cardObjB = cardsDb.get(cardB.id);
+          var cardObjB = db.card(cardB.id);
           if (cardObj.name == cardObjB.name) {
             cardB.existed = true;
             diff = cardB.quantity - card.quantity;
@@ -366,17 +365,17 @@ function onLabelInDeckUpdateDeck(entry, json) {
 
       json.mainDeck.forEach(function(card) {
         if (card.existed == undefined) {
-          let cardObj = cardsDb.get(card.id);
+          let cardObj = db.card(card.id);
           deltaDeck.changesMain.push({ id: card.id, quantity: card.quantity });
         }
       });
       // Check sideboard
       _deck.sideboard.forEach(function(card) {
-        var cardObj = cardsDb.get(card.id);
+        var cardObj = db.card(card.id);
 
         var diff = 0 - card.quantity;
         json.sideboard.forEach(function(cardB) {
-          var cardObjB = cardsDb.get(cardB.id);
+          var cardObjB = db.card(cardB.id);
           if (cardObj.name == cardObjB.name) {
             cardB.existed = true;
             diff = cardB.quantity - card.quantity;
@@ -390,7 +389,7 @@ function onLabelInDeckUpdateDeck(entry, json) {
 
       json.sideboard.forEach(function(card) {
         if (card.existed == undefined) {
-          let cardObj = cardsDb.get(card.id);
+          let cardObj = db.card(card.id);
           deltaDeck.changesSide.push({ id: card.id, quantity: card.quantity });
         }
       });
@@ -561,8 +560,8 @@ function onLabelInDraftDraftStatus(entry, json) {
   if (!json) return;
 
   if (json.eventName != undefined) {
-    for (let set in setsList) {
-      let setCode = setsList[set]["code"];
+    for (let set in db.sets) {
+      let setCode = db.sets[set]["code"];
       if (json.eventName.indexOf(setCode) !== -1) {
         draftSet = set;
       }
@@ -586,8 +585,8 @@ function onLabelInDraftMakePick(entry, json) {
   if (!json) return;
   // store pack in recording
   if (json.eventName != undefined) {
-    for (let set in setsList) {
-      let setCode = setsList[set]["code"];
+    for (let set in db.sets) {
+      let setCode = db.sets[set]["code"];
       if (json.eventName.indexOf(setCode) !== -1) {
         currentDraft.set = set;
       }
@@ -702,30 +701,7 @@ function onLabelMatchGameRoomStateChangedEvent(entry, json) {
 
 function onLabelInEventGetSeasonAndRankDetail(entry, json) {
   if (!json) return;
-
-  season_starts = new Date(json.currentSeason.seasonStartTime);
-  season_ends = new Date(json.currentSeason.seasonEndTime);
-
-  json.constructedRankInfo.forEach(rank => {
-    if (
-      rank.rankClass == playerData.rank.constructed.rank &&
-      rank.level == playerData.rank.constructed.tier
-    ) {
-      playerData.rank.constructed.steps = rank.steps;
-    }
-  });
-
-  json.limitedRankInfo.forEach(rank => {
-    if (
-      rank.rankClass == playerData.rank.limited.rank &&
-      rank.level == playerData.rank.limited.tier
-    ) {
-      playerData.rank.limited.steps = rank.steps;
-    }
-  });
-
-  ipc_send("set_season", { starts: season_starts, ends: season_ends });
-  updateRank();
+  ipc_send("set_season", json);
 }
 
 function onLabelGetPlayerInventoryGetRewardSchedule(entry, json) {

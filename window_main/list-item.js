@@ -2,10 +2,10 @@
 /*
 globals
   $$,
-  cardsDb,
   createDivision
 */
 const { DEFAULT_TILE } = require("../shared/constants.js");
+const db = require("../shared/database.js");
 
 class ListItem {
   constructor(_grpId, _id, _onClick, _onDelete = false, isArchived = false) {
@@ -27,7 +27,7 @@ class ListItem {
     this.deleteButton.title = isArchived
       ? "restore"
       : "archive (will not delete data)";
-    let cardObj = cardsDb.get(_grpId || DEFAULT_TILE);
+    let cardObj = db.card(_grpId || DEFAULT_TILE);
     this.imageContainer = createDivision(["list_item_image"]);
     try {
       this.imageContainer.style.backgroundImage = `url(https://img.scryfall.com/cards${

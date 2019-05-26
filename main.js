@@ -180,10 +180,16 @@ function startApp() {
 
       case "set_db":
         mainWindow.webContents.send("set_db", arg);
+        background.webContents.send("set_db", arg);
         overlay.webContents.send("set_db", arg);
         if (autoLogin) {
           background.webContents.send("auto_login");
         }
+        break;
+
+      case "set_season":
+        mainWindow.webContents.send("set_season", arg);
+        background.webContents.send("set_season", arg);
         break;
 
       case "popup":

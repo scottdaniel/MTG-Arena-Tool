@@ -2,10 +2,10 @@
 global
     add,
     Aggregator,
-    cardsDb,
     ConicGradient,
     change_background,
     createDivision,
+    db,
     drawDeck,
     drawDeckVisual,
     economyHistory,
@@ -40,7 +40,7 @@ function get_deck_colors_ammount(deck) {
   //var mana = {0: "", 1: "white", 2: "blue", 3: "black", 4: "red", 5: "green", 6: "colorless", 7: "", 8: "x"}
   deck.mainDeck.forEach(function(card) {
     if (card.quantity > 0) {
-      cardsDb.get(card.id).cost.forEach(function(c) {
+      db.card(card.id).cost.forEach(function(c) {
         if (c.indexOf("w") !== -1) {
           colors.w += card.quantity;
           colors.total += card.quantity;
@@ -79,7 +79,7 @@ function get_deck_lands_ammount(deck) {
   //var mana = {0: "", 1: "white", 2: "blue", 3: "black", 4: "red", 5: "green", 6: "colorless", 7: "", 8: "x"}
   deck.mainDeck.forEach(function(card) {
     var quantity = card.quantity;
-    card = cardsDb.get(card.id);
+    card = db.card(card.id);
     if (quantity > 0) {
       if (card.type.indexOf("Land") != -1 || card.type.indexOf("land") != -1) {
         if (card.frame.length < 5) {
@@ -123,12 +123,12 @@ function get_deck_curve(deck) {
 
   deck.mainDeck.forEach(function(card) {
     var grpid = card.id;
-    var cmc = cardsDb.get(grpid).cmc;
+    var cmc = db.card(grpid).cmc;
     if (curve[cmc] == undefined) curve[cmc] = [0, 0, 0, 0, 0, 0];
 
-    let card_cost = cardsDb.get(grpid).cost;
+    let card_cost = db.card(grpid).cost;
 
-    if (cardsDb.get(grpid).type.indexOf("Land") == -1) {
+    if (db.card(grpid).type.indexOf("Land") == -1) {
       card_cost.forEach(function(c) {
         if (c.indexOf("w") !== -1) curve[cmc][1] += card.quantity;
         if (c.indexOf("u") !== -1) curve[cmc][2] += card.quantity;
@@ -144,11 +144,11 @@ function get_deck_curve(deck) {
   // Do not account sideboard?
   deck.sideboard.forEach(function(card) {
     var grpid = card.id;
-    var cmc = cardsDb.get(grpid).cmc;
+    var cmc = db.card(grpid).cmc;
     if (curve[cmc] == undefined)  curve[cmc] = 0;
     curve[cmc] += card.quantity
 
-    if (cardsDb.get(grpid).rarity !== 'land') {
+    if (db.card(grpid).rarity !== 'land') {
       curve[cmc] += card.quantity
     }
   });
@@ -370,7 +370,7 @@ function openDeck(deck = currentOpenDeck, filters = currentFilters) {
   top.appendChild(deckColors);
 
   const tileGrpId = deck.deckTileId;
-  if (cardsDb.get(tileGrpId)) {
+  if (db.card(tileGrpId)) {
     change_background("", tileGrpId);
   }
 

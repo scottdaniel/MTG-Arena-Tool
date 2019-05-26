@@ -3,7 +3,6 @@ globals
   actionLog,
   actionLogGenerateAbilityLink,
   actionLogGenerateLink,
-  cardsDb,
   currentDeck,
   currentMatch,
   cloneDeep,
@@ -471,7 +470,7 @@ function getOppUsedCards() {
             obj.type == "GameObjectType_Card"
           ) {
             grpId = obj.grpId;
-            //cardsUsed.push(cardsDb.get(grpId).name+" - "+zone.type);
+            //cardsUsed.push(db.card(grpId).name+" - "+zone.type);
             // 3 is the code for "Face down card", apparently
             if (grpId !== 3) cardsUsed.push(grpId);
           }
@@ -503,7 +502,7 @@ function getPlayerUsedCards() {
             obj.type == "GameObjectType_Card"
           ) {
             grpId = obj.grpId;
-            //cardsUsed.push(cardsDb.get(grpId).name+" - "+zone.type);
+            //cardsUsed.push(db.card(grpId).name+" - "+zone.type);
             if (grpId !== 3) cardsUsed.push(grpId);
           }
         } catch (e) {
