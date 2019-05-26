@@ -1,3 +1,26 @@
+## 2.6.0 (2019-05-26)
+
+* auto clean jQuery cruft from settings ([32d3c54](https://github.com/Manuel-777/MTG-Arena-Tool/commit/32d3c54))
+* black background for overlay elements ([e465e22](https://github.com/Manuel-777/MTG-Arena-Tool/commit/e465e22))
+* bugfix settings page adding jQuery cruft to settings ([da458ea](https://github.com/Manuel-777/MTG-Arena-Tool/commit/da458ea))
+* cards style settings ([fce8b2d](https://github.com/Manuel-777/MTG-Arena-Tool/commit/fce8b2d))
+* disable background loading bars ([5d7627b](https://github.com/Manuel-777/MTG-Arena-Tool/commit/5d7627b))
+* logLanguage as a gobal ([5d3d9ee](https://github.com/Manuel-777/MTG-Arena-Tool/commit/5d3d9ee))
+* new archetype detection ([26520f3](https://github.com/Manuel-777/MTG-Arena-Tool/commit/26520f3))
+* new flat card tile style ([0ebc67d](https://github.com/Manuel-777/MTG-Arena-Tool/commit/0ebc67d))
+* new settings.last_open_tab ([1ff54e0](https://github.com/Manuel-777/MTG-Arena-Tool/commit/1ff54e0))
+* prettier ([9c6bd4a](https://github.com/Manuel-777/MTG-Arena-Tool/commit/9c6bd4a))
+* refactor renderer to use last_open_tab ([7661716](https://github.com/Manuel-777/MTG-Arena-Tool/commit/7661716))
+* save card style ([4c74840](https://github.com/Manuel-777/MTG-Arena-Tool/commit/4c74840))
+* settings and prettier ([344b550](https://github.com/Manuel-777/MTG-Arena-Tool/commit/344b550))
+* Show game start in action log ([a0d6dd7](https://github.com/Manuel-777/MTG-Arena-Tool/commit/a0d6dd7))
+* top bar changes ([8aaa329](https://github.com/Manuel-777/MTG-Arena-Tool/commit/8aaa329))
+* Update background.js ([e18a063](https://github.com/Manuel-777/MTG-Arena-Tool/commit/e18a063))
+* Update index.css ([76cb1da](https://github.com/Manuel-777/MTG-Arena-Tool/commit/76cb1da))
+* update overlay on settings change ([44c281c](https://github.com/Manuel-777/MTG-Arena-Tool/commit/44c281c))
+
+
+
 ## <small>2.5.11 (2019-05-25)</small>
 
 * bugfix aggregator winrate total ([20774ad](https://github.com/Manuel-777/MTG-Arena-Tool/commit/20774ad))
