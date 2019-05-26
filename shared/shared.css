@@ -795,6 +795,8 @@ span {
 
 .card_tile_container {
     width: 100%;
+    line-height: 18px;
+    color: black;
     display: flex;
 }
 

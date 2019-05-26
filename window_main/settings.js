@@ -334,7 +334,10 @@ function openSettingsTab(openSection = lastSettingsSection) {
     cardsStyleCont[0],
     [CARD_TILE_ARENA, CARD_TILE_FLAT],
     cardStyle,
-    filter => updateUserSettingsBlend({ card_tile_style: filter }),
+    filter => {
+      cardStyle = filter;
+      updateUserSettingsBlend({ card_tile_style: filter });
+    },
     "settings_cards_style",
     getCardStyleName
   );
