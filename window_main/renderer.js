@@ -94,7 +94,7 @@ let ladder = null;
 let cards = {};
 let cardsNew = {};
 
-let sidebarActive = -1;
+let sidebarActive = -2;
 let filterEvent = "All";
 let filterSort = "By Winrate";
 
@@ -106,6 +106,7 @@ let defaultBackground = "";
 let loggedIn = false;
 let canLogin = false;
 let offlineMode = false;
+let lastTab = -1;
 
 let playerData = playerDataDefault;
 
@@ -460,7 +461,7 @@ ipc.on("set_home", function(event, arg) {
   Object.keys(deck_tags).forEach(function(format) {
     deck_tags[format].sort(compare_archetypes);
   });
-  ipc_send("set_deck_archetypes", arg.tags);
+  ipc_send("set_deck_archetypes", arg.archetypes);
   if (sidebarActive == -1) {
     console.log("Home", arg);
     openHomeTab(arg);
@@ -534,6 +535,9 @@ ipc.on("set_settings", function(event, arg) {
       change_background();
     }
   }
+  if (arg.last_open_tab !== undefined) {
+    lastTab = arg.last_open_tab;
+  }
   $(".main_wrapper").css("background-color", arg.back_color);
   cardSize = 100 + arg.cards_size * 10;
   if (sidebarActive === 6) {
@@ -592,13 +596,70 @@ function rememberMe() {
 }
 
 //
+function openTab(tab) {
+  showLoadingBars();
+  $(".top_nav_item").each(function() {
+    $(this).removeClass("item_selected");
+  });
+  let tabClass = "it" + tab;
+  $("#ux_0").html("");
+  switch (tab) {
+    case 0:
+      openDecksTab();
+      break;
+    case 1:
+      ipc_send("request_history", 1);
+      break;
+    case 2:
+      ipc_send("request_events", 1);
+      break;
+    case 3:
+      if (offlineMode) {
+        showOfflineSplash();
+      } else {
+        openExploreTab();
+      }
+      break;
+    case 4:
+      ipc_send("request_economy", 1);
+      break;
+    case 5:
+      openCollectionTab();
+      break;
+    case 6:
+      openSettingsTab();
+      break;
+    case -1:
+      tabClass = "ith";
+      if (offlineMode) {
+        showOfflineSplash();
+      } else {
+        if (discordTag == null) {
+          openHomeTab(null, true);
+        } else {
+          ipc_send("request_home", filteredWildcardsSet);
+        }
+      }
+      break;
+    case -2:
+    default:
+      $(".message_center").css("display", "initial");
+      $(".init_loading").show();
+      break;
+  }
+  $("." + tabClass).addClass("item_selected");
+  ipc_send("save_user_settings", { last_open_tab: tab });
+}
+
+//
 ipc.on("initialize", function() {
   $(".top_username").html(playerData.name.slice(0, -6));
   $(".top_username_id").html(playerData.name.slice(-6));
 
-  sidebarActive = -1;
-  showLoadingBars();
-  ipc_send("request_home", "");
+  sidebarActive = lastTab;
+  ipc_send("request_home", filteredWildcardsSet);
+  openTab(sidebarActive);
+
   $(".top_nav").removeClass("hidden");
   $(".overflow_ux").removeClass("hidden");
   $(".message_center").css("display", "none");
@@ -858,60 +919,23 @@ $(document).ready(function() {
     document.body.style.cursor = "auto";
     if (!$(this).hasClass("item_selected")) {
       $(".moving_ux").animate({ left: "0px" }, 250, "easeInOutCubic");
-
-      $(".top_nav_item").each(function() {
-        $(this).removeClass("item_selected");
-      });
-
-      $(this).addClass("item_selected");
-      $("#ux_0").html("");
-      showLoadingBars();
-
       if ($(this).hasClass("ith")) {
         sidebarActive = -1;
-        if (offlineMode) {
-          showOfflineSplash();
-        } else {
-          if (discordTag == null) {
-            openHomeTab(null, true);
-          } else {
-            ipc_send("request_home", filteredWildcardsSet);
-          }
-        }
-      }
-      if ($(this).hasClass("it0")) {
+      } else if ($(this).hasClass("it0")) {
         sidebarActive = 0;
-        openDecksTab();
-      }
-      if ($(this).hasClass("it1")) {
+      } else if ($(this).hasClass("it1")) {
         sidebarActive = 1;
-        ipc_send("request_history", 1);
-      }
-      if ($(this).hasClass("it2")) {
+      } else if ($(this).hasClass("it2")) {
         sidebarActive = 2;
-        ipc_send("request_events", 1);
-      }
-      if ($(this).hasClass("it3")) {
+      } else if ($(this).hasClass("it3")) {
         sidebarActive = 3;
-        if (offlineMode) {
-          showOfflineSplash();
-        } else {
-          openExploreTab();
-        }
-      }
-      if ($(this).hasClass("it4")) {
+      } else if ($(this).hasClass("it4")) {
         sidebarActive = 4;
-        ipc_send("request_economy", 1);
-      }
-      if ($(this).hasClass("it5")) {
+      } else if ($(this).hasClass("it5")) {
         sidebarActive = 5;
-        openCollectionTab();
-      }
-      if ($(this).hasClass("it6")) {
+      } else if ($(this).hasClass("it6")) {
         sidebarActive = 6;
-        openSettingsTab();
-      }
-      if ($(this).hasClass("it7")) {
+      } else if ($(this).hasClass("it7")) {
         sidebarActive = 1;
         setFilters({
           ...Aggregator.getDefaultFilters(),
@@ -919,11 +943,7 @@ $(document).ready(function() {
           eventId: RANKED_CONST,
           rankedMode: true
         });
-        ipc_send("request_history", 1);
-        $(this).removeClass("item_selected");
-        $(".it1").addClass("item_selected");
-      }
-      if ($(this).hasClass("it8")) {
+      } else if ($(this).hasClass("it8")) {
         sidebarActive = 1;
         setFilters({
           ...Aggregator.getDefaultFilters(),
@@ -931,10 +951,8 @@ $(document).ready(function() {
           eventId: RANKED_DRAFT,
           rankedMode: true
         });
-        ipc_send("request_history", 1);
-        $(this).removeClass("item_selected");
-        $(".it1").addClass("item_selected");
       }
+      openTab(sidebarActive);
     } else {
       $(".moving_ux").animate({ left: "0px" }, 250, "easeInOutCubic");
     }

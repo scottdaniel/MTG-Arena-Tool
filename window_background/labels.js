@@ -313,6 +313,16 @@ function onLabelInEventGetPlayerCourseV2(entry, json) {
   onLabelInEventGetPlayerCourse(entry, json);
 }
 
+function onLabelInEventJoin(entry, json) {
+  if (!json) return;
+
+  if (json.CourseDeck) {
+    json.CourseDeck.colors = get_deck_colors(json.CourseDeck);
+    addCustomDeck(json.CourseDeck);
+    select_deck(json);
+  }
+}
+
 function onLabelInDeckUpdateDeck(entry, json) {
   if (!json) return;
   logTime = parseWotcTime(entry.timestamp);
@@ -707,6 +717,7 @@ module.exports = {
   onLabelClientToMatchServiceMessageTypeClientToGREMessage,
   onLabelInEventGetPlayerCourse,
   onLabelInEventGetPlayerCourseV2,
+  onLabelInEventJoin,
   onLabelInEventGetCombinedRankInfo,
   onLabelInDeckGetDeckLists,
   onLabelInDeckGetDeckListsV3,

@@ -56,6 +56,7 @@ const {
   onLabelClientToMatchServiceMessageTypeClientToGREMessage,
   onLabelInEventGetPlayerCourse,
   onLabelInEventGetPlayerCourseV2,
+  onLabelInEventJoin,
   onLabelInEventGetCombinedRankInfo,
   onLabelInDeckGetDeckLists,
   onLabelInDeckGetDeckListsV3,
@@ -126,7 +127,8 @@ const defaultCfg = {
     export_format: "$Name,$Count,$Rarity,$SetName,$Collector",
     back_color: "rgba(0,0,0,0.3)",
     back_url: "",
-    right_panel_width: 200
+    right_panel_width: 200,
+    last_open_tab: -1
   },
   economy_index: [],
   economy: [],
@@ -1056,6 +1058,13 @@ function onLogEntryFound(entry) {
             }
             break;
 
+          case "Event.Join":
+            if (entry.arrow == "<==") {
+              json = entry.json();
+              onLabelInEventJoin(entry, json);
+            }
+            break;
+
           case "Event.GetCombinedRankInfo":
             if (entry.arrow == "<==") {
               json = entry.json();
@@ -1623,6 +1632,47 @@ function update_deck(force) {
   }
 }
 
+function getBestArchetype(deck) {
+  let bestMatch = "-";
+
+  // Calculate worst possible deviation for this deck
+  let mainDeviations = [];
+  if (deck.mainDeck.length == 0) return bestMatch;
+  deck.mainDeck.forEach(card => {
+    let deviation = card.quantity;
+    mainDeviations.push(deviation * deviation);
+  });
+  let lowestDeviation = Math.sqrt(
+    mainDeviations.reduce((a, b) => a + b) / (mainDeviations.length - 1)
+  );
+
+  // Test for each archertype
+  deck_archetypes.forEach(arch => {
+    //console.log(arch.name);
+    mainDeviations = [];
+    deck.mainDeck.forEach(card => {
+      let q = card.quantity;
+      let name = db.card(card.id).name;
+      let archMain = arch.average.mainDeck;
+
+      let deviation = q - (archMain[name] ? 1 : 0); // archMain[name] ? archMain[name] : 0 // for full data
+      mainDeviations.push(deviation * deviation);
+      //console.log(name, deviation, q, archMain[name]);
+    });
+    let averageDeviation =
+      mainDeviations.reduce((a, b) => a + b) / (mainDeviations.length - 1);
+    let finalDeviation = Math.sqrt(averageDeviation);
+
+    if (finalDeviation < lowestDeviation) {
+      lowestDeviation = finalDeviation;
+      bestMatch = arch;
+    }
+    //console.log(">>", averageDeviation, Math.sqrt(averageDeviation));
+  });
+
+  return bestMatch.name;
+}
+
 function getOppDeck() {
   let _deck = new Deck({}, currentMatch.oppCardsUsed, false);
   _deck.mainboard.removeDuplicates(true);
@@ -1631,32 +1681,9 @@ function getOppDeck() {
   let format = db.events_format[currentMatch.eventId];
   currentMatch.opponent.deck.archetype = "-";
   let bestMatch = "-";
-  if (format && deck_archetypes[format]) {
-    deck_archetypes[format].sort(compare_archetypes);
-
-    let possible = deck_archetypes[format];
-    let bestMatchRate = 0;
-    possible.forEach(arch => {
-      let found = 0;
-      arch.cards.forEach(card => {
-        let cName = db.card(card.id).name;
-
-        _deck.mainboard.get().forEach(oppCard => {
-          let oName = db.card(oppCard.id).name;
-          if (cName == oName) {
-            found += card.quantity / arch.average;
-          }
-        });
-      });
-      if (found > bestMatchRate) {
-        bestMatchRate = found;
-        bestMatch = arch.tag;
-      }
-    });
-  }
 
   _deck = _deck.getSave();
-  _deck.archetype = bestMatch;
+  _deck.archetype = getBestArchetype(_deck);
 
   return _deck;
 }
