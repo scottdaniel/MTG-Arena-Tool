@@ -396,11 +396,13 @@ function onLabelInDeckUpdateDeck(entry, json) {
       });
 
       if (!deck_changes_index.includes(changeId)) {
-        deck_changes_index.push(changeId);
-        deck_changes[changeId] = deltaDeck;
+        if (deltaDeck.changesMain.length > 0 || deltaDeck.changesSide.length > 0) {
+          deck_changes_index.push(changeId);
+          deck_changes[changeId] = deltaDeck;
 
-        store.set("deck_changes_index", deck_changes_index);
-        store.set("deck_changes." + changeId, deltaDeck);
+          store.set("deck_changes_index", deck_changes_index);
+          store.set("deck_changes." + changeId, deltaDeck);
+        }
       }
     }
   });
