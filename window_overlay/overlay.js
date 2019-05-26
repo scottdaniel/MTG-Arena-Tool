@@ -356,7 +356,6 @@ ipc.on("set_settings", function(event, settings) {
   $(".top").css("display", "");
   $(".overlay_deckname").css("display", "");
   $(".overlay_deckcolors").css("display", "");
-  $(".overlay_separator").css("display", "");
   $(".overlay_decklist").css("display", "");
   $(".overlay_clock_spacer").css("display", "");
   $(".overlay_clock_container").css("display", "");
@@ -364,7 +363,6 @@ ipc.on("set_settings", function(event, settings) {
   $(".overlay_draft_container").attr("style", "");
   $(".overlay_deckname").attr("style", "");
   $(".overlay_deckcolors").attr("style", "");
-  $(".overlay_separator").attr("style", "");
 
   if (overlayMode == 0) {
     $(".overlay_draft_container").hide();
@@ -384,7 +382,6 @@ ipc.on("set_settings", function(event, settings) {
   if (!settings.overlay_title) {
     hideDiv(".overlay_deckname");
     hideDiv(".overlay_deckcolors");
-    hideDiv(".overlay_separator");
   }
   if (!settings.overlay_deck) {
     hideDiv(".overlay_decklist");
@@ -559,7 +556,7 @@ function updateView() {
   if (deckMode == 2) {
     let cardsLeft = currentMatch.playerCardsLeft.mainboard.count();
     deckListDiv.append(
-      `<div class="chance_title">${cardsLeft} cards left</div>`
+      `<div class="decklist_title">${cardsLeft} cards left</div>`
     );
     deckToDraw = currentMatch.playerCardsLeft;
   }
@@ -569,7 +566,7 @@ function updateView() {
   //
   if (deckMode == 1) {
     let cardsCount = currentMatch.player.deck.mainboard.count();
-    deckListDiv.append(`<div class="chance_title">${cardsCount} cards</div>`);
+    deckListDiv.append(`<div class="decklist_title">${cardsCount} cards</div>`);
     deckToDraw = currentMatch.player.deck;
   }
 
@@ -579,7 +576,7 @@ function updateView() {
   if (deckMode == 0) {
     let cardsLeft = currentMatch.playerCardsLeft.mainboard.count();
     deckListDiv.append(
-      `<div class="chance_title">${cardsLeft} cards left</div>`
+      `<div class="decklist_title">${cardsLeft} cards left</div>`
     );
     deckToDraw = currentMatch.playerCardsLeft;
   }
