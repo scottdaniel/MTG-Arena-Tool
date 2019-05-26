@@ -13,7 +13,9 @@ const {
   HIDDEN_PW,
   IPC_BACKGROUND,
   IPC_OVERLAY,
-  IPC_MAIN
+  IPC_MAIN,
+  CARD_TILE_ARENA,
+  CARD_TILE_FLAT
 } = require("../shared/constants.js");
 
 var electron = require("electron");
@@ -129,7 +131,8 @@ const defaultCfg = {
     back_color: "rgba(0,0,0,0.3)",
     back_url: "",
     right_panel_width: 200,
-    last_open_tab: -1
+    last_open_tab: -1,
+    card_tile_style: CARD_TILE_FLAT
   },
   economy_index: [],
   economy: [],

@@ -671,5 +671,5 @@ exports.PACK_SIZES = { "Ravnica Allegiance": 14, "Guilds of Ravnica": 14 };
 
 exports.DEFAULT_TILE = 67003;
 
-exports.CARD_TILE_ARENA = 1;
-exports.CARD_TILE_FLAT = 2;
+exports.CARD_TILE_ARENA = 0;
+exports.CARD_TILE_FLAT = 1;

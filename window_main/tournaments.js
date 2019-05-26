@@ -5,6 +5,7 @@ global
   createDivision,
   createSelect,
   compare_cards,
+  cardStyle,
   decks,
   drawDeck,
   drawDeckVisual,
@@ -756,7 +757,12 @@ function drawSideboardDeck(div) {
     let grpId = card.id;
 
     if (card.quantity > 0) {
-      let tile = deckDrawer.cardTile(grpId, unique + "a", card.quantity);
+      let tile = deckDrawer.cardTile(
+        cardStyle,
+        grpId,
+        unique + "a",
+        card.quantity
+      );
       mainboardDiv.append(tile);
     }
   });
@@ -775,7 +781,12 @@ function drawSideboardDeck(div) {
       currentDeck.sideboard.forEach(function(card) {
         let grpId = card.id;
         if (card.quantity > 0) {
-          let tile = deckDrawer.cardTile(grpId, unique + "b", card.quantity);
+          let tile = deckDrawer.cardTile(
+            cardStyle,
+            grpId,
+            unique + "b",
+            card.quantity
+          );
           sideboardDiv.append(tile);
         }
       });

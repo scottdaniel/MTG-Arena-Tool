@@ -18,7 +18,9 @@ const {
   MANA,
   PACK_SIZES,
   IPC_BACKGROUND,
-  IPC_OVERLAY
+  IPC_OVERLAY,
+  CARD_TILE_ARENA,
+  CARD_TILE_FLAT
 } = require("../shared/constants.js");
 const electron = require("electron");
 const { webFrame, remote } = require("electron");
@@ -88,6 +90,7 @@ let overlayAlphaBack = 1;
 let oddsSampleSize = 1;
 
 let cardQuality = "normal";
+let cardStyle = CARD_TILE_FLAT;
 
 let showSideboard = false;
 let actionLog = [];
@@ -343,6 +346,7 @@ ipc.on("set_settings", function(event, settings) {
   if (settings.cards_quality != undefined) {
     cardQuality = settings.cards_quality;
   }
+  cardStyle = settings.card_tile_style;
 
   showSideboard = settings.overlay_sideboard;
   soundPriority = settings.sound_priority;
@@ -623,11 +627,11 @@ function updateView() {
     if (deckMode == 2) {
       let quantity = (card.chance !== undefined ? card.chance : "0") + "%";
       if (!overlayLands || (overlayLands && quantity !== "0%")) {
-        let tile = deckDrawer.cardTile(grpId, "a", quantity);
+        let tile = deckDrawer.cardTile(cardStyle, grpId, "a", quantity);
         deckListDiv.append(tile);
       }
     } else {
-      let tile = deckDrawer.cardTile(grpId, "a", card.quantity);
+      let tile = deckDrawer.cardTile(cardStyle, grpId, "a", card.quantity);
       deckListDiv.append(tile);
     }
   });
@@ -641,10 +645,10 @@ function updateView() {
     sideCards.get().forEach(function(card) {
       var grpId = card.id;
       if (deckMode == 2) {
-        let tile = deckDrawer.cardTile(grpId, "a", "0%");
+        let tile = deckDrawer.cardTile(cardStyle, grpId, "a", "0%");
         deckListDiv.append(tile);
       } else {
-        let tile = deckDrawer.cardTile(grpId, "a", card.quantity);
+        let tile = deckDrawer.cardTile(cardStyle, grpId, "a", card.quantity);
         deckListDiv.append(tile);
       }
     });
@@ -823,7 +827,7 @@ function setDraft(_packN = -1, _pickN = -1) {
     currentDraft.pickedCards.sort(compare_draft_cards);
 
     currentDraft.pickedCards.forEach(function(grpId) {
-      let tile = deckDrawer.cardTile(grpId, "a", 1);
+      let tile = deckDrawer.cardTile(cardStyle, grpId, "a", 1);
       $(".overlay_decklist").append(tile);
     });
   } else if (draftMode == 1) {
@@ -873,7 +877,7 @@ function setDraft(_packN = -1, _pickN = -1) {
       }
 
       cont.appendTo(od);
-      let tile = deckDrawer.cardTile(grpId, "a", DRAFT_RANKS[rank]);
+      let tile = deckDrawer.cardTile(cardStyle, grpId, "a", DRAFT_RANKS[rank]);
       od.append(tile);
       if (grpId == pick) {
         tile.style.backgroundColor = "rgba(250, 229, 210, 0.66)";
