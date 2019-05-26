@@ -188,6 +188,11 @@ function startApp() {
 
       case "popup":
         mainWindow.webContents.send("popup", arg.text, arg.time);
+        if (arg.progress) {
+          // set progress to <0 to disable
+          // set progress to >1 for indeterminate time
+          mainWindow.setProgressBar(arg.progress);
+        }
         break;
 
       case "renderer_window_minimize":

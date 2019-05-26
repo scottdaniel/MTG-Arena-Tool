@@ -111,6 +111,11 @@ function httpBasic() {
           path: "/database/database.json",
           method: "GET"
         };
+        ipc_send("popup", {
+          text: "Downloading metadata...",
+          time: 0,
+          progress: 2
+        });
       } else if (_headers.method == "get_ladder_decks") {
         options = {
           protocol: "https:",
@@ -318,7 +323,8 @@ function httpBasic() {
                 cardsDb.set(parsedResult);
                 ipc_send("popup", {
                   text: "Metadata: Ok",
-                  time: 1000
+                  time: 1000,
+                  progress: -1
                 });
                 ipc_send("set_db", results);
                 ipc_send("show_login", true);
@@ -555,7 +561,6 @@ function httpDeleteData() {
 
 function httpGetDatabase() {
   var _id = makeId(6);
-  ipc_send("popup", { text: "Downloading metadata", time: 0 });
   httpAsync.push({ reqId: _id, method: "get_database" });
 }
 

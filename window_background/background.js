@@ -359,7 +359,8 @@ ipc.on("auto_login", () => {
   tokenAuth = rstore.get("token");
   ipc_send("popup", {
     text: "Logging in automatically...",
-    time: 0
+    time: 0,
+    progress: 2
   });
   if (rSettings.remember_me) {
     httpApi.httpAuth(rstore.get("email"), HIDDEN_PW);
@@ -732,7 +733,8 @@ function loadPlayerConfig(playerId, serverData = undefined) {
   for (let i = 0; i < history.matches.length; i++) {
     ipc_send("popup", {
       text: "Reading history: " + i + " / " + history.matches.length,
-      time: 0
+      time: 0,
+      progress: i / history.matches.length
     });
     id = history.matches[i];
     if (id != null) {
@@ -748,7 +750,8 @@ function loadPlayerConfig(playerId, serverData = undefined) {
   for (let i = 0; i < drafts.matches.length; i++) {
     ipc_send("popup", {
       text: "Reading drafts: " + i + " / " + drafts.matches.length,
-      time: 0
+      time: 0,
+      progress: i / drafts.matches.length
     });
     id = drafts.matches[i];
 
@@ -768,7 +771,8 @@ function loadPlayerConfig(playerId, serverData = undefined) {
   for (let i = 0; i < events.courses.length; i++) {
     ipc_send("popup", {
       text: "Reading events: " + i + " / " + events.courses.length,
-      time: 0
+      time: 0,
+      progress: i / events.courses.length
     });
     id = events.courses[i];
 
@@ -785,7 +789,8 @@ function loadPlayerConfig(playerId, serverData = undefined) {
   for (let i = 0; i < economy.changes.length; i++) {
     ipc_send("popup", {
       text: "Reading economy: " + i + " / " + economy.changes.length,
-      time: 0
+      time: 0,
+      progress: i / economy.changes.length
     });
     id = economy.changes[i];
 
@@ -801,7 +806,8 @@ function loadPlayerConfig(playerId, serverData = undefined) {
   for (let i = 0; i < decks.index.length; i++) {
     ipc_send("popup", {
       text: "Reading decks: " + i + " / " + decks.index.length,
-      time: 0
+      time: 0,
+      progress: i / decks.index.length
     });
     id = decks.index[i];
 
@@ -1993,9 +1999,11 @@ function saveDraft() {
 //
 function updateLoading(entry) {
   if (firstPass) {
+    const completion = entry.position / entry.size;
     ipc_send("popup", {
-      text: `Reading log: ${Math.round((100 / entry.size) * entry.position)}%`,
-      time: 0
+      text: `Reading log: ${Math.round(100 * completion)}%`,
+      time: 0,
+      progress: completion
     });
   }
 }
@@ -2033,7 +2041,7 @@ function finishLoading() {
         playerData.rank.limited.tier
       );
     }
-    ipc_send("popup", { text: `Reading log: 100%`, time: 1000 });
+    ipc_send("popup", { text: `Reading log: 100%`, time: 1000, progress: -1 });
     logReadEnd = new Date();
     let logReadElapsed = (logReadEnd - logReadStart) / 1000;
     ipc_send("ipc_log", `Log read in ${logReadElapsed}s`);
