@@ -383,6 +383,10 @@ span.top_nav_item_text {
     display: inline-grid;
 }
 
+.it7, .it8 {
+    opacity: 1;
+}
+
 .top_nav_item:hover {
     background-position-y: 4px;
     opacity: 1;
