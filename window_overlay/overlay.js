@@ -346,7 +346,9 @@ ipc.on("set_settings", function(event, settings) {
   if (settings.cards_quality != undefined) {
     cardQuality = settings.cards_quality;
   }
-  cardStyle = settings.card_tile_style;
+  if (settings.card_tile_style != undefined) {
+    cardStyle = settings.card_tile_style;
+  }
 
   showSideboard = settings.overlay_sideboard;
   soundPriority = settings.sound_priority;
@@ -392,6 +394,10 @@ ipc.on("set_settings", function(event, settings) {
   if (!settings.overlay_clock || overlayMode == 1) {
     hideDiv(".overlay_clock_spacer");
     hideDiv(".overlay_clock_container");
+  }
+
+  if (currentMatch) {
+    updateView();
   }
 });
 

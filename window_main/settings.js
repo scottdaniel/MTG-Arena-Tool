@@ -345,6 +345,7 @@ function openSettingsTab(openSection = lastSettingsSection) {
   tagStyleSelect.style.marginLeft = "32px";
 
   let tile = deckDrawer.cardTile(cardStyle, 67518, "a", 4);
+  tile.style.width = "auto";
   cardsStyleCont.append(tile);
   section.append(cardsStyleCont);
 

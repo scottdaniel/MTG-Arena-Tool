@@ -733,7 +733,7 @@ span {
     background-color: rgba(0,0,0,0.75);
     -webkit-transition: all .15s ease-in;
     cursor: pointer;
-    width: auto;
+    width: 100%;
 }
 
 .card_tile_odds_flat {
