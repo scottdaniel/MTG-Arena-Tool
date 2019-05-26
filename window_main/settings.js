@@ -310,7 +310,7 @@ function openSettingsTab(openSection = lastSettingsSection) {
     label[0],
     ["small", "normal", "large"],
     cardQuality,
-    filter => updateUserSettings({ cards_quality: filter }),
+    filter => updateUserSettingsBlend({ cards_quality: filter }),
     "settings_cards_quality"
   );
   tagSelect.style.width = "180px";
@@ -619,8 +619,13 @@ function transparencyFromAlpha(alpha) {
   return Math.round((1 - alpha) * 100);
 }
 
+// only purpose is to strip paramaters for use with add_checkbox
+function updateUserSettings() {
+  updateUserSettingsBlend();
+}
+
 //
-function updateUserSettings(_settings = {}) {
+function updateUserSettingsBlend(_settings = {}) {
   const startup = document.getElementById("settings_startup").checked;
   const readonlogin = document.getElementById("settings_readlogonlogin")
     .checked;
