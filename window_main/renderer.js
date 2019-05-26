@@ -24,7 +24,9 @@ const {
   HIDDEN_PW,
   MANA,
   IPC_MAIN,
-  IPC_BACKGROUND
+  IPC_BACKGROUND,
+  CARD_TILE_ARENA,
+  CARD_TILE_FLAT
 } = require("../shared/constants.js");
 const electron = require("electron");
 const _ = require("lodash");
@@ -101,6 +103,7 @@ let filterSort = "By Winrate";
 let draftPosition = 1;
 let cardSize = 140;
 let cardQuality = "normal";
+let cardStyle = CARD_TILE_FLAT;
 let loadEvents = 0;
 let defaultBackground = "";
 let loggedIn = false;
@@ -540,6 +543,7 @@ ipc.on("set_settings", function(event, arg) {
   }
   $(".main_wrapper").css("background-color", arg.back_color);
   cardSize = 100 + arg.cards_size * 10;
+  cardStyle = arg.card_tile_style;
   if (sidebarActive === 6) {
     openSettingsTab();
   }
@@ -965,7 +969,7 @@ function showLoadingBars() {
 }
 
 //
-ipc.on("show_loading", () => showLoadingBars());
+//ipc.on("show_loading", () => showLoadingBars());
 
 function hideLoadingBars() {
   $$(".main_loading")[0].style.display = "none";
@@ -973,7 +977,7 @@ function hideLoadingBars() {
 }
 
 //
-ipc.on("hide_loading", () => hideLoadingBars());
+//ipc.on("hide_loading", () => hideLoadingBars());
 
 //
 ipc.on("set_draft_link", function(event, arg) {
@@ -1105,6 +1109,7 @@ function drawDeck(div, deck, showWildcards = false) {
         .orderBy(["data.cmc", "data.name"])
         .forEach(card => {
           const tile = deckDrawer.cardTile(
+            cardStyle,
             card.id,
             unique + "a",
             card.quantity,
@@ -1129,6 +1134,7 @@ function drawDeck(div, deck, showWildcards = false) {
       .orderBy(["data.cmc", "data.name"])
       .forEach(card => {
         const tile = deckDrawer.cardTile(
+          cardStyle,
           card.id,
           unique + "b",
           card.quantity,
@@ -1147,7 +1153,7 @@ function drawCardList(div, cards) {
   let counts = {};
   cards.forEach(cardId => (counts[cardId] = (counts[cardId] || 0) + 1));
   Object.keys(counts).forEach(cardId => {
-    let tile = deckDrawer.cardTile(cardId, unique, counts[cardId]);
+    let tile = deckDrawer.cardTile(cardStyle, cardId, unique, counts[cardId]);
     div.append(tile);
   });
 }
@@ -1457,7 +1463,12 @@ function setChangesTimeline() {
         ic.appendTo(dd);
       }
 
-      let tile = deckDrawer.cardTile(c.id, "chm" + cn, Math.abs(c.quantity));
+      let tile = deckDrawer.cardTile(
+        cardStyle,
+        c.id,
+        "chm" + cn,
+        Math.abs(c.quantity)
+      );
       dd.append(tile);
       dd.appendTo(data);
     });
@@ -1482,7 +1493,12 @@ function setChangesTimeline() {
         ic.appendTo(dd);
       }
 
-      let tile = deckDrawer.cardTile(c.id, "chs" + cn, Math.abs(c.quantity));
+      let tile = deckDrawer.cardTile(
+        cardStyle,
+        c.id,
+        "chs" + cn,
+        Math.abs(c.quantity)
+      );
       dd.append(tile);
       dd.appendTo(data);
     });
@@ -1906,6 +1922,7 @@ function open_match(id) {
             : "line_dark";
         let cardDiv = $(`<div class="library_card ${rowShade}"></div>`);
         let tile = deckDrawer.cardTile(
+          cardStyle,
           cardId,
           unique + libraryIndex,
           "#" + (libraryIndex + 1)
@@ -1917,6 +1934,7 @@ function open_match(id) {
       if (unknownCards > 0) {
         let cardDiv = $('<div class="library_card"></div>');
         let tile = deckDrawer.cardTile(
+          cardStyle,
           null,
           unique + game.deckSize,
           unknownCards + "x"

@@ -3,6 +3,10 @@
 function onLabelOutLogInfo(entry, json) {
   if (!json) return;
   logTime = parseWotcTime(entry.timestamp);
+  if (json.params.messageName == "DuelScene.GameStart") {
+    let gameNumber = json.params.payloadObject.gameNumber;
+    actionLog(-2, logTime, `Game ${gameNumber} Start`);
+  }
 
   if (json.params.messageName == "Client.Connected") {
     logLanguage = json.params.payloadObject.settings.language.language;

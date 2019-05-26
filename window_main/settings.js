@@ -2,6 +2,7 @@
 global
   add_checkbox,
   cardQuality,
+  cardStyle,
   cardSize,
   change_background,
   createSelect,
@@ -25,6 +26,15 @@ let overlayScale = 1;
 let cardSizePos = 4;
 let settings = null;
 let updateState = "";
+
+const deckDrawer = require("../shared/deck-drawer");
+
+const { CARD_TILE_ARENA, CARD_TILE_FLAT } = require("../shared/constants.js");
+
+function getCardStyleName(style) {
+  if (style == CARD_TILE_FLAT) return "Flat";
+  return "Arena";
+}
 
 //
 function openSettingsTab(openSection = lastSettingsSection) {
@@ -310,11 +320,30 @@ function openSettingsTab(openSection = lastSettingsSection) {
     label[0],
     ["small", "normal", "large"],
     cardQuality,
-    filter => updateUserSettings({ cards_quality: filter }),
+    filter => updateUserSettingsBlend({ cards_quality: filter }),
     "settings_cards_quality"
   );
   tagSelect.style.width = "180px";
   tagSelect.style.marginLeft = "32px";
+
+  let cardsStyleCont = $(
+    '<label class="but_container_label">Cards style:</label>'
+  );
+  let stylesList = [CARD_TILE_ARENA, CARD_TILE_ARENA];
+  const tagStyleSelect = createSelect(
+    cardsStyleCont[0],
+    stylesList,
+    cardStyle,
+    filter => updateUserSettings({ card_tile_style: filter }),
+    "settings_cards_style",
+    getCardStyleName
+  );
+  tagStyleSelect.style.width = "180px";
+  tagStyleSelect.style.marginLeft = "32px";
+
+  let tile = deckDrawer.cardTile(cardStyle, 67518, "a", 4);
+  cardsStyleCont.append(tile);
+  section.append(cardsStyleCont);
 
   const slider = $('<div class="slidecontainer_settings"></div>');
   slider.appendTo(section);
@@ -619,8 +648,13 @@ function transparencyFromAlpha(alpha) {
   return Math.round((1 - alpha) * 100);
 }
 
+// only purpose is to strip paramaters for use with add_checkbox
+function updateUserSettings() {
+  updateUserSettingsBlend();
+}
+
 //
-function updateUserSettings(_settings = {}) {
+function updateUserSettingsBlend(_settings = {}) {
   const startup = document.getElementById("settings_startup").checked;
   const readonlogin = document.getElementById("settings_readlogonlogin")
     .checked;

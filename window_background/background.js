@@ -12,7 +12,9 @@ const {
   HIDDEN_PW,
   IPC_BACKGROUND,
   IPC_OVERLAY,
-  IPC_MAIN
+  IPC_MAIN,
+  CARD_TILE_ARENA,
+  CARD_TILE_FLAT
 } = require("../shared/constants.js");
 
 var electron = require("electron");
@@ -128,7 +130,8 @@ const defaultCfg = {
     back_color: "rgba(0,0,0,0.3)",
     back_url: "",
     right_panel_width: 200,
-    last_open_tab: -1
+    last_open_tab: -1,
+    card_tile_style: CARD_TILE_FLAT
   },
   economy_index: [],
   economy: [],
@@ -268,7 +271,7 @@ var deck_changes_index = [];
 var deck_changes = {};
 var decks_tags = {};
 var tags_colors = {};
-var deck_archetypes = {};
+var deck_archetypes = [];
 
 var gold = 0;
 var gems = 0;
@@ -398,6 +401,22 @@ ipc.on("save_user_settings", function(event, settings) {
   ipc_send("show_loading");
   const oldSettings = store.get("settings");
   const updated = { ...oldSettings, ...settings };
+
+  // clean up garbage jQuery data that slipped into some configs
+  // TODO remove this after it has a chance to run everywhere
+  const jQueryGarbageKeys = [
+    "currentTarget",
+    "delegateTarget",
+    "handleObj",
+    "originalEvent",
+    "relatedTarget",
+    "target",
+    "timeStamp",
+    "type",
+    ...Object.keys(updated).filter(key => key.slice(0, 6) === "jQuery")
+  ];
+  jQueryGarbageKeys.forEach(key => delete updated[key]);
+
   loadSettings(updated);
   store.set("settings", updated);
   ipc_send("hide_loading");
@@ -1417,7 +1436,7 @@ var currentActionLog = "";
 function actionLog(seat, time, str, grpId = 0) {
   if (!time) time = new Date();
   if (seat == -99) {
-    currentActionLog = "version: 0\r\n";
+    currentActionLog = "version: 1\r\n";
   } else {
     var hh = ("0" + time.getHours()).slice(-2);
     var mm = ("0" + time.getMinutes()).slice(-2);

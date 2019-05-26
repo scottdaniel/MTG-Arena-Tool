@@ -725,6 +725,58 @@ span {
     background: url(../images/not_owned.png) center no-repeat;
 }
 
+
+.card_tile_container_flat {
+    display: flex;
+    height: 31px;
+    margin-bottom: 1px;
+    background-color: rgba(0,0,0,0.75);
+    -webkit-transition: all .15s ease-in;
+    cursor: pointer;
+    width: auto;
+}
+
+.card_tile_odds_flat {
+    font-size: 14px;
+    min-width: 32px;
+    color: white;
+    line-height: 31px;
+    text-align: center;
+}
+
+.card_tile_quantity_flat {
+    font-size: 14px;
+    min-width: 32px;
+    color: white;
+    line-height: 31px;
+    text-align: center;
+}
+
+.card_tile_crop_flat {
+    min-width: 32px;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+}
+
+.card_tile_name_flat {
+    font-size: 14px;
+    margin-left: 8px;
+    margin-right: 8px;
+    color: white;
+    text-align: center;
+    line-height: 31px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: pre;
+}
+
+.cart_tile_mana_flat {
+    display: flex;
+    align-items: center;
+    margin: 0 6px 0 auto;
+}
+
 .not_owned_sprite {
     margin-top: 2px;
     min-width: 24px;
@@ -836,6 +888,12 @@ span {
 }
 
 .log_p-1 {
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: bold;
+}
+
+.log_p-2 {
+    margin-top: 16px;
     color: rgba(255, 255, 255, 0.9);
     font-weight: bold;
 }
