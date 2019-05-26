@@ -3,7 +3,7 @@ global
   $$,
   addCardHover,
   authToken,
-  cardsDb,
+  db,
   discordTag,
   filteredWildcardsSet,
   ipc_send,
@@ -11,7 +11,6 @@ global
   rewards_daily_ends,
   rewards_weekly_ends,
   shell,
-  setsList,
   showLoadingBars,
   toHHMMSS,
   toDDHHMMSS,
@@ -245,8 +244,8 @@ function openHomeTab(arg, opentab = true) {
     });
   });
 
-  let orderedSets = Object.keys(setsList).filter(
-    set => setsList[set].collation > 0
+  let orderedSets = Object.keys(db.sets).filter(
+    set => db.sets[set].collation > 0
   );
 
   orderedSets.sort((a, b) => {
@@ -270,7 +269,7 @@ function openHomeTab(arg, opentab = true) {
         setbutton.classList.add("set_filter_on");
       }
       setbutton.style.backgroundImage = `url(../images/sets/${
-        setsList[set].code
+        db.sets[set].code
       }.png)`;
       setbutton.title = set;
 
@@ -313,7 +312,7 @@ function openHomeTab(arg, opentab = true) {
     cont.appendChild(cell);
 
     topWildcards.forEach((wc, index) => {
-      let card = cardsDb.get(wc.grpId);
+      let card = db.card(wc.grpId);
       let ld = index % 2 ? "line_dark" : "line_light";
 
       cell = createDivision([ld], index + 1);
@@ -323,7 +322,7 @@ function openHomeTab(arg, opentab = true) {
 
       cell = createDivision(["top_wildcards_set_icon", ld]);
       cell.style.backgroundImage = `url(../images/sets/${
-        setsList[card.set].code
+        db.sets[card.set].code
       }.png)`;
       cell.title = card.set;
       cell.style.gridArea = `${index + 2} / 2 / auto / auto`;

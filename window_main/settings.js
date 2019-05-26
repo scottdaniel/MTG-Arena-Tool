@@ -3,10 +3,10 @@ global
   add_checkbox,
   cardQuality,
   cardStyle,
-  cardsDb,
   cardSize,
   change_background,
   createSelect,
+  db,
   get_card_image,
   hideLoadingBars,
   ipc_send,
@@ -375,7 +375,7 @@ function openSettingsTab(openSection = lastSettingsSection) {
       'px; !important" class="inventory_card_settings_img"></img>'
   );
 
-  const card = cardsDb.get(67518);
+  const card = db.card(67518);
   img.attr("src", get_card_image(card));
   img.appendTo(d);
 

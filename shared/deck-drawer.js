@@ -1,13 +1,12 @@
 /*
 global
   createDivision,
-  cardsDb,
   addCardHover,
   shell,
   get_wc_missing,
   get_set_scryfall,
 */
-
+const db = require("./database.js");
 const _ = require("lodash");
 
 const { CARD_TILE_FLAT } = require("./constants.js");
@@ -90,7 +89,7 @@ exports.cardTile = function(
     card = grpId;
     grpId = grpId.id;
   } else {
-    card = cardsDb.get(grpId);
+    card = db.card(grpId);
   }
 
   // Default to Arena style
@@ -209,7 +208,7 @@ function drawCardTileArena(
 
     glow.addEventListener("click", () => {
       if (card.dfc == "SplitHalf") {
-        card = cardsDb.get(card.dfcId);
+        card = db.card(card.dfcId);
       }
       shell.openExternal(
         `https://scryfall.com/card/${get_set_scryfall(card.set)}/${card.cid}/${
@@ -311,7 +310,7 @@ function drawCardTileFlat(
 
     cont.addEventListener("click", () => {
       if (card.dfc == "SplitHalf") {
-        card = cardsDb.get(card.dfcId);
+        card = db.card(card.dfcId);
       }
       shell.openExternal(
         `https://scryfall.com/card/${get_set_scryfall(card.set)}/${card.cid}/${

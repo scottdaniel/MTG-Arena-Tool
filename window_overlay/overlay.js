@@ -2,15 +2,12 @@
 global
   $$,
   addCardHover,
-  cardsDb,
   compare_cards,
   CardsList,
   Colors,
+  db,
   Deck,
-  eventsList,
-  eventsToFormat,
   get_card_type_sort,
-  setsList
   $
 */
 const {
@@ -107,7 +104,7 @@ const fix = new TransparencyMouseFix({
 function get_ids_colors(list) {
   var colors = [];
   list.forEach(function(grpid) {
-    var cdb = cardsDb.get(grpid);
+    var cdb = db.card(grpid);
     if (cdb) {
       //var card_name = cdb.name;
       var card_cost = cdb.cost;
@@ -143,8 +140,8 @@ function compare_chances(a, b) {
 //
 function compare_draft_cards(a, b) {
   // Yeah this is lazy.. I know
-  a = cardsDb.get(a);
-  b = cardsDb.get(b);
+  a = db.card(a);
+  b = db.card(b);
   var as = get_card_type_sort(a.type);
   var bs = get_card_type_sort(b.type);
 
@@ -266,24 +263,6 @@ function recreateClock() {
 
   updateClock();
 }
-
-//
-ipc.on("set_db", function(event, arg) {
-  try {
-    arg = JSON.parse(arg);
-    setsList = arg.sets;
-    eventsList = arg.events;
-    eventsToFormat = arg.events_format;
-    delete arg.sets;
-    delete arg.events;
-    delete arg.events_format;
-    delete arg.ranked_events;
-    cardsDb.set(arg);
-  } catch (e) {
-    console.log("Error parsing metadata", e);
-    return false;
-  }
-});
 
 //
 ipc.on("set_timer", function(event, arg) {
@@ -520,12 +499,12 @@ function updateView() {
 
     $$("log-card").forEach(obj => {
       let grpId = obj.getAttribute("id");
-      addCardHover(obj, cardsDb.get(grpId));
+      addCardHover(obj, db.card(grpId));
     });
 
     $$("log-ability").forEach(obj => {
       let grpId = obj.getAttribute("id");
-      let abilityText = cardsDb.getAbility(grpId);
+      let abilityText = db.abilities[grpId] || "";
       obj.title = abilityText;
     });
 
@@ -605,7 +584,7 @@ function updateView() {
     let landsChance = 0;
     let landsColors = new Colors();
     mainCards.get().forEach(card => {
-      let cardObj = cardsDb.get(card.id);
+      let cardObj = db.card(card.id);
       if (cardObj && cardObj.type.includes("Land", 0)) {
         landsNumber += card.quantity;
         landsChance += card.chance !== undefined ? card.chance : 0;
@@ -856,7 +835,7 @@ function setDraft(_packN = -1, _pickN = -1) {
 
     draftPack.forEach(function(grpId) {
       try {
-        var rank = cardsDb.get(grpId).rank;
+        var rank = db.card(grpId).rank;
       } catch (e) {
         var rank = 0;
       }
@@ -896,8 +875,8 @@ function compare_logs(a, b) {
 }
 
 function compare_draft_picks(a, b) {
-  var arank = cardsDb.get(a).rank;
-  var brank = cardsDb.get(b).rank;
+  var arank = db.card(a).rank;
+  var brank = db.card(b).rank;
 
   if (arank > brank) return -1;
   if (arank < brank) return 1;
@@ -910,13 +889,13 @@ function hoverCard(grpId) {
     $(".overlay_hover").css("opacity", 0);
   } else {
     //let dfc = '';
-    //if (cardsDb.get(grpId).dfc == 'DFC_Back') dfc = 'a';
-    //if (cardsDb.get(grpId).dfc == 'DFC_Front')  dfc = 'b';
-    //if (cardsDb.get(grpId).dfc == 'SplitHalf')  dfc = 'a';
+    //if (db.card(grpId).dfc == 'DFC_Back') dfc = 'a';
+    //if (db.card(grpId).dfc == 'DFC_Front')  dfc = 'b';
+    //if (db.card(grpId).dfc == 'SplitHalf')  dfc = 'a';
     $(".overlay_hover").css("opacity", 1);
     $(".overlay_hover").attr(
       "src",
-      "https://img.scryfall.com/cards" + cardsDb.get(grpId).images["normal"]
+      "https://img.scryfall.com/cards" + db.card(grpId).images["normal"]
     );
     setTimeout(function() {
       $(".overlay_hover").css("opacity", 0);

@@ -1,9 +1,8 @@
 /*
 global
-  cardsDb,
   compare_archetypes,
+  db,
   Deck,
-  eventsToFormat,
   get_rank_index,
   playerDataDefault,
   hypergeometricRange,
@@ -525,9 +524,6 @@ function requestHistorySend(state) {
 
 var ranked_events = ["QuickDraft_M19_20190118"];
 
-var season_starts = new Date("2019-01-31T17:05:00Z");
-var season_ends = null;
-
 // Calculates winrates for history tabs (set to last 10 dys as default)
 function calculateRankWins() {
   var rankwinrates = {
@@ -539,7 +535,11 @@ function calculateRankWins() {
       diamond: { w: 0, l: 0, t: 0, r: "Diamond" },
       mythic: { w: 0, l: 0, t: 0, r: "Mythic" },
       step: playerData.rank.constructed.step,
-      steps: playerData.rank.constructed.steps,
+      steps: db.getRankSteps(
+        playerData.rank.constructed.rank,
+        playerData.rank.constructed.tier,
+        false
+      ),
       total: {
         w: playerData.rank.constructed.won,
         l: playerData.rank.constructed.lost,
@@ -554,7 +554,11 @@ function calculateRankWins() {
       diamond: { w: 0, l: 0, t: 0, r: "Diamond" },
       mythic: { w: 0, l: 0, t: 0, r: "Mythic" },
       step: playerData.rank.limited.step,
-      steps: playerData.rank.limited.steps,
+      steps: db.getRankSteps(
+        playerData.rank.limited.rank,
+        playerData.rank.limited.tier,
+        true
+      ),
       total: {
         w: playerData.rank.limited.won,
         l: playerData.rank.limited.lost,
@@ -563,8 +567,8 @@ function calculateRankWins() {
     }
   };
 
-  let ss = new Date(season_starts);
-  let se = new Date(season_ends);
+  let ss = db.season_starts;
+  let se = db.season_ends;
 
   for (var i = 0; i < history.matches.length; i++) {
     let match_id = history.matches[i];
@@ -1425,7 +1429,7 @@ function setDraftCards(json) {
 }
 
 function actionLogGenerateLink(grpId) {
-  var card = cardsDb.get(grpId);
+  var card = db.card(grpId);
   return '<log-card id="' + grpId + '">' + card.name + "</log-card>";
 }
 
@@ -1674,7 +1678,7 @@ function getBestArchetype(deck) {
     mainDeviations = [];
     deck.mainDeck.forEach(card => {
       let q = card.quantity;
-      let name = cardsDb.get(card.id).name;
+      let name = db.card(card.id).name;
       let archMain = arch.average.mainDeck;
 
       let deviation = q - (archMain[name] ? 1 : 0); // archMain[name] ? archMain[name] : 0 // for full data
@@ -1700,7 +1704,7 @@ function getOppDeck() {
   _deck.mainboard.removeDuplicates(true);
   _deck.getColors();
 
-  let format = eventsToFormat[currentMatch.eventId];
+  let format = db.events_format[currentMatch.eventId];
   currentMatch.opponent.deck.archetype = "-";
   let bestMatch = "-";
 

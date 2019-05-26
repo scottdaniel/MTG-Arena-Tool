@@ -1,20 +1,15 @@
 /*
 global
-  eventsList,
-  eventsToFormat,
   tokenAuth,
   decks,
   rstore,
   loadPlayerConfig,
-  cardsDb,
   playerData,
   ipc_send,
   debugNet,
   store,
   makeId,
   debugLog,
-  ranked_events,
-  setsList,
   syncUserData,
   sha1
 */
@@ -316,11 +311,6 @@ function httpBasic() {
                 //resetLogLoop(100);
                 metadataState = true;
                 delete parsedResult.ok;
-                setsList = parsedResult.sets;
-                eventsList = parsedResult.events;
-                eventsToFormat = parsedResult.events_format;
-                ranked_events = parsedResult.ranked_events;
-                cardsDb.set(parsedResult);
                 ipc_send("popup", {
                   text: "Metadata: Ok",
                   time: 1000,

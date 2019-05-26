@@ -6,15 +6,14 @@ globals
   getDeck,
   getReadableEvent,
   getRecentDeckName,
-  matchesHistory,
-  rankedEvents,
-  season_starts
+  matchesHistory
 */
 const {
   COLORS_ALL,
   COLORS_BRIEF,
   DEFAULT_TILE
 } = require("../shared/constants.js");
+const db = require("../shared/database.js");
 
 // Default filter values
 const DEFAULT_DECK = "All Decks";
@@ -156,7 +155,7 @@ class Aggregator {
     const { date } = this.filters;
     let dateFilter = null;
     if (date === DATE_SEASON) {
-      dateFilter = season_starts;
+      dateFilter = db.season_starts;
     } else if (date === DATE_LAST_30) {
       dateFilter = DAYS_AGO_30;
     } else {
@@ -235,7 +234,7 @@ class Aggregator {
       (eventId === ALL_EVENT_TRACKS &&
         !SINGLE_MATCH_EVENTS.includes(_eventId)) ||
       (eventId === RANKED_CONST && CONSTRUCTED_EVENTS.includes(_eventId)) ||
-      (eventId === RANKED_DRAFT && rankedEvents.includes(_eventId)) ||
+      (eventId === RANKED_DRAFT && db.ranked_events.includes(_eventId)) ||
       eventId === _eventId
     );
   }
@@ -358,7 +357,7 @@ class Aggregator {
         }
         if (CONSTRUCTED_EVENTS.includes(match.eventId)) {
           statsToUpdate.push(this.constructedStats[rank]);
-        } else if (rankedEvents.includes(match.eventId)) {
+        } else if (db.ranked_events.includes(match.eventId)) {
           statsToUpdate.push(this.limitedStats[rank]);
         }
       }
