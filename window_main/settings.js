@@ -329,12 +329,12 @@ function openSettingsTab(openSection = lastSettingsSection) {
   let cardsStyleCont = $(
     '<label class="but_container_label">Cards style:</label>'
   );
-  let stylesList = [CARD_TILE_ARENA, CARD_TILE_ARENA];
+
   const tagStyleSelect = createSelect(
     cardsStyleCont[0],
-    stylesList,
+    [CARD_TILE_ARENA, CARD_TILE_FLAT],
     cardStyle,
-    filter => updateUserSettings({ card_tile_style: filter }),
+    filter => updateUserSettingsBlend({ card_tile_style: filter }),
     "settings_cards_style",
     getCardStyleName
   );
@@ -707,6 +707,7 @@ function updateUserSettingsBlend(_settings = {}) {
     close_on_match: closeOnMatch,
     cards_size: cardSizePos,
     cards_quality: cardQuality,
+    card_tile_style: cardStyle,
     overlay_alpha: overlayAlpha,
     overlay_alpha_back: overlayAlphaBack,
     overlay_scale: overlayScale,

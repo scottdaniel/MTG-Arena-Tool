@@ -565,6 +565,9 @@ ipc.on("set_settings", function(event, arg) {
   if (arg.cards_quality) {
     cardQuality = arg.cards_quality;
   }
+  if (arg.card_tile_style) {
+    cardStyle = arg.card_tile_style;
+  }
   if (arg.back_url) {
     let oldBack = defaultBackground;
     defaultBackground = arg.back_url;
@@ -577,7 +580,6 @@ ipc.on("set_settings", function(event, arg) {
   }
   $(".main_wrapper").css("background-color", arg.back_color);
   cardSize = 100 + arg.cards_size * 10;
-  cardStyle = arg.card_tile_style;
   if (sidebarActive === 6) {
     openSettingsTab();
   }
@@ -1497,7 +1499,12 @@ function setChangesTimeline() {
         ic.appendTo(dd);
       }
 
-      let tile = deckDrawer.cardTile(cardStyle, c.id, "chm" + cn, Math.abs(c.quantity));
+      let tile = deckDrawer.cardTile(
+        cardStyle,
+        c.id,
+        "chm" + cn,
+        Math.abs(c.quantity)
+      );
       dd.append(tile);
       dd.appendTo(data);
     });
@@ -1522,7 +1529,12 @@ function setChangesTimeline() {
         ic.appendTo(dd);
       }
 
-      let tile = deckDrawer.cardTile(cardStyle, c.id, "chs" + cn, Math.abs(c.quantity));
+      let tile = deckDrawer.cardTile(
+        cardStyle,
+        c.id,
+        "chs" + cn,
+        Math.abs(c.quantity)
+      );
       dd.append(tile);
       dd.appendTo(data);
     });
