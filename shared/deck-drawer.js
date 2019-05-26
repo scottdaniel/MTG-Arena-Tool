@@ -10,6 +10,8 @@ global
 
 const _ = require("lodash");
 
+const { CARD_TILE_FLAT } = require("./constants.js");
+
 //
 function isNumber(n) {
   return !isNaN(parseFloat(n)) && isFinite(n);
@@ -73,6 +75,7 @@ exports.cardSeparator = function(str) {
 };
 
 exports.cardTile = function(
+  style,
   grpId,
   indent,
   quantity,
@@ -90,8 +93,32 @@ exports.cardTile = function(
     card = cardsDb.get(grpId);
   }
 
-  const cont = createDivision(["card_tile_container", "click-on"]);
+  // Default to Arena style
+  let drawFunc = drawCardTileArena;
+  if (style == CARD_TILE_FLAT) {
+    drawFunc = drawCardTileFlat;
+  }
+  return drawFunc(
+    card,
+    grpId,
+    indent,
+    quantity,
+    showWildcards,
+    deck,
+    isSideboard
+  );
+};
 
+function drawCardTileArena(
+  card,
+  grpId,
+  indent,
+  quantity,
+  showWildcards,
+  deck,
+  isSideboard
+) {
+  const cont = createDivision(["card_tile_container", "click-on"]);
   cont.dataset["grpId"] = grpId;
   cont.dataset["id"] = indent;
   cont.dataset["quantity"] = quantity;
@@ -209,4 +236,90 @@ exports.cardTile = function(
     }
   }
   return cont;
-};
+}
+
+function drawCardTileFlat(
+  card,
+  grpId,
+  indent,
+  quantity,
+  showWildcards,
+  deck,
+  isSideboard
+) {
+  const cont = createDivision(["card_tile_container_flat", "click-on"]);
+  cont.dataset["grpId"] = grpId;
+  cont.dataset["id"] = indent;
+  cont.dataset["quantity"] = quantity;
+
+  if (!isNumber(quantity)) {
+    // Text quantity
+    const col = rankingClassName(quantity);
+    const quantityDiv = createDivision(["card_tile_odds_flat", col], quantity);
+    cont.appendChild(quantityDiv);
+  } else if (quantity == 9999) {
+    // Undefined Quantity
+    const quantityDiv = createDivision(["card_tile_quantity_flat"], 1);
+    cont.appendChild(quantityDiv);
+  } else {
+    // Normal Quantity
+    const quantityDiv = createDivision(["card_tile_quantity_flat"], quantity);
+    cont.appendChild(quantityDiv);
+  }
+
+  const cardTile = createDivision(["card_tile_crop_flat"]);
+  try {
+    cardTile.style.backgroundImage = `url(https://img.scryfall.com/cards${
+      card.images["art_crop"]
+    })`;
+  } catch (e) {
+    console.log(e);
+  }
+  cont.appendChild(cardTile);
+
+  let name = card ? card.name : "Unknown";
+  let cardName = createDivision(["card_tile_name_flat"], name);
+  cont.appendChild(cardName);
+
+  const cardCost = createDivision(["cart_tile_mana_flat"]);
+  if (card) {
+    let prevc = true;
+    const hasSplitCost = card.dfc === "SplitHalf";
+
+    card.cost.forEach(cost => {
+      if (hasSplitCost) {
+        if (/^(x|\d)+$/.test(cost) && prevc === false) {
+          cardCost.innerHTML += "//";
+        }
+        prevc = /^\d+$/.test(cost);
+      }
+      cardCost.appendChild(
+        createDivision(["mana_s16", "flex_end", `mana_${cost}`])
+      );
+    });
+  }
+  cont.appendChild(cardCost);
+
+  if (card) {
+    addCardHover(cont, card);
+    cont.addEventListener("mouseenter", () => {
+      cont.style.backgroundColor = "rgba(65, 50, 40, 0.75)";
+    });
+    cont.addEventListener("mouseleave", () => {
+      cont.style.backgroundColor = "rgba(0, 0, 0, 0.75)";
+    });
+
+    cont.addEventListener("click", () => {
+      if (card.dfc == "SplitHalf") {
+        card = cardsDb.get(card.dfcId);
+      }
+      shell.openExternal(
+        `https://scryfall.com/card/${get_set_scryfall(card.set)}/${card.cid}/${
+          card.name
+        }`
+      );
+    });
+  }
+
+  return cont;
+}
