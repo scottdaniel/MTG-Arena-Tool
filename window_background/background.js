@@ -283,6 +283,7 @@ var wcUncommon = 0;
 var wcRare = 0;
 var wcMythic = 0;
 
+var logLanguage = "English";
 var lastDeckUpdate = new Date();
 
 // Begin of IPC messages recievers
