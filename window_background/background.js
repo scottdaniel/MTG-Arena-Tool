@@ -1413,7 +1413,7 @@ var currentActionLog = "";
 function actionLog(seat, time, str, grpId = 0) {
   if (!time) time = new Date();
   if (seat == -99) {
-    currentActionLog = "version: 0\r\n";
+    currentActionLog = "version: 1\r\n";
   } else {
     var hh = ("0" + time.getHours()).slice(-2);
     var mm = ("0" + time.getMinutes()).slice(-2);
