@@ -121,7 +121,6 @@ let activeEvents = [];
 
 let filteredWildcardsSet = "";
 
-let deck_tags = {};
 let tags_colors = {};
 let authToken = null;
 let discordTag = null;
@@ -459,11 +458,7 @@ ipc.on("set_status", function(event, arg) {
 //
 ipc.on("set_home", function(event, arg) {
   hideLoadingBars();
-  deck_tags = arg.tags;
 
-  Object.keys(deck_tags).forEach(function(format) {
-    deck_tags[format].sort(compare_archetypes);
-  });
   ipc_send("set_deck_archetypes", arg.archetypes);
   if (sidebarActive == -1) {
     console.log("Home", arg);
