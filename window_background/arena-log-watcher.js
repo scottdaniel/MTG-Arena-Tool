@@ -70,21 +70,31 @@ function start({ path, chunkSize, onLogEntry, onError, onFinish }) {
 }
 
 function fsWatch(path, onChanged, interval) {
-  let lastStats;
+  let lastSize;
   let handle;
   start();
   return stop;
 
   async function start() {
-    lastStats = await fsAsync.stat(path);
+    lastSize = await attemptSize();
     handle = setInterval(checkFile, interval);
   }
 
   async function checkFile() {
-    const stats = await fsAsync.stat(path);
-    if (lastStats.size === stats.size) return;
-    lastStats = stats;
+    const size = await attemptSize();
+    if (lastSize === size) return;
+    lastSize = size;
     onChanged();
+  }
+
+  async function attemptSize() {
+    try {
+      const stats = await fsAsync.stat(path);
+      return stats.size;
+    } catch (err) {
+      if (err.code === "ENOENT") return 0;
+      throw err;
+    }
   }
 
   function stop() {
