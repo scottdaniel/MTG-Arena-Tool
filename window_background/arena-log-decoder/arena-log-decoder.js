@@ -1,8 +1,9 @@
+const _ = require("lodash");
 const nthLastIndexOf = require("./nth-last-index-of");
 const jsonText = require("./json-text");
 const { unleakString } = require("../background-util");
 
-const CONNECTION_JSON_PATTERN = /\[(?:UnityCrossThreadLogger|Client GRE)\]WebSocketClient (.*) WebSocketSharp\.WebSocket connecting to .*: (.*)(?:\r\n|\n)/;
+const CONNECTION_JSON_PATTERN = /\[(?:UnityCrossThreadLogger|Client GRE)\]WebSocketClient (?<client>.*) WebSocketSharp\.WebSocket connecting to .*: (?<socket>.*)(?:\r\n|\n)/;
 
 const LABEL_JSON_PATTERNS = [
   /\[Client GRE\](?<timestamp>.*): (?:Match to )?(?<playerId>\w*)(?: to Match)?: (?<label>.*)(?:\r\n|\n)\[Message (.*)\]/,
@@ -11,7 +12,7 @@ const LABEL_JSON_PATTERNS = [
   /\[UnityCrossThreadLogger\]Received unhandled GREMessageType: (?<label>.*)(?:\r\n|\n)/
 ];
 
-const LABEL_ARROW_JSON_PATTERN = /\[UnityCrossThreadLogger\](.*)(?:\r\n|\n)([<=]=[=>]) (.*)\(.*\):?(?:\r\n|\n)/;
+const LABEL_ARROW_JSON_PATTERN = /\[UnityCrossThreadLogger\](?<timestamp>.*)(?:\r\n|\n)(?<arrow>[<=]=[=>]) (?<label>.*)\(.*\):?(?:\r\n|\n)/;
 
 const ALL_PATTERNS = [
   CONNECTION_JSON_PATTERN,
@@ -71,6 +72,8 @@ function ArenaLogDecoder() {
       bufferDiscarded += bufferUsed;
       buffer = unleakString(buffer.substr(bufferUsed));
     }
+
+    unleakRegExp();
   }
 }
 
@@ -82,8 +85,7 @@ function parseLogEntry(text, matchText, position) {
       matchText.length,
       {
         type: "connection",
-        client: JSON.parse(rematches[1]),
-        socket: JSON.parse(rematches[2])
+        ..._.mapValues(rematches.groups, JSON.parse)
       }
     ];
   }
@@ -115,9 +117,7 @@ function parseLogEntry(text, matchText, position) {
       matchText.length + jsonLen + textAfterJson.length,
       {
         type: "label_arrow_json",
-        label: rematches[3],
-        arrow: rematches[2],
-        timestamp: rematches[1],
+        ..._.mapValues(rematches.groups, unleakString),
         json: () => JSON.parse(text.substr(jsonStart, jsonLen))
       }
     ];
@@ -153,7 +153,7 @@ function parseLogEntry(text, matchText, position) {
       matchText.length + jsonLen + textAfterJson.length,
       {
         type: "label_json",
-        ...rematches.groups,
+        ..._.mapValues(rematches.groups, unleakString),
         json: () => JSON.parse(text.substr(jsonStart, jsonLen))
       }
     ];
@@ -167,6 +167,12 @@ function parseLogEntry(text, matchText, position) {
 function occurrences(text, re) {
   const matches = text.match(re);
   return matches ? matches.length : 0;
+}
+
+// The global RegExp object has a lastMatch property that holds references to
+// strings -- even our very large ones. This fn can be called to release those.
+function unleakRegExp() {
+  /\s*/g.exec("");
 }
 
 module.exports = ArenaLogDecoder;
