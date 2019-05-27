@@ -1,27 +1,4 @@
-/*
-global
-  $$,
-  addCardHover,
-  compare_cards,
-  CardsList,
-  Colors,
-  db,
-  Deck,
-  get_card_type_sort,
-  $
-*/
-const {
-  DRAFT_RANKS,
-  MANA,
-  PACK_SIZES,
-  IPC_BACKGROUND,
-  IPC_OVERLAY,
-  CARD_TILE_ARENA,
-  CARD_TILE_FLAT
-} = require("../shared/constants.js");
-const electron = require("electron");
-const { webFrame, remote } = require("electron");
-const deckDrawer = require("../shared/deck-drawer");
+const { ipcRenderer: ipc, webFrame, remote } = require("electron");
 
 if (!remote.app.isPackaged) {
   const { openNewGitHubIssue, debugInfo } = require("electron-util");
@@ -37,6 +14,28 @@ if (!remote.app.isPackaged) {
     }
   });
 }
+
+const TransparencyMouseFix = require("electron-transparency-mouse-fix");
+const fs = require("fs");
+const striptags = require("striptags");
+const $ = (window.$ = window.jQuery = require("jquery"));
+
+const db = require("../shared/database");
+const Deck = require("../shared/deck.js");
+const Colors = require("../shared/colors");
+const deckDrawer = require("../shared/deck-drawer");
+const { compare_cards, get_card_type_sort } = require("../shared/util");
+const { setRenderer, addCardHover } = require("../shared/card-hover");
+const { queryElements: $$ } = require("../shared/dom-fns");
+
+const {
+  DRAFT_RANKS,
+  MANA,
+  PACK_SIZES,
+  IPC_BACKGROUND,
+  IPC_OVERLAY,
+  CARD_TILE_FLAT
+} = require("../shared/constants.js");
 
 let landsCard = {
   id: 100,
@@ -56,19 +55,13 @@ let landsCard = {
   dfcId: 0
 };
 
-let shell = electron.shell;
-const fs = require("fs");
-const ipc = electron.ipcRenderer;
-const striptags = require("striptags");
-window.$ = window.jQuery = require("jquery");
-
 let matchBeginTime = Date.now();
 let priorityTimers = [];
 let clockMode = 0;
 let draftMode = 1;
 let deckMode = 0;
 let overlayMode = 0;
-var renderer = 1;
+setRenderer(1);
 
 //var turnPhase = 0;
 //var turnStep = 0;
@@ -95,7 +88,6 @@ let actionLog = [];
 let currentMatch = null;
 let cards = {};
 
-const TransparencyMouseFix = require("electron-transparency-mouse-fix");
 const fix = new TransparencyMouseFix({
   fixPointerEvents: "auto"
 });

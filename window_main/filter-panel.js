@@ -1,15 +1,18 @@
-"use strict";
 /*
-globals
-  Aggregator,
-  createDivision,
-  createSelect,
+global
+  Aggregator
+  getTagColor
+*/
+
+const { createDivision } = require("../shared/dom-fns");
+const { createSelect } = require("../shared/select");
+const {
   doesDeckStillExist,
   getReadableEvent,
   getReadableFormat,
-  getRecentDeckName,
-  getTagColor
-*/
+  getRecentDeckName
+} = require("../shared/util");
+
 const { COLORS_ALL, COLORS_BRIEF } = require("../shared/constants.js");
 
 const {

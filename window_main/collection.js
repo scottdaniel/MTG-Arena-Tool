@@ -1,29 +1,32 @@
 /*
 global
-  $$,
-  addCardHover,
-  cards,
-  cardsNew,
-  cardSize,
+  cards
+  cardsNew
+  cardSize
+  change_background
+  decks
+  hideLoadingBars
+  ipc_send
+  remote
+  Menu
+  MenuItem
+*/
+
+const { ipcRenderer: ipc, shell } = require("electron");
+const db = require("../shared/database");
+const { queryElements: $$, createDivision } = require("../shared/dom-fns");
+const { createSelect } = require("../shared/select");
+const { addCardHover } = require("../shared/card-hover");
+const {
   collectionSortRarity,
-  change_background,
-  createDivision,
-  createSelect,
-  db,
-  decks,
   get_card_image,
   get_set_scryfall,
   getCardsMissingCount,
-  hideLoadingBars,
-  ipc,
-  ipc_send,
-  remote,
-  replaceAll,
-  Menu,
-  MenuItem,
-  shell
-*/
+  replaceAll
+} = require("../shared/util");
+
 const { COLORS_BRIEF, CARD_RARITIES } = require("../shared/constants.js");
+
 let collectionPage = 0;
 let sortingAlgorithm = "Sort by Set";
 let filteredSets;
@@ -1150,12 +1153,10 @@ function addCardMenu(div, card) {
 }
 
 //
-/* eslint-disable */
 function printCollectionPage(page = 0) {
   collectionPage = page;
   printCards();
 }
-/* eslint-enable */
 
 module.exports = {
   openCollectionTab: openCollectionTab

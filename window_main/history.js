@@ -1,46 +1,47 @@
 /*
-globals
-  Aggregator,
-  allMatches,
-  compare_cards,
-  createDivision,
-  currentId,
-  db,
-  DataScroller,
-  deck_tags,
-  decks,
-  FilterPanel,
+global
+  Aggregator
+  allMatches
+  currentId
+  DataScroller
+  deck_tags
+  decks
+  FilterPanel
+  getTagColor
+  ipc_send
+  makeResizable
+  matchesHistory
+  open_match
+  open_draft
+  ListItem
+  playerData
+  setTagColor
+  showLoadingBars
+  sidebarActive
+  sidebarSize
+  sort_decks
+  StatsPanel
+*/
+
+const autocomplete = require("../shared/autocomplete.js");
+
+const db = require("../shared/database");
+const { selectAdd } = require("../shared/select");
+const { createDivision } = require("../shared/dom-fns");
+const {
   get_deck_colors,
-  get_rank_index,
   get_rank_index_16,
   getReadableEvent,
-  getTagColor,
-  ipc_send,
-  makeResizable,
   makeId,
-  matchesHistory,
-  open_match,
-  open_draft,
-  ListItem,
-  playerData,
-  selectAdd,
-  setTagColor,
-  showLoadingBars,
-  sidebarActive,
-  sidebarSize,
-  sort_decks,
-  StatsPanel,
   timeSince,
-  toMMSS,
-  $$
-*/
+  toMMSS
+} = require("../shared/util");
+
 const { MANA, RANKS } = require("../shared/constants.js");
 
 const { DEFAULT_DECK, RANKED_CONST, RANKED_DRAFT, DATE_SEASON } = Aggregator;
 let filters = Aggregator.getDefaultFilters();
 let filteredMatches;
-
-const autocomplete = require("../shared/autocomplete.js");
 
 function getNextRank(currentRank) {
   /*
@@ -397,15 +398,6 @@ function formatPercent(percent, precision) {
 }
 
 function renderRanksStats(container) {
-  /*
-    globals:
-      matchesHistory
-      get_rank_index
-      getStepsUntilNextRank
-      createButton
-      formatPercent
-      playerData
-  */
   container.innerHTML = "";
   const viewingLimitSeason = filters.eventId === RANKED_DRAFT;
   let seasonName = !viewingLimitSeason ? "constructed" : "limited";

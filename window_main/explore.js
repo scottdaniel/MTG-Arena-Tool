@@ -1,23 +1,27 @@
 /*
-globals
-  activeEvents,
-  db,
+global
+  activeEvents
+  add_checkbox
+  economyHistory
+  getWinrateClass
+  hideLoadingBars
+  ipc_send
+  showLoadingBars
+*/
+
+const _ = require("lodash");
+const db = require("../shared/database");
+const { queryElements: $$, createDivision } = require("../shared/dom-fns");
+const { createSelect } = require("../shared/select");
+const {
   getReadableEvent,
-  createSelect,
   timeSince,
-  ipc_send,
-  showLoadingBars,
-  add_checkbox,
-  economyHistory,
-  getWinrateClass,
   get_rank_index_16,
-  hideLoadingBars,
-  createDivision,
   removeDuplicates,
   compare_cards,
-  getBoosterCountEstimate,
-  $$
-*/
+  getBoosterCountEstimate
+} = require("../shared/util");
+
 const { MANA, COLORS_BRIEF, DEFAULT_TILE } = require("../shared/constants.js");
 
 let filterWCC = 0;
@@ -462,7 +466,7 @@ function deckLoad(_deck, index) {
         ["wc_explore_cost", "wc_" + raritySort[key]],
         _deck.wildcards[key]
       );
-      wc.title = raritySort[key].capitalize() + " wildcards needed.";
+      wc.title = _.capitalize(raritySort[key]) + " wildcards needed.";
       flcf.appendChild(wc);
       n++;
     }
@@ -598,7 +602,7 @@ function eventLoad(event, index) {
         ["wc_explore_cost", "wc_" + raritySort[key]],
         event.wildcards[key]
       );
-      wc.title = raritySort[key].capitalize() + " wldcards needed.";
+      wc.title = _.capitalize(raritySort[key]) + " wldcards needed.";
       flcf.appendChild(wc);
       n++;
     }

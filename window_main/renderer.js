@@ -1,38 +1,9 @@
 /*
 global
-  addCardHover,
-  compare_archetypes,
-  compare_cards,
-  db,
-  get_card_image,
-  get_deck_colors,
-  get_deck_export,
-  get_deck_export_txt,
-  get_deck_types_ammount,
-  get_rank_index,
-  hypergeometricSignificance,
-  hypergeometricRange,
-  makeId,
-  playerDataDefault,
-  removeDuplicates,
-  set_tou_state,
-  timeSince,
-  $$
+  set_tou_state
 */
-const {
-  DRAFT_RANKS,
-  HIDDEN_PW,
-  MANA,
-  IPC_MAIN,
-  IPC_BACKGROUND,
-  CARD_TILE_ARENA,
-  CARD_TILE_FLAT
-} = require("../shared/constants.js");
-const electron = require("electron");
-const _ = require("lodash");
-const remote = electron.remote;
-const shell = electron.shell;
-const ipc = electron.ipcRenderer;
+
+const { app, ipcRenderer: ipc, remote, shell } = require("electron");
 
 if (!remote.app.isPackaged) {
   const { openNewGitHubIssue, debugInfo } = require("electron-util");
@@ -49,15 +20,12 @@ if (!remote.app.isPackaged) {
   });
 }
 
-const Menu = remote.Menu;
-const MenuItem = remote.MenuItem;
-
-require("time-elements");
-const striptags = require("striptags");
-
+const _ = require("lodash");
 window.$ = window.jQuery = require("jquery");
 require("jquery.easing");
 require("spectrum-colorpicker");
+require("time-elements");
+const striptags = require("striptags");
 
 const Aggregator = require("./aggregator.js");
 const ListItem = require("./list-item.js");
@@ -79,8 +47,39 @@ const expandEvent = require("./events").expandEvent;
 const openSettingsTab = require("./settings").openSettingsTab;
 const deckDrawer = require("../shared/deck-drawer");
 const cardTypes = require("../shared/card-types");
-
 const openEconomyTab = require("./economy").openEconomyTab;
+const db = require("../shared/database");
+const { queryElements: $$ } = require("../shared/dom-fns");
+const { addCardHover } = require("../shared/card-hover");
+const {
+  compare_archetypes,
+  compare_cards,
+  get_card_image,
+  get_deck_colors,
+  get_deck_export,
+  get_deck_export_txt,
+  get_deck_types_ammount,
+  get_rank_index,
+  makeId,
+  playerDataDefault,
+  removeDuplicates,
+  timeSince
+} = require("../shared/util");
+const {
+  DRAFT_RANKS,
+  HIDDEN_PW,
+  MANA,
+  IPC_MAIN,
+  IPC_BACKGROUND,
+  CARD_TILE_FLAT
+} = require("../shared/constants.js");
+const {
+  hypergeometricSignificance,
+  hypergeometricRange
+} = require("../shared/stats-fns");
+
+const Menu = remote.Menu;
+const MenuItem = remote.MenuItem;
 
 const { RANKED_CONST, RANKED_DRAFT, DATE_SEASON } = Aggregator;
 
@@ -111,7 +110,7 @@ let canLogin = false;
 let offlineMode = false;
 let lastTab = -1;
 
-let playerData = playerDataDefault;
+let playerData = playerDataDefault();
 
 let economyHistory = [];
 
@@ -132,7 +131,7 @@ const fs = require("fs");
 const path = require("path");
 
 const actionLogDir = path.join(
-  (electron.app || electron.remote.app).getPath("userData"),
+  (app || remote.app).getPath("userData"),
   "actionlogs"
 );
 
