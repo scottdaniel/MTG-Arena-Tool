@@ -653,8 +653,10 @@ function openTab(tab) {
 
 //
 ipc.on("initialize", function() {
-  $(".top_username").html(playerData.name.slice(0, -6));
-  $(".top_username_id").html(playerData.name.slice(-6));
+  if (playerData.name) {
+    $(".top_username").html(playerData.name.slice(0, -6));
+    $(".top_username_id").html(playerData.name.slice(-6));
+  }
 
   sidebarActive = lastTab;
   ipc_send("request_home", filteredWildcardsSet);
