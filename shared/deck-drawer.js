@@ -316,5 +316,20 @@ function drawCardTileFlat(
     });
   }
 
+  //
+  if (showWildcards && deck) {
+    if (card && card.type.indexOf("Basic Land") == -1) {
+      const missing = get_wc_missing(deck, grpId, isSideboard);
+      if (missing > 0) {
+        const asasdf = createDivision(["not_owned_sprite_flat"]);
+        const xoff = rarities[card.rarity] * -24;
+        const yoff = missing * -24;
+        asasdf.style.cssText = `background-position: ${xoff}px ${yoff}px;);`;
+        asasdf.title = `${missing} missing`;
+        cont.appendChild(asasdf);
+      }
+    }
+  }
+
   return cont;
 }

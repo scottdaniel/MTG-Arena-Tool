@@ -777,6 +777,17 @@ span {
     margin: 0 6px 0 auto;
 }
 
+.not_owned_sprite_flat {
+    margin-left: -24px;
+    left: 24px;
+    margin-top: 4px;
+    min-width: 24px;
+    width: 24px;
+    height: 24px;
+    position: relative;
+    background-image: url(../images/not_owned_sprite.png);
+}
+
 .not_owned_sprite {
     margin-top: 2px;
     min-width: 24px;
