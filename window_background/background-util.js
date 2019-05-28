@@ -41,7 +41,7 @@ function parseWotcTime(dateStr) {
 
   if (!date || isNaN(date.getTime())) {
     console.log(`Invalid date ('${dateStr}') - using current date as backup.`);
-    date = new Date(dateStr);
+    date = new Date();
   }
   return date;
 }
