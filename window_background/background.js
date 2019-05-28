@@ -1666,17 +1666,18 @@ function getBestArchetype(deck) {
   let lowestDeviation = Math.sqrt(
     mainDeviations.reduce((a, b) => a + b) / (mainDeviations.length - 1)
   );
+  let highest = lowestDeviation;//err..
 
   // Test for each archertype
   deck_archetypes.forEach(arch => {
     //console.log(arch.name);
     mainDeviations = [];
     deck.mainDeck.forEach(card => {
-      let q = card.quantity;
+      //let q = card.quantity;
       let name = db.card(card.id).name;
       let archMain = arch.average.mainDeck;
 
-      let deviation = q - (archMain[name] ? 1 : 0); // archMain[name] ? archMain[name] : 0 // for full data
+      let deviation = 1 - (archMain[name] ? 1 : 0); // archMain[name] ? archMain[name] : 0 // for full data
       mainDeviations.push(deviation * deviation);
       //console.log(name, deviation, q, archMain[name]);
     });
@@ -1690,6 +1691,10 @@ function getBestArchetype(deck) {
     }
     //console.log(">>", averageDeviation, Math.sqrt(averageDeviation));
   });
+
+  if (lowestDeviation > highest * 0.5) {
+    return "Unknown";
+  }
 
   return bestMatch.name;
 }
