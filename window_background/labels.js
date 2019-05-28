@@ -529,8 +529,10 @@ function onLabelInventoryUpdated(entry, transaction) {
 
   // Construct a unique ID
   let context = transaction.context;
-  let milliseconds = transaction.date.getTime();
-  transaction.id = sha1(milliseconds + context);
+  //let milliseconds = transaction.date.getTime();
+  // We use the original time string for the ID to ensure parsing does not alter it
+  // This will make the ID the same if parsing either changes or breaks
+  transaction.id = sha1(entry.timestamp + context);
 
   // Do not modify the context from now on.
   saveEconomyTransaction(transaction);
