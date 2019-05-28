@@ -1666,7 +1666,7 @@ function getBestArchetype(deck) {
   let lowestDeviation = Math.sqrt(
     mainDeviations.reduce((a, b) => a + b) / (mainDeviations.length - 1)
   );
-  let highest = lowestDeviation;//err..
+  let highest = lowestDeviation; //err..
 
   // Test for each archertype
   deck_archetypes.forEach(arch => {
