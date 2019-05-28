@@ -323,13 +323,15 @@ function attachMatchData(listItem, match) {
   listItem.rightBottom.appendChild(tags_div);
 
   // Set tag
+  /*
   let t = db.events_format[match.eventId];
-  let tags = [];
   if (t && deck_tags[t]) {
     deck_tags[t].forEach(val => {
       tags.push({ tag: val.tag, q: val.average });
     });
   }
+  */
+  let tags = [];
   if (match.tags) {
     match.tags.forEach(tag => {
       let t = createTag(tag, tags_div, true);
