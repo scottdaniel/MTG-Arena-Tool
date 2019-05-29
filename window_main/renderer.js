@@ -84,7 +84,6 @@ const MenuItem = remote.MenuItem;
 const { RANKED_CONST, RANKED_DRAFT, DATE_SEASON } = Aggregator;
 
 let deck = null;
-let decks = null;
 let changes = null;
 let matchesHistory = [];
 let allMatches = null;
@@ -92,8 +91,6 @@ let eventsHistory = [];
 
 let explore = null;
 let ladder = null;
-let cards = {};
-let cardsNew = {};
 
 let sidebarActive = -2;
 let filterEvent = "All";
@@ -260,15 +257,7 @@ ipc.on("set_reward_resets", function(event, arg) {
 
 //
 ipc.on("set_decks", function(event, arg) {
-  try {
-    arg = JSON.parse(arg);
-  } catch (e) {
-    console.log("Error parsing JSON:", arg);
-    return false;
-  }
-  if (arg != null) {
-    delete arg.index;
-    decks = Object.values(arg);
+  if (arg !== null) {
     if (matchesHistory.length) {
       allMatches = Aggregator.createAllMatches();
     }
@@ -292,7 +281,7 @@ ipc.on("set_history", function(event, arg) {
   if (arg != null) {
     try {
       matchesHistory = JSON.parse(arg);
-      if (decks) {
+      if (pd.decks_index.length) {
         allMatches = Aggregator.createAllMatches();
       }
     } catch (e) {
@@ -308,7 +297,7 @@ ipc.on("set_history", function(event, arg) {
 ipc.on("set_history_data", function(event, arg) {
   if (arg != null) {
     matchesHistory = JSON.parse(arg);
-    if (decks) {
+    if (pd.decks_index.length) {
       allMatches = Aggregator.createAllMatches();
     }
   }
@@ -370,12 +359,6 @@ ipc.on("set_deck_changes", function(event, arg) {
   if (changes != null) {
     setChangesTimeline();
   }
-});
-
-//
-ipc.on("set_cards", function(event, _cards, _cardsnew) {
-  cards = _cards;
-  cardsNew = _cardsnew;
 });
 
 //
@@ -2244,16 +2227,6 @@ function compare_color_winrates(a, b) {
   if (sa > sb) return 1;
 
   return 0;
-}
-
-//
-function sort_decks(compareFunc = compare_decks) {
-  decks.sort(compareFunc);
-  decks.forEach(function(deck) {
-    deck.colors = [];
-    deck.colors = get_deck_colors(deck);
-    deck.mainDeck.sort(compare_cards);
-  });
 }
 
 //

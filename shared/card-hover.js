@@ -1,10 +1,5 @@
-/*
-global
-  cards
-  cardsNew
-*/
-
 const db = require("../shared/database");
+const pd = require("../shared/player-data");
 const { createDivision, queryElements: $$ } = require("../shared/dom-fns");
 const { get_card_image } = require("../shared/util");
 
@@ -83,8 +78,8 @@ function attachOwnerhipStars(card, starContainer) {
   starContainer.innerHTML = "";
   starContainer.style.opacity = 1;
 
-  let owned = cards[card.id];
-  let aquired = cardsNew[card.id];
+  const owned = pd.cards[card.id];
+  const aquired = pd.cardsNew[card.id];
   for (let i = 0; i < 4; i++) {
     let color = "gray";
 

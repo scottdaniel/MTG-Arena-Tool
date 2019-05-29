@@ -1,8 +1,3 @@
-/*
-global
-  cards
-  decks
-*/
 const db = require("../shared/database");
 const pd = require("../shared/player-data");
 
@@ -63,15 +58,13 @@ function get_rank_index_16(_rank) {
 //
 exports.getDeck = getDeck;
 function getDeck(deckId) {
-  const matches = decks.filter(deck => deck.id === deckId);
-  if (!matches.length) return null;
-  return matches[0];
+  return pd.deck(deckId);
 }
 
 //
 exports.doesDeckStillExist = doesDeckStillExist;
 function doesDeckStillExist(deckId) {
-  return decks.filter(deck => deck.id === deckId).length > 0;
+  return pd.deckExists(deckId);
 }
 
 exports.getRecentDeckName = getRecentDeckName;
@@ -335,7 +328,7 @@ function get_wc_missing(deck, grpid, isSideboard) {
 
   let have = 0;
   arr.forEach(id => {
-    let n = cards[id];
+    let n = pd.cards[id];
     if (n !== undefined) {
       have += n;
     }

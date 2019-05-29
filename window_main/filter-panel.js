@@ -1,20 +1,19 @@
 /*
 global
-  Aggregator
   getTagColor
 */
 
+const { COLORS_ALL, COLORS_BRIEF } = require("../shared/constants");
+const pd = require("../shared/player-data");
 const { createDivision } = require("../shared/dom-fns");
 const { createSelect } = require("../shared/select");
 const {
-  doesDeckStillExist,
   getReadableEvent,
   getReadableFormat,
   getRecentDeckName
 } = require("../shared/util");
 
-const { COLORS_ALL, COLORS_BRIEF } = require("../shared/constants.js");
-
+const Aggregator = require("./aggregator");
 const {
   DEFAULT_ARCH,
   DEFAULT_DECK,
@@ -76,7 +75,7 @@ class FilterPanel {
     if (matches.length === 0) return deckId;
     const deck = matches[0];
 
-    const deckExists = doesDeckStillExist(deckId);
+    const deckExists = pd.deckExists(deckId);
 
     let deckName = deckExists ? getRecentDeckName(deckId) : deck.name;
     let maxChars = 10;

@@ -171,7 +171,6 @@ function startApp() {
         break;
 
       case "set_settings":
-        background.webContents.send("set_settings", arg);
         mainWindow.webContents.send("set_settings", arg);
         overlay.webContents.send("set_settings", arg);
         setSettings(arg);
@@ -184,7 +183,6 @@ function startApp() {
 
       case "set_db":
         mainWindow.webContents.send("set_db", arg);
-        background.webContents.send("set_db", arg);
         overlay.webContents.send("set_db", arg);
         if (autoLogin) {
           background.webContents.send("auto_login");
@@ -194,12 +192,6 @@ function startApp() {
       case "set_player_data":
         mainWindow.webContents.send("set_player_data", arg);
         overlay.webContents.send("set_player_data", arg);
-        background.webContents.send("set_player_data", arg);
-        break;
-
-      case "set_season":
-        mainWindow.webContents.send("set_season", arg);
-        background.webContents.send("set_season", arg);
         break;
 
       case "popup":
@@ -215,13 +207,9 @@ function startApp() {
         mainWindow.minimize();
         break;
 
-      case "set_rank":
-        mainWindow.webContents.send("set_rank", arg.rank, arg.str);
-        break;
-
       case "set_cards":
         mainWindow.webContents.send("set_cards", arg.cards, arg.new);
-        overlay.webContents.send("set_cards", arg.cards);
+        overlay.webContents.send("set_cards", arg.cards, arg.new);
         break;
 
       case "set_opponent_rank":

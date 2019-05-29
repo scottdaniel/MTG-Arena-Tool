@@ -148,19 +148,20 @@ class PlayerData {
 
     this.handleSetPlayerData = this.handleSetPlayerData.bind(this);
     if (ipc) ipc.on("set_player_data", this.handleSetPlayerData);
-    // this.handleSetCards = this.handleSetCards.bind(this);
-    // if (ipc) ipc.on("set_cards", this.handleSetCards);
-    // this.handleSetDecks = this.handleSetDecks.bind(this);
-    // if (ipc) ipc.on("set_decks", this.handleSetDecks);
+    this.handleSetCards = this.handleSetCards.bind(this);
+    if (ipc) ipc.on("set_cards", this.handleSetCards);
+    this.handleSetDecks = this.handleSetDecks.bind(this);
+    if (ipc) ipc.on("set_decks", this.handleSetDecks);
     // this.handleToggleArchived = this.handleToggleArchived.bind(this);
     // if (ipc) ipc.on("toggle_archived", this.handleToggleArchived);
     this.handleSetSettings = this.handleSetSettings.bind(this);
     if (ipc) ipc.on("set_settings", this.handleSetSettings);
 
     //set_active_events
+    this.deck = this.deck.bind(this);
+    this.deckExists = this.deckExists.bind(this);
 
-    this.handleSetPlayerData(null, playerDataDefault);
-    this.handleSetPlayerData(null, defaultCfg);
+    this.handleSetPlayerData(null, { ...playerDataDefault, ...defaultCfg });
     this.defaultCfg = defaultCfg;
 
     PlayerData.instance = this;
@@ -176,7 +177,6 @@ class PlayerData {
   }
 
   handleSetCards(_event, cards, cardsnew) {
-    // TODO get rid of this entirely?
     this.cards = cards;
     this.cardsNew = cardsnew;
   }
@@ -198,8 +198,16 @@ class PlayerData {
     this[arg].archived = !this[arg].archived;
   }
 
+  get cardsSize() {
+    return 100 + this.settings.cards_size * 10;
+  }
+
   get changes() {
-    return this.economy_index.map(this.change);
+    return this.economy_index.filter(this.changeExists).map(this.change);
+  }
+
+  get deckList() {
+    return this.decks_index.filter(this.deckExists).map(this.deck);
   }
 
   get drafts() {
@@ -214,22 +222,27 @@ class PlayerData {
     return [...this.matches_index.map(this.match), ...this.drafts()];
   }
 
-  get cardsSize() {
-    return 100 + this.settings.cards_size * 10;
+  change(id) {
+    if (!this.changeExists(id)) return false;
+    return {
+      ...this[id],
+      // Some old data stores the raw original context in ".originalContext"
+      // All NEW data stores this in ".context" and ".originalContext" is blank.
+      originalContext: this[id].originalContext || this[id].context
+    };
   }
 
-  change(id) {
-    if (!this.economy_index.includes(id)) return false;
-    if (!(id in this)) return false;
-    return { ...this[id] };
+  changeExists(id) {
+    return this.economy_index.includes(id) && id in this;
   }
 
   deck(id) {
     if (!this.deckExists(id)) return false;
     return {
       ...this.decks[id],
-      tags: this.deck_tags[id] || [],
-      custom: this.staticDecks.has(id)
+      colors: get_deck_colors(this.decks[id]),
+      tags: this.decks_tags[id] || [],
+      custom: !this.staticDecks.has(id)
     };
   }
 

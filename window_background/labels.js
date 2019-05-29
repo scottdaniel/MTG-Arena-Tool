@@ -15,11 +15,7 @@
     greToClientInterpreter
     decodePayload
     updateRank
-    ipc_send
-    staticDecks
     decks_tags
-    decks
-    updateCustomDecks
     requestHistorySend
     addCustomDeck
     saveCourse
@@ -64,9 +60,10 @@ const {
   httpTournamentCheck
 } = require("./http-api");
 const {
-  unleakString,
+  ipc_send,
+  normaliseFields,
   parseWotcTime,
-  normaliseFields
+  pd_sync
 } = require("./background-util");
 
 //
@@ -301,7 +298,7 @@ function onLabelInEventGetCombinedRankInfo(entry, json) {
   rank.limited.lost = json.limitedMatchesLost;
   rank.limited.drawn = json.limitedMatchesDrawn;
 
-  ipc_send("set_player_data", { rank });
+  pd_sync({ rank });
   ipc_send("player_data_updated");
 }
 
@@ -314,9 +311,9 @@ function onLabelInEventGetActiveEvents(entry, json) {
 
 function onLabelRankUpdated(entry, json) {
   if (!json) return;
-  const rank = { constructed: {}, limited: {} };
+  const rank = { ...pd.rank };
 
-  if (json.rankUpdateType == "Constructed") {
+  if (json.rankUpdateType === "Constructed") {
     rank.constructed.rank = json.newClass;
     rank.constructed.tier = json.newLevel;
     rank.constructed.step = json.newStep;
@@ -325,29 +322,16 @@ function onLabelRankUpdated(entry, json) {
     rank.limited.tier = json.newLevel;
     rank.limited.step = json.newStep;
   }
-  ipc_send("set_player_data", { rank });
+
+  pd_sync({ rank });
   ipc_send("player_data_updated");
 }
 
 function onLabelInDeckGetDeckLists(entry, json) {
   if (!json) return;
-
-  staticDecks = [];
-  json.forEach(deck => {
-    let deckId = deck.id;
-    deck.tags = decks_tags[deckId];
-    if (!deck.tags) deck.tags = [];
-
-    decks[deckId] = deck;
-    if (decks["index"].indexOf(deckId) == -1) {
-      decks["index"].push(deck.id);
-    }
-    staticDecks.push(deck.id);
-  });
-
-  updateCustomDecks();
+  pd.handleSetDecks(null, json);
+  ipc_send("set_decks", json);
   requestHistorySend(0);
-  ipc_send("set_decks", JSON.stringify(decks));
 }
 
 function onLabelInDeckGetDeckListsV3(entry, json) {
@@ -417,85 +401,78 @@ function onLabelInEventJoin(entry, json) {
 
 function onLabelInDeckUpdateDeck(entry, json) {
   if (!json) return;
-  logTime = parseWotcTime(entry.timestamp);
+  const logTime = parseWotcTime(entry.timestamp);
+  const _deck = pd.deck(json.id);
 
-  decks.index.forEach(function(_deckid) {
-    if (_deckid == json.id) {
-      let _deck = decks[_deckid];
-      var changeId = sha1(_deckid + "-" + logTime);
-      var deltaDeck = {
-        id: changeId,
-        deckId: _deck.id,
-        date: logTime,
-        changesMain: [],
-        changesSide: [],
-        previousMain: _deck.mainDeck,
-        previousSide: _deck.sideboard
-      };
+  const changeId = sha1(json.id + "-" + logTime);
+  const deltaDeck = {
+    id: changeId,
+    deckId: _deck.id,
+    date: logTime,
+    changesMain: [],
+    changesSide: [],
+    previousMain: _deck.mainDeck,
+    previousSide: _deck.sideboard
+  };
 
-      // Check Mainboard
-      _deck.mainDeck.forEach(function(card) {
-        var cardObj = db.card(card.id);
+  // Check Mainboard
+  _deck.mainDeck.forEach(card => {
+    const cardObj = db.card(card.id);
 
-        var diff = 0 - card.quantity;
-        json.mainDeck.forEach(function(cardB) {
-          var cardObjB = db.card(cardB.id);
-          if (cardObj.name == cardObjB.name) {
-            cardB.existed = true;
-            diff = cardB.quantity - card.quantity;
-          }
-        });
-
-        if (diff !== 0) {
-          deltaDeck.changesMain.push({ id: card.id, quantity: diff });
-        }
-      });
-
-      json.mainDeck.forEach(function(card) {
-        if (card.existed == undefined) {
-          let cardObj = db.card(card.id);
-          deltaDeck.changesMain.push({ id: card.id, quantity: card.quantity });
-        }
-      });
-      // Check sideboard
-      _deck.sideboard.forEach(function(card) {
-        var cardObj = db.card(card.id);
-
-        var diff = 0 - card.quantity;
-        json.sideboard.forEach(function(cardB) {
-          var cardObjB = db.card(cardB.id);
-          if (cardObj.name == cardObjB.name) {
-            cardB.existed = true;
-            diff = cardB.quantity - card.quantity;
-          }
-        });
-
-        if (diff !== 0) {
-          deltaDeck.changesSide.push({ id: card.id, quantity: diff });
-        }
-      });
-
-      json.sideboard.forEach(function(card) {
-        if (card.existed == undefined) {
-          let cardObj = db.card(card.id);
-          deltaDeck.changesSide.push({ id: card.id, quantity: card.quantity });
-        }
-      });
-
-      if (!deck_changes_index.includes(changeId)) {
-        if (
-          deltaDeck.changesMain.length > 0 ||
-          deltaDeck.changesSide.length > 0
-        ) {
-          deck_changes_index.push(changeId);
-          deck_changes[changeId] = deltaDeck;
-
-          store.set("deck_changes_index", deck_changes_index);
-          store.set("deck_changes." + changeId, deltaDeck);
-        }
+    let diff = 0 - card.quantity;
+    json.mainDeck.forEach(cardB => {
+      const cardObjB = db.card(cardB.id);
+      if (cardObj.name === cardObjB.name) {
+        cardB.existed = true;
+        diff = cardB.quantity - card.quantity;
       }
+    });
+
+    if (diff !== 0) {
+      deltaDeck.changesMain.push({ id: card.id, quantity: diff });
     }
   });
+
+  json.mainDeck.forEach(card => {
+    if (card.existed === undefined) {
+      deltaDeck.changesMain.push({ id: card.id, quantity: card.quantity });
+    }
+  });
+  // Check sideboard
+  _deck.sideboard.forEach(card => {
+    const cardObj = db.card(card.id);
+
+    let diff = 0 - card.quantity;
+    json.sideboard.forEach(cardB => {
+      const cardObjB = db.card(cardB.id);
+      if (cardObj.name === cardObjB.name) {
+        cardB.existed = true;
+        diff = cardB.quantity - card.quantity;
+      }
+    });
+
+    if (diff !== 0) {
+      deltaDeck.changesSide.push({ id: card.id, quantity: diff });
+    }
+  });
+
+  json.sideboard.forEach(card => {
+    if (card.existed === undefined) {
+      deltaDeck.changesSide.push({ id: card.id, quantity: card.quantity });
+    }
+  });
+
+  const foundNewDeckChange =
+    !deck_changes_index.includes(changeId) &&
+    (deltaDeck.changesMain.length || deltaDeck.changesSide.length);
+
+  if (foundNewDeckChange) {
+    deck_changes_index.push(changeId);
+    deck_changes[changeId] = deltaDeck;
+
+    store.set("deck_changes_index", deck_changes_index);
+    store.set("deck_changes." + changeId, deltaDeck);
+  }
 }
 
 function onLabelInDeckUpdateDeckV3(entry, json) {
@@ -591,6 +568,7 @@ function onLabelInPlayerInventoryGetPlayerCardsV3(entry, json) {
     }
   });
 
+  pd.handleSetCards(null, json, cardsNewlyAdded);
   ipc_send("set_cards", { cards: json, new: cardsNewlyAdded });
 }
 
@@ -794,6 +772,7 @@ function onLabelMatchGameRoomStateChangedEvent(entry, json) {
 
 function onLabelInEventGetSeasonAndRankDetail(entry, json) {
   if (!json) return;
+  db.handleSetSeason(null, json);
   ipc_send("set_season", json);
 }
 

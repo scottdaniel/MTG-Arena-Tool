@@ -1,5 +1,5 @@
 const electron = require("electron");
-const { remote, app, net, clipboard, ipcRenderer: ipc } = require("electron");
+const { remote, ipcRenderer: ipc } = require("electron");
 
 if (!remote.app.isPackaged) {
   const { openNewGitHubIssue, debugInfo } = require("electron-util");
@@ -29,24 +29,9 @@ const Deck = require("../shared/deck.js");
 const db = require("../shared/database");
 const pd = require("../shared/player-data.js");
 const { hypergeometricRange } = require("../shared/stats-fns");
-const {
-  compare_archetypes,
-  get_rank_index,
-  objectClone
-} = require("../shared/util");
-const {
-  HIDDEN_PW,
-  IPC_BACKGROUND,
-  IPC_OVERLAY,
-  IPC_MAIN,
-  CARD_TILE_ARENA,
-  CARD_TILE_FLAT
-} = require("../shared/constants.js");
-const {
-  unleakString,
-  parseWotcTime,
-  normaliseFields
-} = require("./background-util");
+const { get_rank_index, objectClone } = require("../shared/util");
+const { HIDDEN_PW, IPC_OVERLAY } = require("../shared/constants.js");
+const { ipc_send, pd_sync, unleakString } = require("./background-util");
 const {
   onLabelOutLogInfo,
   onLabelGreToClient,
@@ -208,9 +193,7 @@ var history = {};
 var drafts = {};
 var events = {};
 var economy = {};
-var staticDecks = [];
 
-var decks = {};
 var deck_changes_index = [];
 var deck_changes = {};
 var decks_tags = {};
@@ -228,15 +211,6 @@ var wcMythic = 0;
 
 var logLanguage = "English";
 var lastDeckUpdate = new Date();
-
-// Begin of IPC messages recievers
-function ipc_send(method, arg, to = IPC_MAIN) {
-  if (method == "ipc_log") {
-    //
-  }
-  //console.log("IPC SEND", method, arg, to);
-  ipc.send("ipc_switch", method, IPC_BACKGROUND, arg, to);
-}
 
 //
 ipc.on("save_app_settings", function(event, arg) {
@@ -322,7 +296,7 @@ ipc.on("login", function(event, arg) {
     tokenAuth = "";
     httpApi.httpAuth(arg.username, arg.password);
   }
-  ipc_send("set_player_data", { userName: arg.username });
+  pd_sync({ userName: arg.username });
 });
 
 //
@@ -374,16 +348,18 @@ ipc.on("delete_data", function() {
 //
 ipc.on("archive_deck", function(event, arg) {
   ipc_send("show_loading");
-  decks[arg].archived = true;
-  store.set("decks." + arg, decks[arg]);
+  // TODO remove this mutation
+  pd.decks[arg].archived = true;
+  store.set("decks." + arg, pd.decks[arg]);
   ipc_send("hide_loading");
 });
 
 //
 ipc.on("unarchive_deck", function(event, arg) {
   ipc_send("show_loading");
-  decks[arg].archived = false;
-  store.set("decks." + arg, decks[arg]);
+  // TODO remove this mutation
+  pd.decks[arg].archived = false;
+  store.set("decks." + arg, pd.decks[arg]);
   ipc_send("hide_loading");
 });
 
@@ -670,7 +646,7 @@ function loadPlayerConfig(playerId, serverData = undefined) {
 
   const decks_last_used = entireConfig["decks_last_used"];
   if (decks_last_used) {
-    ipc_send("set_player_data", { decks_last_used });
+    pd_sync({ decks_last_used });
   }
 
   for (let i = 0; i < history.matches.length; i++) {
@@ -745,24 +721,15 @@ function loadPlayerConfig(playerId, serverData = undefined) {
     }
   }
 
-  decks.index = store.get("decks_index");
-  for (let i = 0; i < decks.index.length; i++) {
-    ipc_send("popup", {
-      text: "Reading decks: " + i + " / " + decks.index.length,
-      time: 0,
-      progress: i / decks.index.length
-    });
-    id = decks.index[i];
-
-    if (id != null) {
-      let deck = entireConfig.decks[id];
-      let tags = entireConfig.decks_tags[id];
-      if (deck != undefined) {
-        deck.tags = tags;
-        decks[id] = deck;
-      }
-    }
-  }
+  ipc_send("popup", {
+    text: "Reading all decks...",
+    time: 0,
+    progress: 2
+  });
+  const decks = entireConfig["decks"];
+  const decks_index = entireConfig["decks_index"];
+  decks_tags = entireConfig["decks_tags"];
+  pd_sync({ decks, decks_tags, decks_index });
 
   if (serverData) {
     let requestSync = {};
@@ -802,6 +769,7 @@ function loadPlayerConfig(playerId, serverData = undefined) {
   ipc_send("set_tags_colors", tags_colors);
   ipc_send("overlay_set_bounds", obj);
 
+  pd.handleSetCards(null, entireConfig.cards.cards, {});
   ipc_send("set_cards", { cards: entireConfig.cards.cards, new: {} });
 
   sendEconomy();
@@ -902,6 +870,7 @@ function loadSettings(dirtySettings = {}) {
     ipc_send("overlay_show", 1);
   }
 
+  pd.handleSetSettings(null, _settings);
   ipc_send("set_settings", _settings);
   ipc_send("settings_updated");
 }
@@ -981,7 +950,7 @@ function onLogEntryFound(entry) {
       arenaVersion: entry.socket.ClientVersion,
       name: entry.socket.PlayerScreenName
     };
-    ipc_send("set_player_data", data);
+    pd_sync(data);
     ipc_send("player_data_updated");
   } else if (entry.playerId && entry.playerId !== pd.arenaId) {
     return;
@@ -1304,7 +1273,7 @@ async function logLoop() {
   for (let key in parsedData) {
     ipc_send("ipc_log", `Initial log parse: ${key}=${parsedData[key]}`);
   }
-  ipc_send("set_player_data", parsedData);
+  pd_sync(parsedData);
   ipc_send("player_data_updated");
 
   if (pd.arenaId) {
@@ -1452,30 +1421,18 @@ function getNameBySeat(seat) {
 
 //
 function addCustomDeck(customDeck) {
-  if (decks.index.indexOf(customDeck.id) == -1) {
-    decks.index.push(customDeck.id);
-  }
-  decks[customDeck.id] = customDeck;
-  updateCustomDecks();
-  store.set("decks_index", decks.index);
-  store.set("decks." + customDeck.id, customDeck);
-}
+  const id = customDeck.id;
+  if (pd.deckExists(id)) return;
 
-//
-function updateCustomDecks() {
-  decks.index.forEach(_deckid => {
-    let _deck = decks[_deckid];
-    try {
-      //console.log(_deck.id, _deck);
-      decks[_deck.id].custom = false;
-      if (staticDecks.indexOf(_deck.id) == -1) {
-        //console.error("CUSTOM!");
-        decks[_deck.id].custom = true;
-      }
-    } catch (e) {
-      //
-    }
-  });
+  store.set("decks." + id, customDeck);
+  const decks = { ...pd.decks };
+  decks[customDeck.id] = customDeck;
+  const decks_index = [...pd.decks_index];
+  if (!decks_index.includes(id)) {
+    decks_index.push(id);
+  }
+  store.set("decks_index", decks_index);
+  pd_sync({ decks, decks_index });
 }
 
 //
@@ -1892,7 +1849,7 @@ function saveMatch(matchId) {
     }
     decks_last_used.push(deckId);
     store.set("decks_last_used", decks_last_used);
-    ipc_send("set_player_data", { decks_last_used });
+    pd_sync({ decks_last_used });
     ipc_send("set_decks_last_used", decks_last_used);
   }
 

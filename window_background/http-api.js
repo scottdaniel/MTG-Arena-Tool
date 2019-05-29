@@ -1,11 +1,10 @@
 /*
 global
   tokenAuth
-  decks
   rstore
   loadPlayerConfig
-  pd,
-  ipc_send
+  db
+  pd
   debugNet
   store
   debugLog
@@ -15,7 +14,9 @@ global
 const electron = require("electron");
 const async = require("async");
 const qs = require("qs");
+
 const { makeId } = require("../shared/util");
+const { ipc_send, pd_sync } = require("./background-util");
 
 let metadataState = false;
 
@@ -277,7 +278,7 @@ function httpBasic() {
                   serverData.drafts = parsedResult.drafts;
                   serverData.economy = parsedResult.economy;
                 }
-                ipc_send("set_player_data", data);
+                pd_sync(data);
                 ipc_send("player_data_updated");
                 loadPlayerConfig(pd.arenaId, serverData);
                 ipc_send("set_discord_tag", parsedResult.discord_tag);
@@ -320,6 +321,7 @@ function httpBasic() {
                   time: 1000,
                   progress: -1
                 });
+                db.handleSetDb(null, results);
                 ipc_send("set_db", results);
                 ipc_send("show_login", true);
               }
@@ -596,7 +598,7 @@ function httpTournamentGet(tid) {
 
 function httpTournamentJoin(tid, _deck, pass) {
   let _id = makeId(6);
-  let deck = JSON.stringify(decks[_deck]);
+  let deck = JSON.stringify(pd.deck(_deck));
   httpAsync.unshift({
     reqId: _id,
     method: "tou_join",

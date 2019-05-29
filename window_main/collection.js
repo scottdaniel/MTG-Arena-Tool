@@ -1,9 +1,6 @@
 /*
 global
-  cards
-  cardsNew
   change_background
-  decks
   hideLoadingBars
   ipc_send
   remote
@@ -41,16 +38,16 @@ let countMode = ALL_CARDS;
 
 //
 function get_collection_export(exportFormat) {
-  var list = "";
-  Object.keys(cards).forEach(function(key) {
-    var add = exportFormat + "";
-    var card = db.card(key);
+  let list = "";
+  Object.keys(pd.cards).forEach(key => {
+    let add = exportFormat + "";
+    const card = db.card(key);
     if (card) {
       let name = card.name;
       name = replaceAll(name, "///", "//");
       add = add.replace("$Name", '"' + name + '"');
 
-      add = add.replace("$Count", cards[key] == 9999 ? 1 : cards[key]);
+      add = add.replace("$Count", pd.cards[key] === 9999 ? 1 : pd.cards[key]);
 
       add = add.replace("$SetName", card.set);
       add = add.replace("$SetCode", db.sets[card.set].code);
@@ -178,8 +175,8 @@ function get_collection_stats() {
     stats.complete[card.rarity].unique += 1;
 
     // add cards we own
-    if (cards[card.id] !== undefined) {
-      var owned = cards[card.id];
+    if (pd.cards[card.id] !== undefined) {
+      const owned = pd.cards[card.id];
       stats[card.set][card.rarity].owned += owned;
       stats.complete[card.rarity].owned += owned;
       stats[card.set][card.rarity].uniqueOwned += 1;
@@ -194,7 +191,7 @@ function get_collection_stats() {
 
     // count cards we know we want across decks
     const wanted = Math.max(
-      ...decks
+      ...pd.deckList
         .filter(deck => deck && !deck.archived)
         .map(deck => getCardsMissingCount(deck, card.id))
     );
@@ -873,7 +870,7 @@ function printCards() {
   if (filterUnown) {
     list = db.cardIds;
   } else {
-    list = Object.keys(cards);
+    list = Object.keys(pd.cards);
   }
 
   let keysSorted = [...list];
@@ -916,13 +913,13 @@ function printCards() {
     }
 
     if (filterIncomplete) {
-      let owned = cards[card.id];
+      const owned = pd.cards[card.id];
       if (owned >= 4) {
         continue;
       }
     }
 
-    if (filterNew.checked && cardsNew[key] == undefined) {
+    if (filterNew.checked && pd.cardsNew[key] === undefined) {
       continue;
     }
 
@@ -1018,8 +1015,8 @@ function printCards() {
     let cardDiv = createDivision(["inventory_card"]);
     cardDiv.style.width = pd.cardsSize + "px";
 
-    let owned = cards[card.id];
-    let aquired = cardsNew[card.id];
+    const owned = pd.cards[card.id];
+    const aquired = pd.cardsNew[card.id];
     for (let i = 0; i < 4; i++) {
       if (aquired && i >= owned - aquired && i < owned) {
         let q = createDivision(["inventory_card_quantity_orange"]);

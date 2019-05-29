@@ -4,8 +4,6 @@ global
   allMatches
   currentId
   DataScroller
-  deck_tags
-  decks
   FilterPanel
   getTagColor
   ipc_send
@@ -18,7 +16,6 @@ global
   setTagColor
   showLoadingBars
   sidebarActive
-  sort_decks
   StatsPanel
 */
 
@@ -78,7 +75,7 @@ function setFilters(selected = {}) {
 }
 
 function openHistoryTab(_deprecated, _filters = {}) {
-  if (sidebarActive != 1 || decks == null) return;
+  if (sidebarActive !== 1) return;
 
   var mainDiv = document.getElementById("ux_0");
   var div, d;
@@ -125,7 +122,6 @@ function openHistoryTab(_deprecated, _filters = {}) {
   );
   const historyTopWinrate = statsPanel.render();
   div.appendChild(historyTopWinrate);
-  sort_decks(filteredMatches.compareDecks);
 
   let wrap_l = createDivision(["wrapper_column"]);
   wrap_l.setAttribute("id", "history_column");

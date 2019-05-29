@@ -377,11 +377,6 @@ ipc.on("set_opponent_rank", function(event, rank, title) {
     .attr("title", title);
 });
 
-//
-ipc.on("set_cards", function(event, _cards) {
-  cards = _cards;
-});
-
 let changedMode = true;
 
 ipc.on("set_match", (event, arg) => {
