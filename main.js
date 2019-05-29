@@ -171,10 +171,15 @@ function startApp() {
         break;
 
       case "set_settings":
-        //console.log("set settings: ", arg);
-        setSettings(arg);
+        background.webContents.send("set_settings", arg);
         mainWindow.webContents.send("set_settings", arg);
         overlay.webContents.send("set_settings", arg);
+        setSettings(arg);
+        break;
+
+      case "settings_updated":
+        mainWindow.webContents.send("settings_updated");
+        overlay.webContents.send("settings_updated");
         break;
 
       case "set_db":

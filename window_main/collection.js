@@ -2,7 +2,6 @@
 global
   cards
   cardsNew
-  cardSize
   change_background
   decks
   hideLoadingBars
@@ -12,8 +11,9 @@ global
   MenuItem
 */
 
-const { ipcRenderer: ipc, shell } = require("electron");
+const { shell } = require("electron");
 const db = require("../shared/database");
+const pd = require("../shared/player-data");
 const { queryElements: $$, createDivision } = require("../shared/dom-fns");
 const { createSelect } = require("../shared/select");
 const { addCardHover } = require("../shared/card-hover");
@@ -595,18 +595,9 @@ function resetFilters() {
   printCollectionPage();
 }
 
-let exportFormat = "";
-
-//
-ipc.on("set_settings", (_event, arg) => {
-  if (arg.export_format) {
-    exportFormat = arg.export_format;
-  }
-});
-
 //
 function exportCollection() {
-  let list = get_collection_export(exportFormat);
+  let list = get_collection_export(pd.settings.export_format);
   ipc_send("export_csvtxt", { str: list, name: "collection" });
 }
 
@@ -1025,28 +1016,28 @@ function printCards() {
     //let dfc = "";
 
     let cardDiv = createDivision(["inventory_card"]);
-    cardDiv.style.width = cardSize + "px";
+    cardDiv.style.width = pd.cardsSize + "px";
 
     let owned = cards[card.id];
     let aquired = cardsNew[card.id];
     for (let i = 0; i < 4; i++) {
       if (aquired && i >= owned - aquired && i < owned) {
         let q = createDivision(["inventory_card_quantity_orange"]);
-        q.style.width = cardSize / 4 + "px";
+        q.style.width = pd.cardsSize / 4 + "px";
         cardDiv.appendChild(q);
       } else if (i < owned) {
         let q = createDivision(["inventory_card_quantity_green"]);
-        q.style.width = cardSize / 4 + "px";
+        q.style.width = pd.cardsSize / 4 + "px";
         cardDiv.appendChild(q);
       } else {
         let q = createDivision(["inventory_card_quantity_gray"]);
-        q.style.width = cardSize / 4 + "px";
+        q.style.width = pd.cardsSize / 4 + "px";
         cardDiv.appendChild(q);
       }
     }
 
     let img = document.createElement("img");
-    img.style.width = cardSize + "px";
+    img.style.width = pd.cardsSize + "px";
     img.classList.add("inventory_card_img");
     img.src = get_card_image(card);
 

@@ -18,7 +18,6 @@ global
   setTagColor
   showLoadingBars
   sidebarActive
-  sidebarSize
   sort_decks
   StatsPanel
 */
@@ -89,8 +88,8 @@ function openHistoryTab(_deprecated, _filters = {}) {
   mainDiv.innerHTML = "";
 
   let wrap_r = createDivision(["wrapper_column", "sidebar_column_l"]);
-  wrap_r.style.width = sidebarSize + "px";
-  wrap_r.style.flex = `0 0 ${sidebarSize}px`;
+  wrap_r.style.width = pd.settings.right_panel_width + "px";
+  wrap_r.style.flex = `0 0 ${pd.settings.right_panel_width}px`;
 
   div = createDivision(["ranks_history"]);
   div.style.padding = "0 12px";
@@ -119,7 +118,7 @@ function openHistoryTab(_deprecated, _filters = {}) {
   const statsPanel = new StatsPanel(
     "history_top",
     filteredMatches,
-    sidebarSize,
+    pd.settings.right_panel_width,
     true,
     rankedStats,
     filters.eventId === RANKED_DRAFT

@@ -12,8 +12,8 @@ global
   makeResizable
   ListItem
   openDeck
+  pd
   sidebarActive
-  sidebarSize
   sort_decks
   getTagColor
   setTagColor
@@ -61,13 +61,13 @@ function openDecksTab(_filters = {}) {
     setFilters(_filters);
 
     const wrap_r = createDivision(["wrapper_column", "sidebar_column_l"]);
-    wrap_r.style.width = sidebarSize + "px";
-    wrap_r.style.flex = `0 0 ${sidebarSize}px`;
+    wrap_r.style.width = pd.settings.right_panel_width + "px";
+    wrap_r.style.flex = `0 0 ${pd.settings.right_panel_width}px`;
     const aggregator = new Aggregator(filters);
     const statsPanel = new StatsPanel(
       "decks_top",
       aggregator,
-      sidebarSize,
+      pd.settings.right_panel_width,
       true
     );
     const decks_top_winrate = statsPanel.render();

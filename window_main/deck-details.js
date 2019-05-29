@@ -8,7 +8,7 @@ global
     ipc_send
     makeResizable
     pop
-    sidebarSize
+    pd
     StatsPanel
 */
 
@@ -326,12 +326,12 @@ function openDeck(deck = currentOpenDeck, filters = currentFilters) {
       mainDiv.classList.add("flex_item");
       const wrap_r = createDivision(["wrapper_column", "sidebar_column_l"]);
       wrap_r.setAttribute("id", "stats_column");
-      wrap_r.style.width = sidebarSize + "px";
-      wrap_r.style.flex = `0 0 ${sidebarSize}px`;
+      wrap_r.style.width = pd.settings.right_panel_width + "px";
+      wrap_r.style.flex = `0 0 ${pd.settings.right_panel_width}px`;
       const statsPanel = new StatsPanel(
         "decks_top",
         aggregator,
-        sidebarSize,
+        pd.settings.right_panel_width,
         true
       );
       const deck_top_winrate = statsPanel.render();

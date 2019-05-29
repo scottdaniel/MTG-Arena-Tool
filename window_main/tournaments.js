@@ -1,7 +1,6 @@
 /*
 global
   change_background
-  cardStyle
   decks
   drawDeck
   drawDeckVisual
@@ -758,7 +757,7 @@ function drawSideboardDeck(div) {
 
     if (card.quantity > 0) {
       let tile = deckDrawer.cardTile(
-        cardStyle,
+        pd.settings.card_tile_style,
         grpId,
         unique + "a",
         card.quantity
@@ -782,7 +781,7 @@ function drawSideboardDeck(div) {
         let grpId = card.id;
         if (card.quantity > 0) {
           let tile = deckDrawer.cardTile(
-            cardStyle,
+            pd.settings.card_tile_style,
             grpId,
             unique + "b",
             card.quantity

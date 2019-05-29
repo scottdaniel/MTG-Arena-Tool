@@ -32,7 +32,6 @@ const { hypergeometricRange } = require("../shared/stats-fns");
 const {
   compare_archetypes,
   get_rank_index,
-  playerDataDefault,
   objectClone
 } = require("../shared/util");
 const {
@@ -96,56 +95,6 @@ const settingsCfg = {
   gUri: ""
 };
 
-const defaultCfg = {
-  windowBounds: { width: 800, height: 600, x: 0, y: 0 },
-  overlayBounds: { width: 300, height: 600, x: 0, y: 0 },
-  cards: { cards_time: 0, cards_before: [], cards: [] },
-  settings: {
-    overlay_sideboard: false,
-    sound_priority: false,
-    sound_priority_volume: 1,
-    cards_quality: "small",
-    show_overlay: true,
-    show_overlay_always: false,
-    startup: true,
-    close_to_tray: true,
-    send_data: true,
-    anon_explore: false,
-    close_on_match: true,
-    cards_size: 2,
-    overlay_alpha: 1,
-    overlay_alpha_back: 1,
-    overlay_scale: 100,
-    overlay_top: true,
-    overlay_title: true,
-    overlay_deck: true,
-    overlay_clock: true,
-    overlay_ontop: true,
-    overlay_lands: true,
-    export_format: "$Name,$Count,$Rarity,$SetName,$Collector",
-    back_color: "rgba(0,0,0,0.3)",
-    back_url: "",
-    right_panel_width: 200,
-    last_open_tab: -1,
-    card_tile_style: CARD_TILE_FLAT
-  },
-  economy_index: [],
-  economy: [],
-  deck_changes: {},
-  deck_changes_index: [],
-  courses_index: [],
-  matches_index: [],
-  draft_index: [],
-  gems_history: [],
-  gold_history: [],
-  decks_index: [],
-  decks_tags: {},
-  decks_last_used: [],
-  tags_colors: {},
-  decks: {},
-  wildcards_history: []
-};
-
 var rstore = new Store({
   name: "remember",
   defaults: rememberCfg
@@ -153,7 +102,7 @@ var rstore = new Store({
 
 var store = new Store({
   name: "default",
-  defaults: defaultCfg
+  defaults: pd.defaultCfg
 });
 
 var settingsStore = new Store({
@@ -711,7 +660,7 @@ function loadPlayerConfig(playerId, serverData = undefined) {
   ipc_send("ipc_log", "Load player ID: " + playerId);
   store = new Store({
     name: playerId,
-    defaults: defaultCfg
+    defaults: pd.defaultCfg
   });
 
   // Preload config, if we use store.get turned out to be SLOOOW
@@ -932,7 +881,7 @@ function loadSettings(dirtySettings = {}) {
   const settings = store.get("settings");
   const rSettings = rstore.get("settings");
   const _settings = {
-    ...defaultCfg.settings,
+    ...pd.defaultCfg.settings,
     ...settings,
     ...rSettings,
     ...dirtySettings
@@ -954,6 +903,7 @@ function loadSettings(dirtySettings = {}) {
   }
 
   ipc_send("set_settings", _settings);
+  ipc_send("settings_updated");
 }
 
 //
@@ -1698,6 +1648,7 @@ function getBestArchetype(deck) {
   return bestMatch.name;
 }
 
+//
 function getOppDeck() {
   let _deck = new Deck({}, currentMatch.oppCardsUsed, false);
   _deck.mainboard.removeDuplicates(true);

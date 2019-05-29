@@ -1,11 +1,10 @@
 /*
 global
   cards
-  cardQuality
   decks
 */
-
-const db = require("../shared/database.js");
+const db = require("../shared/database");
+const pd = require("../shared/player-data");
 
 const {
   FORMATS,
@@ -17,40 +16,6 @@ const {
 } = require("../shared/constants.js");
 
 //
-exports.playerDataDefault = playerDataDefault;
-function playerDataDefault() {
-  return {
-    name: null,
-    userName: null,
-    arenaId: "",
-    arenaVersion: "",
-    patreon: false,
-    patreon_tier: 0,
-    decks_last_used: [],
-    rank: {
-      constructed: {
-        rank: "",
-        tier: 0,
-        step: 0,
-        steps: 4,
-        won: 0,
-        lost: 0,
-        drawn: 0
-      },
-      limited: {
-        rank: "",
-        tier: 0,
-        step: 0,
-        steps: 4,
-        won: 0,
-        lost: 0,
-        drawn: 0
-      }
-    }
-  };
-}
-
-//
 exports.get_card_image = get_card_image;
 function get_card_image(cardObj) {
   if (typeof cardObj !== "object") {
@@ -60,7 +25,10 @@ function get_card_image(cardObj) {
   if (!cardObj) {
     return "../images/notfound.png";
   } else {
-    return "https://img.scryfall.com/cards" + cardObj.images[cardQuality];
+    return (
+      "https://img.scryfall.com/cards" +
+      cardObj.images[pd.settings.cards_quality]
+    );
   }
 }
 

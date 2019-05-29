@@ -62,7 +62,6 @@ const {
   get_deck_types_ammount,
   get_rank_index,
   makeId,
-  playerDataDefault,
   removeDuplicates,
   timeSince
 } = require("../shared/util");
@@ -101,15 +100,11 @@ let filterEvent = "All";
 let filterSort = "By Winrate";
 
 let draftPosition = 1;
-let cardSize = 140;
-let cardQuality = "normal";
-let cardStyle = CARD_TILE_FLAT;
 let loadEvents = 0;
-let defaultBackground = "";
 let loggedIn = false;
 let canLogin = false;
 let offlineMode = false;
-let lastTab = -1;
+let lastSettings = {};
 
 let economyHistory = [];
 
@@ -122,8 +117,6 @@ let filteredWildcardsSet = "";
 let tags_colors = {};
 let authToken = null;
 let discordTag = null;
-
-let sidebarSize = 200;
 
 const sha1 = require("js-sha1");
 const fs = require("fs");
@@ -512,29 +505,15 @@ ipc.on("open_course_deck", function(event, arg) {
 });
 
 //
-ipc.on("set_settings", function(event, arg) {
-  sidebarSize = arg.right_panel_width;
-  if (arg.cards_quality) {
-    cardQuality = arg.cards_quality;
+ipc.on("settings_updated", function() {
+  if (lastSettings.back_url !== pd.settings.back_url) {
+    change_background();
   }
-  if (arg.card_tile_style) {
-    cardStyle = arg.card_tile_style;
-  }
-  if (arg.back_url) {
-    let oldBack = defaultBackground;
-    defaultBackground = arg.back_url;
-    if (oldBack == "") {
-      change_background();
-    }
-  }
-  if (arg.last_open_tab !== undefined) {
-    lastTab = arg.last_open_tab;
-  }
-  $(".main_wrapper").css("background-color", arg.back_color);
-  cardSize = 100 + arg.cards_size * 10;
+  $(".main_wrapper").css("background-color", pd.settings.back_color);
   if (sidebarActive === 6) {
     openSettingsTab();
   }
+  lastSettings = { ...pd.settings };
 });
 
 //
@@ -650,7 +629,7 @@ ipc.on("initialize", function() {
     $(".top_username_id").html(pd.name.slice(-6));
   }
 
-  sidebarActive = lastTab;
+  sidebarActive = pd.settings.last_open_tab;
   ipc_send("request_home", filteredWildcardsSet);
   openTab(sidebarActive);
 
@@ -1018,7 +997,7 @@ function makeResizable(div, resizeCallback, finalCallback) {
     var dx = m_pos - e.x;
     m_pos = e.x;
     let newWidth = Math.max(10, parseInt(parent.style.width) + dx);
-    sidebarSize = newWidth;
+    ipc_send("save_user_settings", { right_panel_width: newWidth });
     parent.style.width = `${newWidth}px`;
     parent.style.flex = `0 0 ${newWidth}px`;
     if (resizeCallback instanceof Function) resizeCallback(newWidth);
@@ -1099,7 +1078,7 @@ function drawDeck(div, deck, showWildcards = false) {
         .orderBy(["data.cmc", "data.name"])
         .forEach(card => {
           const tile = deckDrawer.cardTile(
-            cardStyle,
+            pd.settings.cards_style,
             card.id,
             unique + "a",
             card.quantity,
@@ -1124,7 +1103,7 @@ function drawDeck(div, deck, showWildcards = false) {
       .orderBy(["data.cmc", "data.name"])
       .forEach(card => {
         const tile = deckDrawer.cardTile(
-          cardStyle,
+          pd.settings.cards_style,
           card.id,
           unique + "b",
           card.quantity,
@@ -1143,7 +1122,12 @@ function drawCardList(div, cards) {
   let counts = {};
   cards.forEach(cardId => (counts[cardId] = (counts[cardId] || 0) + 1));
   Object.keys(counts).forEach(cardId => {
-    let tile = deckDrawer.cardTile(cardStyle, cardId, unique, counts[cardId]);
+    let tile = deckDrawer.cardTile(
+      pd.settings.cards_style,
+      cardId,
+      unique,
+      counts[cardId]
+    );
     div.append(tile);
   });
 }
@@ -1243,7 +1227,7 @@ function drawDeckVisual(_div, _stats, deck) {
     });
   }
 
-  var sz = cardSize;
+  var sz = pd.cardsSize;
   let div = $('<div class="visual_mainboard"></div>');
   div.css("display", "flex");
   div.css("flex-wrap", "wrap");
@@ -1454,7 +1438,7 @@ function setChangesTimeline() {
       }
 
       let tile = deckDrawer.cardTile(
-        cardStyle,
+        pd.settings.cards_style,
         c.id,
         "chm" + cn,
         Math.abs(c.quantity)
@@ -1484,7 +1468,7 @@ function setChangesTimeline() {
       }
 
       let tile = deckDrawer.cardTile(
-        cardStyle,
+        pd.settings.cards_style,
         c.id,
         "chs" + cn,
         Math.abs(c.quantity)
@@ -1610,12 +1594,12 @@ function open_draft(id) {
   pack.forEach(function(grpId) {
     var d = $(
       '<div style="width: ' +
-        cardSize +
+        pd.cardsSize +
         'px !important;" class="draft_card"></div>'
     );
     var img = $(
       '<img style="width: ' +
-        cardSize +
+        pd.cardsSize +
         'px !important;" class="draft_card_img"></img>'
     );
     if (grpId == pick && draftPosition % 2 == 0) {
@@ -1912,7 +1896,7 @@ function open_match(id) {
             : "line_dark";
         let cardDiv = $(`<div class="library_card ${rowShade}"></div>`);
         let tile = deckDrawer.cardTile(
-          cardStyle,
+          pd.settings.cards_style,
           cardId,
           unique + libraryIndex,
           "#" + (libraryIndex + 1)
@@ -1924,7 +1908,7 @@ function open_match(id) {
       if (unknownCards > 0) {
         let cardDiv = $('<div class="library_card"></div>');
         let tile = deckDrawer.cardTile(
-          cardStyle,
+          pd.settings.cards_style,
           null,
           unique + game.deckSize,
           unknownCards + "x"
@@ -2157,7 +2141,7 @@ function change_background(arg = "default", grpId = 0) {
   //console.log(arg, grpId, _card);
   if (arg === "default") {
     $(".top_artist").html("Ghitu Lavarunner by Jesper Ejsing");
-    if (defaultBackground == "") {
+    if (pd.settings.back_url === "") {
       $(".main_wrapper").css(
         "background-image",
         "url(../images/Ghitu-Lavarunner-Dominaria-MtG-Art.jpg)"
@@ -2166,7 +2150,7 @@ function change_background(arg = "default", grpId = 0) {
       $(".top_artist").html("");
       $(".main_wrapper").css(
         "background-image",
-        "url(" + defaultBackground + ")"
+        "url(" + pd.settings.back_url + ")"
       );
     }
   } else if (_card) {
