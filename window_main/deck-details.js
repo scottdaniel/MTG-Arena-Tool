@@ -4,7 +4,6 @@ global
     change_background
     drawDeck
     drawDeckVisual
-    economyHistory
     ipc_send
     makeResizable
     pop
@@ -279,10 +278,10 @@ function deckStatsSection(deck) {
 
   // Deck crafting cost section
   let ownedWildcards = {
-    common: economyHistory.wcCommon,
-    uncommon: economyHistory.wcUncommon,
-    rare: economyHistory.wcRare,
-    mythic: economyHistory.wcMythic
+    common: pd.economy.wcCommon,
+    uncommon: pd.economy.wcUncommon,
+    rare: pd.economy.wcRare,
+    mythic: pd.economy.wcMythic
   };
 
   let missingWildcards = get_deck_missing(deck);

@@ -103,8 +103,6 @@ let canLogin = false;
 let offlineMode = false;
 let lastSettings = {};
 
-let economyHistory = [];
-
 let rewards_daily_ends = new Date();
 let rewards_weekly_ends = new Date();
 let activeEvents = [];
@@ -329,17 +327,8 @@ ipc.on("set_active_events", (event, arg) => {
   }
 });
 
-ipc.on("set_economy", function(event, arg) {
-  if (arg != null) {
-    try {
-      economyHistory = JSON.parse(arg);
-    } catch (e) {
-      console.log("Error parsing JSON:", arg);
-      return false;
-    }
-  }
-
-  if (sidebarActive == 4) {
+ipc.on("set_economy", function() {
+  if (sidebarActive === 4) {
     openEconomyTab(0);
   }
 });
@@ -575,7 +564,7 @@ function openTab(tab) {
       }
       break;
     case 4:
-      ipc_send("request_economy", 1);
+      openEconomyTab();
       break;
     case 5:
       openCollectionTab();

@@ -2,7 +2,6 @@
 global
   Aggregator
   allMatches
-  economyHistory
   FilterPanel
   formatPercent
   hideLoadingBars
@@ -117,7 +116,7 @@ function openDecksTab(_filters = {}) {
   decks_top.appendChild(decks_top_filter);
   wrap_l.appendChild(decks_top);
 
-  const decks = pd.deckList;
+  const decks = [...pd.deckList];
   decks.sort(aggregator.compareDecks);
 
   const isDeckVisible = deck =>
@@ -168,10 +167,10 @@ function openDecksTab(_filters = {}) {
 
     // Deck crafting cost section
     const ownedWildcards = {
-      common: economyHistory.wcCommon,
-      uncommon: economyHistory.wcUncommon,
-      rare: economyHistory.wcRare,
-      mythic: economyHistory.wcMythic
+      common: pd.economy.wcCommon,
+      uncommon: pd.economy.wcUncommon,
+      rare: pd.economy.wcRare,
+      mythic: pd.economy.wcMythic
     };
 
     let missingWildcards = get_deck_missing(deck);

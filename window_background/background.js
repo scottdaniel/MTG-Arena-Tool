@@ -192,22 +192,12 @@ let instanceToCardIdMap = {};
 var history = {};
 var drafts = {};
 var events = {};
-var economy = {};
 
 var deck_changes_index = [];
 var deck_changes = {};
 var decks_tags = {};
 var tags_colors = {};
 var deck_archetypes = [];
-
-var gold = 0;
-var gems = 0;
-var vault = 0;
-var wcTrack = 0;
-var wcCommon = 0;
-var wcUncommon = 0;
-var wcRare = 0;
-var wcMythic = 0;
 
 var logLanguage = "English";
 var lastDeckUpdate = new Date();
@@ -398,16 +388,18 @@ ipc.on("unarchive_match", function(event, arg) {
 //
 ipc.on("archive_economy", function(event, _id) {
   ipc_send("show_loading");
-  economy[_id].archived = true;
-  store.set(_id, economy[_id]);
+  // TODO remove this mutation
+  pd[_id].archived = true;
+  store.set(_id, pd[_id]);
   ipc_send("hide_loading");
 });
 
 //
 ipc.on("unarchive_economy", function(event, _id) {
   ipc_send("show_loading");
-  economy[_id].archived = false;
-  store.set(_id, economy[_id]);
+  // TODO remove this mutation
+  pd[_id].archived = false;
+  store.set(_id, pd[_id]);
   ipc_send("hide_loading");
 });
 
@@ -527,10 +519,6 @@ ipc.on("request_explore", function(event, arg) {
   }
 });
 
-ipc.on("request_economy", function() {
-  sendEconomy();
-});
-
 ipc.on("request_course", function(event, arg) {
   httpApi.httpGetCourse(arg);
 });
@@ -618,19 +606,6 @@ ipc.on("get_deck_changes", function(event, arg) {
   get_deck_changes(arg);
 });
 
-function sendEconomy() {
-  var ec = economy;
-  ec.gold = gold;
-  ec.gems = gems;
-  ec.vault = vault;
-  ec.wcTrack = wcTrack;
-  ec.wcCommon = wcCommon;
-  ec.wcUncommon = wcUncommon;
-  ec.wcRare = wcRare;
-  ec.wcMythic = wcMythic;
-  ipc_send("set_economy", JSON.stringify(ec));
-}
-
 // Loads this player's configuration file
 function loadPlayerConfig(playerId, serverData = undefined) {
   ipc_send("ipc_log", "Load player ID: " + playerId);
@@ -704,22 +679,25 @@ function loadPlayerConfig(playerId, serverData = undefined) {
     }
   }
 
-  economy.changes = store.get("economy_index");
-  for (let i = 0; i < economy.changes.length; i++) {
+  const economy = {};
+  const economy_index = entireConfig["economy_index"];
+  for (let i = 0; i < economy_index.length; i++) {
     ipc_send("popup", {
-      text: "Reading economy: " + i + " / " + economy.changes.length,
+      text: "Reading economy: " + i + " / " + economy_index.length,
       time: 0,
-      progress: i / economy.changes.length
+      progress: i / economy_index.length
     });
-    id = economy.changes[i];
+    id = economy_index[i];
 
-    if (id != null) {
+    if (id !== null) {
       item = entireConfig[id];
-      if (item != undefined) {
+      if (item !== undefined) {
         economy[id] = item;
       }
     }
   }
+  economy.economy_index = economy_index;
+  pd_sync(economy);
 
   ipc_send("popup", {
     text: "Reading all decks...",
@@ -772,8 +750,6 @@ function loadPlayerConfig(playerId, serverData = undefined) {
   pd.handleSetCards(null, entireConfig.cards.cards, {});
   ipc_send("set_cards", { cards: entireConfig.cards.cards, new: {} });
 
-  sendEconomy();
-
   loadSettings();
   requestHistorySend(0);
 
@@ -811,18 +787,19 @@ function syncUserData(data) {
   requestHistorySend(0);
 
   // Sync Economy
-  var economy_index = store.get("economy_index");
-  data.economy.forEach(doc => {
-    doc.id = doc._id;
-    delete doc._id;
-    if (!economy_index.includes(doc.id)) {
-      economy_index.push(doc.id);
-      store.set(doc.id, doc);
-      economy[doc.id] = doc;
-      economy.changes = economy_index;
-    }
-  });
+  const economy_index = [...pd.economy_index];
+  data.economy
+    .filter(doc => !pd.changeExists(doc._id))
+    .forEach(doc => {
+      const id = doc._id;
+      doc.id = id;
+      delete doc._id;
+      economy_index.push(id);
+      store.set(id, doc);
+      pd_sync({ [id]: doc });
+    });
   store.set("economy_index", economy_index);
+  pd_sync({ economy_index });
 
   // Sync Drafts
   var draft_index = store.get("draft_index");
@@ -1715,17 +1692,16 @@ function chanceType(quantity, cardsleft, odds_sample_size) {
 
 //
 function saveEconomyTransaction(transaction) {
-  let id = transaction.id;
-  let economyIndex = store.get("economy_index");
+  const id = transaction.id;
+  if (pd.changeExists(id)) return;
 
-  if (!economyIndex.includes(id)) {
-    economyIndex.push(id);
-    store.set("economy_index", economyIndex);
-    economy.changes = economyIndex;
-  }
-
-  economy[id] = transaction;
   store.set(id, transaction);
+  pd_sync({ [id]: transaction });
+
+  const economy_index = [...pd.economy_index];
+  economy_index.push(id);
+  store.set("economy_index", economy_index);
+  pd_sync({ economy_index });
 
   httpApi.httpSetEconomy(transaction);
 }

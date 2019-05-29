@@ -74,7 +74,16 @@ const defaultCfg = {
     card_tile_style: CARD_TILE_FLAT
   },
   economy_index: [],
-  economy: {},
+  economy: {
+    gold: 0,
+    gems: 0,
+    vault: 0,
+    wcTrack: 0,
+    wcCommon: 0,
+    wcUncommon: 0,
+    wcRare: 0,
+    wcMythic: 0
+  },
   deck_changes: {},
   deck_changes_index: [],
   courses_index: [],
@@ -152,17 +161,26 @@ class PlayerData {
     if (ipc) ipc.on("set_cards", this.handleSetCards);
     this.handleSetDecks = this.handleSetDecks.bind(this);
     if (ipc) ipc.on("set_decks", this.handleSetDecks);
-    // this.handleToggleArchived = this.handleToggleArchived.bind(this);
-    // if (ipc) ipc.on("toggle_archived", this.handleToggleArchived);
     this.handleSetSettings = this.handleSetSettings.bind(this);
     if (ipc) ipc.on("set_settings", this.handleSetSettings);
+    this.handleSetEconomy = this.handleSetEconomy.bind(this);
+    if (ipc) ipc.on("set_economy", this.handleSetEconomy);
 
-    //set_active_events
+    this.change = this.change.bind(this);
     this.deck = this.deck.bind(this);
+    this.draft = this.draft.bind(this);
+    this.event = this.event.bind(this);
+    this.match = this.match.bind(this);
+    this.changeExists = this.changeExists.bind(this);
     this.deckExists = this.deckExists.bind(this);
+    this.deckChangeExists = this.deckChangeExists.bind(this);
+    this.draftExists = this.draftExists.bind(this);
+    this.eventExists = this.eventExists.bind(this);
+    this.matchExists = this.matchExists.bind(this);
+    this.deckChanges = this.deckChanges.bind(this);
 
     this.handleSetPlayerData(null, { ...playerDataDefault, ...defaultCfg });
-    this.defaultCfg = defaultCfg;
+    this.defaultCfg = { ...defaultCfg };
 
     PlayerData.instance = this;
   }
@@ -184,18 +202,42 @@ class PlayerData {
   handleSetDecks(_event, arg) {
     this.staticDecks = new Set();
     arg.forEach(deck => {
-      this.decks[deck.id] = deck;
+      const deckData = {
+        // preserve custom fields if possible
+        ...(this.deck(deck.id) || {}),
+        ...deck
+      };
+      this.decks[deck.id] = deckData;
       this.staticDecks.add(deck.id);
     });
+  }
+
+  handleSetEconomy(_event, arg) {
+    if (!arg) return false;
+    try {
+      this.economy = { ...defaultCfg.economy };
+      const economy = JSON.parse(arg);
+      Object.keys(defaultCfg.economy)
+        .filter(key => key in economy)
+        .forEach(key => (this.economy[key] = economy[key]));
+    } catch (e) {
+      console.log("Error parsing JSON:", arg);
+      return false;
+    }
   }
 
   handleSetSettings(_event, arg) {
     Object.assign(this.settings, arg);
   }
 
-  handleToggleArchived(_event, arg) {
-    if (!(arg in this)) return;
-    this[arg].archived = !this[arg].archived;
+  toggleDeckArchived(id) {
+    if (!this.deckExists(id)) return;
+    this.decks[id].archived = !this.decks[id].archived;
+  }
+
+  toggleArchived(id) {
+    if (!(id in this)) return;
+    this[id].archived = !this[id].archived;
   }
 
   get cardsSize() {
@@ -211,15 +253,19 @@ class PlayerData {
   }
 
   get drafts() {
-    return this.draft_index.map(this.draft);
+    return this.draft_index.filter(this.draftExists).map(this.draft);
   }
 
   get events() {
-    return this.courses_index.map(this.event);
+    return this.courses_index.filter(this.eventExists).map(this.event);
   }
 
   get matches() {
-    return [...this.matches_index.map(this.match), ...this.drafts()];
+    return this.matches_index.filter(this.matchExists).map(this.match);
+  }
+
+  get history() {
+    return [...this.matches, ...this.drafts];
   }
 
   change(id) {
@@ -236,6 +282,10 @@ class PlayerData {
     return this.economy_index.includes(id) && id in this;
   }
 
+  deckChangeExists(id) {
+    return this.deck_changes_index.includes(id) && id in this.deck_changes;
+  }
+
   deck(id) {
     if (!this.deckExists(id)) return false;
     return {
@@ -247,7 +297,14 @@ class PlayerData {
   }
 
   deckExists(id) {
-    return this.decks_index.includes(id) && id in this.decks;
+    return id in this.decks;
+  }
+
+  deckChanges(id) {
+    if (!this.deckExists(id)) return [];
+    return this.deck_changes_index
+      .map(id => this.deck_changes[id])
+      .filter(change => change && change.deckId === id);
   }
 
   draft(id) {

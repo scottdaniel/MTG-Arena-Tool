@@ -33,7 +33,6 @@
     wcUncommon
     wcRare
     wcMythic
-    sendEconomy
     matchBeginTime
     createMatch
     draftSet
@@ -522,17 +521,19 @@ function onLabelInventoryUpdated(entry, transaction) {
 function onLabelInPlayerInventoryGetPlayerInventory(entry, json) {
   if (!json) return;
   logTime = parseWotcTime(entry.timestamp);
-
-  gold = json.gold;
-  gems = json.gems;
-  vault = json.vaultProgress;
-  wcTrack = json.wcTrackPosition;
-  wcCommon = json.wcCommon;
-  wcUncommon = json.wcUncommon;
-  wcRare = json.wcRare;
-  wcMythic = json.wcMythic;
-
-  sendEconomy();
+  const economy = {
+    gold: json.gold,
+    gems: json.gems,
+    vault: json.vaultProgress,
+    wcTrack: json.wcTrackPosition,
+    wcCommon: json.wcCommon,
+    wcUncommon: json.wcUncommon,
+    wcRare: json.wcRare,
+    wcMythic: json.wcMythic
+  };
+  const payload = JSON.stringify(economy);
+  pd.handleSetEconomy(null, payload);
+  ipc_send("set_economy", payload);
 }
 
 function onLabelInPlayerInventoryGetPlayerCardsV3(entry, json) {
