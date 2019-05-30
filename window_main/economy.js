@@ -4,6 +4,7 @@ global
   DataScroller
   formatNumber
   formatPercent
+  toggleArchived
   ipc_send
 */
 
@@ -671,21 +672,11 @@ function createChangeRow(change, economyId) {
 
   changeRow.appendChild(deleteButton);
 
-  let archiveCallback = e => {
+  const archiveCallback = e => {
     e.stopPropagation();
-    ipc_send("archive_economy", economyId);
-    change.archived = true;
+    toggleArchived(economyId);
     openEconomyTab();
   };
-  if (change.archived) {
-    archiveCallback = e => {
-      e.stopPropagation();
-      ipc_send("unarchive_economy", economyId);
-      change.archived = false;
-      openEconomyTab();
-    };
-  }
-
   deleteButton.addEventListener("click", archiveCallback);
 
   return changeRow;

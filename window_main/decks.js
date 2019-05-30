@@ -22,7 +22,6 @@ const { createDivision } = require("../shared/dom-fns");
 const {
   get_deck_missing,
   getBoosterCountEstimate,
-  getDeck,
   getReadableFormat
 } = require("../shared/util");
 
@@ -128,10 +127,12 @@ function openDecksTab(_filters = {}) {
     let tileGrpid = deck.deckTileId;
     let listItem;
     if (deck.custom) {
-      let archiveCallback = archiveDeck;
-      if (deck.archived) {
-        archiveCallback = unarchiveDeck;
-      }
+      const archiveCallback = id => {
+        pd.toggleDeckArchived(id);
+        ipc_send("toggle_deck_archived", id);
+        openDecksTab();
+      };
+
       listItem = new ListItem(
         tileGrpid,
         deck.id,
@@ -252,22 +253,10 @@ function openDecksTab(_filters = {}) {
 }
 
 function openDeckCallback(id, filters) {
-  const deck = getDeck(id);
+  const deck = pd.deck(id);
   if (!deck) return;
   openDeck(deck, { ...filters, deckId: id });
   $(".moving_ux").animate({ left: "-100%" }, 250, "easeInOutCubic");
-}
-
-function archiveDeck(id) {
-  ipc_send("archive_deck", id);
-  getDeck(id).archived = true;
-  openDecksTab();
-}
-
-function unarchiveDeck(id) {
-  ipc_send("unarchive_deck", id);
-  getDeck(id).archived = false;
-  openDecksTab();
 }
 
 function createTag(tag, div, showClose = true) {
@@ -372,38 +361,34 @@ function createTag(tag, div, showClose = true) {
 }
 
 function addTag(deckid, tag, div) {
-  pd.decks.forEach(function(deck) {
-    if (deck.id === deckid && deck.format !== tag) {
-      if (deck.tags) {
-        if (deck.tags.indexOf(tag) == -1) {
-          deck.tags.push(tag);
-        }
-      } else {
-        deck.tags = [tag];
-      }
-    }
-  });
+  const deck = pd.deck(deckid);
+  if (!deck || deck.format === tag) return;
+  if (deck.tags && deck.tags.includes(tag)) return;
 
-  let obj = { deck: deckid, name: tag };
-  ipc_send("add_tag", obj);
+  const decks_tags = {
+    ...pd.decks_tags,
+    [deckid]: [...deck.tags, tag]
+  };
+  pd.handleSetPlayerData(null, { decks_tags });
 
+  ipc_send("add_tag", { deckid, tag });
   createTag(tag, div);
 }
 
 function deleteTag(deckid, tag) {
-  pd.decks.forEach(function(deck) {
-    if (deck.id == deckid) {
-      if (deck.tags) {
-        let ind = deck.tags.indexOf(tag);
-        if (ind !== -1) {
-          deck.tags.splice(ind, 1);
-        }
-      }
-    }
-  });
+  const deck = pd.deck(deckid);
+  if (!deck || !deck.tags || !deck.tags.includes(tag)) return;
 
-  let obj = { deck: deckid, name: tag };
-  ipc_send("delete_tag", obj);
+  const tags = [...deck.tags];
+  tags.splice(tags.indexOf(tag), 1);
+
+  const decks_tags = {
+    ...pd.decks_tags,
+    [deckid]: tags
+  };
+  pd.handleSetPlayerData(null, { decks_tags });
+
+  ipc_send("delete_tag", { deckid, tag });
 }
 
 module.exports = { openDecksTab: openDecksTab };

@@ -8,6 +8,7 @@ global
     makeResizable
     pop
     pd
+    setChangesTimeline
     StatsPanel
 */
 
@@ -397,7 +398,7 @@ function openDeck(deck = currentOpenDeck, filters = currentFilters) {
     drawDeckVisual(deckListSection, statsSection, deck);
   });
 
-  $(".openHistory").click(() => ipc_send("get_deck_changes", deck.id));
+  $(".openHistory").click(() => setChangesTimeline(deck.id));
 
   $(".exportDeck").click(() => {
     const list = get_deck_export(deck);

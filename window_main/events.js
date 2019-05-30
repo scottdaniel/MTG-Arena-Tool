@@ -2,17 +2,15 @@
 global
   Aggregator
   allMatches
-  compare_courses
   DataScroller
-  eventsHistory
   FilterPanel
   getEventWinLossClass
   ipc_send
-  matchesHistory
   ListItem
   open_match
-  pd,
+  pd
   StatsPanel
+  toggleArchived
 */
 
 const { createDivision, queryElementsByClass } = require("../shared/dom-fns");
@@ -30,6 +28,7 @@ const { MANA } = require("../shared/constants.js");
 let filters = Aggregator.getDefaultFilters();
 filters.eventId = Aggregator.ALL_EVENT_TRACKS;
 let filteredMatches;
+let sortedEvents;
 
 function openEventsTab(_filters) {
   const mainDiv = document.getElementById("ux_0");
@@ -38,7 +37,8 @@ function openEventsTab(_filters) {
   const d = createDivision(["list_fill"]);
   mainDiv.appendChild(d);
 
-  eventsHistory.courses.sort(compare_courses);
+  sortedEvents = [...pd.events];
+  sortedEvents.sort(compare_courses);
   filters = { ...filters, ..._filters };
   filteredMatches = new Aggregator(filters);
 
@@ -76,7 +76,7 @@ function openEventsTab(_filters) {
     mainDiv,
     renderData,
     20,
-    eventsHistory.courses.length
+    sortedEvents.length
   );
   dataScroller.render(25);
 }
@@ -85,9 +85,8 @@ function openEventsTab(_filters) {
 function renderData(container, index) {
   // for performance reasons, we leave events order mostly alone
   // to display most-recent-first, we use a reverse index
-  const revIndex = eventsHistory.courses.length - index - 1;
-  var course_id = eventsHistory.courses[revIndex];
-  var course = eventsHistory[course_id];
+  const revIndex = sortedEvents.length - index - 1;
+  const course = sortedEvents[revIndex];
 
   if (
     course === undefined ||
@@ -105,10 +104,10 @@ function renderData(container, index) {
 
   var tileGrpid = course.CourseDeck.deckTileId;
 
-  let archiveCallback = archiveEvent;
-  if (course.archived) {
-    archiveCallback = unarchiveEvent;
-  }
+  const archiveCallback = id => {
+    toggleArchived(id);
+    openEventsTab();
+  };
 
   const listItem = new ListItem(
     tileGrpid,
@@ -132,12 +131,12 @@ function renderData(container, index) {
 // object into a valid index into the
 // matchesHistory object
 function getMatchesHistoryIndex(matchIndex) {
-  if (matchesHistory.hasOwnProperty(matchIndex)) {
+  if (pd.matchExists(matchIndex)) {
     return matchIndex;
   }
 
-  let newStyleMatchIndex = `${matchIndex}-${pd.arenaId}`;
-  if (matchesHistory.hasOwnProperty(newStyleMatchIndex)) {
+  const newStyleMatchIndex = `${matchIndex}-${pd.arenaId}`;
+  if (pd.matchExists(newStyleMatchIndex)) {
     return newStyleMatchIndex;
   }
 
@@ -163,7 +162,7 @@ function getCourseStats(course) {
 
   matchesList
     .map(getMatchesHistoryIndex)
-    .map(index => matchesHistory[index])
+    .map(pd.match)
     .filter(
       match =>
         match !== undefined &&
@@ -233,18 +232,6 @@ function attachEventData(listItem, course) {
   let resultDiv = createDivision(["list_match_result", winLossClass], wl);
   resultDiv.style.marginLeft = "8px";
   listItem.right.after(resultDiv);
-}
-
-function archiveEvent(id) {
-  ipc_send("archive_course", id);
-  eventsHistory[id].archived = true;
-  openEventsTab();
-}
-
-function unarchiveEvent(id) {
-  ipc_send("unarchive_course", id);
-  eventsHistory[id].archived = false;
-  openEventsTab();
 }
 
 // Given the data of a match will return a data row to be
@@ -317,7 +304,7 @@ function openMatch(id) {
 // This code is executed when an event row is clicked and adds
 // rows below the event for every match in that event.
 function expandEvent(id) {
-  let course = eventsHistory[id];
+  const course = pd.event(id);
   let expandDiv = queryElementsByClass(id + "exp")[0];
 
   if (expandDiv.hasAttribute("style")) {
@@ -335,9 +322,7 @@ function expandEvent(id) {
   if (!matchesList) return;
 
   var matchRows = matchesList
-    .map(
-      index => matchesHistory[index] || matchesHistory[index + "-" + pd.arenaId]
-    )
+    .map(index => pd.match(index) || pd.match(index + "-" + pd.arenaId))
     .filter(
       match =>
         match !== undefined &&
@@ -353,6 +338,13 @@ function expandEvent(id) {
   var newHeight = matchRows.length * 64 + 16;
 
   expandDiv.style.height = `${newHeight}px`;
+}
+
+function compare_courses(a, b) {
+  if (a === undefined) return 0;
+  if (b === undefined) return 0;
+
+  return Date.parse(a.date) - Date.parse(b.date);
 }
 
 module.exports = {

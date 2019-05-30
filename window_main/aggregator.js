@@ -1,22 +1,11 @@
-/*
-global
-  matchesHistory
-*/
-
-const db = require("../shared/database.js");
+const { COLORS_ALL, COLORS_BRIEF } = require("../shared/constants");
+const db = require("../shared/database");
+const pd = require("../shared/player-data");
 const {
-  doesDeckStillExist,
   get_deck_colors,
-  getDeck,
   getReadableEvent,
   getRecentDeckName
 } = require("../shared/util");
-
-const {
-  COLORS_ALL,
-  COLORS_BRIEF,
-  DEFAULT_TILE
-} = require("../shared/constants.js");
 
 // Default filter values
 const DEFAULT_DECK = "All Decks";
@@ -77,29 +66,6 @@ class Aggregator {
   }
 
   static createAllMatches() {
-    // For legacy reasons, we rely on pre-processing all matches
-    // and normalizing some data irregularities (this can be slow).
-    // This should happen exactly once iff matchesHistory changes.
-    matchesHistory.matches.forEach(mid => {
-      const match = matchesHistory[mid];
-      if (!match || match.type === "draft" || match.type === "Event") return;
-      try {
-        if (match.playerDeck && match.playerDeck.mainDeck) {
-          match.playerDeck.colors = get_deck_colors(match.playerDeck);
-        } else {
-          match.playerDeck = JSON.parse(
-            '{"deckTileId":' +
-              DEFAULT_TILE +
-              ',"description":null,"format":"Standard","colors":[],"id":"00000000-0000-0000-0000-000000000000","isValid":false,"lastUpdated":"2018-05-31T00:06:29.7456958","lockedForEdit":false,"lockedForUse":false,"mainDeck":[],"name":"Undefined","resourceId":"00000000-0000-0000-0000-000000000000","sideboard":[]}'
-          );
-        }
-        if (match.oppDeck && match.oppDeck.mainDeck) {
-          match.oppDeck.colors = get_deck_colors(match.oppDeck);
-        }
-      } catch (e) {
-        console.log(e, match);
-      }
-    });
     return new Aggregator({ date: DATE_ALL_TIME });
   }
 
@@ -205,7 +171,7 @@ class Aggregator {
     const passesDeckFilter = deckId === DEFAULT_DECK || deckId === deck.id;
     if (!passesDeckFilter) return false;
 
-    const currentDeck = getDeck(deck.id);
+    const currentDeck = pd.deck(deck.id);
     const passesArchiveFilter =
       !onlyCurrentDecks ||
       (currentDeck && (showArchived || !currentDeck.archived));
@@ -293,9 +259,7 @@ class Aggregator {
     this.constructedStats = {};
     this.limitedStats = {};
 
-    this._matches = matchesHistory.matches
-      .map(matchId => matchesHistory[matchId])
-      .filter(this.filterMatch);
+    this._matches = pd.history.filter(this.filterMatch);
     this._matches.forEach(this._processMatch);
 
     [
@@ -318,7 +282,7 @@ class Aggregator {
     this.archs = [DEFAULT_ARCH, ...archList];
 
     for (const deckId in this.deckMap) {
-      const deck = getDeck(deckId) || this.deckMap[deckId];
+      const deck = pd.deck(deckId) || this.deckMap[deckId];
       if (deck) {
         this._decks.push(deck);
       }
@@ -376,8 +340,8 @@ class Aggregator {
         this.deckMap[id] = match.playerDeck;
         this.deckLastPlayed[id] = match.date;
       }
-      if (doesDeckStillExist(id)) {
-        const currentDeck = getDeck(match.playerDeck.id);
+      if (pd.deckExists(id)) {
+        const currentDeck = pd.deck(match.playerDeck.id);
         if (!(id in this.deckStats)) {
           this.deckStats[id] = Aggregator.getDefaultStats();
         }
