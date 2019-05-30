@@ -14,25 +14,12 @@
     saveMatch
     greToClientInterpreter
     decodePayload
-    updateRank
-    decks_tags
-    requestHistorySend
     addCustomDeck
     saveCourse
     select_deck
     sha1
-    deck_changes_index
-    deck_changes
     store
     saveEconomyTransaction
-    gold
-    gems
-    vault
-    wcTrack
-    wcCommon
-    wcUncommon
-    wcRare
-    wcMythic
     matchBeginTime
     createMatch
     draftSet
@@ -330,7 +317,6 @@ function onLabelInDeckGetDeckLists(entry, json) {
   if (!json) return;
   pd.handleSetDecks(null, json);
   ipc_send("set_decks", json);
-  requestHistorySend(0);
 }
 
 function onLabelInDeckGetDeckListsV3(entry, json) {
@@ -462,15 +448,19 @@ function onLabelInDeckUpdateDeck(entry, json) {
   });
 
   const foundNewDeckChange =
-    !deck_changes_index.includes(changeId) &&
+    !pd.deckChangeExists(changeId) &&
     (deltaDeck.changesMain.length || deltaDeck.changesSide.length);
 
   if (foundNewDeckChange) {
-    deck_changes_index.push(changeId);
-    deck_changes[changeId] = deltaDeck;
-
-    store.set("deck_changes_index", deck_changes_index);
     store.set("deck_changes." + changeId, deltaDeck);
+    const deck_changes = { ...pd.deck_changes, [changeId]: deltaDeck };
+    const deck_changes_index = [...pd.deck_changes_index];
+    if (!deck_changes_index.includes(changeId)) {
+      deck_changes_index.push(changeId);
+    }
+    store.set("deck_changes_index", deck_changes_index);
+
+    pd_sync({ deck_changes, deck_changes_index });
   }
 }
 

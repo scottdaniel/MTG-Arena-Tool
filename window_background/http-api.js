@@ -225,7 +225,8 @@ function httpBasic() {
             } catch (e) {
               ipc_send("popup", {
                 text: `Error parsing response. (${_headers.method})`,
-                time: 2000
+                time: 2000,
+                progress: -1
               });
             }
 
@@ -354,7 +355,8 @@ function httpBasic() {
                 ipc_send("clear_pwd", 1);
                 ipc_send("popup", {
                   text: `Error: ${parsedResult.error}`,
-                  time: 3000
+                  time: 3000,
+                  progress: -1
                 });
               }
               // errors here
@@ -362,7 +364,8 @@ function httpBasic() {
               ipc_send("auth", {});
               ipc_send("popup", {
                 text: "Something went wrong, please try again",
-                time: 5000
+                time: 5000,
+                progress: -1
               });
             }
           } catch (e) {
@@ -392,7 +395,8 @@ function httpBasic() {
         if (!metadataState) {
           ipc_send("popup", {
             text: "Server unreachable, try offline mode.",
-            time: 0
+            time: 0,
+            progress: -1
           });
         }
 
@@ -424,14 +428,14 @@ function removeFromHttp(req) {
   });
 }
 
-function httpAuth(user, pass) {
+function httpAuth(userName, pass) {
   var _id = makeId(6);
-  ipc_send("set_player_data", { userName: user });
+  pd_sync({ userName });
   httpAsync.push({
     reqId: _id,
     method: "auth",
     method_path: "/api/login.php",
-    email: user,
+    email: userName,
     password: pass,
     playerid: pd.arenaId,
     playername: encodeURIComponent(pd.name),
