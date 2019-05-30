@@ -56,23 +56,9 @@ function get_rank_index_16(_rank) {
 }
 
 //
-exports.getDeck = getDeck;
-function getDeck(deckId) {
-  return pd.deck(deckId);
-}
-
-//
-exports.doesDeckStillExist = doesDeckStillExist;
-function doesDeckStillExist(deckId) {
-  return pd.deckExists(deckId);
-}
-
 exports.getRecentDeckName = getRecentDeckName;
 function getRecentDeckName(deckId) {
-  if (doesDeckStillExist(deckId)) {
-    return getDeck(deckId).name;
-  }
-  return deckId;
+  return pd.deckExists(deckId) ? pd.deck(deckId).name : deckId;
 }
 
 //
