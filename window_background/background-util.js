@@ -11,7 +11,7 @@ const parse = require("date-fns").parse;
 // At most some format from date-fns could be wrong;
 // https://date-fns.org/v2.0.0-alpha.7/docs/parse
 let dateLangs = {
-  English: "dd/MM/yyyy HH:mm:ss", // ex: 26/05/2019 15:15:26
+  English: "M/dd/yyyy hh:mm:ss aa", //ex 5/28/2019 10:20:35 PM
   German: "dd.MM.yyyy HH:mm:ss", // ex: 19.05.2019 09:59:00
   French: "dd/MM/yyyy HH:mm:ss", //ex: 19/05/2019 10:39:42
   Italian: "dd/MM/yyyy HH:mm:ss", //ex: 19/05/2019 10:43:03
@@ -33,7 +33,7 @@ function parseWotcTime(dateStr) {
       let test = parse(dateStr, dateLangs[lang], new Date());
       if (test && !isNaN(test.getTime())) {
         //logLanguage = lang;
-        console.log(`Log datetime language detected: ${lang}`);
+        console.log(`Log datetime language detected: ${lang}`, dateStr, test);
         date = test;
       }
     });
