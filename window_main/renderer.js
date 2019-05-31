@@ -347,8 +347,7 @@ ipc.on("set_status", function(event, arg) {
 ipc.on("set_home", function(event, arg) {
   hideLoadingBars();
 
-  ipc_send("set_deck_archetypes", arg.archetypes);
-  if (sidebarActive == -1) {
+  if (sidebarActive === -1) {
     console.log("Home", arg);
     openHomeTab(arg);
   }

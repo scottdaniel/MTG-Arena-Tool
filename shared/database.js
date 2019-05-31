@@ -18,11 +18,14 @@ class Database {
 
     this.handleSetDb = this.handleSetDb.bind(this);
     this.handleSetSeason = this.handleSetSeason.bind(this);
+    this.handleSetHome = this.handleSetHome.bind(this);
     if (ipc) ipc.on("set_db", this.handleSetDb);
     if (ipc) ipc.on("set_season", this.handleSetSeason);
+    if (ipc) ipc.on("set_home", this.handleSetHome);
     const dbUri = `${__dirname}/../resources/database.json`;
     const defaultDb = fs.readFileSync(dbUri, "utf8");
     this.handleSetDb(null, defaultDb);
+    this.archetypes = [];
 
     Database.instance = this;
   }
@@ -41,6 +44,11 @@ class Database {
     } catch (e) {
       console.log("Error parsing metadata", e);
     }
+  }
+
+  handleSetHome(_event, arg) {
+    // console.log(arg); // arg has all data from request_home
+    this.archetypes = arg.archetypes || [];
   }
 
   get abilities() {

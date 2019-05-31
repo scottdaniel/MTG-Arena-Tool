@@ -189,8 +189,6 @@ let initialLibraryInstanceIds = [];
 let idChanges = {};
 let instanceToCardIdMap = {};
 
-var deck_archetypes = [];
-
 var logLanguage = "English";
 var lastDeckUpdate = new Date();
 
@@ -263,6 +261,7 @@ ipc.on("auto_login", () => {
   });
   if (rSettings.remember_me) {
     httpApi.httpAuth(rstore.get("email"), HIDDEN_PW);
+    httpApi.httpHomeGet();
   } else {
     offlineLogin();
   }
@@ -273,11 +272,13 @@ ipc.on("login", function(event, arg) {
   if (arg.password == HIDDEN_PW) {
     tokenAuth = rstore.get("token");
     httpApi.httpAuth(arg.username, arg.password);
+    httpApi.httpHomeGet();
   } else if (arg.username === "" && arg.password === "") {
     offlineLogin();
   } else {
     tokenAuth = "";
     httpApi.httpAuth(arg.username, arg.password);
+    httpApi.httpHomeGet();
   }
 });
 
@@ -360,11 +361,6 @@ ipc.on("calculate_rank_wins", () => {
   });
   ipc_send("hide_loading");
   ipc_send("rank_wins_updated");
-});
-
-//
-ipc.on("set_deck_archetypes", (event, arg) => {
-  deck_archetypes = arg;
 });
 
 // Calculates winrates for history tabs (set to last 10 dys as default)
@@ -1398,8 +1394,8 @@ function getBestArchetype(deck) {
   );
   let highest = lowestDeviation; //err..
 
-  // Test for each archertype
-  deck_archetypes.forEach(arch => {
+  // Test for each archetype
+  db.archetypes.forEach(arch => {
     //console.log(arch.name);
     mainDeviations = [];
     deck.mainDeck.forEach(card => {
