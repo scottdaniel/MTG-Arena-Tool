@@ -18,6 +18,7 @@ if (!remote.app.isPackaged) {
       });
     }
   });
+  require("devtron").install();
 }
 
 const _ = require("lodash");
