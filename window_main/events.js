@@ -5,7 +5,6 @@ global
   DataScroller
   FilterPanel
   getEventWinLossClass
-  ipc_send
   ListItem
   open_match
   pd
@@ -321,21 +320,26 @@ function expandEvent(id) {
   const matchesList = wlGate.ProcessedMatchIds;
   if (!matchesList) return;
 
-  var matchRows = matchesList
+  const matchRows = matchesList
     .map(index => pd.match(index) || pd.match(index + "-" + pd.arenaId))
     .filter(
       match =>
         match !== undefined &&
         match.type === "match" &&
         (!match.archived || filters.showArchived)
-    )
-    .map(match => {
-      let row = createMatchRow(match);
-      expandDiv.appendChild(row);
-      return row;
-    });
+    );
+  matchRows.sort((a, b) => {
+    if (a === undefined) return 0;
+    if (b === undefined) return 0;
 
-  var newHeight = matchRows.length * 64 + 16;
+    return Date.parse(b.date) - Date.parse(a.date);
+  });
+  matchRows.forEach(match => {
+    const row = createMatchRow(match);
+    expandDiv.appendChild(row);
+  });
+
+  const newHeight = matchRows.length * 64 + 16;
 
   expandDiv.style.height = `${newHeight}px`;
 }
