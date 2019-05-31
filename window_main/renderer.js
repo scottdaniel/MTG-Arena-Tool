@@ -910,6 +910,10 @@ function makeResizable(div, resizeCallback, finalCallback) {
     finalWidth = newWidth;
   };
 
+  let saveWidth = function(width) {
+    ipc_send("save_user_settings", { right_panel_width: width });
+  };
+
   div.addEventListener(
     "mousedown",
     event => {
@@ -924,6 +928,7 @@ function makeResizable(div, resizeCallback, finalCallback) {
     event => {
       document.removeEventListener("mousemove", resize, false);
       if (finalWidth && finalCallback instanceof Function) {
+        saveWidth(finalWidth);
         finalCallback(finalWidth);
         finalWidth = null;
       }
