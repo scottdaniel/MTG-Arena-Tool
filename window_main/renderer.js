@@ -904,7 +904,6 @@ function makeResizable(div, resizeCallback, finalCallback) {
     var dx = m_pos - e.x;
     m_pos = e.x;
     let newWidth = Math.max(10, parseInt(parent.style.width) + dx);
-    ipc_send("save_user_settings", { right_panel_width: newWidth });
     parent.style.width = `${newWidth}px`;
     parent.style.flex = `0 0 ${newWidth}px`;
     if (resizeCallback instanceof Function) resizeCallback(newWidth);
