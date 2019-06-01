@@ -65,9 +65,9 @@ if (!singleLock) {
 
 app.on("ready", () => {
   if (app.isPackaged) {
-    require("devtron").install();
     startUpdater();
   } else {
+    require("devtron").install();
     startApp();
   }
 });
