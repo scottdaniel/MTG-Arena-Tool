@@ -342,10 +342,7 @@ function openDeck(deck = currentOpenDeck, filters = currentFilters) {
 
       const drag = createDivision(["dragger"]);
       wrap_r.appendChild(drag);
-      const finalCallback = width => {
-        ipc_send("save_user_settings", { right_panel_width: width });
-      };
-      makeResizable(drag, statsPanel.handleResize, finalCallback);
+      makeResizable(drag, statsPanel.handleResize);
 
       wrap_r.appendChild(deck_top_winrate);
 

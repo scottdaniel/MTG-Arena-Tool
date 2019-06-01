@@ -927,9 +927,9 @@ function makeResizable(div, resizeCallback, finalCallback) {
     "mouseup",
     event => {
       document.removeEventListener("mousemove", resize, false);
-      if (finalWidth && finalCallback instanceof Function) {
+      if (finalWidth) {
         saveWidth(finalWidth);
-        finalCallback(finalWidth);
+        if (finalCallback instanceof Function) finalCallback(finalWidth);
         finalWidth = null;
       }
     },
