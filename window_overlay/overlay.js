@@ -77,7 +77,6 @@ let oddsSampleSize = 1;
 let actionLog = [];
 
 let currentMatch = null;
-let cards = {};
 
 const fix = new TransparencyMouseFix({
   fixPointerEvents: "auto"
@@ -844,7 +843,7 @@ function setDraft(_packN = -1, _pickN = -1) {
       }
 
       for (let i = 0; i < 4; i++) {
-        if (i < cards[grpId]) {
+        if (i < pd.cards[grpId]) {
           $(
             '<div style="width: 24px; " class="inventory_card_quantity_green"></div>'
           ).appendTo(cont);
