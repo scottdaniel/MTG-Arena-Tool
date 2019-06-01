@@ -250,11 +250,6 @@ ipc.on("player_data_updated", () => {
 });
 
 //
-ipc.on("rank_wins_updated", () => {
-  openHistoryTab();
-});
-
-//
 ipc.on("set_reward_resets", function(event, arg) {
   rewards_daily_ends = new Date(arg.daily);
   rewards_weekly_ends = new Date(arg.weekly);
