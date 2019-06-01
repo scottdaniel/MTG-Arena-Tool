@@ -1572,7 +1572,7 @@ function saveCourse(json) {
   pd_sync({ [id]: eventData });
 
   if (!pd.courses_index.includes(id)) {
-    const courses_index = [...courses_index, id];
+    const courses_index = [...pd.courses_index, id];
     store.set("courses_index", courses_index);
     pd_sync({ courses_index });
   }
