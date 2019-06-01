@@ -821,7 +821,6 @@ $(document).ready(function() {
           eventId: RANKED_CONST,
           rankedMode: true
         });
-        ipc_send("calculate_rank_wins");
       } else if ($(this).hasClass("it8")) {
         sidebarActive = 1;
         setFilters({
@@ -830,7 +829,6 @@ $(document).ready(function() {
           eventId: RANKED_DRAFT,
           rankedMode: true
         });
-        ipc_send("calculate_rank_wins");
       }
       openTab(sidebarActive);
     } else {

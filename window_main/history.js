@@ -98,9 +98,9 @@ function openHistoryTab(_deprecated, _filters = {}) {
   const showingRanked =
     filters.date === DATE_SEASON &&
     (filters.eventId === RANKED_CONST || filters.eventId === RANKED_DRAFT);
-  if (showingRanked && pd.rankwinrates) {
+  if (showingRanked) {
     const rankStats = createDivision(["ranks_stats"]);
-    renderRanksStats(rankStats);
+    renderRanksStats(rankStats, filteredMatches);
     rankStats.style.paddingBottom = "16px";
     div.appendChild(rankStats);
     rankedStats =
@@ -377,9 +377,10 @@ function formatPercent(percent, precision) {
   return (100 * percent).toFixed(precision);
 }
 
-function renderRanksStats(container) {
+function renderRanksStats(container, aggregator) {
   container.innerHTML = "";
-  if (!pd.rankwinrates) return;
+  if (!aggregator || !aggregator.stats.total) return;
+  const { winrate } = aggregator.stats;
 
   const viewingLimitSeason = filters.eventId === RANKED_DRAFT;
   let seasonName = !viewingLimitSeason ? "constructed" : "limited";
@@ -404,19 +405,15 @@ function renderRanksStats(container) {
   );
   container.appendChild(title);
 
-  // Add ranks matchup history here
-  let rc = pd.rankwinrates[seasonName];
-  let totalWon = rc.total.w;
-  let totalWinrate = totalWon / rc.total.t;
   let currentRank = viewingLimitSeason
     ? pd.rank.limited.rank
     : pd.rank.constructed.rank;
-  let expected = getStepsUntilNextRank(viewingLimitSeason, totalWinrate);
+  let expected = getStepsUntilNextRank(viewingLimitSeason, winrate);
   title = createDivision(
     ["ranks_history_title"],
     `Games until ${getNextRank(currentRank)}: ${expected}`
   );
-  title.title = `Using ${formatPercent(totalWinrate)}% winrate`;
+  title.title = `Using ${formatPercent(winrate)}% winrate`;
   container.appendChild(title);
 
   seasonToggleButton.addEventListener("click", () => {
