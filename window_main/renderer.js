@@ -1500,18 +1500,18 @@ function open_draft(id) {
   );
   sliderInput.appendTo(slider);
 
-  var pd = $('<div class="draft_pack_container"></div>');
-  pd.appendTo(cont);
+  const pdiv = $('<div class="draft_pack_container"></div>');
+  pdiv.appendTo(cont);
 
   pack.forEach(function(grpId) {
     var d = $(
       '<div style="width: ' +
-        pd.cardsSize +
+        pdiv.cardsSize +
         'px !important;" class="draft_card"></div>'
     );
     var img = $(
       '<img style="width: ' +
-        pd.cardsSize +
+        pdiv.cardsSize +
         'px !important;" class="draft_card_img"></img>'
     );
     if (grpId == pick && draftPosition % 2 == 0) {
@@ -1528,7 +1528,7 @@ function open_draft(id) {
     );
     r.appendTo(d);
     addCardHover(img, card);
-    d.appendTo(pd);
+    d.appendTo(pdiv);
   });
 
   $("#ux_1").append(top);

@@ -1681,6 +1681,7 @@ function saveDraft() {
     date: new Date(),
     // preserve custom fields if possible
     ...(pd.draft(id) || {}),
+    ...currentDraft,
     draftId: id,
     id,
     owner: pd.name
