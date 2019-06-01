@@ -208,11 +208,6 @@ function startApp() {
         mainWindow.minimize();
         break;
 
-      case "set_cards":
-        mainWindow.webContents.send("set_cards", arg.cards, arg.new);
-        overlay.webContents.send("set_cards", arg.cards, arg.new);
-        break;
-
       case "set_opponent_rank":
         overlay.webContents.send("set_opponent_rank", arg.rank, arg.str);
         break;

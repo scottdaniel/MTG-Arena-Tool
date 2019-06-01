@@ -521,9 +521,7 @@ function onLabelInPlayerInventoryGetPlayerInventory(entry, json) {
     wcRare: json.wcRare,
     wcMythic: json.wcMythic
   };
-  const payload = JSON.stringify(economy);
-  pd.handleSetEconomy(null, payload);
-  ipc_send("set_economy", payload);
+  pd_sync({ economy });
 }
 
 function onLabelInPlayerInventoryGetPlayerCardsV3(entry, json) {
@@ -548,19 +546,18 @@ function onLabelInPlayerInventoryGetPlayerCardsV3(entry, json) {
   }
 
   var cardsPrevious = store.get("cards.cards_before");
-  var cardsNewlyAdded = {};
+  const cardsNew = {};
 
   Object.keys(json).forEach(function(key) {
     // get differences
-    if (cardsPrevious[key] == undefined) {
-      cardsNewlyAdded[key] = json[key];
+    if (cardsPrevious[key] === undefined) {
+      cardsNew[key] = json[key];
     } else if (cardsPrevious[key] < json[key]) {
-      cardsNewlyAdded[key] = json[key] - cardsPrevious[key];
+      cardsNew[key] = json[key] - cardsPrevious[key];
     }
   });
 
-  pd.handleSetCards(null, json, cardsNewlyAdded);
-  ipc_send("set_cards", { cards: json, new: cardsNewlyAdded });
+  pd_sync({ cards: json, cardsNew });
 }
 
 function onLabelInEventDeckSubmit(entry, json) {

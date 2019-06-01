@@ -157,14 +157,10 @@ class PlayerData {
 
     this.handleSetPlayerData = this.handleSetPlayerData.bind(this);
     if (ipc) ipc.on("set_player_data", this.handleSetPlayerData);
-    this.handleSetCards = this.handleSetCards.bind(this);
-    if (ipc) ipc.on("set_cards", this.handleSetCards);
     this.handleSetDecks = this.handleSetDecks.bind(this);
     if (ipc) ipc.on("set_decks", this.handleSetDecks);
     this.handleSetSettings = this.handleSetSettings.bind(this);
     if (ipc) ipc.on("set_settings", this.handleSetSettings);
-    this.handleSetEconomy = this.handleSetEconomy.bind(this);
-    if (ipc) ipc.on("set_economy", this.handleSetEconomy);
 
     this.change = this.change.bind(this);
     this.deck = this.deck.bind(this);
@@ -194,11 +190,6 @@ class PlayerData {
     Object.assign(this, data);
   }
 
-  handleSetCards(_event, cards, cardsnew) {
-    this.cards = cards;
-    this.cardsNew = cardsnew;
-  }
-
   handleSetDecks(_event, arg) {
     this.staticDecks = new Set();
     arg.forEach(deck => {
@@ -210,20 +201,6 @@ class PlayerData {
       this.decks[deck.id] = deckData;
       this.staticDecks.add(deck.id);
     });
-  }
-
-  handleSetEconomy(_event, arg) {
-    if (!arg) return false;
-    try {
-      this.economy = { ...defaultCfg.economy };
-      const economy = JSON.parse(arg);
-      Object.keys(defaultCfg.economy)
-        .filter(key => key in economy)
-        .forEach(key => (this.economy[key] = economy[key]));
-    } catch (e) {
-      console.log("Error parsing JSON:", arg);
-      return false;
-    }
   }
 
   handleSetSettings(_event, arg) {
