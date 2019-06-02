@@ -1765,6 +1765,13 @@ function forceDeckUpdate(removeUsed = true) {
     typePla = main.countType("Planeswalker");
 
     let chancesObj = {};
+    let landsCount = main.getLandsAmounts();
+    chancesObj.landW = chanceType(landsCount.w, cardsleft, odds_sample_size);
+    chancesObj.landU = chanceType(landsCount.u, cardsleft, odds_sample_size);
+    chancesObj.landB = chanceType(landsCount.b, cardsleft, odds_sample_size);
+    chancesObj.landR = chanceType(landsCount.r, cardsleft, odds_sample_size);
+    chancesObj.landG = chanceType(landsCount.g, cardsleft, odds_sample_size);
+
     chancesObj.chanceCre = chanceType(typeCre, cardsleft, odds_sample_size);
     chancesObj.chanceIns = chanceType(typeIns, cardsleft, odds_sample_size);
     chancesObj.chanceSor = chanceType(typeSor, cardsleft, odds_sample_size);
@@ -1781,6 +1788,11 @@ function forceDeckUpdate(removeUsed = true) {
     main.addProperty("chance", () => 1);
 
     let chancesObj = {};
+    chancesObj.landW = 0;
+    chancesObj.landU = 0;
+    chancesObj.landB = 0;
+    chancesObj.landR = 0;
+    chancesObj.landG = 0;
     chancesObj.chanceCre = 0;
     chancesObj.chanceIns = 0;
     chancesObj.chanceSor = 0;

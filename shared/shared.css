@@ -734,6 +734,7 @@ span {
     -webkit-transition: all .15s ease-in;
     cursor: pointer;
     width: 100%;
+    font-family: var(--main-font-name);
 }
 
 .card_tile_odds_flat {
