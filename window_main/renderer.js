@@ -1703,7 +1703,7 @@ function open_match(id) {
 
   if (match.gameStats) {
     match.gameStats.forEach((game, gameIndex) => {
-      if (game.sideboardChanges) {
+      if (game && game.sideboardChanges) {
         let separator1 = deckDrawer.cardSeparator(
           `Game ${gameIndex + 1} Sideboard Changes`
         );
@@ -1738,191 +1738,193 @@ function open_match(id) {
       $("#ux_1").append(separator5);
 
       let handsDiv = $('<div class="card_lists_list"></div>');
-      if (game.handsDrawn.length > 3) {
+      if (game && game.handsDrawn.length > 3) {
         // The default value of "center" apparently causes padding to be omitted in the calculation of how far
         // the scrolling should go. So, if there are enough hands to actually need scrolling, override it.
         handsDiv.css("justify-content", "start");
       }
 
-      game.handsDrawn.forEach((hand, i) => {
-        let handDiv = $('<div class="cardlist"></div>');
-        drawCardList(handDiv, hand);
-        handDiv.appendTo(handsDiv);
-        if (game.bestOf == 1 && i == 0) {
-          let landDiv = $(
-            '<div style="margin: auto; text-align: center;" tooltip-top tooltip-content=' +
-              '"This hand was drawn with weighted odds that Wizards of the Coast has not disclosed because it is the first hand in a best-of-one match. ' +
-              'It should be more likely to have a close to average number of lands, but only they could calculate the exact odds.">Land Percentile: Unknown</div>'
+      if (game) {
+        game.handsDrawn.forEach((hand, i) => {
+          let handDiv = $('<div class="cardlist"></div>');
+          drawCardList(handDiv, hand);
+          handDiv.appendTo(handsDiv);
+          if (game.bestOf == 1 && i == 0) {
+            let landDiv = $(
+              '<div style="margin: auto; text-align: center;" tooltip-top tooltip-content=' +
+                '"This hand was drawn with weighted odds that Wizards of the Coast has not disclosed because it is the first hand in a best-of-one match. ' +
+                'It should be more likely to have a close to average number of lands, but only they could calculate the exact odds.">Land Percentile: Unknown</div>'
+            );
+            landDiv.appendTo(handDiv);
+          } else {
+            let likelihood = hypergeometricSignificance(
+              game.handLands[i],
+              game.deckSize,
+              hand.length,
+              game.landsInDeck
+            );
+            let landDiv = $(
+              '<div style="margin: auto; text-align: center;" tooltip-top tooltip-content=' +
+                '"The probability of a random hand of the same size having a number of lands at least as far from average as this one, ' +
+                'calculated as if the distribution were continuous. Over a large number of games, this should average about 50%.">Land Likelihood: ' +
+                (likelihood * 100).toFixed(2) +
+                "%</div>"
+            );
+            landDiv.appendTo(handDiv);
+          }
+        });
+
+        $("#ux_1").append(handsDiv);
+
+        let separator6 = deckDrawer.cardSeparator(
+          `Game ${gameIndex + 1} Shuffled Order`
+        );
+        $("#ux_1").append(separator6);
+        let libraryDiv = $('<div class="library_list"></div>');
+        let unique = makeId(4);
+        let handSize = 8 - game.handsDrawn.length;
+
+        game.shuffledOrder.forEach((cardId, libraryIndex) => {
+          let rowShade =
+            libraryIndex === handSize - 1
+              ? "line_dark line_bottom_border"
+              : libraryIndex < handSize - 1
+              ? "line_dark"
+              : (libraryIndex - handSize) % 2 === 0
+              ? "line_light"
+              : "line_dark";
+          let cardDiv = $(`<div class="library_card ${rowShade}"></div>`);
+          let tile = deckDrawer.cardTile(
+            pd.settings.card_tile_style,
+            cardId,
+            unique + libraryIndex,
+            "#" + (libraryIndex + 1)
           );
-          landDiv.appendTo(handDiv);
-        } else {
-          let likelihood = hypergeometricSignificance(
-            game.handLands[i],
-            game.deckSize,
-            hand.length,
-            game.landsInDeck
+          cardDiv.append(tile);
+          cardDiv.appendTo(libraryDiv);
+        });
+        let unknownCards = game.deckSize - game.shuffledOrder.length;
+        if (unknownCards > 0) {
+          let cardDiv = $('<div class="library_card"></div>');
+          let tile = deckDrawer.cardTile(
+            pd.settings.card_tile_style,
+            null,
+            unique + game.deckSize,
+            unknownCards + "x"
           );
-          let landDiv = $(
-            '<div style="margin: auto; text-align: center;" tooltip-top tooltip-content=' +
-              '"The probability of a random hand of the same size having a number of lands at least as far from average as this one, ' +
-              'calculated as if the distribution were continuous. Over a large number of games, this should average about 50%.">Land Likelihood: ' +
-              (likelihood * 100).toFixed(2) +
-              "%</div>"
-          );
-          landDiv.appendTo(handDiv);
+          cardDiv.append(tile);
+          cardDiv.appendTo(libraryDiv);
         }
-      });
 
-      $("#ux_1").append(handsDiv);
-
-      let separator6 = deckDrawer.cardSeparator(
-        `Game ${gameIndex + 1} Shuffled Order`
-      );
-      $("#ux_1").append(separator6);
-      let libraryDiv = $('<div class="library_list"></div>');
-      let unique = makeId(4);
-      let handSize = 8 - game.handsDrawn.length;
-
-      game.shuffledOrder.forEach((cardId, libraryIndex) => {
-        let rowShade =
-          libraryIndex === handSize - 1
-            ? "line_dark line_bottom_border"
-            : libraryIndex < handSize - 1
-            ? "line_dark"
-            : (libraryIndex - handSize) % 2 === 0
-            ? "line_light"
-            : "line_dark";
-        let cardDiv = $(`<div class="library_card ${rowShade}"></div>`);
-        let tile = deckDrawer.cardTile(
-          pd.settings.card_tile_style,
-          cardId,
-          unique + libraryIndex,
-          "#" + (libraryIndex + 1)
+        let handExplanation = $(
+          '<div class="library_hand">The opening hand is excluded from the below statistics to prevent mulligan choices from influencing them.</div>'
         );
-        cardDiv.append(tile);
-        cardDiv.appendTo(libraryDiv);
-      });
-      let unknownCards = game.deckSize - game.shuffledOrder.length;
-      if (unknownCards > 0) {
-        let cardDiv = $('<div class="library_card"></div>');
-        let tile = deckDrawer.cardTile(
-          pd.settings.card_tile_style,
-          null,
-          unique + game.deckSize,
-          unknownCards + "x"
+        handExplanation.css("grid-row-end", "span " + (handSize - 1));
+        handExplanation.appendTo(libraryDiv);
+
+        let headerDiv = $(
+          '<div class="library_header" tooltip-bottom tooltip-content="The number of lands in the library at or before this point.">Lands</div>'
         );
-        cardDiv.append(tile);
-        cardDiv.appendTo(libraryDiv);
+        headerDiv.css("grid-area", handSize + " / 2");
+        headerDiv.appendTo(libraryDiv);
+        headerDiv = $(
+          '<div class="library_header" tooltip-bottom tooltip-content="The average number of lands expected in the library at or before this point.">Expected</div>'
+        );
+        headerDiv.css("grid-area", handSize + " / 3");
+        headerDiv.appendTo(libraryDiv);
+        headerDiv = $(
+          '<div class="library_header" tooltip-bottom tooltip-content="The probability of the number of lands being at least this far from average, calculated as if the distribution were continuous. For details see footnote. Over a large number of games, this should average about 50%.">Likelihood</div>'
+        );
+        headerDiv.css("grid-area", handSize + " / 4");
+        headerDiv.appendTo(libraryDiv);
+        headerDiv = $(
+          '<div class="library_header" tooltip-bottomright tooltip-content="The expected percentage of games where the actual number of lands is equal or less than this one. This is easier to calculate and more widely recognized but harder to assess the meaning of.">Percentile</div>'
+        );
+        headerDiv.css("grid-area", handSize + " / 5");
+        headerDiv.appendTo(libraryDiv);
+
+        game.libraryLands.forEach((count, index) => {
+          let rowShade = index % 2 === 0 ? "line_light" : "line_dark";
+          let landsDiv = $(
+            `<div class="library_stat ${rowShade}">${count}</div>`
+          );
+          landsDiv.css("grid-area", handSize + index + 1 + " / 2");
+          landsDiv.appendTo(libraryDiv);
+          let expected = (
+            ((index + 1) * game.landsInLibrary) /
+            game.librarySize
+          ).toFixed(2);
+          let expectedDiv = $(
+            `<div class="library_stat ${rowShade}">${expected}</div>`
+          );
+          expectedDiv.css("grid-area", handSize + index + 1 + " / 3");
+          expectedDiv.appendTo(libraryDiv);
+          let likelihood = hypergeometricSignificance(
+            count,
+            game.librarySize,
+            index + 1,
+            game.landsInLibrary
+          );
+          let likelihoodDiv = $(
+            `<div class="library_stat ${rowShade}">${(likelihood * 100).toFixed(
+              2
+            )}</div>`
+          );
+          likelihoodDiv.css("grid-area", handSize + index + 1 + " / 4");
+          likelihoodDiv.appendTo(libraryDiv);
+          let percentile = hypergeometricRange(
+            0,
+            count,
+            game.librarySize,
+            index + 1,
+            game.landsInLibrary
+          );
+          let percentileDiv = $(
+            `<div class="library_stat ${rowShade}">${(percentile * 100).toFixed(
+              2
+            )}</div>`
+          );
+          percentileDiv.css("grid-area", handSize + index + 1 + " / 5");
+          percentileDiv.appendTo(libraryDiv);
+        });
+
+        let footnoteLabel = $(
+          '<div id="library_footnote_label' +
+            gameIndex +
+            '" class="library_footnote" tooltip-bottom ' +
+            'tooltip-content="Click to show footnote" onclick="toggleVisibility(\'library_footnote_label' +
+            gameIndex +
+            "', 'library_footnote" +
+            gameIndex +
+            "')\">Footnote on Likelihood</div>"
+        );
+        footnoteLabel.css("grid-row", game.shuffledOrder.length + 1);
+        footnoteLabel.appendTo(libraryDiv);
+        let footnote = $(
+          '<div id="library_footnote' +
+            gameIndex +
+            '" class="library_footnote hidden" ' +
+            "onclick=\"toggleVisibility('library_footnote_label" +
+            gameIndex +
+            "', 'library_footnote" +
+            gameIndex +
+            "')\">" +
+            "<p>The Likelihood column calculations are designed to enable assessment of fairness at a glance, in a way " +
+            "that is related to percentile but differs in important ways. In short, it treats the count of lands as if " +
+            "it were actually a bucket covering a continuous range, and calculates the cumulative probability of the " +
+            "continuous value being at least as far from the median as a randomly selected value within the range covered " +
+            "by the actual count. Importantly, this guarantees that the theoretical average will always be exactly 50%.</p>" +
+            "<p>For values that are not the median, the result is halfway between the value's own percentile and the " +
+            "next one up or down. For the median itself, the covered range is split and weighted for how much of it is " +
+            "on each side of the 50th percentile. In both cases, the result's meaning is the same for each direction " +
+            "from the 50th percentile, and scaled up by a factor of 2 to keep the possible range at 0% to 100%. " +
+            "For precise details, see the source code on github.</p></div>"
+        );
+        footnote.css("grid-row", game.shuffledOrder.length + 1);
+        footnote.appendTo(libraryDiv);
+
+        $("#ux_1").append(libraryDiv);
       }
-
-      let handExplanation = $(
-        '<div class="library_hand">The opening hand is excluded from the below statistics to prevent mulligan choices from influencing them.</div>'
-      );
-      handExplanation.css("grid-row-end", "span " + (handSize - 1));
-      handExplanation.appendTo(libraryDiv);
-
-      let headerDiv = $(
-        '<div class="library_header" tooltip-bottom tooltip-content="The number of lands in the library at or before this point.">Lands</div>'
-      );
-      headerDiv.css("grid-area", handSize + " / 2");
-      headerDiv.appendTo(libraryDiv);
-      headerDiv = $(
-        '<div class="library_header" tooltip-bottom tooltip-content="The average number of lands expected in the library at or before this point.">Expected</div>'
-      );
-      headerDiv.css("grid-area", handSize + " / 3");
-      headerDiv.appendTo(libraryDiv);
-      headerDiv = $(
-        '<div class="library_header" tooltip-bottom tooltip-content="The probability of the number of lands being at least this far from average, calculated as if the distribution were continuous. For details see footnote. Over a large number of games, this should average about 50%.">Likelihood</div>'
-      );
-      headerDiv.css("grid-area", handSize + " / 4");
-      headerDiv.appendTo(libraryDiv);
-      headerDiv = $(
-        '<div class="library_header" tooltip-bottomright tooltip-content="The expected percentage of games where the actual number of lands is equal or less than this one. This is easier to calculate and more widely recognized but harder to assess the meaning of.">Percentile</div>'
-      );
-      headerDiv.css("grid-area", handSize + " / 5");
-      headerDiv.appendTo(libraryDiv);
-
-      game.libraryLands.forEach((count, index) => {
-        let rowShade = index % 2 === 0 ? "line_light" : "line_dark";
-        let landsDiv = $(
-          `<div class="library_stat ${rowShade}">${count}</div>`
-        );
-        landsDiv.css("grid-area", handSize + index + 1 + " / 2");
-        landsDiv.appendTo(libraryDiv);
-        let expected = (
-          ((index + 1) * game.landsInLibrary) /
-          game.librarySize
-        ).toFixed(2);
-        let expectedDiv = $(
-          `<div class="library_stat ${rowShade}">${expected}</div>`
-        );
-        expectedDiv.css("grid-area", handSize + index + 1 + " / 3");
-        expectedDiv.appendTo(libraryDiv);
-        let likelihood = hypergeometricSignificance(
-          count,
-          game.librarySize,
-          index + 1,
-          game.landsInLibrary
-        );
-        let likelihoodDiv = $(
-          `<div class="library_stat ${rowShade}">${(likelihood * 100).toFixed(
-            2
-          )}</div>`
-        );
-        likelihoodDiv.css("grid-area", handSize + index + 1 + " / 4");
-        likelihoodDiv.appendTo(libraryDiv);
-        let percentile = hypergeometricRange(
-          0,
-          count,
-          game.librarySize,
-          index + 1,
-          game.landsInLibrary
-        );
-        let percentileDiv = $(
-          `<div class="library_stat ${rowShade}">${(percentile * 100).toFixed(
-            2
-          )}</div>`
-        );
-        percentileDiv.css("grid-area", handSize + index + 1 + " / 5");
-        percentileDiv.appendTo(libraryDiv);
-      });
-
-      let footnoteLabel = $(
-        '<div id="library_footnote_label' +
-          gameIndex +
-          '" class="library_footnote" tooltip-bottom ' +
-          'tooltip-content="Click to show footnote" onclick="toggleVisibility(\'library_footnote_label' +
-          gameIndex +
-          "', 'library_footnote" +
-          gameIndex +
-          "')\">Footnote on Likelihood</div>"
-      );
-      footnoteLabel.css("grid-row", game.shuffledOrder.length + 1);
-      footnoteLabel.appendTo(libraryDiv);
-      let footnote = $(
-        '<div id="library_footnote' +
-          gameIndex +
-          '" class="library_footnote hidden" ' +
-          "onclick=\"toggleVisibility('library_footnote_label" +
-          gameIndex +
-          "', 'library_footnote" +
-          gameIndex +
-          "')\">" +
-          "<p>The Likelihood column calculations are designed to enable assessment of fairness at a glance, in a way " +
-          "that is related to percentile but differs in important ways. In short, it treats the count of lands as if " +
-          "it were actually a bucket covering a continuous range, and calculates the cumulative probability of the " +
-          "continuous value being at least as far from the median as a randomly selected value within the range covered " +
-          "by the actual count. Importantly, this guarantees that the theoretical average will always be exactly 50%.</p>" +
-          "<p>For values that are not the median, the result is halfway between the value's own percentile and the " +
-          "next one up or down. For the median itself, the covered range is split and weighted for how much of it is " +
-          "on each side of the 50th percentile. In both cases, the result's meaning is the same for each direction " +
-          "from the 50th percentile, and scaled up by a factor of 2 to keep the possible range at 0% to 100%. " +
-          "For precise details, see the source code on github.</p></div>"
-      );
-      footnote.css("grid-row", game.shuffledOrder.length + 1);
-      footnote.appendTo(libraryDiv);
-
-      $("#ux_1").append(libraryDiv);
     });
   }
 

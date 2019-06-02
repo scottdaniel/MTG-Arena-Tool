@@ -510,7 +510,9 @@ function onLabelInventoryUpdated(entry, transaction) {
   //let milliseconds = transaction.date.getTime();
   // We use the original time string for the ID to ensure parsing does not alter it
   // This will make the ID the same if parsing either changes or breaks
-  transaction.id = sha1(entry.timestamp + context);
+  transaction.id = sha1(
+    entry.timestamp + context + JSON.stringify(transaction.delta)
+  );
 
   // Do not modify the context from now on.
   saveEconomyTransaction(transaction);
@@ -711,6 +713,25 @@ function onLabelMatchGameRoomStateChangedEvent(entry, json) {
   if (eventId == "NPE") return;
 
   if (json.stateType == "MatchGameRoomStateType_Playing") {
+    // If current match does nt exist (create match was not recieved , maybe a reconnection)
+    // Only problem is recieving the decklist
+    if (!currentMatch) {
+      let oName = "";
+      json.gameRoomConfig.reservedPlayers.forEach(player => {
+        if (!player.userId === pd.arenaId) {
+          oName = player.playerName;
+        }
+      });
+
+      let arg = {
+        opponentScreenName: oName,
+        opponentRankingClass: "",
+        opponentRankingTier: 1,
+        eventId: eventId,
+        matchId: json.gameRoomConfig.matchId
+      };
+      createMatch(arg);
+    }
     json.gameRoomConfig.reservedPlayers.forEach(player => {
       if (player.userId == pd.arenaId) {
         currentMatch.player.seat = player.systemSeatId;

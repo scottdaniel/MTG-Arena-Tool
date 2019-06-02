@@ -5,7 +5,7 @@ const { createDivision } = require("../shared/dom-fns");
 const { addCardHover } = require("../shared/card-hover");
 const { get_wc_missing, get_set_scryfall } = require("../shared/util");
 
-const { CARD_TILE_FLAT } = require("./constants.js");
+const { CARD_TILE_FLAT, COLORS_ALL } = require("./constants.js");
 
 //
 function isNumber(n) {
@@ -271,6 +271,22 @@ function drawCardTileFlat(
     console.log(e);
   }
   cont.appendChild(cardTile);
+
+  let colorA = "c";
+  let colorB = "c";
+  if (card.frame) {
+    if (card.frame.length == 1) {
+      colorA = COLORS_ALL[card.frame[0] - 1];
+      colorB = COLORS_ALL[card.frame[0] - 1];
+    } else if (card.frame.length == 2) {
+      colorA = COLORS_ALL[card.frame[0] - 1];
+      colorB = COLORS_ALL[card.frame[1] - 1];
+    } else if (card.frame.length > 2) {
+      colorA = "m";
+      colorB = "m";
+    }
+  }
+  cardTile.style.borderImage = `linear-gradient(to bottom, var(--color-${colorA}) 30%, var(--color-${colorB}) 70%) 1 100%`;
 
   let name = card ? card.name : "Unknown";
   let cardName = createDivision(["card_tile_name_flat"], name);

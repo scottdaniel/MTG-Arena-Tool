@@ -27,7 +27,7 @@ const Colors = require("../shared/colors");
 const deckDrawer = require("../shared/deck-drawer");
 const { compare_cards, get_card_type_sort } = require("../shared/util");
 const { setRenderer, addCardHover } = require("../shared/card-hover");
-const { queryElements: $$ } = require("../shared/dom-fns");
+const { queryElements: $$, createDivision } = require("../shared/dom-fns");
 
 const {
   DRAFT_RANKS,
@@ -570,13 +570,14 @@ function updateView() {
   mainCards.get().sort(sortFunc);
   mainCards.get().forEach(card => {
     var grpId = card.id;
+    let tile;
     if (deckMode == 2) {
       let quantity = (card.chance !== undefined ? card.chance : "0") + "%";
       if (
         !pd.settings.overlay_lands ||
         (pd.settings.overlay_lands && quantity !== "0%")
       ) {
-        let tile = deckDrawer.cardTile(
+        tile = deckDrawer.cardTile(
           pd.settings.card_tile_style,
           grpId,
           "a",
@@ -585,13 +586,19 @@ function updateView() {
         deckListDiv.append(tile);
       }
     } else {
-      let tile = deckDrawer.cardTile(
+      tile = deckDrawer.cardTile(
         pd.settings.card_tile_style,
         grpId,
         "a",
         card.quantity
       );
       deckListDiv.append(tile);
+    }
+
+    // This is hackish.. the way we insert our custom elements in the
+    // array of cards is wrong in the first place :()
+    if (tile && card.id.id && card.id.id == 100) {
+      attachLandOdds(tile, currentMatch.playerCardsOdds);
     }
   });
   if (pd.settings.overlay_sideboard && deckToDraw.sideboard.count() > 0) {
@@ -628,6 +635,37 @@ function updateView() {
   }
 }
 
+function attachLandOdds(tile, odds) {
+  let landsDiv = createDivision(["lands_div"]);
+
+  let createManaChanceDiv = function(odds, color) {
+    let cont = createDivision(["mana_cont"], odds + "%");
+    let div = createDivision(["mana_s16", "flex_end", "mana_" + color]);
+    cont.appendChild(div);
+    landsDiv.appendChild(cont);
+  };
+
+  if (odds.landW) createManaChanceDiv(odds.landW, "w");
+  if (odds.landU) createManaChanceDiv(odds.landU, "u");
+  if (odds.landB) createManaChanceDiv(odds.landB, "b");
+  if (odds.landR) createManaChanceDiv(odds.landR, "r");
+  if (odds.landG) createManaChanceDiv(odds.landG, "g");
+
+  tile.addEventListener("mouseenter", () => {
+    if ($$(".lands_div").length == 0) {
+      $$(".overlay_hover_container")[0].appendChild(landsDiv);
+    }
+  });
+
+  tile.addEventListener("mouseleave", () => {
+    $$(".lands_div").forEach(div => {
+      if (div) {
+        $$(".overlay_hover_container")[0].removeChild(div);
+      }
+    });
+  });
+}
+
 function drawDeckOdds() {
   let deckListDiv = $(".overlay_decklist");
   deckListDiv.append(`
@@ -639,53 +677,42 @@ function drawDeckOdds() {
        `);
 
   deckListDiv.append('<div class="chance_title"></div>'); // Add some space
+
+  let cardOdds = currentMatch.playerCardsOdds;
+
   deckListDiv.append(
     '<div class="chance_title">Creature: ' +
-      (currentMatch.playerCardsOdds.chanceCre != undefined
-        ? currentMatch.playerCardsOdds.chanceCre
-        : "0") +
+      (cardOdds.chanceCre != undefined ? cardOdds.chanceCre : "0") +
       "%</div>"
   );
   deckListDiv.append(
     '<div class="chance_title">Instant: ' +
-      (currentMatch.playerCardsOdds.chanceIns != undefined
-        ? currentMatch.playerCardsOdds.chanceIns
-        : "0") +
+      (cardOdds.chanceIns != undefined ? cardOdds.chanceIns : "0") +
       "%</div>"
   );
   deckListDiv.append(
     '<div class="chance_title">Sorcery: ' +
-      (currentMatch.playerCardsOdds.chanceSor != undefined
-        ? currentMatch.playerCardsOdds.chanceSor
-        : "0") +
+      (cardOdds.chanceSor != undefined ? cardOdds.chanceSor : "0") +
       "%</div>"
   );
   deckListDiv.append(
     '<div class="chance_title">Artifact: ' +
-      (currentMatch.playerCardsOdds.chanceArt != undefined
-        ? currentMatch.playerCardsOdds.chanceArt
-        : "0") +
+      (cardOdds.chanceArt != undefined ? cardOdds.chanceArt : "0") +
       "%</div>"
   );
   deckListDiv.append(
     '<div class="chance_title">Enchantment: ' +
-      (currentMatch.playerCardsOdds.chanceEnc != undefined
-        ? currentMatch.playerCardsOdds.chanceEnc
-        : "0") +
+      (cardOdds.chanceEnc != undefined ? cardOdds.chanceEnc : "0") +
       "%</div>"
   );
   deckListDiv.append(
     '<div class="chance_title">Planeswalker: ' +
-      (currentMatch.playerCardsOdds.chancePla != undefined
-        ? currentMatch.playerCardsOdds.chancePla
-        : "0") +
+      (cardOdds.chancePla != undefined ? cardOdds.chancePla : "0") +
       "%</div>"
   );
   deckListDiv.append(
     '<div class="chance_title">Land: ' +
-      (currentMatch.playerCardsOdds.chanceLan != undefined
-        ? currentMatch.playerCardsOdds.chanceLan
-        : "0") +
+      (cardOdds.chanceLan != undefined ? cardOdds.chanceLan : "0") +
       "%</div>"
   );
 

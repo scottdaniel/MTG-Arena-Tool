@@ -291,3 +291,24 @@ body {
     display: inline-block;
     background: center no-repeat url("../images/quantity_orange.png");
 }
+
+.lands_div {
+    max-width: 120px;
+    margin: 0 auto 16px auto;
+    padding: 16px;
+    border-radius: 6px;
+    background-color: rgba(0,0,0,0.75);
+    opacity: 1;
+    font-family: var(--main-font-name);
+}
+
+.mana_cont {
+    display: flex;
+    font-size: 14px;
+    line-height: 23px;
+    height: 24px;
+    color: white;
+    justify-content: space-between;
+    flex-flow: row-reverse;
+    overflow: hidden;
+}
