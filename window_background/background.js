@@ -402,7 +402,7 @@ ipc.on("delete_tag", (event, arg) => {
     [deckid]: tags
   };
   pd.handleSetPlayerData(null, { decks_tags });
-
+  ipc_send("set_deck_tags", decks_tags);
   store.set("decks_tags", decks_tags);
 });
 
@@ -417,7 +417,7 @@ ipc.on("add_tag", (event, arg) => {
     [deckid]: [...deck.tags, tag]
   };
   pd.handleSetPlayerData(null, { decks_tags });
-
+  ipc_send("set_deck_tags", decks_tags);
   store.set("decks_tags", decks_tags);
 });
 

@@ -358,33 +358,12 @@ function createTag(tag, div, showClose = true) {
 }
 
 function addTag(deckid, tag, div) {
-  const deck = pd.deck(deckid);
-  if (!deck || deck.format === tag) return;
-  if (deck.tags && deck.tags.includes(tag)) return;
-
-  const decks_tags = {
-    ...pd.decks_tags,
-    [deckid]: [...deck.tags, tag]
-  };
-  pd.handleSetPlayerData(null, { decks_tags });
-
   ipc_send("add_tag", { deckid, tag });
+  // This createTag should not be here 
   createTag(tag, div);
 }
 
 function deleteTag(deckid, tag) {
-  const deck = pd.deck(deckid);
-  if (!deck || !deck.tags || !deck.tags.includes(tag)) return;
-
-  const tags = [...deck.tags];
-  tags.splice(tags.indexOf(tag), 1);
-
-  const decks_tags = {
-    ...pd.decks_tags,
-    [deckid]: tags
-  };
-  pd.handleSetPlayerData(null, { decks_tags });
-
   ipc_send("delete_tag", { deckid, tag });
 }
 

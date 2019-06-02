@@ -161,6 +161,8 @@ class PlayerData {
     if (ipc) ipc.on("set_decks", this.handleSetDecks);
     this.handleSetSettings = this.handleSetSettings.bind(this);
     if (ipc) ipc.on("set_settings", this.handleSetSettings);
+    this.handleSetDeckTags = this.handleSetDeckTags.bind(this);
+    if (ipc) ipc.on("set_deck_tags", this.handleSetDeckTags);
 
     this.change = this.change.bind(this);
     this.deck = this.deck.bind(this);
@@ -179,6 +181,10 @@ class PlayerData {
     this.defaultCfg = { ...defaultCfg };
 
     PlayerData.instance = this;
+  }
+
+  handleSetDeckTags(_event, arg) {
+    Object.assign(this.decks_tags, arg);
   }
 
   handleSetPlayerData(_event, arg) {
