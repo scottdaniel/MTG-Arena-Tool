@@ -982,7 +982,7 @@ function drawDeck(div, deck, showWildcards = false) {
         .orderBy(["data.cmc", "data.name"])
         .forEach(card => {
           const tile = deckDrawer.cardTile(
-            pd.settings.cards_style,
+            pd.settings.card_tile_style,
             card.id,
             unique + "a",
             card.quantity,
@@ -1007,7 +1007,7 @@ function drawDeck(div, deck, showWildcards = false) {
       .orderBy(["data.cmc", "data.name"])
       .forEach(card => {
         const tile = deckDrawer.cardTile(
-          pd.settings.cards_style,
+          pd.settings.card_tile_style,
           card.id,
           unique + "b",
           card.quantity,
@@ -1027,7 +1027,7 @@ function drawCardList(div, cards) {
   cards.forEach(cardId => (counts[cardId] = (counts[cardId] || 0) + 1));
   Object.keys(counts).forEach(cardId => {
     let tile = deckDrawer.cardTile(
-      pd.settings.cards_style,
+      pd.settings.card_tile_style,
       cardId,
       unique,
       counts[cardId]
@@ -1343,7 +1343,7 @@ function setChangesTimeline(deckId) {
       }
 
       let tile = deckDrawer.cardTile(
-        pd.settings.cards_style,
+        pd.settings.card_tile_style,
         c.id,
         "chm" + cn,
         Math.abs(c.quantity)
@@ -1373,7 +1373,7 @@ function setChangesTimeline(deckId) {
       }
 
       let tile = deckDrawer.cardTile(
-        pd.settings.cards_style,
+        pd.settings.card_tile_style,
         c.id,
         "chs" + cn,
         Math.abs(c.quantity)
@@ -1801,7 +1801,7 @@ function open_match(id) {
             : "line_dark";
         let cardDiv = $(`<div class="library_card ${rowShade}"></div>`);
         let tile = deckDrawer.cardTile(
-          pd.settings.cards_style,
+          pd.settings.card_tile_style,
           cardId,
           unique + libraryIndex,
           "#" + (libraryIndex + 1)
@@ -1813,7 +1813,7 @@ function open_match(id) {
       if (unknownCards > 0) {
         let cardDiv = $('<div class="library_card"></div>');
         let tile = deckDrawer.cardTile(
-          pd.settings.cards_style,
+          pd.settings.card_tile_style,
           null,
           unique + game.deckSize,
           unknownCards + "x"
