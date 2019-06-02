@@ -1,3 +1,14 @@
+## <small>2.6.2 (2019-06-02)</small>
+
+* Do not crash on reconnection ([217b60a](https://github.com/Manuel-777/MTG-Arena-Tool/commit/217b60a))
+* Fix consecutive rewards ([b7c7c1a](https://github.com/Manuel-777/MTG-Arena-Tool/commit/b7c7c1a)), closes [#403](https://github.com/Manuel-777/MTG-Arena-Tool/issues/403)
+* flat tile color border ([7322f78](https://github.com/Manuel-777/MTG-Arena-Tool/commit/7322f78))
+* Revert english date format ([ff84f9b](https://github.com/Manuel-777/MTG-Arena-Tool/commit/ff84f9b))
+* Show color odds on hover ([3d5ae20](https://github.com/Manuel-777/MTG-Arena-Tool/commit/3d5ae20))
+* Update renderer.js ([e161b46](https://github.com/Manuel-777/MTG-Arena-Tool/commit/e161b46)), closes [#389](https://github.com/Manuel-777/MTG-Arena-Tool/issues/389)
+
+
+
 ## <small>2.6.1 (2019-05-28)</small>
 
 * background log handling sets taskbar progress ([c5fbc77](https://github.com/Manuel-777/MTG-Arena-Tool/commit/c5fbc77))
