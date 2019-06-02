@@ -106,7 +106,7 @@ function httpBasic() {
           protocol: "https:",
           port: 443,
           hostname: serverAddress,
-          path: "/database/database.json",
+          path: "/database/",
           method: "GET"
         };
         ipc_send("popup", {
@@ -301,7 +301,6 @@ function httpBasic() {
                 ipc_send("set_draft_link", parsedResult.url);
               }
               if (_headers.method == "home_get") {
-                db.handleSetHome(null, parsedResult);
                 ipc_send("set_home", parsedResult);
               }
               if (_headers.method == "tou_get") {

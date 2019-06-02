@@ -359,7 +359,7 @@ function createTag(tag, div, showClose = true) {
 
 function addTag(deckid, tag, div) {
   ipc_send("add_tag", { deckid, tag });
-  // This createTag should not be here 
+  // This createTag should not be here
   createTag(tag, div);
 }
 

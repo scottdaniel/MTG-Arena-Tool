@@ -262,7 +262,6 @@ ipc.on("auto_login", () => {
   });
   if (rSettings.remember_me) {
     httpApi.httpAuth(rstore.get("email"), HIDDEN_PW);
-    httpApi.httpHomeGet();
   } else {
     offlineLogin();
   }
@@ -273,13 +272,11 @@ ipc.on("login", function(event, arg) {
   if (arg.password == HIDDEN_PW) {
     tokenAuth = rstore.get("token");
     httpApi.httpAuth(arg.username, arg.password);
-    httpApi.httpHomeGet();
   } else if (arg.username === "" && arg.password === "") {
     offlineLogin();
   } else {
     tokenAuth = "";
     httpApi.httpAuth(arg.username, arg.password);
-    httpApi.httpHomeGet();
   }
 });
 

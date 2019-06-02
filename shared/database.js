@@ -1,16 +1,6 @@
 const { ipcRenderer: ipc } = require("electron");
 const fs = require("fs");
 
-const otherKeys = [
-  "sets",
-  "events",
-  "events_format",
-  "cards",
-  "ranked_events",
-  "abilities",
-  "ok"
-];
-
 // Some other things should go here later, like updating from MTGA Servers themselves.
 class Database {
   constructor() {
@@ -18,14 +8,11 @@ class Database {
 
     this.handleSetDb = this.handleSetDb.bind(this);
     this.handleSetSeason = this.handleSetSeason.bind(this);
-    this.handleSetHome = this.handleSetHome.bind(this);
     if (ipc) ipc.on("set_db", this.handleSetDb);
     if (ipc) ipc.on("set_season", this.handleSetSeason);
-    if (ipc) ipc.on("set_home", this.handleSetHome);
     const dbUri = `${__dirname}/../resources/database.json`;
     const defaultDb = fs.readFileSync(dbUri, "utf8");
     this.handleSetDb(null, defaultDb);
-    this.archetypes = [];
 
     Database.instance = this;
   }
@@ -46,20 +33,16 @@ class Database {
     }
   }
 
-  handleSetHome(_event, arg) {
-    // console.log(arg); // arg has all data from request_home
-    this.archetypes = arg.archetypes || [];
-  }
-
   get abilities() {
     return this.data.abilities;
   }
 
+  get archetypes() {
+    return this.data.archetypes;
+  }
+
   get cards() {
-    if (this.data.cards) return this.data.cards;
-    const clone = { ...this.data };
-    otherKeys.forEach(key => delete clone[key]);
-    return clone;
+    return this.data.cards;
   }
 
   get cardIds() {
@@ -105,8 +88,7 @@ class Database {
   }
 
   card(id) {
-    if (this.data.cards) return this.data.cards[id] || false;
-    return this.data[id] || false;
+    return this.data.cards[id] || false;
   }
 
   event(id) {
