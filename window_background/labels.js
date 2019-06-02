@@ -733,6 +733,25 @@ function onLabelMatchGameRoomStateChangedEvent(entry, json) {
   if (eventId == "NPE") return;
 
   if (json.stateType == "MatchGameRoomStateType_Playing") {
+    // If current match does nt exist (create match was not recieved , maybe a reconnection)
+    // Only problem is recieving the decklist
+    if (!currentMatch) {
+      let oName = "";
+      json.gameRoomConfig.reservedPlayers.forEach(player => {
+        if (!player.userId == playerData.arenaId) {
+          oName = player.playerName;
+        }
+      });
+
+      let arg = {
+        opponentScreenName: oName,
+        opponentRankingClass: "",
+        opponentRankingTier: 1,
+        eventId: eventId,
+        matchId: json.gameRoomConfig.matchId
+      };
+      createMatch(arg);
+    }
     json.gameRoomConfig.reservedPlayers.forEach(player => {
       if (player.userId == playerData.arenaId) {
         currentMatch.player.seat = player.systemSeatId;
