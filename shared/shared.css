@@ -10,6 +10,13 @@
   --sub-font-name-bold:  'roboto-bold', sans-serif;
   --sub-font-name-bold-it:  'roboto-bold-italic', sans-serif;
   --main-font-style-it: normal;
+  --color-w: #E7CA8E;
+  --color-u: #AABEDF;
+  --color-b: #A18E87;
+  --color-r: #DD8263;
+  --color-g: #B7C89E;
+  --color-c: #B6A59E;
+  --color-m: #FFCD70;
 }
 
 html {
@@ -754,6 +761,8 @@ span {
 }
 
 .card_tile_crop_flat {
+    border-width: 2px;
+    border-style: none none none solid;
     min-width: 32px;
     height: 100%;
     background-size: cover;
