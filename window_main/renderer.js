@@ -129,7 +129,6 @@ function ipc_send(method, arg, to = IPC_BACKGROUND) {
 
 // convenience handler for player data singleton
 function toggleArchived(id) {
-  pd.toggleArchived(id);
   ipc_send("toggle_archived", id);
 }
 
@@ -184,15 +183,6 @@ ipc.on("too_slow", function() {
 //
 function getTagColor(tag) {
   return pd.tags_colors[tag] || "#FAE5D2";
-}
-
-//
-function setTagColor(tag, color) {
-  const tags_colors = {
-    ...pd.tags_colors,
-    [tag]: color
-  };
-  pd.handleSetPlayerData(null, { tags_colors });
 }
 
 ipc.on("show_login", () => {
@@ -414,6 +404,9 @@ ipc.on("settings_updated", function() {
   }
   lastSettings = { ...pd.settings };
 });
+
+//
+ipc.on("player_data_refresh", () => openTab(sidebarActive));
 
 //
 ipc.on("set_update_state", function(event, arg) {

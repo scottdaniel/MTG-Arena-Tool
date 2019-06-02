@@ -675,7 +675,6 @@ function createChangeRow(change, economyId) {
   const archiveCallback = e => {
     e.stopPropagation();
     toggleArchived(economyId);
-    openEconomyTab();
   };
   deleteButton.addEventListener("click", archiveCallback);
 

@@ -12,7 +12,6 @@ global
   open_draft
   ListItem
   pd
-  setTagColor
   showLoadingBars
   sidebarActive
   StatsPanel
@@ -212,7 +211,6 @@ function renderData(container, index) {
   }
   const deleteCallback = id => {
     toggleArchived(id);
-    openHistoryTab();
   };
 
   let listItem = new ListItem(
@@ -441,16 +439,19 @@ function createTag(tag, div, showClose = true) {
       colorPick.spectrum("set", tagCol);
       colorPick.spectrum("show");
 
-      colorPick.on("move.spectrum", function(e, color) {
-        let tag = $(this).text();
-        let col = color.toRgbString();
-        ipc_send("edit_tag", { tag: tag, color: col });
-        setTagColor(tag, col);
-
+      colorPick.on("move.spectrum", (e, color) => {
+        const tag = $(this).text();
+        const col = color.toRgbString();
         $(".deck_tag").each((index, obj) => {
-          let tag = $(obj).text();
-          $(obj).css("background-color", getTagColor(tag));
+          if (tag !== $(obj).text()) return;
+          $(obj).css("background-color", col);
         });
+      });
+
+      colorPick.on("change.spectrum", (e, color) => {
+        const tag = $(this).text();
+        const col = color.toRgbString();
+        ipc_send("edit_tag", { tag, color: col });
       });
 
       colorPick.on("hide.spectrum", () => {
@@ -563,25 +564,12 @@ function addTag(matchid, tag, div) {
   if (!match) return;
   if (match.tags && match.tags.includes(tag)) return;
 
-  if (match.tags) {
-    match.tags.push(tag);
-  } else {
-    match.tags = [tag];
-  }
-  pd.handleSetPlayerData(null, { [matchid]: match });
-
   ipc_send("add_history_tag", { matchid, tag });
-
-  const t = createTag(tag, div);
-  jQuery.data(t, "match", matchid);
 }
 
 function deleteTag(matchid, tag) {
   const match = pd.match(matchid);
   if (!match || !match.tags || !match.tags.includes(tag)) return;
-
-  match.tags.splice(match.tags.indexOf(tag), 1);
-  pd.handleSetPlayerData(null, { [matchid]: match });
 
   ipc_send("delete_history_tag", { matchid, tag });
 }

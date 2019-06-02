@@ -13,7 +13,6 @@ global
   pd
   sidebarActive
   getTagColor
-  setTagColor
   StatsPanel
 */
 
@@ -125,9 +124,7 @@ function openDecksTab(_filters = {}) {
     let listItem;
     if (deck.custom) {
       const archiveCallback = id => {
-        pd.toggleDeckArchived(id);
         ipc_send("toggle_deck_archived", id);
-        openDecksTab();
       };
 
       listItem = new ListItem(
@@ -272,16 +269,19 @@ function createTag(tag, div, showClose = true) {
       colorPick.spectrum("set", tagCol);
       colorPick.spectrum("show");
 
-      colorPick.on("move.spectrum", function(e, color) {
-        let tag = $(this).text();
-        let col = color.toRgbString();
-        ipc_send("edit_tag", { tag: tag, color: col });
-        setTagColor(tag, col);
-
+      colorPick.on("move.spectrum", (e, color) => {
+        const tag = $(this).text();
+        const col = color.toRgbString();
         $(".deck_tag").each((index, obj) => {
-          let tag = $(obj).text();
-          $(obj).css("background-color", getTagColor(tag));
+          if (tag !== $(obj).text()) return;
+          $(obj).css("background-color", col);
         });
+      });
+
+      colorPick.on("change.spectrum", (e, color) => {
+        const tag = $(this).text();
+        const col = color.toRgbString();
+        ipc_send("edit_tag", { tag, color: col });
       });
 
       colorPick.on("hide.spectrum", () => {
@@ -357,10 +357,8 @@ function createTag(tag, div, showClose = true) {
   return t;
 }
 
-function addTag(deckid, tag, div) {
+function addTag(deckid, tag) {
   ipc_send("add_tag", { deckid, tag });
-  // This createTag should not be here
-  createTag(tag, div);
 }
 
 function deleteTag(deckid, tag) {

@@ -153,8 +153,6 @@ function startApp() {
         debugIPC == 2 &&
         method != "set_status" &&
         method != "set_db" &&
-        method != "set_cards" &&
-        method != "set_decks" &&
         method != "background_set_history_data"
       ) {
         console.log("IPC ", method + ": " + JSON.stringify(arg));
@@ -172,8 +170,6 @@ function startApp() {
         break;
 
       case "set_settings":
-        mainWindow.webContents.send("set_settings", arg);
-        overlay.webContents.send("set_settings", arg);
         setSettings(arg);
         break;
 
@@ -182,17 +178,17 @@ function startApp() {
         overlay.webContents.send("settings_updated");
         break;
 
+      case "player_data_refresh":
+        mainWindow.webContents.send("player_data_refresh");
+        overlay.webContents.send("player_data_refresh");
+        break;
+
       case "set_db":
         mainWindow.webContents.send("set_db", arg);
         overlay.webContents.send("set_db", arg);
         if (autoLogin) {
           background.webContents.send("auto_login");
         }
-        break;
-
-      case "set_player_data":
-        mainWindow.webContents.send("set_player_data", arg);
-        overlay.webContents.send("set_player_data", arg);
         break;
 
       case "popup":

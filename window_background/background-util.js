@@ -7,7 +7,11 @@ const { ipcRenderer: ipc } = require("electron");
 const _ = require("lodash");
 const parse = require("date-fns").parse;
 
-const { IPC_BACKGROUND, IPC_MAIN } = require("../shared/constants.js");
+const {
+  IPC_BACKGROUND,
+  IPC_MAIN,
+  IPC_OVERLAY
+} = require("../shared/constants.js");
 const pd = require("../shared/player-data.js");
 
 // These were tested briefly , but hey are all taken from actual logs
@@ -73,16 +77,50 @@ function ipc_send(method, arg, to = IPC_MAIN) {
   ipc.send("ipc_switch", method, IPC_BACKGROUND, arg, to);
 }
 
-// convenience handler for player data singleton
-function pd_sync(arg) {
-  pd.handleSetPlayerData(null, arg);
-  ipc_send("set_player_data", arg);
+const dataBlacklist = ["changes", "drafts", "events", "matches"];
+
+const overlayWhitelist = [
+  "name",
+  "userName",
+  "arenaId",
+  "arenaVersion",
+  "patreon",
+  "patreon_tier",
+  "rank",
+  "cards",
+  "cardsNew",
+  "settings"
+];
+
+// convenience fn to destructively update player data
+// singletons in all processes
+// (to incrementally add data, use pd_merge instead)
+function pd_set(data) {
+  const cleanData = _.omit(data, dataBlacklist);
+  pd.handleSetData(null, cleanData);
+  pd_sync(cleanData, "set_player_data");
+}
+
+// convenience fn to additively update player data
+// singletons in all processes
+// (to remove data, use ps_set instead)
+function pd_merge(data) {
+  const cleanData = _.omit(data, dataBlacklist);
+  pd.handleMergeData(null, cleanData);
+  pd_sync(cleanData, "merge_player_data");
+}
+
+function pd_sync(cleanData, signal) {
+  ipc_send(signal, cleanData, IPC_MAIN);
+  const overlayData = _.pick(cleanData, overlayWhitelist);
+  ipc_send(signal, overlayData, IPC_OVERLAY);
 }
 
 module.exports = {
   ipc_send,
   normaliseFields,
   parseWotcTime,
-  pd_sync,
+  pd_merge,
+  pd_set,
   unleakString
 };

@@ -1,5 +1,6 @@
 const electron = require("electron");
 const ipc = electron.ipcRenderer;
+const _ = require("lodash");
 
 const {
   CARD_TILE_FLAT,
@@ -92,7 +93,6 @@ const defaultCfg = {
   gems_history: [],
   gold_history: [],
   decks: {},
-  staticDecks: new Set(),
   decks_index: [],
   decks_tags: {},
   decks_last_used: [],
@@ -155,14 +155,10 @@ class PlayerData {
   constructor() {
     if (PlayerData.instance) return PlayerData.instance;
 
-    this.handleSetPlayerData = this.handleSetPlayerData.bind(this);
-    if (ipc) ipc.on("set_player_data", this.handleSetPlayerData);
-    this.handleSetDecks = this.handleSetDecks.bind(this);
-    if (ipc) ipc.on("set_decks", this.handleSetDecks);
-    this.handleSetSettings = this.handleSetSettings.bind(this);
-    if (ipc) ipc.on("set_settings", this.handleSetSettings);
-    this.handleSetDeckTags = this.handleSetDeckTags.bind(this);
-    if (ipc) ipc.on("set_deck_tags", this.handleSetDeckTags);
+    this.handleSetData = this.handleSetData.bind(this);
+    if (ipc) ipc.on("set_player_data", this.handleSetData);
+    this.handleMergeData = this.handleMergeData.bind(this);
+    if (ipc) ipc.on("merge_player_data", this.handleMergeData);
 
     this.change = this.change.bind(this);
     this.deck = this.deck.bind(this);
@@ -177,50 +173,21 @@ class PlayerData {
     this.matchExists = this.matchExists.bind(this);
     this.deckChanges = this.deckChanges.bind(this);
 
-    this.handleSetPlayerData(null, { ...playerDataDefault, ...defaultCfg });
-    this.defaultCfg = { ...defaultCfg };
+    Object.assign(this, {
+      ...playerDataDefault,
+      ...defaultCfg,
+      defaultCfg: { ...defaultCfg }
+    });
 
     PlayerData.instance = this;
   }
 
-  handleSetDeckTags(_event, arg) {
-    Object.assign(this.decks_tags, arg);
+  handleSetData(_event, arg) {
+    Object.assign(this, arg);
   }
 
-  handleSetPlayerData(_event, arg) {
-    const data = { ...arg };
-    delete data.changes;
-    delete data.drafts;
-    delete data.events;
-    delete data.matches;
-    Object.assign(this, data);
-  }
-
-  handleSetDecks(_event, arg) {
-    this.staticDecks = new Set();
-    arg.forEach(deck => {
-      const deckData = {
-        // preserve custom fields if possible
-        ...(this.deck(deck.id) || {}),
-        ...deck
-      };
-      this.decks[deck.id] = deckData;
-      this.staticDecks.add(deck.id);
-    });
-  }
-
-  handleSetSettings(_event, arg) {
-    Object.assign(this.settings, arg);
-  }
-
-  toggleDeckArchived(id) {
-    if (!this.deckExists(id)) return;
-    this.decks[id].archived = !this.decks[id].archived;
-  }
-
-  toggleArchived(id) {
-    if (!(id in this)) return;
-    this[id].archived = !this[id].archived;
+  handleMergeData(_event, arg) {
+    _.merge(this, arg);
   }
 
   get cardsSize() {
@@ -272,10 +239,10 @@ class PlayerData {
   deck(id) {
     if (!this.deckExists(id)) return false;
     return {
+      custom: true,
       ...this.decks[id],
       colors: get_deck_colors(this.decks[id]),
-      tags: this.decks_tags[id] || [],
-      custom: !this.staticDecks.has(id)
+      tags: this.decks_tags[id] || []
     };
   }
 

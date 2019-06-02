@@ -105,7 +105,6 @@ function renderData(container, index) {
 
   const archiveCallback = id => {
     toggleArchived(id);
-    openEventsTab();
   };
 
   const listItem = new ListItem(

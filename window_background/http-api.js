@@ -16,7 +16,7 @@ const async = require("async");
 const qs = require("qs");
 
 const { makeId } = require("../shared/util");
-const { ipc_send, pd_sync } = require("./background-util");
+const { ipc_send, pd_merge, pd_set } = require("./background-util");
 
 let metadataState = false;
 
@@ -279,7 +279,7 @@ function httpBasic() {
                   serverData.drafts = parsedResult.drafts;
                   serverData.economy = parsedResult.economy;
                 }
-                pd_sync(data);
+                pd_merge(data);
                 ipc_send("player_data_updated");
                 loadPlayerConfig(pd.arenaId, serverData);
                 ipc_send("set_discord_tag", parsedResult.discord_tag);
@@ -430,7 +430,7 @@ function removeFromHttp(req) {
 
 function httpAuth(userName, pass) {
   var _id = makeId(6);
-  pd_sync({ userName });
+  pd_set({ userName });
   httpAsync.push({
     reqId: _id,
     method: "auth",
