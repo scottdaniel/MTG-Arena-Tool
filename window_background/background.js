@@ -395,13 +395,8 @@ ipc.on("tou_drop", function(event, arg) {
 
 ipc.on("edit_tag", (event, arg) => {
   const { tag, color } = arg;
-  const tags_colors = {
-    ...pd.tags_colors,
-    [tag]: color
-  };
-  pd_set({ tags_colors });
-
-  store.set("tags_colors", tags_colors);
+  pd_merge({ tags_colors: { [tag]: color } });
+  store.set("tags_colors." + tag, color);
   ipc_send("player_data_refresh");
 });
 
@@ -457,8 +452,8 @@ ipc.on("add_history_tag", (event, arg) => {
   const tags = [...(match.tags || []), tag];
 
   pd_merge({ [matchid]: { tags } });
-  ipc_send("player_data_refresh");
   store.set(matchid + ".tags", tags);
+  ipc_send("player_data_refresh");
   httpApi.httpSetDeckTag(tag, match.oppDeck.mainDeck, match.eventId);
 });
 
@@ -592,6 +587,8 @@ function syncUserData(data) {
     });
   store.set("draft_index", draft_index);
   pd_set({ draft_index });
+
+  if (!firstPass) ipc_send("player_data_refresh");
 }
 
 // Loads and combines settings variables, sends result to display
@@ -1176,6 +1173,8 @@ function addCustomDeck(customDeck) {
     store.set("decks_index", decks_index);
     pd_set({ decks_index });
   }
+
+  if (!firstPass) ipc_send("player_data_refresh");
 }
 
 //
@@ -1482,6 +1481,7 @@ function saveEconomyTransaction(transaction) {
     pd_set({ economy_index });
   }
 
+  if (!firstPass) ipc_send("player_data_refresh");
   httpApi.httpSetEconomy(txnData);
 }
 
@@ -1506,6 +1506,8 @@ function saveCourse(json) {
     store.set("courses_index", courses_index);
     pd_set({ courses_index });
   }
+
+  if (!firstPass) ipc_send("player_data_refresh");
 }
 
 //
@@ -1592,6 +1594,7 @@ function saveMatch(id) {
     pd_set({ matches_index });
   }
 
+  if (!firstPass) ipc_send("player_data_refresh");
   if (matchCompletedOnGameNumber === gameNumberCompleted) {
     httpApi.httpSetMatch(match);
   }
@@ -1627,6 +1630,7 @@ function saveDraft() {
     pd_set({ draft_index });
   }
 
+  if (!firstPass) ipc_send("player_data_refresh");
   httpApi.httpSetDraft(draftData);
   ipc_send("popup", { text: "Draft saved!", time: 3000 });
 }

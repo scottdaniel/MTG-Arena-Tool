@@ -35,6 +35,7 @@
     matchCompletedOnGameNumber
     oppId
     pd
+    firstPass
 */
 
 const db = require("../shared/database");
@@ -326,6 +327,7 @@ function onLabelInDeckGetDeckLists(entry, json) {
   });
 
   pd_merge({ decks });
+  if (!firstPass) ipc_send("player_data_refresh");
 }
 
 function onLabelInDeckGetDeckListsV3(entry, json) {
@@ -470,6 +472,7 @@ function onLabelInDeckUpdateDeck(entry, json) {
     store.set("deck_changes_index", deck_changes_index);
 
     pd_set({ deck_changes, deck_changes_index });
+    if (!firstPass) ipc_send("player_data_refresh");
   }
 }
 
@@ -533,6 +536,7 @@ function onLabelInPlayerInventoryGetPlayerInventory(entry, json) {
     wcMythic: json.wcMythic
   };
   pd_set({ economy });
+  if (!firstPass) ipc_send("player_data_refresh");
 }
 
 function onLabelInPlayerInventoryGetPlayerCardsV3(entry, json) {
@@ -569,6 +573,7 @@ function onLabelInPlayerInventoryGetPlayerCardsV3(entry, json) {
   });
 
   pd_set({ cards: json, cardsNew });
+  if (!firstPass) ipc_send("player_data_refresh");
 }
 
 function onLabelInEventDeckSubmit(entry, json) {
