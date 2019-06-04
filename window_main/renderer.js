@@ -40,7 +40,7 @@ const tournamentCreate = require("./tournaments").tournamentCreate;
 const tournamentSetState = require("./tournaments").tournamentSetState;
 const openDeck = require("./deck-details").openDeck;
 const openDecksTab = require("./decks").openDecksTab;
-const { openHistoryTab, setFilters } = require("./history");
+const { openHistoryTab } = require("./history");
 const openExploreTab = require("./explore").openExploreTab;
 const setExploreDecks = require("./explore").setExploreDecks;
 const openCollectionTab = require("./collection").openCollectionTab;
@@ -92,8 +92,8 @@ let explore = null;
 let ladder = null;
 
 let sidebarActive = -2;
-let filterEvent = "All";
-let filterSort = "By Winrate";
+let lastDataIndex = 0;
+let lastScrollTop = 0;
 
 let draftPosition = 1;
 let loadEvents = 0;
@@ -406,7 +406,9 @@ ipc.on("settings_updated", function() {
 });
 
 //
-ipc.on("player_data_refresh", () => openTab(sidebarActive));
+ipc.on("player_data_refresh", () => {
+  openTab(sidebarActive, {}, lastDataIndex, lastScrollTop);
+});
 
 //
 ipc.on("set_update_state", function(event, arg) {
@@ -459,7 +461,7 @@ function rememberMe() {
 }
 
 //
-function openTab(tab) {
+function openTab(tab, filters = {}, dataIndex = 0, scrollTop = 0) {
   showLoadingBars();
   $(".top_nav_item").each(function() {
     $(this).removeClass("item_selected");
@@ -468,13 +470,13 @@ function openTab(tab) {
   $("#ux_0").html("");
   switch (tab) {
     case 0:
-      openDecksTab();
+      openDecksTab(filters, scrollTop);
       break;
     case 1:
-      openHistoryTab();
+      openHistoryTab(filters, dataIndex, scrollTop);
       break;
     case 2:
-      openEventsTab();
+      openEventsTab(filters, dataIndex, scrollTop);
       break;
     case 3:
       if (offlineMode) {
@@ -484,7 +486,7 @@ function openTab(tab) {
       }
       break;
     case 4:
-      openEconomyTab();
+      openEconomyTab(dataIndex, scrollTop);
       break;
     case 5:
       openCollectionTab();
@@ -785,6 +787,7 @@ $(document).ready(function() {
     document.body.style.cursor = "auto";
     if (!$(this).hasClass("item_selected")) {
       $(".moving_ux").animate({ left: "0px" }, 250, "easeInOutCubic");
+      let filters = {};
       if ($(this).hasClass("ith")) {
         sidebarActive = -1;
       } else if ($(this).hasClass("it0")) {
@@ -803,22 +806,22 @@ $(document).ready(function() {
         sidebarActive = 6;
       } else if ($(this).hasClass("it7")) {
         sidebarActive = 1;
-        setFilters({
+        filters = {
           ...Aggregator.getDefaultFilters(),
           date: DATE_SEASON,
           eventId: RANKED_CONST,
           rankedMode: true
-        });
+        };
       } else if ($(this).hasClass("it8")) {
         sidebarActive = 1;
-        setFilters({
+        filters = {
           ...Aggregator.getDefaultFilters(),
           date: DATE_SEASON,
           eventId: RANKED_DRAFT,
           rankedMode: true
-        });
+        };
       }
-      openTab(sidebarActive);
+      openTab(sidebarActive, filters);
     } else {
       $(".moving_ux").animate({ left: "0px" }, 250, "easeInOutCubic");
     }

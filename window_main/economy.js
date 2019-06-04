@@ -133,7 +133,7 @@ function getPrettyContext(context, full = true) {
   return pretty || context;
 }
 
-function openEconomyTab() {
+function openEconomyTab(dataIndex = 25, scrollTop = 0) {
   const mainDiv = document.getElementById("ux_0");
   createEconomyUI(mainDiv);
   const dataScroller = new DataScroller(
@@ -142,7 +142,7 @@ function openEconomyTab() {
     20,
     sortedChanges.length
   );
-  dataScroller.render(25);
+  dataScroller.render(dataIndex, scrollTop);
 }
 
 // return val = how many rows it rendered into container

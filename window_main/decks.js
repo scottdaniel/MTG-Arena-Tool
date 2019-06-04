@@ -14,6 +14,7 @@ global
   sidebarActive
   getTagColor
   StatsPanel
+  lastScrollTop
 */
 
 const _ = require("lodash");
@@ -47,7 +48,7 @@ function setFilters(selected = {}) {
 }
 
 //
-function openDecksTab(_filters = {}) {
+function openDecksTab(_filters = {}, scrollTop = 0) {
   if (sidebarActive !== 0) return;
 
   hideLoadingBars();
@@ -243,6 +244,14 @@ function openDecksTab(_filters = {}) {
     }
 
     wrap_l.appendChild(listItem.container);
+  });
+
+  const jCont = $(wrap_l);
+  if (scrollTop) {
+    jCont.scrollTop(lastScrollTop);
+  }
+  jCont.on("scroll", () => {
+    lastScrollTop = jCont.scrollTop();
   });
 }
 

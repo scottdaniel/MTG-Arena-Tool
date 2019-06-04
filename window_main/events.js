@@ -29,7 +29,7 @@ filters.eventId = Aggregator.ALL_EVENT_TRACKS;
 let filteredMatches;
 let sortedEvents;
 
-function openEventsTab(_filters) {
+function openEventsTab(_filters, dataIndex = 25, scrollTop = 0) {
   const mainDiv = document.getElementById("ux_0");
   mainDiv.classList.remove("flex_item");
   mainDiv.innerHTML = "";
@@ -77,7 +77,7 @@ function openEventsTab(_filters) {
     20,
     sortedEvents.length
   );
-  dataScroller.render(25);
+  dataScroller.render(dataIndex, scrollTop);
 }
 
 // return val = how many rows it rendered into container

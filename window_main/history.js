@@ -71,7 +71,7 @@ function setFilters(selected = {}) {
   }
 }
 
-function openHistoryTab(_deprecated, _filters = {}) {
+function openHistoryTab(_filters = {}, dataIndex = 25, scrollTop = 0) {
   if (sidebarActive !== 1) return;
 
   var mainDiv = document.getElementById("ux_0");
@@ -149,7 +149,7 @@ function openHistoryTab(_deprecated, _filters = {}) {
 
   const filterPanel = new FilterPanel(
     "history_top",
-    selected => openHistoryTab(0, selected),
+    selected => openHistoryTab(selected),
     filters,
     allMatches.events,
     matchesInEvent.tags,
@@ -169,7 +169,7 @@ function openHistoryTab(_deprecated, _filters = {}) {
     20,
     sortedHistory.length
   );
-  dataScroller.render(25);
+  dataScroller.render(dataIndex, scrollTop);
 }
 
 // return val = how many rows it rendered into container
@@ -415,7 +415,7 @@ function renderRanksStats(container, aggregator) {
   container.appendChild(title);
 
   seasonToggleButton.addEventListener("click", () => {
-    openHistoryTab(0, switchSeasonFilters);
+    openHistoryTab(switchSeasonFilters);
   });
 }
 
