@@ -6,8 +6,10 @@ class Database {
   constructor() {
     if (Database.instance) return Database.instance;
 
+    this.handleSetActiveEvents = this.handleSetActiveEvents.bind(this);
     this.handleSetDb = this.handleSetDb.bind(this);
     this.handleSetSeason = this.handleSetSeason.bind(this);
+    if (ipc) ipc.on("set_active_events", this.handleSetActiveEvents);
     if (ipc) ipc.on("set_db", this.handleSetDb);
     if (ipc) ipc.on("set_season", this.handleSetSeason);
     const dbUri = `${__dirname}/../resources/database.json`;
@@ -15,6 +17,16 @@ class Database {
     this.handleSetDb(null, defaultDb);
 
     Database.instance = this;
+  }
+
+  handleSetActiveEvents(_event, arg) {
+    if (!arg) return;
+    try {
+      this.activeEvents = JSON.parse(arg);
+    } catch (e) {
+      console.log("Error parsing JSON:", arg);
+      return false;
+    }
   }
 
   handleSetDb(_event, arg) {
