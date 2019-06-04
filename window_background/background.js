@@ -1156,8 +1156,7 @@ function addCustomDeck(customDeck) {
   const deckData = {
     // preserve custom fields if possible
     ...(pd.deck(id) || {}),
-    ...customDeck,
-    custom: true
+    ...customDeck
   };
 
   pd_set({ decks: { ...pd.decks, [customDeck.id]: deckData } });

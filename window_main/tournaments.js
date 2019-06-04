@@ -1,9 +1,10 @@
 /*
 global
+  allMatches
   change_background
-  decks
   drawDeck
   drawDeckVisual
+  FilterPanel
   ipc_send
   pd
   pop
@@ -15,6 +16,8 @@ const deckDrawer = require("../shared/deck-drawer");
 const {
   compare_cards,
   get_deck_export,
+  get_deck_missing,
+  getBoosterCountEstimate,
   makeId,
   objectClone,
   timestamp,
@@ -180,18 +183,21 @@ function showTournamentRegister(mainDiv, tou) {
   } else {
     let deckSelectContainer = createDivision(["flex_item"]);
 
-    let decksList = decks.map((d, index) => index);
-    //select.append(`<option value="${_deck.id}">${_deck.name}</option>`);
-
-    let deckSelect = createSelect(
+    // filter to current decks in Arena with no missing cards
+    const validDecks = pd.deckList
+      .filter(deck => !deck.custom)
+      .filter(deck => getBoosterCountEstimate(get_deck_missing(deck)) === 0);
+    validDecks.sort(allMatches.compareDecks);
+    // hack to make pretty deck names
+    // TODO move getDeckString out of FilterPanel
+    const filterPanel = new FilterPanel("unused", null, {}, [], [], validDecks);
+    const deckSelect = createSelect(
       deckSelectContainer,
-      decksList,
+      validDecks.map(deck => deck.id),
       -1,
       selectTourneyDeck,
       "tou_deck_select",
-      index => {
-        return decks[index].name;
-      }
+      filterPanel.getDeckString
     );
 
     deckSelect.style.width = "300px";
@@ -725,7 +731,7 @@ function generateChecks(state, seat) {
 }
 
 function selectTourneyDeck(index) {
-  let _deck = decks[index];
+  const _deck = pd.deck(index);
   tournamentDeck = _deck.id;
   _deck.mainDeck.sort(compare_cards);
   _deck.sideboard.sort(compare_cards);
