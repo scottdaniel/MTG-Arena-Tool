@@ -674,6 +674,10 @@ function createChangeRow(change, economyId) {
 
   const archiveCallback = e => {
     e.stopPropagation();
+    if (!change.archived) {
+      changeRow.style.height = "0px";
+      changeRow.style.overflow = "hidden";
+    }
     toggleArchived(economyId);
   };
   deleteButton.addEventListener("click", archiveCallback);
