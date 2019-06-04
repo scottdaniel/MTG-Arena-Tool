@@ -1,6 +1,5 @@
 /*
 global
-  activeEvents
   add_checkbox
   getWinrateClass
   hideLoadingBars
@@ -178,7 +177,7 @@ function drawFilters() {
   let eventFilters = [];
   if (filterType == "Events") {
     eventFilters = db.eventIds
-      .concat(activeEvents)
+      .concat(db.activeEvents)
       .map(ev => getEventPrettyName(ev))
       .filter(
         item =>
@@ -206,7 +205,7 @@ function drawFilters() {
     return 0;
   });
 
-  let mappedActive = activeEvents.map(ev => getEventPrettyName(ev));
+  let mappedActive = db.activeEvents.map(ev => getEventPrettyName(ev));
   eventFilters.forEach(item => {
     if (mappedActive.includes(item)) {
       eventFilters.splice(eventFilters.indexOf(item), 1);
