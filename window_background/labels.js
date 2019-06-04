@@ -50,7 +50,6 @@ const {
   ipc_send,
   normaliseFields,
   parseWotcTime,
-  pd_merge,
   pd_set
 } = require("./background-util");
 
@@ -311,14 +310,14 @@ function onLabelRankUpdated(entry, json) {
     rank.limited.step = json.newStep;
   }
 
-  pd_merge({ rank });
+  pd_set({ rank });
   ipc_send("player_data_updated");
 }
 
 function onLabelInDeckGetDeckLists(entry, json) {
   if (!json) return;
 
-  const decks = {};
+  const decks = { ...pd.decks };
   json.forEach(deck => {
     decks[deck.id] = {
       ...deck,
@@ -326,7 +325,7 @@ function onLabelInDeckGetDeckLists(entry, json) {
     };
   });
 
-  pd_merge({ decks });
+  pd_set({ decks });
   if (!firstPass) ipc_send("player_data_refresh");
 }
 

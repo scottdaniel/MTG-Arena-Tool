@@ -32,12 +32,7 @@ const pd = require("../shared/player-data.js");
 const { hypergeometricRange } = require("../shared/stats-fns");
 const { get_rank_index, objectClone } = require("../shared/util");
 const { HIDDEN_PW, IPC_OVERLAY } = require("../shared/constants.js");
-const {
-  ipc_send,
-  pd_merge,
-  pd_set,
-  unleakString
-} = require("./background-util");
+const { ipc_send, pd_set, unleakString } = require("./background-util");
 const {
   onLabelOutLogInfo,
   onLabelGreToClient,
@@ -338,8 +333,9 @@ ipc.on("toggle_deck_archived", function(event, arg) {
   if (!pd.deckExists(id)) return;
   const deckData = { ...pd.deck(id) };
   deckData.archived = !deckData.archived;
+  const decks = { ...pd.decks, [id]: deckData };
 
-  pd_merge({ decks: { [id]: deckData } });
+  pd_set({ decks });
   store.set("decks." + id, deckData);
   ipc_send("player_data_refresh");
   ipc_send("hide_loading");
@@ -354,7 +350,7 @@ ipc.on("toggle_archived", function(event, arg) {
   const data = { ...item };
   data.archived = !data.archived;
 
-  pd_merge({ [id]: data });
+  pd_set({ [id]: data });
   store.set(id, data);
   ipc_send("player_data_refresh");
   ipc_send("hide_loading");
@@ -395,7 +391,7 @@ ipc.on("tou_drop", function(event, arg) {
 
 ipc.on("edit_tag", (event, arg) => {
   const { tag, color } = arg;
-  pd_merge({ tags_colors: { [tag]: color } });
+  pd_set({ tags_colors: { ...pd.tags_colors, [tag]: color } });
   store.set("tags_colors." + tag, color);
   ipc_send("player_data_refresh");
 });
@@ -422,8 +418,8 @@ ipc.on("add_tag", (event, arg) => {
 
   const tags = [...deck.tags, tag];
 
-  const decks_tags = { [deckid]: tags };
-  pd_merge({ decks_tags });
+  const decks_tags = { ...pd.decks_tags, [deckid]: tags };
+  pd_set({ decks_tags });
   store.set("decks_tags." + deckid, tags);
   ipc_send("player_data_refresh");
 });
@@ -451,7 +447,7 @@ ipc.on("add_history_tag", (event, arg) => {
 
   const tags = [...(match.tags || []), tag];
 
-  pd_merge({ [matchid]: { tags } });
+  pd_set({ [matchid]: { ...match, tags } });
   store.set(matchid + ".tags", tags);
   ipc_send("player_data_refresh");
   httpApi.httpSetDeckTag(tag, match.oppDeck.mainDeck, match.eventId);
@@ -538,7 +534,7 @@ function syncUserData(data) {
       delete doc._id;
       courses_index.push(id);
       store.set(id, doc);
-      pd_merge({ [id]: doc });
+      pd_set({ [id]: doc });
     });
   store.set("courses_index", courses_index);
   pd_set({ courses_index });
@@ -553,7 +549,7 @@ function syncUserData(data) {
       delete doc._id;
       matches_index.push(id);
       store.set(id, doc);
-      pd_merge({ [id]: doc });
+      pd_set({ [id]: doc });
     });
   store.set("matches_index", matches_index);
   pd_set({ matches_index });
@@ -568,7 +564,7 @@ function syncUserData(data) {
       delete doc._id;
       economy_index.push(id);
       store.set(id, doc);
-      pd_merge({ [id]: doc });
+      pd_set({ [id]: doc });
     });
   store.set("economy_index", economy_index);
   pd_set({ economy_index });
@@ -583,7 +579,7 @@ function syncUserData(data) {
       delete doc._id;
       draft_index.push(id);
       store.set(id, doc);
-      pd_merge({ [id]: doc });
+      pd_set({ [id]: doc });
     });
   store.set("draft_index", draft_index);
   pd_set({ draft_index });
@@ -610,7 +606,7 @@ function loadSettings(dirtySettings = {}) {
   //const exeName = path.basename(process.execPath);
 
   skipFirstPass = settings.skip_firstpass;
-  pd_merge({ settings });
+  pd_set({ settings });
 
   ipc_send("overlay_set_ontop", settings.overlay_ontop);
 
@@ -1164,7 +1160,7 @@ function addCustomDeck(customDeck) {
     custom: true
   };
 
-  pd_merge({ decks: { [customDeck.id]: deckData } });
+  pd_set({ decks: { ...pd.decks, [customDeck.id]: deckData } });
   store.set("decks." + id, deckData);
 
   const decks_index = [...pd.decks_index];
@@ -1473,7 +1469,7 @@ function saveEconomyTransaction(transaction) {
   };
 
   store.set(id, txnData);
-  pd_merge({ [id]: txnData });
+  pd_set({ [id]: txnData });
 
   if (!pd.economy_index.includes(id)) {
     const economy_index = [...pd.economy_index, id];
@@ -1499,7 +1495,7 @@ function saveCourse(json) {
   };
 
   store.set(id, eventData);
-  pd_merge({ [id]: eventData });
+  pd_set({ [id]: eventData });
 
   if (!pd.courses_index.includes(id)) {
     const courses_index = [...pd.courses_index, id];
@@ -1586,7 +1582,7 @@ function saveMatch(id) {
   // console.log("Save match:", match);
 
   store.set(id, match);
-  pd_merge({ [id]: match });
+  pd_set({ [id]: match });
 
   if (!pd.matches_index.includes(id)) {
     const matches_index = [...pd.matches_index, id];
@@ -1622,7 +1618,7 @@ function saveDraft() {
   // console.log("Save draft:", currentDraft);
 
   store.set(id, draftData);
-  pd_merge({ [id]: draftData });
+  pd_set({ [id]: draftData });
 
   if (!pd.draft_index.includes(id)) {
     const draft_index = [...pd.draft_index, id];

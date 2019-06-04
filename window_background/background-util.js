@@ -92,35 +92,20 @@ const overlayWhitelist = [
   "settings"
 ];
 
-// convenience fn to destructively update player data
-// singletons in all processes
-// (to incrementally add data, use pd_merge instead)
+// convenience fn to update player data singletons in all processes
+// (update is destructive, be sure to use spread syntax if necessary)
 function pd_set(data) {
   const cleanData = _.omit(data, dataBlacklist);
   pd.handleSetData(null, cleanData);
-  pd_sync(cleanData, "set_player_data");
-}
-
-// convenience fn to additively update player data
-// singletons in all processes
-// (to remove data, use ps_set instead)
-function pd_merge(data) {
-  const cleanData = _.omit(data, dataBlacklist);
-  pd.handleMergeData(null, cleanData);
-  pd_sync(cleanData, "merge_player_data");
-}
-
-function pd_sync(cleanData, signal) {
-  ipc_send(signal, cleanData, IPC_MAIN);
+  ipc_send("set_player_data", cleanData, IPC_MAIN);
   const overlayData = _.pick(cleanData, overlayWhitelist);
-  ipc_send(signal, overlayData, IPC_OVERLAY);
+  ipc_send("set_player_data", overlayData, IPC_OVERLAY);
 }
 
 module.exports = {
   ipc_send,
   normaliseFields,
   parseWotcTime,
-  pd_merge,
   pd_set,
   unleakString
 };

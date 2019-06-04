@@ -1,6 +1,5 @@
 const electron = require("electron");
 const ipc = electron.ipcRenderer;
-const _ = require("lodash");
 
 const {
   CARD_TILE_FLAT,
@@ -157,8 +156,6 @@ class PlayerData {
 
     this.handleSetData = this.handleSetData.bind(this);
     if (ipc) ipc.on("set_player_data", this.handleSetData);
-    this.handleMergeData = this.handleMergeData.bind(this);
-    if (ipc) ipc.on("merge_player_data", this.handleMergeData);
 
     this.change = this.change.bind(this);
     this.deck = this.deck.bind(this);
@@ -184,10 +181,6 @@ class PlayerData {
 
   handleSetData(_event, arg) {
     Object.assign(this, arg);
-  }
-
-  handleMergeData(_event, arg) {
-    _.merge(this, arg);
   }
 
   get cardsSize() {
