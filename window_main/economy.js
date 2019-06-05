@@ -2,14 +2,15 @@
 global
   $
   DataScroller
-  economyHistory
   formatNumber
   formatPercent
+  toggleArchived
   ipc_send
 */
 
 const { shell } = require("electron");
 const db = require("../shared/database");
+const pd = require("../shared/player-data");
 const { createDivision } = require("../shared/dom-fns");
 const { createSelect } = require("../shared/select");
 const { addCardHover } = require("../shared/card-hover");
@@ -24,6 +25,7 @@ var filterEconomy = "All";
 let showArchived = false;
 var daysago = 0;
 var dayList = [];
+let sortedChanges = [];
 
 const differenceInCalendarDays = require("date-fns").differenceInCalendarDays;
 
@@ -131,25 +133,25 @@ function getPrettyContext(context, full = true) {
   return pretty || context;
 }
 
-function openEconomyTab() {
+function openEconomyTab(dataIndex = 25, scrollTop = 0) {
   const mainDiv = document.getElementById("ux_0");
   createEconomyUI(mainDiv);
   const dataScroller = new DataScroller(
     mainDiv,
     renderData,
     20,
-    economyHistory.changes.length
+    sortedChanges.length
   );
-  dataScroller.render(25);
+  dataScroller.render(dataIndex, scrollTop);
 }
 
 // return val = how many rows it rendered into container
 function renderData(container, index) {
   // for performance reasons, we leave changes order mostly alone
   // to display most-recent-first, we use a reverse index
-  const revIndex = economyHistory.changes.length - index - 1;
-  let economyId = economyHistory.changes[revIndex];
-  let change = economyHistory[economyId];
+  const revIndex = sortedChanges.length - index - 1;
+  const economyId = sortedChanges[revIndex];
+  const change = pd.change(economyId);
 
   if (change === undefined) return 0;
   if (change.archived && !showArchived) return 0;
@@ -163,7 +165,8 @@ function renderData(container, index) {
     return 1;
   }
 
-  if (filterEconomy !== "All" && change.context !== filterEconomy) {
+  const selectVal = getPrettyContext(change.context, false);
+  if (filterEconomy !== "All" && selectVal !== filterEconomy) {
     return 0;
   }
 
@@ -312,7 +315,9 @@ function createChangeRow(change, economyId) {
 
   var bon, bos;
 
-  if (change.contextPretty == "Booster Open") {
+  const fullContext = getPrettyContext(change.originalContext);
+
+  if (fullContext === "Booster Open") {
     change.delta.boosterDelta.forEach(function(booster) {
       var set = get_colation_set(booster.collationId);
 
@@ -334,17 +339,17 @@ function createChangeRow(change, economyId) {
     checkWildcardsAdded = true;
     checkCardsAdded = true;
     checkAetherized = true;
-  } else if (change.contextPretty == "Store") {
+  } else if (fullContext === "Store") {
     checkGemsPaid = true;
     checkGoldPaid = true;
     checkBoosterAdded = true;
     checkCardsAdded = true;
     checkAetherized = true;
-  } else if (change.contextPretty == "Booster Redeem") {
+  } else if (fullContext === "Booster Redeem") {
     checkGemsPaid = true;
     checkGoldPaid = true;
     checkBoosterAdded = true;
-  } else if (change.contextPretty == "Pay Event Entry") {
+  } else if (fullContext === "Pay Event Entry") {
     checkGemsPaid = true;
     checkGoldPaid = true;
 
@@ -352,7 +357,7 @@ function createChangeRow(change, economyId) {
     bos.title = "Event Entry";
 
     flexRight.appendChild(bos);
-  } else if (change.contextPretty == "Redeem Wildcard") {
+  } else if (fullContext === "Redeem Wildcard") {
     let imgUri = "";
     let title = "";
     let count = 0;
@@ -638,7 +643,7 @@ function createChangeRow(change, economyId) {
   flexTop.appendChild(
     createDivision(
       [],
-      `<span title="${change.originalContext}">${change.contextPretty}</span>`
+      `<span title="${change.originalContext}">${fullContext}</span>`
     )
   );
 
@@ -667,23 +672,14 @@ function createChangeRow(change, economyId) {
 
   changeRow.appendChild(deleteButton);
 
-  let archiveCallback = e => {
+  const archiveCallback = e => {
     e.stopPropagation();
-    ipc_send("archive_economy", economyId);
-    change.archived = true;
-    economyHistory[economyId] = change;
-    openEconomyTab();
+    if (!change.archived) {
+      changeRow.style.height = "0px";
+      changeRow.style.overflow = "hidden";
+    }
+    toggleArchived(economyId);
   };
-  if (change.archived) {
-    archiveCallback = e => {
-      e.stopPropagation();
-      ipc_send("unarchive_economy", economyId);
-      change.archived = false;
-      economyHistory[economyId] = change;
-      openEconomyTab();
-    };
-  }
-
   deleteButton.addEventListener("click", archiveCallback);
 
   return changeRow;
@@ -692,14 +688,15 @@ function createChangeRow(change, economyId) {
 function createEconomyUI(mainDiv) {
   daysago = -999;
   dayList = [];
-  economyHistory.changes.sort(compare_economy);
+  sortedChanges = [...pd.economy_index];
+  sortedChanges.sort(compare_economy);
 
   var topSelectItems = ["All", "Day Summaries"];
   var selectItems = [];
 
-  for (var n = 0; n < economyHistory.changes.length; n++) {
-    let economyId = economyHistory.changes[n];
-    let change = economyHistory[economyId];
+  for (var n = 0; n < sortedChanges.length; n++) {
+    const economyId = sortedChanges[n];
+    const change = pd.change(economyId);
     if (change === undefined) continue;
     if (change.archived && !showArchived) continue;
 
@@ -711,17 +708,9 @@ function createEconomyUI(mainDiv) {
       // console.log("new day", change.date);
     }
 
-    // IMPORTANT:
-    // Some old data stores the raw original context in ".originalContext"
-    // All NEW data stores this in ".context" and ".originalContext" is blank.
-
-    // In the below code all three of these values are used.
-    change.originalContext = change.originalContext || change.context;
-    change.contextPretty = getPrettyContext(change.originalContext);
-    change.context = getPrettyContext(change.originalContext, false);
-
-    if (!selectItems.includes(change.context)) {
-      selectItems.push(change.context);
+    const selectVal = getPrettyContext(change.context, false);
+    if (!selectItems.includes(selectVal)) {
+      selectItems.push(selectVal);
     }
 
     if (change.delta.gemsDelta != undefined) {
@@ -815,36 +804,36 @@ function createEconomyUI(mainDiv) {
 
   div.appendChild(icwcc);
   let ntx = tx.cloneNode(true);
-  ntx.innerHTML = formatNumber(economyHistory.wcCommon);
+  ntx.innerHTML = formatNumber(pd.economy.wcCommon);
   div.appendChild(ntx);
 
   div.appendChild(icwcu);
   ntx = tx.cloneNode(true);
-  ntx.innerHTML = formatNumber(economyHistory.wcUncommon);
+  ntx.innerHTML = formatNumber(pd.economy.wcUncommon);
   div.appendChild(ntx);
 
   div.appendChild(icwcr);
   ntx = tx.cloneNode(true);
-  ntx.innerHTML = formatNumber(economyHistory.wcRare);
+  ntx.innerHTML = formatNumber(pd.economy.wcRare);
   div.appendChild(ntx);
 
   div.appendChild(icwcm);
   ntx = tx.cloneNode(true);
-  ntx.innerHTML = formatNumber(economyHistory.wcMythic);
+  ntx.innerHTML = formatNumber(pd.economy.wcMythic);
   div.appendChild(ntx);
 
   div.appendChild(icgo);
   ntx = tx.cloneNode(true);
-  ntx.innerHTML = formatNumber(economyHistory.gold);
+  ntx.innerHTML = formatNumber(pd.economy.gold);
   div.appendChild(ntx);
 
   div.appendChild(icge);
   ntx = tx.cloneNode(true);
-  ntx.innerHTML = formatNumber(economyHistory.gems);
+  ntx.innerHTML = formatNumber(pd.economy.gems);
   div.appendChild(ntx);
 
   ntx = tx.cloneNode(true);
-  ntx.innerHTML = "Vault: " + formatPercent(economyHistory.vault / 100);
+  ntx.innerHTML = "Vault: " + formatPercent(pd.economy.vault / 100);
   ntx.style.marginLeft = "32px";
   div.appendChild(ntx);
 
@@ -855,12 +844,11 @@ function createEconomyUI(mainDiv) {
 // Compare two economy events OR the IDs of two economy events.
 // If two IDs are specified then events are retrieved from `economyHistory`
 function compare_economy(a, b) {
-  /* global economyHistory */
   if (a === undefined) return 0;
   if (b === undefined) return 0;
 
-  a = economyHistory[a];
-  b = economyHistory[b];
+  a = pd.change(a);
+  b = pd.change(b);
 
   if (a === undefined) return 0;
   if (b === undefined) return 0;

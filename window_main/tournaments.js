@@ -1,13 +1,13 @@
 /*
 global
+  allMatches
   change_background
-  cardStyle
-  decks
   drawDeck
   drawDeckVisual
+  FilterPanel
   ipc_send
+  pd
   pop
-  playerData
 */
 
 const { queryElements: $$, createDivision } = require("../shared/dom-fns");
@@ -16,6 +16,8 @@ const deckDrawer = require("../shared/deck-drawer");
 const {
   compare_cards,
   get_deck_export,
+  get_deck_missing,
+  getBoosterCountEstimate,
   makeId,
   objectClone,
   timestamp,
@@ -76,9 +78,9 @@ function tournamentOpen(t) {
   }
 
   let joined = false;
-  if (tou.players.indexOf(playerData.name) !== -1) {
+  if (tou.players.indexOf(pd.name) !== -1) {
     joined = true;
-    stats = tou.playerStats[playerData.name];
+    stats = tou.playerStats[pd.name];
     record = stats.w + " - " + stats.d + " - " + stats.l;
   }
 
@@ -159,7 +161,7 @@ function tournamentOpen(t) {
 
 function showTournamentRegister(mainDiv, tou) {
   let joined = false;
-  if (tou.players.indexOf(playerData.name) !== -1) {
+  if (tou.players.indexOf(pd.name) !== -1) {
     joined = true;
   }
 
@@ -181,18 +183,21 @@ function showTournamentRegister(mainDiv, tou) {
   } else {
     let deckSelectContainer = createDivision(["flex_item"]);
 
-    let decksList = decks.map((d, index) => index);
-    //select.append(`<option value="${_deck.id}">${_deck.name}</option>`);
-
-    let deckSelect = createSelect(
+    // filter to current decks in Arena with no missing cards
+    const validDecks = pd.deckList
+      .filter(deck => !deck.custom)
+      .filter(deck => getBoosterCountEstimate(get_deck_missing(deck)) === 0);
+    validDecks.sort(allMatches.compareDecks);
+    // hack to make pretty deck names
+    // TODO move getDeckString out of FilterPanel
+    const filterPanel = new FilterPanel("unused", null, {}, [], [], validDecks);
+    const deckSelect = createSelect(
       deckSelectContainer,
-      decksList,
+      validDecks.map(deck => deck.id),
       -1,
       selectTourneyDeck,
       "tou_deck_select",
-      index => {
-        return decks[index].name;
-      }
+      filterPanel.getDeckString
     );
 
     deckSelect.style.width = "300px";
@@ -276,9 +281,9 @@ function tournamentJoin(_id, _deck, _pass) {
 
 function showTournamentStarted(mainDiv, tou) {
   let joined = false;
-  if (tou.players.indexOf(playerData.name) !== -1) {
+  if (tou.players.indexOf(pd.name) !== -1) {
     joined = true;
-    stats = tou.playerStats[playerData.name];
+    stats = tou.playerStats[pd.name];
     record = stats.w + " - " + stats.d + " - " + stats.l;
   }
 
@@ -726,7 +731,7 @@ function generateChecks(state, seat) {
 }
 
 function selectTourneyDeck(index) {
-  let _deck = decks[index];
+  const _deck = pd.deck(index);
   tournamentDeck = _deck.id;
   _deck.mainDeck.sort(compare_cards);
   _deck.sideboard.sort(compare_cards);
@@ -758,7 +763,7 @@ function drawSideboardDeck(div) {
 
     if (card.quantity > 0) {
       let tile = deckDrawer.cardTile(
-        cardStyle,
+        pd.settings.card_tile_style,
         grpId,
         unique + "a",
         card.quantity
@@ -782,7 +787,7 @@ function drawSideboardDeck(div) {
         let grpId = card.id;
         if (card.quantity > 0) {
           let tile = deckDrawer.cardTile(
-            cardStyle,
+            pd.settings.card_tile_style,
             grpId,
             unique + "b",
             card.quantity

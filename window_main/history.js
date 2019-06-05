@@ -4,23 +4,18 @@ global
   allMatches
   currentId
   DataScroller
-  deck_tags
-  decks
   FilterPanel
   getTagColor
   ipc_send
   makeResizable
-  matchesHistory
   open_match
   open_draft
   ListItem
-  playerData
-  setTagColor
+  pd
   showLoadingBars
   sidebarActive
-  sidebarSize
-  sort_decks
   StatsPanel
+  toggleArchived
 */
 
 const autocomplete = require("../shared/autocomplete.js");
@@ -42,11 +37,9 @@ const { MANA, RANKS } = require("../shared/constants.js");
 const { DEFAULT_DECK, RANKED_CONST, RANKED_DRAFT, DATE_SEASON } = Aggregator;
 let filters = Aggregator.getDefaultFilters();
 let filteredMatches;
+let sortedHistory;
 
 function getNextRank(currentRank) {
-  /*
-    Globals used: RANKS
-  */
   var rankIndex = RANKS.indexOf(currentRank);
   if (rankIndex < RANKS.length - 1) {
     return RANKS[rankIndex + 1];
@@ -78,19 +71,21 @@ function setFilters(selected = {}) {
   }
 }
 
-function openHistoryTab(_deprecated, _filters = {}) {
-  if (sidebarActive != 1 || decks == null) return;
+function openHistoryTab(_filters = {}, dataIndex = 25, scrollTop = 0) {
+  if (sidebarActive !== 1) return;
 
   var mainDiv = document.getElementById("ux_0");
   var div, d;
   mainDiv.classList.add("flex_item");
 
-  sort_history();
+  sortedHistory = [...pd.history];
+  sortedHistory.sort(compare_matches);
+
   mainDiv.innerHTML = "";
 
   let wrap_r = createDivision(["wrapper_column", "sidebar_column_l"]);
-  wrap_r.style.width = sidebarSize + "px";
-  wrap_r.style.flex = `0 0 ${sidebarSize}px`;
+  wrap_r.style.width = pd.settings.right_panel_width + "px";
+  wrap_r.style.flex = `0 0 ${pd.settings.right_panel_width}px`;
 
   div = createDivision(["ranks_history"]);
   div.style.padding = "0 12px";
@@ -104,7 +99,7 @@ function openHistoryTab(_deprecated, _filters = {}) {
     (filters.eventId === RANKED_CONST || filters.eventId === RANKED_DRAFT);
   if (showingRanked) {
     const rankStats = createDivision(["ranks_stats"]);
-    renderRanksStats(rankStats);
+    renderRanksStats(rankStats, filteredMatches);
     rankStats.style.paddingBottom = "16px";
     div.appendChild(rankStats);
     rankedStats =
@@ -119,14 +114,13 @@ function openHistoryTab(_deprecated, _filters = {}) {
   const statsPanel = new StatsPanel(
     "history_top",
     filteredMatches,
-    sidebarSize,
+    pd.settings.right_panel_width,
     true,
     rankedStats,
     filters.eventId === RANKED_DRAFT
   );
   const historyTopWinrate = statsPanel.render();
   div.appendChild(historyTopWinrate);
-  sort_decks(filteredMatches.compareDecks);
 
   let wrap_l = createDivision(["wrapper_column"]);
   wrap_l.setAttribute("id", "history_column");
@@ -135,10 +129,7 @@ function openHistoryTab(_deprecated, _filters = {}) {
 
   let drag = createDivision(["dragger"]);
   wrap_r.appendChild(drag);
-  const finalCallback = width => {
-    ipc_send("save_user_settings", { right_panel_width: width });
-  };
-  makeResizable(drag, statsPanel.handleResize, finalCallback);
+  makeResizable(drag, statsPanel.handleResize);
 
   wrap_r.appendChild(div);
   mainDiv.appendChild(wrap_l);
@@ -158,7 +149,7 @@ function openHistoryTab(_deprecated, _filters = {}) {
 
   const filterPanel = new FilterPanel(
     "history_top",
-    selected => openHistoryTab(0, selected),
+    selected => openHistoryTab(selected),
     filters,
     allMatches.events,
     matchesInEvent.tags,
@@ -176,20 +167,19 @@ function openHistoryTab(_deprecated, _filters = {}) {
     historyColumn,
     renderData,
     20,
-    matchesHistory.matches.length
+    sortedHistory.length
   );
-  dataScroller.render(25);
+  dataScroller.render(dataIndex, scrollTop);
 }
 
 // return val = how many rows it rendered into container
 function renderData(container, index) {
   // for performance reasons, we leave matches order mostly alone
   // to display most-recent-first, we use a reverse index
-  const revIndex = matchesHistory.matches.length - index - 1;
-  let match_id = matchesHistory.matches[revIndex];
-  let match = matchesHistory[match_id];
+  const revIndex = sortedHistory.length - index - 1;
+  const match = sortedHistory[revIndex];
 
-  //console.log("match: ", match_id, match);
+  //console.log("match: ", id, match);
   if (match == undefined) {
     return 0;
   }
@@ -211,19 +201,17 @@ function renderData(container, index) {
     return 0;
   }
 
-  let tileGrpid, clickCallback, deleteCallback;
+  let tileGrpid, clickCallback;
   if (match.type == "match") {
     tileGrpid = match.playerDeck.deckTileId;
     clickCallback = openMatch;
-    deleteCallback = archiveMatch;
   } else {
     tileGrpid = db.sets[match.set].tile;
     clickCallback = openDraft;
-    deleteCallback = archiveMatch;
   }
-  if (match.archived) {
-    deleteCallback = unarchiveMatch;
-  }
+  const deleteCallback = id => {
+    toggleArchived(id);
+  };
 
   let listItem = new ListItem(
     tileGrpid,
@@ -249,18 +237,6 @@ function renderData(container, index) {
   //console.log("Load match: ", match_id, match);
   //console.log("Match: ", match.type, match);
   return 1;
-}
-
-function archiveMatch(id) {
-  ipc_send("archive_match", id);
-  matchesHistory[id].archived = true;
-  openHistoryTab();
-}
-
-function unarchiveMatch(id) {
-  ipc_send("unarchive_match", id);
-  matchesHistory[id].archived = false;
-  openHistoryTab();
 }
 
 function openMatch(id) {
@@ -399,8 +375,11 @@ function formatPercent(percent, precision) {
   return (100 * percent).toFixed(precision);
 }
 
-function renderRanksStats(container) {
+function renderRanksStats(container, aggregator) {
   container.innerHTML = "";
+  if (!aggregator || !aggregator.stats.total) return;
+  const { winrate } = aggregator.stats;
+
   const viewingLimitSeason = filters.eventId === RANKED_DRAFT;
   let seasonName = !viewingLimitSeason ? "constructed" : "limited";
   let switchSeasonName = viewingLimitSeason ? "constructed" : "limited";
@@ -424,23 +403,19 @@ function renderRanksStats(container) {
   );
   container.appendChild(title);
 
-  // Add ranks matchup history here
-  let rc = matchesHistory.rankwinrates[seasonName];
-  let totalWon = rc.total.w;
-  let totalWinrate = totalWon / rc.total.t;
   let currentRank = viewingLimitSeason
-    ? playerData.rank.limited.rank
-    : playerData.rank.constructed.rank;
-  let expected = getStepsUntilNextRank(viewingLimitSeason, totalWinrate);
+    ? pd.rank.limited.rank
+    : pd.rank.constructed.rank;
+  let expected = getStepsUntilNextRank(viewingLimitSeason, winrate);
   title = createDivision(
     ["ranks_history_title"],
     `Games until ${getNextRank(currentRank)}: ${expected}`
   );
-  title.title = `Using ${formatPercent(totalWinrate)}% winrate`;
+  title.title = `Using ${formatPercent(winrate)}% winrate`;
   container.appendChild(title);
 
   seasonToggleButton.addEventListener("click", () => {
-    openHistoryTab(0, switchSeasonFilters);
+    openHistoryTab(switchSeasonFilters);
   });
 }
 
@@ -464,16 +439,19 @@ function createTag(tag, div, showClose = true) {
       colorPick.spectrum("set", tagCol);
       colorPick.spectrum("show");
 
-      colorPick.on("move.spectrum", function(e, color) {
-        let tag = $(this).text();
-        let col = color.toRgbString();
-        ipc_send("edit_tag", { tag: tag, color: col });
-        setTagColor(tag, col);
-
+      colorPick.on("move.spectrum", (e, color) => {
+        const tag = $(this).text();
+        const col = color.toRgbString();
         $(".deck_tag").each((index, obj) => {
-          let tag = $(obj).text();
-          $(obj).css("background-color", getTagColor(tag));
+          if (tag !== $(obj).text()) return;
+          $(obj).css("background-color", col);
         });
+      });
+
+      colorPick.on("change.spectrum", (e, color) => {
+        const tag = $(this).text();
+        const col = color.toRgbString();
+        ipc_send("edit_tag", { tag, color: col });
       });
 
       colorPick.on("hide.spectrum", () => {
@@ -582,38 +560,22 @@ function createTag(tag, div, showClose = true) {
 }
 
 function addTag(matchid, tag, div) {
-  let match = matchesHistory[matchid];
-  if (match.tags) {
-    if (match.tags.indexOf(tag) == -1) {
-      match.tags.push(tag);
-    }
-  } else {
-    match.tags = [tag];
-  }
+  const match = pd.match(matchid);
+  if (!match) return;
+  if (match.tags && match.tags.includes(tag)) return;
 
-  let obj = { match: matchid, name: tag };
-  ipc_send("add_history_tag", obj);
-
-  let t = createTag(tag, div);
-  jQuery.data(t, "match", matchid);
+  ipc_send("add_history_tag", { matchid, tag });
 }
 
 function deleteTag(matchid, tag) {
-  let match = matchesHistory[matchid];
+  const match = pd.match(matchid);
+  if (!match || !match.tags || !match.tags.includes(tag)) return;
 
-  if (match.tags) {
-    let ind = match.tags.indexOf(tag);
-    if (ind !== -1) {
-      match.tags.splice(ind, 1);
-    }
-  }
-
-  let obj = { match: matchid, name: tag };
-  ipc_send("delete_history_tag", obj);
+  ipc_send("delete_history_tag", { matchid, tag });
 }
 
 function getStepsUntilNextRank(mode, winrate) {
-  let rr = mode ? playerData.rank.limited : playerData.rank.constructed;
+  let rr = mode ? pd.rank.limited : pd.rank.constructed;
 
   let cr = rr.rank;
   let cs = rr.step;
@@ -755,17 +717,7 @@ function draftShareLink() {
   ipc_send("request_draft_link", obj);
 }
 
-function sort_history() {
-  matchesHistory.matches.sort(compare_matches);
-}
-
 function compare_matches(a, b) {
-  if (a === undefined) return 0;
-  if (b === undefined) return 0;
-
-  a = matchesHistory[a];
-  b = matchesHistory[b];
-
   if (a === undefined) return 0;
   if (b === undefined) return 0;
 

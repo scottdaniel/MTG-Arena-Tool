@@ -1,5 +1,5 @@
 const electron = require("electron");
-const { remote, app, net, clipboard, ipcRenderer: ipc } = require("electron");
+const { remote, ipcRenderer: ipc } = require("electron");
 
 if (!remote.app.isPackaged) {
   const { openNewGitHubIssue, debugInfo } = require("electron-util");
@@ -14,6 +14,7 @@ if (!remote.app.isPackaged) {
       });
     }
   });
+  require("devtron").install();
 }
 
 const _ = require("lodash");
@@ -27,26 +28,11 @@ const manifestParser = require("./manifest-parser");
 const greToClientInterpreter = require("./gre-to-client-interpreter");
 const Deck = require("../shared/deck.js");
 const db = require("../shared/database");
+const pd = require("../shared/player-data.js");
 const { hypergeometricRange } = require("../shared/stats-fns");
-const {
-  compare_archetypes,
-  get_rank_index,
-  playerDataDefault,
-  objectClone
-} = require("../shared/util");
-const {
-  HIDDEN_PW,
-  IPC_BACKGROUND,
-  IPC_OVERLAY,
-  IPC_MAIN,
-  CARD_TILE_ARENA,
-  CARD_TILE_FLAT
-} = require("../shared/constants.js");
-const {
-  unleakString,
-  parseWotcTime,
-  normaliseFields
-} = require("./background-util");
+const { get_rank_index, objectClone } = require("../shared/util");
+const { HIDDEN_PW, IPC_OVERLAY } = require("../shared/constants.js");
+const { ipc_send, pd_set, unleakString } = require("./background-util");
 const {
   onLabelOutLogInfo,
   onLabelGreToClient,
@@ -95,56 +81,6 @@ const settingsCfg = {
   gUri: ""
 };
 
-const defaultCfg = {
-  windowBounds: { width: 800, height: 600, x: 0, y: 0 },
-  overlayBounds: { width: 300, height: 600, x: 0, y: 0 },
-  cards: { cards_time: 0, cards_before: [], cards: [] },
-  settings: {
-    overlay_sideboard: false,
-    sound_priority: false,
-    sound_priority_volume: 1,
-    cards_quality: "small",
-    show_overlay: true,
-    show_overlay_always: false,
-    startup: true,
-    close_to_tray: true,
-    send_data: true,
-    anon_explore: false,
-    close_on_match: true,
-    cards_size: 2,
-    overlay_alpha: 1,
-    overlay_alpha_back: 1,
-    overlay_scale: 100,
-    overlay_top: true,
-    overlay_title: true,
-    overlay_deck: true,
-    overlay_clock: true,
-    overlay_ontop: true,
-    overlay_lands: true,
-    export_format: "$Name,$Count,$Rarity,$SetName,$Collector",
-    back_color: "rgba(0,0,0,0.3)",
-    back_url: "",
-    right_panel_width: 200,
-    last_open_tab: -1,
-    card_tile_style: CARD_TILE_FLAT
-  },
-  economy_index: [],
-  economy: [],
-  deck_changes: {},
-  deck_changes_index: [],
-  courses_index: [],
-  matches_index: [],
-  draft_index: [],
-  gems_history: [],
-  gold_history: [],
-  decks_index: [],
-  decks_tags: {},
-  decks_last_used: [],
-  tags_colors: {},
-  decks: {},
-  wildcards_history: []
-};
-
 var rstore = new Store({
   name: "remember",
   defaults: rememberCfg
@@ -152,7 +88,7 @@ var rstore = new Store({
 
 var store = new Store({
   name: "default",
-  defaults: defaultCfg
+  defaults: pd.defaultCfg
 });
 
 var settingsStore = new Store({
@@ -239,7 +175,6 @@ var draftSet = "";
 var draftId = undefined;
 */
 
-var playerData = playerDataDefault();
 var currentMatch = null;
 
 var renderer_state = 0;
@@ -255,39 +190,8 @@ let initialLibraryInstanceIds = [];
 let idChanges = {};
 let instanceToCardIdMap = {};
 
-var history = {};
-var drafts = {};
-var events = {};
-var economy = {};
-var staticDecks = [];
-
-var decks = {};
-var deck_changes_index = [];
-var deck_changes = {};
-var decks_tags = {};
-var tags_colors = {};
-var deck_archetypes = [];
-
-var gold = 0;
-var gems = 0;
-var vault = 0;
-var wcTrack = 0;
-var wcCommon = 0;
-var wcUncommon = 0;
-var wcRare = 0;
-var wcMythic = 0;
-
 var logLanguage = "English";
 var lastDeckUpdate = new Date();
-
-// Begin of IPC messages recievers
-function ipc_send(method, arg, to = IPC_MAIN) {
-  if (method == "ipc_log") {
-    //
-  }
-  //console.log("IPC SEND", method, arg, to);
-  ipc.send("ipc_switch", method, IPC_BACKGROUND, arg, to);
-}
 
 //
 ipc.on("save_app_settings", function(event, arg) {
@@ -339,10 +243,10 @@ ipc.on("set_renderer_state", function(event, arg) {
 });
 
 function offlineLogin() {
+  pd_set({ userName: "" });
   ipc_send("auth", { ok: true, user: -1 });
   ipc_send("set_offline", true);
-  loadPlayerConfig(playerData.arenaId);
-  playerData.userName = "";
+  loadPlayerConfig(pd.arenaId);
 }
 
 //
@@ -367,12 +271,10 @@ ipc.on("auto_login", () => {
 ipc.on("login", function(event, arg) {
   if (arg.password == HIDDEN_PW) {
     tokenAuth = rstore.get("token");
-    playerData.userName = arg.username;
     httpApi.httpAuth(arg.username, arg.password);
-  } else if (arg.username == "" && arg.password == "") {
+  } else if (arg.username === "" && arg.password === "") {
     offlineLogin();
   } else {
-    playerData.userName = arg.username;
     tokenAuth = "";
     httpApi.httpAuth(arg.username, arg.password);
   }
@@ -425,182 +327,37 @@ ipc.on("delete_data", function() {
 });
 
 //
-ipc.on("archive_deck", function(event, arg) {
+ipc.on("toggle_deck_archived", function(event, arg) {
   ipc_send("show_loading");
-  decks[arg].archived = true;
-  store.set("decks." + arg, decks[arg]);
+  const id = arg;
+  if (!pd.deckExists(id)) return;
+  const deckData = { ...pd.deck(id) };
+  deckData.archived = !deckData.archived;
+  const decks = { ...pd.decks, [id]: deckData };
+
+  pd_set({ decks });
+  store.set("decks." + id, deckData);
+  ipc_send("player_data_refresh");
   ipc_send("hide_loading");
 });
 
 //
-ipc.on("unarchive_deck", function(event, arg) {
+ipc.on("toggle_archived", function(event, arg) {
   ipc_send("show_loading");
-  decks[arg].archived = false;
-  store.set("decks." + arg, decks[arg]);
+  const id = arg;
+  const item = pd[id];
+  if (!item) return;
+  const data = { ...item };
+  data.archived = !data.archived;
+
+  pd_set({ [id]: data });
+  store.set(id, data);
+  ipc_send("player_data_refresh");
   ipc_send("hide_loading");
 });
-
-//
-ipc.on("archive_course", function(event, arg) {
-  ipc_send("show_loading");
-  events[arg].archived = true;
-  store.set(arg, events[arg]);
-  ipc_send("hide_loading");
-});
-
-//
-ipc.on("unarchive_course", function(event, arg) {
-  ipc_send("show_loading");
-  events[arg].archived = false;
-  store.set(arg, events[arg]);
-  ipc_send("hide_loading");
-});
-
-//
-ipc.on("archive_match", function(event, arg) {
-  ipc_send("show_loading");
-  history[arg].archived = true;
-  store.set(arg, history[arg]);
-  ipc_send("hide_loading");
-});
-
-//
-ipc.on("unarchive_match", function(event, arg) {
-  ipc_send("show_loading");
-  history[arg].archived = false;
-  store.set(arg, history[arg]);
-  ipc_send("hide_loading");
-});
-
-//
-ipc.on("archive_economy", function(event, _id) {
-  ipc_send("show_loading");
-  economy[_id].archived = true;
-  store.set(_id, economy[_id]);
-  ipc_send("hide_loading");
-});
-
-//
-ipc.on("unarchive_economy", function(event, _id) {
-  ipc_send("show_loading");
-  economy[_id].archived = false;
-  store.set(_id, economy[_id]);
-  ipc_send("hide_loading");
-});
-
-//
-ipc.on("request_events", () => {
-  ipc_send("set_events", JSON.stringify(events));
-});
-
-//
-ipc.on("request_history", (event, state) => {
-  requestHistorySend(state);
-});
-
-//
-ipc.on("set_deck_archetypes", (event, arg) => {
-  deck_archetypes = arg;
-});
-
-//
-function requestHistorySend(state) {
-  if (history.matches != undefined) {
-    calculateRankWins(history);
-  }
-  if (state == 1) {
-    // Send the data and open history tab
-    ipc_send("set_history", JSON.stringify(history));
-  } else {
-    /// Send only the data
-    ipc_send("set_history_data", JSON.stringify(history));
-  }
-}
-
-var ranked_events = ["QuickDraft_M19_20190118"];
-
-// Calculates winrates for history tabs (set to last 10 dys as default)
-function calculateRankWins() {
-  var rankwinrates = {
-    constructed: {
-      bronze: { w: 0, l: 0, t: 0, r: "Bronze" },
-      silver: { w: 0, l: 0, t: 0, r: "Silver" },
-      gold: { w: 0, l: 0, t: 0, r: "Gold" },
-      platinum: { w: 0, l: 0, t: 0, r: "Platinum" },
-      diamond: { w: 0, l: 0, t: 0, r: "Diamond" },
-      mythic: { w: 0, l: 0, t: 0, r: "Mythic" },
-      step: playerData.rank.constructed.step,
-      steps: db.getRankSteps(
-        playerData.rank.constructed.rank,
-        playerData.rank.constructed.tier,
-        false
-      ),
-      total: {
-        w: playerData.rank.constructed.won,
-        l: playerData.rank.constructed.lost,
-        t: playerData.rank.constructed.won + playerData.rank.constructed.lost
-      }
-    },
-    limited: {
-      bronze: { w: 0, l: 0, t: 0, r: "Bronze" },
-      silver: { w: 0, l: 0, t: 0, r: "Silver" },
-      gold: { w: 0, l: 0, t: 0, r: "Gold" },
-      platinum: { w: 0, l: 0, t: 0, r: "Platinum" },
-      diamond: { w: 0, l: 0, t: 0, r: "Diamond" },
-      mythic: { w: 0, l: 0, t: 0, r: "Mythic" },
-      step: playerData.rank.limited.step,
-      steps: db.getRankSteps(
-        playerData.rank.limited.rank,
-        playerData.rank.limited.tier,
-        true
-      ),
-      total: {
-        w: playerData.rank.limited.won,
-        l: playerData.rank.limited.lost,
-        t: playerData.rank.limited.won + playerData.rank.limited.lost
-      }
-    }
-  };
-
-  let ss = db.season_starts;
-  let se = db.season_ends;
-
-  for (var i = 0; i < history.matches.length; i++) {
-    let match_id = history.matches[i];
-    let match = history[match_id];
-
-    if (match == undefined) continue;
-    if (match.type !== "match") continue;
-    if (match.opponent == undefined) continue;
-
-    let md = new Date(match.date);
-
-    if (md < ss) continue;
-    if (md > se) continue;
-
-    let struct;
-    if (match.eventId == "Ladder" || match.eventId == "Traditional_Ladder") {
-      struct = rankwinrates.constructed;
-    } else if (ranked_events.includes(match.eventId)) {
-      struct = rankwinrates.limited;
-    } else {
-      continue;
-    }
-
-    struct = struct[match.player.rank.toLowerCase()];
-
-    if (struct) {
-      struct.t += match.opponent.win + match.player.win;
-      struct.l += match.opponent.win;
-      struct.w += match.player.win;
-    }
-  }
-
-  history.rankwinrates = rankwinrates;
-}
 
 ipc.on("request_explore", function(event, arg) {
-  if (playerData.userName == "") {
+  if (pd.userName === "") {
     ipc_send("offline", 1);
   } else {
     let cards = store.get("cards.cards");
@@ -608,16 +365,12 @@ ipc.on("request_explore", function(event, arg) {
   }
 });
 
-ipc.on("request_economy", function() {
-  sendEconomy();
-});
-
 ipc.on("request_course", function(event, arg) {
   httpApi.httpGetCourse(arg);
 });
 
 ipc.on("request_home", (event, set) => {
-  if (playerData.userName == "") {
+  if (pd.userName === "") {
     ipc_send("offline", 1);
   } else {
     httpApi.httpHomeGet(set);
@@ -636,56 +389,68 @@ ipc.on("tou_drop", function(event, arg) {
   httpApi.httpTournamentDrop(arg);
 });
 
-ipc.on("edit_tag", function(event, arg) {
-  tags_colors[arg.tag] = arg.color;
-  store.set("tags_colors", tags_colors);
+ipc.on("edit_tag", (event, arg) => {
+  const { tag, color } = arg;
+  pd_set({ tags_colors: { ...pd.tags_colors, [tag]: color } });
+  store.set("tags_colors." + tag, color);
+  ipc_send("player_data_refresh");
 });
 
-ipc.on("delete_tag", function(event, arg) {
-  if (decks_tags[arg.deck]) {
-    decks_tags[arg.deck].forEach((tag, index) => {
-      if (tag == arg.name) {
-        decks_tags[arg.deck].splice(index, 1);
-      }
-    });
-  }
-  store.set("decks_tags", decks_tags);
+ipc.on("delete_tag", (event, arg) => {
+  const { deckid, tag } = arg;
+  const deck = pd.deck(deckid);
+  if (!deck || !deck.tags || !deck.tags.includes(tag)) return;
+
+  const tags = [...deck.tags];
+  tags.splice(tags.indexOf(tag), 1);
+
+  const decks_tags = { ...pd.decks_tags, [deckid]: tags };
+  pd_set({ decks_tags });
+  store.set("decks_tags." + deckid, tags);
+  ipc_send("player_data_refresh");
 });
 
-ipc.on("add_tag", function(event, arg) {
-  if (decks_tags[arg.deck]) {
-    decks_tags[arg.deck].push(arg.name);
-  } else {
-    decks_tags[arg.deck] = [arg.name];
-  }
-  store.set("decks_tags", decks_tags);
+ipc.on("add_tag", (event, arg) => {
+  const { deckid, tag } = arg;
+  const deck = pd.deck(deckid);
+  if (!deck || deck.format === tag) return;
+  if (deck.tags && deck.tags.includes(tag)) return;
+
+  const tags = [...deck.tags, tag];
+
+  const decks_tags = { ...pd.decks_tags, [deckid]: tags };
+  pd_set({ decks_tags });
+  store.set("decks_tags." + deckid, tags);
+  ipc_send("player_data_refresh");
 });
 
-ipc.on("delete_history_tag", function(event, arg) {
-  let match = history[arg.match];
+ipc.on("delete_history_tag", (event, arg) => {
+  const { matchid, tag } = arg;
+  const match = pd.match(matchid);
+  if (!match || !match.tags || !match.tags.includes(tag)) return;
 
-  if (match.tags) {
-    match.tags.forEach((tag, index) => {
-      if (tag == arg.name) {
-        match.tags.splice(index, 1);
-      }
-    });
-  }
+  const tags = [...match.tags];
+  tags.splice(tags.indexOf(tag), 1);
 
-  store.set(arg.match, match);
+  const matchData = { ...match, tags };
+
+  pd_set({ [matchid]: matchData });
+  store.set(matchid + ".tags", tags);
+  ipc_send("player_data_refresh");
 });
 
-ipc.on("add_history_tag", function(event, arg) {
-  let match = history[arg.match];
+ipc.on("add_history_tag", (event, arg) => {
+  const { matchid, tag } = arg;
+  const match = pd.match(matchid);
+  if (!match) return;
+  if (match.tags && match.tags.includes(tag)) return;
 
-  if (match.tags) {
-    match.tags.push(arg.name);
-  } else {
-    match.tags = [arg.name];
-  }
+  const tags = [...(match.tags || []), tag];
 
-  httpApi.httpSetDeckTag(arg.name, match.oppDeck.mainDeck, match.eventId);
-  store.set(arg.match, match);
+  pd_set({ [matchid]: { ...match, tags } });
+  store.set(matchid + ".tags", tags);
+  ipc_send("player_data_refresh");
+  httpApi.httpSetDeckTag(tag, match.oppDeck.mainDeck, match.eventId);
 });
 
 let odds_sample_size = 1;
@@ -695,236 +460,131 @@ ipc.on("set_odds_samplesize", function(event, state) {
   update_deck(true);
 });
 
-ipc.on("get_deck_changes", function(event, arg) {
-  get_deck_changes(arg);
-});
-
-function sendEconomy() {
-  var ec = economy;
-  ec.gold = gold;
-  ec.gems = gems;
-  ec.vault = vault;
-  ec.wcTrack = wcTrack;
-  ec.wcCommon = wcCommon;
-  ec.wcUncommon = wcUncommon;
-  ec.wcRare = wcRare;
-  ec.wcMythic = wcMythic;
-  ipc_send("set_economy", JSON.stringify(ec));
-}
-
 // Loads this player's configuration file
 function loadPlayerConfig(playerId, serverData = undefined) {
   ipc_send("ipc_log", "Load player ID: " + playerId);
+  ipc_send("popup", {
+    text: "Loading player history...",
+    time: 0,
+    progress: 2
+  });
   store = new Store({
     name: playerId,
-    defaults: defaultCfg
+    defaults: pd.defaultCfg
   });
+  const playerData = store.get();
+  pd_set(playerData);
 
-  // Preload config, if we use store.get turned out to be SLOOOW
-  var entireConfig = store.get();
-  var id, item;
-  history.matches = entireConfig["matches_index"];
-
-  if (entireConfig["decks_last_used"]) {
-    playerData.decks_last_used = entireConfig["decks_last_used"];
-  }
-
-  for (let i = 0; i < history.matches.length; i++) {
-    ipc_send("popup", {
-      text: "Reading history: " + i + " / " + history.matches.length,
-      time: 0,
-      progress: i / history.matches.length
-    });
-    id = history.matches[i];
-    if (id != null) {
-      item = entireConfig[id];
-      if (item != undefined) {
-        history[id] = item;
-        history[id].type = "match";
-      }
-    }
-  }
-
-  drafts.matches = store.get("draft_index");
-  for (let i = 0; i < drafts.matches.length; i++) {
-    ipc_send("popup", {
-      text: "Reading drafts: " + i + " / " + drafts.matches.length,
-      time: 0,
-      progress: i / drafts.matches.length
-    });
-    id = drafts.matches[i];
-
-    if (id != null) {
-      item = entireConfig[id];
-      if (item != undefined) {
-        if (history.matches.indexOf(id) == -1) {
-          history.matches.push(id);
-        }
-        history[id] = item;
-        history[id].type = "draft";
-      }
-    }
-  }
-
-  events.courses = store.get("courses_index");
-  for (let i = 0; i < events.courses.length; i++) {
-    ipc_send("popup", {
-      text: "Reading events: " + i + " / " + events.courses.length,
-      time: 0,
-      progress: i / events.courses.length
-    });
-    id = events.courses[i];
-
-    if (id != null) {
-      item = entireConfig[id];
-      if (item != undefined) {
-        events[id] = item;
-        events[id].type = "Event";
-      }
-    }
-  }
-
-  economy.changes = store.get("economy_index");
-  for (let i = 0; i < economy.changes.length; i++) {
-    ipc_send("popup", {
-      text: "Reading economy: " + i + " / " + economy.changes.length,
-      time: 0,
-      progress: i / economy.changes.length
-    });
-    id = economy.changes[i];
-
-    if (id != null) {
-      item = entireConfig[id];
-      if (item != undefined) {
-        economy[id] = item;
-      }
-    }
-  }
-
-  decks.index = store.get("decks_index");
-  for (let i = 0; i < decks.index.length; i++) {
-    ipc_send("popup", {
-      text: "Reading decks: " + i + " / " + decks.index.length,
-      time: 0,
-      progress: i / decks.index.length
-    });
-    id = decks.index[i];
-
-    if (id != null) {
-      let deck = entireConfig.decks[id];
-      let tags = entireConfig.decks_tags[id];
-      if (deck != undefined) {
-        deck.tags = tags;
-        decks[id] = deck;
-      }
-    }
-  }
+  ipc_send("popup", {
+    text: "Player history loaded.",
+    time: 3000,
+    progress: -1
+  });
 
   if (serverData) {
-    let requestSync = {};
-    requestSync.courses = serverData.courses.filter(_id => !entireConfig[_id]);
-    requestSync.matches = serverData.matches.filter(_id => !entireConfig[_id]);
-    requestSync.drafts = serverData.drafts.filter(_id => !entireConfig[_id]);
-    requestSync.economy = serverData.economy.filter(_id => !entireConfig[_id]);
-    console.log("requestSync", requestSync);
+    const requestSync = {};
+    requestSync.courses = serverData.courses.filter(id => !(id in playerData));
+    requestSync.matches = serverData.matches.filter(id => !(id in playerData));
+    requestSync.drafts = serverData.drafts.filter(id => !(id in playerData));
+    requestSync.economy = serverData.economy.filter(id => !(id in playerData));
 
-    if (
+    const itemCount =
       requestSync.courses.length +
-        requestSync.matches.length +
-        requestSync.drafts.length +
-        requestSync.economy.length >
-      0
-    ) {
+      requestSync.matches.length +
+      requestSync.drafts.length +
+      requestSync.economy.length;
+
+    if (itemCount) {
+      ipc_send("ipc_log", "Fetch remote player items: " + itemCount);
       httpApi.httpSyncRequest(requestSync);
+      // console.log("requestSync", requestSync);
+    } else {
+      ipc_send("ipc_log", "No need to fetch remote player items.");
     }
   }
 
-  // Remove duplicates, sorry :(
-  let length = history.matches.length;
-  history.matches = history.matches.sort().filter(function(item, pos, ary) {
-    return !pos || item != ary[pos - 1];
+  ipc_send("popup", {
+    text: "Loading settings...",
+    time: 0,
+    progress: 2
   });
-  if (length !== history.matches.length) {
-    store.set("matches_index", history.matches);
-  }
 
-  deck_changes_index = entireConfig["deck_changes_index"];
-  deck_changes = entireConfig["deck_changes"];
-  decks_tags = entireConfig["decks_tags"];
-  tags_colors = entireConfig["tags_colors"];
-
-  var obj = store.get("overlayBounds");
-
-  ipc_send("set_tags_colors", tags_colors);
+  // TODO move this into main?
+  const obj = store.get("overlayBounds");
   ipc_send("overlay_set_bounds", obj);
-
-  ipc_send("set_cards", { cards: entireConfig.cards.cards, new: {} });
-
-  sendEconomy();
-
   loadSettings();
-  requestHistorySend(0);
 
   watchingLog = true;
   stopWatchingLog = startWatchingLog();
+  ipc_send("popup", {
+    text: "Settings loaded.",
+    time: 3000,
+    progress: -1
+  });
 }
 
 function syncUserData(data) {
   // Sync Events
-  var courses_index = store.get("courses_index");
-  data.courses.forEach(doc => {
-    doc.id = doc._id;
-    delete doc._id;
-    if (!courses_index.includes(doc.id)) {
-      courses_index.push(doc.id);
-      store.set(doc.id, doc);
-      events[doc.id] = doc;
-    }
-  });
+  const courses_index = [...pd.courses_index];
+  data.courses
+    .filter(doc => !pd.eventExists(doc._id))
+    .forEach(doc => {
+      const id = doc._id;
+      doc.id = id;
+      delete doc._id;
+      courses_index.push(id);
+      store.set(id, doc);
+      pd_set({ [id]: doc });
+    });
   store.set("courses_index", courses_index);
+  pd_set({ courses_index });
 
   // Sync Matches
-  var matches_index = store.get("matches_index");
-  data.matches.forEach(doc => {
-    doc.id = doc._id;
-    delete doc._id;
-    if (!matches_index.includes(doc.id)) {
-      matches_index.push(doc.id);
-      store.set(doc.id, doc);
-      history[doc.id] = doc;
-      history.matches.push(doc.id);
-    }
-  });
+  const matches_index = [...pd.matches_index];
+  data.matches
+    .filter(doc => !pd.matchExists(doc._id))
+    .forEach(doc => {
+      const id = doc._id;
+      doc.id = id;
+      delete doc._id;
+      matches_index.push(id);
+      store.set(id, doc);
+      pd_set({ [id]: doc });
+    });
   store.set("matches_index", matches_index);
-  requestHistorySend(0);
+  pd_set({ matches_index });
 
   // Sync Economy
-  var economy_index = store.get("economy_index");
-  data.economy.forEach(doc => {
-    doc.id = doc._id;
-    delete doc._id;
-    if (!economy_index.includes(doc.id)) {
-      economy_index.push(doc.id);
-      store.set(doc.id, doc);
-      economy[doc.id] = doc;
-      economy.changes = economy_index;
-    }
-  });
+  const economy_index = [...pd.economy_index];
+  data.economy
+    .filter(doc => !pd.changeExists(doc._id))
+    .forEach(doc => {
+      const id = doc._id;
+      doc.id = id;
+      delete doc._id;
+      economy_index.push(id);
+      store.set(id, doc);
+      pd_set({ [id]: doc });
+    });
   store.set("economy_index", economy_index);
+  pd_set({ economy_index });
 
   // Sync Drafts
-  var draft_index = store.get("draft_index");
-  data.drafts.forEach(doc => {
-    doc.id = doc._id;
-    delete doc._id;
-    if (!draft_index.includes(doc.id)) {
-      draft_index.push(doc.id);
-      store.set(doc.id, doc);
-
-      history[doc.id] = doc;
-    }
-  });
+  const draft_index = [...pd.draft_index];
+  data.drafts
+    .filter(doc => !pd.draftExists(doc._id))
+    .forEach(doc => {
+      const id = doc._id;
+      doc.id = id;
+      delete doc._id;
+      draft_index.push(id);
+      store.set(id, doc);
+      pd_set({ [id]: doc });
+    });
   store.set("draft_index", draft_index);
+  pd_set({ draft_index });
+
+  if (!firstPass) ipc_send("player_data_refresh");
 }
 
 // Loads and combines settings variables, sends result to display
@@ -934,45 +594,30 @@ function loadSettings(dirtySettings = {}) {
   //  to make UI responsive without waiting for slow store IO
   // Since settings have migrated between areas, collisions happen
   // Order of precedence is: dirty > app > user > defaults
-  const settings = store.get("settings");
-  const rSettings = rstore.get("settings");
-  const _settings = {
-    ...defaultCfg.settings,
-    ...settings,
-    ...rSettings,
+
+  const settings = {
+    ...pd.settings,
+    ...store.get("settings"),
+    ...rstore.get("settings"),
     ...dirtySettings
   };
-
-  if (_settings.decks_last_used == undefined) _settings.decks_last_used = [];
 
   //console.log(_settings);
   //const exeName = path.basename(process.execPath);
 
-  skipFirstPass = _settings.skip_firstpass;
+  skipFirstPass = settings.skip_firstpass;
+  pd_set({ settings });
 
-  ipc_send("overlay_set_ontop", _settings.overlay_ontop);
+  ipc_send("overlay_set_ontop", settings.overlay_ontop);
 
-  if (_settings.show_overlay == false) {
+  if (settings.show_overlay == false) {
     ipc_send("overlay_close", 1);
-  } else if (duringMatch || _settings.show_overlay_always) {
+  } else if (duringMatch || settings.show_overlay_always) {
     ipc_send("overlay_show", 1);
   }
 
-  ipc_send("set_settings", _settings);
-}
-
-//
-function get_deck_changes(deckId) {
-  // sends to renderer the selected deck's data
-  var changes = [];
-  deck_changes_index.forEach(function(changeId) {
-    var change = deck_changes[changeId];
-    if (change.deckId == deckId) {
-      changes.push(change);
-    }
-  });
-
-  ipc_send("set_deck_changes", JSON.stringify(changes));
+  ipc_send("set_settings", settings);
+  ipc_send("settings_updated");
 }
 
 // Set a new log URI
@@ -1031,11 +676,14 @@ function onLogEntryFound(entry) {
   }
   let json;
   if (entry.type == "connection") {
-    playerData.arenaId = entry.socket.PlayerId;
-    playerData.arenaVersion = entry.socket.ClientVersion;
-    playerData.name = entry.socket.PlayerScreenName;
-    ipc_send("set_player_data", playerData);
-  } else if (entry.playerId && entry.playerId !== playerData.arenaId) {
+    const data = {
+      arenaId: entry.socket.PlayerId,
+      arenaVersion: entry.socket.ClientVersion,
+      name: entry.socket.PlayerScreenName
+    };
+    pd_set(data);
+    ipc_send("player_data_updated");
+  } else if (entry.playerId && entry.playerId !== pd.arenaId) {
     return;
   } else {
     //console.log("Entry:", entry.label, entry, entry.json());
@@ -1318,43 +966,33 @@ async function logLoop() {
       : await mtgaLog.readSegment(logUri, 0, size);
 
   // We are looping only to get user data (processLogUser)
-  processLogUser(logSegment);
-
-  if (playerData.arenaId) {
-    clearInterval(logLoopInterval);
-  }
-  prevLogSize = size;
-}
-
-// Process only the user data for initial loading (prior to log in)
-// Same logic as processLog() but without the processLogData() function
-function processLogUser(rawString) {
+  // Process only the user data for initial loading (prior to log in)
+  // Same logic as processLog() but without the processLogData() function
+  const rawString = logSegment;
   var splitString = rawString.split("[UnityCrossThread");
+  const parsedData = {};
 
   splitString.forEach(value => {
     //ipc_send("ipc_log", "Async: ("+index+")");
 
     // Get player Id
     let strCheck = '"playerId": "';
-    if (value.indexOf(strCheck) > -1) {
-      playerData.arenaId = unleakString(dataChop(value, strCheck, '"'));
+    if (value.includes(strCheck)) {
+      parsedData.arenaId = unleakString(dataChop(value, strCheck, '"'));
     }
 
     // Get User name
     strCheck = '"screenName": "';
-    if (value.indexOf(strCheck) > -1) {
-      playerData.name = unleakString(dataChop(value, strCheck, '"'));
-      ipc_send("set_player_data", playerData);
-      ipc_send("ipc_log", "Arena screen name: " + playerData.name);
+    if (value.includes(strCheck)) {
+      parsedData.name = unleakString(dataChop(value, strCheck, '"'));
     }
 
     // Get Client Version
     strCheck = '"clientVersion": "';
-    if (value.indexOf(strCheck) > -1) {
-      playerData.arenaVersion = unleakString(dataChop(value, strCheck, '"'));
-      ipc_send("ipc_log", "Arena version: " + playerData.arenaVersion);
+    if (value.includes(strCheck)) {
+      parsedData.arenaVersion = unleakString(dataChop(value, strCheck, '"'));
       // We request manifest data here
-      //manifestParser.requestManifestData(playerData.arenaVersion);
+      //manifestParser.requestManifestData(pd.arenaVersion);
     }
     /*
     if (firstPass) {
@@ -1363,7 +1001,18 @@ function processLogUser(rawString) {
     */
   });
 
-  if (firstPass && playerData.name == null) {
+  for (let key in parsedData) {
+    ipc_send("ipc_log", `Initial log parse: ${key}=${parsedData[key]}`);
+  }
+  pd_set(parsedData);
+  ipc_send("player_data_updated");
+
+  if (pd.arenaId) {
+    clearInterval(logLoopInterval);
+  }
+  prevLogSize = size;
+
+  if (firstPass && pd.name === null) {
     ipc_send("popup", { text: "output_log contains no player data", time: 0 });
   }
 }
@@ -1488,7 +1137,7 @@ function changePriority(previous, current, time) {
 function getNameBySeat(seat) {
   try {
     if (seat == currentMatch.player.seat) {
-      return playerData.name.slice(0, -6);
+      return pd.name.slice(0, -6);
     } else {
       let oppName = currentMatch.opponent.name;
       if (oppName && oppName !== "Sparky") {
@@ -1503,30 +1152,26 @@ function getNameBySeat(seat) {
 
 //
 function addCustomDeck(customDeck) {
-  if (decks.index.indexOf(customDeck.id) == -1) {
-    decks.index.push(customDeck.id);
-  }
-  decks[customDeck.id] = customDeck;
-  updateCustomDecks();
-  store.set("decks_index", decks.index);
-  store.set("decks." + customDeck.id, customDeck);
-}
+  const id = customDeck.id;
+  const deckData = {
+    // preserve custom fields if possible
+    ...(pd.deck(id) || {}),
+    ...customDeck
+  };
 
-//
-function updateCustomDecks() {
-  decks.index.forEach(_deckid => {
-    let _deck = decks[_deckid];
-    try {
-      //console.log(_deck.id, _deck);
-      decks[_deck.id].custom = false;
-      if (staticDecks.indexOf(_deck.id) == -1) {
-        //console.error("CUSTOM!");
-        decks[_deck.id].custom = true;
-      }
-    } catch (e) {
-      //
-    }
-  });
+  pd_set({ decks: { ...pd.decks, [customDeck.id]: deckData } });
+  store.set("decks." + id, deckData);
+
+  // decks_index is for backwards compatibility
+  // (just in case bleeding edge folks need to revert)
+  const decks_index = [...pd.decks_index];
+  if (!decks_index.includes(id)) {
+    decks_index.push(id);
+    store.set("decks_index", decks_index);
+    pd_set({ decks_index });
+  }
+
+  if (!firstPass) ipc_send("player_data_refresh");
 }
 
 //
@@ -1553,7 +1198,7 @@ function createMatch(arg) {
   currentMatch.opponent.tier = arg.opponentRankingTier;
   currentMatch.opponent.cards = [];
   currentMatch.eventId = arg.eventId;
-  currentMatch.matchId = arg.matchId + "-" + playerData.arenaId;
+  currentMatch.matchId = arg.matchId + "-" + pd.arenaId;
   currentMatch.gameStage = "";
 
   currentMatch.beginTime = matchBeginTime;
@@ -1582,10 +1227,6 @@ function createMatch(arg) {
   }
 
   ipc_send("set_priority_timer", currentMatch.priorityTimers, IPC_OVERLAY);
-
-  if (history[currentMatch.matchId]) {
-    //skipMatch = true;
-  }
 }
 
 //
@@ -1668,8 +1309,8 @@ function getBestArchetype(deck) {
   );
   let highest = lowestDeviation; //err..
 
-  // Test for each archertype
-  deck_archetypes.forEach(arch => {
+  // Test for each archetype
+  db.archetypes.forEach(arch => {
     //console.log(arch.name);
     mainDeviations = [];
     deck.mainDeck.forEach(card => {
@@ -1699,6 +1340,7 @@ function getBestArchetype(deck) {
   return bestMatch.name;
 }
 
+//
 function getOppDeck() {
   let _deck = new Deck({}, currentMatch.oppCardsUsed, false);
   _deck.mainboard.removeDuplicates(true);
@@ -1820,50 +1462,55 @@ function chanceType(quantity, cardsleft, odds_sample_size) {
 
 //
 function saveEconomyTransaction(transaction) {
-  let id = transaction.id;
-  let economyIndex = store.get("economy_index");
+  const id = transaction.id;
+  const txnData = {
+    // preserve custom fields if possible
+    ...(pd.change(id) || {}),
+    ...transaction
+  };
 
-  if (!economyIndex.includes(id)) {
-    economyIndex.push(id);
-    store.set("economy_index", economyIndex);
-    economy.changes = economyIndex;
+  store.set(id, txnData);
+  pd_set({ [id]: txnData });
+
+  if (!pd.economy_index.includes(id)) {
+    const economy_index = [...pd.economy_index, id];
+    store.set("economy_index", economy_index);
+    pd_set({ economy_index });
   }
 
-  economy[id] = transaction;
-  store.set(id, transaction);
-
-  httpApi.httpSetEconomy(transaction);
+  if (!firstPass) ipc_send("player_data_refresh");
+  httpApi.httpSetEconomy(txnData);
 }
 
 //
 function saveCourse(json) {
-  json.id = json._id;
-  json.date = new Date();
+  const id = json._id;
   delete json._id;
+  json.id = id;
 
-  var courses_index = store.get("courses_index");
+  const eventData = {
+    date: new Date(),
+    // preserve custom fields if possible
+    ...(pd.event(id) || {}),
+    ...json
+  };
 
-  if (!courses_index.includes(json.id)) {
-    courses_index.push(json.id);
-  } else {
-    json.date = store.get(json.id).date;
+  store.set(id, eventData);
+  pd_set({ [id]: eventData });
+
+  if (!pd.courses_index.includes(id)) {
+    const courses_index = [...pd.courses_index, id];
+    store.set("courses_index", courses_index);
+    pd_set({ courses_index });
   }
 
-  // add locally
-  if (!events.courses.includes(json.id)) {
-    events.courses.push(json.id);
-  }
-
-  json.type = "Event";
-  events[json.id] = json;
-  store.set("courses_index", courses_index);
-  store.set(json.id, json);
+  if (!firstPass) ipc_send("player_data_refresh");
 }
 
 //
-function saveMatch(matchId) {
+function saveMatch(id) {
   //console.log(currentMatch.matchId, matchId);
-  if (currentMatch.matchTime == 0 || currentMatch.matchId != matchId) {
+  if (!currentMatch || !currentMatch.matchTime || currentMatch.matchId !== id) {
     return;
   }
 
@@ -1883,7 +1530,7 @@ function saveMatch(matchId) {
     }
   });
 
-  var match = {};
+  const match = pd.match(id) || {};
   match.onThePlay = currentMatch.onThePlay;
   match.id = currentMatch.matchId;
   match.duration = currentMatch.matchTime;
@@ -1896,18 +1543,18 @@ function saveMatch(matchId) {
     win: ow
   };
   let rank, tier;
-  if (ranked_events.includes(currentMatch.eventId)) {
-    rank = playerData.rank.limited.rank;
-    tier = playerData.rank.limited.tier;
+  if (db.ranked_events.includes(currentMatch.eventId)) {
+    rank = pd.rank.limited.rank;
+    tier = pd.rank.limited.tier;
   } else {
-    rank = playerData.rank.constructed.rank;
-    tier = playerData.rank.constructed.tier;
+    rank = pd.rank.constructed.rank;
+    tier = pd.rank.constructed.tier;
   }
   match.player = {
-    name: playerData.name,
+    name: pd.name,
     rank,
     tier,
-    userid: playerData.arenaId,
+    userid: pd.arenaId,
     seat: currentMatch.player.seat,
     win: pw
   };
@@ -1933,83 +1580,56 @@ function saveMatch(matchId) {
     .reduce((acc, cur) => +acc * 256 + +cur);
   match.toolRunFromSource = !electron.remote.app.isPackaged;
 
-  console.log("Save match:", match);
-  var matches_index = store.get("matches_index");
+  // console.log("Save match:", match);
 
-  if (!matches_index.includes(currentMatch.matchId)) {
-    matches_index.push(currentMatch.matchId);
-  } else {
-    let cm = store.get(currentMatch.matchId);
-    match.date = cm.date;
-    match.tags = cm.tags;
+  store.set(id, match);
+  pd_set({ [id]: match });
+
+  if (!pd.matches_index.includes(id)) {
+    const matches_index = [...pd.matches_index, id];
+    store.set("matches_index", matches_index);
+    pd_set({ matches_index });
   }
 
-  // Add deck to last used array
-  if (match.playerDeck && match.playerDeck.id) {
-    let decks_last_used = store.get("decks_last_used");
-    let deckId = match.playerDeck.id;
-    if (decks_last_used.includes(deckId)) {
-      let pos = decks_last_used.indexOf(deckId);
-      decks_last_used.splice(pos, 1);
-    }
-    decks_last_used.push(deckId);
-    store.set("decks_last_used", decks_last_used);
-    playerData.decks_last_used = decks_last_used;
-    ipc_send("set_decks_last_used", decks_last_used);
-  }
-
-  // add locally
-  if (!history.matches.includes(currentMatch.matchId)) {
-    history.matches.push(currentMatch.matchId);
-  }
-
-  store.set("matches_index", matches_index);
-  store.set(currentMatch.matchId, match);
-
-  history[currentMatch.matchId] = match;
-  history[currentMatch.matchId].type = "match";
-  if (matchCompletedOnGameNumber == gameNumberCompleted) {
+  if (!firstPass) ipc_send("player_data_refresh");
+  if (matchCompletedOnGameNumber === gameNumberCompleted) {
     httpApi.httpSetMatch(match);
   }
-  requestHistorySend(0);
   ipc_send("set_timer", 0, IPC_OVERLAY);
   ipc_send("popup", { text: "Match saved!", time: 3000 });
 }
 
 //
 function saveDraft() {
-  if (currentDraft.draftId != undefined) {
-    currentDraft.draftId = currentDraft.draftId + "-draft";
-
-    currentDraft.id = currentDraft.draftId;
-    currentDraft.date = new Date();
-    currentDraft.owner = playerData.name;
-
-    console.log("Save draft:", currentDraft);
-
-    var draft_index = store.get("draft_index");
-    // add to config
-    if (!draft_index.includes(currentDraft.draftId)) {
-      draft_index.push(currentDraft.draftId);
-    } else {
-      currentDraft.date = store.get(currentDraft.draftId).date;
-    }
-
-    // add locally
-    if (!history.matches.includes(currentDraft.draftId)) {
-      history.matches.push(currentDraft.draftId);
-    }
-
-    store.set("draft_index", draft_index);
-    store.set(currentDraft.draftId, currentDraft);
-    history[currentDraft.draftId] = currentDraft;
-    history[currentDraft.draftId].type = "draft";
-    httpApi.httpSetDraft(currentDraft);
-    requestHistorySend(0);
-    ipc_send("popup", { text: "Draft saved!", time: 3000 });
-  } else {
-    console.log("Couldnt save draft with undefined ID:", currentDraft);
+  if (!currentDraft || !currentDraft.draftId) {
+    console.log("Couldnt save undefined draft:", currentDraft);
+    return;
   }
+
+  const id = currentDraft.draftId + "-draft";
+  const draftData = {
+    date: new Date(),
+    // preserve custom fields if possible
+    ...(pd.draft(id) || {}),
+    ...currentDraft,
+    draftId: id,
+    id,
+    owner: pd.name
+  };
+  // console.log("Save draft:", currentDraft);
+
+  store.set(id, draftData);
+  pd_set({ [id]: draftData });
+
+  if (!pd.draft_index.includes(id)) {
+    const draft_index = [...pd.draft_index, id];
+    store.set("draft_index", draft_index);
+    pd_set({ draft_index });
+  }
+
+  if (!firstPass) ipc_send("player_data_refresh");
+  httpApi.httpSetDraft(draftData);
+  ipc_send("popup", { text: "Draft saved!", time: 3000 });
 }
 
 //
@@ -2024,43 +1644,49 @@ function updateLoading(entry) {
   }
 }
 
-//
-function updateRank() {
-  ipc_send("set_player_data", playerData);
-}
-
 ///
 function finishLoading() {
   if (firstPass) {
     firstPass = false;
+    logReadEnd = new Date();
+    let logReadElapsed = (logReadEnd - logReadStart) / 1000;
+    ipc_send("ipc_log", `Log read in ${logReadElapsed}s`);
+
+    ipc_send("popup", {
+      text: "Initializing...",
+      time: 0,
+      progress: 2
+    });
 
     if (duringMatch) {
       ipc_send("renderer_hide", 1);
       ipc_send("overlay_show", 1);
       update_deck(false);
     }
-    var obj = store.get("overlayBounds");
-    ipc_send("overlay_set_bounds", obj);
 
-    requestHistorySend(0);
-    ipc_send("initialize", 1);
+    let obj = store.get("overlayBounds");
+    ipc_send("overlay_set_bounds", obj);
 
     obj = store.get("windowBounds");
     ipc_send("renderer_set_bounds", obj);
 
-    if (playerData.name != null) {
+    ipc_send("initialize", 1);
+
+    if (pd.name) {
       httpApi.httpSetPlayer(
-        playerData.name,
-        playerData.rank.constructed.rank,
-        playerData.rank.constructed.tier,
-        playerData.rank.limited.rank,
-        playerData.rank.limited.tier
+        pd.name,
+        pd.rank.constructed.rank,
+        pd.rank.constructed.tier,
+        pd.rank.limited.rank,
+        pd.rank.limited.tier
       );
     }
-    ipc_send("popup", { text: `Reading log: 100%`, time: 1000, progress: -1 });
-    logReadEnd = new Date();
-    let logReadElapsed = (logReadEnd - logReadStart) / 1000;
-    ipc_send("ipc_log", `Log read in ${logReadElapsed}s`);
+
+    ipc_send("popup", {
+      text: "Initialized successfully!",
+      time: 3000,
+      progress: -1
+    });
   }
 }
 

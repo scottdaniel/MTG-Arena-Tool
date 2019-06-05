@@ -4,7 +4,7 @@ global
   discordTag
   filteredWildcardsSet
   ipc_send
-  playerData
+  pd,
   rewards_daily_ends
   rewards_weekly_ends
   showLoadingBars
@@ -115,7 +115,7 @@ function openHomeTab(arg, opentab = true) {
     listInterval = [];
     if (tournaments_list) {
       // Create tournament button
-      if (playerData.name == "Manuel777#63494") {
+      if (pd.name === "Manuel777#63494") {
         let div = createDivision(["tou_container"]);
         div.id = "create";
         div.style.justifyContent = "center";

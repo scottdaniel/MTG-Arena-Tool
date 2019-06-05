@@ -1,11 +1,10 @@
 /*
 global
   tokenAuth
-  decks
   rstore
   loadPlayerConfig
-  playerData
-  ipc_send
+  db
+  pd
   debugNet
   store
   debugLog
@@ -15,7 +14,9 @@ global
 const electron = require("electron");
 const async = require("async");
 const qs = require("qs");
+
 const { makeId } = require("../shared/util");
+const { ipc_send, pd_set } = require("./background-util");
 
 let metadataState = false;
 
@@ -105,7 +106,7 @@ function httpBasic() {
           protocol: "https:",
           port: 443,
           hostname: serverAddress,
-          path: "/database/database.json",
+          path: "/database/",
           method: "GET"
         };
         ipc_send("popup", {
@@ -224,7 +225,8 @@ function httpBasic() {
             } catch (e) {
               ipc_send("popup", {
                 text: `Error parsing response. (${_headers.method})`,
-                time: 2000
+                time: 2000,
+                progress: -1
               });
             }
 
@@ -259,10 +261,11 @@ function httpBasic() {
                 //ipc_send("auth", parsedResult.arenaids);
                 if (rstore.get("settings").remember_me) {
                   rstore.set("token", tokenAuth);
-                  rstore.set("email", playerData.userName);
+                  rstore.set("email", pd.userName);
                 }
-                playerData.patreon = parsedResult.patreon;
-                playerData.patreon_tier = parsedResult.patreon_tier;
+                const data = {};
+                data.patreon = parsedResult.patreon;
+                data.patreon_tier = parsedResult.patreon_tier;
 
                 let serverData = {
                   matches: [],
@@ -270,14 +273,15 @@ function httpBasic() {
                   drafts: [],
                   economy: []
                 };
-                if (playerData.patreon) {
+                if (data.patreon) {
                   serverData.matches = parsedResult.matches;
                   serverData.courses = parsedResult.courses;
                   serverData.drafts = parsedResult.drafts;
                   serverData.economy = parsedResult.economy;
                 }
-                ipc_send("set_player_data", playerData);
-                loadPlayerConfig(playerData.arenaId, serverData);
+                pd_set(data);
+                ipc_send("player_data_updated");
+                loadPlayerConfig(pd.arenaId, serverData);
                 ipc_send("set_discord_tag", parsedResult.discord_tag);
                 beginSSE();
               }
@@ -318,6 +322,7 @@ function httpBasic() {
                   time: 1000,
                   progress: -1
                 });
+                db.handleSetDb(null, results);
                 ipc_send("set_db", results);
                 ipc_send("show_login", true);
               }
@@ -350,7 +355,8 @@ function httpBasic() {
                 ipc_send("clear_pwd", 1);
                 ipc_send("popup", {
                   text: `Error: ${parsedResult.error}`,
-                  time: 3000
+                  time: 3000,
+                  progress: -1
                 });
               }
               // errors here
@@ -358,7 +364,8 @@ function httpBasic() {
               ipc_send("auth", {});
               ipc_send("popup", {
                 text: "Something went wrong, please try again",
-                time: 5000
+                time: 5000,
+                progress: -1
               });
             }
           } catch (e) {
@@ -388,7 +395,8 @@ function httpBasic() {
         if (!metadataState) {
           ipc_send("popup", {
             text: "Server unreachable, try offline mode.",
-            time: 0
+            time: 0,
+            progress: -1
           });
         }
 
@@ -420,18 +428,18 @@ function removeFromHttp(req) {
   });
 }
 
-function httpAuth(user, pass) {
+function httpAuth(userName, pass) {
   var _id = makeId(6);
-  playerData.userName = user;
+  pd_set({ userName });
   httpAsync.push({
     reqId: _id,
     method: "auth",
     method_path: "/api/login.php",
-    email: user,
+    email: userName,
     password: pass,
-    playerid: playerData.arenaId,
-    playername: encodeURIComponent(playerData.name),
-    mtgaversion: playerData.arenaVersion,
+    playerid: pd.arenaId,
+    playername: encodeURIComponent(pd.name),
+    mtgaversion: pd.arenaVersion,
     version: electron.remote.app.getVersion()
   });
 }
@@ -442,7 +450,7 @@ function httpSubmitCourse(course) {
     course.PlayerId = "000000000000000";
     course.PlayerName = "Anonymous";
   }
-  course.playerRank = playerData.rank.limited.rank;
+  course.playerRank = pd.rank.limited.rank;
   course = JSON.stringify(course);
   httpAsync.push({
     reqId: _id,
@@ -594,7 +602,7 @@ function httpTournamentGet(tid) {
 
 function httpTournamentJoin(tid, _deck, pass) {
   let _id = makeId(6);
-  let deck = JSON.stringify(decks[_deck]);
+  let deck = JSON.stringify(pd.deck(_deck));
   httpAsync.unshift({
     reqId: _id,
     method: "tou_join",

@@ -2,7 +2,6 @@
 global
   activeEvents
   add_checkbox
-  economyHistory
   getWinrateClass
   hideLoadingBars
   ipc_send
@@ -11,6 +10,7 @@ global
 
 const _ = require("lodash");
 const db = require("../shared/database");
+const pd = require("../shared/player-data");
 const { queryElements: $$, createDivision } = require("../shared/dom-fns");
 const { createSelect } = require("../shared/select");
 const {
@@ -49,10 +49,10 @@ function openExploreTab() {
   var mainDiv = document.getElementById("ux_0");
   var dateNow, d;
   ownedWildcards = {
-    c: economyHistory.wcCommon,
-    u: economyHistory.wcUncommon,
-    r: economyHistory.wcRare,
-    m: economyHistory.wcMythic
+    c: pd.economy.wcCommon,
+    u: pd.economy.wcUncommon,
+    r: pd.economy.wcRare,
+    m: pd.economy.wcMythic
   };
 
   mainDiv.classList.remove("flex_item");

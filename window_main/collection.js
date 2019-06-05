@@ -1,10 +1,6 @@
 /*
 global
-  cards
-  cardsNew
-  cardSize
   change_background
-  decks
   hideLoadingBars
   ipc_send
   remote
@@ -12,8 +8,9 @@ global
   MenuItem
 */
 
-const { ipcRenderer: ipc, shell } = require("electron");
+const { shell } = require("electron");
 const db = require("../shared/database");
+const pd = require("../shared/player-data");
 const { queryElements: $$, createDivision } = require("../shared/dom-fns");
 const { createSelect } = require("../shared/select");
 const { addCardHover } = require("../shared/card-hover");
@@ -41,16 +38,16 @@ let countMode = ALL_CARDS;
 
 //
 function get_collection_export(exportFormat) {
-  var list = "";
-  Object.keys(cards).forEach(function(key) {
-    var add = exportFormat + "";
-    var card = db.card(key);
+  let list = "";
+  Object.keys(pd.cards).forEach(key => {
+    let add = exportFormat + "";
+    const card = db.card(key);
     if (card) {
       let name = card.name;
       name = replaceAll(name, "///", "//");
       add = add.replace("$Name", '"' + name + '"');
 
-      add = add.replace("$Count", cards[key] == 9999 ? 1 : cards[key]);
+      add = add.replace("$Count", pd.cards[key] === 9999 ? 1 : pd.cards[key]);
 
       add = add.replace("$SetName", card.set);
       add = add.replace("$SetCode", db.sets[card.set].code);
@@ -178,8 +175,8 @@ function get_collection_stats() {
     stats.complete[card.rarity].unique += 1;
 
     // add cards we own
-    if (cards[card.id] !== undefined) {
-      var owned = cards[card.id];
+    if (pd.cards[card.id] !== undefined) {
+      const owned = pd.cards[card.id];
       stats[card.set][card.rarity].owned += owned;
       stats.complete[card.rarity].owned += owned;
       stats[card.set][card.rarity].uniqueOwned += 1;
@@ -194,7 +191,7 @@ function get_collection_stats() {
 
     // count cards we know we want across decks
     const wanted = Math.max(
-      ...decks
+      ...pd.deckList
         .filter(deck => deck && !deck.archived)
         .map(deck => getCardsMissingCount(deck, card.id))
     );
@@ -595,18 +592,9 @@ function resetFilters() {
   printCollectionPage();
 }
 
-let exportFormat = "";
-
-//
-ipc.on("set_settings", (_event, arg) => {
-  if (arg.export_format) {
-    exportFormat = arg.export_format;
-  }
-});
-
 //
 function exportCollection() {
-  let list = get_collection_export(exportFormat);
+  let list = get_collection_export(pd.settings.export_format);
   ipc_send("export_csvtxt", { str: list, name: "collection" });
 }
 
@@ -882,7 +870,7 @@ function printCards() {
   if (filterUnown) {
     list = db.cardIds;
   } else {
-    list = Object.keys(cards);
+    list = Object.keys(pd.cards);
   }
 
   let keysSorted = [...list];
@@ -925,13 +913,13 @@ function printCards() {
     }
 
     if (filterIncomplete) {
-      let owned = cards[card.id];
+      const owned = pd.cards[card.id];
       if (owned >= 4) {
         continue;
       }
     }
 
-    if (filterNew.checked && cardsNew[key] == undefined) {
+    if (filterNew.checked && pd.cardsNew[key] === undefined) {
       continue;
     }
 
@@ -1025,28 +1013,28 @@ function printCards() {
     //let dfc = "";
 
     let cardDiv = createDivision(["inventory_card"]);
-    cardDiv.style.width = cardSize + "px";
+    cardDiv.style.width = pd.cardsSize + "px";
 
-    let owned = cards[card.id];
-    let aquired = cardsNew[card.id];
+    const owned = pd.cards[card.id];
+    const aquired = pd.cardsNew[card.id];
     for (let i = 0; i < 4; i++) {
       if (aquired && i >= owned - aquired && i < owned) {
         let q = createDivision(["inventory_card_quantity_orange"]);
-        q.style.width = cardSize / 4 + "px";
+        q.style.width = pd.cardsSize / 4 + "px";
         cardDiv.appendChild(q);
       } else if (i < owned) {
         let q = createDivision(["inventory_card_quantity_green"]);
-        q.style.width = cardSize / 4 + "px";
+        q.style.width = pd.cardsSize / 4 + "px";
         cardDiv.appendChild(q);
       } else {
         let q = createDivision(["inventory_card_quantity_gray"]);
-        q.style.width = cardSize / 4 + "px";
+        q.style.width = pd.cardsSize / 4 + "px";
         cardDiv.appendChild(q);
       }
     }
 
     let img = document.createElement("img");
-    img.style.width = cardSize + "px";
+    img.style.width = pd.cardsSize + "px";
     img.classList.add("inventory_card_img");
     img.src = get_card_image(card);
 

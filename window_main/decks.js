@@ -2,8 +2,6 @@
 global
   Aggregator
   allMatches
-  decks
-  economyHistory
   FilterPanel
   formatPercent
   hideLoadingBars
@@ -12,12 +10,11 @@ global
   makeResizable
   ListItem
   openDeck
+  pd
   sidebarActive
-  sidebarSize
-  sort_decks
   getTagColor
-  setTagColor
   StatsPanel
+  lastScrollTop
 */
 
 const _ = require("lodash");
@@ -25,7 +22,6 @@ const { createDivision } = require("../shared/dom-fns");
 const {
   get_deck_missing,
   getBoosterCountEstimate,
-  getDeck,
   getReadableFormat
 } = require("../shared/util");
 
@@ -52,224 +48,218 @@ function setFilters(selected = {}) {
 }
 
 //
-function openDecksTab(_filters = {}) {
-  if (sidebarActive == 0 && decks != null) {
-    hideLoadingBars();
-    var mainDiv = document.getElementById("ux_0");
-    mainDiv.classList.add("flex_item");
-    mainDiv.innerHTML = "";
-    setFilters(_filters);
+function openDecksTab(_filters = {}, scrollTop = 0) {
+  if (sidebarActive !== 0) return;
 
-    const wrap_r = createDivision(["wrapper_column", "sidebar_column_l"]);
-    wrap_r.style.width = sidebarSize + "px";
-    wrap_r.style.flex = `0 0 ${sidebarSize}px`;
-    const aggregator = new Aggregator(filters);
-    const statsPanel = new StatsPanel(
-      "decks_top",
-      aggregator,
-      sidebarSize,
-      true
-    );
-    const decks_top_winrate = statsPanel.render();
-    decks_top_winrate.style.display = "flex";
-    decks_top_winrate.style.flexDirection = "column";
-    decks_top_winrate.style.marginTop = "16px";
-    decks_top_winrate.style.padding = "12px";
+  hideLoadingBars();
+  const mainDiv = document.getElementById("ux_0");
+  mainDiv.classList.add("flex_item");
+  mainDiv.innerHTML = "";
+  setFilters(_filters);
 
-    let drag = createDivision(["dragger"]);
-    wrap_r.appendChild(drag);
-    const finalCallback = width => {
-      ipc_send("save_user_settings", { right_panel_width: width });
-    };
-    makeResizable(drag, statsPanel.handleResize, finalCallback);
+  const wrap_r = createDivision(["wrapper_column", "sidebar_column_l"]);
+  wrap_r.style.width = pd.settings.right_panel_width + "px";
+  wrap_r.style.flex = `0 0 ${pd.settings.right_panel_width}px`;
+  const aggregator = new Aggregator(filters);
+  const statsPanel = new StatsPanel(
+    "decks_top",
+    aggregator,
+    pd.settings.right_panel_width,
+    true
+  );
+  const decks_top_winrate = statsPanel.render();
+  decks_top_winrate.style.display = "flex";
+  decks_top_winrate.style.flexDirection = "column";
+  decks_top_winrate.style.marginTop = "16px";
+  decks_top_winrate.style.padding = "12px";
 
-    wrap_r.appendChild(decks_top_winrate);
+  let drag = createDivision(["dragger"]);
+  wrap_r.appendChild(drag);
+  makeResizable(drag, statsPanel.handleResize);
 
-    const wrap_l = createDivision(["wrapper_column"]);
-    wrap_l.setAttribute("id", "decks_column");
+  wrap_r.appendChild(decks_top_winrate);
 
-    var d = document.createElement("div");
-    d.classList.add("list_fill");
-    wrap_l.appendChild(d);
+  const wrap_l = createDivision(["wrapper_column"]);
+  wrap_l.setAttribute("id", "decks_column");
 
-    mainDiv.appendChild(wrap_l);
-    mainDiv.appendChild(wrap_r);
+  let d = document.createElement("div");
+  d.classList.add("list_fill");
+  wrap_l.appendChild(d);
 
-    // Tags and filters
-    let decks_top = document.createElement("div");
-    decks_top.classList.add("decks_top");
+  mainDiv.appendChild(wrap_l);
+  mainDiv.appendChild(wrap_r);
 
-    const tags = Aggregator.gatherTags(decks);
-    const filterPanel = new FilterPanel(
-      "decks_top",
-      selected => openDecksTab(selected),
-      filters,
-      allMatches.events,
-      tags,
-      [],
-      true,
-      [],
-      false,
-      null,
-      true
-    );
-    const decks_top_filter = filterPanel.render();
+  // Tags and filters
+  let decks_top = document.createElement("div");
+  decks_top.classList.add("decks_top");
 
-    decks_top.appendChild(decks_top_filter);
-    wrap_l.appendChild(decks_top);
+  const tags = Aggregator.gatherTags(Object.values(pd.decks));
+  const filterPanel = new FilterPanel(
+    "decks_top",
+    selected => openDecksTab(selected),
+    filters,
+    allMatches.events,
+    tags,
+    [],
+    true,
+    [],
+    false,
+    null,
+    true
+  );
+  const decks_top_filter = filterPanel.render();
 
-    sort_decks(aggregator.compareDecks);
+  decks_top.appendChild(decks_top_filter);
+  wrap_l.appendChild(decks_top);
 
-    const isDeckVisible = deck =>
-      aggregator.filterDeck(deck) &&
-      (filters.eventId === Aggregator.DEFAULT_EVENT ||
-        aggregator.deckLastPlayed[deck.id]);
+  const decks = [...pd.deckList];
+  decks.sort(aggregator.compareDecks);
 
-    decks.filter(isDeckVisible).forEach(deck => {
-      let tileGrpid = deck.deckTileId;
-      let listItem;
-      if (deck.custom) {
-        let archiveCallback = archiveDeck;
-        if (deck.archived) {
-          archiveCallback = unarchiveDeck;
-        }
-        listItem = new ListItem(
-          tileGrpid,
-          deck.id,
-          id => openDeckCallback(id, filters),
-          archiveCallback,
-          deck.archived
-        );
-      } else {
-        listItem = new ListItem(tileGrpid, deck.id, id =>
-          openDeckCallback(id, filters)
-        );
-      }
-      listItem.center.classList.add("deck_tags_container");
-      listItem.divideLeft();
-      listItem.divideRight();
+  const isDeckVisible = deck =>
+    aggregator.filterDeck(deck) &&
+    (filters.eventId === Aggregator.DEFAULT_EVENT ||
+      aggregator.deckLastPlayed[deck.id]);
 
-      const t = createTag(null, listItem.center, false);
-      jQuery.data(t, "deck", deck.id);
-      if (deck.format) {
-        const fText = getReadableFormat(deck.format);
-        const t = createTag(fText, listItem.center, false);
-        t.style.fontStyle = "italic";
-        jQuery.data(t, "deck", deck.id);
-      }
-      if (deck.tags) {
-        deck.tags.forEach(tag => {
-          if (tag !== deck.format) {
-            const t = createTag(tag, listItem.center);
-            jQuery.data(t, "deck", deck.id);
-          }
-        });
-      }
-
-      // Deck crafting cost section
-      let ownedWildcards = {
-        common: economyHistory.wcCommon,
-        uncommon: economyHistory.wcUncommon,
-        rare: economyHistory.wcRare,
-        mythic: economyHistory.wcMythic
+  decks.filter(isDeckVisible).forEach(deck => {
+    let tileGrpid = deck.deckTileId;
+    let listItem;
+    if (deck.custom) {
+      const archiveCallback = id => {
+        ipc_send("toggle_deck_archived", id);
       };
 
-      let missingWildcards = get_deck_missing(deck);
+      listItem = new ListItem(
+        tileGrpid,
+        deck.id,
+        id => openDeckCallback(id, filters),
+        archiveCallback,
+        deck.archived
+      );
+    } else {
+      listItem = new ListItem(tileGrpid, deck.id, id =>
+        openDeckCallback(id, filters)
+      );
+    }
+    listItem.center.classList.add("deck_tags_container");
+    listItem.divideLeft();
+    listItem.divideRight();
 
-      let wc;
-      let n = 0;
-      let boosterCost = getBoosterCountEstimate(missingWildcards);
-      CARD_RARITIES.forEach(cardRarity => {
-        if (missingWildcards[cardRarity]) {
-          n++;
-          wc = document.createElement("div");
-          wc.classList.add("wc_explore_cost");
-          wc.classList.add("wc_" + cardRarity);
-          wc.title = _.capitalize(cardRarity) + " wldcards needed.";
-          wc.innerHTML =
-            (ownedWildcards[cardRarity] > 0
-              ? ownedWildcards[cardRarity] + "/"
-              : "") + missingWildcards[cardRarity];
-          listItem.right.appendChild(wc);
-          listItem.right.style.flexDirection = "row";
-          listItem.right.style.marginRight = "16px";
+    const t = createTag(null, listItem.center, false);
+    jQuery.data(t, "deck", deck.id);
+    if (deck.format) {
+      const fText = getReadableFormat(deck.format);
+      const t = createTag(fText, listItem.center, false);
+      t.style.fontStyle = "italic";
+      jQuery.data(t, "deck", deck.id);
+    }
+    if (deck.tags) {
+      deck.tags.forEach(tag => {
+        if (tag !== deck.format) {
+          const t = createTag(tag, listItem.center);
+          jQuery.data(t, "deck", deck.id);
         }
       });
-      if (n !== 0) {
-        let bo = document.createElement("div");
-        bo.classList.add("bo_explore_cost");
-        bo.innerHTML = Math.round(boosterCost);
-        bo.title = "Boosters needed (estimated)";
-        listItem.right.appendChild(bo);
+    }
+
+    // Deck crafting cost section
+    const ownedWildcards = {
+      common: pd.economy.wcCommon,
+      uncommon: pd.economy.wcUncommon,
+      rare: pd.economy.wcRare,
+      mythic: pd.economy.wcMythic
+    };
+
+    let missingWildcards = get_deck_missing(deck);
+
+    let wc;
+    let n = 0;
+    let boosterCost = getBoosterCountEstimate(missingWildcards);
+    CARD_RARITIES.forEach(cardRarity => {
+      if (missingWildcards[cardRarity]) {
+        n++;
+        wc = document.createElement("div");
+        wc.classList.add("wc_explore_cost");
+        wc.classList.add("wc_" + cardRarity);
+        wc.title = _.capitalize(cardRarity) + " wldcards needed.";
+        wc.innerHTML =
+          (ownedWildcards[cardRarity] > 0
+            ? ownedWildcards[cardRarity] + "/"
+            : "") + missingWildcards[cardRarity];
+        listItem.right.appendChild(wc);
+        listItem.right.style.flexDirection = "row";
+        listItem.right.style.marginRight = "16px";
       }
-
-      if (deck.name.indexOf("?=?Loc/Decks/Precon/") != -1) {
-        deck.name = deck.name.replace("?=?Loc/Decks/Precon/", "");
-      }
-
-      let deckNameDiv = createDivision(["list_deck_name"], deck.name);
-      listItem.leftTop.appendChild(deckNameDiv);
-
-      deck.colors.forEach(function(color) {
-        let m = createDivision(["mana_s20", "mana_" + MANA[color]]);
-        listItem.leftBottom.appendChild(m);
-      });
-
-      const dwr = aggregator.deckStats[deck.id];
-      if (dwr && dwr.total > 0) {
-        let deckWinrateDiv = createDivision(["list_deck_winrate"]);
-        let colClass = getWinrateClass(dwr.winrate);
-        deckWinrateDiv.innerHTML = `${dwr.wins}:${
-          dwr.losses
-        } <span class="${colClass}_bright">(${formatPercent(
-          dwr.winrate
-        )})</span>`;
-        deckWinrateDiv.title = `${dwr.wins} matches won : ${
-          dwr.losses
-        } matches lost`;
-        listItem.rightTop.appendChild(deckWinrateDiv);
-
-        let deckWinrateLastDiv = createDivision(["list_deck_winrate"]);
-        deckWinrateLastDiv.style.opacity = 0.6;
-        deckWinrateLastDiv.innerHTML = "Since last edit: ";
-        const drwr = aggregator.deckRecentStats[deck.id];
-        if (drwr && drwr.total > 0) {
-          colClass = getWinrateClass(drwr.winrate);
-          deckWinrateLastDiv.innerHTML += `<span class="${colClass}_bright">${formatPercent(
-            drwr.winrate
-          )}</span>`;
-          deckWinrateLastDiv.title = `${drwr.wins} matches won : ${
-            drwr.losses
-          } matches lost`;
-        } else {
-          deckWinrateLastDiv.innerHTML += "<span>--</span>";
-          deckWinrateLastDiv.title = "no data yet";
-        }
-        listItem.rightBottom.appendChild(deckWinrateLastDiv);
-      }
-
-      wrap_l.appendChild(listItem.container);
     });
+    if (n !== 0) {
+      let bo = document.createElement("div");
+      bo.classList.add("bo_explore_cost");
+      bo.innerHTML = Math.round(boosterCost);
+      bo.title = "Boosters needed (estimated)";
+      listItem.right.appendChild(bo);
+    }
+
+    if (deck.name.indexOf("?=?Loc/Decks/Precon/") != -1) {
+      deck.name = deck.name.replace("?=?Loc/Decks/Precon/", "");
+    }
+
+    let deckNameDiv = createDivision(["list_deck_name"], deck.name);
+    listItem.leftTop.appendChild(deckNameDiv);
+
+    deck.colors.forEach(function(color) {
+      let m = createDivision(["mana_s20", "mana_" + MANA[color]]);
+      listItem.leftBottom.appendChild(m);
+    });
+
+    const dwr = aggregator.deckStats[deck.id];
+    if (dwr && dwr.total > 0) {
+      let deckWinrateDiv = createDivision(["list_deck_winrate"]);
+      let colClass = getWinrateClass(dwr.winrate);
+      deckWinrateDiv.innerHTML = `${dwr.wins}:${
+        dwr.losses
+      } <span class="${colClass}_bright">(${formatPercent(
+        dwr.winrate
+      )})</span>`;
+      deckWinrateDiv.title = `${dwr.wins} matches won : ${
+        dwr.losses
+      } matches lost`;
+      listItem.rightTop.appendChild(deckWinrateDiv);
+
+      let deckWinrateLastDiv = createDivision(["list_deck_winrate"]);
+      deckWinrateLastDiv.style.opacity = 0.6;
+      deckWinrateLastDiv.innerHTML = "Since last edit: ";
+      const drwr = aggregator.deckRecentStats[deck.id];
+      if (drwr && drwr.total > 0) {
+        colClass = getWinrateClass(drwr.winrate);
+        deckWinrateLastDiv.innerHTML += `<span class="${colClass}_bright">${formatPercent(
+          drwr.winrate
+        )}</span>`;
+        deckWinrateLastDiv.title = `${drwr.wins} matches won : ${
+          drwr.losses
+        } matches lost`;
+      } else {
+        deckWinrateLastDiv.innerHTML += "<span>--</span>";
+        deckWinrateLastDiv.title = "no data yet";
+      }
+      listItem.rightBottom.appendChild(deckWinrateLastDiv);
+    }
+
+    wrap_l.appendChild(listItem.container);
+  });
+
+  const jCont = $(wrap_l);
+  if (scrollTop) {
+    jCont.scrollTop(lastScrollTop);
   }
+  jCont.on("scroll", () => {
+    lastScrollTop = jCont.scrollTop();
+  });
 }
 
 function openDeckCallback(id, filters) {
-  const deck = getDeck(id);
+  const deck = pd.deck(id);
   if (!deck) return;
   openDeck(deck, { ...filters, deckId: id });
   $(".moving_ux").animate({ left: "-100%" }, 250, "easeInOutCubic");
-}
-
-function archiveDeck(id) {
-  ipc_send("archive_deck", id);
-  getDeck(id).archived = true;
-  openDecksTab();
-}
-
-function unarchiveDeck(id) {
-  ipc_send("unarchive_deck", id);
-  getDeck(id).archived = false;
-  openDecksTab();
 }
 
 function createTag(tag, div, showClose = true) {
@@ -288,16 +278,19 @@ function createTag(tag, div, showClose = true) {
       colorPick.spectrum("set", tagCol);
       colorPick.spectrum("show");
 
-      colorPick.on("move.spectrum", function(e, color) {
-        let tag = $(this).text();
-        let col = color.toRgbString();
-        ipc_send("edit_tag", { tag: tag, color: col });
-        setTagColor(tag, col);
-
+      colorPick.on("move.spectrum", (e, color) => {
+        const tag = $(this).text();
+        const col = color.toRgbString();
         $(".deck_tag").each((index, obj) => {
-          let tag = $(obj).text();
-          $(obj).css("background-color", getTagColor(tag));
+          if (tag !== $(obj).text()) return;
+          $(obj).css("background-color", col);
         });
+      });
+
+      colorPick.on("change.spectrum", (e, color) => {
+        const tag = $(this).text();
+        const col = color.toRgbString();
+        ipc_send("edit_tag", { tag, color: col });
       });
 
       colorPick.on("hide.spectrum", () => {
@@ -373,39 +366,12 @@ function createTag(tag, div, showClose = true) {
   return t;
 }
 
-function addTag(deckid, tag, div) {
-  decks.forEach(function(deck) {
-    if (deck.id === deckid && deck.format !== tag) {
-      if (deck.tags) {
-        if (deck.tags.indexOf(tag) == -1) {
-          deck.tags.push(tag);
-        }
-      } else {
-        deck.tags = [tag];
-      }
-    }
-  });
-
-  let obj = { deck: deckid, name: tag };
-  ipc_send("add_tag", obj);
-
-  createTag(tag, div);
+function addTag(deckid, tag) {
+  ipc_send("add_tag", { deckid, tag });
 }
 
 function deleteTag(deckid, tag) {
-  decks.forEach(function(deck) {
-    if (deck.id == deckid) {
-      if (deck.tags) {
-        let ind = deck.tags.indexOf(tag);
-        if (ind !== -1) {
-          deck.tags.splice(ind, 1);
-        }
-      }
-    }
-  });
-
-  let obj = { deck: deckid, name: tag };
-  ipc_send("delete_tag", obj);
+  ipc_send("delete_tag", { deckid, tag });
 }
 
 module.exports = { openDecksTab: openDecksTab };

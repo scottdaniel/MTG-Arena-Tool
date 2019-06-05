@@ -67,6 +67,7 @@ app.on("ready", () => {
   if (app.isPackaged) {
     startUpdater();
   } else {
+    require("devtron").install();
     startApp();
   }
 });
@@ -152,8 +153,6 @@ function startApp() {
         debugIPC == 2 &&
         method != "set_status" &&
         method != "set_db" &&
-        method != "set_cards" &&
-        method != "set_decks" &&
         method != "background_set_history_data"
       ) {
         console.log("IPC ", method + ": " + JSON.stringify(arg));
@@ -171,24 +170,25 @@ function startApp() {
         break;
 
       case "set_settings":
-        //console.log("set settings: ", arg);
         setSettings(arg);
-        mainWindow.webContents.send("set_settings", arg);
-        overlay.webContents.send("set_settings", arg);
+        break;
+
+      case "settings_updated":
+        mainWindow.webContents.send("settings_updated");
+        overlay.webContents.send("settings_updated");
+        break;
+
+      case "player_data_refresh":
+        mainWindow.webContents.send("player_data_refresh");
+        overlay.webContents.send("player_data_refresh");
         break;
 
       case "set_db":
         mainWindow.webContents.send("set_db", arg);
-        background.webContents.send("set_db", arg);
         overlay.webContents.send("set_db", arg);
         if (autoLogin) {
           background.webContents.send("auto_login");
         }
-        break;
-
-      case "set_season":
-        mainWindow.webContents.send("set_season", arg);
-        background.webContents.send("set_season", arg);
         break;
 
       case "popup":
@@ -202,15 +202,6 @@ function startApp() {
 
       case "renderer_window_minimize":
         mainWindow.minimize();
-        break;
-
-      case "set_rank":
-        mainWindow.webContents.send("set_rank", arg.rank, arg.str);
-        break;
-
-      case "set_cards":
-        mainWindow.webContents.send("set_cards", arg.cards, arg.new);
-        overlay.webContents.send("set_cards", arg.cards);
         break;
 
       case "set_opponent_rank":

@@ -3,9 +3,16 @@ global
   logLanguage
 */
 // Utility functions that belong only to background
-
+const { ipcRenderer: ipc } = require("electron");
 const _ = require("lodash");
 const parse = require("date-fns").parse;
+
+const {
+  IPC_BACKGROUND,
+  IPC_MAIN,
+  IPC_OVERLAY
+} = require("../shared/constants.js");
+const pd = require("../shared/player-data.js");
 
 // These were tested briefly , but hey are all taken from actual logs
 // At most some format from date-fns could be wrong;
@@ -40,7 +47,7 @@ function parseWotcTime(dateStr) {
   }
 
   if (!date || isNaN(date.getTime())) {
-    console.log(`Invalid date ('${dateStr}') - using current date as backup.`);
+    // console.log(`Invalid date ('${dateStr}') - using current date as backup.`);
     date = new Date();
   }
   return date;
@@ -61,8 +68,44 @@ function unleakString(s) {
   return (" " + s).substr(1);
 }
 
+// Begin of IPC messages recievers
+function ipc_send(method, arg, to = IPC_MAIN) {
+  if (method == "ipc_log") {
+    //
+  }
+  //console.log("IPC SEND", method, arg, to);
+  ipc.send("ipc_switch", method, IPC_BACKGROUND, arg, to);
+}
+
+const dataBlacklist = ["changes", "drafts", "events", "matches"];
+
+const overlayWhitelist = [
+  "name",
+  "userName",
+  "arenaId",
+  "arenaVersion",
+  "patreon",
+  "patreon_tier",
+  "rank",
+  "cards",
+  "cardsNew",
+  "settings"
+];
+
+// convenience fn to update player data singletons in all processes
+// (update is destructive, be sure to use spread syntax if necessary)
+function pd_set(data) {
+  const cleanData = _.omit(data, dataBlacklist);
+  pd.handleSetData(null, cleanData);
+  ipc_send("set_player_data", cleanData, IPC_MAIN);
+  const overlayData = _.pick(cleanData, overlayWhitelist);
+  ipc_send("set_player_data", overlayData, IPC_OVERLAY);
+}
+
 module.exports = {
-  unleakString: unleakString,
-  parseWotcTime: parseWotcTime,
-  normaliseFields: normaliseFields
+  ipc_send,
+  normaliseFields,
+  parseWotcTime,
+  pd_set,
+  unleakString
 };

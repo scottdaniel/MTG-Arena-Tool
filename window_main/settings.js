@@ -1,13 +1,11 @@
 /*
 global
   add_checkbox
-  cardQuality
-  cardStyle
-  cardSize
   change_background
   hideLoadingBars
   ipc_send
   offlineMode
+  pd
 */
 
 const { ipcRenderer: ipc, remote, shell } = require("electron");
@@ -20,11 +18,6 @@ const { get_card_image } = require("../shared/util");
 const { CARD_TILE_ARENA, CARD_TILE_FLAT } = require("../shared/constants.js");
 
 let lastSettingsSection = 1;
-let overlayAlpha = 1;
-let overlayAlphaBack = 1;
-let overlayScale = 1;
-let cardSizePos = 4;
-let settings = null;
 let updateState = "";
 
 function getCardStyleName(style) {
@@ -70,35 +63,35 @@ function openSettingsTab(openSection = lastSettingsSection) {
     section,
     "Beta updates channel",
     "settings_betachannel",
-    settings.beta_channel,
+    pd.settings.beta_channel,
     updateAppSettings
   );
   add_checkbox(
     section,
     "Login automatically",
     "settings_autologin",
-    settings.auto_login,
+    pd.settings.auto_login,
     updateAppSettings
   );
   add_checkbox(
     section,
     "Launch to tray",
     "settings_launchtotray",
-    settings.launch_to_tray,
+    pd.settings.launch_to_tray,
     updateAppSettings
   );
   add_checkbox(
     section,
     "Launch on startup",
     "settings_startup",
-    settings.startup,
+    pd.settings.startup,
     updateUserSettings
   );
   add_checkbox(
     section,
     "Read log on login",
     "settings_readlogonlogin",
-    !settings.skip_firstpass,
+    !pd.settings.skip_firstpass,
     updateUserSettings
   );
   section.append(`
@@ -109,21 +102,21 @@ function openSettingsTab(openSection = lastSettingsSection) {
     section,
     "Close main window on match found",
     "settings_closeonmatch",
-    settings.close_on_match,
+    pd.settings.close_on_match,
     updateUserSettings
   );
   add_checkbox(
     section,
     "Close to tray",
     "settings_closetotray",
-    settings.close_to_tray,
+    pd.settings.close_to_tray,
     updateUserSettings
   );
   add_checkbox(
     section,
     "Sound when priority changes",
     "settings_soundpriority",
-    settings.sound_priority,
+    pd.settings.sound_priority,
     updateUserSettings
   );
 
@@ -131,13 +124,13 @@ function openSettingsTab(openSection = lastSettingsSection) {
   sliderSoundVolume.appendTo(section);
   const sliderSoundVolumeLabel = $(
     `<label style="width: 400px;">Volume: ${Math.round(
-      settings.sound_priority_volume * 100
+      pd.settings.sound_priority_volume * 100
     )}%</label>`
   );
   sliderSoundVolumeLabel.appendTo(sliderSoundVolume);
   const sliderSoundVolumeInput = $(
     '<input type="range" min="0" max="1" step=".001" value="' +
-      settings.sound_priority_volume +
+      pd.settings.sound_priority_volume +
       '" class="slider sliderSoundVolume" id="settings_soundpriorityvolume">'
   );
   sliderSoundVolumeInput.appendTo(sliderSoundVolume);
@@ -147,7 +140,7 @@ function openSettingsTab(openSection = lastSettingsSection) {
   icd = $('<div class="input_container"></div>');
   const export_input = $(
     '<input type="search" id="settings_export_format" autocomplete="off" value="' +
-      settings.export_format +
+      pd.settings.export_format +
       '" />'
   );
   export_input.appendTo(icd);
@@ -166,21 +159,21 @@ function openSettingsTab(openSection = lastSettingsSection) {
     section,
     "Always on top",
     "settings_overlay_ontop",
-    settings.overlay_ontop,
+    pd.settings.overlay_ontop,
     updateUserSettings
   );
   add_checkbox(
     section,
     "Show overlay",
     "settings_showoverlay",
-    settings.show_overlay,
+    pd.settings.show_overlay,
     updateUserSettings
   );
   add_checkbox(
     section,
     "Persistent overlay&nbsp;<i>(useful for OBS setup)</i>",
     "settings_showoverlayalways",
-    settings.show_overlay_always,
+    pd.settings.show_overlay_always,
     updateUserSettings
   );
 
@@ -188,42 +181,42 @@ function openSettingsTab(openSection = lastSettingsSection) {
     section,
     "Show top bar",
     "settings_overlay_top",
-    settings.overlay_top,
+    pd.settings.overlay_top,
     updateUserSettings
   );
   add_checkbox(
     section,
     "Show title",
     "settings_overlay_title",
-    settings.overlay_title,
+    pd.settings.overlay_title,
     updateUserSettings
   );
   add_checkbox(
     section,
     "Show deck/lists",
     "settings_overlay_deck",
-    settings.overlay_deck,
+    pd.settings.overlay_deck,
     updateUserSettings
   );
   add_checkbox(
     section,
     "Show clock",
     "settings_overlay_clock",
-    settings.overlay_clock,
+    pd.settings.overlay_clock,
     updateUserSettings
   );
   add_checkbox(
     section,
     "Show sideboard",
     "settings_overlay_sideboard",
-    settings.overlay_sideboard,
+    pd.settings.overlay_sideboard,
     updateUserSettings
   );
   add_checkbox(
     section,
     "Compact lands",
     "settings_overlay_lands",
-    settings.overlay_lands,
+    pd.settings.overlay_lands,
     updateUserSettings
   );
 
@@ -231,13 +224,13 @@ function openSettingsTab(openSection = lastSettingsSection) {
   sliderOpacity.appendTo(section);
   const sliderOpacityLabel = $(
     '<label style="width: 400px; !important" class="card_size_container">Elements transparency: ' +
-      transparencyFromAlpha(overlayAlpha) +
+      transparencyFromAlpha(pd.settings.overlay_alpha) +
       "%</label>"
   );
   sliderOpacityLabel.appendTo(sliderOpacity);
   const sliderOpacityInput = $(
     '<input type="range" min="0" max="100" step="5" value="' +
-      transparencyFromAlpha(overlayAlpha) +
+      transparencyFromAlpha(pd.settings.overlay_alpha) +
       '" class="slider sliderB" id="opacityRange">'
   );
   sliderOpacityInput.appendTo(sliderOpacity);
@@ -246,13 +239,13 @@ function openSettingsTab(openSection = lastSettingsSection) {
   sliderOpacityBack.appendTo(section);
   const sliderOpacityBackLabel = $(
     '<label style="width: 400px; !important" class="card_size_container">Background transparency: ' +
-      transparencyFromAlpha(overlayAlphaBack) +
+      transparencyFromAlpha(pd.settings.overlay_alpha_back) +
       "%</label>"
   );
   sliderOpacityBackLabel.appendTo(sliderOpacityBack);
   const sliderOpacityBackInput = $(
     '<input type="range" min="0" max="100" step="5" value="' +
-      transparencyFromAlpha(overlayAlphaBack) +
+      transparencyFromAlpha(pd.settings.overlay_alpha_back) +
       '" class="slider sliderC" id="opacityBackRange">'
   );
   sliderOpacityBackInput.appendTo(sliderOpacityBack);
@@ -261,13 +254,13 @@ function openSettingsTab(openSection = lastSettingsSection) {
   sliderScale.appendTo(section);
   const sliderScaleLabel = $(
     '<label style="width: 400px; !important" class="card_size_container">Scale: ' +
-      overlayScale +
+      pd.settings.overlay_scale +
       "%</label>"
   );
   sliderScaleLabel.appendTo(sliderScale);
   const sliderScaleInput = $(
     '<input type="range" min="10" max="200" step="10" value="' +
-      overlayScale +
+      pd.settings.overlay_scale +
       '" class="slider sliderD" id="scaleRange">'
   );
   sliderScaleInput.appendTo(sliderScale);
@@ -287,7 +280,7 @@ function openSettingsTab(openSection = lastSettingsSection) {
   icd = $('<div class="input_container"></div>');
   const url_input = $(
     '<input type="search" id="query_image" autocomplete="off" value="' +
-      settings.back_url +
+      pd.settings.back_url +
       '" />'
   );
   url_input.appendTo(icd);
@@ -302,7 +295,7 @@ function openSettingsTab(openSection = lastSettingsSection) {
     showAlpha: true,
     showButtons: false
   });
-  colorPick.spectrum("set", settings.back_color);
+  colorPick.spectrum("set", pd.settings.back_color);
 
   colorPick.on("dragstop.spectrum", function(e, color) {
     $(".main_wrapper").css("background-color", color.toRgbString());
@@ -315,7 +308,7 @@ function openSettingsTab(openSection = lastSettingsSection) {
   const tagSelect = createSelect(
     label[0],
     ["small", "normal", "large"],
-    cardQuality,
+    pd.settings.cards_quality,
     filter => updateUserSettingsBlend({ cards_quality: filter }),
     "settings_cards_quality"
   );
@@ -329,18 +322,15 @@ function openSettingsTab(openSection = lastSettingsSection) {
   const tagStyleSelect = createSelect(
     cardsStyleCont[0],
     [CARD_TILE_ARENA, CARD_TILE_FLAT],
-    cardStyle,
-    filter => {
-      cardStyle = filter;
-      updateUserSettingsBlend({ card_tile_style: filter });
-    },
+    pd.settings.card_tile_style,
+    filter => updateUserSettingsBlend({ card_tile_style: filter }),
     "settings_cards_style",
     getCardStyleName
   );
   tagStyleSelect.style.width = "180px";
   tagStyleSelect.style.marginLeft = "32px";
 
-  let tile = deckDrawer.cardTile(cardStyle, 67518, "a", 4);
+  let tile = deckDrawer.cardTile(pd.settings.card_tile_style, 67518, "a", 4);
   tile.style.width = "auto";
   cardsStyleCont.append(tile);
   section.append(cardsStyleCont);
@@ -349,25 +339,25 @@ function openSettingsTab(openSection = lastSettingsSection) {
   slider.appendTo(section);
   const sliderlabel = $(
     '<label style="width: 400px; !important" class="card_size_container">Cards size: ' +
-      cardSize +
+      pd.cardsSize +
       "px</label>"
   );
   sliderlabel.appendTo(slider);
   const sliderInput = $(
     '<input type="range" min="0" max="20" value="' +
-      cardSizePos +
+      pd.settings.cards_size +
       '" class="slider sliderA" id="myRange">'
   );
   sliderInput.appendTo(slider);
 
   const d = $(
     '<div style="width: ' +
-      cardSize +
+      pd.cardsSize +
       'px; !important" class="inventory_card_settings"></div>'
   );
   const img = $(
     '<img style="width: ' +
-      cardSize +
+      pd.cardsSize +
       'px; !important" class="inventory_card_settings_img"></img>'
   );
 
@@ -385,14 +375,14 @@ function openSettingsTab(openSection = lastSettingsSection) {
     section,
     "Anonymous sharing&nbsp;<i>(makes your username anonymous on Explore)</i>",
     "settings_anon_explore",
-    settings.anon_explore,
+    pd.settings.anon_explore,
     updateUserSettings
   );
   add_checkbox(
     section,
     "Online sharing&nbsp;<i>(when disabled, blocks any connections with our servers)</i>",
     "settings_senddata",
-    settings.send_data,
+    pd.settings.send_data,
     updateUserSettings
   );
 
@@ -551,7 +541,7 @@ function openSettingsTab(openSection = lastSettingsSection) {
   $(".sliderA").off();
 
   $(".sliderA").on("click mousemove", function() {
-    cardSizePos = Math.round(parseInt(this.value));
+    const cardSize = 100 + Math.round(parseInt(this.value)) * 10;
     sliderlabel.html("Cards size: " + cardSize + "px");
 
     $(".inventory_card_settings").css("width", "");
@@ -566,26 +556,28 @@ function openSettingsTab(openSection = lastSettingsSection) {
   });
 
   $(".sliderA").on("click mouseup", function() {
-    cardSizePos = Math.round(parseInt(this.value));
-    updateUserSettings();
+    updateUserSettingsBlend({ cards_size: Math.round(parseInt(this.value)) });
   });
 
   $(".sliderB").off();
 
   $(".sliderB").on("click mousemove", function() {
-    overlayAlpha = alphaFromTransparency(parseInt(this.value));
+    const overlayAlpha = alphaFromTransparency(parseInt(this.value));
     sliderOpacityLabel.html(
       "Elements transparency: " + transparencyFromAlpha(overlayAlpha) + "%"
     );
   });
 
   $(".sliderB").on("click mouseup", function() {
-    overlayAlpha = alphaFromTransparency(parseInt(this.value));
-    updateUserSettings();
+    updateUserSettingsBlend({
+      overlay_alpha: alphaFromTransparency(parseInt(this.value))
+    });
   });
 
+  $(".sliderC").off();
+
   $(".sliderC").on("click mousemove", function() {
-    overlayAlphaBack = alphaFromTransparency(parseInt(this.value));
+    const overlayAlphaBack = alphaFromTransparency(parseInt(this.value));
     sliderOpacityBackLabel.html(
       "Background transparency: " +
         transparencyFromAlpha(overlayAlphaBack) +
@@ -594,33 +586,38 @@ function openSettingsTab(openSection = lastSettingsSection) {
   });
 
   $(".sliderC").on("click mouseup", function() {
-    overlayAlphaBack = alphaFromTransparency(parseInt(this.value));
-    updateUserSettings();
+    updateUserSettingsBlend({
+      overlay_alpha_back: alphaFromTransparency(parseInt(this.value))
+    });
   });
 
   $(".sliderD").off();
 
   $(".sliderD").on("click mousemove", function() {
-    overlayScale = parseInt(this.value);
-    sliderScaleLabel.html("Scale: " + overlayScale + "%");
+    sliderScaleLabel.html("Scale: " + parseInt(this.value) + "%");
   });
 
   $(".sliderD").on("click mouseup", function() {
-    overlayScale = parseInt(this.value);
-    updateUserSettings();
+    updateUserSettingsBlend({
+      overlay_scale: parseInt(this.value)
+    });
   });
 
   $(".sliderSoundVolume").off();
 
+  $(".sliderSoundVolume").on("click mousemove", function() {
+    const volume = Math.round(this.value * 100);
+    sliderSoundVolumeLabel.html("Volume: " + volume + "%");
+  });
+
   $(".sliderSoundVolume").on("click mouseup", function() {
-    sliderSoundVolumeLabel.html(
-      `Volume: ${Math.round(settings.sound_priority_volume * 100)}%`
-    );
     let { Howl, Howler } = require("howler");
     let sound = new Howl({ src: ["../sounds/blip.mp3"] });
-    updateUserSettings();
-    Howler.volume(settings.sound_priority_volume);
+    Howler.volume(this.value);
     sound.play();
+    updateUserSettingsBlend({
+      sound_priority_volume: this.value
+    });
   });
 }
 
@@ -665,10 +662,6 @@ function updateUserSettingsBlend(_settings = {}) {
   const soundPriority = document.getElementById("settings_soundpriority")
     .checked;
 
-  const soundPriorityVolume = document.getElementById(
-    "settings_soundpriorityvolume"
-  ).value;
-
   const backColor = $(".color_picker")
     .spectrum("get")
     .toRgbString();
@@ -696,21 +689,15 @@ function updateUserSettingsBlend(_settings = {}) {
     .checked;
 
   const exportFormat = document.getElementById("settings_export_format").value;
-  settings = {
+
+  ipc_send("save_user_settings", {
     sound_priority: soundPriority,
-    sound_priority_volume: soundPriorityVolume,
     show_overlay: showOverlay,
     show_overlay_always: showOverlayAlways,
     startup: startup,
     close_to_tray: closeToTray,
     send_data: sendData,
     close_on_match: closeOnMatch,
-    cards_size: cardSizePos,
-    cards_quality: cardQuality,
-    card_tile_style: cardStyle,
-    overlay_alpha: overlayAlpha,
-    overlay_alpha_back: overlayAlphaBack,
-    overlay_scale: overlayScale,
     overlay_top: overlayTop,
     overlay_title: overlayTitle,
     overlay_deck: overlayDeck,
@@ -724,27 +711,8 @@ function updateUserSettingsBlend(_settings = {}) {
     export_format: exportFormat,
     skip_firstpass: !readonlogin,
     ..._settings
-  };
-  ipc_send("save_user_settings", settings);
+  });
 }
-
-//
-ipc.on("set_settings", function(event, arg) {
-  settings = arg;
-  cardSizePos = settings.cards_size;
-  overlayAlpha = settings.overlay_alpha;
-  overlayAlphaBack = settings.overlay_alpha_back;
-  overlayScale = settings.overlay_scale;
-  if (overlayScale === undefined) {
-    overlayScale = 100;
-  }
-  if (settings.back_color === undefined) {
-    settings.back_color = "rgba(0,0,0,0.3)";
-  }
-  if (settings.back_url === undefined) {
-    settings.back_url = "";
-  }
-});
 
 //
 ipc.on("set_update_state", function(event, arg) {

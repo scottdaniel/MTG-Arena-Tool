@@ -1,16 +1,6 @@
 const { ipcRenderer: ipc } = require("electron");
 const fs = require("fs");
 
-const otherKeys = [
-  "sets",
-  "events",
-  "events_format",
-  "cards",
-  "ranked_events",
-  "abilities",
-  "ok"
-];
-
 // Some other things should go here later, like updating from MTGA Servers themselves.
 class Database {
   constructor() {
@@ -47,11 +37,12 @@ class Database {
     return this.data.abilities;
   }
 
+  get archetypes() {
+    return this.data.archetypes;
+  }
+
   get cards() {
-    if (this.data.cards) return this.data.cards;
-    const clone = { ...this.data };
-    otherKeys.forEach(key => delete clone[key]);
-    return clone;
+    return this.data.cards;
   }
 
   get cardIds() {
@@ -97,8 +88,7 @@ class Database {
   }
 
   card(id) {
-    if (this.data.cards) return this.data.cards[id] || false;
-    return this.data[id] || false;
+    return this.data.cards[id] || false;
   }
 
   event(id) {

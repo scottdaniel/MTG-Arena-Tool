@@ -44,8 +44,11 @@ class ListItem {
       this.deleteButton.addEventListener("click", e => {
         e.stopPropagation();
         this.onDeleteCallback(this.id);
-        this.container.style.height = "0px";
-        this.container.style.overflow = "hidden";
+        if (!isArchived) {
+          this.container.style.height = "0px";
+          this.container.style.overflow = "hidden";
+        }
+        this.deleteButton.classList.add("hidden");
       });
     }
 

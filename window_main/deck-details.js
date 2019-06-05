@@ -4,11 +4,11 @@ global
     change_background
     drawDeck
     drawDeckVisual
-    economyHistory
     ipc_send
     makeResizable
     pop
-    sidebarSize
+    pd
+    setChangesTimeline
     StatsPanel
 */
 
@@ -279,10 +279,10 @@ function deckStatsSection(deck) {
 
   // Deck crafting cost section
   let ownedWildcards = {
-    common: economyHistory.wcCommon,
-    uncommon: economyHistory.wcUncommon,
-    rare: economyHistory.wcRare,
-    mythic: economyHistory.wcMythic
+    common: pd.economy.wcCommon,
+    uncommon: pd.economy.wcUncommon,
+    rare: pd.economy.wcRare,
+    mythic: pd.economy.wcMythic
   };
 
   let missingWildcards = get_deck_missing(deck);
@@ -326,12 +326,12 @@ function openDeck(deck = currentOpenDeck, filters = currentFilters) {
       mainDiv.classList.add("flex_item");
       const wrap_r = createDivision(["wrapper_column", "sidebar_column_l"]);
       wrap_r.setAttribute("id", "stats_column");
-      wrap_r.style.width = sidebarSize + "px";
-      wrap_r.style.flex = `0 0 ${sidebarSize}px`;
+      wrap_r.style.width = pd.settings.right_panel_width + "px";
+      wrap_r.style.flex = `0 0 ${pd.settings.right_panel_width}px`;
       const statsPanel = new StatsPanel(
         "decks_top",
         aggregator,
-        sidebarSize,
+        pd.settings.right_panel_width,
         true
       );
       const deck_top_winrate = statsPanel.render();
@@ -342,10 +342,7 @@ function openDeck(deck = currentOpenDeck, filters = currentFilters) {
 
       const drag = createDivision(["dragger"]);
       wrap_r.appendChild(drag);
-      const finalCallback = width => {
-        ipc_send("save_user_settings", { right_panel_width: width });
-      };
-      makeResizable(drag, statsPanel.handleResize, finalCallback);
+      makeResizable(drag, statsPanel.handleResize);
 
       wrap_r.appendChild(deck_top_winrate);
 
@@ -398,7 +395,7 @@ function openDeck(deck = currentOpenDeck, filters = currentFilters) {
     drawDeckVisual(deckListSection, statsSection, deck);
   });
 
-  $(".openHistory").click(() => ipc_send("get_deck_changes", deck.id));
+  $(".openHistory").click(() => setChangesTimeline(deck.id));
 
   $(".exportDeck").click(() => {
     const list = get_deck_export(deck);

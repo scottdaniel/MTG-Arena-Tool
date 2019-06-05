@@ -6,7 +6,6 @@
     currentMatch
     getNameBySeat
     logLanguage
-    playerData
     gameNumberCompleted
     initialLibraryInstanceIds
     instanceToCardIdMap
@@ -15,30 +14,12 @@
     saveMatch
     greToClientInterpreter
     decodePayload
-    updateRank
-    ipc_send
-    staticDecks
-    decks_tags
-    decks
-    updateCustomDecks
-    requestHistorySend
     addCustomDeck
     saveCourse
     select_deck
     sha1
-    deck_changes_index
-    deck_changes
     store
     saveEconomyTransaction
-    gold
-    gems
-    vault
-    wcTrack
-    wcCommon
-    wcUncommon
-    wcRare
-    wcMythic
-    sendEconomy
     matchBeginTime
     createMatch
     draftSet
@@ -53,6 +34,8 @@
     oppWin
     matchCompletedOnGameNumber
     oppId
+    pd
+    firstPass
 */
 
 const db = require("../shared/database");
@@ -64,9 +47,10 @@ const {
   httpTournamentCheck
 } = require("./http-api");
 const {
-  unleakString,
+  ipc_send,
+  normaliseFields,
   parseWotcTime,
-  normaliseFields
+  pd_set
 } = require("./background-util");
 
 //
@@ -113,7 +97,7 @@ function onLabelOutLogInfo(entry, json) {
     let playerName = getNameBySeat(payload.winningTeamId);
     actionLog(-1, logTime, `${playerName} Wins!`);
 
-    var mid = payload.matchId + "-" + playerData.arenaId;
+    var mid = payload.matchId + "-" + pd.arenaId;
     var time = payload.secondsCount;
     if (mid == currentMatch.matchId) {
       gameNumberCompleted = payload.gameNumber;
@@ -283,24 +267,26 @@ function onLabelClientToMatchServiceMessageTypeClientToGREMessage(entry, json) {
 
 function onLabelInEventGetCombinedRankInfo(entry, json) {
   if (!json) return;
+  const rank = { constructed: {}, limited: {} };
 
-  playerData.rank.constructed.rank = json.constructedClass;
-  playerData.rank.constructed.tier = json.constructedLevel;
-  playerData.rank.constructed.step = json.constructedStep;
+  rank.constructed.rank = json.constructedClass;
+  rank.constructed.tier = json.constructedLevel;
+  rank.constructed.step = json.constructedStep;
 
-  playerData.rank.limited.rank = json.limitedClass;
-  playerData.rank.limited.tier = json.limitedLevel;
-  playerData.rank.limited.step = json.limitedStep;
+  rank.limited.rank = json.limitedClass;
+  rank.limited.tier = json.limitedLevel;
+  rank.limited.step = json.limitedStep;
 
-  playerData.rank.constructed.won = json.constructedMatchesWon;
-  playerData.rank.constructed.lost = json.constructedMatchesLost;
-  playerData.rank.constructed.drawn = json.constructedMatchesDrawn;
+  rank.constructed.won = json.constructedMatchesWon;
+  rank.constructed.lost = json.constructedMatchesLost;
+  rank.constructed.drawn = json.constructedMatchesDrawn;
 
-  playerData.rank.limited.won = json.limitedMatchesWon;
-  playerData.rank.limited.lost = json.limitedMatchesLost;
-  playerData.rank.limited.drawn = json.limitedMatchesDrawn;
+  rank.limited.won = json.limitedMatchesWon;
+  rank.limited.lost = json.limitedMatchesLost;
+  rank.limited.drawn = json.limitedMatchesDrawn;
 
-  updateRank();
+  pd_set({ rank });
+  ipc_send("player_data_updated");
 }
 
 function onLabelInEventGetActiveEvents(entry, json) {
@@ -312,39 +298,40 @@ function onLabelInEventGetActiveEvents(entry, json) {
 
 function onLabelRankUpdated(entry, json) {
   if (!json) return;
+  const rank = { ...pd.rank };
 
-  if (json.rankUpdateType == "Constructed") {
-    playerData.rank.constructed.rank = json.newClass;
-    playerData.rank.constructed.tier = json.newLevel;
-    playerData.rank.constructed.step = json.newStep;
+  if (json.rankUpdateType === "Constructed") {
+    rank.constructed.rank = json.newClass;
+    rank.constructed.tier = json.newLevel;
+    rank.constructed.step = json.newStep;
   } else {
-    playerData.rank.limited.rank = json.newClass;
-    playerData.rank.limited.tier = json.newLevel;
-    playerData.rank.limited.step = json.newStep;
+    rank.limited.rank = json.newClass;
+    rank.limited.tier = json.newLevel;
+    rank.limited.step = json.newStep;
   }
 
-  updateRank();
+  pd_set({ rank });
+  ipc_send("player_data_updated");
 }
 
 function onLabelInDeckGetDeckLists(entry, json) {
   if (!json) return;
 
-  staticDecks = [];
+  const decks = { ...pd.decks };
+  // decks_index is for backwards compatibility
+  // (just in case bleeding edge folks need to revert)
+  const decks_index = [...pd.decks_index];
+  const static_decks = [];
   json.forEach(deck => {
-    let deckId = deck.id;
-    deck.tags = decks_tags[deckId];
-    if (!deck.tags) deck.tags = [];
-
-    decks[deckId] = deck;
-    if (decks["index"].indexOf(deckId) == -1) {
-      decks["index"].push(deck.id);
+    if (!decks_index.includes(deck.id)) {
+      decks_index.push(deck.id);
     }
-    staticDecks.push(deck.id);
+    decks[deck.id] = { ...(pd.deck(deck.id) || {}), ...deck };
+    static_decks.push(deck.id);
   });
 
-  updateCustomDecks();
-  requestHistorySend(0);
-  ipc_send("set_decks", JSON.stringify(decks));
+  pd_set({ decks, decks_index, static_decks });
+  if (!firstPass) ipc_send("player_data_refresh");
 }
 
 function onLabelInDeckGetDeckListsV3(entry, json) {
@@ -414,85 +401,83 @@ function onLabelInEventJoin(entry, json) {
 
 function onLabelInDeckUpdateDeck(entry, json) {
   if (!json) return;
-  logTime = parseWotcTime(entry.timestamp);
+  const logTime = parseWotcTime(entry.timestamp);
+  const _deck = pd.deck(json.id);
 
-  decks.index.forEach(function(_deckid) {
-    if (_deckid == json.id) {
-      let _deck = decks[_deckid];
-      var changeId = sha1(_deckid + "-" + logTime);
-      var deltaDeck = {
-        id: changeId,
-        deckId: _deck.id,
-        date: logTime,
-        changesMain: [],
-        changesSide: [],
-        previousMain: _deck.mainDeck,
-        previousSide: _deck.sideboard
-      };
+  const changeId = sha1(json.id + "-" + logTime);
+  const deltaDeck = {
+    id: changeId,
+    deckId: _deck.id,
+    date: logTime,
+    changesMain: [],
+    changesSide: [],
+    previousMain: _deck.mainDeck,
+    previousSide: _deck.sideboard
+  };
 
-      // Check Mainboard
-      _deck.mainDeck.forEach(function(card) {
-        var cardObj = db.card(card.id);
+  // Check Mainboard
+  _deck.mainDeck.forEach(card => {
+    const cardObj = db.card(card.id);
 
-        var diff = 0 - card.quantity;
-        json.mainDeck.forEach(function(cardB) {
-          var cardObjB = db.card(cardB.id);
-          if (cardObj.name == cardObjB.name) {
-            cardB.existed = true;
-            diff = cardB.quantity - card.quantity;
-          }
-        });
-
-        if (diff !== 0) {
-          deltaDeck.changesMain.push({ id: card.id, quantity: diff });
-        }
-      });
-
-      json.mainDeck.forEach(function(card) {
-        if (card.existed == undefined) {
-          let cardObj = db.card(card.id);
-          deltaDeck.changesMain.push({ id: card.id, quantity: card.quantity });
-        }
-      });
-      // Check sideboard
-      _deck.sideboard.forEach(function(card) {
-        var cardObj = db.card(card.id);
-
-        var diff = 0 - card.quantity;
-        json.sideboard.forEach(function(cardB) {
-          var cardObjB = db.card(cardB.id);
-          if (cardObj.name == cardObjB.name) {
-            cardB.existed = true;
-            diff = cardB.quantity - card.quantity;
-          }
-        });
-
-        if (diff !== 0) {
-          deltaDeck.changesSide.push({ id: card.id, quantity: diff });
-        }
-      });
-
-      json.sideboard.forEach(function(card) {
-        if (card.existed == undefined) {
-          let cardObj = db.card(card.id);
-          deltaDeck.changesSide.push({ id: card.id, quantity: card.quantity });
-        }
-      });
-
-      if (!deck_changes_index.includes(changeId)) {
-        if (
-          deltaDeck.changesMain.length > 0 ||
-          deltaDeck.changesSide.length > 0
-        ) {
-          deck_changes_index.push(changeId);
-          deck_changes[changeId] = deltaDeck;
-
-          store.set("deck_changes_index", deck_changes_index);
-          store.set("deck_changes." + changeId, deltaDeck);
-        }
+    let diff = 0 - card.quantity;
+    json.mainDeck.forEach(cardB => {
+      const cardObjB = db.card(cardB.id);
+      if (cardObj.name === cardObjB.name) {
+        cardB.existed = true;
+        diff = cardB.quantity - card.quantity;
       }
+    });
+
+    if (diff !== 0) {
+      deltaDeck.changesMain.push({ id: card.id, quantity: diff });
     }
   });
+
+  json.mainDeck.forEach(card => {
+    if (card.existed === undefined) {
+      deltaDeck.changesMain.push({ id: card.id, quantity: card.quantity });
+    }
+  });
+  // Check sideboard
+  _deck.sideboard.forEach(card => {
+    const cardObj = db.card(card.id);
+
+    let diff = 0 - card.quantity;
+    json.sideboard.forEach(cardB => {
+      const cardObjB = db.card(cardB.id);
+      if (cardObj.name === cardObjB.name) {
+        cardB.existed = true;
+        diff = cardB.quantity - card.quantity;
+      }
+    });
+
+    if (diff !== 0) {
+      deltaDeck.changesSide.push({ id: card.id, quantity: diff });
+    }
+  });
+
+  json.sideboard.forEach(card => {
+    if (card.existed === undefined) {
+      deltaDeck.changesSide.push({ id: card.id, quantity: card.quantity });
+    }
+  });
+
+  const foundNewDeckChange =
+    !pd.deckChangeExists(changeId) &&
+    (deltaDeck.changesMain.length || deltaDeck.changesSide.length);
+
+  if (foundNewDeckChange) {
+    store.set("deck_changes." + changeId, deltaDeck);
+    const deck_changes = { ...pd.deck_changes, [changeId]: deltaDeck };
+    const deck_changes_index = [...pd.deck_changes_index];
+    if (!deck_changes_index.includes(changeId)) {
+      deck_changes_index.push(changeId);
+    }
+    store.set("deck_changes_index", deck_changes_index);
+
+    pd_set({ deck_changes, deck_changes_index });
+    if (!firstPass) ipc_send("player_data_refresh");
+  }
 }
 
 function onLabelInDeckUpdateDeckV3(entry, json) {
@@ -544,17 +529,18 @@ function onLabelInventoryUpdated(entry, transaction) {
 function onLabelInPlayerInventoryGetPlayerInventory(entry, json) {
   if (!json) return;
   logTime = parseWotcTime(entry.timestamp);
-
-  gold = json.gold;
-  gems = json.gems;
-  vault = json.vaultProgress;
-  wcTrack = json.wcTrackPosition;
-  wcCommon = json.wcCommon;
-  wcUncommon = json.wcUncommon;
-  wcRare = json.wcRare;
-  wcMythic = json.wcMythic;
-
-  sendEconomy();
+  const economy = {
+    gold: json.gold,
+    gems: json.gems,
+    vault: json.vaultProgress,
+    wcTrack: json.wcTrackPosition,
+    wcCommon: json.wcCommon,
+    wcUncommon: json.wcUncommon,
+    wcRare: json.wcRare,
+    wcMythic: json.wcMythic
+  };
+  pd_set({ economy });
+  if (!firstPass) ipc_send("player_data_refresh");
 }
 
 function onLabelInPlayerInventoryGetPlayerCardsV3(entry, json) {
@@ -579,18 +565,19 @@ function onLabelInPlayerInventoryGetPlayerCardsV3(entry, json) {
   }
 
   var cardsPrevious = store.get("cards.cards_before");
-  var cardsNewlyAdded = {};
+  const cardsNew = {};
 
   Object.keys(json).forEach(function(key) {
     // get differences
-    if (cardsPrevious[key] == undefined) {
-      cardsNewlyAdded[key] = json[key];
+    if (cardsPrevious[key] === undefined) {
+      cardsNew[key] = json[key];
     } else if (cardsPrevious[key] < json[key]) {
-      cardsNewlyAdded[key] = json[key] - cardsPrevious[key];
+      cardsNew[key] = json[key] - cardsPrevious[key];
     }
   });
 
-  ipc_send("set_cards", { cards: json, new: cardsNewlyAdded });
+  pd_set({ cards: json, cardsNew });
+  if (!firstPass) ipc_send("player_data_refresh");
 }
 
 function onLabelInEventDeckSubmit(entry, json) {
@@ -740,7 +727,7 @@ function onLabelMatchGameRoomStateChangedEvent(entry, json) {
     if (!currentMatch) {
       let oName = "";
       json.gameRoomConfig.reservedPlayers.forEach(player => {
-        if (!player.userId == playerData.arenaId) {
+        if (!player.userId === pd.arenaId) {
           oName = player.playerName;
         }
       });
@@ -755,7 +742,7 @@ function onLabelMatchGameRoomStateChangedEvent(entry, json) {
       createMatch(arg);
     }
     json.gameRoomConfig.reservedPlayers.forEach(player => {
-      if (player.userId == playerData.arenaId) {
+      if (player.userId == pd.arenaId) {
         currentMatch.player.seat = player.systemSeatId;
       } else {
         currentMatch.opponent.name = player.playerName;
@@ -795,12 +782,12 @@ function onLabelMatchGameRoomStateChangedEvent(entry, json) {
       ipc_send("overlay_close", 1);
     }
     matchCompletedOnGameNumber = json.finalMatchResult.resultList.length - 1;
-    saveMatch(json.finalMatchResult.matchId + "-" + playerData.arenaId);
+    saveMatch(json.finalMatchResult.matchId + "-" + pd.arenaId);
   }
 
   if (json.players) {
     json.players.forEach(function(player) {
-      if (player.userId == playerData.arenaId) {
+      if (player.userId == pd.arenaId) {
         currentMatch.player.seat = player.systemSeatId;
       } else {
         oppId = player.userId;
@@ -812,6 +799,7 @@ function onLabelMatchGameRoomStateChangedEvent(entry, json) {
 
 function onLabelInEventGetSeasonAndRankDetail(entry, json) {
   if (!json) return;
+  db.handleSetSeason(null, json);
   ipc_send("set_season", json);
 }
 

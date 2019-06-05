@@ -18,6 +18,7 @@ if (!remote.app.isPackaged) {
       });
     }
   });
+  require("devtron").install();
 }
 
 const _ = require("lodash");
@@ -27,6 +28,7 @@ require("spectrum-colorpicker");
 require("time-elements");
 const striptags = require("striptags");
 
+const pd = require("../shared/player-data.js");
 const Aggregator = require("./aggregator.js");
 const ListItem = require("./list-item.js");
 const FilterPanel = require("./filter-panel.js");
@@ -38,7 +40,7 @@ const tournamentCreate = require("./tournaments").tournamentCreate;
 const tournamentSetState = require("./tournaments").tournamentSetState;
 const openDeck = require("./deck-details").openDeck;
 const openDecksTab = require("./decks").openDecksTab;
-const { openHistoryTab, setFilters } = require("./history");
+const { openHistoryTab } = require("./history");
 const openExploreTab = require("./explore").openExploreTab;
 const setExploreDecks = require("./explore").setExploreDecks;
 const openCollectionTab = require("./collection").openCollectionTab;
@@ -61,7 +63,6 @@ const {
   get_deck_types_ammount,
   get_rank_index,
   makeId,
-  playerDataDefault,
   removeDuplicates,
   timeSince
 } = require("../shared/util");
@@ -84,35 +85,22 @@ const MenuItem = remote.MenuItem;
 const { RANKED_CONST, RANKED_DRAFT, DATE_SEASON } = Aggregator;
 
 let deck = null;
-let decks = null;
 let changes = null;
-let matchesHistory = [];
 let allMatches = null;
-let eventsHistory = [];
 
 let explore = null;
 let ladder = null;
-let cards = {};
-let cardsNew = {};
 
 let sidebarActive = -2;
-let filterEvent = "All";
-let filterSort = "By Winrate";
+let lastDataIndex = 0;
+let lastScrollTop = 0;
 
 let draftPosition = 1;
-let cardSize = 140;
-let cardQuality = "normal";
-let cardStyle = CARD_TILE_FLAT;
 let loadEvents = 0;
-let defaultBackground = "";
 let loggedIn = false;
 let canLogin = false;
 let offlineMode = false;
-let lastTab = -1;
-
-let playerData = playerDataDefault();
-
-let economyHistory = [];
+let lastSettings = {};
 
 let rewards_daily_ends = new Date();
 let rewards_weekly_ends = new Date();
@@ -120,11 +108,8 @@ let activeEvents = [];
 
 let filteredWildcardsSet = "";
 
-let tags_colors = {};
 let authToken = null;
 let discordTag = null;
-
-let sidebarSize = 200;
 
 const sha1 = require("js-sha1");
 const fs = require("fs");
@@ -140,6 +125,11 @@ function ipc_send(method, arg, to = IPC_BACKGROUND) {
   // 1: background
   // 2: overlay
   ipc.send("ipc_switch", method, IPC_MAIN, arg, to);
+}
+
+// convenience handler for player data singleton
+function toggleArchived(id) {
+  ipc_send("toggle_archived", id);
 }
 
 //
@@ -190,22 +180,10 @@ ipc.on("too_slow", function() {
   });
 });
 
+//
 function getTagColor(tag) {
-  let tc = tags_colors[tag];
-  if (tc) return tc;
-
-  return "#FAE5D2";
+  return pd.tags_colors[tag] || "#FAE5D2";
 }
-
-//
-function setTagColor(tag, color) {
-  tags_colors[tag] = color;
-}
-
-//
-ipc.on("set_tags_colors", function(event, arg) {
-  tags_colors = arg;
-});
 
 ipc.on("show_login", () => {
   canLogin = true;
@@ -221,15 +199,13 @@ function showLogin() {
 }
 
 //
-ipc.on("set_player_data", (event, _data) => {
-  playerData = _data;
-
+ipc.on("player_data_updated", () => {
   if (sidebarActive != -99) {
-    $(".top_username").html(playerData.name.slice(0, -6));
-    $(".top_username_id").html(playerData.name.slice(-6));
+    $(".top_username").html(pd.name.slice(0, -6));
+    $(".top_username_id").html(pd.name.slice(-6));
 
     let rankOffset;
-    let constructed = playerData.rank.constructed;
+    let constructed = pd.rank.constructed;
     rankOffset = get_rank_index(constructed.rank, constructed.tier);
     let constructedRankIcon = $$(".top_constructed_rank")[0];
     constructedRankIcon.style.backgroundPosition = rankOffset * -48 + "px 0px";
@@ -238,21 +214,21 @@ ipc.on("set_player_data", (event, _data) => {
       constructed.rank + " " + constructed.tier
     );
 
-    let limited = playerData.rank.limited;
+    let limited = pd.rank.limited;
     rankOffset = get_rank_index(limited.rank, limited.tier);
     let limitedRankIcon = $$(".top_limited_rank")[0];
     limitedRankIcon.style.backgroundPosition = rankOffset * -48 + "px 0px";
     limitedRankIcon.setAttribute("title", limited.rank + " " + limited.tier);
 
     let patreonIcon = $$(".top_patreon")[0];
-    if (playerData.patreon) {
-      let xoff = -40 * playerData.patreon_tier;
+    if (pd.patreon) {
+      let xoff = -40 * pd.patreon_tier;
       let title = "Patreon Basic Tier";
 
-      if (playerData.patreon_tier == 1) title = "Patreon Standard Tier";
-      if (playerData.patreon_tier == 2) title = "Patreon Modern Tier";
-      if (playerData.patreon_tier == 3) title = "Patreon Legacy Tier";
-      if (playerData.patreon_tier == 4) title = "Patreon Vintage Tier";
+      if (pd.patreon_tier == 1) title = "Patreon Standard Tier";
+      if (pd.patreon_tier == 2) title = "Patreon Modern Tier";
+      if (pd.patreon_tier == 3) title = "Patreon Legacy Tier";
+      if (pd.patreon_tier == 4) title = "Patreon Vintage Tier";
 
       patreonIcon.style.backgroundPosition = xoff + "px 0px";
       patreonIcon.setAttribute("title", title);
@@ -264,31 +240,9 @@ ipc.on("set_player_data", (event, _data) => {
 });
 
 //
-ipc.on("set_decks_last_used", (event, arg) => {
-  playerData.decks_last_used = arg;
-});
-
 ipc.on("set_reward_resets", function(event, arg) {
   rewards_daily_ends = new Date(arg.daily);
   rewards_weekly_ends = new Date(arg.weekly);
-});
-
-//
-ipc.on("set_decks", function(event, arg) {
-  try {
-    arg = JSON.parse(arg);
-  } catch (e) {
-    console.log("Error parsing JSON:", arg);
-    return false;
-  }
-  if (arg != null) {
-    delete arg.index;
-    decks = Object.values(arg);
-    if (matchesHistory.length) {
-      allMatches = Aggregator.createAllMatches();
-    }
-  }
-  openDecksTab();
 });
 
 //
@@ -303,47 +257,6 @@ ipc.on("set_deck_updated", function(event, str) {
 });
 
 //
-ipc.on("set_history", function(event, arg) {
-  if (arg != null) {
-    try {
-      matchesHistory = JSON.parse(arg);
-      if (decks) {
-        allMatches = Aggregator.createAllMatches();
-      }
-    } catch (e) {
-      console.log("Error parsing JSON:", arg);
-      return false;
-    }
-  }
-
-  openHistoryTab(0);
-});
-
-//
-ipc.on("set_history_data", function(event, arg) {
-  if (arg != null) {
-    matchesHistory = JSON.parse(arg);
-    if (decks) {
-      allMatches = Aggregator.createAllMatches();
-    }
-  }
-});
-
-//
-ipc.on("set_events", function(event, arg) {
-  if (arg != null) {
-    try {
-      eventsHistory = JSON.parse(arg);
-    } catch (e) {
-      console.log("Error parsing JSON:", arg);
-      return false;
-    }
-  }
-
-  openEventsTab(0);
-});
-
-//
 ipc.on("set_active_events", (event, arg) => {
   if (arg != null) {
     try {
@@ -353,44 +266,6 @@ ipc.on("set_active_events", (event, arg) => {
       return false;
     }
   }
-});
-
-ipc.on("set_economy", function(event, arg) {
-  if (arg != null) {
-    try {
-      economyHistory = JSON.parse(arg);
-    } catch (e) {
-      console.log("Error parsing JSON:", arg);
-      return false;
-    }
-  }
-
-  if (sidebarActive == 4) {
-    openEconomyTab(0);
-  }
-});
-
-//
-ipc.on("set_deck_changes", function(event, arg) {
-  if (arg != null) {
-    try {
-      changes = JSON.parse(arg);
-      console.log(changes);
-    } catch (e) {
-      console.log("Error parsing JSON:", arg);
-      return false;
-    }
-  }
-
-  if (changes != null) {
-    setChangesTimeline();
-  }
-});
-
-//
-ipc.on("set_cards", function(event, _cards, _cardsnew) {
-  cards = _cards;
-  cardsNew = _cardsnew;
 });
 
 //
@@ -458,8 +333,7 @@ ipc.on("set_status", function(event, arg) {
 ipc.on("set_home", function(event, arg) {
   hideLoadingBars();
 
-  ipc_send("set_deck_archetypes", arg.archetypes);
-  if (sidebarActive == -1) {
+  if (sidebarActive === -1) {
     console.log("Home", arg);
     openHomeTab(arg);
   }
@@ -520,29 +394,20 @@ ipc.on("open_course_deck", function(event, arg) {
 });
 
 //
-ipc.on("set_settings", function(event, arg) {
-  sidebarSize = arg.right_panel_width;
-  if (arg.cards_quality) {
-    cardQuality = arg.cards_quality;
+ipc.on("settings_updated", function() {
+  if (lastSettings.back_url !== pd.settings.back_url) {
+    change_background();
   }
-  if (arg.card_tile_style) {
-    cardStyle = arg.card_tile_style;
-  }
-  if (arg.back_url) {
-    let oldBack = defaultBackground;
-    defaultBackground = arg.back_url;
-    if (oldBack == "") {
-      change_background();
-    }
-  }
-  if (arg.last_open_tab !== undefined) {
-    lastTab = arg.last_open_tab;
-  }
-  $(".main_wrapper").css("background-color", arg.back_color);
-  cardSize = 100 + arg.cards_size * 10;
+  $(".main_wrapper").css("background-color", pd.settings.back_color);
   if (sidebarActive === 6) {
     openSettingsTab();
   }
+  lastSettings = { ...pd.settings };
+});
+
+//
+ipc.on("player_data_refresh", () => {
+  openTab(sidebarActive, {}, lastDataIndex, lastScrollTop);
 });
 
 //
@@ -596,7 +461,7 @@ function rememberMe() {
 }
 
 //
-function openTab(tab) {
+function openTab(tab, filters = {}, dataIndex = 0, scrollTop = 0) {
   showLoadingBars();
   $(".top_nav_item").each(function() {
     $(this).removeClass("item_selected");
@@ -605,13 +470,13 @@ function openTab(tab) {
   $("#ux_0").html("");
   switch (tab) {
     case 0:
-      openDecksTab();
+      openDecksTab(filters, scrollTop);
       break;
     case 1:
-      ipc_send("request_history", 1);
+      openHistoryTab(filters, dataIndex, scrollTop);
       break;
     case 2:
-      ipc_send("request_events", 1);
+      openEventsTab(filters, dataIndex, scrollTop);
       break;
     case 3:
       if (offlineMode) {
@@ -621,7 +486,7 @@ function openTab(tab) {
       }
       break;
     case 4:
-      ipc_send("request_economy", 1);
+      openEconomyTab(dataIndex, scrollTop);
       break;
     case 5:
       openCollectionTab();
@@ -653,13 +518,14 @@ function openTab(tab) {
 
 //
 ipc.on("initialize", function() {
-  if (playerData.name) {
-    $(".top_username").html(playerData.name.slice(0, -6));
-    $(".top_username_id").html(playerData.name.slice(-6));
+  showLoadingBars();
+  if (pd.name) {
+    $(".top_username").html(pd.name.slice(0, -6));
+    $(".top_username_id").html(pd.name.slice(-6));
   }
 
-  sidebarActive = lastTab;
-  ipc_send("request_home", filteredWildcardsSet);
+  sidebarActive = pd.settings.last_open_tab;
+  allMatches = Aggregator.createAllMatches();
   openTab(sidebarActive);
 
   $(".top_nav").removeClass("hidden");
@@ -921,6 +787,7 @@ $(document).ready(function() {
     document.body.style.cursor = "auto";
     if (!$(this).hasClass("item_selected")) {
       $(".moving_ux").animate({ left: "0px" }, 250, "easeInOutCubic");
+      let filters = {};
       if ($(this).hasClass("ith")) {
         sidebarActive = -1;
       } else if ($(this).hasClass("it0")) {
@@ -939,22 +806,22 @@ $(document).ready(function() {
         sidebarActive = 6;
       } else if ($(this).hasClass("it7")) {
         sidebarActive = 1;
-        setFilters({
+        filters = {
           ...Aggregator.getDefaultFilters(),
           date: DATE_SEASON,
           eventId: RANKED_CONST,
           rankedMode: true
-        });
+        };
       } else if ($(this).hasClass("it8")) {
         sidebarActive = 1;
-        setFilters({
+        filters = {
           ...Aggregator.getDefaultFilters(),
           date: DATE_SEASON,
           eventId: RANKED_DRAFT,
           rankedMode: true
-        });
+        };
       }
-      openTab(sidebarActive);
+      openTab(sidebarActive, filters);
     } else {
       $(".moving_ux").animate({ left: "0px" }, 250, "easeInOutCubic");
     }
@@ -1026,11 +893,14 @@ function makeResizable(div, resizeCallback, finalCallback) {
     var dx = m_pos - e.x;
     m_pos = e.x;
     let newWidth = Math.max(10, parseInt(parent.style.width) + dx);
-    sidebarSize = newWidth;
     parent.style.width = `${newWidth}px`;
     parent.style.flex = `0 0 ${newWidth}px`;
     if (resizeCallback instanceof Function) resizeCallback(newWidth);
     finalWidth = newWidth;
+  };
+
+  let saveWidth = function(width) {
+    ipc_send("save_user_settings", { right_panel_width: width });
   };
 
   div.addEventListener(
@@ -1046,8 +916,9 @@ function makeResizable(div, resizeCallback, finalCallback) {
     "mouseup",
     event => {
       document.removeEventListener("mousemove", resize, false);
-      if (finalWidth && finalCallback instanceof Function) {
-        finalCallback(finalWidth);
+      if (finalWidth) {
+        saveWidth(finalWidth);
+        if (finalCallback instanceof Function) finalCallback(finalWidth);
         finalWidth = null;
       }
     },
@@ -1107,7 +978,7 @@ function drawDeck(div, deck, showWildcards = false) {
         .orderBy(["data.cmc", "data.name"])
         .forEach(card => {
           const tile = deckDrawer.cardTile(
-            cardStyle,
+            pd.settings.card_tile_style,
             card.id,
             unique + "a",
             card.quantity,
@@ -1132,7 +1003,7 @@ function drawDeck(div, deck, showWildcards = false) {
       .orderBy(["data.cmc", "data.name"])
       .forEach(card => {
         const tile = deckDrawer.cardTile(
-          cardStyle,
+          pd.settings.card_tile_style,
           card.id,
           unique + "b",
           card.quantity,
@@ -1151,7 +1022,12 @@ function drawCardList(div, cards) {
   let counts = {};
   cards.forEach(cardId => (counts[cardId] = (counts[cardId] || 0) + 1));
   Object.keys(counts).forEach(cardId => {
-    let tile = deckDrawer.cardTile(cardStyle, cardId, unique, counts[cardId]);
+    let tile = deckDrawer.cardTile(
+      pd.settings.card_tile_style,
+      cardId,
+      unique,
+      counts[cardId]
+    );
     div.append(tile);
   });
 }
@@ -1251,7 +1127,7 @@ function drawDeckVisual(_div, _stats, deck) {
     });
   }
 
-  var sz = cardSize;
+  var sz = pd.cardsSize;
   let div = $('<div class="visual_mainboard"></div>');
   div.css("display", "flex");
   div.css("flex-wrap", "wrap");
@@ -1363,13 +1239,14 @@ function drawDeckVisual(_div, _stats, deck) {
 }
 
 //
-function setChangesTimeline() {
+function setChangesTimeline(deckId) {
+  const changes = [...pd.deckChanges(deckId)];
+  changes.sort(compare_changes);
+
   var cont = $(".stats");
   cont.html("");
 
   var time = $('<div class="changes_timeline"></div>');
-
-  changes.sort(compare_changes);
 
   // CURRENT DECK
   let div = $('<div class="change"></div>');
@@ -1462,7 +1339,7 @@ function setChangesTimeline() {
       }
 
       let tile = deckDrawer.cardTile(
-        cardStyle,
+        pd.settings.card_tile_style,
         c.id,
         "chm" + cn,
         Math.abs(c.quantity)
@@ -1492,7 +1369,7 @@ function setChangesTimeline() {
       }
 
       let tile = deckDrawer.cardTile(
-        cardStyle,
+        pd.settings.card_tile_style,
         c.id,
         "chs" + cn,
         Math.abs(c.quantity)
@@ -1558,7 +1435,7 @@ function open_draft(id) {
   console.log("OPEN DRAFT", id, draftPosition);
   $("#ux_1").html("");
   $("#ux_1").removeClass("flex_item");
-  let draft = matchesHistory[id];
+  const draft = pd.draft(id);
   let tileGrpid = db.sets[draft.set].tile;
 
   if (draftPosition < 1) draftPosition = 1;
@@ -1612,18 +1489,18 @@ function open_draft(id) {
   );
   sliderInput.appendTo(slider);
 
-  var pd = $('<div class="draft_pack_container"></div>');
-  pd.appendTo(cont);
+  const pdiv = $('<div class="draft_pack_container"></div>');
+  pdiv.appendTo(cont);
 
   pack.forEach(function(grpId) {
     var d = $(
       '<div style="width: ' +
-        cardSize +
+        pdiv.cardsSize +
         'px !important;" class="draft_card"></div>'
     );
     var img = $(
       '<img style="width: ' +
-        cardSize +
+        pdiv.cardsSize +
         'px !important;" class="draft_card_img"></img>'
     );
     if (grpId == pick && draftPosition % 2 == 0) {
@@ -1640,7 +1517,7 @@ function open_draft(id) {
     );
     r.appendTo(d);
     addCardHover(img, card);
-    d.appendTo(pd);
+    d.appendTo(pdiv);
   });
 
   $("#ux_1").append(top);
@@ -1682,7 +1559,7 @@ function open_draft(id) {
 function open_match(id) {
   $("#ux_1").html("");
   $("#ux_1").removeClass("flex_item");
-  var match = matchesHistory[id];
+  const match = pd.match(id);
 
   let top = $(
     '<div class="decklist_top"><div class="button back"></div><div class="deck_name">' +
@@ -1921,7 +1798,7 @@ function open_match(id) {
               : "line_dark";
           let cardDiv = $(`<div class="library_card ${rowShade}"></div>`);
           let tile = deckDrawer.cardTile(
-            cardStyle,
+            pd.settings.card_tile_style,
             cardId,
             unique + libraryIndex,
             "#" + (libraryIndex + 1)
@@ -1933,7 +1810,7 @@ function open_match(id) {
         if (unknownCards > 0) {
           let cardDiv = $('<div class="library_card"></div>');
           let tile = deckDrawer.cardTile(
-            cardStyle,
+            pd.settings.card_tile_style,
             null,
             unique + game.deckSize,
             unknownCards + "x"
@@ -2167,7 +2044,7 @@ function change_background(arg = "default", grpId = 0) {
   //console.log(arg, grpId, _card);
   if (arg === "default") {
     $(".top_artist").html("Ghitu Lavarunner by Jesper Ejsing");
-    if (defaultBackground == "") {
+    if (pd.settings.back_url === "") {
       $(".main_wrapper").css(
         "background-image",
         "url(../images/Ghitu-Lavarunner-Dominaria-MtG-Art.jpg)"
@@ -2176,7 +2053,7 @@ function change_background(arg = "default", grpId = 0) {
       $(".top_artist").html("");
       $(".main_wrapper").css(
         "background-image",
-        "url(" + defaultBackground + ")"
+        "url(" + pd.settings.back_url + ")"
       );
     }
   } else if (_card) {
@@ -2273,34 +2150,6 @@ function compare_color_winrates(a, b) {
 }
 
 //
-function sort_decks(compareFunc = compare_decks) {
-  decks.sort(compareFunc);
-  decks.forEach(function(deck) {
-    deck.colors = [];
-    deck.colors = get_deck_colors(deck);
-    deck.mainDeck.sort(compare_cards);
-  });
-}
-
-//
-function compare_decks(a, b) {
-  a = playerData.decks_last_used.indexOf(a.id);
-  b = playerData.decks_last_used.indexOf(b.id);
-
-  if (a == b) {
-    a = Date.parse(a.lastUpdated);
-    b = Date.parse(b.lastUpdated);
-    if (a < b) return 1;
-    if (a > b) return -1;
-    return 0;
-  } else {
-    if (a < b) return 1;
-    if (a > b) return -1;
-    return 0;
-  }
-}
-
-//
 function compare_changes(a, b) {
   a = Date.parse(a.date);
   b = Date.parse(b.date);
@@ -2328,18 +2177,4 @@ function compare_changes_inner(a, b) {
     return 1;
   }
   return 0;
-}
-
-//
-function compare_courses(a, b) {
-  if (a === undefined) return 0;
-  if (b === undefined) return 0;
-
-  a = eventsHistory[a];
-  b = eventsHistory[b];
-
-  if (a === undefined) return 0;
-  if (b === undefined) return 0;
-
-  return Date.parse(a.date) - Date.parse(b.date);
 }

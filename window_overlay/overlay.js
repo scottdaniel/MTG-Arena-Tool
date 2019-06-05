@@ -21,6 +21,7 @@ const striptags = require("striptags");
 const $ = (window.$ = window.jQuery = require("jquery"));
 
 const db = require("../shared/database");
+const pd = require("../shared/player-data");
 const Deck = require("../shared/deck.js");
 const Colors = require("../shared/colors");
 const deckDrawer = require("../shared/deck-drawer");
@@ -33,8 +34,7 @@ const {
   MANA,
   PACK_SIZES,
   IPC_BACKGROUND,
-  IPC_OVERLAY,
-  CARD_TILE_FLAT
+  IPC_OVERLAY
 } = require("../shared/constants.js");
 
 let landsCard = {
@@ -72,21 +72,11 @@ setRenderer(1);
 let playerSeat = 0;
 let oppName = "";
 let turnPriority = 0;
-let soundPriority = false;
-let soundPriorityVolume = 1;
-let overlayLands = true;
-let overlayAlpha = 1;
-let overlayAlphaBack = 1;
 let oddsSampleSize = 1;
 
-let cardQuality = "normal";
-let cardStyle = CARD_TILE_FLAT;
-
-let showSideboard = false;
 let actionLog = [];
 
 let currentMatch = null;
-let cards = {};
 
 const fix = new TransparencyMouseFix({
   fixPointerEvents: "auto"
@@ -285,7 +275,7 @@ ipc.on("action_log", function(event, arg) {
   //console.log(arg.seat, arg.str);
 });
 
-ipc.on("set_settings", function(event, settings) {
+ipc.on("settings_updated", function() {
   // Alpha does some weird things..
   /*
   let alpha = settings.overlay_alpha;
@@ -293,16 +283,13 @@ ipc.on("set_settings", function(event, settings) {
   $('.overlay_wrapper:before').css("opacity", 0.4*alpha);
   $('.overlay_wrapper').css("opacity", alpha);
   */
-  overlayAlpha = settings.overlay_alpha;
-  overlayAlphaBack = settings.overlay_alpha_back;
-  overlayLands = settings.overlay_lands;
-  change_background(settings.back_url);
+  change_background(pd.settings.back_url);
 
-  webFrame.setZoomFactor(settings.overlay_scale / 100);
+  webFrame.setZoomFactor(pd.settings.overlay_scale / 100);
 
-  $(".overlay_container").css("opacity", overlayAlpha);
-  $(".overlay_wrapper").css("opacity", overlayAlphaBack);
-  if (overlayAlphaBack === 1) {
+  $(".overlay_container").css("opacity", pd.settings.overlay_alpha);
+  $(".overlay_wrapper").css("opacity", pd.settings.overlay_alpha_back);
+  if (pd.settings.overlay_alpha_back === 1) {
     $(".click-through").each(function() {
       $(this).css("pointer-events", "all");
     });
@@ -314,16 +301,6 @@ ipc.on("set_settings", function(event, settings) {
     $(document.body).css("background-color", "rgba(0,0,0,0)");
   }
 
-  if (settings.cards_quality != undefined) {
-    cardQuality = settings.cards_quality;
-  }
-  if (settings.card_tile_style != undefined) {
-    cardStyle = settings.card_tile_style;
-  }
-
-  showSideboard = settings.overlay_sideboard;
-  soundPriority = settings.sound_priority;
-  soundPriorityVolume = settings.sound_priority_volume;
   $(".top").css("display", "");
   $(".overlay_deckname").css("display", "");
   $(".overlay_deckcolors").css("display", "");
@@ -344,22 +321,22 @@ ipc.on("set_settings", function(event, settings) {
     $(".overlay_deck_container").hide();
   }
 
-  if (!settings.overlay_top) {
+  if (!pd.settings.overlay_top) {
     hideDiv(".top");
     let style = "top: 0px !important;";
     $(".overlay_deck_container").attr("style", style);
     $(".overlay_draft_container").attr("style", style);
   }
-  if (!settings.overlay_title) {
+  if (!pd.settings.overlay_title) {
     hideDiv(".overlay_deckname");
     hideDiv(".overlay_deckcolors");
   }
-  if (!settings.overlay_deck) {
+  if (!pd.settings.overlay_deck) {
     hideDiv(".overlay_decklist");
     hideDiv(".overlay_deck_container");
     hideDiv(".overlay_draft_container");
   }
-  if (!settings.overlay_clock || overlayMode == 1) {
+  if (!pd.settings.overlay_clock || overlayMode == 1) {
     hideDiv(".overlay_clock_spacer");
     hideDiv(".overlay_clock_container");
   }
@@ -397,11 +374,6 @@ ipc.on("set_opponent_rank", function(event, rank, title) {
   $(".top_rank")
     .css("background-position", rank * -48 + "px 0px")
     .attr("title", title);
-});
-
-//
-ipc.on("set_cards", function(event, _cards) {
-  cards = _cards;
 });
 
 let changedMode = true;
@@ -571,7 +543,7 @@ function updateView() {
   let mainCards = deckToDraw.mainboard;
   mainCards.removeDuplicates();
   // group lands
-  if (overlayLands && deckMode !== 3) {
+  if (pd.settings.overlay_lands && deckMode !== 3) {
     let landsNumber = 0;
     let landsChance = 0;
     let landsColors = new Colors();
@@ -596,18 +568,30 @@ function updateView() {
     landsCard.frame = landsColors.get();
   }
   mainCards.get().sort(sortFunc);
-  console.log(mainCards.get());
   mainCards.get().forEach(card => {
     var grpId = card.id;
     let tile;
     if (deckMode == 2) {
       let quantity = (card.chance !== undefined ? card.chance : "0") + "%";
-      if (!overlayLands || (overlayLands && quantity !== "0%")) {
-        tile = deckDrawer.cardTile(cardStyle, grpId, "a", quantity);
+      if (
+        !pd.settings.overlay_lands ||
+        (pd.settings.overlay_lands && quantity !== "0%")
+      ) {
+        tile = deckDrawer.cardTile(
+          pd.settings.card_tile_style,
+          grpId,
+          "a",
+          quantity
+        );
         deckListDiv.append(tile);
       }
     } else {
-      tile = deckDrawer.cardTile(cardStyle, grpId, "a", card.quantity);
+      tile = deckDrawer.cardTile(
+        pd.settings.card_tile_style,
+        grpId,
+        "a",
+        card.quantity
+      );
       deckListDiv.append(tile);
     }
 
@@ -617,7 +601,7 @@ function updateView() {
       attachLandOdds(tile, currentMatch.playerCardsOdds);
     }
   });
-  if (showSideboard && deckToDraw.sideboard.count() > 0) {
+  if (pd.settings.overlay_sideboard && deckToDraw.sideboard.count() > 0) {
     deckListDiv.append('<div class="card_tile_separator">Sideboard</div>');
 
     let sideCards = deckToDraw.sideboard;
@@ -627,10 +611,20 @@ function updateView() {
     sideCards.get().forEach(function(card) {
       var grpId = card.id;
       if (deckMode == 2) {
-        let tile = deckDrawer.cardTile(cardStyle, grpId, "a", "0%");
+        let tile = deckDrawer.cardTile(
+          pd.settings.card_tile_style,
+          grpId,
+          "a",
+          "0%"
+        );
         deckListDiv.append(tile);
       } else {
-        let tile = deckDrawer.cardTile(cardStyle, grpId, "a", card.quantity);
+        let tile = deckDrawer.cardTile(
+          pd.settings.card_tile_style,
+          grpId,
+          "a",
+          card.quantity
+        );
         deckListDiv.append(tile);
       }
     });
@@ -773,11 +767,15 @@ ipc.on("set_turn", function(
   _decision
 ) {
   playerSeat = _we;
-  if (turnPriority != _priority && _priority == _we && soundPriority) {
+  if (
+    turnPriority != _priority &&
+    _priority == _we &&
+    pd.settings.sound_priority
+  ) {
     //    playBlip();
     let { Howl, Howler } = require("howler");
     let sound = new Howl({ src: ["../sounds/blip.mp3"] });
-    Howler.volume(soundPriorityVolume);
+    Howler.volume(pd.settings.sound_priority_volume);
     sound.play();
   }
   //turnPhase = _phase;
@@ -829,7 +827,12 @@ function setDraft(_packN = -1, _pickN = -1) {
     currentDraft.pickedCards.sort(compare_draft_cards);
 
     currentDraft.pickedCards.forEach(function(grpId) {
-      let tile = deckDrawer.cardTile(cardStyle, grpId, "a", 1);
+      let tile = deckDrawer.cardTile(
+        pd.settings.card_tile_style,
+        grpId,
+        "a",
+        1
+      );
       $(".overlay_decklist").append(tile);
     });
   } else if (draftMode == 1) {
@@ -867,7 +870,7 @@ function setDraft(_packN = -1, _pickN = -1) {
       }
 
       for (let i = 0; i < 4; i++) {
-        if (i < cards[grpId]) {
+        if (i < pd.cards[grpId]) {
           $(
             '<div style="width: 24px; " class="inventory_card_quantity_green"></div>'
           ).appendTo(cont);
@@ -879,7 +882,12 @@ function setDraft(_packN = -1, _pickN = -1) {
       }
 
       cont.appendTo(od);
-      let tile = deckDrawer.cardTile(cardStyle, grpId, "a", DRAFT_RANKS[rank]);
+      let tile = deckDrawer.cardTile(
+        pd.settings.card_tile_style,
+        grpId,
+        "a",
+        DRAFT_RANKS[rank]
+      );
       od.append(tile);
       if (grpId == pick) {
         tile.style.backgroundColor = "rgba(250, 229, 210, 0.66)";
@@ -1043,8 +1051,8 @@ $(document).ready(function() {
       $(".overlay_container").css("opacity", 1);
     },
     function() {
-      if (overlayAlpha !== 1) {
-        $(".overlay_container").css("opacity", overlayAlpha);
+      if (pd.settings.overlay_alpha !== 1) {
+        $(".overlay_container").css("opacity", pd.settings.overlay_alpha);
       }
     }
   );

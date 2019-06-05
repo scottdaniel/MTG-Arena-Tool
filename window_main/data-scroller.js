@@ -3,6 +3,8 @@ global
   $
   hideLoadingBars
   showLoadingBars
+  lastDataIndex
+  lastScrollTop
 */
 
 const { createDivision } = require("../shared/dom-fns");
@@ -17,7 +19,7 @@ class DataScroller {
     return this;
   }
 
-  render(loadMore) {
+  render(loadMore, scrollTop) {
     const d = createDivision(["list_fill"]);
     this.container.appendChild(d);
     this.loaded = 0;
@@ -26,12 +28,17 @@ class DataScroller {
     this.renderRows(loadMore || this.loadAmount);
 
     const jCont = $(this.container);
+    if (scrollTop) {
+      jCont.scrollTop(scrollTop);
+    }
     jCont.off();
     jCont.on("scroll", () => {
       const desiredHeight = Math.round(jCont.scrollTop() + jCont.innerHeight());
       if (desiredHeight >= jCont[0].scrollHeight) {
         this.renderRows(this.loadAmount);
+        lastDataIndex = this.dataIndex;
       }
+      lastScrollTop = jCont.scrollTop();
     });
   }
 
