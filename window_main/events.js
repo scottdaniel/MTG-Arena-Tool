@@ -1,17 +1,5 @@
-/*
-global
-  Aggregator
-  allMatches
-  DataScroller
-  FilterPanel
-  getEventWinLossClass
-  ListItem
-  open_match
-  pd
-  StatsPanel
-  toggleArchived
-*/
-
+const { MANA } = require("../shared/constants");
+const pd = require("../shared/player-data");
 const { createDivision, queryElementsByClass } = require("../shared/dom-fns");
 const {
   compare_cards,
@@ -22,7 +10,17 @@ const {
   toMMSS
 } = require("../shared/util");
 
-const { MANA } = require("../shared/constants.js");
+const Aggregator = require("./aggregator");
+const DataScroller = require("./data-scroller");
+const FilterPanel = require("./filter-panel");
+const ListItem = require("./list-item");
+const StatsPanel = require("./stats-panel");
+const {
+  getEventWinLossClass,
+  getLocalState,
+  openMatch: open_match,
+  toggleArchived
+} = require("./renderer-util");
 
 let filters = Aggregator.getDefaultFilters();
 filters.eventId = Aggregator.ALL_EVENT_TRACKS;
@@ -51,7 +49,7 @@ function openEventsTab(_filters, dataIndex = 25, scrollTop = 0) {
     "events_top",
     selected => openEventsTab(selected),
     filters,
-    allMatches.trackEvents,
+    getLocalState().totalAgg.trackEvents,
     [],
     [],
     false,

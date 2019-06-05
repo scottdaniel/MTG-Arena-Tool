@@ -1,15 +1,3 @@
-/*
-global
-  allMatches
-  change_background
-  drawDeck
-  drawDeckVisual
-  FilterPanel
-  ipc_send
-  pd
-  pop
-*/
-
 const { queryElements: $$, createDivision } = require("../shared/dom-fns");
 const { createSelect } = require("../shared/select");
 const deckDrawer = require("../shared/deck-drawer");
@@ -24,6 +12,17 @@ const {
   toHHMMSS,
   urlDecode
 } = require("../shared/util");
+const pd = require("../shared/player-data");
+
+const FilterPanel = require("./filter-panel");
+const {
+  pop,
+  changeBackground: change_background,
+  drawDeck,
+  drawDeckVisual,
+  getLocalState,
+  ipcSend: ipc_send
+} = require("./renderer-util");
 
 let tournamentDeck = null;
 let currentDeck = null;
@@ -173,7 +172,7 @@ function showTournamentRegister(mainDiv, tou) {
 
     mainDiv.appendChild(deckContainer);
     if (tou.deck) {
-      drawDeckVisual(deckvisual, undefined, tou.deck);
+      drawDeckVisual(deckvisual, tou.deck);
     }
 
     if (tou.state !== 4) {
@@ -187,7 +186,7 @@ function showTournamentRegister(mainDiv, tou) {
     const validDecks = pd.deckList
       .filter(deck => !deck.custom)
       .filter(deck => getBoosterCountEstimate(get_deck_missing(deck)) === 0);
-    validDecks.sort(allMatches.compareDecks);
+    validDecks.sort(getLocalState().totalAgg.compareDecks);
     // hack to make pretty deck names
     // TODO move getDeckString out of FilterPanel
     const filterPanel = new FilterPanel("unused", null, {}, [], [], validDecks);

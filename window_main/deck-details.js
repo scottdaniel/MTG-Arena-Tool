@@ -1,29 +1,3 @@
-/*
-global
-    Aggregator
-    change_background
-    drawDeck
-    drawDeckVisual
-    ipc_send
-    makeResizable
-    pop
-    pd
-    setChangesTimeline
-    StatsPanel
-*/
-
-const db = require("../shared/database");
-const ConicGradient = require("../shared/conic-gradient");
-const { createDivision } = require("../shared/dom-fns");
-const {
-  add,
-  get_deck_export,
-  get_deck_export_txt,
-  get_deck_missing,
-  get_deck_types_ammount,
-  getBoosterCountEstimate
-} = require("../shared/util");
-
 const {
   MANA,
   CARD_RARITIES,
@@ -31,7 +5,32 @@ const {
   CARD_TYPES,
   COLORS_ALL,
   MANA_COLORS
-} = require("../shared/constants.js");
+} = require("../shared/constants");
+const db = require("../shared/database");
+const pd = require("../shared/player-data");
+const ConicGradient = require("../shared/conic-gradient");
+const { createDivision } = require("../shared/dom-fns");
+const deckDrawer = require("../shared/deck-drawer");
+const {
+  add,
+  get_deck_export,
+  get_deck_export_txt,
+  get_deck_missing,
+  get_deck_types_ammount,
+  getBoosterCountEstimate,
+  timeSince
+} = require("../shared/util");
+
+const Aggregator = require("./aggregator");
+const StatsPanel = require("./stats-panel");
+const {
+  changeBackground: change_background,
+  drawDeck,
+  drawDeckVisual,
+  ipcSend: ipc_send,
+  makeResizable,
+  pop
+} = require("./renderer-util");
 
 // We need to store a sorted list of card types so we create the card counts in the same order.
 let currentOpenDeck = null;
@@ -392,7 +391,7 @@ function openDeck(deck = currentOpenDeck, filters = currentFilters) {
     if (showStatsPanel) {
       $("#stats_column").hide();
     }
-    drawDeckVisual(deckListSection, statsSection, deck);
+    drawDeckVisual(deckListSection, deck, statsSection, openDeck);
   });
 
   $(".openHistory").click(() => setChangesTimeline(deck.id));
@@ -414,6 +413,228 @@ function openDeck(deck = currentOpenDeck, filters = currentFilters) {
   });
 }
 
+//
+function setChangesTimeline(deckId) {
+  const changes = [...pd.deckChanges(deckId)];
+  changes.sort(compare_changes);
+
+  var cont = $(".stats");
+  cont.html("");
+
+  var time = $('<div class="changes_timeline"></div>');
+
+  // CURRENT DECK
+  let div = $('<div class="change"></div>');
+  let butbox = $(
+    '<div class="change_button_cont" style="transform: scaleY(-1);"></div>'
+  );
+  let button = $('<div class="change_button"></div>');
+  button.appendTo(butbox);
+  let datbox = $('<div class="change_data"></div>');
+
+  // title
+  let title = $('<div class="change_data_box"></div>');
+  title.html("Current Deck");
+
+  butbox.appendTo(div);
+  datbox.appendTo(div);
+  title.appendTo(datbox);
+  div.appendTo(time);
+
+  butbox.on("mouseenter", function() {
+    button.css("width", "32px");
+    button.css("height", "32px");
+    button.css("top", "calc(50% - 16px)");
+  });
+
+  butbox.on("mouseleave", function() {
+    button.css("width", "24px");
+    button.css("height", "24px");
+    button.css("top", "calc(50% - 12px)");
+  });
+
+  butbox.on("click", function() {
+    var hasc = button.hasClass("change_button_active");
+
+    $(".change_data_box_inside").each(function() {
+      $(this).css("height", "0px");
+    });
+
+    $(".change_button").each(function() {
+      $(this).removeClass("change_button_active");
+    });
+
+    if (!hasc) {
+      button.addClass("change_button_active");
+    }
+  });
+  //
+
+  var cn = 0;
+  changes.forEach(function(change) {
+    change.changesMain.sort(compare_changes_inner);
+    change.changesSide.sort(compare_changes_inner);
+
+    let div = $('<div class="change"></div>');
+    let butbox;
+    if (cn < changes.length - 1) {
+      butbox = $(
+        '<div style="background-size: 100% 100% !important;" class="change_button_cont"></div>'
+      );
+    } else {
+      butbox = $('<div class="change_button_cont"></div>');
+    }
+    var button = $('<div class="change_button"></div>');
+    button.appendTo(butbox);
+    let datbox = $('<div class="change_data"></div>');
+
+    // title
+    let title = $('<div class="change_data_box"></div>');
+    // inside
+    let data = $('<div class="change_data_box_inside"></div>');
+    var innherH = 54;
+    let nc = 0;
+    if (change.changesMain.length > 0) {
+      let dd = $('<div class="change_item_box"></div>');
+      let separator = deckDrawer.cardSeparator("Mainboard");
+      dd.append(separator);
+      dd.appendTo(data);
+    }
+
+    change.changesMain.forEach(function(c) {
+      innherH += 30;
+      if (c.quantity > 0) nc += c.quantity;
+      let dd = $('<div class="change_item_box"></div>');
+      if (c.quantity > 0) {
+        let ic = $('<div class="change_add"></div>');
+        ic.appendTo(dd);
+      } else {
+        let ic = $('<div class="change_remove"></div>');
+        ic.appendTo(dd);
+      }
+
+      let tile = deckDrawer.cardTile(
+        pd.settings.card_tile_style,
+        c.id,
+        "chm" + cn,
+        Math.abs(c.quantity)
+      );
+      dd.append(tile);
+      dd.appendTo(data);
+    });
+
+    if (change.changesSide.length > 0) {
+      let dd = $('<div class="change_item_box"></div>');
+      let separator = deckDrawer.cardSeparator("Sideboard");
+      dd.append(separator);
+      innherH += 30;
+      dd.appendTo(data);
+    }
+
+    change.changesSide.forEach(function(c) {
+      innherH += 30;
+      if (c.quantity > 0) nc += c.quantity;
+      let dd = $('<div class="change_item_box"></div>');
+      if (c.quantity > 0) {
+        let ic = $('<div class="change_add"></div>');
+        ic.appendTo(dd);
+      } else {
+        let ic = $('<div class="change_remove"></div>');
+        ic.appendTo(dd);
+      }
+
+      let tile = deckDrawer.cardTile(
+        pd.settings.card_tile_style,
+        c.id,
+        "chs" + cn,
+        Math.abs(c.quantity)
+      );
+      dd.append(tile);
+      dd.appendTo(data);
+    });
+
+    title.html(
+      nc + " changes, " + timeSince(Date.parse(change.date)) + " ago."
+    );
+
+    butbox.appendTo(div);
+    datbox.appendTo(div);
+    title.appendTo(datbox);
+    data.appendTo(datbox);
+    div.appendTo(time);
+
+    butbox.on("mouseenter", function() {
+      button.css("width", "32px");
+      button.css("height", "32px");
+      button.css("top", "calc(50% - 16px)");
+    });
+
+    butbox.on("mouseleave", function() {
+      button.css("width", "24px");
+      button.css("height", "24px");
+      button.css("top", "calc(50% - 12px)");
+    });
+
+    butbox.on("click", function() {
+      // This requires some UX indicators
+      //drawDeck($('.decklist'), {mainDeck: change.previousMain, sideboard: change.previousSide});
+      var hasc = button.hasClass("change_button_active");
+
+      $(".change_data_box_inside").each(function() {
+        $(this).css("height", "0px");
+      });
+
+      $(".change_button").each(function() {
+        $(this).removeClass("change_button_active");
+      });
+
+      if (!hasc) {
+        button.addClass("change_button_active");
+        data.css("height", innherH + "px");
+      }
+    });
+
+    cn++;
+  });
+
+  $('<div class="button_simple openDeck">View stats</div>').appendTo(cont);
+
+  $(".openDeck").click(function() {
+    openDeck();
+  });
+  time.appendTo(cont);
+}
+
+//
+function compare_changes(a, b) {
+  a = Date.parse(a.date);
+  b = Date.parse(b.date);
+  if (a < b) return 1;
+  if (a > b) return -1;
+  return 0;
+}
+
+//
+function compare_changes_inner(a, b) {
+  a = a.quantity;
+  b = b.quantity;
+  if (a > 0 && b > 0) {
+    if (a < b) return -1;
+    if (a > b) return 1;
+  }
+  if (a < 0 && b < 0) {
+    if (a < b) return 1;
+    if (a > b) return -1;
+  }
+  if (a < 0 && b > 0) {
+    return -1;
+  }
+  if (a > 0 && b < 0) {
+    return 1;
+  }
+  return 0;
+}
+
 module.exports = {
-  openDeck: openDeck
+  openDeck
 };

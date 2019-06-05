@@ -1,13 +1,10 @@
-/*
-global
-  $
-  hideLoadingBars
-  showLoadingBars
-  lastDataIndex
-  lastScrollTop
-*/
-
 const { createDivision } = require("../shared/dom-fns");
+
+const {
+  setLocalState,
+  showLoadingBars,
+  hideLoadingBars
+} = require("./renderer-util");
 
 class DataScroller {
   constructor(container, renderData, loadAmount, maxDataIndex) {
@@ -33,12 +30,14 @@ class DataScroller {
     }
     jCont.off();
     jCont.on("scroll", () => {
+      const newLs = {};
       const desiredHeight = Math.round(jCont.scrollTop() + jCont.innerHeight());
       if (desiredHeight >= jCont[0].scrollHeight) {
         this.renderRows(this.loadAmount);
-        lastDataIndex = this.dataIndex;
+        newLs.lastDataIndex = this.dataIndex;
       }
-      lastScrollTop = jCont.scrollTop();
+      newLs.lastScrollTop = jCont.scrollTop();
+      setLocalState(newLs);
     });
   }
 

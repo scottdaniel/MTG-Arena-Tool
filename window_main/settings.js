@@ -1,21 +1,18 @@
-/*
-global
-  add_checkbox
-  change_background
-  hideLoadingBars
-  ipc_send
-  offlineMode
-  pd
-*/
-
 const { ipcRenderer: ipc, remote, shell } = require("electron");
 
+const { CARD_TILE_ARENA, CARD_TILE_FLAT } = require("../shared/constants");
 const db = require("../shared/database");
+const pd = require("../shared/player-data");
 const deckDrawer = require("../shared/deck-drawer");
 const { createSelect } = require("../shared/select");
 const { get_card_image } = require("../shared/util");
 
-const { CARD_TILE_ARENA, CARD_TILE_FLAT } = require("../shared/constants.js");
+const {
+  add_checkbox,
+  changeBackground: change_background,
+  hideLoadingBars,
+  ipcSend: ipc_send
+} = require("./renderer-util");
 
 let lastSettingsSection = 1;
 let updateState = "";
@@ -44,7 +41,7 @@ function openSettingsTab(openSection = lastSettingsSection) {
   $('<div class="settings_nav sn4">Privacy</div>').appendTo(wrap_l);
   $('<div class="settings_nav sn5">About</div>').appendTo(wrap_l);
 
-  if (offlineMode) {
+  if (pd.offline) {
     $('<div class="settings_nav sn6">Login</div>').appendTo(wrap_l);
   } else {
     $('<div class="settings_nav sn6">Logout</div>').appendTo(wrap_l);
@@ -428,7 +425,7 @@ function openSettingsTab(openSection = lastSettingsSection) {
   section = $('<div class="settings_section ss6" style="height: 100%;"></div>');
   const login = $('<div class="about"></div>');
   section.appendTo(div);
-  if (offlineMode) {
+  if (pd.offline) {
     button = $(
       '<div class="button_simple centered login_link_about">Login</div>'
     );

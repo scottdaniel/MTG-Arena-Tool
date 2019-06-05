@@ -1,15 +1,13 @@
-/*
-global
-  compare_winrates
-  formatPercent
-  getTagColor
-  getWinrateClass
-*/
-
+const { MANA, RANKS } = require("../shared/constants");
 const { createDivision } = require("../shared/dom-fns");
 const { get_rank_index, toDDHHMMSS, toMMSS } = require("../shared/util");
 
-const { MANA, RANKS } = require("../shared/constants.js");
+const {
+  compareWinrates: compare_winrates,
+  formatPercent,
+  getTagColor,
+  getWinrateClass
+} = require("./renderer-util");
 
 class StatsPanel {
   constructor(

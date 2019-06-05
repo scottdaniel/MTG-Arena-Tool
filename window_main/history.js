@@ -1,26 +1,7 @@
-/*
-global
-  Aggregator
-  allMatches
-  currentId
-  DataScroller
-  FilterPanel
-  getTagColor
-  ipc_send
-  makeResizable
-  open_match
-  open_draft
-  ListItem
-  pd
-  showLoadingBars
-  sidebarActive
-  StatsPanel
-  toggleArchived
-*/
-
-const autocomplete = require("../shared/autocomplete.js");
-
+const autocomplete = require("../shared/autocomplete");
+const { MANA, RANKS } = require("../shared/constants");
 const db = require("../shared/database");
+const pd = require("../shared/player-data");
 const { selectAdd } = require("../shared/select");
 const { createDivision } = require("../shared/dom-fns");
 const {
@@ -32,7 +13,22 @@ const {
   toMMSS
 } = require("../shared/util");
 
-const { MANA, RANKS } = require("../shared/constants.js");
+const Aggregator = require("./aggregator");
+const DataScroller = require("./data-scroller");
+const FilterPanel = require("./filter-panel");
+const ListItem = require("./list-item");
+const StatsPanel = require("./stats-panel");
+const {
+  formatPercent,
+  getLocalState,
+  getTagColor,
+  ipcSend: ipc_send,
+  makeResizable,
+  openDraft: open_draft,
+  openMatch: open_match,
+  showLoadingBars,
+  toggleArchived
+} = require("./renderer-util");
 
 const { DEFAULT_DECK, RANKED_CONST, RANKED_DRAFT, DATE_SEASON } = Aggregator;
 let filters = Aggregator.getDefaultFilters();
@@ -72,8 +68,6 @@ function setFilters(selected = {}) {
 }
 
 function openHistoryTab(_filters = {}, dataIndex = 25, scrollTop = 0) {
-  if (sidebarActive !== 1) return;
-
   var mainDiv = document.getElementById("ux_0");
   var div, d;
   mainDiv.classList.add("flex_item");
@@ -151,7 +145,7 @@ function openHistoryTab(_filters = {}, dataIndex = 25, scrollTop = 0) {
     "history_top",
     selected => openHistoryTab(selected),
     filters,
-    allMatches.events,
+    getLocalState().totalAgg.events,
     matchesInEvent.tags,
     matchesInPartialDeckFilters.decks,
     true,
@@ -366,15 +360,6 @@ function attachDraftData(listItem, draft) {
   listItem.right.after(replayShareButton);
 }
 
-function formatPercent(percent, precision) {
-  // Utility function: converts a number to rounded percent
-  // converts number to percent
-  // 0.333333 -> 33%
-  // 20 -> 2000%
-  precision = precision || 0;
-  return (100 * percent).toFixed(precision);
-}
-
 function renderRanksStats(container, aggregator) {
   container.innerHTML = "";
   if (!aggregator || !aggregator.stats.total) return;
@@ -411,7 +396,7 @@ function renderRanksStats(container, aggregator) {
     ["ranks_history_title"],
     `Games until ${getNextRank(currentRank)}: ${expected}`
   );
-  title.title = `Using ${formatPercent(winrate)}% winrate`;
+  title.title = `Using ${formatPercent(winrate)} winrate`;
   container.appendChild(title);
 
   seasonToggleButton.addEventListener("click", () => {
@@ -627,8 +612,7 @@ function getStepsUntilNextRank(mode, winrate) {
 }
 
 function addShare(_match) {
-  $("." + _match.id + "dr").on("click", function(e) {
-    currentId = _match.id;
+  $("." + _match.id + "dr").on("click", e => {
     e.stopPropagation();
     $(".dialog_wrapper").css("opacity", 1);
     $(".dialog_wrapper").css("pointer-events", "all");
@@ -681,7 +665,7 @@ function addShare(_match) {
       );
     }
     select.appendTo(cont);
-    selectAdd(select, draftShareLink);
+    selectAdd(select, () => draftShareLink(_match.id));
 
     but.click(function() {
       ipc_send("set_clipboard", document.getElementById("share_input").value);
@@ -689,9 +673,9 @@ function addShare(_match) {
   });
 }
 
-function draftShareLink() {
-  var shareExpire = document.getElementById("expire_select").value;
-  var expire = 0;
+function draftShareLink(id) {
+  const shareExpire = document.getElementById("expire_select").value;
+  let expire = 0;
   switch (shareExpire) {
     case "One day":
       expire = 0;
@@ -709,12 +693,8 @@ function draftShareLink() {
       expire = 0;
       break;
   }
-  var obj = {
-    expire: expire,
-    id: currentId
-  };
   showLoadingBars();
-  ipc_send("request_draft_link", obj);
+  ipc_send("request_draft_link", { expire, id });
 }
 
 function compare_matches(a, b) {

@@ -1,14 +1,8 @@
-/*
-global
-  change_background
-  hideLoadingBars
-  ipc_send
-  remote
-  Menu
-  MenuItem
-*/
+const { remote, shell } = require("electron");
+const Menu = remote.Menu;
+const MenuItem = remote.MenuItem;
 
-const { shell } = require("electron");
+const { COLORS_BRIEF, CARD_RARITIES } = require("../shared/constants");
 const db = require("../shared/database");
 const pd = require("../shared/player-data");
 const { queryElements: $$, createDivision } = require("../shared/dom-fns");
@@ -22,7 +16,11 @@ const {
   replaceAll
 } = require("../shared/util");
 
-const { COLORS_BRIEF, CARD_RARITIES } = require("../shared/constants.js");
+const {
+  hideLoadingBars,
+  changeBackground: change_background,
+  ipcSend: ipc_send
+} = require("./renderer-util");
 
 let collectionPage = 0;
 let sortingAlgorithm = "Sort by Set";

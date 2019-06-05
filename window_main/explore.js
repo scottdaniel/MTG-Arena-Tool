@@ -1,13 +1,6 @@
-/*
-global
-  add_checkbox
-  getWinrateClass
-  hideLoadingBars
-  ipc_send
-  showLoadingBars
-*/
-
 const _ = require("lodash");
+
+const { MANA, COLORS_BRIEF, DEFAULT_TILE } = require("../shared/constants");
 const db = require("../shared/database");
 const pd = require("../shared/player-data");
 const { queryElements: $$, createDivision } = require("../shared/dom-fns");
@@ -21,7 +14,13 @@ const {
   getBoosterCountEstimate
 } = require("../shared/util");
 
-const { MANA, COLORS_BRIEF, DEFAULT_TILE } = require("../shared/constants.js");
+const {
+  addCheckbox: add_checkbox,
+  getWinrateClass,
+  hideLoadingBars,
+  ipcSend: ipc_send,
+  showLoadingBars
+} = require("./renderer-util");
 
 let filterWCC = 0;
 let filterWCU = 0;

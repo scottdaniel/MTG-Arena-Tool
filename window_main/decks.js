@@ -1,23 +1,7 @@
-/*
-global
-  Aggregator
-  allMatches
-  FilterPanel
-  formatPercent
-  hideLoadingBars
-  getWinrateClass
-  ipc_send
-  makeResizable
-  ListItem
-  openDeck
-  pd
-  sidebarActive
-  getTagColor
-  StatsPanel
-  lastScrollTop
-*/
-
 const _ = require("lodash");
+
+const { MANA, CARD_RARITIES } = require("../shared/constants");
+const pd = require("../shared/player-data");
 const { createDivision } = require("../shared/dom-fns");
 const {
   get_deck_missing,
@@ -25,7 +9,21 @@ const {
   getReadableFormat
 } = require("../shared/util");
 
-const { MANA, CARD_RARITIES } = require("../shared/constants.js");
+const Aggregator = require("./aggregator");
+const FilterPanel = require("./filter-panel");
+const ListItem = require("./list-item");
+const StatsPanel = require("./stats-panel");
+const { openDeck } = require("./deck-details");
+const {
+  formatPercent,
+  getLocalState,
+  getTagColor,
+  getWinrateClass,
+  hideLoadingBars,
+  ipcSend: ipc_send,
+  makeResizable,
+  setLocalState
+} = require("./renderer-util");
 
 let filters = Aggregator.getDefaultFilters();
 filters.onlyCurrentDecks = true;
@@ -49,9 +47,8 @@ function setFilters(selected = {}) {
 
 //
 function openDecksTab(_filters = {}, scrollTop = 0) {
-  if (sidebarActive !== 0) return;
-
   hideLoadingBars();
+  const ls = getLocalState();
   const mainDiv = document.getElementById("ux_0");
   mainDiv.classList.add("flex_item");
   mainDiv.innerHTML = "";
@@ -98,7 +95,7 @@ function openDecksTab(_filters = {}, scrollTop = 0) {
     "decks_top",
     selected => openDecksTab(selected),
     filters,
-    allMatches.events,
+    ls.totalAgg.events,
     tags,
     [],
     true,
@@ -248,10 +245,10 @@ function openDecksTab(_filters = {}, scrollTop = 0) {
 
   const jCont = $(wrap_l);
   if (scrollTop) {
-    jCont.scrollTop(lastScrollTop);
+    jCont.scrollTop(ls.lastScrollTop);
   }
   jCont.on("scroll", () => {
-    lastScrollTop = jCont.scrollTop();
+    setLocalState({ lastScrollTop: jCont.scrollTop() });
   });
 }
 
