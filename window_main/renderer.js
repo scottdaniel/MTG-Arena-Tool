@@ -1,10 +1,5 @@
-/*
-global
-  set_tou_state
-*/
-
-const { app, ipcRenderer: ipc, remote, shell } = require("electron");
-
+const { ipcRenderer: ipc, remote, shell } = require("electron");
+const sha1 = require("js-sha1");
 if (!remote.app.isPackaged) {
   const { openNewGitHubIssue, debugInfo } = require("electron-util");
   const unhandled = require("electron-unhandled");
@@ -20,117 +15,52 @@ if (!remote.app.isPackaged) {
   });
   require("devtron").install();
 }
-
-const _ = require("lodash");
 window.$ = window.jQuery = require("jquery");
 require("jquery.easing");
 require("spectrum-colorpicker");
 require("time-elements");
-const striptags = require("striptags");
 
-const pd = require("../shared/player-data.js");
-const Aggregator = require("./aggregator.js");
-const ListItem = require("./list-item.js");
-const FilterPanel = require("./filter-panel.js");
-const StatsPanel = require("./stats-panel.js");
-const DataScroller = require("./data-scroller.js");
-const openHomeTab = require("./home").openHomeTab;
-const tournamentOpen = require("./tournaments").tournamentOpen;
-const tournamentCreate = require("./tournaments").tournamentCreate;
-const tournamentSetState = require("./tournaments").tournamentSetState;
-const openDeck = require("./deck-details").openDeck;
-const openDecksTab = require("./decks").openDecksTab;
-const { openHistoryTab } = require("./history");
-const openExploreTab = require("./explore").openExploreTab;
-const setExploreDecks = require("./explore").setExploreDecks;
-const openCollectionTab = require("./collection").openCollectionTab;
-const openEventsTab = require("./events").openEventsTab;
-const expandEvent = require("./events").expandEvent;
-const openSettingsTab = require("./settings").openSettingsTab;
-const deckDrawer = require("../shared/deck-drawer");
-const cardTypes = require("../shared/card-types");
-const openEconomyTab = require("./economy").openEconomyTab;
-const db = require("../shared/database");
+const { HIDDEN_PW } = require("../shared/constants");
+const pd = require("../shared/player-data");
 const { queryElements: $$ } = require("../shared/dom-fns");
-const { addCardHover } = require("../shared/card-hover");
 const {
-  compare_archetypes,
   compare_cards,
-  get_card_image,
   get_deck_colors,
-  get_deck_export,
-  get_deck_export_txt,
-  get_deck_types_ammount,
   get_rank_index,
-  makeId,
-  removeDuplicates,
-  timeSince
+  removeDuplicates
 } = require("../shared/util");
+
 const {
-  DRAFT_RANKS,
-  HIDDEN_PW,
-  MANA,
-  IPC_MAIN,
-  IPC_BACKGROUND,
-  CARD_TILE_FLAT
-} = require("../shared/constants.js");
+  changeBackground: change_background,
+  getLocalState,
+  hideLoadingBars,
+  ipcSend: ipc_send,
+  pop,
+  setLocalState,
+  showLoadingBars
+} = require("./renderer-util");
 const {
-  hypergeometricSignificance,
-  hypergeometricRange
-} = require("../shared/stats-fns");
-
-const Menu = remote.Menu;
-const MenuItem = remote.MenuItem;
-
-const { RANKED_CONST, RANKED_DRAFT, DATE_SEASON } = Aggregator;
-
-let deck = null;
-let changes = null;
-let allMatches = null;
-
-let explore = null;
-let ladder = null;
+  createAllMatches,
+  getDefaultFilters,
+  RANKED_CONST,
+  RANKED_DRAFT,
+  DATE_SEASON
+} = require("./aggregator");
+const { openHomeTab, requestHome } = require("./home");
+const { tournamentOpen } = require("./tournaments");
+const { openDecksTab } = require("./decks");
+const { openDeck } = require("./deck-details");
+const { openHistoryTab } = require("./history");
+const { openEventsTab } = require("./events");
+const { openEconomyTab } = require("./economy");
+const { openExploreTab, setExploreDecks } = require("./explore");
+const { openCollectionTab } = require("./collection");
+const { openSettingsTab } = require("./settings");
 
 let sidebarActive = -2;
-let lastDataIndex = 0;
-let lastScrollTop = 0;
-
-let draftPosition = 1;
-let loadEvents = 0;
 let loggedIn = false;
 let canLogin = false;
-let offlineMode = false;
 let lastSettings = {};
-
-let rewards_daily_ends = new Date();
-let rewards_weekly_ends = new Date();
-let activeEvents = [];
-
-let filteredWildcardsSet = "";
-
-let authToken = null;
-let discordTag = null;
-
-const sha1 = require("js-sha1");
-const fs = require("fs");
-const path = require("path");
-
-const actionLogDir = path.join(
-  (app || remote.app).getPath("userData"),
-  "actionlogs"
-);
-
-function ipc_send(method, arg, to = IPC_BACKGROUND) {
-  // 0: Main window
-  // 1: background
-  // 2: overlay
-  ipc.send("ipc_switch", method, IPC_MAIN, arg, to);
-}
-
-// convenience handler for player data singleton
-function toggleArchived(id) {
-  ipc_send("toggle_archived", id);
-}
 
 //
 ipc.on("clear_pwd", function() {
@@ -139,7 +69,7 @@ ipc.on("clear_pwd", function() {
 
 //
 ipc.on("auth", function(event, arg) {
-  authToken = arg.token;
+  setLocalState({ authToken: arg.token });
   if (arg.ok) {
     $(".message_center").css("display", "flex");
     $(".authenticate").hide();
@@ -151,15 +81,12 @@ ipc.on("auth", function(event, arg) {
   }
 });
 
+//
 ipc.on("set_discord_tag", (event, arg) => {
-  discordTag = arg;
+  setLocalState({ discordTag: arg });
   if (sidebarActive == -1) {
     openHomeTab(null, true);
   }
-});
-
-ipc.on("set_tou_state", (event, arg) => {
-  set_tou_state(arg);
 });
 
 //
@@ -181,15 +108,12 @@ ipc.on("too_slow", function() {
 });
 
 //
-function getTagColor(tag) {
-  return pd.tags_colors[tag] || "#FAE5D2";
-}
-
 ipc.on("show_login", () => {
   canLogin = true;
   showLogin();
 });
 
+//
 function showLogin() {
   $(".authenticate").show();
   $(".message_center").css("display", "none");
@@ -235,35 +159,6 @@ ipc.on("player_data_updated", () => {
       patreonIcon.style.display = "block";
     } else {
       patreonIcon.style.display = "none";
-    }
-  }
-});
-
-//
-ipc.on("set_reward_resets", function(event, arg) {
-  rewards_daily_ends = new Date(arg.daily);
-  rewards_weekly_ends = new Date(arg.weekly);
-});
-
-//
-// Whats this?
-ipc.on("set_deck_updated", function(event, str) {
-  try {
-    deck = JSON.parse(str);
-  } catch (e) {
-    console.log("Error parsing JSON:", str);
-    return false;
-  }
-});
-
-//
-ipc.on("set_active_events", (event, arg) => {
-  if (arg != null) {
-    try {
-      activeEvents = JSON.parse(arg);
-    } catch (e) {
-      console.log("Error parsing JSON:", arg);
-      return false;
     }
   }
 });
@@ -347,37 +242,6 @@ ipc.on("set_explore_decks", function(event, arg) {
   }
 });
 
-/*//
-ipc.on("set_explore", function(event, arg) {
-  if (sidebarActive == 3) {
-    open_explore_tab(arg, 0);
-  }
-});
-
-//
-ipc.on("set_ladder_decks", function(event, arg) {
-  set_ladder_decks(arg);
-});
-
-//
-ipc.on("set_ladder_traditional_decks", function(event, arg) {
-  set_ladder_decks(arg);
-});
-
-function set_ladder_decks(arg) {
-  if (sidebarActive == 3) {
-
-    arg.decks.forEach(function(deck) {
-      deck.colors = [];
-      deck.colors = get_deck_colors(deck);
-      deck.mainDeck.sort(compare_cards);
-    });
-
-    open_explore_tab(arg.decks, 0);
-  }
-}
-*/
-
 //
 ipc.on("open_course_deck", function(event, arg) {
   $(".moving_ux").animate({ left: "-100%" }, 250, "easeInOutCubic");
@@ -407,7 +271,8 @@ ipc.on("settings_updated", function() {
 
 //
 ipc.on("player_data_refresh", () => {
-  openTab(sidebarActive, {}, lastDataIndex, lastScrollTop);
+  const ls = getLocalState();
+  openTab(sidebarActive, {}, ls.lastDataIndex, ls.lastScrollTop);
 });
 
 //
@@ -479,7 +344,7 @@ function openTab(tab, filters = {}, dataIndex = 0, scrollTop = 0) {
       openEventsTab(filters, dataIndex, scrollTop);
       break;
     case 3:
-      if (offlineMode) {
+      if (pd.offline) {
         showOfflineSplash();
       } else {
         openExploreTab();
@@ -496,13 +361,13 @@ function openTab(tab, filters = {}, dataIndex = 0, scrollTop = 0) {
       break;
     case -1:
       tabClass = "ith";
-      if (offlineMode) {
+      if (pd.offline) {
         showOfflineSplash();
       } else {
-        if (discordTag == null) {
+        if (getLocalState().discordTag === null) {
           openHomeTab(null, true);
         } else {
-          ipc_send("request_home", filteredWildcardsSet);
+          requestHome();
         }
       }
       break;
@@ -525,7 +390,8 @@ ipc.on("initialize", function() {
   }
 
   sidebarActive = pd.settings.last_open_tab;
-  allMatches = Aggregator.createAllMatches();
+  const totalAgg = createAllMatches();
+  setLocalState({ totalAgg });
   openTab(sidebarActive);
 
   $(".top_nav").removeClass("hidden");
@@ -613,6 +479,7 @@ ipc.on("no_log", function(event, arg) {
   }
 });
 
+//
 ipc.on("log_ok", function() {
   logDialogOpen = false;
   $(".dialog_wrapper").css("opacity", 0);
@@ -626,15 +493,11 @@ ipc.on("log_ok", function() {
 });
 
 //
-ipc.on("set_offline", (_event, arg) => {
-  offlineMode = arg;
-});
-
-//
 ipc.on("offline", function() {
   showOfflineSplash();
 });
 
+//
 function showOfflineSplash() {
   hideLoadingBars();
   $("#ux_0").html(
@@ -654,6 +517,7 @@ ipc.on("log_read", function() {
   }
 });
 
+//
 $(".list_deck").on("mouseenter mouseleave", function(e) {
   $(".deck_tile").trigger(e.type);
 });
@@ -663,23 +527,7 @@ ipc.on("popup", function(event, arg, time) {
   pop(arg, time);
 });
 
-var popTimeout = null;
-function pop(str, timeout) {
-  $(".popup").css("opacity", 1);
-  $(".popup").html(str);
-  if (popTimeout != null) {
-    clearTimeout(popTimeout);
-  }
-  if (timeout < 1) {
-    popTimeout = null;
-  } else {
-    popTimeout = setTimeout(function() {
-      $(".popup").css("opacity", 0);
-      popTimeout = null;
-    }, timeout);
-  }
-}
-
+//
 function force_open_settings() {
   sidebarActive = 6;
   $(".top_nav_item").each(function() {
@@ -692,6 +540,7 @@ function force_open_settings() {
   openSettingsTab();
 }
 
+//
 function force_open_about() {
   sidebarActive = 9;
   $(".top_nav_item").each(function() {
@@ -704,6 +553,7 @@ function force_open_about() {
   openSettingsTab(5);
 }
 
+//
 let top_compact = false;
 let resizeTimer;
 window.addEventListener("resize", event => {
@@ -807,7 +657,7 @@ $(document).ready(function() {
       } else if ($(this).hasClass("it7")) {
         sidebarActive = 1;
         filters = {
-          ...Aggregator.getDefaultFilters(),
+          ...getDefaultFilters(),
           date: DATE_SEASON,
           eventId: RANKED_CONST,
           rankedMode: true
@@ -815,7 +665,7 @@ $(document).ready(function() {
       } else if ($(this).hasClass("it8")) {
         sidebarActive = 1;
         filters = {
-          ...Aggregator.getDefaultFilters(),
+          ...getDefaultFilters(),
           date: DATE_SEASON,
           eventId: RANKED_DRAFT,
           rankedMode: true
@@ -828,18 +678,8 @@ $(document).ready(function() {
   });
 });
 
-function showLoadingBars() {
-  $$(".main_loading")[0].style.display = "block";
-  document.body.style.cursor = "progress";
-}
-
 //
 //ipc.on("show_loading", () => showLoadingBars());
-
-function hideLoadingBars() {
-  $$(".main_loading")[0].style.display = "none";
-  document.body.style.cursor = "auto";
-}
 
 //
 //ipc.on("hide_loading", () => hideLoadingBars());
@@ -851,1330 +691,8 @@ ipc.on("set_draft_link", function(event, arg) {
 });
 
 //
-function addHover(_match, tileGrpid) {
-  $("." + _match.id).on("mouseenter", function() {
-    $("." + _match.id + "t").css("opacity", 1);
-    $("." + _match.id + "t").css("width", "200px");
-  });
-
-  $("." + _match.id).on("mouseleave", function() {
-    $("." + _match.id + "t").css("opacity", 0.66);
-    $("." + _match.id + "t").css("width", "128px");
-  });
-
-  $("." + _match.id).on("click", function() {
-    if (_match.type == "match") {
-      open_match(_match.id);
-      $(".moving_ux").animate({ left: "-100%" }, 250, "easeInOutCubic");
-    } else if (_match.type == "draft") {
-      draftPosition = 1;
-      open_draft(_match.id, tileGrpid, _match.set);
-      $(".moving_ux").animate({ left: "-100%" }, 250, "easeInOutCubic");
-    } else if (_match.type == "Event") {
-      expandEvent(_match, tileGrpid);
-    }
-  });
-}
-
-//
 ipc.on("tou_set", function(event, arg) {
   document.body.style.cursor = "auto";
   tournamentOpen(arg);
   $(".moving_ux").animate({ left: "-100%" }, 250, "easeInOutCubic");
 });
-
-//
-function makeResizable(div, resizeCallback, finalCallback) {
-  var m_pos;
-  let finalWidth;
-
-  let resize = function(e) {
-    var parent = div.parentNode;
-    var dx = m_pos - e.x;
-    m_pos = e.x;
-    let newWidth = Math.max(10, parseInt(parent.style.width) + dx);
-    parent.style.width = `${newWidth}px`;
-    parent.style.flex = `0 0 ${newWidth}px`;
-    if (resizeCallback instanceof Function) resizeCallback(newWidth);
-    finalWidth = newWidth;
-  };
-
-  let saveWidth = function(width) {
-    ipc_send("save_user_settings", { right_panel_width: width });
-  };
-
-  div.addEventListener(
-    "mousedown",
-    event => {
-      m_pos = event.x;
-      document.addEventListener("mousemove", resize, false);
-    },
-    false
-  );
-
-  document.addEventListener(
-    "mouseup",
-    event => {
-      document.removeEventListener("mousemove", resize, false);
-      if (finalWidth) {
-        saveWidth(finalWidth);
-        if (finalCallback instanceof Function) finalCallback(finalWidth);
-        finalWidth = null;
-      }
-    },
-    false
-  );
-}
-
-//
-function drawDeck(div, deck, showWildcards = false) {
-  div.html("");
-  const unique = makeId(4);
-
-  // draw maindeck grouped by cardType
-  const cardsByGroup = _(deck.mainDeck)
-    .map(card => ({ data: db.card(card.id), ...card }))
-    .groupBy(card => {
-      const cardType = cardTypes.cardType(card.data);
-      switch (cardType) {
-        case "Creature":
-          return "Creatures";
-        case "Planeswalker":
-          return "Planeswalkers";
-        case "Instant":
-        case "Sorcery":
-          return "Spells";
-        case "Enchantment":
-          return "Enchantments";
-        case "Artifact":
-          return "Artifacts";
-        case "Land":
-          return "Lands";
-        default:
-          throw new Error(`Unexpected card type: ${cardType}`);
-      }
-    })
-    .value();
-
-  _([
-    "Creatures",
-    "Planeswalkers",
-    "Spells",
-    "Enchantments",
-    "Artifacts",
-    "Lands"
-  ])
-    .filter(group => !_.isEmpty(cardsByGroup[group]))
-    .forEach(group => {
-      // draw a separator for the group
-      const cards = cardsByGroup[group];
-      const count = _.sumBy(cards, "quantity");
-      const separator = deckDrawer.cardSeparator(`${group} (${count})`);
-      div.append(separator);
-
-      // draw the cards
-      _(cards)
-        .filter(card => card.quantity > 0)
-        .orderBy(["data.cmc", "data.name"])
-        .forEach(card => {
-          const tile = deckDrawer.cardTile(
-            pd.settings.card_tile_style,
-            card.id,
-            unique + "a",
-            card.quantity,
-            showWildcards,
-            deck,
-            false
-          );
-          div.append(tile);
-        });
-    });
-
-  const sideboardSize = _.sumBy(deck.sideboard, "quantity");
-  if (sideboardSize) {
-    // draw a separator for the sideboard
-    let separator = deckDrawer.cardSeparator(`Sideboard (${sideboardSize})`);
-    div.append(separator);
-
-    // draw the cards
-    _(deck.sideboard)
-      .filter(card => card.quantity > 0)
-      .map(card => ({ data: db.card(card.id), ...card }))
-      .orderBy(["data.cmc", "data.name"])
-      .forEach(card => {
-        const tile = deckDrawer.cardTile(
-          pd.settings.card_tile_style,
-          card.id,
-          unique + "b",
-          card.quantity,
-          showWildcards,
-          deck,
-          true
-        );
-        div.append(tile);
-      });
-  }
-}
-
-//
-function drawCardList(div, cards) {
-  let unique = makeId(4);
-  let counts = {};
-  cards.forEach(cardId => (counts[cardId] = (counts[cardId] || 0) + 1));
-  Object.keys(counts).forEach(cardId => {
-    let tile = deckDrawer.cardTile(
-      pd.settings.card_tile_style,
-      cardId,
-      unique,
-      counts[cardId]
-    );
-    div.append(tile);
-  });
-}
-
-//
-function drawDeckVisual(_div, _stats, deck) {
-  // PLACEHOLDER
-  if (!(_div instanceof jQuery)) {
-    _div = $(_div);
-  }
-  // attempt at sorting visually..
-  var newMainDeck = [];
-
-  for (var cmc = 0; cmc < 21; cmc++) {
-    for (var qq = 4; qq > -1; qq--) {
-      deck.mainDeck.forEach(function(c) {
-        var grpId = c.id;
-        var card = db.card(grpId);
-        var quantity;
-        if (card.type.indexOf("Land") == -1 && grpId != 67306) {
-          if (card.cmc == cmc) {
-            quantity = c.quantity;
-
-            if (quantity == qq) {
-              newMainDeck.push(c);
-            }
-          }
-        } else if (cmc == 20) {
-          quantity = c.quantity;
-          if (qq == 0 && quantity > 4) {
-            newMainDeck.push(c);
-          }
-          if (quantity == qq) {
-            newMainDeck.push(c);
-          }
-        }
-      });
-    }
-  }
-
-  var types = get_deck_types_ammount(deck);
-  var typesdiv = $('<div class="types_container"></div>');
-  $(
-    '<div class="type_icon_cont"><div title="Creatures" class="type_icon type_cre"></div><span>' +
-      types.cre +
-      "</span></div>"
-  ).appendTo(typesdiv);
-  $(
-    '<div class="type_icon_cont"><div title="Lands" class="type_icon type_lan"></div><span>' +
-      types.lan +
-      "</span></div>"
-  ).appendTo(typesdiv);
-  $(
-    '<div class="type_icon_cont"><div title="Instants" class="type_icon type_ins"></div><span>' +
-      types.ins +
-      "</span></div>"
-  ).appendTo(typesdiv);
-  $(
-    '<div class="type_icon_cont"><div title="Sorceries" class="type_icon type_sor"></div><span>' +
-      types.sor +
-      "</span></div>"
-  ).appendTo(typesdiv);
-  $(
-    '<div class="type_icon_cont"><div title="Enchantments" class="type_icon type_enc"></div><span>' +
-      types.enc +
-      "</span></div>"
-  ).appendTo(typesdiv);
-  $(
-    '<div class="type_icon_cont"><div title="Artifacts" class="type_icon type_art"></div><span>' +
-      types.art +
-      "</span></div>"
-  ).appendTo(typesdiv);
-  $(
-    '<div class="type_icon_cont"><div title="Planeswalkers" class="type_icon type_pla"></div><span>' +
-      types.pla +
-      "</span></div>"
-  ).appendTo(typesdiv);
-  typesdiv.prependTo(_div.parent());
-
-  if (_stats) {
-    _stats.hide();
-  }
-  _div.css("display", "flex");
-  _div.css("width", "auto");
-  _div.css("margin", "0 auto");
-  _div.html("");
-
-  _div.parent().css("flex-direction", "column");
-
-  if (_stats) {
-    $('<div class="button_simple openDeck">Normal view</div>').appendTo(
-      _div.parent()
-    );
-
-    $(".openDeck").click(function() {
-      openDeck();
-    });
-  }
-
-  var sz = pd.cardsSize;
-  let div = $('<div class="visual_mainboard"></div>');
-  div.css("display", "flex");
-  div.css("flex-wrap", "wrap");
-  div.css("align-content", "start");
-  div.css("max-width", (sz + 6) * 5 + "px");
-  div.appendTo(_div);
-
-  //var unique = makeId(4);
-  //var prevIndex = 0;
-
-  var tileNow;
-  var _n = 0;
-  newMainDeck.forEach(function(c) {
-    var grpId = c.id;
-    var card = db.card(grpId);
-
-    if (c.quantity > 0) {
-      let dfc = "";
-      if (card.dfc == "DFC_Back") dfc = "a";
-      if (card.dfc == "DFC_Front") dfc = "b";
-      if (card.dfc == "SplitHalf") dfc = "a";
-      if (dfc != "b") {
-        for (let i = 0; i < c.quantity; i++) {
-          if (_n % 4 == 0) {
-            tileNow = $('<div class="deck_visual_tile"></div>');
-            tileNow.appendTo(div);
-          }
-
-          let d = $(
-            '<div style="width: ' +
-              sz +
-              'px !important;" class="deck_visual_card"></div>'
-          );
-          let img = $(
-            '<img style="width: ' +
-              sz +
-              'px !important;" class="deck_visual_card_img"></img>'
-          );
-
-          img.attr("src", get_card_image(card));
-          img.appendTo(d);
-          d.appendTo(tileNow);
-
-          addCardHover(img, card);
-          _n++;
-        }
-      }
-    }
-  });
-
-  div = $('<div class="visual_sideboard"></div>');
-  div.css("display", "flex");
-  div.css("flex-wrap", "wrap");
-  div.css("margin-left", "32px");
-  div.css("align-content", "start");
-  div.css("max-width", (sz + 6) * 1.5 + "px");
-  div.appendTo(_div);
-
-  if (deck.sideboard != undefined) {
-    tileNow = $('<div class="deck_visual_tile_side"></div>');
-    tileNow.css("width", (sz + 6) * 5 + "px");
-    tileNow.appendTo(div);
-
-    if (deck.sideboard.length == 0) {
-      tileNow.css("display", "none");
-    }
-
-    _n = 0;
-    deck.sideboard.forEach(function(c) {
-      var grpId = c.id;
-      var card = db.card(grpId);
-      if (c.quantity > 0) {
-        let dfc = "";
-        if (card.dfc == "DFC_Back") dfc = "a";
-        if (card.dfc == "DFC_Front") dfc = "b";
-        if (card.dfc == "SplitHalf") dfc = "a";
-        if (dfc != "b") {
-          for (let i = 0; i < c.quantity; i++) {
-            var d;
-            if (_n % 2 == 1) {
-              d = $(
-                '<div style="width: ' +
-                  sz +
-                  'px !important;" class="deck_visual_card_side"></div>'
-              );
-            } else {
-              d = $(
-                '<div style="margin-left: 60px; width: ' +
-                  sz +
-                  'px !important;" class="deck_visual_card_side"></div>'
-              );
-            }
-            let img = $(
-              '<img style="width: ' +
-                sz +
-                'px !important;" class="deck_visual_card_img"></img>'
-            );
-            img.attr("src", get_card_image(card));
-            img.appendTo(d);
-            d.appendTo(tileNow);
-
-            addCardHover(img, card);
-            _n++;
-          }
-        }
-      }
-    });
-  }
-}
-
-//
-function setChangesTimeline(deckId) {
-  const changes = [...pd.deckChanges(deckId)];
-  changes.sort(compare_changes);
-
-  var cont = $(".stats");
-  cont.html("");
-
-  var time = $('<div class="changes_timeline"></div>');
-
-  // CURRENT DECK
-  let div = $('<div class="change"></div>');
-  let butbox = $(
-    '<div class="change_button_cont" style="transform: scaleY(-1);"></div>'
-  );
-  let button = $('<div class="change_button"></div>');
-  button.appendTo(butbox);
-  let datbox = $('<div class="change_data"></div>');
-
-  // title
-  let title = $('<div class="change_data_box"></div>');
-  title.html("Current Deck");
-
-  butbox.appendTo(div);
-  datbox.appendTo(div);
-  title.appendTo(datbox);
-  div.appendTo(time);
-
-  butbox.on("mouseenter", function() {
-    button.css("width", "32px");
-    button.css("height", "32px");
-    button.css("top", "calc(50% - 16px)");
-  });
-
-  butbox.on("mouseleave", function() {
-    button.css("width", "24px");
-    button.css("height", "24px");
-    button.css("top", "calc(50% - 12px)");
-  });
-
-  butbox.on("click", function() {
-    var hasc = button.hasClass("change_button_active");
-
-    $(".change_data_box_inside").each(function() {
-      $(this).css("height", "0px");
-    });
-
-    $(".change_button").each(function() {
-      $(this).removeClass("change_button_active");
-    });
-
-    if (!hasc) {
-      button.addClass("change_button_active");
-    }
-  });
-  //
-
-  var cn = 0;
-  changes.forEach(function(change) {
-    change.changesMain.sort(compare_changes_inner);
-    change.changesSide.sort(compare_changes_inner);
-
-    let div = $('<div class="change"></div>');
-    let butbox;
-    if (cn < changes.length - 1) {
-      butbox = $(
-        '<div style="background-size: 100% 100% !important;" class="change_button_cont"></div>'
-      );
-    } else {
-      butbox = $('<div class="change_button_cont"></div>');
-    }
-    var button = $('<div class="change_button"></div>');
-    button.appendTo(butbox);
-    let datbox = $('<div class="change_data"></div>');
-
-    // title
-    let title = $('<div class="change_data_box"></div>');
-    // inside
-    let data = $('<div class="change_data_box_inside"></div>');
-    var innherH = 54;
-    let nc = 0;
-    if (change.changesMain.length > 0) {
-      let dd = $('<div class="change_item_box"></div>');
-      let separator = deckDrawer.cardSeparator("Mainboard");
-      dd.append(separator);
-      dd.appendTo(data);
-    }
-
-    change.changesMain.forEach(function(c) {
-      innherH += 30;
-      if (c.quantity > 0) nc += c.quantity;
-      let dd = $('<div class="change_item_box"></div>');
-      if (c.quantity > 0) {
-        let ic = $('<div class="change_add"></div>');
-        ic.appendTo(dd);
-      } else {
-        let ic = $('<div class="change_remove"></div>');
-        ic.appendTo(dd);
-      }
-
-      let tile = deckDrawer.cardTile(
-        pd.settings.card_tile_style,
-        c.id,
-        "chm" + cn,
-        Math.abs(c.quantity)
-      );
-      dd.append(tile);
-      dd.appendTo(data);
-    });
-
-    if (change.changesSide.length > 0) {
-      let dd = $('<div class="change_item_box"></div>');
-      let separator = deckDrawer.cardSeparator("Sideboard");
-      dd.append(separator);
-      innherH += 30;
-      dd.appendTo(data);
-    }
-
-    change.changesSide.forEach(function(c) {
-      innherH += 30;
-      if (c.quantity > 0) nc += c.quantity;
-      let dd = $('<div class="change_item_box"></div>');
-      if (c.quantity > 0) {
-        let ic = $('<div class="change_add"></div>');
-        ic.appendTo(dd);
-      } else {
-        let ic = $('<div class="change_remove"></div>');
-        ic.appendTo(dd);
-      }
-
-      let tile = deckDrawer.cardTile(
-        pd.settings.card_tile_style,
-        c.id,
-        "chs" + cn,
-        Math.abs(c.quantity)
-      );
-      dd.append(tile);
-      dd.appendTo(data);
-    });
-
-    title.html(
-      nc + " changes, " + timeSince(Date.parse(change.date)) + " ago."
-    );
-
-    butbox.appendTo(div);
-    datbox.appendTo(div);
-    title.appendTo(datbox);
-    data.appendTo(datbox);
-    div.appendTo(time);
-
-    butbox.on("mouseenter", function() {
-      button.css("width", "32px");
-      button.css("height", "32px");
-      button.css("top", "calc(50% - 16px)");
-    });
-
-    butbox.on("mouseleave", function() {
-      button.css("width", "24px");
-      button.css("height", "24px");
-      button.css("top", "calc(50% - 12px)");
-    });
-
-    butbox.on("click", function() {
-      // This requires some UX indicators
-      //drawDeck($('.decklist'), {mainDeck: change.previousMain, sideboard: change.previousSide});
-      var hasc = button.hasClass("change_button_active");
-
-      $(".change_data_box_inside").each(function() {
-        $(this).css("height", "0px");
-      });
-
-      $(".change_button").each(function() {
-        $(this).removeClass("change_button_active");
-      });
-
-      if (!hasc) {
-        button.addClass("change_button_active");
-        data.css("height", innherH + "px");
-      }
-    });
-
-    cn++;
-  });
-
-  $('<div class="button_simple openDeck">View stats</div>').appendTo(cont);
-
-  $(".openDeck").click(function() {
-    openDeck();
-  });
-  time.appendTo(cont);
-}
-
-//
-function open_draft(id) {
-  console.log("OPEN DRAFT", id, draftPosition);
-  $("#ux_1").html("");
-  $("#ux_1").removeClass("flex_item");
-  const draft = pd.draft(id);
-  let tileGrpid = db.sets[draft.set].tile;
-
-  if (draftPosition < 1) draftPosition = 1;
-  if (draftPosition > packSize * 6) draftPosition = packSize * 6;
-
-  var packSize = 14;
-  if (draft.set == "Guilds of Ravnica" || draft.set == "Ravnica Allegiance") {
-    packSize = 15;
-  }
-
-  var pa = Math.floor((draftPosition - 1) / 2 / packSize);
-  var pi = Math.floor(((draftPosition - 1) / 2) % packSize);
-  var key = "pack_" + pa + "pick_" + pi;
-
-  var pack = (draft[key] && draft[key].pack) || [];
-  var pick = (draft[key] && draft[key].pick) || "";
-
-  var top = $(
-    '<div class="decklist_top"><div class="button back"></div><div class="deck_name">' +
-      draft.set +
-      " Draft</div></div>"
-  );
-  let flr = $('<div class="deck_top_colors"></div>');
-  top.append(flr);
-
-  if (db.card(tileGrpid)) {
-    change_background("", tileGrpid);
-  }
-
-  var cont = $('<div class="flex_item" style="flex-direction: column;"></div>');
-  cont.append(
-    '<div class="draft_nav_container"><div class="draft_nav_prev"></div><div class="draft_nav_next"></div></div>'
-  );
-
-  $(
-    '<div class="draft_title">Pack ' +
-      (pa + 1) +
-      ", Pick " +
-      (pi + 1) +
-      "</div>"
-  ).appendTo(cont);
-
-  var slider = $('<div class="slidecontainer"></div>');
-  slider.appendTo(cont);
-  var sliderInput = $(
-    '<input type="range" min="1" max="' +
-      packSize * 6 +
-      '" value="' +
-      draftPosition +
-      '" class="slider" id="draftPosRange">'
-  );
-  sliderInput.appendTo(slider);
-
-  const pdiv = $('<div class="draft_pack_container"></div>');
-  pdiv.appendTo(cont);
-
-  pack.forEach(function(grpId) {
-    var d = $(
-      '<div style="width: ' +
-        pdiv.cardsSize +
-        'px !important;" class="draft_card"></div>'
-    );
-    var img = $(
-      '<img style="width: ' +
-        pdiv.cardsSize +
-        'px !important;" class="draft_card_img"></img>'
-    );
-    if (grpId == pick && draftPosition % 2 == 0) {
-      img.addClass("draft_card_picked");
-    }
-    var card = db.card(grpId);
-    img.attr("src", get_card_image(card));
-
-    img.appendTo(d);
-    var r = $(
-      '<div style="" class="draft_card_rating">' +
-        DRAFT_RANKS[card.rank] +
-        "</div>"
-    );
-    r.appendTo(d);
-    addCardHover(img, card);
-    d.appendTo(pdiv);
-  });
-
-  $("#ux_1").append(top);
-  $("#ux_1").append(cont);
-
-  var posRange = $("#draftPosRange")[0];
-
-  $(".draft_nav_prev").off();
-  $(".draft_nav_next").off();
-  $("#draftPosRange").off();
-
-  $("#draftPosRange").on("click mousemove", function() {
-    var pa = Math.floor((posRange.value - 1) / 2 / packSize);
-    var pi = Math.floor(((posRange.value - 1) / 2) % packSize);
-    $(".draft_title").html("Pack " + (pa + 1) + ", Pick " + (pi + 1));
-  });
-
-  $("#draftPosRange").on("click mouseup", function() {
-    draftPosition = parseInt(posRange.value);
-    open_draft(id, tileGrpid, draft.set);
-  });
-
-  $(".draft_nav_prev").on("click mouseup", function() {
-    draftPosition -= 1;
-    open_draft(id, tileGrpid, draft.set);
-  });
-
-  $(".draft_nav_next").on("click mouseup", function() {
-    draftPosition += 1;
-    open_draft(id, tileGrpid, draft.set);
-  });
-  //
-  $(".back").click(function() {
-    change_background("default");
-    $(".moving_ux").animate({ left: "0px" }, 250, "easeInOutCubic");
-  });
-}
-
-function open_match(id) {
-  $("#ux_1").html("");
-  $("#ux_1").removeClass("flex_item");
-  const match = pd.match(id);
-
-  let top = $(
-    '<div class="decklist_top"><div class="button back"></div><div class="deck_name">' +
-      match.playerDeck.name +
-      "</div></div>"
-  );
-  let flr = $('<div class="deck_top_colors"></div>');
-
-  if (match.playerDeck.colors != undefined) {
-    match.playerDeck.colors.forEach(function(color) {
-      var m = $('<div class="mana_s20 mana_' + MANA[color] + '"></div>');
-      flr.append(m);
-    });
-  }
-  top.append(flr);
-
-  var flc = $(
-    '<div class="flex_item" style="justify-content: space-evenly;"></div>'
-  );
-  if (fs.existsSync(path.join(actionLogDir, id + ".txt"))) {
-    $('<div class="button_simple openLog">Action log</div>').appendTo(flc);
-  }
-
-  var tileGrpid = match.playerDeck.deckTileId;
-  if (db.card(tileGrpid)) {
-    change_background("", tileGrpid);
-  }
-  var fld = $('<div class="flex_item"></div>');
-
-  // this is a mess
-  var flt = $('<div class="flex_item"></div>');
-  var fltl = $('<div class="flex_item"></div>');
-  var r = $('<div class="rank"></div>');
-  r.appendTo(fltl);
-
-  var fltr = $('<div class="flex_item"></div>');
-  fltr.css("flex-direction", "column");
-  var fltrt = $('<div class="flex_top"></div>');
-  var fltrb = $('<div class="flex_bottom"></div>');
-  fltrt.appendTo(fltr);
-  fltrb.appendTo(fltr);
-
-  fltl.appendTo(flt);
-  fltr.appendTo(flt);
-
-  var rank = match.player.rank;
-  var tier = match.player.tier;
-  r.css(
-    "background-position",
-    get_rank_index(rank, tier) * -48 + "px 0px"
-  ).attr("title", rank + " " + tier);
-
-  var name = $(
-    '<div class="list_match_player_left">' +
-      match.player.name.slice(0, -6) +
-      " (" +
-      match.player.win +
-      ")</div>"
-  );
-  name.appendTo(fltrt);
-
-  if (match.player.win > match.opponent.win) {
-    var w = $('<div class="list_match_player_left green">Winner</div>');
-    w.appendTo(fltrb);
-  }
-
-  var dl = $('<div class="decklist"></div>');
-  flt.appendTo(dl);
-
-  drawDeck(dl, match.playerDeck);
-
-  $(
-    '<div class="button_simple centered exportDeckPlayer">Export to Arena</div>'
-  ).appendTo(dl);
-  $(
-    '<div class="button_simple centered exportDeckStandardPlayer">Export to .txt</div>'
-  ).appendTo(dl);
-
-  flt = $('<div class="flex_item" style="flex-direction: row-reverse;"></div>');
-  fltl = $('<div class="flex_item"></div>');
-  r = $('<div class="rank"></div>');
-  r.appendTo(fltl);
-
-  fltr = $('<div class="flex_item"></div>');
-  fltr.css("flex-direction", "column");
-  fltr.css("align-items", "flex-end");
-  fltrt = $('<div class="flex_top"></div>');
-  fltrb = $('<div class="flex_bottom"></div>');
-  fltrt.appendTo(fltr);
-  fltrb.appendTo(fltr);
-
-  fltl.appendTo(flt);
-  fltr.appendTo(flt);
-
-  rank = match.opponent.rank;
-  tier = match.opponent.tier;
-  r.css(
-    "background-position",
-    get_rank_index(rank, tier) * -48 + "px 0px"
-  ).attr("title", rank + " " + tier);
-
-  name = $(
-    '<div class="list_match_player_right">' +
-      match.opponent.name.slice(0, -6) +
-      " (" +
-      match.opponent.win +
-      ")</div>"
-  );
-  name.appendTo(fltrt);
-
-  if (match.player.win < match.opponent.win) {
-    w = $('<div class="list_match_player_right green">Winner</div>');
-    w.appendTo(fltrb);
-  }
-
-  var odl = $('<div class="decklist"></div>');
-  flt.appendTo(odl);
-
-  match.oppDeck.mainDeck.sort(compare_cards);
-  match.oppDeck.sideboard.sort(compare_cards);
-  /*
-  match.oppDeck.mainDeck.forEach(function(c) {
-    c.quantity = 9999;
-  });
-  match.oppDeck.sideboard.forEach(function(c) {
-    c.quantity = 9999;
-  });
-  */
-  drawDeck(odl, match.oppDeck);
-
-  $(
-    '<div class="button_simple centered exportDeck">Export to Arena</div>'
-  ).appendTo(odl);
-  $(
-    '<div class="button_simple centered exportDeckStandard">Export to .txt</div>'
-  ).appendTo(odl);
-
-  dl.appendTo(fld);
-  odl.appendTo(fld);
-
-  $("#ux_1").append(top);
-  $("#ux_1").append(flc);
-  $("#ux_1").append(fld);
-
-  if (match.gameStats) {
-    match.gameStats.forEach((game, gameIndex) => {
-      if (game && game.sideboardChanges) {
-        let separator1 = deckDrawer.cardSeparator(
-          `Game ${gameIndex + 1} Sideboard Changes`
-        );
-        $("#ux_1").append(separator1);
-        let sideboardDiv = $('<div class="card_lists_list"></div>');
-        let additionsDiv = $('<div class="cardlist"></div>');
-        if (
-          game.sideboardChanges.added.length == 0 &&
-          game.sideboardChanges.removed.length == 0
-        ) {
-          let separator2 = deckDrawer.cardSeparator("No changes");
-          additionsDiv.append(separator2);
-          additionsDiv.appendTo(sideboardDiv);
-        } else {
-          let separator3 = deckDrawer.cardSeparator("Sideboarded In");
-          additionsDiv.append(separator3);
-          drawCardList(additionsDiv, game.sideboardChanges.added);
-          additionsDiv.appendTo(sideboardDiv);
-          let removalsDiv = $('<div class="cardlist"></div>');
-          let separator4 = deckDrawer.cardSeparator("Sideboarded Out");
-          removalsDiv.append(separator4);
-          drawCardList(removalsDiv, game.sideboardChanges.removed);
-          removalsDiv.appendTo(sideboardDiv);
-        }
-
-        $("#ux_1").append(sideboardDiv);
-      }
-
-      let separator5 = deckDrawer.cardSeparator(
-        `Game ${gameIndex + 1} Hands Drawn`
-      );
-      $("#ux_1").append(separator5);
-
-      let handsDiv = $('<div class="card_lists_list"></div>');
-      if (game && game.handsDrawn.length > 3) {
-        // The default value of "center" apparently causes padding to be omitted in the calculation of how far
-        // the scrolling should go. So, if there are enough hands to actually need scrolling, override it.
-        handsDiv.css("justify-content", "start");
-      }
-
-      if (game) {
-        game.handsDrawn.forEach((hand, i) => {
-          let handDiv = $('<div class="cardlist"></div>');
-          drawCardList(handDiv, hand);
-          handDiv.appendTo(handsDiv);
-          if (game.bestOf == 1 && i == 0) {
-            let landDiv = $(
-              '<div style="margin: auto; text-align: center;" tooltip-top tooltip-content=' +
-                '"This hand was drawn with weighted odds that Wizards of the Coast has not disclosed because it is the first hand in a best-of-one match. ' +
-                'It should be more likely to have a close to average number of lands, but only they could calculate the exact odds.">Land Percentile: Unknown</div>'
-            );
-            landDiv.appendTo(handDiv);
-          } else {
-            let likelihood = hypergeometricSignificance(
-              game.handLands[i],
-              game.deckSize,
-              hand.length,
-              game.landsInDeck
-            );
-            let landDiv = $(
-              '<div style="margin: auto; text-align: center;" tooltip-top tooltip-content=' +
-                '"The probability of a random hand of the same size having a number of lands at least as far from average as this one, ' +
-                'calculated as if the distribution were continuous. Over a large number of games, this should average about 50%.">Land Likelihood: ' +
-                (likelihood * 100).toFixed(2) +
-                "%</div>"
-            );
-            landDiv.appendTo(handDiv);
-          }
-        });
-
-        $("#ux_1").append(handsDiv);
-
-        let separator6 = deckDrawer.cardSeparator(
-          `Game ${gameIndex + 1} Shuffled Order`
-        );
-        $("#ux_1").append(separator6);
-        let libraryDiv = $('<div class="library_list"></div>');
-        let unique = makeId(4);
-        let handSize = 8 - game.handsDrawn.length;
-
-        game.shuffledOrder.forEach((cardId, libraryIndex) => {
-          let rowShade =
-            libraryIndex === handSize - 1
-              ? "line_dark line_bottom_border"
-              : libraryIndex < handSize - 1
-              ? "line_dark"
-              : (libraryIndex - handSize) % 2 === 0
-              ? "line_light"
-              : "line_dark";
-          let cardDiv = $(`<div class="library_card ${rowShade}"></div>`);
-          let tile = deckDrawer.cardTile(
-            pd.settings.card_tile_style,
-            cardId,
-            unique + libraryIndex,
-            "#" + (libraryIndex + 1)
-          );
-          cardDiv.append(tile);
-          cardDiv.appendTo(libraryDiv);
-        });
-        let unknownCards = game.deckSize - game.shuffledOrder.length;
-        if (unknownCards > 0) {
-          let cardDiv = $('<div class="library_card"></div>');
-          let tile = deckDrawer.cardTile(
-            pd.settings.card_tile_style,
-            null,
-            unique + game.deckSize,
-            unknownCards + "x"
-          );
-          cardDiv.append(tile);
-          cardDiv.appendTo(libraryDiv);
-        }
-
-        let handExplanation = $(
-          '<div class="library_hand">The opening hand is excluded from the below statistics to prevent mulligan choices from influencing them.</div>'
-        );
-        handExplanation.css("grid-row-end", "span " + (handSize - 1));
-        handExplanation.appendTo(libraryDiv);
-
-        let headerDiv = $(
-          '<div class="library_header" tooltip-bottom tooltip-content="The number of lands in the library at or before this point.">Lands</div>'
-        );
-        headerDiv.css("grid-area", handSize + " / 2");
-        headerDiv.appendTo(libraryDiv);
-        headerDiv = $(
-          '<div class="library_header" tooltip-bottom tooltip-content="The average number of lands expected in the library at or before this point.">Expected</div>'
-        );
-        headerDiv.css("grid-area", handSize + " / 3");
-        headerDiv.appendTo(libraryDiv);
-        headerDiv = $(
-          '<div class="library_header" tooltip-bottom tooltip-content="The probability of the number of lands being at least this far from average, calculated as if the distribution were continuous. For details see footnote. Over a large number of games, this should average about 50%.">Likelihood</div>'
-        );
-        headerDiv.css("grid-area", handSize + " / 4");
-        headerDiv.appendTo(libraryDiv);
-        headerDiv = $(
-          '<div class="library_header" tooltip-bottomright tooltip-content="The expected percentage of games where the actual number of lands is equal or less than this one. This is easier to calculate and more widely recognized but harder to assess the meaning of.">Percentile</div>'
-        );
-        headerDiv.css("grid-area", handSize + " / 5");
-        headerDiv.appendTo(libraryDiv);
-
-        game.libraryLands.forEach((count, index) => {
-          let rowShade = index % 2 === 0 ? "line_light" : "line_dark";
-          let landsDiv = $(
-            `<div class="library_stat ${rowShade}">${count}</div>`
-          );
-          landsDiv.css("grid-area", handSize + index + 1 + " / 2");
-          landsDiv.appendTo(libraryDiv);
-          let expected = (
-            ((index + 1) * game.landsInLibrary) /
-            game.librarySize
-          ).toFixed(2);
-          let expectedDiv = $(
-            `<div class="library_stat ${rowShade}">${expected}</div>`
-          );
-          expectedDiv.css("grid-area", handSize + index + 1 + " / 3");
-          expectedDiv.appendTo(libraryDiv);
-          let likelihood = hypergeometricSignificance(
-            count,
-            game.librarySize,
-            index + 1,
-            game.landsInLibrary
-          );
-          let likelihoodDiv = $(
-            `<div class="library_stat ${rowShade}">${(likelihood * 100).toFixed(
-              2
-            )}</div>`
-          );
-          likelihoodDiv.css("grid-area", handSize + index + 1 + " / 4");
-          likelihoodDiv.appendTo(libraryDiv);
-          let percentile = hypergeometricRange(
-            0,
-            count,
-            game.librarySize,
-            index + 1,
-            game.landsInLibrary
-          );
-          let percentileDiv = $(
-            `<div class="library_stat ${rowShade}">${(percentile * 100).toFixed(
-              2
-            )}</div>`
-          );
-          percentileDiv.css("grid-area", handSize + index + 1 + " / 5");
-          percentileDiv.appendTo(libraryDiv);
-        });
-
-        let footnoteLabel = $(
-          '<div id="library_footnote_label' +
-            gameIndex +
-            '" class="library_footnote" tooltip-bottom ' +
-            'tooltip-content="Click to show footnote" onclick="toggleVisibility(\'library_footnote_label' +
-            gameIndex +
-            "', 'library_footnote" +
-            gameIndex +
-            "')\">Footnote on Likelihood</div>"
-        );
-        footnoteLabel.css("grid-row", game.shuffledOrder.length + 1);
-        footnoteLabel.appendTo(libraryDiv);
-        let footnote = $(
-          '<div id="library_footnote' +
-            gameIndex +
-            '" class="library_footnote hidden" ' +
-            "onclick=\"toggleVisibility('library_footnote_label" +
-            gameIndex +
-            "', 'library_footnote" +
-            gameIndex +
-            "')\">" +
-            "<p>The Likelihood column calculations are designed to enable assessment of fairness at a glance, in a way " +
-            "that is related to percentile but differs in important ways. In short, it treats the count of lands as if " +
-            "it were actually a bucket covering a continuous range, and calculates the cumulative probability of the " +
-            "continuous value being at least as far from the median as a randomly selected value within the range covered " +
-            "by the actual count. Importantly, this guarantees that the theoretical average will always be exactly 50%.</p>" +
-            "<p>For values that are not the median, the result is halfway between the value's own percentile and the " +
-            "next one up or down. For the median itself, the covered range is split and weighted for how much of it is " +
-            "on each side of the 50th percentile. In both cases, the result's meaning is the same for each direction " +
-            "from the 50th percentile, and scaled up by a factor of 2 to keep the possible range at 0% to 100%. " +
-            "For precise details, see the source code on github.</p></div>"
-        );
-        footnote.css("grid-row", game.shuffledOrder.length + 1);
-        footnote.appendTo(libraryDiv);
-
-        $("#ux_1").append(libraryDiv);
-      }
-    });
-  }
-
-  $(".openLog").click(function() {
-    openActionLog(id, $("#ux_1"));
-  });
-
-  $(".exportDeckPlayer").click(function() {
-    var list = get_deck_export(match.playerDeck);
-    ipc_send("set_clipboard", list);
-  });
-  $(".exportDeckStandardPlayer").click(function() {
-    var list = get_deck_export_txt(match.playerDeck);
-    ipc_send("export_txt", { str: list, name: match.playerDeck.name });
-  });
-
-  $(".exportDeck").click(function() {
-    var list = get_deck_export(match.oppDeck);
-    ipc_send("set_clipboard", list);
-  });
-  $(".exportDeckStandard").click(function() {
-    var list = get_deck_export_txt(match.oppDeck);
-    ipc_send("export_txt", {
-      str: list,
-      name: match.opponent.name.slice(0, -6) + "'s deck"
-    });
-  });
-
-  $(".back").click(function() {
-    change_background("default");
-    $(".moving_ux").animate({ left: "0px" }, 250, "easeInOutCubic");
-  });
-}
-
-function openActionLog(actionLogId) {
-  $("#ux_2").html("");
-  let top = $(
-    `<div class="decklist_top"><div class="button back actionlog_back"></div><div class="deck_name">Action Log</div><div class="deck_name"></div></div>`
-  );
-
-  let actionLogContainer = $(`<div class="action_log_container"></div>`);
-
-  let actionLogFile = path.join(actionLogDir, actionLogId + ".txt");
-  let str = fs.readFileSync(actionLogFile).toString();
-
-  let actionLog = str.split("\n");
-  for (let line = 1; line < actionLog.length - 1; line += 3) {
-    let seat = actionLog[line];
-    let time = actionLog[line + 1];
-    let str = actionLog[line + 2];
-    str = striptags(str, ["log-card", "log-ability"]);
-
-    var boxDiv = $('<div class="actionlog log_p' + seat + '"></div>');
-    var timeDiv = $('<div class="actionlog_time">' + time + "</div>");
-    var strDiv = $('<div class="actionlog_text">' + str + "</div>");
-
-    boxDiv.append(timeDiv);
-    boxDiv.append(strDiv);
-    actionLogContainer.append(boxDiv);
-  }
-
-  $("#ux_2").append(top);
-  $("#ux_2").append(actionLogContainer);
-
-  $$("log-card").forEach(obj => {
-    let grpId = obj.getAttribute("id");
-    addCardHover(obj, db.card(grpId));
-  });
-
-  $$("log-ability").forEach(obj => {
-    let grpId = obj.getAttribute("id");
-    let abilityText = db.abilities[grpId] || "";
-    obj.title = abilityText;
-  });
-
-  $(".moving_ux").animate({ left: "-200%" }, 250, "easeInOutCubic");
-
-  $(".actionlog_back").click(() => {
-    $(".moving_ux").animate({ left: "-100%" }, 250, "easeInOutCubic");
-  });
-}
-
-//
-function toggleVisibility(...ids) {
-  ids.forEach(id => {
-    let el = document.getElementById(id);
-    if (el.classList.contains("hidden")) {
-      el.classList.remove("hidden");
-    } else {
-      el.classList.add("hidden");
-    }
-  });
-}
-
-//
-function add_checkbox(div, label, iid, def, func) {
-  label = $('<label class="check_container hover_label">' + label + "</label>");
-  label.appendTo(div);
-  var check_new = $('<input type="checkbox" id="' + iid + '" />');
-  check_new.on("click", func);
-  check_new.appendTo(label);
-  check_new.prop("checked", def);
-
-  var span = $('<span class="checkmark"></span>');
-  span.appendTo(label);
-  return label;
-}
-
-//
-function change_background(arg = "default", grpId = 0) {
-  let artistLine = "";
-  const _card = db.card(grpId);
-
-  //console.log(arg, grpId, _card);
-  if (arg === "default") {
-    $(".top_artist").html("Ghitu Lavarunner by Jesper Ejsing");
-    if (pd.settings.back_url === "") {
-      $(".main_wrapper").css(
-        "background-image",
-        "url(../images/Ghitu-Lavarunner-Dominaria-MtG-Art.jpg)"
-      );
-    } else {
-      $(".top_artist").html("");
-      $(".main_wrapper").css(
-        "background-image",
-        "url(" + pd.settings.back_url + ")"
-      );
-    }
-  } else if (_card) {
-    // console.log(_card.images["art_crop"]);
-    $(".main_wrapper").css(
-      "background-image",
-      "url(https://img.scryfall.com/cards" + _card.images["art_crop"] + ")"
-    );
-    try {
-      artistLine = _card.name + " by " + _card.artist;
-      $(".top_artist").html(artistLine);
-    } catch (e) {
-      console.log(e);
-    }
-  } else if (fs.existsSync(arg)) {
-    $(".top_artist").html("");
-    $(".main_wrapper").css("background-image", "url(" + arg + ")");
-  } else {
-    $(".top_artist").html("");
-    $.ajax({
-      url: arg,
-      type: "HEAD",
-      error: function() {
-        $(".main_wrapper").css("background-image", "");
-      },
-      success: function() {
-        $(".main_wrapper").css("background-image", "url(" + arg + ")");
-      }
-    });
-  }
-}
-
-//
-function formatPercent(value, config = {}) {
-  return value.toLocaleString([], {
-    style: "percent",
-    maximumSignificantDigits: 2,
-    ...config
-  });
-}
-
-//
-function formatNumber(value, config = {}) {
-  return value.toLocaleString([], {
-    style: "decimal",
-    ...config
-  });
-}
-
-//
-function getWinrateClass(wr) {
-  if (wr > 0.65) return "blue";
-  if (wr > 0.55) return "green";
-  if (wr < 0.45) return "orange";
-  if (wr < 0.35) return "red";
-  return "white";
-}
-
-function getEventWinLossClass(wlGate) {
-  if (wlGate === undefined) return "white";
-  if (wlGate.MaxWins === wlGate.CurrentWins) return "blue";
-  if (wlGate.CurrentWins > wlGate.CurrentLosses) return "green";
-  if (wlGate.CurrentWins * 2 > wlGate.CurrentLosses) return "orange";
-  return "red";
-}
-
-function compare_winrates(a, b) {
-  let _a = a.wins / a.losses;
-  let _b = b.wins / b.losses;
-
-  if (_a < _b) return 1;
-  if (_a > _b) return -1;
-
-  return compare_color_winrates(a, b);
-}
-
-function compare_color_winrates(a, b) {
-  a = a.colors;
-  b = b.colors;
-
-  if (a.length < b.length) return -1;
-  if (a.length > b.length) return 1;
-
-  let sa = a.reduce(function(_a, _b) {
-    return _a + _b;
-  }, 0);
-  let sb = b.reduce(function(_a, _b) {
-    return _a + _b;
-  }, 0);
-  if (sa < sb) return -1;
-  if (sa > sb) return 1;
-
-  return 0;
-}
-
-//
-function compare_changes(a, b) {
-  a = Date.parse(a.date);
-  b = Date.parse(b.date);
-  if (a < b) return 1;
-  if (a > b) return -1;
-  return 0;
-}
-
-//
-function compare_changes_inner(a, b) {
-  a = a.quantity;
-  b = b.quantity;
-  if (a > 0 && b > 0) {
-    if (a < b) return -1;
-    if (a > b) return 1;
-  }
-  if (a < 0 && b < 0) {
-    if (a < b) return 1;
-    if (a > b) return -1;
-  }
-  if (a < 0 && b > 0) {
-    return -1;
-  }
-  if (a > 0 && b < 0) {
-    return 1;
-  }
-  return 0;
-}
