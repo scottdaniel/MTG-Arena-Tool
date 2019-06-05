@@ -1162,6 +1162,8 @@ function addCustomDeck(customDeck) {
   pd_set({ decks: { ...pd.decks, [customDeck.id]: deckData } });
   store.set("decks." + id, deckData);
 
+  // decks_index is for backwards compatibility
+  // (just in case bleeding edge folks need to revert)
   const decks_index = [...pd.decks_index];
   if (!decks_index.includes(id)) {
     decks_index.push(id);

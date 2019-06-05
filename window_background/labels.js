@@ -318,13 +318,19 @@ function onLabelInDeckGetDeckLists(entry, json) {
   if (!json) return;
 
   const decks = { ...pd.decks };
+  // decks_index is for backwards compatibility
+  // (just in case bleeding edge folks need to revert)
+  const decks_index = [...pd.decks_index];
   const static_decks = [];
   json.forEach(deck => {
+    if (!decks_index.includes(deck.id)) {
+      decks_index.push(deck.id);
+    }
     decks[deck.id] = { ...(pd.deck(deck.id) || {}), ...deck };
     static_decks.push(deck.id);
   });
 
-  pd_set({ decks, static_decks });
+  pd_set({ decks, decks_index, static_decks });
   if (!firstPass) ipc_send("player_data_refresh");
 }
 

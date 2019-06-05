@@ -193,7 +193,7 @@ class PlayerData {
   }
 
   get deckList() {
-    return this.decks_index.filter(this.deckExists).map(this.deck);
+    return Object.keys(this.decks).map(this.deck);
   }
 
   get drafts() {
