@@ -95,6 +95,7 @@ const defaultCfg = {
   decks_index: [],
   decks_tags: {},
   decks_last_used: [],
+  static_decks: [],
   tags_colors: {},
   wildcards_history: []
 };
@@ -232,9 +233,9 @@ class PlayerData {
   deck(id) {
     if (!this.deckExists(id)) return false;
     return {
-      custom: true,
       ...this.decks[id],
       colors: get_deck_colors(this.decks[id]),
+      custom: !this.static_decks.includes(id),
       tags: this.decks_tags[id] || []
     };
   }

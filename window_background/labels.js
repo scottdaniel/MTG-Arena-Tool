@@ -318,14 +318,13 @@ function onLabelInDeckGetDeckLists(entry, json) {
   if (!json) return;
 
   const decks = { ...pd.decks };
+  const static_decks = [];
   json.forEach(deck => {
-    decks[deck.id] = {
-      ...deck,
-      custom: false
-    };
+    decks[deck.id] = { ...(pd.deck(deck.id) || {}), ...deck };
+    static_decks.push(deck.id);
   });
 
-  pd_set({ decks });
+  pd_set({ decks, static_decks });
   if (!firstPass) ipc_send("player_data_refresh");
 }
 
