@@ -17,6 +17,7 @@ const playerDataDefault = {
   userName: "",
   arenaId: "",
   arenaVersion: "",
+  offline: false,
   patreon: false,
   patreon_tier: 0,
   rank: {

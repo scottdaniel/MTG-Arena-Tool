@@ -26,12 +26,12 @@ const sha1 = require("js-sha1");
 const httpApi = require("./http-api");
 const manifestParser = require("./manifest-parser");
 const greToClientInterpreter = require("./gre-to-client-interpreter");
-const Deck = require("../shared/deck.js");
+const Deck = require("../shared/deck");
 const db = require("../shared/database");
-const pd = require("../shared/player-data.js");
+const pd = require("../shared/player-data");
 const { hypergeometricRange } = require("../shared/stats-fns");
 const { get_rank_index, objectClone } = require("../shared/util");
-const { HIDDEN_PW, IPC_OVERLAY } = require("../shared/constants.js");
+const { HIDDEN_PW, IPC_OVERLAY } = require("../shared/constants");
 const { ipc_send, pd_set, unleakString } = require("./background-util");
 const {
   onLabelOutLogInfo,
@@ -243,9 +243,8 @@ ipc.on("set_renderer_state", function(event, arg) {
 });
 
 function offlineLogin() {
-  pd_set({ userName: "" });
+  pd_set({ userName: "", offline: true });
   ipc_send("auth", { ok: true, user: -1 });
-  ipc_send("set_offline", true);
   loadPlayerConfig(pd.arenaId);
 }
 
