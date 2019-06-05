@@ -8,9 +8,11 @@ class Database {
 
     this.handleSetActiveEvents = this.handleSetActiveEvents.bind(this);
     this.handleSetDb = this.handleSetDb.bind(this);
+    this.handleSetRewardResets = this.handleSetRewardResets.bind(this);
     this.handleSetSeason = this.handleSetSeason.bind(this);
     if (ipc) ipc.on("set_active_events", this.handleSetActiveEvents);
     if (ipc) ipc.on("set_db", this.handleSetDb);
+    if (ipc) ipc.on("set_reward_resets", this.handleSetRewardResets);
     if (ipc) ipc.on("set_season", this.handleSetSeason);
     const dbUri = `${__dirname}/../resources/database.json`;
     const defaultDb = fs.readFileSync(dbUri, "utf8");
@@ -35,6 +37,11 @@ class Database {
     } catch (e) {
       console.log("Error parsing metadata", e);
     }
+  }
+
+  handleSetRewardResets(_event, arg) {
+    this.rewards_daily_ends = new Date(arg.daily);
+    this.rewards_weekly_ends = new Date(arg.weekly);
   }
 
   handleSetSeason(_event, arg) {
