@@ -8,7 +8,7 @@ const { createSelect } = require("../shared/select");
 const { get_card_image } = require("../shared/util");
 
 const {
-  add_checkbox,
+  addCheckbox: add_checkbox,
   changeBackground: change_background,
   hideLoadingBars,
   ipcSend: ipc_send
