@@ -15,10 +15,10 @@ const {
 } = require("../shared/util");
 
 const {
-  addCheckbox: add_checkbox,
+  addCheckbox,
   getWinrateClass,
   hideLoadingBars,
-  ipcSend: ipc_send,
+  ipcSend,
   showLoadingBars
 } = require("./renderer-util");
 
@@ -254,7 +254,7 @@ function drawFilters() {
   /**
    *  Only owned filter
    **/
-  let lab = add_checkbox(
+  let lab = addCheckbox(
     $(buttonsMiddle),
     "Only owned",
     "settings_owned",
@@ -427,7 +427,7 @@ function queryExplore(skip) {
   };
 
   showLoadingBars();
-  ipc_send("request_explore", query);
+  ipcSend("request_explore", query);
 }
 
 function setExploreDecks(data) {
@@ -705,7 +705,7 @@ function eventLoad(event, index) {
 
 function open_course_request(courseId) {
   showLoadingBars();
-  ipc_send("request_course", courseId);
+  ipcSend("request_course", courseId);
 }
 
 module.exports = {

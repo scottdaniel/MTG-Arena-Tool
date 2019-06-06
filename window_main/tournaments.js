@@ -17,11 +17,11 @@ const pd = require("../shared/player-data");
 const FilterPanel = require("./filter-panel");
 const {
   pop,
-  changeBackground: change_background,
+  changeBackground,
   drawDeck,
   drawDeckVisual,
   getLocalState,
-  ipcSend: ipc_send
+  ipcSend
 } = require("./renderer-util");
 
 let tournamentDeck = null;
@@ -51,7 +51,7 @@ function tournamentCreate() {
   // Append
   mainDiv.appendChild(top);
   buttonBack.addEventListener("click", () => {
-    change_background("default");
+    changeBackground("default");
     $(".moving_ux").animate({ left: "0px" }, 250, "easeInOutCubic");
   });
 }
@@ -153,7 +153,7 @@ function tournamentOpen(t) {
   }
 
   topButtonBack.addEventListener("click", () => {
-    change_background("default");
+    changeBackground("default");
     $(".moving_ux").animate({ left: "0px" }, 250, "easeInOutCubic");
   });
 }
@@ -269,13 +269,13 @@ function showTournamentRegister(mainDiv, tou) {
 
   if (buttonDrop) {
     buttonDrop.addEventListener("click", () => {
-      ipc_send("tou_drop", tou._id);
+      ipcSend("tou_drop", tou._id);
     });
   }
 }
 
 function tournamentJoin(_id, _deck, _pass) {
-  ipc_send("tou_join", { id: _id, deck: _deck, pass: _pass });
+  ipcSend("tou_join", { id: _id, deck: _deck, pass: _pass });
 }
 
 function showTournamentStarted(mainDiv, tou) {
@@ -326,12 +326,12 @@ function showTournamentStarted(mainDiv, tou) {
 
       copyMtgaButton.addEventListener("click", () => {
         pop("Copied to clipboard", 1000);
-        ipc_send("set_clipboard", urlDecode(tou.current_opponent));
+        ipcSend("set_clipboard", urlDecode(tou.current_opponent));
       });
 
       copyDiscordButton.addEventListener("click", () => {
         pop("Copied to clipboard", 1000);
-        ipc_send("set_clipboard", urlDecode(tou.current_opponent_discord));
+        ipcSend("set_clipboard", urlDecode(tou.current_opponent_discord));
       });
     }
 
@@ -530,7 +530,7 @@ function createRoundsTab(joined) {
     let dropButton = createDivision(["button_simple", "but_drop"], "Drop");
     tab_cont_a.appendChild(dropButton);
     dropButton.addEventListener("click", () => {
-      ipc_send("tou_drop", tou._id);
+      ipcSend("tou_drop", tou._id);
     });
   }
 
@@ -700,7 +700,7 @@ function createDecklistTab() {
 
   buttonExport.addEventListener("click", () => {
     let list = get_deck_export(currentDeck);
-    ipc_send("set_clipboard", list);
+    ipcSend("set_clipboard", list);
   });
   return tab_cont_c;
 }

@@ -20,7 +20,7 @@ const {
   getTagColor,
   getWinrateClass,
   hideLoadingBars,
-  ipcSend: ipc_send,
+  ipcSend,
   makeResizable,
   setLocalState
 } = require("./renderer-util");
@@ -122,7 +122,7 @@ function openDecksTab(_filters = {}, scrollTop = 0) {
     let listItem;
     if (deck.custom) {
       const archiveCallback = id => {
-        ipc_send("toggle_deck_archived", id);
+        ipcSend("toggle_deck_archived", id);
       };
 
       listItem = new ListItem(
@@ -287,7 +287,7 @@ function createTag(tag, div, showClose = true) {
       colorPick.on("change.spectrum", (e, color) => {
         const tag = $(this).text();
         const col = color.toRgbString();
-        ipc_send("edit_tag", { tag, color: col });
+        ipcSend("edit_tag", { tag, color: col });
       });
 
       colorPick.on("hide.spectrum", () => {
@@ -364,11 +364,11 @@ function createTag(tag, div, showClose = true) {
 }
 
 function addTag(deckid, tag) {
-  ipc_send("add_tag", { deckid, tag });
+  ipcSend("add_tag", { deckid, tag });
 }
 
 function deleteTag(deckid, tag) {
-  ipc_send("delete_tag", { deckid, tag });
+  ipcSend("delete_tag", { deckid, tag });
 }
 
 module.exports = { openDecksTab: openDecksTab };

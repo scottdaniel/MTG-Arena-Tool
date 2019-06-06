@@ -24,10 +24,10 @@ const {
 const Aggregator = require("./aggregator");
 const StatsPanel = require("./stats-panel");
 const {
-  changeBackground: change_background,
+  changeBackground,
   drawDeck,
   drawDeckVisual,
-  ipcSend: ipc_send,
+  ipcSend,
   makeResizable,
   pop
 } = require("./renderer-util");
@@ -371,7 +371,7 @@ function openDeck(deck = currentOpenDeck, filters = currentFilters) {
 
   const tileGrpId = deck.deckTileId;
   if (db.card(tileGrpId)) {
-    change_background("", tileGrpId);
+    changeBackground("", tileGrpId);
   }
 
   const deckListSection = createDivision(["decklist"]);
@@ -399,16 +399,16 @@ function openDeck(deck = currentOpenDeck, filters = currentFilters) {
   $(".exportDeck").click(() => {
     const list = get_deck_export(deck);
     pop("Copied to clipboard", 1000);
-    ipc_send("set_clipboard", list);
+    ipcSend("set_clipboard", list);
   });
 
   $(".exportDeckStandard").click(() => {
     const list = get_deck_export_txt(deck);
-    ipc_send("export_txt", { str: list, name: deck.name });
+    ipcSend("export_txt", { str: list, name: deck.name });
   });
 
   $(".back").click(() => {
-    change_background("default");
+    changeBackground("default");
     $(".moving_ux").animate({ left: "0px" }, 250, "easeInOutCubic");
   });
 }

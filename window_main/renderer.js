@@ -31,10 +31,10 @@ const {
 } = require("../shared/util");
 
 const {
-  changeBackground: change_background,
+  changeBackground,
   getLocalState,
   hideLoadingBars,
-  ipcSend: ipc_send,
+  ipcSend,
   pop,
   setLocalState,
   showLoadingBars
@@ -76,7 +76,7 @@ ipc.on("auth", function(event, arg) {
     loggedIn = true;
   } else {
     canLogin = true;
-    ipc_send("renderer_show");
+    ipcSend("renderer_show");
     pop(arg.error, -1);
   }
 });
@@ -260,7 +260,7 @@ ipc.on("open_course_deck", function(event, arg) {
 //
 ipc.on("settings_updated", function() {
   if (lastSettings.back_url !== pd.settings.back_url) {
-    change_background();
+    changeBackground();
   }
   $(".main_wrapper").css("background-color", pd.settings.back_color);
   if (sidebarActive === 6) {
@@ -322,7 +322,7 @@ function rememberMe() {
   const rSettings = {
     remember_me: document.getElementById("rememberme").checked
   };
-  ipc_send("save_app_settings", rSettings);
+  ipcSend("save_app_settings", rSettings);
 }
 
 //
@@ -378,7 +378,7 @@ function openTab(tab, filters = {}, dataIndex = 0, scrollTop = 0) {
       break;
   }
   $("." + tabClass).addClass("item_selected");
-  ipc_send("save_user_settings", { last_open_tab: tab });
+  ipcSend("save_user_settings", { last_open_tab: tab });
 }
 
 //
@@ -463,7 +463,7 @@ ipc.on("no_log", function(event, arg) {
     but.appendTo(dialog);
 
     but.click(function() {
-      ipc_send("set_log", document.getElementById("log_input").value);
+      ipcSend("set_log", document.getElementById("log_input").value);
       console.log(".dialog_wrapper on click");
       //e.stopPropagation();
       $(".dialog_wrapper").css("opacity", 0);
@@ -586,7 +586,7 @@ $(document).ready(function() {
   });
 
   $(".offline_link").click(function() {
-    ipc_send("login", { username: "", password: "" });
+    ipcSend("login", { username: "", password: "" });
     $(".unlink").show();
   });
 
@@ -601,7 +601,7 @@ $(document).ready(function() {
       if (pass != HIDDEN_PW) {
         pass = sha1(pass);
       }
-      ipc_send("login", { username: user, password: pass });
+      ipcSend("login", { username: user, password: pass });
       canLogin = false;
     }
   }
@@ -615,12 +615,12 @@ $(document).ready(function() {
 
   //
   $(".close").click(function() {
-    ipc_send("renderer_window_close", 1);
+    ipcSend("renderer_window_close", 1);
   });
 
   //
   $(".minimize").click(function() {
-    ipc_send("renderer_window_minimize", 1);
+    ipcSend("renderer_window_minimize", 1);
   });
 
   //
@@ -633,7 +633,7 @@ $(document).ready(function() {
     $("#ux_0").off();
     $("#ux_0")[0].removeEventListener("scroll", () => {}, false);
     $("#history_column").off();
-    change_background("default");
+    changeBackground("default");
     document.body.style.cursor = "auto";
     if (!$(this).hasClass("item_selected")) {
       $(".moving_ux").animate({ left: "0px" }, 250, "easeInOutCubic");

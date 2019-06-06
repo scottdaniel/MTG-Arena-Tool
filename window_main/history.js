@@ -22,10 +22,10 @@ const {
   formatPercent,
   getLocalState,
   getTagColor,
-  ipcSend: ipc_send,
+  ipcSend,
   makeResizable,
-  openDraft: open_draft,
-  openMatch: open_match,
+  openDraft,
+  openMatch,
   showLoadingBars,
   toggleArchived
 } = require("./renderer-util");
@@ -198,10 +198,10 @@ function renderData(container, index) {
   let tileGrpid, clickCallback;
   if (match.type == "match") {
     tileGrpid = match.playerDeck.deckTileId;
-    clickCallback = openMatch;
+    clickCallback = handleOpenMatch;
   } else {
     tileGrpid = db.sets[match.set].tile;
-    clickCallback = openDraft;
+    clickCallback = handleOpenDraft;
   }
   const deleteCallback = id => {
     toggleArchived(id);
@@ -233,13 +233,13 @@ function renderData(container, index) {
   return 1;
 }
 
-function openMatch(id) {
-  open_match(id);
+function handleOpenMatch(id) {
+  openMatch(id);
   $(".moving_ux").animate({ left: "-100%" }, 250, "easeInOutCubic");
 }
 
-function openDraft(id) {
-  open_draft(id);
+function handleOpenDraft(id) {
+  openDraft(id);
   $(".moving_ux").animate({ left: "-100%" }, 250, "easeInOutCubic");
 }
 
@@ -436,7 +436,7 @@ function createTag(tag, div, showClose = true) {
       colorPick.on("change.spectrum", (e, color) => {
         const tag = $(this).text();
         const col = color.toRgbString();
-        ipc_send("edit_tag", { tag, color: col });
+        ipcSend("edit_tag", { tag, color: col });
       });
 
       colorPick.on("hide.spectrum", () => {
@@ -549,14 +549,14 @@ function addTag(matchid, tag, div) {
   if (!match) return;
   if (match.tags && match.tags.includes(tag)) return;
 
-  ipc_send("add_history_tag", { matchid, tag });
+  ipcSend("add_history_tag", { matchid, tag });
 }
 
 function deleteTag(matchid, tag) {
   const match = pd.match(matchid);
   if (!match || !match.tags || !match.tags.includes(tag)) return;
 
-  ipc_send("delete_history_tag", { matchid, tag });
+  ipcSend("delete_history_tag", { matchid, tag });
 }
 
 function getStepsUntilNextRank(mode, winrate) {
@@ -668,7 +668,7 @@ function addShare(_match) {
     selectAdd(select, () => draftShareLink(_match.id));
 
     but.click(function() {
-      ipc_send("set_clipboard", document.getElementById("share_input").value);
+      ipcSend("set_clipboard", document.getElementById("share_input").value);
     });
   });
 }
@@ -694,7 +694,7 @@ function draftShareLink(id) {
       break;
   }
   showLoadingBars();
-  ipc_send("request_draft_link", { expire, id });
+  ipcSend("request_draft_link", { expire, id });
 }
 
 function compare_matches(a, b) {

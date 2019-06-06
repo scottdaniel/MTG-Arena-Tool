@@ -3,7 +3,7 @@ const { createDivision } = require("../shared/dom-fns");
 const { get_rank_index, toDDHHMMSS, toMMSS } = require("../shared/util");
 
 const {
-  compareWinrates: compare_winrates,
+  compareWinrates,
   formatPercent,
   getTagColor,
   getWinrateClass
@@ -146,7 +146,7 @@ class StatsPanel {
       ...tagsWinrates.map(cwr => Math.max(cwr.wins || 0, cwr.losses || 0)),
       0
     );
-    tagsWinrates.sort(compare_winrates);
+    tagsWinrates.sort(compareWinrates);
     // Colors
     let colorsWinrates = [...Object.values(this.data.colorStats)];
     colorsWinrates.sort(frequencySort);
@@ -155,7 +155,7 @@ class StatsPanel {
       ...colorsWinrates.map(cwr => Math.max(cwr.wins || 0, cwr.losses || 0)),
       0
     );
-    colorsWinrates.sort(compare_winrates);
+    colorsWinrates.sort(compareWinrates);
 
     if (curveMaxTags || curveMax) {
       const chartTitle = createDivision(["ranks_history_title"]);

@@ -18,8 +18,8 @@ const {
 
 const {
   hideLoadingBars,
-  changeBackground: change_background,
-  ipcSend: ipc_send
+  changeBackground,
+  ipcSend
 } = require("./renderer-util");
 
 let collectionPage = 0;
@@ -593,7 +593,7 @@ function resetFilters() {
 //
 function exportCollection() {
   let list = get_collection_export(pd.settings.export_format);
-  ipc_send("export_csvtxt", { str: list, name: "collection" });
+  ipcSend("export_csvtxt", { str: list, name: "collection" });
 }
 
 //
@@ -609,7 +609,7 @@ function printStats() {
   top.appendChild(createDivision(["deck_name"], "Collection Statistics"));
   top.appendChild(createDivision(["deck_top_colors"]));
 
-  //change_background("", 67574);
+  //changeBackground("", 67574);
 
   const flex = createDivision(["flex_item"]);
   const mainstats = createDivision(["main_stats"]);
@@ -657,7 +657,7 @@ function printStats() {
 
   //
   $$(".back")[0].addEventListener("click", () => {
-    change_background("default");
+    changeBackground("default");
     $(".moving_ux").animate({ left: "0px" }, 250, "easeInOutCubic");
   });
 }

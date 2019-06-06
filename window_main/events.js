@@ -18,7 +18,7 @@ const StatsPanel = require("./stats-panel");
 const {
   getEventWinLossClass,
   getLocalState,
-  openMatch: open_match,
+  openMatch,
   toggleArchived
 } = require("./renderer-util");
 
@@ -240,7 +240,7 @@ function createMatchRow(match) {
 
   var tileGrpid = match.playerDeck.deckTileId;
 
-  let matchRow = new ListItem(tileGrpid, match.id, openMatch);
+  let matchRow = new ListItem(tileGrpid, match.id, handleOpenMatch);
   matchRow.divideLeft();
   matchRow.divideRight();
 
@@ -292,8 +292,8 @@ function createMatchRow(match) {
   return matchRow.container;
 }
 
-function openMatch(id) {
-  open_match(id);
+function handleOpenMatch(id) {
+  openMatch(id);
   $(".moving_ux").animate({ left: "-100%" }, 250, "easeInOutCubic");
 }
 

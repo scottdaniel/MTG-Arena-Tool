@@ -5,11 +5,7 @@ const { queryElements: $$, createDivision } = require("../shared/dom-fns");
 const { addCardHover } = require("../shared/card-hover");
 const { toHHMMSS, toDDHHMMSS, timestamp } = require("../shared/util");
 const { tournamentCreate } = require("./tournaments");
-const {
-  getLocalState,
-  ipcSend: ipc_send,
-  showLoadingBars
-} = require("./renderer-util");
+const { getLocalState, ipcSend, showLoadingBars } = require("./renderer-util");
 
 let usersActive;
 let tournaments_list;
@@ -27,7 +23,7 @@ function clearHomeInverals() {
 
 //
 function requestHome() {
-  ipc_send("request_home", filteredWildcardsSet);
+  ipcSend("request_home", filteredWildcardsSet);
 }
 
 // Should separate these two into smaller functions
@@ -238,7 +234,7 @@ function openHomeTab(arg, opentab = true) {
         tournamentCreate();
       } else {
         document.body.style.cursor = "progress";
-        ipc_send("tou_get", cont.id);
+        ipcSend("tou_get", cont.id);
       }
     });
   });

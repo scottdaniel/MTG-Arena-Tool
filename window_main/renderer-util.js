@@ -46,8 +46,8 @@ const actionLogDir = path.join(
 );
 
 //
-exports.ipcSend = ipc_send;
-function ipc_send(method, arg, to = IPC_BACKGROUND) {
+exports.ipcSend = ipcSend;
+function ipcSend(method, arg, to = IPC_BACKGROUND) {
   ipc.send("ipc_switch", method, IPC_MAIN, arg, to);
 }
 
@@ -98,7 +98,7 @@ function getLocalState() {
 // convenience handler for player data singleton
 exports.toggleArchived = toggleArchived;
 function toggleArchived(id) {
-  ipc_send("toggle_archived", id);
+  ipcSend("toggle_archived", id);
 }
 
 //
@@ -125,7 +125,7 @@ function makeResizable(div, resizeCallback, finalCallback) {
   };
 
   let saveWidth = function(width) {
-    ipc_send("save_user_settings", { right_panel_width: width });
+    ipcSend("save_user_settings", { right_panel_width: width });
   };
 
   div.addEventListener(
@@ -139,7 +139,7 @@ function makeResizable(div, resizeCallback, finalCallback) {
 
   document.addEventListener(
     "mouseup",
-    event => {
+    () => {
       document.removeEventListener("mousemove", resize, false);
       if (finalWidth) {
         saveWidth(finalWidth);
@@ -467,8 +467,8 @@ function drawDeckVisual(_div, deck, _stats, openCallback) {
 }
 
 //
-exports.openDraft = open_draft;
-function open_draft(id) {
+exports.openDraft = openDraft;
+function openDraft(id) {
   console.log("OPEN DRAFT", id, draftPosition);
   $("#ux_1").html("");
   $("#ux_1").removeClass("flex_item");
@@ -499,7 +499,7 @@ function open_draft(id) {
   top.append(flr);
 
   if (db.card(tileGrpid)) {
-    change_background("", tileGrpid);
+    changeBackground("", tileGrpid);
   }
 
   var cont = $('<div class="flex_item" style="flex-direction: column;"></div>');
@@ -574,28 +574,28 @@ function open_draft(id) {
 
   $("#draftPosRange").on("click mouseup", function() {
     draftPosition = parseInt(posRange.value);
-    open_draft(id, tileGrpid, draft.set);
+    openDraft(id, tileGrpid, draft.set);
   });
 
   $(".draft_nav_prev").on("click mouseup", function() {
     draftPosition -= 1;
-    open_draft(id, tileGrpid, draft.set);
+    openDraft(id, tileGrpid, draft.set);
   });
 
   $(".draft_nav_next").on("click mouseup", function() {
     draftPosition += 1;
-    open_draft(id, tileGrpid, draft.set);
+    openDraft(id, tileGrpid, draft.set);
   });
   //
   $(".back").click(function() {
-    change_background("default");
+    changeBackground("default");
     $(".moving_ux").animate({ left: "0px" }, 250, "easeInOutCubic");
   });
 }
 
 //
-exports.openMatch = open_match;
-function open_match(id) {
+exports.openMatch = openMatch;
+function openMatch(id) {
   $("#ux_1").html("");
   $("#ux_1").removeClass("flex_item");
   const match = pd.match(id);
@@ -624,7 +624,7 @@ function open_match(id) {
 
   var tileGrpid = match.playerDeck.deckTileId;
   if (db.card(tileGrpid)) {
-    change_background("", tileGrpid);
+    changeBackground("", tileGrpid);
   }
   var fld = $('<div class="flex_item"></div>');
 
@@ -976,27 +976,27 @@ function open_match(id) {
 
   $(".exportDeckPlayer").click(function() {
     var list = get_deck_export(match.playerDeck);
-    ipc_send("set_clipboard", list);
+    ipcSend("set_clipboard", list);
   });
   $(".exportDeckStandardPlayer").click(function() {
     var list = get_deck_export_txt(match.playerDeck);
-    ipc_send("export_txt", { str: list, name: match.playerDeck.name });
+    ipcSend("export_txt", { str: list, name: match.playerDeck.name });
   });
 
   $(".exportDeck").click(function() {
     var list = get_deck_export(match.oppDeck);
-    ipc_send("set_clipboard", list);
+    ipcSend("set_clipboard", list);
   });
   $(".exportDeckStandard").click(function() {
     var list = get_deck_export_txt(match.oppDeck);
-    ipc_send("export_txt", {
+    ipcSend("export_txt", {
       str: list,
       name: match.opponent.name.slice(0, -6) + "'s deck"
     });
   });
 
   $(".back").click(function() {
-    change_background("default");
+    changeBackground("default");
     $(".moving_ux").animate({ left: "0px" }, 250, "easeInOutCubic");
   });
 }
@@ -1065,8 +1065,8 @@ function toggleVisibility(...ids) {
 }
 
 //
-exports.addCheckbox = add_checkbox;
-function add_checkbox(div, label, iid, def, func) {
+exports.addCheckbox = addCheckbox;
+function addCheckbox(div, label, iid, def, func) {
   label = $('<label class="check_container hover_label">' + label + "</label>");
   label.appendTo(div);
   var check_new = $('<input type="checkbox" id="' + iid + '" />');
@@ -1080,8 +1080,8 @@ function add_checkbox(div, label, iid, def, func) {
 }
 
 //
-exports.changeBackground = change_background;
-function change_background(arg = "default", grpId = 0) {
+exports.changeBackground = changeBackground;
+function changeBackground(arg = "default", grpId = 0) {
   let artistLine = "";
   const _card = db.card(grpId);
 
@@ -1170,20 +1170,20 @@ function getEventWinLossClass(wlGate) {
 }
 
 //
-exports.compareWinrates = compare_winrates;
-function compare_winrates(a, b) {
+exports.compareWinrates = compareWinrates;
+function compareWinrates(a, b) {
   let _a = a.wins / a.losses;
   let _b = b.wins / b.losses;
 
   if (_a < _b) return 1;
   if (_a > _b) return -1;
 
-  return compare_color_winrates(a, b);
+  return compareColorWinrates(a, b);
 }
 
 //
-exports.compareColorWinrates = compare_color_winrates;
-function compare_color_winrates(a, b) {
+exports.compareColorWinrates = compareColorWinrates;
+function compareColorWinrates(a, b) {
   a = a.colors;
   b = b.colors;
 
