@@ -210,13 +210,6 @@ ipc.on("save_app_settings", function(event, arg) {
 });
 
 //
-ipc.on("reload_overlay", function() {
-  loadSettings();
-  var obj = store.get("overlayBounds");
-  ipc_send("overlay_set_bounds", obj);
-});
-
-//
 ipc.on("set_renderer_state", function(event, arg) {
   ipc_send("ipc_log", "Renderer state: " + arg);
   renderer_state = arg;
@@ -290,14 +283,10 @@ ipc.on("windowBounds", function(event, obj) {
 });
 
 //
-ipc.on("overlayBounds", function(event, obj) {
-  store.set("overlayBounds", obj);
-});
-
-//
 ipc.on("save_user_settings", function(event, settings) {
   ipc_send("show_loading");
   const oldSettings = store.get("settings");
+  console.log("> settings: ", oldSettings);
   const updated = { ...oldSettings, ...settings };
 
   // clean up garbage jQuery data that slipped into some configs
@@ -316,8 +305,9 @@ ipc.on("save_user_settings", function(event, settings) {
   jQueryGarbageKeys.forEach(key => delete updated[key]);
 
   loadSettings(updated);
-  store.set("settings", updated);
+  store.set("settings", pd.settings);
   ipc_send("hide_loading");
+  console.log("> updated: ", updated);
 });
 
 //
@@ -508,9 +498,6 @@ function loadPlayerConfig(playerId, serverData = undefined) {
     progress: 2
   });
 
-  // TODO move this into main?
-  const obj = store.get("overlayBounds");
-  ipc_send("overlay_set_bounds", obj);
   loadSettings();
 
   watchingLog = true;
@@ -601,20 +588,13 @@ function loadSettings(dirtySettings = {}) {
     ...dirtySettings
   };
 
-  //console.log(_settings);
+  console.log(settings);
   //const exeName = path.basename(process.execPath);
 
   skipFirstPass = settings.skip_firstpass;
   pd_set({ settings });
 
-  ipc_send("overlay_set_ontop", settings.overlay_ontop);
-
-  if (settings.show_overlay == false) {
-    ipc_send("overlay_close", 1);
-  } else if (duringMatch || settings.show_overlay_always) {
-    ipc_send("overlay_show", 1);
-  }
-
+  console.log("> Loaded: ", settings);
   ipc_send("set_settings", settings);
   ipc_send("settings_updated");
 }
@@ -1176,16 +1156,15 @@ function addCustomDeck(customDeck) {
 //
 function createMatch(arg) {
   actionLog(-99, new Date(), "");
-  var obj = store.get("overlayBounds");
 
   currentMatch = _.cloneDeep(currentMatchDefault);
 
-  if (!firstPass && store.get("settings").show_overlay == true) {
+  if (!firstPass) {
     if (store.get("settings").close_on_match) {
       ipc_send("renderer_hide", 1);
     }
+
     ipc_send("overlay_show", 1);
-    ipc_send("overlay_set_bounds", obj);
   }
 
   currentMatch.player.originalDeck = originalDeck;
@@ -1236,18 +1215,13 @@ function createDraft() {
   currentDraft = _.cloneDeep(currentDraftDefault);
   currentMatch = _.cloneDeep(currentMatchDefault);
 
-  if (!firstPass && store.get("settings").show_overlay == true) {
+  if (!firstPass) {
     if (store.get("settings").close_on_match) {
       ipc_send("renderer_hide", 1);
     }
 
-    ipc_send("overlay_show", 1);
-    ipc_send("overlay_set_bounds", obj);
+    ipc_send("overlay_show", 2);
   }
-
-  ipc_send("set_draft", true, IPC_OVERLAY);
-  ipc_send("set_timer", -1, IPC_OVERLAY);
-  ipc_send("set_opponent", "", IPC_OVERLAY);
 }
 
 //
@@ -1662,9 +1636,6 @@ function finishLoading() {
       ipc_send("overlay_show", 1);
       update_deck(false);
     }
-
-    let obj = store.get("overlayBounds");
-    ipc_send("overlay_set_bounds", obj);
 
     obj = store.get("windowBounds");
     ipc_send("renderer_set_bounds", obj);

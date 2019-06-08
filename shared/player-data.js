@@ -42,37 +42,29 @@ const playerDataDefault = {
 
 const defaultCfg = {
   windowBounds: { width: 800, height: 600, x: 0, y: 0 },
-  overlayBounds: { width: 300, height: 600, x: 0, y: 0 },
   cards: { cards_time: 0, cards_before: [], cards: [] },
   cardsNew: {},
   settings: {
-    overlay_sideboard: false,
     sound_priority: false,
     sound_priority_volume: 1,
     cards_quality: "small",
-    show_overlay: true,
-    show_overlay_always: false,
     startup: true,
     close_to_tray: true,
     send_data: true,
     anon_explore: false,
     close_on_match: true,
     cards_size: 2,
-    overlay_alpha: 1,
-    overlay_alpha_back: 1,
-    overlay_scale: 100,
-    overlay_top: true,
-    overlay_title: true,
-    overlay_deck: true,
-    overlay_clock: true,
-    overlay_ontop: true,
-    overlay_lands: true,
     export_format: "$Name,$Count,$Rarity,$SetName,$Collector",
     back_color: "rgba(0,0,0,0.3)",
     back_url: "",
     right_panel_width: 200,
     last_open_tab: -1,
-    card_tile_style: CARD_TILE_FLAT
+    card_tile_style: CARD_TILE_FLAT,
+    overlays: [
+      newOverlaySettings(0),
+      newOverlaySettings(1),
+      newOverlaySettings(3)
+    ]
   },
   economy_index: [],
   economy: {
@@ -100,6 +92,25 @@ const defaultCfg = {
   tags_colors: {},
   wildcards_history: []
 };
+
+function newOverlaySettings(mode) {
+  return {
+    bounds: { width: 300, height: 600, x: 0, y: 0 },
+    show: true,
+    show_awlays: true,
+    mode: mode,
+    sideboard: false,
+    alpha: 1,
+    alpha_back: 1,
+    scale: 100,
+    top: true,
+    title: true,
+    deck: true,
+    clock: true,
+    ontop: true,
+    lands: true
+  };
+}
 
 // cloned from util to avoid circular dependency
 // TODO refactor to recombine

@@ -31,7 +31,8 @@ const debugIPC = false;
 var mainWindow;
 var updaterWindow;
 var background;
-var overlay;
+var overlays = null;
+var overlays_settings = null;
 var tray = null;
 var closeToTray = true;
 let autoLogin = false;
@@ -115,14 +116,12 @@ function installUpdate() {
 
 function startApp() {
   mainWindow = createMainWindow();
-  overlay = createOverlay();
   background = createBackgroundWindow();
 
   globalShortcut.register("Alt+Shift+D", () => {
     if (!background.isVisible()) background.show();
     else background.hide();
     background.toggleDevTools();
-    overlay.toggleDevTools();
     mainWindow.toggleDevTools();
   });
 
@@ -175,17 +174,23 @@ function startApp() {
 
       case "settings_updated":
         mainWindow.webContents.send("settings_updated");
-        overlay.webContents.send("settings_updated");
+        overlays.forEach(overlay => {
+          overlay.webContents.send("settings_updated");
+        });
         break;
 
       case "player_data_refresh":
         mainWindow.webContents.send("player_data_refresh");
-        overlay.webContents.send("player_data_refresh");
+        overlays.forEach(overlay => {
+          overlay.webContents.send("player_data_refresh");
+        });
         break;
 
       case "set_db":
         mainWindow.webContents.send("set_db", arg);
-        overlay.webContents.send("set_db", arg);
+        overlays.forEach(overlay => {
+          overlay.webContents.send("set_db", arg);
+        });
         if (autoLogin) {
           background.webContents.send("auto_login");
         }
@@ -202,10 +207,6 @@ function startApp() {
 
       case "renderer_window_minimize":
         mainWindow.minimize();
-        break;
-
-      case "set_opponent_rank":
-        overlay.webContents.send("set_opponent_rank", arg.rank, arg.str);
         break;
 
       // to main js / window handling
@@ -234,36 +235,6 @@ function startApp() {
         closeToTray = arg;
         break;
 
-      case "overlay_show":
-        if (!overlay.isVisible()) {
-          overlay.showInactive();
-        }
-        break;
-
-      case "overlay_close":
-        overlay.hide();
-        break;
-
-      case "overlay_minimize":
-        overlay.minimize();
-        break;
-
-      case "renderer_set_bounds":
-        mainWindow.setBounds(arg);
-        break;
-
-      case "overlay_set_bounds":
-        overlay.setBounds(arg);
-        break;
-
-      case "overlay_set_ontop":
-        overlay.setAlwaysOnTop(arg, "floating");
-        break;
-
-      case "save_overlay_pos":
-        saveOverlayPos();
-        break;
-
       case "force_open_settings":
         mainWindow.webContents.send("force_open_settings", true);
         showWindow();
@@ -274,7 +245,9 @@ function startApp() {
         break;
 
       case "reset_overlay_pos":
-        overlay.setPosition(0, 0);
+        overlays.forEach(overlay => {
+          overlay.setPosition(0, 0);
+        });
         break;
 
       case "updates_check":
@@ -336,14 +309,20 @@ function startApp() {
       default:
         if (to == 0) background.webContents.send(method, arg);
         if (to == 1) mainWindow.webContents.send(method, arg);
-        if (to == 2) overlay.webContents.send(method, arg);
+        if (to == 2) {
+          overlays.forEach(overlay => {
+            overlay.webContents.send(method, arg);
+          });
+        }
         break;
     }
   });
 
   //
   ipc.on("set_draft_cards", function(event, pack, picks, packn, pickn) {
-    overlay.webContents.send("set_draft_cards", pack, picks, packn, pickn);
+    overlays.forEach(overlay => {
+      overlay.webContents.send("set_draft_cards", pack, picks, packn, pickn);
+    });
   });
 
   //
@@ -357,16 +336,18 @@ function startApp() {
     turnPriority,
     turnDecision
   ) {
-    overlay.webContents.send(
-      "set_turn",
-      playerSeat,
-      turnPhase,
-      turnStep,
-      turnNumber,
-      turnActive,
-      turnPriority,
-      turnDecision
-    );
+    overlays.forEach(overlay => {
+      overlay.webContents.send(
+        "set_turn",
+        playerSeat,
+        turnPhase,
+        turnStep,
+        turnNumber,
+        turnActive,
+        turnPriority,
+        turnDecision
+      );
+    });
   });
 }
 
@@ -382,11 +363,16 @@ function setSettings(settings) {
     showWindow();
   }
 
-  var oldAlphaEnabled = alphaEnabled;
-  alphaEnabled = settings.overlay_alpha_back < 1;
-  if (oldAlphaEnabled != alphaEnabled) {
-    recreateOverlay();
+  overlays_settings = settings.overlays;
+
+  if (overlays == null) {
+    overlays = [];
+    overlays_settings.forEach((overlaySettings, index) => {
+      overlays[index] = createOverlay(overlaySettings);
+    });
   }
+
+  updateOverlays(settings);
   firstSettingsRead = false;
 }
 
@@ -402,7 +388,7 @@ function onClosed() {
 }
 
 function onOverlayClosed() {
-  overlay = null;
+//  overlay = null;
 }
 
 function hideWindow() {
@@ -445,17 +431,6 @@ function saveWindowPos() {
   obj.x = Math.floor(pos[0]);
   obj.y = Math.floor(pos[1]);
   background.webContents.send("windowBounds", obj);
-}
-
-function saveOverlayPos() {
-  var obj = {};
-  var bounds = overlay.getBounds();
-  var pos = overlay.getPosition();
-  obj.width = Math.floor(bounds.width);
-  obj.height = Math.floor(bounds.height);
-  obj.x = Math.floor(pos[0]);
-  obj.y = Math.floor(pos[1]);
-  background.webContents.send("overlayBounds", obj);
 }
 
 function createUpdaterWindow() {
@@ -546,16 +521,17 @@ function createMainWindow() {
   return win;
 }
 
-function createOverlay() {
+function createOverlay(settings, index) {
+  let alphaEnabled = settings.alpha_back < 1;
   const over = new electron.BrowserWindow({
     transparent: alphaEnabled,
     frame: false,
-    alwaysOnTop: true,
-    x: 0,
-    y: 0,
-    width: 300,
-    height: 600,
-    show: false,
+    alwaysOnTop: settings.bounds.ontop,
+    x: settings.bounds.x,
+    y: settings.bounds.y,
+    width: settings.bounds.width,
+    height: settings.bounds.height,
+    show: settings.bounds.show,
     title: "MTG Arena Tool",
     icon: "iconoverlay.png",
     webPreferences: {
@@ -569,23 +545,52 @@ function createOverlay() {
     saveOverlayPos();
   });
 
-  /*
-  setTimeout( function() {
-    overlay.webContents.send("set_deck", currentDeck);
-    //debug_overlay_show();
-  }, 1000);
-  */
+  over.webContents.send("set_overlay_index", index);
+
   return over;
 }
 
-function recreateOverlay() {
+function saveOverlayPos() {
+  /*
+  var obj = {};
+  var bounds = overlay.getBounds();
+  var pos = overlay.getPosition();
+  obj.width = Math.floor(bounds.width);
+  obj.height = Math.floor(bounds.height);
+  obj.x = Math.floor(pos[0]);
+  obj.y = Math.floor(pos[1]);
+  background.webContents.send("overlayBounds", obj);
+  */
+}
+
+function showOverlay(type) {
+  //
+}
+
+function overlaySetSettings(overlay, settings, index) {
+  var oldAlphaEnabled = overlay.transparent;
+  alphaEnabled = settings.overlay_alpha_back < 1;
+  if (oldAlphaEnabled != alphaEnabled) {
+    overlays[index] = recreateOverlay(overlay, settings, index);
+  }
+}
+
+function recreateOverlay(overlay, settings, index) {
   if (overlay) {
     overlay.destroy();
-    overlay = createOverlay();
-    overlay.webContents.once("dom-ready", () => {
-      background.webContents.send("reload_overlay");
-    });
+    overlay = createOverlay(settings, index);
   }
+  return overlay;
+}
+
+function updateOverlays(settings) {
+  settings.overlays.forEach((overlaySettings, index) => {
+    let overlay = overlays[index];
+    if (!overlay) {
+      overlays[index] = createOverlay(overlaySettings, index);
+    }
+    overlaySetSettings(overlay, overlaySettings, index);
+  });
 }
 
 app.on("window-all-closed", () => {

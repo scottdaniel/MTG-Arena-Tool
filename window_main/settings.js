@@ -22,6 +22,8 @@ function getCardStyleName(style) {
   return "Arena";
 }
 
+let currentOverlay = 0;
+
 //
 function openSettingsTab(openSection = lastSettingsSection) {
   lastSettingsSection = openSection;
@@ -49,11 +51,128 @@ function openSettingsTab(openSection = lastSettingsSection) {
 
   const wrap_r = $('<div class="wrapper_column"></div>');
   const div = $('<div class="settings_page"></div>');
-  let label, icd, section;
+  let section;
 
   // BEHAVIOR
   section = $('<div class="settings_section ss1"></div>');
   section.appendTo(div);
+  appendBehaviour(section);
+
+  // OVERLAY
+  section = $('<div class="settings_section ss2"></div>');
+  section.appendTo(div);
+  appendOverlay(section);
+
+  // VISUAL
+  section = $('<div class="settings_section ss3"></div>');
+  section.appendTo(div);
+  appendVisual(section);
+
+  // PRIVACY
+  section = $('<div class="settings_section ss4"></div>');
+  section.appendTo(div);
+  appendPrivacy(section);
+
+  // ABOUT
+  section = $('<div class="settings_section ss5" style="height: 100%;"></div>');
+  section.appendTo(div);
+  appendAbout(section);
+
+  // LOGIN
+  section = $('<div class="settings_section ss6" style="height: 100%;"></div>');
+  section.appendTo(div);
+  appendLogin(section);
+
+  div.appendTo(wrap_r);
+  $("#ux_0").append(wrap_l);
+  $("#ux_0").append(wrap_r);
+
+  $(".ss" + openSection).show();
+  $(".sn" + openSection).addClass("nav_selected");
+
+  $(".resetOverlayPos").click(function() {
+    ipcSend("reset_overlay_pos", true);
+  });
+
+  $(".top_logo_about").click(function() {
+    shell.openExternal("https://mtgatool.com");
+  });
+
+  $(".twitter_link").click(function() {
+    shell.openExternal("https://twitter.com/MEtchegaray7");
+  });
+
+  $(".discord_link").click(function() {
+    shell.openExternal("https://discord.gg/K9bPkJy");
+  });
+
+  $(".git_link").click(function() {
+    shell.openExternal("https://github.com/Manuel-777/MTG-Arena-Tool");
+  });
+
+  $(".release_notes_link").click(function() {
+    shell.openExternal("https://mtgatool.com/release-notes/");
+  });
+
+  $(".donate_link").click(function() {
+    shell.openExternal("https://www.paypal.me/ManuelEtchegaray/10");
+  });
+
+  $(".login_link_about").click(function() {
+    const clearAppSettings = {
+      remember_me: false,
+      auto_login: false,
+      launch_to_tray: false
+    };
+    ipcSend("save_app_settings", clearAppSettings);
+    remote.app.relaunch();
+    remote.app.exit(0);
+  });
+
+  $(".update_link_about").click(function() {
+    ipcSend("updates_check", true);
+  });
+
+  $(".settings_nav").click(function() {
+    if (!$(this).hasClass("nav_selected")) {
+      $(".settings_nav").each(function() {
+        $(this).removeClass("nav_selected");
+      });
+      $(".settings_section").each(function() {
+        $(this).hide();
+      });
+
+      $(this).addClass("nav_selected");
+
+      if ($(this).hasClass("sn1")) {
+        lastSettingsSection = 1;
+        $(".ss1").show();
+      }
+      if ($(this).hasClass("sn2")) {
+        lastSettingsSection = 2;
+        $(".ss2").show();
+      }
+      if ($(this).hasClass("sn3")) {
+        lastSettingsSection = 3;
+        $(".ss3").show();
+      }
+      if ($(this).hasClass("sn4")) {
+        lastSettingsSection = 4;
+        $(".ss4").show();
+      }
+      if ($(this).hasClass("sn5")) {
+        lastSettingsSection = 5;
+        $(".ss5").show();
+      }
+      if ($(this).hasClass("sn6")) {
+        lastSettingsSection = 6;
+        $(".ss6").show();
+      }
+    }
+  });
+}
+
+function appendBehaviour(section) {
   section.append('<div class="settings_title">Behaviour</div>');
 
   addCheckbox(
@@ -132,9 +251,9 @@ function openSettingsTab(openSection = lastSettingsSection) {
   );
   sliderSoundVolumeInput.appendTo(sliderSoundVolume);
 
-  label = $('<label class="but_container_label">Export Format:</label>');
+  let label = $('<label class="but_container_label">Export Format:</label>');
   label.appendTo(section);
-  icd = $('<div class="input_container"></div>');
+  let icd = $('<div class="input_container"></div>');
   const export_input = $(
     '<input type="search" id="settings_export_format" autocomplete="off" value="' +
       pd.settings.export_format +
@@ -147,30 +266,51 @@ function openSettingsTab(openSection = lastSettingsSection) {
       <i>Possible constiables: $Name, $Count, $SetName, $SetCode, $Collector, $Rarity, $Type, $Cmc</i>
       </div>`);
 
-  // OVERLAY
-  section = $('<div class="settings_section ss2"></div>');
-  section.appendTo(div);
+  export_input.on("keyup", function() {
+    updateUserSettings();
+  });
+
+  sliderSoundVolumeInput.off();
+
+  sliderSoundVolumeInput.on("click mousemove", function() {
+    const volume = Math.round(this.value * 100);
+    sliderSoundVolumeLabel.html("Volume: " + volume + "%");
+  });
+
+  sliderSoundVolumeInput.on("click mouseup", function() {
+    let { Howl, Howler } = require("howler");
+    let sound = new Howl({ src: ["../sounds/blip.mp3"] });
+    Howler.volume(this.value);
+    sound.play();
+    updateUserSettingsBlend({
+      sound_priority_volume: this.value
+    });
+  });
+}
+
+function appendOverlay(section) {
+  let settings = pd.settings.overlays[currentOverlay];
   section.append('<div class="settings_title">Overlay</div>');
 
   addCheckbox(
     section,
     "Always on top",
     "settings_overlay_ontop",
-    pd.settings.overlay_ontop,
+    settings.ontop,
     updateUserSettings
   );
   addCheckbox(
     section,
     "Show overlay",
     "settings_showoverlay",
-    pd.settings.show_overlay,
+    settings.show,
     updateUserSettings
   );
   addCheckbox(
     section,
     "Persistent overlay&nbsp;<i>(useful for OBS setup)</i>",
     "settings_showoverlayalways",
-    pd.settings.show_overlay_always,
+    settings.show_always,
     updateUserSettings
   );
 
@@ -178,42 +318,42 @@ function openSettingsTab(openSection = lastSettingsSection) {
     section,
     "Show top bar",
     "settings_overlay_top",
-    pd.settings.overlay_top,
+    settings.top,
     updateUserSettings
   );
   addCheckbox(
     section,
     "Show title",
     "settings_overlay_title",
-    pd.settings.overlay_title,
+    settings.title,
     updateUserSettings
   );
   addCheckbox(
     section,
     "Show deck/lists",
     "settings_overlay_deck",
-    pd.settings.overlay_deck,
+    settings.deck,
     updateUserSettings
   );
   addCheckbox(
     section,
     "Show clock",
     "settings_overlay_clock",
-    pd.settings.overlay_clock,
+    settings.clock,
     updateUserSettings
   );
   addCheckbox(
     section,
     "Show sideboard",
     "settings_overlay_sideboard",
-    pd.settings.overlay_sideboard,
+    settings.sideboard,
     updateUserSettings
   );
   addCheckbox(
     section,
     "Compact lands",
     "settings_overlay_lands",
-    pd.settings.overlay_lands,
+    settings.lands,
     updateUserSettings
   );
 
@@ -221,13 +361,13 @@ function openSettingsTab(openSection = lastSettingsSection) {
   sliderOpacity.appendTo(section);
   const sliderOpacityLabel = $(
     '<label style="width: 400px; !important" class="card_size_container">Elements transparency: ' +
-      transparencyFromAlpha(pd.settings.overlay_alpha) +
+      transparencyFromAlpha(settings.alpha) +
       "%</label>"
   );
   sliderOpacityLabel.appendTo(sliderOpacity);
   const sliderOpacityInput = $(
     '<input type="range" min="0" max="100" step="5" value="' +
-      transparencyFromAlpha(pd.settings.overlay_alpha) +
+      transparencyFromAlpha(settings.alpha) +
       '" class="slider sliderB" id="opacityRange">'
   );
   sliderOpacityInput.appendTo(sliderOpacity);
@@ -236,13 +376,13 @@ function openSettingsTab(openSection = lastSettingsSection) {
   sliderOpacityBack.appendTo(section);
   const sliderOpacityBackLabel = $(
     '<label style="width: 400px; !important" class="card_size_container">Background transparency: ' +
-      transparencyFromAlpha(pd.settings.overlay_alpha_back) +
+      transparencyFromAlpha(settings.alpha_back) +
       "%</label>"
   );
   sliderOpacityBackLabel.appendTo(sliderOpacityBack);
   const sliderOpacityBackInput = $(
     '<input type="range" min="0" max="100" step="5" value="' +
-      transparencyFromAlpha(pd.settings.overlay_alpha_back) +
+      transparencyFromAlpha(settings.alpha_back) +
       '" class="slider sliderC" id="opacityBackRange">'
   );
   sliderOpacityBackInput.appendTo(sliderOpacityBack);
@@ -251,13 +391,13 @@ function openSettingsTab(openSection = lastSettingsSection) {
   sliderScale.appendTo(section);
   const sliderScaleLabel = $(
     '<label style="width: 400px; !important" class="card_size_container">Scale: ' +
-      pd.settings.overlay_scale +
+      settings.scale +
       "%</label>"
   );
   sliderScaleLabel.appendTo(sliderScale);
   const sliderScaleInput = $(
     '<input type="range" min="10" max="200" step="10" value="' +
-      pd.settings.overlay_scale +
+      settings.scale +
       '" class="slider sliderD" id="scaleRange">'
   );
   sliderScaleInput.appendTo(sliderScale);
@@ -266,15 +406,58 @@ function openSettingsTab(openSection = lastSettingsSection) {
     '<div class="button_simple centered resetOverlayPos">Reset Position</div>'
   ).appendTo(section);
 
-  // VISUAL
-  section = $('<div class="settings_section ss3"></div>');
-  section.appendTo(div);
+  sliderOpacityInput.off();
+
+  sliderOpacityInput.on("click mousemove", function() {
+    const overlayAlpha = alphaFromTransparency(parseInt(this.value));
+    sliderOpacityLabel.html(
+      "Elements transparency: " + transparencyFromAlpha(overlayAlpha) + "%"
+    );
+  });
+
+  sliderOpacityInput.on("click mouseup", function() {
+    updateUserSettingsBlend({
+      overlay_alpha: alphaFromTransparency(parseInt(this.value))
+    });
+  });
+
+  sliderOpacityBackInput.off();
+
+  sliderOpacityBackInput.on("click mousemove", function() {
+    const overlayAlphaBack = alphaFromTransparency(parseInt(this.value));
+    sliderOpacityBackLabel.html(
+      "Background transparency: " +
+        transparencyFromAlpha(overlayAlphaBack) +
+        "%"
+    );
+  });
+
+  sliderOpacityBackInput.on("click mouseup", function() {
+    updateUserSettingsBlend({
+      overlay_alpha_back: alphaFromTransparency(parseInt(this.value))
+    });
+  });
+
+  sliderScaleInput.off();
+
+  sliderScaleInput.on("click mousemove", function() {
+    sliderScaleLabel.html("Scale: " + parseInt(this.value) + "%");
+  });
+
+  sliderScaleInput.on("click mouseup", function() {
+    updateUserSettingsBlend({
+      overlay_scale: parseInt(this.value)
+    });
+  });
+}
+
+function appendVisual(section) {
   section.append('<div class="settings_title">Visual</div>');
 
-  label = $('<label class="but_container_label">Background URL:</label>');
+  let label = $('<label class="but_container_label">Background URL:</label>');
   label.appendTo(section);
 
-  icd = $('<div class="input_container"></div>');
+  let icd = $('<div class="input_container"></div>');
   const url_input = $(
     '<input type="search" id="query_image" autocomplete="off" value="' +
       pd.settings.back_url +
@@ -364,9 +547,35 @@ function openSettingsTab(openSection = lastSettingsSection) {
 
   d.appendTo(slider);
 
-  // PRIVACY
-  section = $('<div class="settings_section ss4"></div>');
-  section.appendTo(div);
+  url_input.on("keyup", function(e) {
+    if (e.keyCode === 13) {
+      updateUserSettings();
+    }
+  });
+
+  sliderInput.off();
+
+  sliderInput.on("click mousemove", function() {
+    const cardSize = 100 + Math.round(parseInt(this.value)) * 10;
+    sliderlabel.html("Cards size: " + cardSize + "px");
+
+    $(".inventory_card_settings").css("width", "");
+    let styles = $(".inventory_card_settings").attr("style");
+    styles += "width: " + cardSize + "px !important;";
+    $(".inventory_card_settings").attr("style", styles);
+
+    $(".inventory_card_settings_img").css("width", "");
+    styles = $(".inventory_card_settings_img").attr("style");
+    styles += "width: " + cardSize + "px !important;";
+    $(".inventory_card_settings_img").attr("style", styles);
+  });
+
+  sliderInput.on("click mouseup", function() {
+    updateUserSettingsBlend({ cards_size: Math.round(parseInt(this.value)) });
+  });
+}
+
+function appendPrivacy(section) {
   section.append('<div class="settings_title">Privacy</div>');
   addCheckbox(
     section,
@@ -383,17 +592,16 @@ function openSettingsTab(openSection = lastSettingsSection) {
     updateUserSettings
   );
 
-  label = $('<label class="check_container_but"></label>');
+  let label = $('<label class="check_container_but"></label>');
   label.appendTo(section);
   let button = $(
     '<div class="button_simple button_long">Erase my shared data</div>'
   );
   button.on("click", eraseData);
   button.appendTo(label);
+}
 
-  // ABOUT
-  section = $('<div class="settings_section ss5" style="height: 100%;"></div>');
-  section.appendTo(div);
+function appendAbout(section) {
   //section.append('<div class="settings_title">About</div>');
 
   const about = $('<div class="about"></div>');
@@ -408,7 +616,7 @@ function openSettingsTab(openSection = lastSettingsSection) {
   );
 
   about.append('<div class="message_updates green">' + updateState + ".</div>");
-  button = $(
+  let button = $(
     '<div class="button_simple centered update_link_about">Check for updates</div>'
   );
   button.appendTo(about);
@@ -420,11 +628,11 @@ function openSettingsTab(openSection = lastSettingsSection) {
     '<div class="message_sub_15 white" style="margin: 24px 0 12px 0;">Support my work!</div><div class="donate_link"><img src="https://www.paypalobjects.com/webstatic/en_US/i/buttons/PP_logo_h_100x26.png" alt="PayPal" /></div>'
   );
   about.appendTo(section);
+}
 
-  // LOGIN
-  section = $('<div class="settings_section ss6" style="height: 100%;"></div>');
+function appendLogin(section) {
   const login = $('<div class="about"></div>');
-  section.appendTo(div);
+  let button;
   if (pd.offline) {
     button = $(
       '<div class="button_simple centered login_link_about">Login</div>'
@@ -436,186 +644,6 @@ function openSettingsTab(openSection = lastSettingsSection) {
   }
   button.appendTo(login);
   login.appendTo(section);
-
-  div.appendTo(wrap_r);
-  $("#ux_0").append(wrap_l);
-  $("#ux_0").append(wrap_r);
-
-  $(".ss" + openSection).show();
-  $(".sn" + openSection).addClass("nav_selected");
-
-  $(".resetOverlayPos").click(function() {
-    ipcSend("reset_overlay_pos", true);
-  });
-
-  $(".top_logo_about").click(function() {
-    shell.openExternal("https://mtgatool.com");
-  });
-
-  $(".twitter_link").click(function() {
-    shell.openExternal("https://twitter.com/MEtchegaray7");
-  });
-
-  $(".discord_link").click(function() {
-    shell.openExternal("https://discord.gg/K9bPkJy");
-  });
-
-  $(".git_link").click(function() {
-    shell.openExternal("https://github.com/Manuel-777/MTG-Arena-Tool");
-  });
-
-  $(".release_notes_link").click(function() {
-    shell.openExternal("https://mtgatool.com/release-notes/");
-  });
-
-  $(".donate_link").click(function() {
-    shell.openExternal("https://www.paypal.me/ManuelEtchegaray/10");
-  });
-
-  $(".login_link_about").click(function() {
-    const clearAppSettings = {
-      remember_me: false,
-      auto_login: false,
-      launch_to_tray: false
-    };
-    ipcSend("save_app_settings", clearAppSettings);
-    remote.app.relaunch();
-    remote.app.exit(0);
-  });
-
-  $(".update_link_about").click(function() {
-    ipcSend("updates_check", true);
-  });
-
-  $(".settings_nav").click(function() {
-    if (!$(this).hasClass("nav_selected")) {
-      $(".settings_nav").each(function() {
-        $(this).removeClass("nav_selected");
-      });
-      $(".settings_section").each(function() {
-        $(this).hide();
-      });
-
-      $(this).addClass("nav_selected");
-
-      if ($(this).hasClass("sn1")) {
-        lastSettingsSection = 1;
-        $(".ss1").show();
-      }
-      if ($(this).hasClass("sn2")) {
-        lastSettingsSection = 2;
-        $(".ss2").show();
-      }
-      if ($(this).hasClass("sn3")) {
-        lastSettingsSection = 3;
-        $(".ss3").show();
-      }
-      if ($(this).hasClass("sn4")) {
-        lastSettingsSection = 4;
-        $(".ss4").show();
-      }
-      if ($(this).hasClass("sn5")) {
-        lastSettingsSection = 5;
-        $(".ss5").show();
-      }
-      if ($(this).hasClass("sn6")) {
-        lastSettingsSection = 6;
-        $(".ss6").show();
-      }
-    }
-  });
-
-  url_input.on("keyup", function(e) {
-    if (e.keyCode === 13) {
-      updateUserSettings();
-    }
-  });
-
-  export_input.on("keyup", function() {
-    updateUserSettings();
-  });
-
-  $(".sliderA").off();
-
-  $(".sliderA").on("click mousemove", function() {
-    const cardSize = 100 + Math.round(parseInt(this.value)) * 10;
-    sliderlabel.html("Cards size: " + cardSize + "px");
-
-    $(".inventory_card_settings").css("width", "");
-    let styles = $(".inventory_card_settings").attr("style");
-    styles += "width: " + cardSize + "px !important;";
-    $(".inventory_card_settings").attr("style", styles);
-
-    $(".inventory_card_settings_img").css("width", "");
-    styles = $(".inventory_card_settings_img").attr("style");
-    styles += "width: " + cardSize + "px !important;";
-    $(".inventory_card_settings_img").attr("style", styles);
-  });
-
-  $(".sliderA").on("click mouseup", function() {
-    updateUserSettingsBlend({ cards_size: Math.round(parseInt(this.value)) });
-  });
-
-  $(".sliderB").off();
-
-  $(".sliderB").on("click mousemove", function() {
-    const overlayAlpha = alphaFromTransparency(parseInt(this.value));
-    sliderOpacityLabel.html(
-      "Elements transparency: " + transparencyFromAlpha(overlayAlpha) + "%"
-    );
-  });
-
-  $(".sliderB").on("click mouseup", function() {
-    updateUserSettingsBlend({
-      overlay_alpha: alphaFromTransparency(parseInt(this.value))
-    });
-  });
-
-  $(".sliderC").off();
-
-  $(".sliderC").on("click mousemove", function() {
-    const overlayAlphaBack = alphaFromTransparency(parseInt(this.value));
-    sliderOpacityBackLabel.html(
-      "Background transparency: " +
-        transparencyFromAlpha(overlayAlphaBack) +
-        "%"
-    );
-  });
-
-  $(".sliderC").on("click mouseup", function() {
-    updateUserSettingsBlend({
-      overlay_alpha_back: alphaFromTransparency(parseInt(this.value))
-    });
-  });
-
-  $(".sliderD").off();
-
-  $(".sliderD").on("click mousemove", function() {
-    sliderScaleLabel.html("Scale: " + parseInt(this.value) + "%");
-  });
-
-  $(".sliderD").on("click mouseup", function() {
-    updateUserSettingsBlend({
-      overlay_scale: parseInt(this.value)
-    });
-  });
-
-  $(".sliderSoundVolume").off();
-
-  $(".sliderSoundVolume").on("click mousemove", function() {
-    const volume = Math.round(this.value * 100);
-    sliderSoundVolumeLabel.html("Volume: " + volume + "%");
-  });
-
-  $(".sliderSoundVolume").on("click mouseup", function() {
-    let { Howl, Howler } = require("howler");
-    let sound = new Howl({ src: ["../sounds/blip.mp3"] });
-    Howler.volume(this.value);
-    sound.play();
-    updateUserSettingsBlend({
-      sound_priority_volume: this.value
-    });
-  });
 }
 
 //
@@ -687,21 +715,22 @@ function updateUserSettingsBlend(_settings = {}) {
 
   const exportFormat = document.getElementById("settings_export_format").value;
 
+  _settings.overlays[currentOverlay].show = showOverlay;
+  _settings.overlays[currentOverlay].show_always = showOverlayAlways;
+  _settings.overlays[currentOverlay].top = overlayTop;
+  _settings.overlays[currentOverlay].title = overlayTitle;
+  _settings.overlays[currentOverlay].deck = overlayDeck;
+  _settings.overlays[currentOverlay].clock = overlayClock;
+  _settings.overlays[currentOverlay].sideboard = overlaySideboard;
+  _settings.overlays[currentOverlay].ontop = overlayOnTop;
+  _settings.overlays[currentOverlay].lands = overlayLands;
+
   ipcSend("save_user_settings", {
     sound_priority: soundPriority,
-    show_overlay: showOverlay,
-    show_overlay_always: showOverlayAlways,
     startup: startup,
     close_to_tray: closeToTray,
     send_data: sendData,
     close_on_match: closeOnMatch,
-    overlay_top: overlayTop,
-    overlay_title: overlayTitle,
-    overlay_deck: overlayDeck,
-    overlay_clock: overlayClock,
-    overlay_sideboard: overlaySideboard,
-    overlay_ontop: overlayOnTop,
-    overlay_lands: overlayLands,
     anon_explore: anonExplore,
     back_color: backColor,
     back_url: backUrl,

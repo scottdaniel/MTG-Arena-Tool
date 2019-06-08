@@ -65,13 +65,8 @@ let clockMode = 0;
 let draftMode = 1;
 let deckMode = 0;
 let overlayMode = 0;
+let overlayIndex = -1;
 setRenderer(1);
-
-//var turnPhase = 0;
-//var turnStep = 0;
-//var turnNumber = 0;
-//var turnActive = 0;
-//var turnDecision = 0;
 
 let playerSeat = 0;
 let oppName = "";
@@ -250,16 +245,18 @@ function recreateClock() {
   updateClock();
 }
 
+ipc.on("set_overlay_index", (event, arg) => {
+  overlayIndex = arg;
+});
+
 //
 ipc.on("set_timer", function(event, arg) {
   if (arg == -1) {
-    //overlayMode = 1;
     matchBeginTime = Date.now();
   } else if (arg !== 0) {
     //matchBeginTime = arg == 0 ? 0 : Date.parse(arg);
     matchBeginTime = Date.parse(arg);
   }
-  //console.log("set time", arg);
 });
 
 ipc.on("set_priority_timer", function(event, arg) {
@@ -279,21 +276,20 @@ ipc.on("action_log", function(event, arg) {
   //console.log(arg.seat, arg.str);
 });
 
-ipc.on("settings_updated", function() {
-  // Alpha does some weird things..
-  /*
-  let alpha = settings.overlay_alpha;
-  $('body').css("background-color", "rgba(0,0,0,"+alpha+")");
-  $('.overlay_wrapper:before').css("opacity", 0.4*alpha);
-  $('.overlay_wrapper').css("opacity", alpha);
-  */
+ipc.on("settings_updated", () => {
+  if (overlayIndex == -1) return;
+
+  let settings = pd.settings.overlays[overlayIndex];
+
+  overlayMode = settings.mode;
+
   change_background(pd.settings.back_url);
 
-  webFrame.setZoomFactor(pd.settings.overlay_scale / 100);
+  webFrame.setZoomFactor(settings.scale / 100);
 
-  $(".overlay_container").css("opacity", pd.settings.overlay_alpha);
-  $(".overlay_wrapper").css("opacity", pd.settings.overlay_alpha_back);
-  if (pd.settings.overlay_alpha_back === 1) {
+  $(".overlay_container").css("opacity", settings.alpha);
+  $(".overlay_wrapper").css("opacity", settings.alpha_back);
+  if (settings.alpha_back === 1) {
     $(".click-through").each(function() {
       $(this).css("pointer-events", "all");
     });
@@ -311,36 +307,31 @@ ipc.on("settings_updated", function() {
   $(".overlay_decklist").css("display", "");
   $(".overlay_clock_spacer").css("display", "");
   $(".overlay_clock_container").css("display", "");
-  $(".overlay_deck_container").attr("style", "");
   $(".overlay_draft_container").attr("style", "");
   $(".overlay_deckname").attr("style", "");
   $(".overlay_deckcolors").attr("style", "");
 
   if (overlayMode == 0) {
     $(".overlay_draft_container").hide();
-    $(".overlay_deck_container").show();
   }
   if (overlayMode == 1) {
     $(".overlay_draft_container").show();
-    $(".overlay_deck_container").hide();
   }
 
-  if (!pd.settings.overlay_top) {
+  if (!settings.top) {
     hideDiv(".top");
     let style = "top: 0px !important;";
-    $(".overlay_deck_container").attr("style", style);
     $(".overlay_draft_container").attr("style", style);
   }
-  if (!pd.settings.overlay_title) {
+  if (!settings.title) {
     hideDiv(".overlay_deckname");
     hideDiv(".overlay_deckcolors");
   }
-  if (!pd.settings.overlay_deck) {
+  if (!settings.deck) {
     hideDiv(".overlay_decklist");
-    hideDiv(".overlay_deck_container");
     hideDiv(".overlay_draft_container");
   }
-  if (!pd.settings.overlay_clock || overlayMode == 1) {
+  if (!settings.clock || overlayMode == 1) {
     hideDiv(".overlay_clock_spacer");
     hideDiv(".overlay_clock_container");
   }
@@ -398,7 +389,6 @@ ipc.on("set_match", (event, arg) => {
 });
 
 function updateView() {
-  overlayMode = 0;
   let cleanName =
     currentMatch && currentMatch.opponent && currentMatch.opponent.name;
   if (cleanName && cleanName !== "Sparky") {
@@ -408,11 +398,9 @@ function updateView() {
 
   if (overlayMode == 0) {
     $(".overlay_draft_container").hide();
-    $(".overlay_deck_container").show();
   }
   if (overlayMode == 1) {
     $(".overlay_draft_container").show();
-    $(".overlay_deck_container").hide();
   }
 
   var doscroll = false;
@@ -427,7 +415,6 @@ function updateView() {
   }
 
   $(".overlay_archetype").remove();
-  $(".overlay_deck_container").show();
   $(".overlay_draft_container").hide();
   $(".overlay_decklist").html("");
   $(".overlay_deckcolors").html("");
@@ -743,13 +730,10 @@ function drawDeckOdds() {
 var currentDraft;
 //
 ipc.on("set_draft_cards", function(event, draft) {
-  if (overlayMode == 0) {
-    overlayMode = 1;
-    clockMode = 1;
-    recreateClock();
-    $(".overlay_draft_container").show();
-    $(".overlay_deck_container").hide();
-  }
+  clockMode = 1;
+  recreateClock();
+  $(".overlay_draft_container").show();
+
   matchBeginTime = Date.now();
   currentDraft = draft;
   //draftPack = pack;
