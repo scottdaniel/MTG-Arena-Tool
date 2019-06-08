@@ -74,12 +74,18 @@ function hide(element) {
   return element;
 }
 
+exports.attachOwnerhipStars = attachOwnerhipStars;
 function attachOwnerhipStars(card, starContainer) {
   starContainer.innerHTML = "";
   starContainer.style.opacity = 1;
 
   const owned = pd.cards[card.id];
   const aquired = pd.cardsNew[card.id];
+  starContainer.title = `${owned}/4 copies in collection`;
+  if (aquired) {
+    starContainer.title += ` (${aquired} recent)`;
+  }
+
   for (let i = 0; i < 4; i++) {
     let color = "gray";
 
