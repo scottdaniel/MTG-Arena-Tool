@@ -1,21 +1,18 @@
-/*
-global
-  add_checkbox
-  change_background
-  hideLoadingBars
-  ipc_send
-  offlineMode
-  pd
-*/
-
 const { ipcRenderer: ipc, remote, shell } = require("electron");
 
+const { CARD_TILE_ARENA, CARD_TILE_FLAT } = require("../shared/constants");
 const db = require("../shared/database");
+const pd = require("../shared/player-data");
 const deckDrawer = require("../shared/deck-drawer");
 const { createSelect } = require("../shared/select");
 const { get_card_image } = require("../shared/util");
 
-const { CARD_TILE_ARENA, CARD_TILE_FLAT } = require("../shared/constants.js");
+const {
+  addCheckbox,
+  changeBackground,
+  hideLoadingBars,
+  ipcSend
+} = require("./renderer-util");
 
 let lastSettingsSection = 1;
 let updateState = "";
@@ -28,7 +25,7 @@ function getCardStyleName(style) {
 //
 function openSettingsTab(openSection = lastSettingsSection) {
   lastSettingsSection = openSection;
-  change_background("default");
+  changeBackground("default");
   hideLoadingBars();
   $("#ux_0").off();
   $("#history_column").off();
@@ -44,7 +41,7 @@ function openSettingsTab(openSection = lastSettingsSection) {
   $('<div class="settings_nav sn4">Privacy</div>').appendTo(wrap_l);
   $('<div class="settings_nav sn5">About</div>').appendTo(wrap_l);
 
-  if (offlineMode) {
+  if (pd.offline) {
     $('<div class="settings_nav sn6">Login</div>').appendTo(wrap_l);
   } else {
     $('<div class="settings_nav sn6">Logout</div>').appendTo(wrap_l);
@@ -59,35 +56,35 @@ function openSettingsTab(openSection = lastSettingsSection) {
   section.appendTo(div);
   section.append('<div class="settings_title">Behaviour</div>');
 
-  add_checkbox(
+  addCheckbox(
     section,
     "Beta updates channel",
     "settings_betachannel",
     pd.settings.beta_channel,
     updateAppSettings
   );
-  add_checkbox(
+  addCheckbox(
     section,
     "Login automatically",
     "settings_autologin",
     pd.settings.auto_login,
     updateAppSettings
   );
-  add_checkbox(
+  addCheckbox(
     section,
     "Launch to tray",
     "settings_launchtotray",
     pd.settings.launch_to_tray,
     updateAppSettings
   );
-  add_checkbox(
+  addCheckbox(
     section,
     "Launch on startup",
     "settings_startup",
     pd.settings.startup,
     updateUserSettings
   );
-  add_checkbox(
+  addCheckbox(
     section,
     "Read log on login",
     "settings_readlogonlogin",
@@ -98,21 +95,21 @@ function openSettingsTab(openSection = lastSettingsSection) {
       <div class="settings_note">
       <i>Reading the log on startup can take a while, disabling this will make mtgatool load instantly, but you may have have to play with Arena to load some data, like Rank, wildcards and decklists. <b>This feature makes mtgatool read games when it was closed.</b></i>
       </div>`);
-  add_checkbox(
+  addCheckbox(
     section,
     "Close main window on match found",
     "settings_closeonmatch",
     pd.settings.close_on_match,
     updateUserSettings
   );
-  add_checkbox(
+  addCheckbox(
     section,
     "Close to tray",
     "settings_closetotray",
     pd.settings.close_to_tray,
     updateUserSettings
   );
-  add_checkbox(
+  addCheckbox(
     section,
     "Sound when priority changes",
     "settings_soundpriority",
@@ -155,21 +152,21 @@ function openSettingsTab(openSection = lastSettingsSection) {
   section.appendTo(div);
   section.append('<div class="settings_title">Overlay</div>');
 
-  add_checkbox(
+  addCheckbox(
     section,
     "Always on top",
     "settings_overlay_ontop",
     pd.settings.overlay_ontop,
     updateUserSettings
   );
-  add_checkbox(
+  addCheckbox(
     section,
     "Show overlay",
     "settings_showoverlay",
     pd.settings.show_overlay,
     updateUserSettings
   );
-  add_checkbox(
+  addCheckbox(
     section,
     "Persistent overlay&nbsp;<i>(useful for OBS setup)</i>",
     "settings_showoverlayalways",
@@ -177,42 +174,42 @@ function openSettingsTab(openSection = lastSettingsSection) {
     updateUserSettings
   );
 
-  add_checkbox(
+  addCheckbox(
     section,
     "Show top bar",
     "settings_overlay_top",
     pd.settings.overlay_top,
     updateUserSettings
   );
-  add_checkbox(
+  addCheckbox(
     section,
     "Show title",
     "settings_overlay_title",
     pd.settings.overlay_title,
     updateUserSettings
   );
-  add_checkbox(
+  addCheckbox(
     section,
     "Show deck/lists",
     "settings_overlay_deck",
     pd.settings.overlay_deck,
     updateUserSettings
   );
-  add_checkbox(
+  addCheckbox(
     section,
     "Show clock",
     "settings_overlay_clock",
     pd.settings.overlay_clock,
     updateUserSettings
   );
-  add_checkbox(
+  addCheckbox(
     section,
     "Show sideboard",
     "settings_overlay_sideboard",
     pd.settings.overlay_sideboard,
     updateUserSettings
   );
-  add_checkbox(
+  addCheckbox(
     section,
     "Compact lands",
     "settings_overlay_lands",
@@ -371,14 +368,14 @@ function openSettingsTab(openSection = lastSettingsSection) {
   section = $('<div class="settings_section ss4"></div>');
   section.appendTo(div);
   section.append('<div class="settings_title">Privacy</div>');
-  add_checkbox(
+  addCheckbox(
     section,
     "Anonymous sharing&nbsp;<i>(makes your username anonymous on Explore)</i>",
     "settings_anon_explore",
     pd.settings.anon_explore,
     updateUserSettings
   );
-  add_checkbox(
+  addCheckbox(
     section,
     "Online sharing&nbsp;<i>(when disabled, blocks any connections with our servers)</i>",
     "settings_senddata",
@@ -428,7 +425,7 @@ function openSettingsTab(openSection = lastSettingsSection) {
   section = $('<div class="settings_section ss6" style="height: 100%;"></div>');
   const login = $('<div class="about"></div>');
   section.appendTo(div);
-  if (offlineMode) {
+  if (pd.offline) {
     button = $(
       '<div class="button_simple centered login_link_about">Login</div>'
     );
@@ -448,7 +445,7 @@ function openSettingsTab(openSection = lastSettingsSection) {
   $(".sn" + openSection).addClass("nav_selected");
 
   $(".resetOverlayPos").click(function() {
-    ipc_send("reset_overlay_pos", true);
+    ipcSend("reset_overlay_pos", true);
   });
 
   $(".top_logo_about").click(function() {
@@ -481,13 +478,13 @@ function openSettingsTab(openSection = lastSettingsSection) {
       auto_login: false,
       launch_to_tray: false
     };
-    ipc_send("save_app_settings", clearAppSettings);
+    ipcSend("save_app_settings", clearAppSettings);
     remote.app.relaunch();
     remote.app.exit(0);
   });
 
   $(".update_link_about").click(function() {
-    ipc_send("updates_check", true);
+    ipcSend("updates_check", true);
   });
 
   $(".settings_nav").click(function() {
@@ -632,7 +629,7 @@ function updateAppSettings() {
     launch_to_tray,
     beta_channel
   };
-  ipc_send("save_app_settings", rSettings);
+  ipcSend("save_app_settings", rSettings);
 }
 
 //
@@ -645,7 +642,7 @@ function transparencyFromAlpha(alpha) {
   return Math.round((1 - alpha) * 100);
 }
 
-// only purpose is to strip paramaters for use with add_checkbox
+// only purpose is to strip paramaters for use with addCheckbox
 function updateUserSettings() {
   updateUserSettingsBlend();
 }
@@ -666,8 +663,8 @@ function updateUserSettingsBlend(_settings = {}) {
     .spectrum("get")
     .toRgbString();
   const backUrl = document.getElementById("query_image").value;
-  if (backUrl === "") change_background("default");
-  else change_background(backUrl);
+  if (backUrl === "") changeBackground("default");
+  else changeBackground(backUrl);
 
   const overlayOnTop = document.getElementById("settings_overlay_ontop")
     .checked;
@@ -690,7 +687,7 @@ function updateUserSettingsBlend(_settings = {}) {
 
   const exportFormat = document.getElementById("settings_export_format").value;
 
-  ipc_send("save_user_settings", {
+  ipcSend("save_user_settings", {
     sound_priority: soundPriority,
     show_overlay: showOverlay,
     show_overlay_always: showOverlayAlways,
@@ -726,7 +723,7 @@ function eraseData() {
       "This will erase all of your decks and events shared online, are you sure?"
     )
   ) {
-    ipc_send("delete_data", true);
+    ipcSend("delete_data", true);
   } else {
     return;
   }

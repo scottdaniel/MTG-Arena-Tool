@@ -1,37 +1,34 @@
-/*
-global
-  authToken
-  discordTag
-  filteredWildcardsSet
-  ipc_send
-  pd,
-  rewards_daily_ends
-  rewards_weekly_ends
-  showLoadingBars
-  tournamentCreate
-*/
-
 const { shell } = require("electron");
 const db = require("../shared/database");
+const pd = require("../shared/player-data");
 const { queryElements: $$, createDivision } = require("../shared/dom-fns");
 const { addCardHover } = require("../shared/card-hover");
 const { toHHMMSS, toDDHHMMSS, timestamp } = require("../shared/util");
+const { tournamentCreate } = require("./tournaments");
+const { getLocalState, ipcSend, showLoadingBars } = require("./renderer-util");
 
 let usersActive;
 let tournaments_list;
 let listInterval = [];
 let topWildcards = null;
-
 let homeInterval = null;
+let filteredWildcardsSet = "";
 
+//
 function clearHomeInverals() {
   listInterval.forEach(_id => {
     clearInterval(_id);
   });
 }
 
+//
+function requestHome() {
+  ipcSend("request_home", filteredWildcardsSet);
+}
+
 // Should separate these two into smaller functions
 function openHomeTab(arg, opentab = true) {
+  const ls = getLocalState();
   let mainDiv = document.getElementById("ux_0");
   mainDiv.classList.remove("flex_item");
   mainDiv.innerHTML = "";
@@ -71,11 +68,11 @@ function openHomeTab(arg, opentab = true) {
     if (homeInterval !== null) clearInterval(homeInterval);
 
     homeInterval = window.setInterval(() => {
-      let dd = new Date(rewards_daily_ends);
+      let dd = db.rewards_daily_ends;
       let timeleft = dd.getTime() / 1000 - timestamp();
       daily.innerHTML = "Daily rewards end: " + toDDHHMMSS(timeleft);
 
-      dd = new Date(rewards_weekly_ends);
+      dd = db.rewards_weekly_ends;
       timeleft = dd.getTime() / 1000 - timestamp();
       weekly.innerHTML = "Weekly rewards end: " + toDDHHMMSS(timeleft);
     }, 250);
@@ -91,18 +88,18 @@ function openHomeTab(arg, opentab = true) {
   mainDiv.appendChild(title);
   let cont = createDivision(["tournament_list_cont"]);
 
-  if (discordTag == null) {
+  if (ls.discordTag === null) {
     let but = createDivision(["discord_but"]);
     but.addEventListener("click", () => {
       let url =
         "https://discordapp.com/api/oauth2/authorize?client_id=531626302004789280&redirect_uri=http%3A%2F%2Fmtgatool.com%2Fdiscord%2F&response_type=code&scope=identify%20email&state=" +
-        authToken;
+        ls.authToken;
       shell.openExternal(url);
     });
 
     cont.appendChild(but);
   } else {
-    let dname = discordTag.split("#")[0];
+    let dname = ls.discordTag.split("#")[0];
     let fl = createDivision(
       ["flex_item"],
       `<div class="discord_icon"></div><div class="top_username discord_username">${dname}</div><div class="discord_message">Your discord tag will be visible to your opponents.</div>`
@@ -237,7 +234,7 @@ function openHomeTab(arg, opentab = true) {
         tournamentCreate();
       } else {
         document.body.style.cursor = "progress";
-        ipc_send("tou_get", cont.id);
+        ipcSend("tou_get", cont.id);
       }
     });
   });
@@ -281,7 +278,7 @@ function openHomeTab(arg, opentab = true) {
           filteredWildcardsSet = set;
         }
         showLoadingBars();
-        ipc_send("request_home", filteredWildcardsSet);
+        requestHome();
       });
     });
 
@@ -361,5 +358,6 @@ function openHomeTab(arg, opentab = true) {
 }
 
 module.exports = {
-  openHomeTab: openHomeTab
+  openHomeTab,
+  requestHome
 };

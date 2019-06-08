@@ -1,5 +1,5 @@
-const { DEFAULT_TILE } = require("../shared/constants.js");
-const db = require("../shared/database.js");
+const { DEFAULT_TILE } = require("../shared/constants");
+const db = require("../shared/database");
 const { createDivision } = require("../shared/dom-fns");
 
 class ListItem {

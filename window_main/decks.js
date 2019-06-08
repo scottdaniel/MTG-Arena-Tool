@@ -1,23 +1,7 @@
-/*
-global
-  Aggregator
-  allMatches
-  FilterPanel
-  formatPercent
-  hideLoadingBars
-  getWinrateClass
-  ipc_send
-  makeResizable
-  ListItem
-  openDeck
-  pd
-  sidebarActive
-  getTagColor
-  StatsPanel
-  lastScrollTop
-*/
-
 const _ = require("lodash");
+
+const { MANA, CARD_RARITIES } = require("../shared/constants");
+const pd = require("../shared/player-data");
 const { createDivision } = require("../shared/dom-fns");
 const {
   get_deck_missing,
@@ -25,7 +9,21 @@ const {
   getReadableFormat
 } = require("../shared/util");
 
-const { MANA, CARD_RARITIES } = require("../shared/constants.js");
+const Aggregator = require("./aggregator");
+const FilterPanel = require("./filter-panel");
+const ListItem = require("./list-item");
+const StatsPanel = require("./stats-panel");
+const { openDeck } = require("./deck-details");
+const {
+  formatPercent,
+  getLocalState,
+  getTagColor,
+  getWinrateClass,
+  hideLoadingBars,
+  ipcSend,
+  makeResizable,
+  setLocalState
+} = require("./renderer-util");
 
 let filters = Aggregator.getDefaultFilters();
 filters.onlyCurrentDecks = true;
@@ -49,9 +47,8 @@ function setFilters(selected = {}) {
 
 //
 function openDecksTab(_filters = {}, scrollTop = 0) {
-  if (sidebarActive !== 0) return;
-
   hideLoadingBars();
+  const ls = getLocalState();
   const mainDiv = document.getElementById("ux_0");
   mainDiv.classList.add("flex_item");
   mainDiv.innerHTML = "";
@@ -98,7 +95,7 @@ function openDecksTab(_filters = {}, scrollTop = 0) {
     "decks_top",
     selected => openDecksTab(selected),
     filters,
-    allMatches.events,
+    ls.totalAgg.events,
     tags,
     [],
     true,
@@ -125,7 +122,7 @@ function openDecksTab(_filters = {}, scrollTop = 0) {
     let listItem;
     if (deck.custom) {
       const archiveCallback = id => {
-        ipc_send("toggle_deck_archived", id);
+        ipcSend("toggle_deck_archived", id);
       };
 
       listItem = new ListItem(
@@ -248,10 +245,10 @@ function openDecksTab(_filters = {}, scrollTop = 0) {
 
   const jCont = $(wrap_l);
   if (scrollTop) {
-    jCont.scrollTop(lastScrollTop);
+    jCont.scrollTop(ls.lastScrollTop);
   }
   jCont.on("scroll", () => {
-    lastScrollTop = jCont.scrollTop();
+    setLocalState({ lastScrollTop: jCont.scrollTop() });
   });
 }
 
@@ -290,7 +287,7 @@ function createTag(tag, div, showClose = true) {
       colorPick.on("change.spectrum", (e, color) => {
         const tag = $(this).text();
         const col = color.toRgbString();
-        ipc_send("edit_tag", { tag, color: col });
+        ipcSend("edit_tag", { tag, color: col });
       });
 
       colorPick.on("hide.spectrum", () => {
@@ -367,11 +364,11 @@ function createTag(tag, div, showClose = true) {
 }
 
 function addTag(deckid, tag) {
-  ipc_send("add_tag", { deckid, tag });
+  ipcSend("add_tag", { deckid, tag });
 }
 
 function deleteTag(deckid, tag) {
-  ipc_send("delete_tag", { deckid, tag });
+  ipcSend("delete_tag", { deckid, tag });
 }
 
 module.exports = { openDecksTab: openDecksTab };

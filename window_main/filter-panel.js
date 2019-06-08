@@ -1,8 +1,3 @@
-/*
-global
-  getTagColor
-*/
-
 const { COLORS_ALL, COLORS_BRIEF } = require("../shared/constants");
 const pd = require("../shared/player-data");
 const { createDivision } = require("../shared/dom-fns");
@@ -13,15 +8,16 @@ const {
   getRecentDeckName
 } = require("../shared/util");
 
-const Aggregator = require("./aggregator");
+const { getTagColor } = require("./renderer-util");
 const {
   DEFAULT_ARCH,
   DEFAULT_DECK,
   DEFAULT_TAG,
   DATE_LAST_30,
   DATE_ALL_TIME,
-  DATE_SEASON
-} = Aggregator;
+  DATE_SEASON,
+  getDefaultFilters
+} = require("./aggregator");
 
 class FilterPanel {
   constructor(
@@ -40,7 +36,7 @@ class FilterPanel {
     this.prefixId = prefixId;
     this.onFilterChange = onFilterChange;
     this.filters = {
-      ...Aggregator.getDefaultFilters(),
+      ...getDefaultFilters(),
       ...filters
     };
     this.events = events || [];

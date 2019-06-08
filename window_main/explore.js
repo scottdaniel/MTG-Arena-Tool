@@ -1,14 +1,6 @@
-/*
-global
-  activeEvents
-  add_checkbox
-  getWinrateClass
-  hideLoadingBars
-  ipc_send
-  showLoadingBars
-*/
-
 const _ = require("lodash");
+
+const { MANA, COLORS_BRIEF, DEFAULT_TILE } = require("../shared/constants");
 const db = require("../shared/database");
 const pd = require("../shared/player-data");
 const { queryElements: $$, createDivision } = require("../shared/dom-fns");
@@ -22,7 +14,13 @@ const {
   getBoosterCountEstimate
 } = require("../shared/util");
 
-const { MANA, COLORS_BRIEF, DEFAULT_TILE } = require("../shared/constants.js");
+const {
+  addCheckbox,
+  getWinrateClass,
+  hideLoadingBars,
+  ipcSend,
+  showLoadingBars
+} = require("./renderer-util");
 
 let filterWCC = 0;
 let filterWCU = 0;
@@ -178,7 +176,7 @@ function drawFilters() {
   let eventFilters = [];
   if (filterType == "Events") {
     eventFilters = db.eventIds
-      .concat(activeEvents)
+      .concat(db.activeEvents)
       .map(ev => getEventPrettyName(ev))
       .filter(
         item =>
@@ -205,7 +203,7 @@ function drawFilters() {
     return 0;
   });
 
-  let mappedActive = activeEvents.map(ev => getEventPrettyName(ev));
+  let mappedActive = db.activeEvents.map(ev => getEventPrettyName(ev));
   eventFilters.forEach(item => {
     if (mappedActive.includes(item)) {
       eventFilters.splice(eventFilters.indexOf(item), 1);
@@ -257,7 +255,7 @@ function drawFilters() {
   /**
    *  Only owned filter
    **/
-  let lab = add_checkbox(
+  let lab = addCheckbox(
     $(buttonsMiddle),
     "Only owned",
     "settings_owned",
@@ -429,7 +427,7 @@ function queryExplore(skip) {
   };
 
   showLoadingBars();
-  ipc_send("request_explore", query);
+  ipcSend("request_explore", query);
 }
 
 function setExploreDecks(data) {

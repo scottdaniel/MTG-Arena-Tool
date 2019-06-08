@@ -1,14 +1,7 @@
-/*
-global
-  $
-  DataScroller
-  formatNumber
-  formatPercent
-  toggleArchived
-  ipc_send
-*/
-
 const { shell } = require("electron");
+
+const { differenceInCalendarDays } = require("date-fns");
+
 const db = require("../shared/database");
 const pd = require("../shared/player-data");
 const { createDivision } = require("../shared/dom-fns");
@@ -21,13 +14,18 @@ const {
   getReadableEvent
 } = require("../shared/util");
 
+const DataScroller = require("./data-scroller");
+const {
+  formatNumber,
+  formatPercent,
+  toggleArchived
+} = require("./renderer-util");
+
 var filterEconomy = "All";
 let showArchived = false;
 var daysago = 0;
 var dayList = [];
 let sortedChanges = [];
-
-const differenceInCalendarDays = require("date-fns").differenceInCalendarDays;
 
 class economyDay {
   constructor(

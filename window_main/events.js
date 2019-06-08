@@ -1,17 +1,5 @@
-/*
-global
-  Aggregator
-  allMatches
-  DataScroller
-  FilterPanel
-  getEventWinLossClass
-  ListItem
-  open_match
-  pd
-  StatsPanel
-  toggleArchived
-*/
-
+const { MANA } = require("../shared/constants");
+const pd = require("../shared/player-data");
 const { createDivision, queryElementsByClass } = require("../shared/dom-fns");
 const {
   compare_cards,
@@ -22,7 +10,17 @@ const {
   toMMSS
 } = require("../shared/util");
 
-const { MANA } = require("../shared/constants.js");
+const Aggregator = require("./aggregator");
+const DataScroller = require("./data-scroller");
+const FilterPanel = require("./filter-panel");
+const ListItem = require("./list-item");
+const StatsPanel = require("./stats-panel");
+const {
+  getEventWinLossClass,
+  getLocalState,
+  openMatch,
+  toggleArchived
+} = require("./renderer-util");
 
 let filters = Aggregator.getDefaultFilters();
 filters.eventId = Aggregator.ALL_EVENT_TRACKS;
@@ -51,7 +49,7 @@ function openEventsTab(_filters, dataIndex = 25, scrollTop = 0) {
     "events_top",
     selected => openEventsTab(selected),
     filters,
-    allMatches.trackEvents,
+    getLocalState().totalAgg.trackEvents,
     [],
     [],
     false,
@@ -242,7 +240,7 @@ function createMatchRow(match) {
 
   var tileGrpid = match.playerDeck.deckTileId;
 
-  let matchRow = new ListItem(tileGrpid, match.id, openMatch);
+  let matchRow = new ListItem(tileGrpid, match.id, handleOpenMatch);
   matchRow.divideLeft();
   matchRow.divideRight();
 
@@ -294,8 +292,8 @@ function createMatchRow(match) {
   return matchRow.container;
 }
 
-function openMatch(id) {
-  open_match(id);
+function handleOpenMatch(id) {
+  openMatch(id);
   $(".moving_ux").animate({ left: "-100%" }, 250, "easeInOutCubic");
 }
 

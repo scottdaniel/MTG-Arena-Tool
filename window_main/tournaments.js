@@ -1,15 +1,3 @@
-/*
-global
-  allMatches
-  change_background
-  drawDeck
-  drawDeckVisual
-  FilterPanel
-  ipc_send
-  pd
-  pop
-*/
-
 const { queryElements: $$, createDivision } = require("../shared/dom-fns");
 const { createSelect } = require("../shared/select");
 const deckDrawer = require("../shared/deck-drawer");
@@ -24,6 +12,17 @@ const {
   toHHMMSS,
   urlDecode
 } = require("../shared/util");
+const pd = require("../shared/player-data");
+
+const FilterPanel = require("./filter-panel");
+const {
+  pop,
+  changeBackground,
+  drawDeck,
+  drawDeckVisual,
+  getLocalState,
+  ipcSend
+} = require("./renderer-util");
 
 let tournamentDeck = null;
 let currentDeck = null;
@@ -52,7 +51,7 @@ function tournamentCreate() {
   // Append
   mainDiv.appendChild(top);
   buttonBack.addEventListener("click", () => {
-    change_background("default");
+    changeBackground("default");
     $(".moving_ux").animate({ left: "0px" }, 250, "easeInOutCubic");
   });
 }
@@ -154,7 +153,7 @@ function tournamentOpen(t) {
   }
 
   topButtonBack.addEventListener("click", () => {
-    change_background("default");
+    changeBackground("default");
     $(".moving_ux").animate({ left: "0px" }, 250, "easeInOutCubic");
   });
 }
@@ -173,7 +172,7 @@ function showTournamentRegister(mainDiv, tou) {
 
     mainDiv.appendChild(deckContainer);
     if (tou.deck) {
-      drawDeckVisual(deckvisual, undefined, tou.deck);
+      drawDeckVisual(deckvisual, tou.deck);
     }
 
     if (tou.state !== 4) {
@@ -187,7 +186,7 @@ function showTournamentRegister(mainDiv, tou) {
     const validDecks = pd.deckList
       .filter(deck => !deck.custom)
       .filter(deck => getBoosterCountEstimate(get_deck_missing(deck)) === 0);
-    validDecks.sort(allMatches.compareDecks);
+    validDecks.sort(getLocalState().totalAgg.compareDecks);
     // hack to make pretty deck names
     // TODO move getDeckString out of FilterPanel
     const filterPanel = new FilterPanel("unused", null, {}, [], [], validDecks);
@@ -270,13 +269,13 @@ function showTournamentRegister(mainDiv, tou) {
 
   if (buttonDrop) {
     buttonDrop.addEventListener("click", () => {
-      ipc_send("tou_drop", tou._id);
+      ipcSend("tou_drop", tou._id);
     });
   }
 }
 
 function tournamentJoin(_id, _deck, _pass) {
-  ipc_send("tou_join", { id: _id, deck: _deck, pass: _pass });
+  ipcSend("tou_join", { id: _id, deck: _deck, pass: _pass });
 }
 
 function showTournamentStarted(mainDiv, tou) {
@@ -327,12 +326,12 @@ function showTournamentStarted(mainDiv, tou) {
 
       copyMtgaButton.addEventListener("click", () => {
         pop("Copied to clipboard", 1000);
-        ipc_send("set_clipboard", urlDecode(tou.current_opponent));
+        ipcSend("set_clipboard", urlDecode(tou.current_opponent));
       });
 
       copyDiscordButton.addEventListener("click", () => {
         pop("Copied to clipboard", 1000);
-        ipc_send("set_clipboard", urlDecode(tou.current_opponent_discord));
+        ipcSend("set_clipboard", urlDecode(tou.current_opponent_discord));
       });
     }
 
@@ -531,7 +530,7 @@ function createRoundsTab(joined) {
     let dropButton = createDivision(["button_simple", "but_drop"], "Drop");
     tab_cont_a.appendChild(dropButton);
     dropButton.addEventListener("click", () => {
-      ipc_send("tou_drop", tou._id);
+      ipcSend("tou_drop", tou._id);
     });
   }
 
@@ -701,7 +700,7 @@ function createDecklistTab() {
 
   buttonExport.addEventListener("click", () => {
     let list = get_deck_export(currentDeck);
-    ipc_send("set_clipboard", list);
+    ipcSend("set_clipboard", list);
   });
   return tab_cont_c;
 }
