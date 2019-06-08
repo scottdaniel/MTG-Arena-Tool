@@ -1220,9 +1220,11 @@ a:hover {
 }
 
 .overlay_card_quantity {
-    width: 100%;
+    max-width: 100px;
+    margin: auto;
     display: flex;
     justify-content: center;
+    margin-top: 8px;
 }
 
 .inventory_card_quantity_blue {
