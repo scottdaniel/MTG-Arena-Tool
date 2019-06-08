@@ -26,7 +26,11 @@ const Deck = require("../shared/deck.js");
 const Colors = require("../shared/colors");
 const deckDrawer = require("../shared/deck-drawer");
 const { compare_cards, get_card_type_sort } = require("../shared/util");
-const { setRenderer, addCardHover } = require("../shared/card-hover");
+const {
+  addCardHover,
+  attachOwnerhipStars,
+  setRenderer
+} = require("../shared/card-hover");
 const { queryElements: $$, createDivision } = require("../shared/dom-fns");
 
 const {
@@ -856,30 +860,13 @@ function setDraft(_packN = -1, _pickN = -1) {
 
     draftPack.sort(compare_draft_picks);
 
-    draftPack.forEach(function(grpId) {
-      try {
-        var rank = db.card(grpId).rank;
-      } catch (e) {
-        var rank = 0;
-      }
+    draftPack.forEach(grpId => {
+      const card = db.card(grpId) || { id: grpId, rank: 0 };
+      const rank = card.rank;
 
-      var od = $(".overlay_decklist");
-      var cont = $('<div class="overlay_card_quantity"></div>');
-      if (grpId == pick) {
-        cont.css("background-color", "rgba(250, 229, 210, 0.66)");
-      }
-
-      for (let i = 0; i < 4; i++) {
-        if (i < pd.cards[grpId]) {
-          $(
-            '<div style="width: 24px; " class="inventory_card_quantity_green"></div>'
-          ).appendTo(cont);
-        } else {
-          $(
-            '<div style="width: 24px; " class="inventory_card_quantity_gray"></div>'
-          ).appendTo(cont);
-        }
-      }
+      const od = $(".overlay_decklist");
+      const cont = $('<div class="overlay_card_quantity"></div>');
+      attachOwnerhipStars(card, cont[0]);
 
       cont.appendTo(od);
       let tile = deckDrawer.cardTile(
