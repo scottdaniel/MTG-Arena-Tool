@@ -590,7 +590,7 @@ function createChangeRow(change, economyId) {
           // only uncommons and commons go to vault
           let vaultProgressDelta =
             card.rarity === "uncommon" ? 1 / 300 : 1 / 900;
-          img.title = "Vault: +" + formatPercent(vaultProgressDelta);
+          img.title = "Vault:+" + formatPercent(vaultProgressDelta);
         }
 
         d.appendChild(img);
@@ -831,7 +831,7 @@ function createEconomyUI(mainDiv) {
   div.appendChild(ntx);
 
   ntx = tx.cloneNode(true);
-  ntx.innerHTML = "Vault: " + formatPercent(pd.economy.vault / 100);
+  ntx.innerHTML = `Vault: ${pd.economy.vault}%`;
   ntx.style.marginLeft = "32px";
   div.appendChild(ntx);
 

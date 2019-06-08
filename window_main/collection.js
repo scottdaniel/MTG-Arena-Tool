@@ -7,7 +7,7 @@ const db = require("../shared/database");
 const pd = require("../shared/player-data");
 const { queryElements: $$, createDivision } = require("../shared/dom-fns");
 const { createSelect } = require("../shared/select");
-const { addCardHover } = require("../shared/card-hover");
+const { addCardHover, attachOwnerhipStars } = require("../shared/card-hover");
 const {
   collectionSortRarity,
   get_card_image,
@@ -1008,30 +1008,11 @@ function printCards() {
       continue;
     }
 
-    //let dfc = "";
-
-    let cardDiv = createDivision(["inventory_card"]);
+    const cardDiv = createDivision(["inventory_card"]);
     cardDiv.style.width = pd.cardsSize + "px";
+    attachOwnerhipStars(card, cardDiv);
 
-    const owned = pd.cards[card.id];
-    const aquired = pd.cardsNew[card.id];
-    for (let i = 0; i < 4; i++) {
-      if (aquired && i >= owned - aquired && i < owned) {
-        let q = createDivision(["inventory_card_quantity_orange"]);
-        q.style.width = pd.cardsSize / 4 + "px";
-        cardDiv.appendChild(q);
-      } else if (i < owned) {
-        let q = createDivision(["inventory_card_quantity_green"]);
-        q.style.width = pd.cardsSize / 4 + "px";
-        cardDiv.appendChild(q);
-      } else {
-        let q = createDivision(["inventory_card_quantity_gray"]);
-        q.style.width = pd.cardsSize / 4 + "px";
-        cardDiv.appendChild(q);
-      }
-    }
-
-    let img = document.createElement("img");
+    const img = document.createElement("img");
     img.style.width = pd.cardsSize + "px";
     img.classList.add("inventory_card_img");
     img.src = get_card_image(card);

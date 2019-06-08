@@ -126,10 +126,10 @@ function drawFilters() {
     : "Events";
   filterEvent = document.getElementById("explore_query_event")
     ? document.getElementById("explore_query_event").value
-    : "All";
+    : "Ladder";
   filterSort = document.getElementById("explore_query_sort")
     ? document.getElementById("explore_query_sort").value
-    : "By Winrate";
+    : "By Wins";
   filterSortDir = document.getElementById("explore_query_sortdirection")
     ? document.getElementById("explore_query_sortdirection").value
     : "Descending";
@@ -197,7 +197,6 @@ function drawFilters() {
     eventFilters.push("Ladder");
     eventFilters.push("Traditional Ladder");
   }
-  eventFilters.unshift("All");
   eventFilters.sort(function(a, b) {
     if (a < b) return -1;
     if (a > b) return 1;
@@ -211,6 +210,8 @@ function drawFilters() {
       eventFilters.unshift(item);
     }
   });
+
+  filterEvent = eventFilters[0];
 
   createSelect(
     buttonsTop,
@@ -228,7 +229,7 @@ function drawFilters() {
   sortLabel.style.margin = "auto 4px auto 16px";
   buttonsTop.appendChild(sortLabel);
 
-  let sortFilters = ["By Date", "By Wins", "By Player"];
+  let sortFilters = ["By Date", "By Wins", "By Winrate", "By Player"];
   let sortSelect = createSelect(
     buttonsTop,
     sortFilters,
@@ -407,7 +408,6 @@ function queryExplore(skip) {
   )[0];
   filterEventId = !filterEventId ? filterEvent : filterEventId;
 
-  if (filterEvent == "All") filterEventId = "";
   if (filterEvent == "Ladder") filterEventId = "Ladder";
   if (filterEvent == "Traditional Ladder") filterEventId = "Traditional_Ladder";
 
@@ -436,20 +436,14 @@ function setExploreDecks(data) {
     document.getElementById("explore_list").innerHTML = "";
   }
   filterSkip += data.results_number;
-  if (data.results_type == "Ranked Constructed") {
-    data.result.forEach((deck, index) => {
-      deckLoad(deck, filterSkip + index);
-    });
-  } else {
-    data.result.forEach((course, index) => {
-      eventLoad(course, filterSkip + index);
-    });
-  }
+  data.result.forEach((deck, index) => {
+    deckLoad(deck, filterSkip + index);
+  });
 }
 
 function deckLoad(_deck, index) {
   var mainDiv = document.getElementById("explore_list");
-  index = "ladder_" + index;
+  index = "result_" + index;
 
   var flcf = createDivision(["flex_item"]);
   flcf.style.width = "20%";
@@ -482,9 +476,9 @@ function deckLoad(_deck, index) {
   if (_deck.colors == undefined) {
     _deck.colors = [];
   }
-  if (_deck.w == undefined) {
-    _deck.w = 0;
-    _deck.l = 0;
+  if (_deck.mw == undefined) {
+    _deck.mw = 0;
+    _deck.ml = 0;
   }
 
   var tileGrpid = _deck.tile;
@@ -530,11 +524,11 @@ function deckLoad(_deck, index) {
     flb.appendChild(manaIcon);
   });
 
-  let colClass = getWinrateClass((1 / _deck.t) * _deck.w);
+  let colClass = getWinrateClass((1 / _deck.mt) * _deck.mw);
   d = createDivision(
     ["list_deck_record"],
-    `${_deck.w}:${_deck.l} <span class="${colClass}_bright">(${Math.round(
-      (100 / _deck.t) * _deck.w
+    `${_deck.mw}:${_deck.ml} <span class="${colClass}_bright">(${Math.round(
+      (100 / _deck.mt) * _deck.mw
     )}%)</span>`
   );
 
@@ -581,131 +575,6 @@ function deckLoad(_deck, index) {
     openDeck(_deck, null);
     $(".moving_ux").animate({ left: "-100%" }, 250, "easeInOutCubic");
   });
-}
-
-function eventLoad(event, index) {
-  var mainDiv = document.getElementById("explore_list");
-  index = "events_" + index;
-
-  var flcf = createDivision(["flex_item"]);
-  flcf.style.width = "20%";
-  flcf.style.justifyContent = "center";
-
-  let wc;
-  let n = 0;
-  let boosterCost = getBoosterCountEstimate(event.wildcards);
-  for (var key in raritySort) {
-    if (event.wildcards.hasOwnProperty(key) && event.wildcards[key] > 0) {
-      wc = createDivision(
-        ["wc_explore_cost", "wc_" + raritySort[key]],
-        event.wildcards[key]
-      );
-      wc.title = _.capitalize(raritySort[key]) + " wldcards needed.";
-      flcf.appendChild(wc);
-      n++;
-    }
-  }
-  if (n == 0) {
-    wc = createDivision(["wc_complete"]);
-    flcf.appendChild(wc);
-  } else {
-    let bo = createDivision(["bo_explore_cost"], Math.round(boosterCost));
-    bo.title = "Boosters needed (estimated)";
-    flcf.appendChild(bo);
-  }
-
-  if (event.w == undefined) {
-    event.w = 0;
-    event.l = 0;
-  }
-
-  var tileGrpid = event.tile;
-  try {
-    let a = db.card(tileGrpid).images["art_crop"];
-  } catch (e) {
-    tileGrpid = DEFAULT_TILE;
-  }
-
-  var tile = createDivision([index + "t", "deck_tile"]);
-  tile.style.backgroundImage =
-    "url(https://img.scryfall.com/cards" +
-    db.card(tileGrpid).images["art_crop"] +
-    ")";
-
-  var div = createDivision([index, "list_deck"]);
-
-  var fll = createDivision(["flex_item"]);
-
-  var flc = createDivision(["flex_item"]);
-  flc.style.flexDirection = "column";
-  flc.style.width = "40%";
-
-  var flr = createDivision(["flex_item"]);
-  flr.style.flexDirection = "column";
-  flr.style.justifyContent = "center";
-  flr.style.width = "40%";
-
-  var flt = createDivision(["flex_top"]);
-
-  var flb = createDivision(["flex_bottom"]);
-
-  let d;
-  d = createDivision(["list_deck_name"], event.deckname);
-  flt.appendChild(d);
-
-  d = createDivision(["list_deck_name_it"], "by " + event.player);
-  flt.appendChild(d);
-
-  event.colors.forEach(function(color) {
-    let d = createDivision(["mana_s20", "mana_" + MANA[color]]);
-    flb.appendChild(d);
-  });
-
-  let colClass = getWinrateClass((1 / (event.w + event.l)) * event.w);
-  d = createDivision(
-    ["list_deck_record"],
-    `${event.w}:${event.l} <span class="${colClass}_bright">(${Math.round(
-      (100 / (event.w + event.l)) * event.w
-    )}%)</span>`
-  );
-
-  flr.appendChild(d);
-
-  let ee = event.event;
-  d = createDivision(
-    ["list_deck_right_it"],
-    getReadableEvent(ee) + " - " + timeSince(new Date(event.date)) + " ago"
-  );
-  flr.appendChild(d);
-
-  div.appendChild(fll);
-  fll.appendChild(tile);
-  div.appendChild(flc);
-  div.appendChild(flcf);
-  flc.appendChild(flt);
-  flc.appendChild(flb);
-  div.appendChild(flr);
-
-  mainDiv.appendChild(div);
-
-  $("." + index).on("mouseenter", function() {
-    $("." + index + "t").css("opacity", 1);
-    $("." + index + "t").css("width", "200px");
-  });
-
-  $("." + index).on("mouseleave", function() {
-    $("." + index + "t").css("opacity", 0.66);
-    $("." + index + "t").css("width", "128px");
-  });
-
-  $("." + index).on("click", function() {
-    open_course_request(event._id);
-  });
-}
-
-function open_course_request(courseId) {
-  showLoadingBars();
-  ipcSend("request_course", courseId);
 }
 
 module.exports = {
