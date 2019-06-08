@@ -1,3 +1,10 @@
+## <small>2.6.4 (2019-06-08)</small>
+
+* center stars in overlay ([f42f457](https://github.com/Manuel-777/MTG-Arena-Tool/commit/f42f457))
+* overlay uses card-hover.attachOwnershipStars ([7c4d84b](https://github.com/Manuel-777/MTG-Arena-Tool/commit/7c4d84b))
+
+
+
 ## <small>2.6.3 (2019-06-08)</small>
 
 * background handles deck_tags ([8b34943](https://github.com/Manuel-777/MTG-Arena-Tool/commit/8b34943))
