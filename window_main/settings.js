@@ -715,6 +715,8 @@ function updateUserSettingsBlend(_settings = {}) {
 
   const exportFormat = document.getElementById("settings_export_format").value;
 
+  _settings.overlays = [];
+  _settings.overlays[currentOverlay] = {};
   _settings.overlays[currentOverlay].show = showOverlay;
   _settings.overlays[currentOverlay].show_always = showOverlayAlways;
   _settings.overlays[currentOverlay].top = overlayTop;
