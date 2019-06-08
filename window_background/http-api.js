@@ -198,17 +198,6 @@ function httpBasic() {
                   ", " +
                   _headers.method +
                   ", " +
-                  _headers.reqId +
-                  ", " +
-                  _headers.token
-              );
-              ipc_send(
-                "ipc_log",
-                "RECV << " +
-                  index +
-                  ", " +
-                  _headers.method +
-                  ", " +
                   results.slice(0, 100)
               );
               console.log(
@@ -472,7 +461,7 @@ function httpGetExplore(query, collection) {
   httpAsync.unshift({
     reqId: _id,
     method: "get_explore",
-    method_path: "/api/get_explore.php",
+    method_path: "/api/get_explore_v2.php",
     filter_wcc: query.filterWCC,
     filter_wcu: query.filterWCU,
     filter_wcr: query.filterWCR,
