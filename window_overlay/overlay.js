@@ -866,9 +866,6 @@ function setDraft(_packN = -1, _pickN = -1) {
 
       const od = $(".overlay_decklist");
       const cont = $('<div class="overlay_card_quantity"></div>');
-      if (grpId === pick) {
-        cont.css("background-color", "rgba(250, 229, 210, 0.66)");
-      }
       attachOwnerhipStars(card, cont[0]);
 
       cont.appendTo(od);
