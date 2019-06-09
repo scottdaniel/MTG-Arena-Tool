@@ -324,8 +324,6 @@ ipc.on("settings_updated", () => {
 
   if (!settings.top) {
     hideDiv(".top");
-    let style = "top: 0px !important;";
-    $(".overlay_draft_container").attr("style", style);
   }
   if (!settings.title) {
     hideDiv(".overlay_deckname");
@@ -333,7 +331,6 @@ ipc.on("settings_updated", () => {
   }
   if (!settings.deck) {
     hideDiv(".overlay_decklist");
-    hideDiv(".overlay_draft_container");
   }
   if (!settings.clock || overlayMode == OVERLAY_DRAFT) {
     hideDiv(".overlay_clock_container");
