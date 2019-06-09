@@ -33,6 +33,7 @@ var updaterWindow;
 var background;
 var overlays = [undefined, undefined, undefined, undefined];
 var overlaysAlpha = [false, false, false, false];
+var overlaysShow = false;
 var overlays_settings = null;
 var tray = null;
 var closeToTray = true;
@@ -212,6 +213,24 @@ function startApp() {
         break;
 
       // to main js / window handling
+      case "overlay_show":
+        overlaysShow = true;
+        overlays_settings.forEach((settings, index) => {
+          let overlay = overlays[index];
+          if (overlay && settings.show) {
+            overlayShow(overlay, true);
+          }
+        });
+        break
+
+      case "overlay_close":
+        overlaysShow = false;
+        overlays.forEach(overlay => {
+          if (overlay) {
+            overlayShow(overlay, false);
+          }
+        });
+        break;
 
       case "show_background":
         background.show();
@@ -528,7 +547,7 @@ function createOverlay(settings, index) {
     y: settings.bounds.y,
     width: settings.bounds.width,
     height: settings.bounds.height,
-    show: settings.bounds.show,
+    show: false,
     title: "MTG Arena Tool",
     icon: "iconoverlay.png",
     webPreferences: {
@@ -573,8 +592,10 @@ function overlayShow(overlay, show) {
 
 function overlaySetSettings(overlay, settings, index) {
   overlay.setAlwaysOnTop(settings.ontop, "floating");
-  overlayShow(overlay, settings.show);
   overlay.setBounds(settings.bounds);
+  if (overlaysShow || settings.show == false) {
+    overlayShow(overlay, settings.show);
+  }
 
   let oldAlphaEnabled = overlaysAlpha[index];
   let alphaEnabled = settings.alpha_back < 1;
