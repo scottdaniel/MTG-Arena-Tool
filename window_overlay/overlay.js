@@ -519,7 +519,11 @@ function updateView() {
     deckToDraw = currentMatch.playerCardsLeft;
   }
 
-  if (overlayMode == OVERLAY_ODDS || overlayMode == OVERLAY_FULL || overlayMode == OVERLAY_LEFT) {
+  if (
+    overlayMode == OVERLAY_ODDS ||
+    overlayMode == OVERLAY_FULL ||
+    overlayMode == OVERLAY_LEFT
+  ) {
     $(".overlay_deckname").html(deckToDraw.name);
     deckToDraw.colors.get().forEach(color => {
       $(".overlay_deckcolors").append(
@@ -572,10 +576,7 @@ function updateView() {
     let tile;
     if (overlayMode == OVERLAY_ODDS) {
       let quantity = (card.chance !== undefined ? card.chance : "0") + "%";
-      if (
-        !settings.lands ||
-        (settings.lands && quantity !== "0%")
-      ) {
+      if (!settings.lands || (settings.lands && quantity !== "0%")) {
         tile = deckDrawer.cardTile(
           pd.settings.card_tile_style,
           grpId,

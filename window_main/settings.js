@@ -34,6 +34,7 @@ function getCardStyleName(style) {
 }
 
 let currentSettings = {};
+let currentOverlay = 0;
 
 //
 function openSettingsTab(openSection = lastSettingsSection, scrollTop = 0) {
@@ -319,11 +320,33 @@ function appendBehaviour(section) {
 function appendOverlay(section) {
   section.append('<div class="settings_title">Overlays</div>');
 
+  let topCont = $('<div class="overlay_section_selector_cont"></div>');
+  let topPrev = $('<div class="overlay_prev"></div>');
+  let topIndex = $(
+    `<div class="overlay_current">Current overlay settings: ${currentOverlay +
+      1}</div>`
+  );
+  let topNext = $('<div class="overlay_next"></div>');
+
+  topCont.append(topPrev);
+  topCont.append(topIndex);
+  topCont.append(topNext);
+  section.append(
+    '<div style="margin: 0px 64px 0px 16px;" class="settings_note">You can have up to 4 overlay windows active, and each window has its own settings.</br>Draft overlay will only show in a draft, while the others will work during any match.</div>'
+  );
+  section.append(topCont);
+
   currentSettings.overlays.forEach((settings, index) => {
-    let overlaySection = $(`<div class="overlay_section_${index}"></div>`);
+    let overlaySection = $(
+      `<div class="overlay_section overlay_section_${index}"></div>`
+    );
+
+    if (currentOverlay !== index) {
+      overlaySection.css("display", "none");
+    }
 
     let label = $('<label class="but_container_label">Mode:</label>');
-    label.appendTo(section);
+    label.appendTo(overlaySection);
 
     const modeOptions = [];
     modeOptions[OVERLAY_FULL] = "Full Deck";
@@ -513,6 +536,30 @@ function appendOverlay(section) {
     ).appendTo(overlaySection);
 
     section.append(overlaySection);
+  });
+
+  topPrev.on("click", () => {
+    currentOverlay -= 1;
+    if (currentOverlay < 0) {
+      currentOverlay = 3;
+    }
+    $(".overlay_section").css("display", "none");
+    $(".overlay_section_" + currentOverlay).css("display", "block");
+    $(".overlay_current").html(
+      `Current overlay settings: ${currentOverlay + 1}`
+    );
+  });
+
+  topNext.on("click", () => {
+    currentOverlay += 1;
+    if (currentOverlay > 3) {
+      currentOverlay = 0;
+    }
+    $(".overlay_section").css("display", "none");
+    $(".overlay_section_" + currentOverlay).css("display", "block");
+    $(".overlay_current").html(
+      `Current overlay settings: ${currentOverlay + 1}`
+    );
   });
 }
 
