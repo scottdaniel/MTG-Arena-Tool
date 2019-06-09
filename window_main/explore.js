@@ -30,6 +30,7 @@ const {
 } = require("./renderer-util");
 const { openDeck } = require("./deck-details");
 
+// default values for cached local state
 const defaultData = {
   filterEvent: null,
   filterType: "Events",
@@ -50,10 +51,11 @@ const defaultData = {
   results_terminated: false
 };
 
+// temporary local state variables (never cached)
 let inputFilterType = defaultData.filterType;
 let inputMana = defaultData.filteredMana;
 let inputRanks = defaultData.filteredranks;
-let queryInFlight = false;
+let queryInFlight = false; // semaphore to limit simultaneous queries
 
 //
 function openExploreTab() {
@@ -110,8 +112,10 @@ function openExploreTab() {
 
   drawFilters();
   if (exploreData.results_number) {
+    // display cached query results
     renderData();
   } else {
+    // automatically fetch data when local cache is empty
     queryExplore();
   }
 
@@ -177,7 +181,7 @@ function drawFilters() {
   if (inputFilterType === "Events") {
     eventFilters = db.eventIds
       .concat(db.activeEvents)
-      .map(ev => getEventPrettyName(ev))
+      .map(getEventPrettyName)
       .filter(
         item =>
           item != undefined &&
@@ -187,12 +191,12 @@ function drawFilters() {
           item != "Play" &&
           item != "Traditional Play" &&
           item != "Traditional Ranked" &&
-          !db.ranked_events.map(ev => getEventPrettyName(ev)).includes(item)
+          !db.ranked_events.map(getEventPrettyName).includes(item)
       );
 
     eventFilters = [...new Set(eventFilters)];
   } else if (inputFilterType === "Ranked Draft") {
-    eventFilters = db.ranked_events.map(ev => getEventPrettyName(ev));
+    eventFilters = db.ranked_events.map(getEventPrettyName);
   } else if (inputFilterType === "Ranked Constructed") {
     eventFilters.push("Ladder");
     eventFilters.push("Traditional Ladder");
@@ -203,7 +207,7 @@ function drawFilters() {
     return 0;
   });
 
-  let mappedActive = db.activeEvents.map(ev => getEventPrettyName(ev));
+  let mappedActive = db.activeEvents.map(getEventPrettyName);
   eventFilters.forEach(item => {
     if (mappedActive.includes(item)) {
       eventFilters.splice(eventFilters.indexOf(item), 1);
@@ -445,8 +449,7 @@ function queryExplore() {
   }
 
   const { exploreData } = getLocalState();
-  let {
-    filterEvent,
+  const {
     filterType,
     filterSort,
     filterSortDir,
@@ -460,15 +463,21 @@ function queryExplore() {
     filterSkip
   } = exploreData;
 
-  let sortDir = filterSortDir === "Descending" ? -1 : 1;
+  const sortDir = filterSortDir === "Descending" ? -1 : 1;
 
-  let filterEventId = db.eventIds.filter(
-    key => db.events[key] === filterEvent
-  )[0];
-  filterEventId = !filterEventId ? filterEvent : filterEventId;
-
-  if (filterEvent == "Ladder") filterEventId = "Ladder";
-  if (filterEvent == "Traditional Ladder") filterEventId = "Traditional_Ladder";
+  // initial query defaults event filter to first event (dynamic)
+  const filterEvent =
+    exploreData.filterEvent || getInputValue("explore_query_event", "Ladder");
+  // map selected event display name back to event ID
+  let filterEventId = filterEvent;
+  const eventIds = db.eventIds.filter(
+    key => getEventPrettyName(key) === filterEvent
+  );
+  if (filterEvent === "Traditional Ladder") {
+    filterEventId = "Traditional_Ladder";
+  } else if (eventIds.length) {
+    filterEventId = eventIds[0];
+  }
 
   const query = {
     filterWCC,
