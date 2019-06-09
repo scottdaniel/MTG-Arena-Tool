@@ -361,6 +361,7 @@ function createChangeRow(change, economyId) {
     let count = 0;
 
     const renderWild = count => {
+      if (!count) return;
       count = Math.abs(count);
       bos = createDivision(["economy_wc"]);
       bos.title = title;
