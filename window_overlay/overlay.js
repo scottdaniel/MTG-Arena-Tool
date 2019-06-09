@@ -391,6 +391,9 @@ ipc.on("set_match", (event, arg) => {
 });
 
 function updateView() {
+  if (overlayIndex == -1) return;
+  let settings = pd.settings.overlays[overlayIndex];
+
   let cleanName =
     currentMatch && currentMatch.opponent && currentMatch.opponent.name;
   if (cleanName && cleanName !== "Sparky") {
@@ -516,7 +519,7 @@ function updateView() {
     deckToDraw = currentMatch.playerCardsLeft;
   }
 
-  if (overlayMode !== OVERLAY_DRAFT && overlayMode !== OVERLAY_LOG) {
+  if (overlayMode == OVERLAY_ODDS || overlayMode == OVERLAY_FULL || overlayMode == OVERLAY_LEFT) {
     $(".overlay_deckname").html(deckToDraw.name);
     deckToDraw.colors.get().forEach(color => {
       $(".overlay_deckcolors").append(
@@ -536,7 +539,7 @@ function updateView() {
   mainCards.removeDuplicates();
   // group lands
   if (
-    pd.settings.overlay_lands &&
+    settings.lands &&
     overlayMode !== OVERLAY_DRAFT &&
     overlayMode !== OVERLAY_LOG
   ) {
@@ -570,8 +573,8 @@ function updateView() {
     if (overlayMode == OVERLAY_ODDS) {
       let quantity = (card.chance !== undefined ? card.chance : "0") + "%";
       if (
-        !pd.settings.overlay_lands ||
-        (pd.settings.overlay_lands && quantity !== "0%")
+        !settings.lands ||
+        (settings.lands && quantity !== "0%")
       ) {
         tile = deckDrawer.cardTile(
           pd.settings.card_tile_style,
@@ -597,7 +600,7 @@ function updateView() {
       attachLandOdds(tile, currentMatch.playerCardsOdds);
     }
   });
-  if (pd.settings.overlay_sideboard && deckToDraw.sideboard.count() > 0) {
+  if (settings.sideboard && deckToDraw.sideboard.count() > 0) {
     deckListDiv.append('<div class="card_tile_separator">Sideboard</div>');
 
     let sideCards = deckToDraw.sideboard;
@@ -1008,8 +1011,9 @@ $(document).ready(function() {
       $(".overlay_container").css("opacity", 1);
     },
     function() {
-      if (pd.settings.overlay_alpha !== 1) {
-        $(".overlay_container").css("opacity", pd.settings.overlay_alpha);
+      let settings = pd.settings.overlays[overlayIndex];
+      if (settings.alpha !== 1) {
+        $(".overlay_container").css("opacity", settings.alpha);
       }
     }
   );
