@@ -241,6 +241,10 @@ function startApp() {
         }
         break;
 
+      case "renderer_set_bounds":
+        mainWindow.setBounds(arg);
+        break;
+
       case "show_background":
         background.show();
         break;
