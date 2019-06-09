@@ -221,12 +221,13 @@ function startApp() {
             overlayShow(overlay, true);
           }
         });
-        break
+        break;
 
       case "overlay_close":
-        overlaysShow = false;
-        overlays.forEach(overlay => {
-          if (overlay) {
+        overlaysShow = true;
+        overlays_settings.forEach((settings, index) => {
+          let overlay = overlays[index];
+          if (overlay && settings.show && !settings.always_show) {
             overlayShow(overlay, false);
           }
         });
@@ -595,6 +596,9 @@ function overlaySetSettings(overlay, settings, index) {
   overlay.setBounds(settings.bounds);
   if (overlaysShow || settings.show == false) {
     overlayShow(overlay, settings.show);
+  }
+  if (settings.always_show) {
+    overlayShow(overlay, settings.always_show);
   }
 
   let oldAlphaEnabled = overlaysAlpha[index];

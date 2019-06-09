@@ -698,9 +698,7 @@ function onLabelInEventCompleteDraft(entry, json) {
   if (!json) return;
   ipc_send("save_overlay_pos", 1);
   clear_deck();
-  if (!store.get("settings.show_overlay_always")) {
-    ipc_send("overlay_close", 1);
-  }
+  ipc_send("overlay_draft_close", 1);
   //ipc_send("renderer_show", 1);
 
   currentDraft.draftId = json.Id;
@@ -778,9 +776,7 @@ function onLabelMatchGameRoomStateChangedEvent(entry, json) {
 
     ipc_send("save_overlay_pos", 1);
     clear_deck();
-    if (!store.get("settings.show_overlay_always")) {
-      ipc_send("overlay_close", 1);
-    }
+    ipc_send("overlay_close", 1);
     matchCompletedOnGameNumber = json.finalMatchResult.resultList.length - 1;
     saveMatch(json.finalMatchResult.matchId + "-" + pd.arenaId);
   }
