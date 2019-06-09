@@ -1645,7 +1645,7 @@ function finishLoading() {
       update_deck(false);
     }
 
-    obj = store.get("windowBounds");
+    let obj = store.get("windowBounds");
     ipc_send("renderer_set_bounds", obj);
 
     ipc_send("initialize", 1);

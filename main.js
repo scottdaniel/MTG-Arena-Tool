@@ -577,7 +577,7 @@ function overlaySetSettings(overlay, settings, index) {
   overlay.setBounds(settings.bounds);
 
   let oldAlphaEnabled = overlaysAlpha[index];
-  let alphaEnabled = settings.overlay_alpha_back < 1;
+  let alphaEnabled = settings.alpha_back < 1;
   if (oldAlphaEnabled != alphaEnabled) {
     recreateOverlay(overlay, settings, index);
   }

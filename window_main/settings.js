@@ -421,9 +421,9 @@ function appendOverlay(section) {
     );
     sliderOpacityLabel.appendTo(sliderOpacity);
     const sliderOpacityInput = $(
-      `<input type="range" min="0" max="100" step="5" value="
-        ${transparencyFromAlpha(settings.alpha)}
-        " class="slider sliderB" id="opacityRange${index}">`
+      `<input type="range" min="0" max="100" step="5" value="${transparencyFromAlpha(
+        settings.alpha
+      )}" class="slider" id="opacityRange${index}">`
     );
     sliderOpacityInput.appendTo(sliderOpacity);
 
@@ -456,7 +456,7 @@ function appendOverlay(section) {
     const sliderOpacityBackInput = $(
       '<input type="range" min="0" max="100" step="5" value="' +
         transparencyFromAlpha(settings.alpha_back) +
-        '" class="slider sliderC" id="opacityBackRange">'
+        '" class="slider" id="opacityBackRange">'
     );
     sliderOpacityBackInput.appendTo(sliderOpacityBack);
 
@@ -491,7 +491,7 @@ function appendOverlay(section) {
     const sliderScaleInput = $(
       '<input type="range" min="10" max="200" step="10" value="' +
         settings.scale +
-        '" class="slider sliderD" id="scaleRange">'
+        '" class="slider" id="scaleRange">'
     );
     sliderScaleInput.appendTo(sliderScale);
 
