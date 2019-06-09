@@ -283,10 +283,17 @@ ipc.on("windowBounds", function(event, obj) {
 });
 
 //
+ipc.on("overlayBounds", function(event, index, obj) {
+  pd.settings.overlays[index].bounds = obj;
+  pd_set({ settings: pd.settings });
+  store.set("settings", pd.settings);
+});
+
+//
 ipc.on("save_user_settings", function(event, settings) {
+  console.log("save_user_settings");
   ipc_send("show_loading");
   const oldSettings = store.get("settings");
-  console.log("> settings: ", oldSettings);
   const updated = { ...oldSettings, ...settings };
 
   // clean up garbage jQuery data that slipped into some configs
@@ -307,7 +314,6 @@ ipc.on("save_user_settings", function(event, settings) {
   loadSettings(updated);
   store.set("settings", pd.settings);
   ipc_send("hide_loading");
-  console.log("> updated: ", updated);
 });
 
 //
@@ -461,7 +467,14 @@ function loadPlayerConfig(playerId, serverData = undefined) {
     name: playerId,
     defaults: pd.defaultCfg
   });
-  const playerData = store.get();
+
+  const savedData = store.get();
+  const playerData = {
+    ...pd,
+    ...savedData,
+    settings: { ...pd.settings, ...savedData.settings }
+  };
+  loadSettings(playerData.settings);
   pd_set(playerData);
 
   ipc_send("popup", {
@@ -497,8 +510,6 @@ function loadPlayerConfig(playerId, serverData = undefined) {
     time: 0,
     progress: 2
   });
-
-  loadSettings();
 
   watchingLog = true;
   stopWatchingLog = startWatchingLog();
@@ -588,13 +599,10 @@ function loadSettings(dirtySettings = {}) {
     ...dirtySettings
   };
 
-  console.log(settings);
   //const exeName = path.basename(process.execPath);
 
   skipFirstPass = settings.skip_firstpass;
   pd_set({ settings });
-
-  console.log("> Loaded: ", settings);
   ipc_send("set_settings", settings);
   ipc_send("settings_updated");
 }

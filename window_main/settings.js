@@ -1,6 +1,15 @@
 const { ipcRenderer: ipc, remote, shell } = require("electron");
 
-const { CARD_TILE_ARENA, CARD_TILE_FLAT } = require("../shared/constants");
+const {
+  CARD_TILE_ARENA,
+  CARD_TILE_FLAT,
+  OVERLAY_FULL,
+  OVERLAY_LEFT,
+  OVERLAY_ODDS,
+  OVERLAY_SEEN,
+  OVERLAY_DRAFT,
+  OVERLAY_LOG
+} = require("../shared/constants");
 const db = require("../shared/database");
 const pd = require("../shared/player-data");
 const deckDrawer = require("../shared/deck-drawer");
@@ -8,6 +17,8 @@ const { createSelect } = require("../shared/select");
 const { get_card_image } = require("../shared/util");
 
 const {
+  setLocalState,
+  getLocalState,
   addCheckbox,
   changeBackground,
   hideLoadingBars,
@@ -22,11 +33,16 @@ function getCardStyleName(style) {
   return "Arena";
 }
 
-let currentOverlay = 0;
+let currentSettings = {};
 
 //
-function openSettingsTab(openSection = lastSettingsSection) {
-  lastSettingsSection = openSection;
+function openSettingsTab(openSection = lastSettingsSection, scrollTop = 0) {
+  const ls = getLocalState();
+  if (openSection !== -1) {
+    lastSettingsSection = openSection;
+  } else {
+    openSection = lastSettingsSection;
+  }
   changeBackground("default");
   hideLoadingBars();
   $("#ux_0").off();
@@ -52,6 +68,9 @@ function openSettingsTab(openSection = lastSettingsSection) {
   const wrap_r = $('<div class="wrapper_column"></div>');
   const div = $('<div class="settings_page"></div>');
   let section;
+
+  currentSettings = pd.settings;
+  console.log("currentSettings", currentSettings);
 
   // BEHAVIOR
   section = $('<div class="settings_section ss1"></div>');
@@ -84,6 +103,7 @@ function openSettingsTab(openSection = lastSettingsSection) {
   appendLogin(section);
 
   div.appendTo(wrap_r);
+
   $("#ux_0").append(wrap_l);
   $("#ux_0").append(wrap_r);
 
@@ -169,6 +189,14 @@ function openSettingsTab(openSection = lastSettingsSection) {
         $(".ss6").show();
       }
     }
+  });
+
+  const jCont = wrap_r;
+  if (scrollTop) {
+    jCont.scrollTop(ls.lastScrollTop);
+  }
+  jCont.on("scroll", () => {
+    setLocalState({ lastScrollTop: jCont.scrollTop() });
   });
 }
 
@@ -289,165 +317,202 @@ function appendBehaviour(section) {
 }
 
 function appendOverlay(section) {
-  let settings = pd.settings.overlays[currentOverlay];
-  section.append('<div class="settings_title">Overlay</div>');
+  section.append('<div class="settings_title">Overlays</div>');
 
-  addCheckbox(
-    section,
-    "Always on top",
-    "settings_overlay_ontop",
-    settings.ontop,
-    updateUserSettings
-  );
-  addCheckbox(
-    section,
-    "Show overlay",
-    "settings_showoverlay",
-    settings.show,
-    updateUserSettings
-  );
-  addCheckbox(
-    section,
-    "Persistent overlay&nbsp;<i>(useful for OBS setup)</i>",
-    "settings_showoverlayalways",
-    settings.show_always,
-    updateUserSettings
-  );
+  currentSettings.overlays.forEach((settings, index) => {
+    let overlaySection = $(`<div class="overlay_section_${index}"></div>`);
 
-  addCheckbox(
-    section,
-    "Show top bar",
-    "settings_overlay_top",
-    settings.top,
-    updateUserSettings
-  );
-  addCheckbox(
-    section,
-    "Show title",
-    "settings_overlay_title",
-    settings.title,
-    updateUserSettings
-  );
-  addCheckbox(
-    section,
-    "Show deck/lists",
-    "settings_overlay_deck",
-    settings.deck,
-    updateUserSettings
-  );
-  addCheckbox(
-    section,
-    "Show clock",
-    "settings_overlay_clock",
-    settings.clock,
-    updateUserSettings
-  );
-  addCheckbox(
-    section,
-    "Show sideboard",
-    "settings_overlay_sideboard",
-    settings.sideboard,
-    updateUserSettings
-  );
-  addCheckbox(
-    section,
-    "Compact lands",
-    "settings_overlay_lands",
-    settings.lands,
-    updateUserSettings
-  );
+    let label = $('<label class="but_container_label">Mode:</label>');
+    label.appendTo(section);
 
-  const sliderOpacity = $('<div class="slidecontainer_settings"></div>');
-  sliderOpacity.appendTo(section);
-  const sliderOpacityLabel = $(
-    '<label style="width: 400px; !important" class="card_size_container">Elements transparency: ' +
-      transparencyFromAlpha(settings.alpha) +
-      "%</label>"
-  );
-  sliderOpacityLabel.appendTo(sliderOpacity);
-  const sliderOpacityInput = $(
-    '<input type="range" min="0" max="100" step="5" value="' +
-      transparencyFromAlpha(settings.alpha) +
-      '" class="slider sliderB" id="opacityRange">'
-  );
-  sliderOpacityInput.appendTo(sliderOpacity);
+    const modeOptions = [];
+    modeOptions[OVERLAY_FULL] = "Full Deck";
+    modeOptions[OVERLAY_LEFT] = "Cards Left";
+    modeOptions[OVERLAY_ODDS] = "Cards Odds";
+    modeOptions[OVERLAY_SEEN] = "Cards Seen";
+    modeOptions[OVERLAY_DRAFT] = "Draft";
+    modeOptions[OVERLAY_LOG] = "Action Log";
 
-  const sliderOpacityBack = $('<div class="slidecontainer_settings"></div>');
-  sliderOpacityBack.appendTo(section);
-  const sliderOpacityBackLabel = $(
-    '<label style="width: 400px; !important" class="card_size_container">Background transparency: ' +
-      transparencyFromAlpha(settings.alpha_back) +
-      "%</label>"
-  );
-  sliderOpacityBackLabel.appendTo(sliderOpacityBack);
-  const sliderOpacityBackInput = $(
-    '<input type="range" min="0" max="100" step="5" value="' +
-      transparencyFromAlpha(settings.alpha_back) +
-      '" class="slider sliderC" id="opacityBackRange">'
-  );
-  sliderOpacityBackInput.appendTo(sliderOpacityBack);
-
-  const sliderScale = $('<div class="slidecontainer_settings"></div>');
-  sliderScale.appendTo(section);
-  const sliderScaleLabel = $(
-    '<label style="width: 400px; !important" class="card_size_container">Scale: ' +
-      settings.scale +
-      "%</label>"
-  );
-  sliderScaleLabel.appendTo(sliderScale);
-  const sliderScaleInput = $(
-    '<input type="range" min="10" max="200" step="10" value="' +
-      settings.scale +
-      '" class="slider sliderD" id="scaleRange">'
-  );
-  sliderScaleInput.appendTo(sliderScale);
-
-  $(
-    '<div class="button_simple centered resetOverlayPos">Reset Position</div>'
-  ).appendTo(section);
-
-  sliderOpacityInput.off();
-
-  sliderOpacityInput.on("click mousemove", function() {
-    const overlayAlpha = alphaFromTransparency(parseInt(this.value));
-    sliderOpacityLabel.html(
-      "Elements transparency: " + transparencyFromAlpha(overlayAlpha) + "%"
+    const modeSelect = createSelect(
+      label[0],
+      modeOptions,
+      modeOptions[settings.mode],
+      function(filter) {
+        currentSettings.overlays[index].mode = modeOptions.indexOf(filter);
+        updateUserSettingsBlend();
+      },
+      `overlay_${index}_mode`
     );
-  });
+    modeSelect.style.width = "180px";
+    modeSelect.style.marginLeft = "32px";
 
-  sliderOpacityInput.on("click mouseup", function() {
-    updateUserSettingsBlend({
-      overlay_alpha: alphaFromTransparency(parseInt(this.value))
-    });
-  });
-
-  sliderOpacityBackInput.off();
-
-  sliderOpacityBackInput.on("click mousemove", function() {
-    const overlayAlphaBack = alphaFromTransparency(parseInt(this.value));
-    sliderOpacityBackLabel.html(
-      "Background transparency: " +
-        transparencyFromAlpha(overlayAlphaBack) +
-        "%"
+    addCheckbox(
+      overlaySection,
+      "Always on top",
+      `overlay_${index}_ontop`,
+      settings.ontop,
+      updateUserSettings
     );
-  });
+    addCheckbox(
+      overlaySection,
+      "Show overlay",
+      `overlay_${index}_show`,
+      settings.show,
+      updateUserSettings
+    );
+    addCheckbox(
+      overlaySection,
+      "Persistent overlay&nbsp;<i>(useful for OBS setup)</i>",
+      `overlay_${index}_show_always`,
+      settings.show_always,
+      updateUserSettings
+    );
+    addCheckbox(
+      overlaySection,
+      "Show top bar",
+      `overlay_${index}_top`,
+      settings.top,
+      updateUserSettings
+    );
+    addCheckbox(
+      overlaySection,
+      "Show title",
+      `overlay_${index}_title`,
+      settings.title,
+      updateUserSettings
+    );
+    addCheckbox(
+      overlaySection,
+      "Show deck/lists",
+      `overlay_${index}_deck`,
+      settings.deck,
+      updateUserSettings
+    );
+    addCheckbox(
+      overlaySection,
+      "Show clock",
+      `overlay_${index}_clock`,
+      settings.clock,
+      updateUserSettings
+    );
+    addCheckbox(
+      overlaySection,
+      "Show sideboard",
+      `overlay_${index}_sideboard`,
+      settings.sideboard,
+      updateUserSettings
+    );
+    addCheckbox(
+      overlaySection,
+      "Compact lands",
+      `overlay_${index}_lands`,
+      settings.lands,
+      updateUserSettings
+    );
 
-  sliderOpacityBackInput.on("click mouseup", function() {
-    updateUserSettingsBlend({
-      overlay_alpha_back: alphaFromTransparency(parseInt(this.value))
+    //
+    //
+    const sliderOpacity = $('<div class="slidecontainer_settings"></div>');
+    sliderOpacity.appendTo(overlaySection);
+    const sliderOpacityLabel = $(
+      '<label style="width: 400px; !important" class="card_size_container">Elements transparency: ' +
+        transparencyFromAlpha(settings.alpha) +
+        "%</label>"
+    );
+    sliderOpacityLabel.appendTo(sliderOpacity);
+    const sliderOpacityInput = $(
+      `<input type="range" min="0" max="100" step="5" value="
+        ${transparencyFromAlpha(settings.alpha)}
+        " class="slider sliderB" id="opacityRange${index}">`
+    );
+    sliderOpacityInput.appendTo(sliderOpacity);
+
+    sliderOpacityInput.off();
+
+    sliderOpacityInput.on("click mousemove", function() {
+      const overlayAlpha = alphaFromTransparency(parseInt(this.value));
+      sliderOpacityLabel.html(
+        "Elements transparency: " + transparencyFromAlpha(overlayAlpha) + "%"
+      );
     });
-  });
 
-  sliderScaleInput.off();
-
-  sliderScaleInput.on("click mousemove", function() {
-    sliderScaleLabel.html("Scale: " + parseInt(this.value) + "%");
-  });
-
-  sliderScaleInput.on("click mouseup", function() {
-    updateUserSettingsBlend({
-      overlay_scale: parseInt(this.value)
+    sliderOpacityInput.on("click mouseup", function() {
+      currentSettings.overlays[index].alpha = alphaFromTransparency(
+        parseInt(this.value)
+      );
+      updateUserSettingsBlend();
     });
+
+    //
+    //
+    const sliderOpacityBack = $('<div class="slidecontainer_settings"></div>');
+    sliderOpacityBack.appendTo(overlaySection);
+    const sliderOpacityBackLabel = $(
+      '<label style="width: 400px; !important" class="card_size_container">Background transparency: ' +
+        transparencyFromAlpha(settings.alpha_back) +
+        "%</label>"
+    );
+    sliderOpacityBackLabel.appendTo(sliderOpacityBack);
+    const sliderOpacityBackInput = $(
+      '<input type="range" min="0" max="100" step="5" value="' +
+        transparencyFromAlpha(settings.alpha_back) +
+        '" class="slider sliderC" id="opacityBackRange">'
+    );
+    sliderOpacityBackInput.appendTo(sliderOpacityBack);
+
+    sliderOpacityBackInput.off();
+
+    sliderOpacityBackInput.on("click mousemove", function() {
+      const overlayAlphaBack = alphaFromTransparency(parseInt(this.value));
+      sliderOpacityBackLabel.html(
+        "Background transparency: " +
+          transparencyFromAlpha(overlayAlphaBack) +
+          "%"
+      );
+    });
+
+    sliderOpacityBackInput.on("click mouseup", function() {
+      currentSettings.overlays[index].alpha_back = alphaFromTransparency(
+        parseInt(this.value)
+      );
+      updateUserSettingsBlend();
+    });
+
+    //
+    //
+    const sliderScale = $('<div class="slidecontainer_settings"></div>');
+    sliderScale.appendTo(overlaySection);
+    const sliderScaleLabel = $(
+      '<label style="width: 400px; !important" class="card_size_container">Scale: ' +
+        settings.scale +
+        "%</label>"
+    );
+    sliderScaleLabel.appendTo(sliderScale);
+    const sliderScaleInput = $(
+      '<input type="range" min="10" max="200" step="10" value="' +
+        settings.scale +
+        '" class="slider sliderD" id="scaleRange">'
+    );
+    sliderScaleInput.appendTo(sliderScale);
+
+    sliderScaleInput.off();
+
+    sliderScaleInput.on("click mousemove", function() {
+      sliderScaleLabel.html("Scale: " + parseInt(this.value) + "%");
+    });
+
+    sliderScaleInput.on("click mouseup", function() {
+      currentSettings.overlays[index].scale = parseInt(this.value);
+      updateUserSettingsBlend();
+    });
+
+    //
+    //
+    $(
+      '<div class="button_simple centered resetOverlayPos">Reset Position</div>'
+    ).appendTo(overlaySection);
+
+    section.append(overlaySection);
   });
 }
 
@@ -680,52 +745,55 @@ function updateUserSettingsBlend(_settings = {}) {
   const startup = document.getElementById("settings_startup").checked;
   const readonlogin = document.getElementById("settings_readlogonlogin")
     .checked;
-  const showOverlay = document.getElementById("settings_showoverlay").checked;
-  const showOverlayAlways = document.getElementById(
-    "settings_showoverlayalways"
-  ).checked;
+
   const soundPriority = document.getElementById("settings_soundpriority")
     .checked;
 
   const backColor = $(".color_picker")
     .spectrum("get")
     .toRgbString();
+
   const backUrl = document.getElementById("query_image").value;
   if (backUrl === "") changeBackground("default");
   else changeBackground(backUrl);
 
-  const overlayOnTop = document.getElementById("settings_overlay_ontop")
-    .checked;
+  currentSettings.overlays.forEach((overlaySettings, index) => {
+    const showOverlay = document.getElementById(`overlay_${index}_show`)
+      .checked;
+    const showOverlayAlways = document.getElementById(
+      `overlay_${index}_show_always`
+    ).checked;
+    const overlayOnTop = document.getElementById(`overlay_${index}_ontop`)
+      .checked;
+    const overlayTop = document.getElementById(`overlay_${index}_top`).checked;
+    const overlayTitle = document.getElementById(`overlay_${index}_title`)
+      .checked;
+    const overlayDeck = document.getElementById(`overlay_${index}_deck`)
+      .checked;
+    const overlayClock = document.getElementById(`overlay_${index}_clock`)
+      .checked;
+    const overlaySideboard = document.getElementById(
+      `overlay_${index}_sideboard`
+    ).checked;
+    const overlayLands = document.getElementById(`overlay_${index}_lands`)
+      .checked;
+
+    overlaySettings.show = showOverlay;
+    overlaySettings.show_always = showOverlayAlways;
+    overlaySettings.top = overlayTop;
+    overlaySettings.title = overlayTitle;
+    overlaySettings.deck = overlayDeck;
+    overlaySettings.clock = overlayClock;
+    overlaySettings.sideboard = overlaySideboard;
+    overlaySettings.ontop = overlayOnTop;
+    overlaySettings.lands = overlayLands;
+  });
+
+  const closeOnMatch = document.getElementById("settings_closeonmatch").checked;
+  const exportFormat = document.getElementById("settings_export_format").value;
   const closeToTray = document.getElementById("settings_closetotray").checked;
   const sendData = document.getElementById("settings_senddata").checked;
   const anonExplore = document.getElementById("settings_anon_explore").checked;
-
-  const closeOnMatch = document.getElementById("settings_closeonmatch").checked;
-
-  const overlayTop = document.getElementById("settings_overlay_top").checked;
-  const overlayTitle = document.getElementById("settings_overlay_title")
-    .checked;
-  const overlayDeck = document.getElementById("settings_overlay_deck").checked;
-  const overlayClock = document.getElementById("settings_overlay_clock")
-    .checked;
-  const overlaySideboard = document.getElementById("settings_overlay_sideboard")
-    .checked;
-  const overlayLands = document.getElementById("settings_overlay_lands")
-    .checked;
-
-  const exportFormat = document.getElementById("settings_export_format").value;
-
-  _settings.overlays = [];
-  _settings.overlays[currentOverlay] = {};
-  _settings.overlays[currentOverlay].show = showOverlay;
-  _settings.overlays[currentOverlay].show_always = showOverlayAlways;
-  _settings.overlays[currentOverlay].top = overlayTop;
-  _settings.overlays[currentOverlay].title = overlayTitle;
-  _settings.overlays[currentOverlay].deck = overlayDeck;
-  _settings.overlays[currentOverlay].clock = overlayClock;
-  _settings.overlays[currentOverlay].sideboard = overlaySideboard;
-  _settings.overlays[currentOverlay].ontop = overlayOnTop;
-  _settings.overlays[currentOverlay].lands = overlayLands;
 
   ipcSend("save_user_settings", {
     sound_priority: soundPriority,
@@ -738,6 +806,7 @@ function updateUserSettingsBlend(_settings = {}) {
     back_url: backUrl,
     export_format: exportFormat,
     skip_firstpass: !readonlogin,
+    ...currentSettings,
     ..._settings
   });
 }

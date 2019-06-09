@@ -8,7 +8,11 @@ const {
   BLUE,
   GREEN,
   RED,
-  WHITE
+  WHITE,
+  OVERLAY_LEFT,
+  OVERLAY_SEEN,
+  OVERLAY_DRAFT,
+  OVERLAY_LOG
 } = require("../shared/constants");
 const db = require("../shared/database");
 
@@ -61,9 +65,10 @@ const defaultCfg = {
     last_open_tab: -1,
     card_tile_style: CARD_TILE_FLAT,
     overlays: [
-      newOverlaySettings(0),
-      newOverlaySettings(1),
-      newOverlaySettings(3)
+      newOverlaySettings(OVERLAY_LEFT),
+      newOverlaySettings(OVERLAY_SEEN),
+      newOverlaySettings(OVERLAY_DRAFT),
+      newOverlaySettings(OVERLAY_LOG)
     ]
   },
   economy_index: [],
@@ -96,8 +101,8 @@ const defaultCfg = {
 function newOverlaySettings(mode) {
   return {
     bounds: { width: 300, height: 600, x: 0, y: 0 },
-    show: true,
-    show_awlays: true,
+    show: false,
+    show_awlays: false,
     mode: mode,
     sideboard: false,
     alpha: 1,

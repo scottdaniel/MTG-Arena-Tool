@@ -38,7 +38,13 @@ const {
   MANA,
   PACK_SIZES,
   IPC_BACKGROUND,
-  IPC_OVERLAY
+  IPC_OVERLAY,
+  OVERLAY_FULL,
+  OVERLAY_LEFT,
+  OVERLAY_ODDS,
+  OVERLAY_SEEN,
+  OVERLAY_DRAFT,
+  OVERLAY_LOG
 } = require("../shared/constants.js");
 
 let landsCard = {
@@ -63,7 +69,6 @@ let matchBeginTime = Date.now();
 let priorityTimers = [];
 let clockMode = 0;
 let draftMode = 1;
-let deckMode = 0;
 let overlayMode = 0;
 let overlayIndex = -1;
 setRenderer(1);
@@ -238,7 +243,7 @@ function recreateClock() {
     }
   }
 
-  if (overlayMode == 1) {
+  if (overlayMode == OVERLAY_DRAFT) {
     $(".clock_turn").html("");
   }
 
@@ -305,16 +310,14 @@ ipc.on("settings_updated", () => {
   $(".overlay_deckname").css("display", "");
   $(".overlay_deckcolors").css("display", "");
   $(".overlay_decklist").css("display", "");
-  $(".overlay_clock_spacer").css("display", "");
   $(".overlay_clock_container").css("display", "");
   $(".overlay_draft_container").attr("style", "");
   $(".overlay_deckname").attr("style", "");
   $(".overlay_deckcolors").attr("style", "");
 
-  if (overlayMode == 0) {
+  if (overlayMode !== OVERLAY_DRAFT) {
     $(".overlay_draft_container").hide();
-  }
-  if (overlayMode == 1) {
+  } else {
     $(".overlay_draft_container").show();
   }
 
@@ -331,8 +334,7 @@ ipc.on("settings_updated", () => {
     hideDiv(".overlay_decklist");
     hideDiv(".overlay_draft_container");
   }
-  if (!settings.clock || overlayMode == 1) {
-    hideDiv(".overlay_clock_spacer");
+  if (!settings.clock || overlayMode == OVERLAY_DRAFT) {
     hideDiv(".overlay_clock_container");
   }
 
@@ -396,10 +398,9 @@ function updateView() {
   }
   oppName = cleanName || "Opponent";
 
-  if (overlayMode == 0) {
+  if (overlayMode !== OVERLAY_DRAFT) {
     $(".overlay_draft_container").hide();
-  }
-  if (overlayMode == 1) {
+  } else {
     $(".overlay_draft_container").show();
   }
 
@@ -425,7 +426,7 @@ function updateView() {
   // Action Log Mode
   //
   deckListDiv = $(".overlay_decklist");
-  if (deckMode == 4) {
+  if (overlayMode == OVERLAY_LOG) {
     $(".overlay_deckname").html("Action Log");
 
     let initalTime = actionLog[0] ? new Date(actionLog[0].time) : new Date();
@@ -471,7 +472,7 @@ function updateView() {
   //
   // Opponent Cards Mode
   //
-  if (deckMode == 3) {
+  if (overlayMode == OVERLAY_SEEN) {
     $('<div class="overlay_archetype"></div>').insertAfter(".overlay_deckname");
     $(".overlay_deckname").html("Played by " + oppName);
     $(".overlay_archetype").html(currentMatch.oppCards.archetype);
@@ -487,7 +488,7 @@ function updateView() {
   //
   // Player Cards Odds Mode
   //
-  if (deckMode == 2) {
+  if (overlayMode == OVERLAY_ODDS) {
     let cardsLeft = currentMatch.playerCardsLeft.mainboard.count();
     deckListDiv.append(
       `<div class="decklist_title">${cardsLeft} cards left</div>`
@@ -498,7 +499,7 @@ function updateView() {
   //
   // Player Full Deck Mode
   //
-  if (deckMode == 1) {
+  if (overlayMode == OVERLAY_FULL) {
     let cardsCount = currentMatch.player.deck.mainboard.count();
     deckListDiv.append(`<div class="decklist_title">${cardsCount} cards</div>`);
     deckToDraw = currentMatch.player.deck;
@@ -507,7 +508,7 @@ function updateView() {
   //
   // Player Cards Left Mode
   //
-  if (deckMode == 0) {
+  if (overlayMode == OVERLAY_LEFT) {
     let cardsLeft = currentMatch.playerCardsLeft.mainboard.count();
     deckListDiv.append(
       `<div class="decklist_title">${cardsLeft} cards left</div>`
@@ -515,7 +516,7 @@ function updateView() {
     deckToDraw = currentMatch.playerCardsLeft;
   }
 
-  if (deckMode !== 3) {
+  if (overlayMode !== OVERLAY_DRAFT && overlayMode !== OVERLAY_LOG) {
     $(".overlay_deckname").html(deckToDraw.name);
     deckToDraw.colors.get().forEach(color => {
       $(".overlay_deckcolors").append(
@@ -527,14 +528,18 @@ function updateView() {
   if (!deckToDraw) return;
 
   let sortFunc = compare_cards;
-  if (deckMode === 2) {
+  if (overlayMode === OVERLAY_ODDS) {
     sortFunc = compare_chances;
   }
 
   let mainCards = deckToDraw.mainboard;
   mainCards.removeDuplicates();
   // group lands
-  if (pd.settings.overlay_lands && deckMode !== 3) {
+  if (
+    pd.settings.overlay_lands &&
+    overlayMode !== OVERLAY_DRAFT &&
+    overlayMode !== OVERLAY_LOG
+  ) {
     let landsNumber = 0;
     let landsChance = 0;
     let landsColors = new Colors();
@@ -562,7 +567,7 @@ function updateView() {
   mainCards.get().forEach(card => {
     var grpId = card.id;
     let tile;
-    if (deckMode == 2) {
+    if (overlayMode == OVERLAY_ODDS) {
       let quantity = (card.chance !== undefined ? card.chance : "0") + "%";
       if (
         !pd.settings.overlay_lands ||
@@ -601,7 +606,7 @@ function updateView() {
 
     sideCards.get().forEach(function(card) {
       var grpId = card.id;
-      if (deckMode == 2) {
+      if (overlayMode == OVERLAY_ODDS) {
         let tile = deckDrawer.cardTile(
           pd.settings.card_tile_style,
           grpId,
@@ -621,7 +626,7 @@ function updateView() {
     });
   }
 
-  if (deckMode == 2) {
+  if (overlayMode == OVERLAY_ODDS) {
     drawDeckOdds();
   }
 }
@@ -981,25 +986,6 @@ $(document).ready(function() {
     } else {
       setDraft(packN, pickN);
     }
-  });
-
-  //
-  $(".deck_prev").click(function() {
-    changedMode = true;
-    deckMode -= 1;
-    if (deckMode < 0) {
-      deckMode = 4;
-    }
-    updateView();
-  });
-  //
-  $(".deck_next").click(function() {
-    changedMode = true;
-    deckMode += 1;
-    if (deckMode > 4) {
-      deckMode = 0;
-    }
-    updateView();
   });
 
   //

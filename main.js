@@ -31,13 +31,13 @@ const debugIPC = false;
 var mainWindow;
 var updaterWindow;
 var background;
-var overlays = null;
+var overlays = [undefined, undefined, undefined, undefined];
+var overlaysAlpha = [false, false, false, false];
 var overlays_settings = null;
 var tray = null;
 var closeToTray = true;
 let autoLogin = false;
 let launchToTray = false;
-var alphaEnabled = false;
 
 const ipc = electron.ipcMain;
 
@@ -175,7 +175,9 @@ function startApp() {
       case "settings_updated":
         mainWindow.webContents.send("settings_updated");
         overlays.forEach(overlay => {
-          overlay.webContents.send("settings_updated");
+          if (overlay) {
+            overlay.webContents.send("settings_updated");
+          }
         });
         break;
 
@@ -311,7 +313,9 @@ function startApp() {
         if (to == 1) mainWindow.webContents.send(method, arg);
         if (to == 2) {
           overlays.forEach(overlay => {
-            overlay.webContents.send(method, arg);
+            if (overlay) {
+              overlay.webContents.send(method, arg);
+            }
           });
         }
         break;
@@ -365,13 +369,6 @@ function setSettings(settings) {
 
   overlays_settings = settings.overlays;
 
-  if (overlays == null) {
-    overlays = [];
-    overlays_settings.forEach((overlaySettings, index) => {
-      overlays[index] = createOverlay(overlaySettings);
-    });
-  }
-
   updateOverlays(settings);
   firstSettingsRead = false;
 }
@@ -388,7 +385,7 @@ function onClosed() {
 }
 
 function onOverlayClosed() {
-//  overlay = null;
+  //  overlay = null;
 }
 
 function hideWindow() {
@@ -541,44 +538,57 @@ function createOverlay(settings, index) {
   over.loadURL(`file://${__dirname}/window_overlay/index.html`);
   over.on("closed", onOverlayClosed);
 
-  over.on("resize", () => {
-    saveOverlayPos();
+  over.on("resize", function() {
+    saveOverlayPos(index);
   });
 
-  over.webContents.send("set_overlay_index", index);
+  over.once("did-finish-load", function() {
+    over.webContents.send("set_overlay_index", index);
+  });
 
   return over;
 }
 
-function saveOverlayPos() {
-  /*
+function saveOverlayPos(index) {
+  if (!overlays[index]) return false;
+
   var obj = {};
-  var bounds = overlay.getBounds();
-  var pos = overlay.getPosition();
+  var bounds = overlays[index].getBounds();
+  var pos = overlays[index].getPosition();
   obj.width = Math.floor(bounds.width);
   obj.height = Math.floor(bounds.height);
   obj.x = Math.floor(pos[0]);
   obj.y = Math.floor(pos[1]);
-  background.webContents.send("overlayBounds", obj);
-  */
+
+  background.webContents.send("overlayBounds", index, obj);
 }
 
-function showOverlay(type) {
-  //
+function overlayShow(overlay, show) {
+  if (show && !overlay.isVisible()) {
+    overlay.showInactive();
+  } else if (!show && overlay.isVisible()) {
+    overlay.hide();
+  }
 }
 
 function overlaySetSettings(overlay, settings, index) {
-  var oldAlphaEnabled = overlay.transparent;
-  alphaEnabled = settings.overlay_alpha_back < 1;
+  overlay.setAlwaysOnTop(settings.ontop, "floating");
+  overlayShow(overlay, settings.show);
+  overlay.setBounds(settings.bounds);
+
+  let oldAlphaEnabled = overlaysAlpha[index];
+  let alphaEnabled = settings.overlay_alpha_back < 1;
   if (oldAlphaEnabled != alphaEnabled) {
-    overlays[index] = recreateOverlay(overlay, settings, index);
+    recreateOverlay(overlay, settings, index);
   }
+  overlaysAlpha[index] = alphaEnabled;
 }
 
 function recreateOverlay(overlay, settings, index) {
   if (overlay) {
     overlay.destroy();
     overlay = createOverlay(settings, index);
+    overlays[index] = overlay;
   }
   return overlay;
 }
@@ -587,8 +597,12 @@ function updateOverlays(settings) {
   settings.overlays.forEach((overlaySettings, index) => {
     let overlay = overlays[index];
     if (!overlay) {
-      overlays[index] = createOverlay(overlaySettings, index);
+      overlay = createOverlay(overlaySettings, index);
+      overlays[index] = overlay;
     }
+
+    overlay.webContents.send("set_overlay_index", index);
+
     overlaySetSettings(overlay, overlaySettings, index);
   });
 }
