@@ -377,6 +377,11 @@ ipc.on("set_opponent_rank", function(event, rank, title) {
 let changedMode = true;
 
 ipc.on("set_match", (event, arg) => {
+  if (overlayMode == OVERLAY_DRAFT) return false;
+  let settings = pd.settings.overlays[overlayIndex];
+
+  if (settings.show == false && settings.show_always == false) return false;
+
   currentMatch = JSON.parse(arg);
 
   currentMatch.oppCards = new Deck(currentMatch.oppCards);

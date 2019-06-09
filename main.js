@@ -19,6 +19,9 @@ var rememberStore = new Store({
   defaults: {}
 });
 
+//const OVERLAY_DRAFT = 5;
+const { OVERLAY_DRAFT } = require("./shared/constants.js");
+
 app.setAppUserModelId("com.github.manuel777.mtgatool");
 
 // Adds debug features like hotkeys for triggering dev tools and reload
@@ -220,7 +223,11 @@ function startApp() {
         overlays_settings.forEach((settings, index) => {
           let overlay = overlays[index];
           if (overlay && settings.show) {
-            overlayShow(overlay, true);
+            if (settings.mode == OVERLAY_DRAFT && arg == 2) {
+              overlayShow(overlay, true);
+            } else if (settings.mode !== OVERLAY_DRAFT && arg == 1) {
+              overlayShow(overlay, true);
+            }
           }
         });
         break;
@@ -230,7 +237,11 @@ function startApp() {
         overlays_settings.forEach((settings, index) => {
           let overlay = overlays[index];
           if (overlay && settings.show && settings.show_always == false) {
-            overlayShow(overlay, false);
+            if (settings.mode == OVERLAY_DRAFT && arg == 2) {
+              overlayShow(overlay, false);
+            } else if (settings.mode !== OVERLAY_DRAFT && arg == 1) {
+              overlayShow(overlay, false);
+            }
           }
         });
         break;
@@ -356,33 +367,23 @@ function startApp() {
 
   //
   ipc.on("set_draft_cards", function(event, pack, picks, packn, pickn) {
-    overlays.forEach(overlay => {
-      overlay.webContents.send("set_draft_cards", pack, picks, packn, pickn);
+    overlays_settings.forEach((settings, index) => {
+      if (settings.mode == OVERLAY_DRAFT) {
+        let overlay = overlays[index];
+        overlay.webContents.send("set_draft_cards", pack, picks, packn, pickn);
+      }
     });
   });
 
   //
-  ipc.on("set_turn", function(
-    event,
-    playerSeat,
-    turnPhase,
-    turnStep,
-    turnNumber,
-    turnActive,
-    turnPriority,
-    turnDecision
-  ) {
-    overlays.forEach(overlay => {
-      overlay.webContents.send(
-        "set_turn",
-        playerSeat,
-        turnPhase,
-        turnStep,
-        turnNumber,
-        turnActive,
-        turnPriority,
-        turnDecision
-      );
+  ipc.on("set_turn", function(event,playerSeat,turnPhase,turnStep,turnNumber,turnActive,turnPriority,turnDecision) {
+    overlays_settings.forEach((settings, index) => {
+      if (settings.mode !== OVERLAY_DRAFT) {
+        let overlay = overlays[index];
+        overlay.webContents.send(
+          "set_turn", playerSeat, turnPhase, turnStep, turnNumber, turnActive, turnPriority, turnDecision
+        );
+      }
     });
   });
 }
