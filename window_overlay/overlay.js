@@ -371,9 +371,8 @@ ipc.on("set_opponent_rank", function(event, rank, title) {
     .attr("title", title);
 });
 
-let changedMode = true;
-
 ipc.on("set_match", (event, arg) => {
+  if (overlayIndex == -1) return;
   if (overlayMode == OVERLAY_DRAFT) return false;
   let settings = pd.settings.overlays[overlayIndex];
 
@@ -1015,6 +1014,7 @@ $(document).ready(function() {
       $(".overlay_container").css("opacity", 1);
     },
     function() {
+      if (overlayIndex == -1) return;
       let settings = pd.settings.overlays[overlayIndex];
       if (settings.alpha !== 1) {
         $(".overlay_container").css("opacity", settings.alpha);

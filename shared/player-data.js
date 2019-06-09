@@ -61,14 +61,74 @@ const defaultCfg = {
     export_format: "$Name,$Count,$Rarity,$SetName,$Collector",
     back_color: "rgba(0,0,0,0.3)",
     back_url: "",
-    right_panel_width: 200,
+    right_panel_width: 400,
     last_open_tab: -1,
     card_tile_style: CARD_TILE_FLAT,
     overlays: [
-      newOverlaySettings(OVERLAY_LEFT, true),
-      newOverlaySettings(OVERLAY_SEEN, true),
-      newOverlaySettings(OVERLAY_DRAFT, true),
-      newOverlaySettings(OVERLAY_LOG, false)
+      {
+        alpha: 1,
+        alpha_back: 1,
+        bounds: { width: 300, height: 600, x: 0, y: 0 },
+        clock: true,
+        deck: true,
+        lands: true,
+        mode: 1,
+        ontop: true,
+        scale: 100,
+        show: true,
+        show_always: false,
+        sideboard: false,
+        title: true,
+        top: true
+      },
+      {
+        alpha: 1,
+        alpha_back: 1,
+        bounds: { width: 300, height: 600, x: 310, y: 0 },
+        clock: false,
+        deck: true,
+        lands: false,
+        mode: 3,
+        ontop: true,
+        scale: 100,
+        show: true,
+        show_always: false,
+        sideboard: false,
+        title: true,
+        top: false
+      },
+      {
+        alpha: 1,
+        alpha_back: 1,
+        bounds: { width: 300, height: 600, x: 0, y: 0 },
+        clock: false,
+        deck: true,
+        lands: false,
+        mode: 5,
+        ontop: false,
+        scale: 100,
+        show: false,
+        show_always: false,
+        sideboard: false,
+        title: true,
+        top: true
+      },
+      {
+        alpha: 1,
+        alpha_back: 1,
+        bounds: { width: 300, height: 600, x: 0, y: 0 },
+        clock: false,
+        deck: true,
+        lands: false,
+        mode: 4,
+        ontop: false,
+        scale: 100,
+        show: false,
+        show_always: false,
+        sideboard: false,
+        title: true,
+        top: true
+      }
     ]
   },
   economy_index: [],
@@ -97,25 +157,6 @@ const defaultCfg = {
   tags_colors: {},
   wildcards_history: []
 };
-
-function newOverlaySettings(mode, show) {
-  return {
-    bounds: { width: 300, height: 600, x: 0, y: 0 },
-    show: show,
-    show_always: false,
-    mode: mode,
-    sideboard: false,
-    alpha: 1,
-    alpha_back: 1,
-    scale: 100,
-    top: true,
-    title: true,
-    deck: true,
-    clock: true,
-    ontop: true,
-    lands: true
-  };
-}
 
 // cloned from util to avoid circular dependency
 // TODO refactor to recombine
