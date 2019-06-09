@@ -15,6 +15,8 @@ global
   update_deck
 */
 
+const { objectClone } = require("../shared/util");
+
 const { ipcRenderer: ipc } = require("electron");
 
 let actionType = [];
@@ -664,6 +666,10 @@ function checkGameInfo(gameInfo) {
     } else {
       currentMatch.bestOf = undefined;
     }
+  }
+
+  if (gameInfo.results) {
+    currentMatch.results = objectClone(gameInfo.results);
   }
 }
 
