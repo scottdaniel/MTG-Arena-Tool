@@ -39,6 +39,7 @@ const {
   PACK_SIZES,
   IPC_BACKGROUND,
   IPC_OVERLAY,
+  IPC_MAIN,
   OVERLAY_FULL,
   OVERLAY_LEFT,
   OVERLAY_ODDS,
@@ -1004,7 +1005,7 @@ $(document).ready(function() {
 
   //
   $(".settings").click(function() {
-    ipc_send("force_open_settings", 1);
+    ipc_send("force_open_overlay_settings", overlayIndex, IPC_MAIN);
   });
 
   $(".overlay_container").hover(

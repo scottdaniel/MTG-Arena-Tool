@@ -55,7 +55,7 @@ const { openEventsTab } = require("./events");
 const { openEconomyTab } = require("./economy");
 const { openExploreTab, setExploreDecks } = require("./explore");
 const { openCollectionTab } = require("./collection");
-const { openSettingsTab } = require("./settings");
+const { openSettingsTab, setCurrentOverlaySettings } = require("./settings");
 
 let sidebarActive = -2;
 let loggedIn = false;
@@ -307,6 +307,12 @@ ipc.on("force_open_settings", function() {
 });
 
 //
+ipc.on("force_open_overlay_settings", function(event, arg) {
+  setCurrentOverlaySettings(arg);
+  force_open_settings(2);
+});
+
+//
 ipc.on("force_open_about", function() {
   force_open_about();
 });
@@ -529,7 +535,7 @@ ipc.on("popup", function(event, arg, time) {
 });
 
 //
-function force_open_settings() {
+function force_open_settings(section = -1) {
   sidebarActive = 6;
   $(".top_nav_item").each(function() {
     $(this).removeClass("item_selected");
@@ -538,7 +544,7 @@ function force_open_settings() {
     }
   });
   $(".moving_ux").animate({ left: "0px" }, 250, "easeInOutCubic");
-  openSettingsTab();
+  openSettingsTab(section);
 }
 
 //

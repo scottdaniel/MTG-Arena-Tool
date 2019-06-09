@@ -872,4 +872,8 @@ function eraseData() {
   }
 }
 
-module.exports = { openSettingsTab };
+function setCurrentOverlaySettings(index) {
+  currentOverlay = index;
+}
+
+module.exports = { setCurrentOverlaySettings, openSettingsTab };
