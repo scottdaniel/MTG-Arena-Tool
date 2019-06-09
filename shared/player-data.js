@@ -65,10 +65,10 @@ const defaultCfg = {
     last_open_tab: -1,
     card_tile_style: CARD_TILE_FLAT,
     overlays: [
-      newOverlaySettings(OVERLAY_LEFT),
-      newOverlaySettings(OVERLAY_SEEN),
-      newOverlaySettings(OVERLAY_DRAFT),
-      newOverlaySettings(OVERLAY_LOG)
+      newOverlaySettings(OVERLAY_LEFT, true),
+      newOverlaySettings(OVERLAY_SEEN, true),
+      newOverlaySettings(OVERLAY_DRAFT, true),
+      newOverlaySettings(OVERLAY_LOG, false)
     ]
   },
   economy_index: [],
@@ -98,10 +98,10 @@ const defaultCfg = {
   wildcards_history: []
 };
 
-function newOverlaySettings(mode) {
+function newOverlaySettings(mode, show) {
   return {
     bounds: { width: 300, height: 600, x: 0, y: 0 },
-    show: false,
+    show: show,
     show_always: false,
     mode: mode,
     sideboard: false,
