@@ -33,7 +33,6 @@ function getCardStyleName(style) {
   return "Arena";
 }
 
-let currentSettings = {};
 let currentOverlay = 0;
 
 //
@@ -69,9 +68,6 @@ function openSettingsTab(openSection = lastSettingsSection, scrollTop = 0) {
   const wrap_r = $('<div class="wrapper_column"></div>');
   const div = $('<div class="settings_page"></div>');
   let section;
-
-  currentSettings = pd.settings;
-  console.log("currentSettings", currentSettings);
 
   // BEHAVIOR
   section = $('<div class="settings_section ss1"></div>');
@@ -336,7 +332,7 @@ function appendOverlay(section) {
   );
   section.append(topCont);
 
-  currentSettings.overlays.forEach((settings, index) => {
+  pd.settings.overlays.forEach((settings, index) => {
     let overlaySection = $(
       `<div class="overlay_section overlay_section_${index}"></div>`
     );
@@ -361,7 +357,7 @@ function appendOverlay(section) {
       modeOptions,
       modeOptions[settings.mode],
       function(filter) {
-        currentSettings.overlays[index].mode = modeOptions.indexOf(filter);
+        pd.settings.overlays[index].mode = modeOptions.indexOf(filter);
         updateUserSettingsBlend();
       },
       `overlay_${index}_mode`
@@ -460,7 +456,7 @@ function appendOverlay(section) {
     });
 
     sliderOpacityInput.on("click mouseup", function() {
-      currentSettings.overlays[index].alpha = alphaFromTransparency(
+      pd.settings.overlays[index].alpha = alphaFromTransparency(
         parseInt(this.value)
       );
       updateUserSettingsBlend();
@@ -495,7 +491,7 @@ function appendOverlay(section) {
     });
 
     sliderOpacityBackInput.on("click mouseup", function() {
-      currentSettings.overlays[index].alpha_back = alphaFromTransparency(
+      pd.settings.overlays[index].alpha_back = alphaFromTransparency(
         parseInt(this.value)
       );
       updateUserSettingsBlend();
@@ -525,7 +521,7 @@ function appendOverlay(section) {
     });
 
     sliderScaleInput.on("click mouseup", function() {
-      currentSettings.overlays[index].scale = parseInt(this.value);
+      pd.settings.overlays[index].scale = parseInt(this.value);
       updateUserSettingsBlend();
     });
 
@@ -804,7 +800,7 @@ function updateUserSettingsBlend(_settings = {}) {
   if (backUrl === "") changeBackground("default");
   else changeBackground(backUrl);
 
-  currentSettings.overlays.forEach((overlaySettings, index) => {
+  pd.settings.overlays.forEach((overlaySettings, index) => {
     const showOverlay = document.getElementById(`overlay_${index}_show`)
       .checked;
     const showOverlayAlways = document.getElementById(
@@ -853,7 +849,7 @@ function updateUserSettingsBlend(_settings = {}) {
     back_url: backUrl,
     export_format: exportFormat,
     skip_firstpass: !readonlogin,
-    ...currentSettings,
+    ...pd.settings,
     ..._settings
   });
 }

@@ -33,6 +33,8 @@ var updaterWindow;
 var background;
 var overlays = [undefined, undefined, undefined, undefined];
 var overlaysAlpha = [false, false, false, false];
+var overlaysTimeout = [null, null, null, null];
+var mainTimeout = null;
 var overlaysShow = false;
 var overlays_settings = null;
 var tray = null;
@@ -541,6 +543,17 @@ function createMainWindow() {
     saveWindowPos();
   });
 
+  win.on("move", function() {
+    if (mainTimeout) {
+      clearTimeout(mainTimeout);
+      mainTimeout = null;
+    }
+    mainTimeout = setTimeout(function() {
+      saveWindowPos();
+      mainTimeout = null;
+    }, 100);
+  });
+
   return win;
 }
 
@@ -568,6 +581,18 @@ function createOverlay(settings, index) {
     saveOverlayPos(index);
   });
 
+  over.on("move", function() {
+    //console.log(new Date().getTime());
+    let timer = overlaysTimeout[index];
+    if (timer) {
+      clearTimeout(timer);
+    }
+    overlaysTimeout[index] = setTimeout(function() {
+      saveOverlayPos(index);
+      overlaysTimeout[index] = null;
+    }, 100);
+  });
+
   over.once("did-finish-load", function() {
     over.webContents.send("set_overlay_index", index);
   });
@@ -586,6 +611,7 @@ function saveOverlayPos(index) {
   obj.x = Math.floor(pos[0]);
   obj.y = Math.floor(pos[1]);
 
+  //console.log(`${index} moved to x:${bounds.x} y:${bounds.y}`);
   background.webContents.send("overlayBounds", index, obj);
 }
 

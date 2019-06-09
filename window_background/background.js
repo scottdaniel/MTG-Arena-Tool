@@ -279,6 +279,8 @@ ipc.on("request_draft_link", function(event, obj) {
 
 //
 ipc.on("windowBounds", function(event, obj) {
+  pd.windowBounds = obj;
+  pd_set({ windowBounds: obj });
   store.set("windowBounds", obj);
 });
 
