@@ -360,28 +360,9 @@ function createChangeRow(change, economyId) {
     let title = "";
     let count = 0;
 
-    if (change.delta.wcCommonDelta !== undefined) {
-      imgUri = "wc_common";
-      title = "Common Wildcard";
-      count = change.delta.wcCommonDelta;
-    }
-    if (change.delta.wcUncommonDelta !== undefined) {
-      imgUri = "wc_uncommon";
-      title = "Uncommon Wildcard";
-      count = change.delta.wcUncommonDelta;
-    }
-    if (change.delta.wcRareDelta !== undefined) {
-      imgUri = "wc_rare";
-      title = "Rare Wildcard";
-      count = change.delta.wcRareDelta;
-    }
-    if (change.delta.wcMythicDelta !== undefined) {
-      imgUri = "wc_mythic";
-      title = "Mythic Wildcard";
-      count = change.delta.wcMythicDelta;
-    }
-    count = Math.abs(count);
-    if (count) {
+    const renderWild = count => {
+      if (!count) return;
+      count = Math.abs(count);
       bos = createDivision(["economy_wc"]);
       bos.title = title;
       bos.style.backgroundImage = "url(../images/" + imgUri + ".png)";
@@ -393,6 +374,31 @@ function createChangeRow(change, economyId) {
 
       flexBottom.appendChild(bos);
       flexBottom.appendChild(bon);
+    };
+
+    if (change.delta.wcCommonDelta !== undefined) {
+      imgUri = "wc_common";
+      title = "Common Wildcard";
+      count = change.delta.wcCommonDelta;
+      renderWild(count);
+    }
+    if (change.delta.wcUncommonDelta !== undefined) {
+      imgUri = "wc_uncommon";
+      title = "Uncommon Wildcard";
+      count = change.delta.wcUncommonDelta;
+      renderWild(count);
+    }
+    if (change.delta.wcRareDelta !== undefined) {
+      imgUri = "wc_rare";
+      title = "Rare Wildcard";
+      count = change.delta.wcRareDelta;
+      renderWild(count);
+    }
+    if (change.delta.wcMythicDelta !== undefined) {
+      imgUri = "wc_mythic";
+      title = "Mythic Wildcard";
+      count = change.delta.wcMythicDelta;
+      renderWild(count);
     }
 
     checkCardsAdded = true;
