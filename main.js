@@ -376,12 +376,28 @@ function startApp() {
   });
 
   //
-  ipc.on("set_turn", function(event,playerSeat,turnPhase,turnStep,turnNumber,turnActive,turnPriority,turnDecision) {
+  ipc.on("set_turn", function(
+    event,
+    playerSeat,
+    turnPhase,
+    turnStep,
+    turnNumber,
+    turnActive,
+    turnPriority,
+    turnDecision
+  ) {
     overlays_settings.forEach((settings, index) => {
       if (settings.mode !== OVERLAY_DRAFT) {
         let overlay = overlays[index];
         overlay.webContents.send(
-          "set_turn", playerSeat, turnPhase, turnStep, turnNumber, turnActive, turnPriority, turnDecision
+          "set_turn",
+          playerSeat,
+          turnPhase,
+          turnStep,
+          turnNumber,
+          turnActive,
+          turnPriority,
+          turnDecision
         );
       }
     });
@@ -564,10 +580,15 @@ function createMainWindow() {
 
 function createOverlay(settings, index) {
   let alphaEnabled = settings.alpha_back < 1;
+  console.log(
+    `bounds x: ${settings.bounds.x} y: ${settings.bounds.y} w: ${
+      settings.bounds.width
+    } h: ${settings.bounds.height} `
+  );
   const over = new electron.BrowserWindow({
     transparent: alphaEnabled,
     frame: false,
-    alwaysOnTop: settings.bounds.ontop,
+    alwaysOnTop: settings.ontop,
     x: settings.bounds.x,
     y: settings.bounds.y,
     width: settings.bounds.width,
