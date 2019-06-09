@@ -227,7 +227,7 @@ function startApp() {
         overlaysShow = false;
         overlays_settings.forEach((settings, index) => {
           let overlay = overlays[index];
-          if (overlay && settings.show && !settings.always_show) {
+          if (overlay && settings.show && settings.show_always == false) {
             overlayShow(overlay, false);
           }
         });
@@ -603,8 +603,8 @@ function overlaySetSettings(overlay, settings, index) {
   if (overlaysShow || settings.show == false) {
     overlayShow(overlay, settings.show);
   }
-  if (settings.always_show) {
-    overlayShow(overlay, settings.always_show);
+  if (settings.show_always == true) {
+    overlayShow(overlay, true);
   }
 
   let oldAlphaEnabled = overlaysAlpha[index];

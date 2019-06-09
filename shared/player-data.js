@@ -102,7 +102,7 @@ function newOverlaySettings(mode) {
   return {
     bounds: { width: 300, height: 600, x: 0, y: 0 },
     show: false,
-    show_awlays: false,
+    show_always: false,
     mode: mode,
     sideboard: false,
     alpha: 1,
