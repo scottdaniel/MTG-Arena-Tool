@@ -224,13 +224,19 @@ function startApp() {
         break;
 
       case "overlay_close":
-        overlaysShow = true;
+        overlaysShow = false;
         overlays_settings.forEach((settings, index) => {
           let overlay = overlays[index];
           if (overlay && settings.show && !settings.always_show) {
             overlayShow(overlay, false);
           }
         });
+        break;
+
+      case "overlay_minimize":
+        if (overlays[arg] && !overlays[arg].isMinimized()) {
+          overlays[arg].minimize();
+        }
         break;
 
       case "show_background":

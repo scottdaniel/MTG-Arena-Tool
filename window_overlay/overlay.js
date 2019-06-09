@@ -998,7 +998,7 @@ $(document).ready(function() {
 
   //
   $(".minimize").click(function() {
-    ipc_send("overlay_minimize", 1);
+    ipc_send("overlay_minimize", overlayIndex);
   });
 
   //
