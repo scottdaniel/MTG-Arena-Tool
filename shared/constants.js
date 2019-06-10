@@ -626,6 +626,10 @@ exports.OVERLAY_SEEN = 3;
 exports.OVERLAY_LOG = 4;
 exports.OVERLAY_DRAFT = 5;
 
+exports.ARENA_MODE_IDLE = 0;
+exports.ARENA_MODE_MATCH = 1;
+exports.ARENA_MODE_DRAFT = 2;
+
 const DRAFT_RANKS = [];
 DRAFT_RANKS[12] = "A+";
 DRAFT_RANKS[11] = "A";

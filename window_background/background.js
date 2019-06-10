@@ -31,7 +31,12 @@ const db = require("../shared/database");
 const pd = require("../shared/player-data");
 const { hypergeometricRange } = require("../shared/stats-fns");
 const { get_rank_index, objectClone } = require("../shared/util");
-const { HIDDEN_PW, IPC_OVERLAY } = require("../shared/constants");
+const {
+  HIDDEN_PW,
+  IPC_OVERLAY,
+  ARENA_MODE_MATCH,
+  ARENA_MODE_DRAFT
+} = require("../shared/constants");
 const { ipc_send, pd_set, unleakString } = require("./background-util");
 const {
   onLabelOutLogInfo,
@@ -1174,7 +1179,7 @@ function createMatch(arg) {
       ipc_send("renderer_hide", 1);
     }
 
-    ipc_send("overlay_show", 1);
+    ipc_send("set_arena_state", ARENA_MODE_MATCH);
   }
 
   currentMatch.player.originalDeck = originalDeck;
@@ -1230,7 +1235,7 @@ function createDraft() {
       ipc_send("renderer_hide", 1);
     }
 
-    ipc_send("overlay_show", 2);
+    ipc_send("set_arena_state", ARENA_MODE_DRAFT);
   }
 }
 
@@ -1643,7 +1648,7 @@ function finishLoading() {
 
     if (duringMatch) {
       ipc_send("renderer_hide", 1);
-      ipc_send("overlay_show", 1);
+      ipc_send("set_arena_state", ARENA_MODE_MATCH);
       update_deck(false);
     }
 
