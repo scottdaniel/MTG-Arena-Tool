@@ -129,6 +129,11 @@ function startApp() {
     else background.hide();
     background.toggleDevTools();
     mainWindow.toggleDevTools();
+    overlays.forEach(overlay => {
+      if (overlay) {
+        overlay.toggleDevTools();
+      }
+    });
   });
 
   mainWindow.webContents.once("dom-ready", () => {
