@@ -544,12 +544,12 @@ function force_open_settings(section = -1) {
     }
   });
   $(".moving_ux").animate({ left: "0px" }, 250, "easeInOutCubic");
-  openSettingsTab(section);
+  openSettingsTab(section, 0);
 }
 
 //
 function force_open_about() {
-  sidebarActive = 9;
+  sidebarActive = 6;
   $(".top_nav_item").each(function() {
     $(this).removeClass("item_selected");
     if ($(this).hasClass("it7")) {
