@@ -849,7 +849,7 @@ function updateUserSettingsBlend(_settings = {}) {
     back_url: backUrl,
     export_format: exportFormat,
     skip_firstpass: !readonlogin,
-    ...pd.settings,
+    overlays: [...pd.settings.overlays],
     ..._settings
   });
 }
