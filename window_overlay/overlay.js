@@ -308,6 +308,7 @@ ipc.on("settings_updated", () => {
   }
 
   $(".top").css("display", "");
+  $(".overlay_title").html("Overlay " + (overlayIndex + 1));
   $(".overlay_deckname").css("display", "");
   $(".overlay_deckcolors").css("display", "");
   $(".overlay_decklist").css("display", "");
