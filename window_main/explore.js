@@ -1,8 +1,13 @@
 const _ = require("lodash");
 
-const { MANA, COLORS_BRIEF, DEFAULT_TILE } = require("../shared/constants");
+const {
+  CARD_RARITIES,
+  MANA,
+  COLORS_BRIEF,
+  DEFAULT_TILE,
+  RANKS
+} = require("../shared/constants");
 const db = require("../shared/database");
-const pd = require("../shared/player-data");
 const { queryElements: $$, createDivision } = require("../shared/dom-fns");
 const { createSelect } = require("../shared/select");
 const {
@@ -16,42 +21,54 @@ const {
 
 const {
   addCheckbox,
+  getLocalState,
   getWinrateClass,
   hideLoadingBars,
   ipcSend,
+  setLocalState,
   showLoadingBars
 } = require("./renderer-util");
+const { openDeck } = require("./deck-details");
 
-let filterWCC = 0;
-let filterWCU = 0;
-let filterWCR = 0;
-let filterWCM = 0;
-let filterSkip = 0;
-let filterEvent = "";
-let filterSort = "";
-let filterType = "";
-let filterSortDir = "";
-let onlyOwned = false;
-let filteredMana = [];
-let filteredranks = [];
-let ownedWildcards = { c: 0, u: 0, r: 0, m: 0 };
+// default values for cached local state
+const defaultData = {
+  filterEvent: null,
+  filterType: "Events",
+  filterSort: "By Wins",
+  filterSortDir: "Descending",
+  filterSkip: 0,
+  filterWCC: "",
+  filterWCU: "",
+  filterWCR: "",
+  filterWCM: "",
+  filteredMana: [],
+  filteredranks: [],
+  onlyOwned: false,
+  result: [],
+  results_number: 0,
+  results_set: new Set(),
+  results_type: "",
+  results_terminated: false
+};
 
-let ranks_list = ["Bronze", "Silver", "Gold", "Platinum", "Diamond", "Mythic"];
+// temporary local state variables (never cached)
+let inputFilterType = defaultData.filterType;
+let inputMana = defaultData.filteredMana;
+let inputRanks = defaultData.filteredranks;
+let queryInFlight = false; // semaphore to limit simultaneous queries
 
-const openDeck = require("./deck-details").openDeck;
-
-let raritySort = { c: "common", u: "uncommon", r: "rare", m: "mythic" };
-
+//
 function openExploreTab() {
   hideLoadingBars();
-  var mainDiv = document.getElementById("ux_0");
-  var dateNow, d;
-  ownedWildcards = {
-    c: pd.economy.wcCommon,
-    u: pd.economy.wcUncommon,
-    r: pd.economy.wcRare,
-    m: pd.economy.wcMythic
-  };
+  queryInFlight = false;
+  let { exploreData } = getLocalState();
+  if (!exploreData) {
+    exploreData = { ...defaultData };
+    setLocalState({ exploreData });
+  }
+
+  const mainDiv = document.getElementById("ux_0");
+  let d;
 
   mainDiv.classList.remove("flex_item");
   mainDiv.innerHTML = "";
@@ -76,79 +93,66 @@ function openExploreTab() {
   exploreFiltersContainer.appendChild(exploreFiltersSelects);
   exploreFiltersContainer.appendChild(exploreFiltersButtons);
   exploreFiltersContainer.appendChild(exploreFiltersInputs);
-
   mainDiv.appendChild(exploreFiltersContainer);
 
   let exploreList = createDivision(["explore_list"]);
   exploreList.id = "explore_list";
   mainDiv.appendChild(exploreList);
 
-  let welcomeMessage = createDivision(
-    ["text_centered", "white"],
-    'Choose filter options and click "Search" to begin.'
-  );
-  exploreList.appendChild(welcomeMessage);
-
-  drawFilters(exploreFiltersContainer);
-
   d = document.createElement("div");
   d.classList.add("list_fill");
   mainDiv.appendChild(d);
   d = document.createElement("div");
   d.classList.add("list_fill");
   mainDiv.appendChild(d);
+
+  inputFilterType = exploreData.filterType;
+  inputMana = [...exploreData.filteredMana];
+  inputRanks = [...exploreData.filteredranks];
+
+  drawFilters();
+  if (exploreData.results_number) {
+    // display cached query results
+    renderData();
+  } else {
+    // automatically fetch data when local cache is empty
+    queryExplore();
+  }
 
   $(mainDiv).off();
   $(mainDiv).on("scroll", () => {
+    const { exploreData } = getLocalState();
+    // do not spam server after reaching end of results
+    if (exploreData.results_terminated) return;
     if (
       Math.round(mainDiv.scrollTop + mainDiv.offsetHeight) >=
       mainDiv.scrollHeight
     ) {
-      queryExplore(filterSkip);
+      queryExplore();
     }
   });
 }
 
 function getEventPrettyName(event) {
-  return db.events[event] || event;
+  return db.event(event) || event;
 }
 
 function drawFilters() {
+  const { exploreData } = getLocalState();
+  const {
+    filterEvent,
+    filterSort,
+    filterSortDir,
+    onlyOwned,
+    filterWCC,
+    filterWCU,
+    filterWCR,
+    filterWCM
+  } = exploreData;
+
   let buttonsTop = $$(".explore_buttons_top")[0];
   let buttonsMiddle = $$(".explore_buttons_middle")[0];
   let buttonsBottom = $$(".explore_buttons_bottom")[0];
-
-  onlyOwned = document.getElementById("settings_owned")
-    ? document.getElementById("settings_owned").checked
-    : false;
-  filterType = document.getElementById("explore_query_type")
-    ? document.getElementById("explore_query_type").value
-    : "Events";
-  filterEvent = document.getElementById("explore_query_event")
-    ? document.getElementById("explore_query_event").value
-    : "Ladder";
-  filterSort = document.getElementById("explore_query_sort")
-    ? document.getElementById("explore_query_sort").value
-    : "By Wins";
-  filterSortDir = document.getElementById("explore_query_sortdirection")
-    ? document.getElementById("explore_query_sortdirection").value
-    : "Descending";
-  filterWCC =
-    document.getElementById("explore_query_wc_c") !== null
-      ? document.getElementById("explore_query_wc_c").value
-      : "";
-  filterWCU =
-    document.getElementById("explore_query_wc_u") !== null
-      ? document.getElementById("explore_query_wc_u").value
-      : "";
-  filterWCR =
-    document.getElementById("explore_query_wc_r") !== null
-      ? document.getElementById("explore_query_wc_r").value
-      : "";
-  filterWCM =
-    document.getElementById("explore_query_wc_m") !== null
-      ? document.getElementById("explore_query_wc_m").value
-      : "";
 
   buttonsTop.innerHTML = "";
   buttonsMiddle.innerHTML = "";
@@ -161,9 +165,9 @@ function drawFilters() {
   let typeSelect = createSelect(
     buttonsTop,
     typeFilter,
-    filterType,
+    inputFilterType,
     res => {
-      filterType = res;
+      inputFilterType = res;
       drawFilters();
     },
     "explore_query_type"
@@ -174,10 +178,10 @@ function drawFilters() {
    *  Event filter
    **/
   let eventFilters = [];
-  if (filterType == "Events") {
+  if (inputFilterType === "Events") {
     eventFilters = db.eventIds
       .concat(db.activeEvents)
-      .map(ev => getEventPrettyName(ev))
+      .map(getEventPrettyName)
       .filter(
         item =>
           item != undefined &&
@@ -187,13 +191,13 @@ function drawFilters() {
           item != "Play" &&
           item != "Traditional Play" &&
           item != "Traditional Ranked" &&
-          !db.ranked_events.map(ev => getEventPrettyName(ev)).includes(item)
+          !db.ranked_events.map(getEventPrettyName).includes(item)
       );
 
     eventFilters = [...new Set(eventFilters)];
-  } else if (filterType == "Ranked Draft") {
-    eventFilters = db.ranked_events.map(ev => getEventPrettyName(ev));
-  } else if (filterType == "Ranked Constructed") {
+  } else if (inputFilterType === "Ranked Draft") {
+    eventFilters = db.ranked_events.map(getEventPrettyName);
+  } else if (inputFilterType === "Ranked Constructed") {
     eventFilters.push("Ladder");
     eventFilters.push("Traditional Ladder");
   }
@@ -203,7 +207,7 @@ function drawFilters() {
     return 0;
   });
 
-  let mappedActive = db.activeEvents.map(ev => getEventPrettyName(ev));
+  let mappedActive = db.activeEvents.map(getEventPrettyName);
   eventFilters.forEach(item => {
     if (mappedActive.includes(item)) {
       eventFilters.splice(eventFilters.indexOf(item), 1);
@@ -211,13 +215,11 @@ function drawFilters() {
     }
   });
 
-  filterEvent = eventFilters[0];
-
   createSelect(
     buttonsTop,
     eventFilters,
-    filterEvent,
-    res => (filterEvent = res),
+    filterEvent || eventFilters[0],
+    () => null,
     "explore_query_event"
   );
 
@@ -234,7 +236,7 @@ function drawFilters() {
     buttonsTop,
     sortFilters,
     filterSort,
-    res => (filterSort = res),
+    () => null,
     "explore_query_sort"
   );
   sortSelect.style.width = "130px";
@@ -247,8 +249,8 @@ function drawFilters() {
     buttonsTop,
     sortDirection,
     filterSortDir,
-    res => (filterSortDir = res),
-    "explore_query_sortdirection"
+    () => null,
+    "explore_query_sortdir"
   );
   sortDirSelect.style.width = "130px";
 
@@ -260,7 +262,7 @@ function drawFilters() {
     "Only owned",
     "settings_owned",
     onlyOwned,
-    updateExploreCheckbox
+    () => null
   );
   lab.css("align-self", "center");
   lab.css("margin-left", "0px");
@@ -269,26 +271,21 @@ function drawFilters() {
   /**
    * Wildcards filters
    **/
-  let commonsInput = wildcardsInput("wc_common", "explore_query_wc_c");
-  let uncommonsInput = wildcardsInput("wc_uncommon", "explore_query_wc_u");
-  let raresInput = wildcardsInput("wc_rare", "explore_query_wc_r");
-  let mythicInput = wildcardsInput("wc_mythic", "explore_query_wc_m");
-
-  commonsInput.addEventListener(
-    "change",
-    event => (filterWCC = event.target.value)
+  const commonsInput = wildcardsInput(
+    "wc_common",
+    "explore_query_wc_c",
+    filterWCC
   );
-  uncommonsInput.addEventListener(
-    "change",
-    event => (filterWCU = event.target.value)
+  const uncommonsInput = wildcardsInput(
+    "wc_uncommon",
+    "explore_query_wc_u",
+    filterWCU
   );
-  raresInput.addEventListener(
-    "change",
-    event => (filterWCR = event.target.value)
-  );
-  mythicInput.addEventListener(
-    "change",
-    event => (filterWCM = event.target.value)
+  const raresInput = wildcardsInput("wc_rare", "explore_query_wc_r", filterWCR);
+  const mythicInput = wildcardsInput(
+    "wc_mythic",
+    "explore_query_wc_m",
+    filterWCM
   );
 
   buttonsMiddle.appendChild(commonsInput);
@@ -303,7 +300,7 @@ function drawFilters() {
   COLORS_BRIEF.forEach(function(s, i) {
     var mi = [1, 2, 3, 4, 5];
     var mf = "";
-    if (!filteredMana.includes(mi[i])) {
+    if (!inputMana.includes(mi[i])) {
       mf = "mana_filter_on";
     }
     var manabutton = $(
@@ -313,12 +310,12 @@ function drawFilters() {
     manabutton.click(function() {
       if (manabutton.hasClass("mana_filter_on")) {
         manabutton.removeClass("mana_filter_on");
-        filteredMana.push(mi[i]);
+        inputMana.push(mi[i]);
       } else {
         manabutton.addClass("mana_filter_on");
-        let n = filteredMana.indexOf(mi[i]);
+        let n = inputMana.indexOf(mi[i]);
         if (n > -1) {
-          filteredMana.splice(n, 1);
+          inputMana.splice(n, 1);
         }
       }
     });
@@ -328,11 +325,11 @@ function drawFilters() {
   /**
    *  Rank filter
    **/
-  if (filterType !== "Events") {
+  if (inputFilterType !== "Events") {
     var ranks_filters = $('<div class="mana_filters_explore"></div>');
-    ranks_list.forEach(function(rr, index) {
+    RANKS.forEach(function(rr, index) {
       var mf = "";
-      if (!filteredranks.includes(rr)) {
+      if (!inputRanks.includes(rr)) {
         mf = "rank_filter_on";
       }
       var rankbutton = $(
@@ -345,12 +342,12 @@ function drawFilters() {
       rankbutton.click(function() {
         if (rankbutton.hasClass("rank_filter_on")) {
           rankbutton.removeClass("rank_filter_on");
-          filteredranks.push(rr);
+          inputRanks.push(rr);
         } else {
           rankbutton.addClass("rank_filter_on");
-          let n = filteredranks.indexOf(rr);
+          let n = inputRanks.indexOf(rr);
           if (n > -1) {
-            filteredranks.splice(n, 1);
+            inputRanks.splice(n, 1);
           }
         }
       });
@@ -362,13 +359,54 @@ function drawFilters() {
    * Search button.
    **/
   let searchButton = createDivision(["button_simple"], "Search");
+  searchButton.id = "explore_query_button";
   searchButton.margin = "0px !important;";
   buttonsBottom.appendChild(searchButton);
-  searchButton.addEventListener("click", () => {
-    queryExplore(0);
-  });
+  searchButton.addEventListener("click", handleNewSearch);
 }
 
+//
+function getInputValue(id, defaultVal) {
+  const q = $$("." + id);
+  if (!q.length) return defaultVal;
+  return q[0].value;
+}
+
+//
+function handleNewSearch() {
+  const exploreList = document.getElementById("explore_list");
+  exploreList.innerHTML = "";
+
+  const ed = getLocalState().exploreData;
+  const exploreData = {
+    ...ed,
+    filterEvent: getInputValue("explore_query_event", ed.filterEvent),
+    filterSort: getInputValue("explore_query_sort", ed.filterSort),
+    filterSortDir: getInputValue("explore_query_sortdir", ed.filterSortDir),
+    filterWCC: getInputValue("explore_query_wc_c", ed.filterWCC),
+    filterWCU: getInputValue("explore_query_wc_u", ed.filterWCU),
+    filterWCR: getInputValue("explore_query_wc_r", ed.filterWCR),
+    filterWCM: getInputValue("explore_query_wc_m", ed.filterWCM),
+    filterSkip: 0,
+    results_number: 0,
+    result: [],
+    results_set: new Set(),
+    results_type: "",
+    results_terminated: false,
+    filterType: inputFilterType,
+    filteredMana: inputMana,
+    filteredranks: inputRanks
+  };
+  const q = $$(".settings_owned");
+  if (q.length) {
+    exploreData.onlyOwned = q[0].checked;
+  }
+
+  setLocalState({ exploreData });
+  queryExplore();
+}
+
+//
 function wildcardsInput(_class, _id, _default) {
   let inputContainer = createDivision([
     "input_container_explore",
@@ -384,6 +422,7 @@ function wildcardsInput(_class, _id, _default) {
 
   let input = document.createElement("input");
   input.id = _id;
+  input.classList.add(_id);
   input.type = "number";
   input.value = _default;
   input.autocomplete = "off";
@@ -395,50 +434,118 @@ function wildcardsInput(_class, _id, _default) {
   return inputContainer;
 }
 
-function updateExploreCheckbox() {
-  onlyOwned = document.getElementById("settings_owned").checked;
-}
+//
+function queryExplore() {
+  if (queryInFlight) return;
 
-function queryExplore(skip) {
-  filterSkip = skip;
-  let sortDir = filterSortDir == "Descending" ? -1 : 1;
+  const button = document.getElementById("explore_query_button");
+  if (button) button.style.display = "none";
+  const exploreList = document.getElementById("explore_list");
+  let loadMessage = document.getElementById("explore_load_message");
+  if (!loadMessage) {
+    loadMessage = createDivision(["text_centered", "white"], "Loading...");
+    loadMessage.id = "explore_load_message";
+    exploreList.appendChild(loadMessage);
+  }
 
-  let filterEventId = db.eventIds.filter(
-    key => db.events[key] === filterEvent
-  )[0];
-  filterEventId = !filterEventId ? filterEvent : filterEventId;
+  const { exploreData } = getLocalState();
+  const {
+    filterType,
+    filterSort,
+    filterSortDir,
+    filterWCC,
+    filterWCU,
+    filterWCR,
+    filterWCM,
+    filteredMana,
+    filteredranks,
+    onlyOwned,
+    filterSkip
+  } = exploreData;
 
-  if (filterEvent == "Ladder") filterEventId = "Ladder";
-  if (filterEvent == "Traditional Ladder") filterEventId = "Traditional_Ladder";
+  const sortDir = filterSortDir === "Descending" ? -1 : 1;
 
-  let query = {
-    filterWCC: filterWCC,
-    filterWCU: filterWCU,
-    filterWCR: filterWCR,
-    filterWCM: filterWCM,
+  // initial query defaults event filter to first event (dynamic)
+  const filterEvent =
+    exploreData.filterEvent || getInputValue("explore_query_event", "Ladder");
+  // map selected event display name back to event ID
+  let filterEventId = filterEvent;
+  const eventIds = db.eventIds.filter(
+    key => getEventPrettyName(key) === filterEvent
+  );
+  if (filterEvent === "Traditional Ladder") {
+    filterEventId = "Traditional_Ladder";
+  } else if (eventIds.length) {
+    filterEventId = eventIds[0];
+  }
+
+  const query = {
+    filterWCC,
+    filterWCU,
+    filterWCR,
+    filterWCM,
     filterEvent: filterEventId,
-    filterType: filterType,
-    filterSort: filterSort,
+    filterType,
+    filterSort,
     filterSortDir: sortDir,
-    onlyOwned: onlyOwned,
-    filteredMana: filteredMana,
-    filteredranks: filteredranks,
-    filterSkip: filterSkip
+    onlyOwned,
+    filteredMana,
+    filteredranks,
+    filterSkip
   };
 
   showLoadingBars();
+  queryInFlight = true;
   ipcSend("request_explore", query);
 }
 
 function setExploreDecks(data) {
-  console.log(data);
-  if (filterSkip == 0) {
-    document.getElementById("explore_list").innerHTML = "";
-  }
-  filterSkip += data.results_number;
-  data.result.forEach((deck, index) => {
-    deckLoad(deck, filterSkip + index);
+  if (!queryInFlight) return;
+
+  const exploreList = document.getElementById("explore_list");
+  const loadMessage = document.getElementById("explore_load_message");
+  if (loadMessage) exploreList.removeChild(loadMessage);
+
+  const exploreData = { ...getLocalState().exploreData };
+
+  // filter out duplicates
+  const results_set = new Set([...exploreData.results_set]);
+  exploreData.result = [...exploreData.result];
+  data.result.forEach(item => {
+    const id = item._id || item.id || "Unknown";
+    if (results_set.has(id)) return;
+    exploreData.result.push(item);
+    results_set.add(id);
   });
+  exploreData.results_set = results_set;
+
+  // update indexes
+  const lastIndex = exploreData.results_number;
+  exploreData.results_number = results_set.size;
+  exploreData.filterSkip += data.results_number;
+  if (data.results_number === 0) {
+    exploreData.results_terminated = true;
+  }
+
+  setLocalState({ exploreData });
+  renderData(lastIndex);
+  queryInFlight = false;
+
+  if (!exploreData.results_terminated && exploreData.results_number < 20) {
+    // in highly filtered situations, keep asking for more
+    queryExplore();
+  } else {
+    const button = document.getElementById("explore_query_button");
+    if (button) button.style.display = "initial";
+  }
+}
+
+function renderData(startIndex = 0) {
+  const data = getLocalState().exploreData;
+
+  data.result
+    .slice(startIndex)
+    .forEach((deck, index) => deckLoad(deck, startIndex + index));
 }
 
 function deckLoad(_deck, index) {
@@ -452,17 +559,18 @@ function deckLoad(_deck, index) {
   let wc;
   let n = 0;
   let boosterCost = getBoosterCountEstimate(_deck.wildcards);
-  for (var key in raritySort) {
+  CARD_RARITIES.forEach(rarity => {
+    const key = rarity[0];
     if (_deck.wildcards.hasOwnProperty(key) && _deck.wildcards[key] > 0) {
       wc = createDivision(
-        ["wc_explore_cost", "wc_" + raritySort[key]],
+        ["wc_explore_cost", "wc_" + rarity],
         _deck.wildcards[key]
       );
-      wc.title = _.capitalize(raritySort[key]) + " wildcards needed.";
+      wc.title = _.capitalize(rarity) + " wildcards needed.";
       flcf.appendChild(wc);
       n++;
     }
-  }
+  });
 
   if (n == 0) {
     wc = createDivision(["wc_complete"]);
@@ -483,7 +591,7 @@ function deckLoad(_deck, index) {
 
   var tileGrpid = _deck.tile;
   try {
-    let a = db.card(tileGrpid).images["art_crop"];
+    db.card(tileGrpid).images["art_crop"];
   } catch (e) {
     tileGrpid = DEFAULT_TILE;
   }

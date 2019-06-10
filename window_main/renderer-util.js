@@ -38,7 +38,8 @@ const localState = {
   authToken: "",
   discordTag: null,
   lastDataIndex: 0,
-  lastScrollTop: 0
+  lastScrollTop: 0,
+  exploreData: null
 };
 const actionLogDir = path.join(
   (app || remote.app).getPath("userData"),
