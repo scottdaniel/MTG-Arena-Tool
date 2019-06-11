@@ -537,8 +537,7 @@ function appendOverlay(section) {
   topPrev.on("click", () => {
     currentOverlay -= 1;
     if (currentOverlay < 0) {
-      currentOverlay = 4;
-    }
+      currentOverlay = pd.settings.overlays.length - 1;
     $(".overlay_section").css("display", "none");
     $(".overlay_section_" + currentOverlay).css("display", "block");
     $(".overlay_current").html(
@@ -548,7 +547,7 @@ function appendOverlay(section) {
 
   topNext.on("click", () => {
     currentOverlay += 1;
-    if (currentOverlay > 4) {
+    if (currentOverlay >= pd.settings.overlays.length) {
       currentOverlay = 0;
     }
     $(".overlay_section").css("display", "none");

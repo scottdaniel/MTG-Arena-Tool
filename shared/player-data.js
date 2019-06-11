@@ -45,6 +45,23 @@ const playerDataDefault = {
   }
 };
 
+const overlayCfg = {
+  alpha: 1,
+  alpha_back: 1,
+  bounds: { width: 300, height: 600, x: 0, y: 0 },
+  clock: false,
+  deck: true,
+  lands: true,
+  mode: 1,
+  ontop: true,
+  scale: 100,
+  show: true,
+  show_always: false,
+  sideboard: false,
+  title: true,
+  top: true
+};
+
 const defaultCfg = {
   windowBounds: { width: 800, height: 600, x: 0, y: 0 },
   cards: { cards_time: 0, cards_before: [], cards: [] },
@@ -67,84 +84,36 @@ const defaultCfg = {
     card_tile_style: CARD_TILE_FLAT,
     overlays: [
       {
-        alpha: 1,
-        alpha_back: 1,
+        ...overlayCfg,
         bounds: { width: 300, height: 600, x: 0, y: 0 },
-        clock: true,
-        deck: true,
-        lands: true,
         mode: OVERLAY_LEFT,
-        ontop: true,
-        scale: 100,
-        show: true,
-        show_always: false,
-        sideboard: false,
-        title: true,
-        top: true
+        clock: true
       },
       {
-        alpha: 1,
-        alpha_back: 1,
+        ...overlayCfg,
         bounds: { width: 300, height: 600, x: 310, y: 0 },
-        clock: false,
-        deck: true,
-        lands: false,
         mode: OVERLAY_SEEN,
-        ontop: true,
-        scale: 100,
-        show: true,
-        show_always: false,
-        sideboard: false,
-        title: true,
-        top: false
+        clock: false
       },
       {
-        alpha: 1,
-        alpha_back: 1,
+        ...overlayCfg,
         bounds: { width: 300, height: 600, x: 0, y: 0 },
-        clock: false,
-        deck: true,
-        lands: false,
         mode: OVERLAY_DRAFT,
-        ontop: false,
-        scale: 100,
-        show: false,
-        show_always: false,
-        sideboard: false,
-        title: true,
-        top: true
+        clock: false,
+        show: false
       },
       {
-        alpha: 1,
-        alpha_back: 1,
+        ...overlayCfg,
         bounds: { width: 300, height: 600, x: 0, y: 0 },
-        clock: false,
-        deck: true,
-        lands: false,
         mode: OVERLAY_LOG,
-        ontop: false,
-        scale: 100,
-        show: false,
-        show_always: false,
-        sideboard: false,
-        title: true,
-        top: true
+        clock: false,
+        show: false
       },
       {
-        alpha: 1,
-        alpha_back: 1,
+        ...overlayCfg,
         bounds: { width: 300, height: 600, x: 0, y: 0 },
-        clock: false,
-        deck: true,
-        lands: false,
         mode: OVERLAY_FULL,
-        ontop: false,
-        scale: 100,
-        show: false,
-        show_always: false,
-        sideboard: true,
-        title: true,
-        top: true
+        show: false
       }
     ]
   },

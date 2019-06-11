@@ -544,7 +544,7 @@ function force_open_settings(section = -1) {
     }
   });
   $(".moving_ux").animate({ left: "0px" }, 250, "easeInOutCubic");
-  openSettingsTab(section);
+  openSettingsTab(section, 0);
 }
 
 //

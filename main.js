@@ -19,8 +19,13 @@ var rememberStore = new Store({
   defaults: {}
 });
 
-//const OVERLAY_DRAFT = 5;
-const { OVERLAY_DRAFT, COLORS_ALL } = require("./shared/constants.js");
+const {
+  ARENA_MODE_IDLE,
+  ARENA_MODE_MATCH,
+  ARENA_MODE_DRAFT,
+  OVERLAY_DRAFT,
+  COLORS_ALL
+} = require("./shared/constants");
 
 app.setAppUserModelId("com.github.manuel777.mtgatool");
 
@@ -38,7 +43,7 @@ var overlays = [undefined, undefined, undefined, undefined, undefined];
 var overlaysAlpha = [false, false, false, false, false];
 var overlaysTimeout = [null, null, null, null, null];
 var mainTimeout = null;
-var overlaysShow = false;
+var arenaState = ARENA_MODE_IDLE;
 var overlays_settings = null;
 var tray = null;
 var closeToTray = true;
@@ -223,32 +228,15 @@ function startApp() {
         break;
 
       // to main js / window handling
-      case "overlay_show":
-        overlaysShow = true;
-        overlays_settings.forEach((settings, index) => {
-          let overlay = overlays[index];
-          if (overlay && settings.show) {
-            if (settings.mode == OVERLAY_DRAFT && arg == 2) {
-              overlayShow(overlay, true);
-            } else if (settings.mode !== OVERLAY_DRAFT && arg == 1) {
-              overlayShow(overlay, true);
-            }
-          }
-        });
+      case "set_arena_state":
+        arenaState = arg;
+        overlays_settings.forEach(overlaySetSettings);
         break;
 
       case "overlay_close":
-        overlaysShow = false;
-        overlays_settings.forEach((settings, index) => {
-          let overlay = overlays[index];
-          if (overlay && settings.show && settings.show_always == false) {
-            if (settings.mode == OVERLAY_DRAFT && arg == 2) {
-              overlayShow(overlay, false);
-            } else if (settings.mode !== OVERLAY_DRAFT && arg == 1) {
-              overlayShow(overlay, false);
-            }
-          }
-        });
+        if (overlays[arg] && overlays[arg].isVisible()) {
+          overlays[arg].hide();
+        }
         break;
 
       case "overlay_minimize":
@@ -422,8 +410,8 @@ function setSettings(settings) {
   }
 
   overlays_settings = settings.overlays;
+  overlays_settings.forEach(overlaySetSettings);
 
-  updateOverlays(settings);
   firstSettingsRead = false;
 }
 
@@ -646,30 +634,38 @@ function saveOverlayPos(index) {
   background.webContents.send("overlayBounds", index, obj);
 }
 
-function overlayShow(overlay, show) {
-  if (show && !overlay.isVisible()) {
-    overlay.showInactive();
-  } else if (!show && overlay.isVisible()) {
-    overlay.hide();
+function overlaySetSettings(settings, index) {
+  let overlay = overlays[index];
+  if (!overlay) {
+    overlay = createOverlay(settings, index);
+    overlays[index] = overlay;
+    overlaysAlpha[index] = settings.alpha_back < 1;
+  } else {
+    let oldAlphaEnabled = overlaysAlpha[index];
+    let alphaEnabled = settings.alpha_back < 1;
+    if (oldAlphaEnabled != alphaEnabled) {
+      overlay = recreateOverlay(overlay, settings, index);
+    }
+    overlaysAlpha[index] = alphaEnabled;
   }
-}
 
-function overlaySetSettings(overlay, settings, index) {
+  // console.log(overlay);
+  overlay.webContents.send("set_overlay_index", index);
   overlay.setAlwaysOnTop(settings.ontop, "floating");
   overlay.setBounds(settings.bounds);
-  if (overlaysShow || settings.show == false) {
-    overlayShow(overlay, settings.show);
-  }
-  if (settings.show_always == true) {
-    overlayShow(overlay, true);
-  }
 
-  let oldAlphaEnabled = overlaysAlpha[index];
-  let alphaEnabled = settings.alpha_back < 1;
-  if (oldAlphaEnabled != alphaEnabled) {
-    recreateOverlay(overlay, settings, index);
+  const currentModeApplies =
+    (settings.mode === OVERLAY_DRAFT && arenaState === ARENA_MODE_DRAFT) ||
+    (settings.mode !== OVERLAY_DRAFT && arenaState === ARENA_MODE_MATCH);
+
+  const shouldShow =
+    settings.show && (currentModeApplies || settings.show_always);
+
+  if (shouldShow && !overlay.isVisible()) {
+    overlay.showInactive();
+  } else if (!shouldShow && overlay.isVisible()) {
+    overlay.hide();
   }
-  overlaysAlpha[index] = alphaEnabled;
 }
 
 function recreateOverlay(overlay, settings, index) {
@@ -679,20 +675,6 @@ function recreateOverlay(overlay, settings, index) {
     overlays[index] = overlay;
   }
   return overlay;
-}
-
-function updateOverlays(settings) {
-  settings.overlays.forEach((overlaySettings, index) => {
-    let overlay = overlays[index];
-    if (!overlay) {
-      overlay = createOverlay(overlaySettings, index);
-      overlays[index] = overlay;
-    }
-
-    overlay.webContents.send("set_overlay_index", index);
-
-    overlaySetSettings(overlay, overlaySettings, index);
-  });
 }
 
 app.on("window-all-closed", () => {
