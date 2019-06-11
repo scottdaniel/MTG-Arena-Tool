@@ -14,6 +14,10 @@ class Database {
     if (ipc) ipc.on("set_db", this.handleSetDb);
     if (ipc) ipc.on("set_reward_resets", this.handleSetRewardResets);
     if (ipc) ipc.on("set_season", this.handleSetSeason);
+
+    this.rewards_daily_ends = new Date();
+    this.rewards_weekly_ends = new Date();
+
     const dbUri = `${__dirname}/../resources/database.json`;
     const defaultDb = fs.readFileSync(dbUri, "utf8");
     this.handleSetDb(null, defaultDb);
