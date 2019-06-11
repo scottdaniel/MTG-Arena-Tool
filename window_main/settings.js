@@ -538,6 +538,7 @@ function appendOverlay(section) {
     currentOverlay -= 1;
     if (currentOverlay < 0) {
       currentOverlay = pd.settings.overlays.length - 1;
+    }
     $(".overlay_section").css("display", "none");
     $(".overlay_section_" + currentOverlay).css("display", "block");
     $(".overlay_current").html(
