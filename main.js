@@ -42,6 +42,7 @@ var background;
 var overlays = [undefined, undefined, undefined, undefined, undefined];
 var overlaysAlpha = [false, false, false, false, false];
 var overlaysTimeout = [null, null, null, null, null];
+var overlaysResizeLock = true;
 var mainTimeout = null;
 var arenaState = ARENA_MODE_IDLE;
 var overlays_settings = null;
@@ -202,6 +203,10 @@ function startApp() {
         overlays.forEach(overlay => {
           overlay.webContents.send("player_data_refresh");
         });
+        break;
+
+      case "player_data_loaded":
+        overlaysResizeLock = false;
         break;
 
       case "set_db":
@@ -573,11 +578,6 @@ function createMainWindow() {
 
 function createOverlay(settings, index) {
   let alphaEnabled = settings.alpha_back < 1;
-  console.log(
-    `bounds x: ${settings.bounds.x} y: ${settings.bounds.y} w: ${
-      settings.bounds.width
-    } h: ${settings.bounds.height} `
-  );
   const over = new electron.BrowserWindow({
     transparent: alphaEnabled,
     frame: false,
@@ -620,18 +620,18 @@ function createOverlay(settings, index) {
 }
 
 function saveOverlayPos(index) {
-  if (!overlays[index]) return false;
+  if (!overlays[index] || overlaysResizeLock) return false;
 
-  var obj = {};
-  var bounds = overlays[index].getBounds();
-  var pos = overlays[index].getPosition();
-  obj.width = Math.floor(bounds.width);
-  obj.height = Math.floor(bounds.height);
-  obj.x = Math.floor(pos[0]);
-  obj.y = Math.floor(pos[1]);
-
-  //console.log(`${index} moved to x:${bounds.x} y:${bounds.y}`);
-  background.webContents.send("overlayBounds", index, obj);
+  let bounds = overlays[index].getBounds();
+  overlays[index].bounds = bounds;
+  background.webContents.send("overlayBounds", index, bounds);
+  /*
+  console.log(
+    `${index} moved to x: ${bounds.x} y: ${bounds.y} w: ${bounds.width} h: ${
+      bounds.height
+    } `
+  );
+  */
 }
 
 function overlaySetSettings(settings, index) {
@@ -651,8 +651,10 @@ function overlaySetSettings(settings, index) {
 
   // console.log(overlay);
   overlay.webContents.send("set_overlay_index", index);
-  overlay.setAlwaysOnTop(settings.ontop, "floating");
-  overlay.setBounds(settings.bounds);
+  if (overlay.isVisible()) {
+    overlay.setBounds(settings.bounds);
+    overlay.setAlwaysOnTop(settings.ontop, "floating");
+  }
 
   const currentModeApplies =
     (settings.mode === OVERLAY_DRAFT && arenaState === ARENA_MODE_DRAFT) ||
@@ -669,6 +671,7 @@ function overlaySetSettings(settings, index) {
 }
 
 function recreateOverlay(overlay, settings, index) {
+  console.log("Recreate overlay: " + index);
   if (overlay) {
     overlay.destroy();
     overlay = createOverlay(settings, index);

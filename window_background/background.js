@@ -292,8 +292,7 @@ ipc.on("windowBounds", function(event, obj) {
 //
 ipc.on("overlayBounds", function(event, index, obj) {
   pd.settings.overlays[index].bounds = obj;
-  pd_set({ settings: pd.settings });
-  store.set("settings", pd.settings);
+  loadSettings(pd.settings);
 });
 
 //
@@ -525,6 +524,7 @@ function loadPlayerConfig(playerId, serverData = undefined) {
     time: 3000,
     progress: -1
   });
+  ipc_send("player_data_loaded", true);
 }
 
 function syncUserData(data) {
@@ -1225,7 +1225,6 @@ function createMatch(arg) {
 //
 function createDraft() {
   actionLog(-99, new Date(), "");
-  var obj = store.get("overlayBounds");
 
   currentDraft = _.cloneDeep(currentDraftDefault);
   currentMatch = _.cloneDeep(currentMatchDefault);
