@@ -208,9 +208,9 @@ ipc.on("save_app_settings", function(event, arg) {
     rstore.set("email", "");
     rstore.set("token", "");
   }
-
-  loadSettings(updated);
   rstore.set("settings", updated);
+
+  syncSettings(updated);
   ipc_send("hide_loading");
 });
 
@@ -218,11 +218,12 @@ ipc.on("save_app_settings", function(event, arg) {
 ipc.on("set_renderer_state", function(event, arg) {
   ipc_send("ipc_log", "Renderer state: " + arg);
   renderer_state = arg;
-  loadSettings();
+  const appSettings = rstore.get("settings");
+  syncSettings(appSettings);
 
   let username = "";
   let password = "";
-  const remember_me = rstore.get("settings").remember_me;
+  const remember_me = pd.settings.remember_me;
 
   if (remember_me) {
     username = rstore.get("email");
@@ -248,8 +249,7 @@ function offlineLogin() {
 
 //
 ipc.on("auto_login", () => {
-  const rSettings = rstore.get("settings");
-  if (!rSettings.auto_login) return;
+  if (!pd.settings.auto_login) return;
 
   tokenAuth = rstore.get("token");
   ipc_send("popup", {
@@ -257,7 +257,7 @@ ipc.on("auto_login", () => {
     time: 0,
     progress: 2
   });
-  if (rSettings.remember_me) {
+  if (pd.settings.remember_me) {
     httpApi.httpAuth(rstore.get("email"), HIDDEN_PW);
   } else {
     offlineLogin();
@@ -283,42 +283,30 @@ ipc.on("request_draft_link", function(event, obj) {
 });
 
 //
-ipc.on("windowBounds", function(event, obj) {
-  pd.windowBounds = obj;
-  pd_set({ windowBounds: obj });
-  store.set("windowBounds", obj);
+ipc.on("windowBounds", (event, windowBounds) => {
+  pd_set({ windowBounds });
+  store.set("windowBounds", windowBounds);
 });
 
 //
-ipc.on("overlayBounds", function(event, index, obj) {
-  pd.settings.overlays[index].bounds = obj;
-  loadSettings(pd.settings);
+ipc.on("overlayBounds", (event, index, bounds) => {
+  const overlays = [...pd.settings.overlays];
+  const newOverlay = {
+    ...overlays[index], // old overlay
+    bounds // new bounds
+  };
+  overlays[index] = newOverlay;
+  pd_set({ settings: { ...pd.settings, overlays } });
+  store.set("settings.overlays", overlays);
 });
 
 //
 ipc.on("save_user_settings", function(event, settings) {
-  console.log("save_user_settings");
+  // console.log("save_user_settings");
   ipc_send("show_loading");
-  const oldSettings = store.get("settings");
-  const updated = { ...oldSettings, ...settings };
-
-  // clean up garbage jQuery data that slipped into some configs
-  // TODO remove this after it has a chance to run everywhere
-  const jQueryGarbageKeys = [
-    "currentTarget",
-    "delegateTarget",
-    "handleObj",
-    "originalEvent",
-    "relatedTarget",
-    "target",
-    "timeStamp",
-    "type",
-    ...Object.keys(updated).filter(key => key.slice(0, 6) === "jQuery")
-  ];
-  jQueryGarbageKeys.forEach(key => delete updated[key]);
-
-  loadSettings(updated);
-  store.set("settings", pd.settings);
+  const updated = { ...pd.settings, ...settings };
+  store.set("settings", updated);
+  syncSettings(updated);
   ipc_send("hide_loading");
 });
 
@@ -480,7 +468,7 @@ function loadPlayerConfig(playerId, serverData = undefined) {
     ...savedData,
     settings: { ...pd.settings, ...savedData.settings }
   };
-  loadSettings(playerData.settings);
+  syncSettings(playerData.settings);
   pd_set(playerData);
 
   ipc_send("popup", {
@@ -591,23 +579,11 @@ function syncUserData(data) {
   if (!firstPass) ipc_send("player_data_refresh");
 }
 
-// Loads and combines settings variables, sends result to display
-function loadSettings(dirtySettings = {}) {
-  // Blends together default, user, app, and optional dirty config
-  // "dirty" config may be a subset, which allows early UI updates
-  //  to make UI responsive without waiting for slow store IO
-  // Since settings have migrated between areas, collisions happen
-  // Order of precedence is: dirty > app > user > defaults
-
-  const settings = {
-    ...pd.settings,
-    ...store.get("settings"),
-    ...rstore.get("settings"),
-    ...dirtySettings
-  };
-
-  //const exeName = path.basename(process.execPath);
-
+// Merges settings and updates singletons across processes
+// (essentially fancy pd_set for settings field only)
+// To persist changes, see "save_user_settings" or "save_app_settings"
+function syncSettings(dirtySettings = {}) {
+  const settings = { ...pd.settings, ...dirtySettings };
   skipFirstPass = settings.skip_firstpass;
   pd_set({ settings });
   ipc_send("set_settings", settings);
@@ -1175,7 +1151,7 @@ function createMatch(arg) {
   currentMatch = _.cloneDeep(currentMatchDefault);
 
   if (!firstPass) {
-    if (store.get("settings").close_on_match) {
+    if (pd.settings.close_on_match) {
       ipc_send("renderer_hide", 1);
     }
 
@@ -1230,7 +1206,7 @@ function createDraft() {
   currentMatch = _.cloneDeep(currentMatchDefault);
 
   if (!firstPass) {
-    if (store.get("settings").close_on_match) {
+    if (pd.settings.close_on_match) {
       ipc_send("renderer_hide", 1);
     }
 

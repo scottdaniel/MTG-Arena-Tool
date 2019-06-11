@@ -82,7 +82,7 @@ function httpBasic() {
       var _headers = value;
 
       if (
-        store.get("settings").send_data == false &&
+        pd.settings.send_data == false &&
         _headers.method != "auth" &&
         _headers.method != "delete_data" &&
         _headers.method != "get_database" &&
@@ -248,7 +248,7 @@ function httpBasic() {
 
                 ipc_send("auth", parsedResult);
                 //ipc_send("auth", parsedResult.arenaids);
-                if (rstore.get("settings").remember_me) {
+                if (pd.settings.remember_me) {
                   rstore.set("token", tokenAuth);
                   rstore.set("email", pd.userName);
                 }
@@ -435,7 +435,7 @@ function httpAuth(userName, pass) {
 
 function httpSubmitCourse(course) {
   var _id = makeId(6);
-  if (store.get("settings").anon_explore == true) {
+  if (pd.settings.anon_explore == true) {
     course.PlayerId = "000000000000000";
     course.PlayerName = "Anonymous";
   }
