@@ -289,10 +289,16 @@ function appendBehaviour(section) {
   icd.appendTo(label);
 
   section.append(`<div class="settings_note">
-      <i>Possible constiables: $Name, $Count, $SetName, $SetCode, $Collector, $Rarity, $Type, $Cmc</i>
+      <i>Possible variables: $Name, $Count, $SetName, $SetCode, $Collector, $Rarity, $Type, $Cmc</i>
       </div>`);
 
-  export_input.on("keyup", function() {
+  export_input.on("keyup", e => {
+    if (e.keyCode === 13) {
+      updateUserSettings();
+    }
+  });
+
+  export_input.on("focusout", () => {
     updateUserSettings();
   });
 
@@ -674,6 +680,10 @@ function appendVisual(section) {
     if (e.keyCode === 13) {
       updateUserSettings();
     }
+  });
+
+  url_input.on("focusout", function() {
+    updateUserSettings();
   });
 
   sliderInput.off();

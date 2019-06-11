@@ -750,24 +750,9 @@ function onLabelMatchGameRoomStateChangedEvent(entry, json) {
     });
   }
   if (json.stateType == "MatchGameRoomStateType_MatchCompleted") {
-    playerWin = 0;
-    draws = 0;
-    oppWin = 0;
-    currentMatch.results = json.finalMatchResult.resultList;
+    currentMatch.results = objectClone(json.finalMatchResult.resultList);
 
     json.finalMatchResult.resultList.forEach(function(res) {
-      if (res.scope == "MatchScope_Game") {
-        if (res.result == "ResultType_Draw") {
-          draws += 1;
-        } else {
-          if (res.winningTeamId == currentMatch.player.seat) {
-            playerWin += 1;
-          }
-          if (res.winningTeamId == currentMatch.opponent.seat) {
-            oppWin += 1;
-          }
-        }
-      }
       if (res.scope == "MatchScope_Match") {
         skipMatch = false;
         duringMatch = false;

@@ -1,3 +1,23 @@
+## <small>2.6.5 (2019-06-10)</small>
+
+* add guard statement just in case ([987bfae](https://github.com/Manuel-777/MTG-Arena-Tool/commit/987bfae))
+* bugfix default event query ([9387499](https://github.com/Manuel-777/MTG-Arena-Tool/commit/9387499))
+* bugfix economy page renders txn with multiple rarities redeemed ([65b8d69](https://github.com/Manuel-777/MTG-Arena-Tool/commit/65b8d69))
+* bugfix settings page require ([b82a195](https://github.com/Manuel-777/MTG-Arena-Tool/commit/b82a195))
+* darker ownership stars ([7d972f0](https://github.com/Manuel-777/MTG-Arena-Tool/commit/7d972f0))
+* db listens to set_active_events ([fb7af81](https://github.com/Manuel-777/MTG-Arena-Tool/commit/fb7af81))
+* db listens to set_reward_resets ([ee01f36](https://github.com/Manuel-777/MTG-Arena-Tool/commit/ee01f36))
+* explore page uses db.activeEvents ([c258cb6](https://github.com/Manuel-777/MTG-Arena-Tool/commit/c258cb6))
+* explore refactor ([2e364fc](https://github.com/Manuel-777/MTG-Arena-Tool/commit/2e364fc))
+* extract renderer-util from renderer ([61b09b8](https://github.com/Manuel-777/MTG-Arena-Tool/commit/61b09b8))
+* fix some game results not tracked ([e2c5f88](https://github.com/Manuel-777/MTG-Arena-Tool/commit/e2c5f88))
+* import lint ([d276cb9](https://github.com/Manuel-777/MTG-Arena-Tool/commit/d276cb9))
+* refactor all globals out of window_main ([1e5b66f](https://github.com/Manuel-777/MTG-Arena-Tool/commit/1e5b66f))
+* refactor set_offline into player-data ([5f255ba](https://github.com/Manuel-777/MTG-Arena-Tool/commit/5f255ba))
+* standardize fn names in renderer-util and downstream ([a641e32](https://github.com/Manuel-777/MTG-Arena-Tool/commit/a641e32))
+
+
+
 ## <small>2.6.4 (2019-06-08)</small>
 
 * center stars in overlay ([f42f457](https://github.com/Manuel-777/MTG-Arena-Tool/commit/f42f457))
