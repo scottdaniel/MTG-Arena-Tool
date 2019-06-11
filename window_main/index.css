@@ -3257,6 +3257,7 @@ a:hover {
     line-height: 64px;
     color: rgba(250, 229, 210, 1);
     text-align: center;
+    margin-right: auto;
     font-family: var(--main-font-name);
 }
 
@@ -3272,4 +3273,10 @@ a:hover {
 
 .overlay_next:hover {
     opacity: 1;
+}
+
+.overlay_icon {
+    width: 20px;
+    height: 20px;
+    margin: auto 24px auto auto;
 }

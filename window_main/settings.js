@@ -8,7 +8,8 @@ const {
   OVERLAY_ODDS,
   OVERLAY_SEEN,
   OVERLAY_DRAFT,
-  OVERLAY_LOG
+  OVERLAY_LOG,
+  COLORS_ALL
 } = require("../shared/constants");
 const db = require("../shared/database");
 const pd = require("../shared/player-data");
@@ -318,6 +319,11 @@ function appendOverlay(section) {
 
   let topCont = $('<div class="overlay_section_selector_cont"></div>');
   let topPrev = $('<div class="overlay_prev"></div>');
+  let topIcon = $(
+    `<div class="overlay_icon" style="background-color:var(--color-${
+      COLORS_ALL[currentOverlay]
+    });"></div>`
+  );
   let topIndex = $(
     `<div class="overlay_current">Current overlay settings: ${currentOverlay +
       1}</div>`
@@ -325,6 +331,7 @@ function appendOverlay(section) {
   let topNext = $('<div class="overlay_next"></div>');
 
   topCont.append(topPrev);
+  topCont.append(topIcon);
   topCont.append(topIndex);
   topCont.append(topNext);
   section.append(
@@ -538,10 +545,15 @@ function appendOverlay(section) {
     currentOverlay -= 1;
     if (currentOverlay < 0) {
       currentOverlay = pd.settings.overlays.length - 1;
+    }
     $(".overlay_section").css("display", "none");
     $(".overlay_section_" + currentOverlay).css("display", "block");
     $(".overlay_current").html(
       `Current overlay settings: ${currentOverlay + 1}`
+    );
+    $(".overlay_icon").css(
+      "background-color",
+      `var(--color-${COLORS_ALL[currentOverlay]})`
     );
   });
 
@@ -554,6 +566,10 @@ function appendOverlay(section) {
     $(".overlay_section_" + currentOverlay).css("display", "block");
     $(".overlay_current").html(
       `Current overlay settings: ${currentOverlay + 1}`
+    );
+    $(".overlay_icon").css(
+      "background-color",
+      `var(--color-${COLORS_ALL[currentOverlay]})`
     );
   });
 }
