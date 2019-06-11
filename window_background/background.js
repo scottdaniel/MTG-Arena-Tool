@@ -218,6 +218,8 @@ ipc.on("save_app_settings", function(event, arg) {
 ipc.on("set_renderer_state", function(event, arg) {
   ipc_send("ipc_log", "Renderer state: " + arg);
   renderer_state = arg;
+  // first time during bootstrapping that we load
+  // app-level settings into singletons
   const appSettings = rstore.get("settings");
   syncSettings(appSettings);
 
