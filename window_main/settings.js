@@ -537,7 +537,7 @@ function appendOverlay(section) {
   topPrev.on("click", () => {
     currentOverlay -= 1;
     if (currentOverlay < 0) {
-      currentOverlay = 3;
+      currentOverlay = 4;
     }
     $(".overlay_section").css("display", "none");
     $(".overlay_section_" + currentOverlay).css("display", "block");
@@ -548,7 +548,7 @@ function appendOverlay(section) {
 
   topNext.on("click", () => {
     currentOverlay += 1;
-    if (currentOverlay > 3) {
+    if (currentOverlay > 4) {
       currentOverlay = 0;
     }
     $(".overlay_section").css("display", "none");
