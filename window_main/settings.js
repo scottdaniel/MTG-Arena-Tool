@@ -144,7 +144,7 @@ function openSettingsTab(openSection = lastSettingsSection) {
   icd.appendTo(label);
 
   section.append(`<div class="settings_note">
-      <i>Possible constiables: $Name, $Count, $SetName, $SetCode, $Collector, $Rarity, $Type, $Cmc</i>
+      <i>Possible variables: $Name, $Count, $SetName, $SetCode, $Collector, $Rarity, $Type, $Cmc</i>
       </div>`);
 
   // OVERLAY
@@ -531,7 +531,17 @@ function openSettingsTab(openSection = lastSettingsSection) {
     }
   });
 
-  export_input.on("keyup", function() {
+  url_input.on("focusout", function() {
+    updateUserSettings();
+  });
+
+  export_input.on("keyup", function(e) {
+    if (e.keyCode === 13) {
+      updateUserSettings();
+    }
+  });
+
+  export_input.on("focusout", function() {
     updateUserSettings();
   });
 
