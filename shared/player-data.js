@@ -44,6 +44,23 @@ const playerDataDefault = {
   }
 };
 
+const overlayCfg = {
+  alpha: 1,
+  alpha_back: 1,
+  bounds: { width: 300, height: 600, x: 0, y: 0 },
+  clock: false,
+  deck: true,
+  lands: true,
+  mode: 1,
+  ontop: true,
+  scale: 100,
+  show: true,
+  show_always: false,
+  sideboard: false,
+  title: true,
+  top: true
+};
+
 const defaultCfg = {
   windowBounds: { width: 800, height: 600, x: 0, y: 0 },
   cards: { cards_time: 0, cards_before: [], cards: [] },
@@ -66,68 +83,29 @@ const defaultCfg = {
     card_tile_style: CARD_TILE_FLAT,
     overlays: [
       {
-        alpha: 1,
-        alpha_back: 1,
+        ...overlayCfg,
         bounds: { width: 300, height: 600, x: 0, y: 0 },
-        clock: true,
-        deck: true,
-        lands: true,
         mode: 1,
-        ontop: true,
-        scale: 100,
-        show: true,
-        show_always: false,
-        sideboard: false,
-        title: true,
-        top: true
+        clock: true
       },
       {
-        alpha: 1,
-        alpha_back: 1,
+        ...overlayCfg,
         bounds: { width: 300, height: 600, x: 310, y: 0 },
-        clock: false,
-        deck: true,
-        lands: false,
         mode: 3,
-        ontop: true,
-        scale: 100,
         show: true,
-        show_always: false,
-        sideboard: false,
-        title: true,
         top: false
       },
       {
-        alpha: 1,
-        alpha_back: 1,
-        bounds: { width: 300, height: 600, x: 0, y: 0 },
-        clock: false,
-        deck: true,
-        lands: false,
+        ...overlayCfg,
+        bounds: { width: 300, height: 600, x: 30, y: 30 },
         mode: 5,
-        ontop: false,
-        scale: 100,
-        show: false,
-        show_always: false,
-        sideboard: false,
-        title: true,
-        top: true
+        show: false
       },
       {
-        alpha: 1,
-        alpha_back: 1,
-        bounds: { width: 300, height: 600, x: 0, y: 0 },
-        clock: false,
-        deck: true,
-        lands: false,
-        mode: 4,
-        ontop: false,
-        scale: 100,
-        show: false,
-        show_always: false,
-        sideboard: false,
-        title: true,
-        top: true
+        ...overlayCfg,
+        bounds: { width: 300, height: 600, x: 40, y: 40 },
+        mode: 2,
+        show: false
       }
     ]
   },
