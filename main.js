@@ -20,7 +20,7 @@ var rememberStore = new Store({
 });
 
 //const OVERLAY_DRAFT = 5;
-const { OVERLAY_DRAFT } = require("./shared/constants.js");
+const { OVERLAY_DRAFT, COLORS_ALL } = require("./shared/constants.js");
 
 app.setAppUserModelId("com.github.manuel777.mtgatool");
 
@@ -600,7 +600,7 @@ function createOverlay(settings, index) {
     height: settings.bounds.height,
     show: false,
     title: "MTG Arena Tool",
-    icon: "iconoverlay.png",
+    icon: `./resources/icon-overlay-${COLORS_ALL[index]}.png`,
     webPreferences: {
       nodeIntegration: true
     }
