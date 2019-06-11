@@ -549,7 +549,7 @@ function force_open_settings(section = -1) {
 
 //
 function force_open_about() {
-  sidebarActive = 6;
+  sidebarActive = 9;
   $(".top_nav_item").each(function() {
     $(this).removeClass("item_selected");
     if ($(this).hasClass("it7")) {
