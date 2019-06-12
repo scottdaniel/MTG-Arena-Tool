@@ -595,7 +595,14 @@ function createOverlay(settings, index) {
   over.on("closed", onOverlayClosed);
 
   over.on("resize", function() {
-    saveOverlayPos(index);
+    let timer = overlaysTimeout[index];
+    if (timer) {
+      clearTimeout(timer);
+    }
+    overlaysTimeout[index] = setTimeout(function() {
+      saveOverlayPos(index);
+      overlaysTimeout[index] = null;
+    }, 500);
   });
 
   over.on("move", function() {
@@ -607,7 +614,7 @@ function createOverlay(settings, index) {
     overlaysTimeout[index] = setTimeout(function() {
       saveOverlayPos(index);
       overlaysTimeout[index] = null;
-    }, 100);
+    }, 500);
   });
 
   over.once("did-finish-load", function() {
