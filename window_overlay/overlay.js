@@ -256,6 +256,11 @@ ipc.on("set_overlay_index", (event, arg) => {
 });
 
 //
+ipc.on("close", (event, arg) => {
+  close(arg);
+});
+
+//
 ipc.on("set_timer", function(event, arg) {
   if (arg == -1) {
     matchBeginTime = Date.now();
@@ -934,6 +939,20 @@ function change_background(arg) {
   }
 }
 
+function close(bool) {
+  if (overlayIndex == -1) return;
+  // -1 to toggle, else set
+  let _new = bool == -1 ? !pd.settings.overlays[overlayIndex].show : bool;
+
+  const overlays = [...pd.settings.overlays];
+  const newOverlay = {
+    ...overlays[overlayIndex], // old overlay
+    show: _new // new setting
+  };
+  overlays[overlayIndex] = newOverlay;
+  ipc_send("save_user_settings", { overlays });
+}
+
 $(document).ready(function() {
   $(".overlay_draft_container").hide();
   recreateClock();
@@ -997,13 +1016,7 @@ $(document).ready(function() {
 
   //
   $(".close").click(function() {
-    const overlays = [...pd.settings.overlays];
-    const newOverlay = {
-      ...overlays[overlayIndex], // old overlay
-      show: false // new setting
-    };
-    overlays[overlayIndex] = newOverlay;
-    ipc_send("save_user_settings", { overlays });
+    close(false);
   });
 
   //

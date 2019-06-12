@@ -628,6 +628,10 @@ function createOverlay(settings, index) {
     over.webContents.send("set_overlay_index", index);
   });
 
+  globalShortcut.register("Alt+" + (index + 1), function() {
+    over.webContents.send("close", -1);
+  });
+
   return over;
 }
 
