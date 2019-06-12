@@ -34,6 +34,7 @@ const { DEFAULT_DECK, RANKED_CONST, RANKED_DRAFT, DATE_SEASON } = Aggregator;
 let filters = Aggregator.getDefaultFilters();
 let filteredMatches;
 let sortedHistory;
+const tagPrompt = "set archetype";
 
 function getNextRank(currentRank) {
   var rankIndex = RANKS.indexOf(currentRank);
@@ -407,10 +408,7 @@ function renderRanksStats(container, aggregator) {
 function createTag(tag, div, showClose = true) {
   let tagCol = getTagColor(tag);
   let iid = makeId(6);
-  let t = createDivision(
-    ["deck_tag", iid],
-    tag == null ? "Set archetype" : tag
-  );
+  let t = createDivision(["deck_tag", iid], tag || tagPrompt);
   t.style.backgroundColor = tagCol;
 
   if (tag) {
@@ -446,7 +444,7 @@ function createTag(tag, div, showClose = true) {
     });
   } else {
     $(t).on("click", function(e) {
-      if ($(this).html() == "Set archetype") {
+      if ($(this).html() === tagPrompt) {
         t.innerHTML = "";
         let input = $(
           `<input style="min-width: 120px;" id="${iid}" size="1" autocomplete="off" type="text" onFocus="this.select()" class="deck_tag_input"></input>`
@@ -457,8 +455,11 @@ function createTag(tag, div, showClose = true) {
 
         input[0].focus();
         input[0].select();
+        const matchid = jQuery.data($(this)[0], "match");
+        const options = jQuery.data($(this)[0], "autocomplete");
+        const masterdiv = $(this).parent()[0];
+        const tag = $(this);
 
-        let options = jQuery.data($(this)[0], "autocomplete");
         autocomplete(input[0], options, () => {
           input[0].focus();
           input[0].select();
@@ -468,24 +469,27 @@ function createTag(tag, div, showClose = true) {
           setTimeout(() => {
             input.css("width", $(this).val().length * 8);
           }, 10);
-          if (e.keyCode == 13) {
+          if (e.keyCode === 13) {
             let val = $(this).val();
-            let matchid = jQuery.data(
-              $(this)
-                .parent()
-                .parent()[0],
-              "match"
-            );
-            let masterdiv = $(this)
-              .parent()
-              .parent()
-              .parent()[0];
-            addTag(matchid, val, masterdiv);
-
-            $(this)
-              .parent()
-              .parent()
-              .remove();
+            tag.remove();
+            if (val && val !== tagPrompt) {
+              addTag(matchid, val);
+            } else {
+              const t = createTag(null, masterdiv, false);
+              jQuery.data(t, "match", matchid);
+              jQuery.data(t, "autocomplete", options);
+            }
+          }
+        });
+        input.on("focusout", function() {
+          let val = $(this).val();
+          tag.remove();
+          if (val && val !== tagPrompt) {
+            addTag(matchid, val);
+          } else {
+            const t = createTag(null, masterdiv, false);
+            jQuery.data(t, "match", matchid);
+            jQuery.data(t, "autocomplete", options);
           }
         });
       }
@@ -544,9 +548,11 @@ function createTag(tag, div, showClose = true) {
   return t;
 }
 
-function addTag(matchid, tag, div) {
+function addTag(matchid, tag) {
   const match = pd.match(matchid);
-  if (!match) return;
+  if (!match || !tag) return;
+  tag = tag.toLowerCase();
+  if (tag === tagPrompt) return;
   if (match.tags && match.tags.includes(tag)) return;
 
   ipcSend("add_history_tag", { matchid, tag });
@@ -554,7 +560,9 @@ function addTag(matchid, tag, div) {
 
 function deleteTag(matchid, tag) {
   const match = pd.match(matchid);
-  if (!match || !match.tags || !match.tags.includes(tag)) return;
+  if (!match || !tag) return;
+  tag = tag.toLowerCase();
+  if (!match.tags || !match.tags.includes(tag)) return;
 
   ipcSend("delete_history_tag", { matchid, tag });
 }

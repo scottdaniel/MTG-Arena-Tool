@@ -424,9 +424,11 @@ ipc.on("add_tag", (event, arg) => {
 });
 
 ipc.on("delete_history_tag", (event, arg) => {
-  const { matchid, tag } = arg;
+  let { matchid, tag } = arg;
   const match = pd.match(matchid);
-  if (!match || !match.tags || !match.tags.includes(tag)) return;
+  if (!match || !tag) return;
+  tag = tag.toLowerCase();
+  if (!match.tags || !match.tags.includes(tag)) return;
 
   const tags = [...match.tags];
   tags.splice(tags.indexOf(tag), 1);
@@ -439,9 +441,10 @@ ipc.on("delete_history_tag", (event, arg) => {
 });
 
 ipc.on("add_history_tag", (event, arg) => {
-  const { matchid, tag } = arg;
+  let { matchid, tag } = arg;
   const match = pd.match(matchid);
-  if (!match) return;
+  if (!match || !tag) return;
+  tag = tag.toLowerCase();
   if (match.tags && match.tags.includes(tag)) return;
 
   const tags = [...(match.tags || []), tag];
