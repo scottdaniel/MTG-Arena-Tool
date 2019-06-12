@@ -628,10 +628,6 @@ function createOverlay(settings, index) {
     over.webContents.send("set_overlay_index", index);
   });
 
-  globalShortcut.register("Alt+" + (index + 1), function() {
-    over.webContents.send("close", -1);
-  });
-
   return over;
 }
 
@@ -670,6 +666,13 @@ function overlaySetSettings(settings, index) {
   if (overlay.isVisible()) {
     overlay.setBounds(settings.bounds);
     overlay.setAlwaysOnTop(settings.ontop, "floating");
+  }
+
+  globalShortcut.unregister("Alt+" + (index + 1));
+  if (settings.keyboard_shortcut) {
+    globalShortcut.register("Alt+" + (index + 1), () => {
+      overlay.webContents.send("close", -1);
+    });
   }
 
   const currentModeApplies =

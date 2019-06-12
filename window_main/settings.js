@@ -16,6 +16,7 @@ const pd = require("../shared/player-data");
 const deckDrawer = require("../shared/deck-drawer");
 const { createSelect } = require("../shared/select");
 const { get_card_image } = require("../shared/util");
+const byId = id => document.getElementById(id);
 
 const {
   setLocalState,
@@ -401,6 +402,13 @@ function appendOverlay(section) {
     );
     addCheckbox(
       overlaySection,
+      `Enable Alt+${index + 1} keyboard shortcut`,
+      `overlay_${index}_keyboard_shortcut`,
+      settings.keyboard_shortcut,
+      updateUserSettings
+    );
+    addCheckbox(
+      overlaySection,
       "Show top bar",
       `overlay_${index}_top`,
       settings.top,
@@ -781,10 +789,9 @@ function appendLogin(section) {
 
 //
 function updateAppSettings() {
-  const auto_login = document.getElementById("settings_autologin").checked;
-  const launch_to_tray = document.getElementById("settings_launchtotray")
-    .checked;
-  const beta_channel = document.getElementById("settings_betachannel").checked;
+  const auto_login = byId("settings_autologin").checked;
+  const launch_to_tray = byId("settings_launchtotray").checked;
+  const beta_channel = byId("settings_betachannel").checked;
   const rSettings = {
     auto_login,
     launch_to_tray,
@@ -810,44 +817,34 @@ function updateUserSettings() {
 
 //
 function updateUserSettingsBlend(_settings = {}) {
-  const startup = document.getElementById("settings_startup").checked;
-  const readonlogin = document.getElementById("settings_readlogonlogin")
-    .checked;
+  const startup = byId("settings_startup").checked;
+  const readonlogin = byId("settings_readlogonlogin").checked;
 
-  const soundPriority = document.getElementById("settings_soundpriority")
-    .checked;
+  const soundPriority = byId("settings_soundpriority").checked;
 
   const backColor = $(".color_picker")
     .spectrum("get")
     .toRgbString();
 
-  const backUrl = document.getElementById("query_image").value;
+  const backUrl = byId("query_image").value;
   if (backUrl === "") changeBackground("default");
   else changeBackground(backUrl);
 
   pd.settings.overlays.forEach((overlaySettings, index) => {
-    const showOverlay = document.getElementById(`overlay_${index}_show`)
-      .checked;
-    const showOverlayAlways = document.getElementById(
-      `overlay_${index}_show_always`
-    ).checked;
-    const overlayOnTop = document.getElementById(`overlay_${index}_ontop`)
-      .checked;
-    const overlayTop = document.getElementById(`overlay_${index}_top`).checked;
-    const overlayTitle = document.getElementById(`overlay_${index}_title`)
-      .checked;
-    const overlayDeck = document.getElementById(`overlay_${index}_deck`)
-      .checked;
-    const overlayClock = document.getElementById(`overlay_${index}_clock`)
-      .checked;
-    const overlaySideboard = document.getElementById(
-      `overlay_${index}_sideboard`
-    ).checked;
-    const overlayLands = document.getElementById(`overlay_${index}_lands`)
-      .checked;
+    const showOverlay = byId(`overlay_${index}_show`).checked;
+    const showOverlayAlways = byId(`overlay_${index}_show_always`).checked;
+    const enableShortcut = byId(`overlay_${index}_keyboard_shortcut`).checked;
+    const overlayOnTop = byId(`overlay_${index}_ontop`).checked;
+    const overlayTop = byId(`overlay_${index}_top`).checked;
+    const overlayTitle = byId(`overlay_${index}_title`).checked;
+    const overlayDeck = byId(`overlay_${index}_deck`).checked;
+    const overlayClock = byId(`overlay_${index}_clock`).checked;
+    const overlaySideboard = byId(`overlay_${index}_sideboard`).checked;
+    const overlayLands = byId(`overlay_${index}_lands`).checked;
 
     overlaySettings.show = showOverlay;
     overlaySettings.show_always = showOverlayAlways;
+    overlaySettings.keyboard_shortcut = enableShortcut;
     overlaySettings.top = overlayTop;
     overlaySettings.title = overlayTitle;
     overlaySettings.deck = overlayDeck;
@@ -857,11 +854,11 @@ function updateUserSettingsBlend(_settings = {}) {
     overlaySettings.lands = overlayLands;
   });
 
-  const closeOnMatch = document.getElementById("settings_closeonmatch").checked;
-  const exportFormat = document.getElementById("settings_export_format").value;
-  const closeToTray = document.getElementById("settings_closetotray").checked;
-  const sendData = document.getElementById("settings_senddata").checked;
-  const anonExplore = document.getElementById("settings_anon_explore").checked;
+  const closeOnMatch = byId("settings_closeonmatch").checked;
+  const exportFormat = byId("settings_export_format").value;
+  const closeToTray = byId("settings_closetotray").checked;
+  const sendData = byId("settings_senddata").checked;
+  const anonExplore = byId("settings_anon_explore").checked;
 
   ipcSend("save_user_settings", {
     sound_priority: soundPriority,
