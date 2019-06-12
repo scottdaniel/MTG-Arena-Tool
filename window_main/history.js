@@ -294,15 +294,15 @@ function attachMatchData(listItem, match) {
   listItem.rightBottom.appendChild(tags_div);
 
   // Set tag
-  /*
-  let t = db.events_format[match.eventId];
-  if (t && deck_tags[t]) {
-    deck_tags[t].forEach(val => {
-      tags.push({ tag: val.tag, q: val.average });
-    });
-  }
-  */
-  let tags = [];
+  const totalAgg = getLocalState().totalAgg;
+  const allTags = [
+    ...totalAgg.archs,
+    ...db.archetypes.map(arch => arch.name.toLowerCase())
+  ];
+  const tags = [...new Set(allTags)].map(tag => {
+    const count = totalAgg.archCounts[tag] || 0;
+    return { tag, q: count };
+  });
   if (match.tags) {
     match.tags.forEach(tag => {
       let t = createTag(tag, tags_div, true);
