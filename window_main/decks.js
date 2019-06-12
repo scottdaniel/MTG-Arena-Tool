@@ -27,6 +27,7 @@ const {
 
 let filters = Aggregator.getDefaultFilters();
 filters.onlyCurrentDecks = true;
+const tagPrompt = "add";
 
 function setFilters(selected = {}) {
   if (selected.eventId || selected.date) {
@@ -144,14 +145,14 @@ function openDecksTab(_filters = {}, scrollTop = 0) {
     const t = createTag(null, listItem.center, false);
     jQuery.data(t, "deck", deck.id);
     if (deck.format) {
-      const fText = getReadableFormat(deck.format);
+      const fText = getReadableFormat(deck.format).toLowerCase();
       const t = createTag(fText, listItem.center, false);
       t.style.fontStyle = "italic";
       jQuery.data(t, "deck", deck.id);
     }
     if (deck.tags) {
       deck.tags.forEach(tag => {
-        if (tag !== deck.format) {
+        if (tag !== getReadableFormat(deck.format).toLowerCase()) {
           const t = createTag(tag, listItem.center);
           jQuery.data(t, "deck", deck.id);
         }
@@ -261,7 +262,7 @@ function openDeckCallback(id, filters) {
 
 function createTag(tag, div, showClose = true) {
   let tagCol = getTagColor(tag);
-  let t = createDivision(["deck_tag"], tag == null ? "Add" : tag);
+  let t = createDivision(["deck_tag"], tag || tagPrompt);
   t.style.backgroundColor = tagCol;
 
   if (tag) {
@@ -297,7 +298,7 @@ function createTag(tag, div, showClose = true) {
     });
   } else {
     $(t).on("click", function(e) {
-      if ($(this).html() == "Add") {
+      if ($(this).html() === tagPrompt) {
         t.innerHTML = "";
         let input = $(
           '<input size="1" onFocus="this.select()" class="deck_tag_input"></input>'
@@ -306,21 +307,25 @@ function createTag(tag, div, showClose = true) {
 
         input[0].focus();
         input[0].select();
+        const deckid = jQuery.data($(this)[0], "deck");
+        const tag = $(this);
         input.keydown(function(e) {
           setTimeout(() => {
             input.css("width", $(this).val().length * 8);
           }, 10);
-          if (e.keyCode == 13) {
-            let val = $(this).val();
-            let deckid = jQuery.data($(this).parent()[0], "deck");
-
-            let masterdiv = $(this)
-              .parent()
-              .parent()[0];
-            addTag(deckid, val, masterdiv);
-            $(this)
-              .parent()
-              .html("Add");
+          if (e.keyCode === 13) {
+            const val = $(this).val();
+            tag.html(tagPrompt);
+            if (val && val !== tagPrompt) {
+              addTag(deckid, val);
+            }
+          }
+        });
+        input.on("focusout", function() {
+          const val = $(this).val();
+          tag.html(tagPrompt);
+          if (val && val !== tagPrompt) {
+            addTag(deckid, val);
           }
         });
       }
@@ -364,10 +369,22 @@ function createTag(tag, div, showClose = true) {
 }
 
 function addTag(deckid, tag) {
+  const deck = pd.deck(deckid);
+  if (!deck || !tag) return;
+  tag = tag.toLowerCase();
+  if (getReadableFormat(deck.format).toLowerCase() === tag) return;
+  if (tag === tagPrompt) return;
+  if (deck.tags && deck.tags.includes(tag)) return;
+
   ipcSend("add_tag", { deckid, tag });
 }
 
 function deleteTag(deckid, tag) {
+  const deck = pd.deck(deckid);
+  if (!deck || !tag) return;
+  tag = tag.toLowerCase();
+  if (!deck.tags || !deck.tags.includes(tag)) return;
+
   ipcSend("delete_tag", { deckid, tag });
 }
 

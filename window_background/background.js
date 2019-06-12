@@ -30,7 +30,11 @@ const Deck = require("../shared/deck");
 const db = require("../shared/database");
 const pd = require("../shared/player-data");
 const { hypergeometricRange } = require("../shared/stats-fns");
-const { get_rank_index, objectClone } = require("../shared/util");
+const {
+  get_rank_index,
+  getReadableFormat,
+  objectClone
+} = require("../shared/util");
 const { HIDDEN_PW, IPC_OVERLAY } = require("../shared/constants");
 const { ipc_send, pd_set, unleakString } = require("./background-util");
 const {
@@ -396,9 +400,11 @@ ipc.on("edit_tag", (event, arg) => {
 });
 
 ipc.on("delete_tag", (event, arg) => {
-  const { deckid, tag } = arg;
+  let { deckid, tag } = arg;
   const deck = pd.deck(deckid);
-  if (!deck || !deck.tags || !deck.tags.includes(tag)) return;
+  if (!deck || !tag) return;
+  tag = tag.toLowerCase();
+  if (!deck.tags || !deck.tags.includes(tag)) return;
 
   const tags = [...deck.tags];
   tags.splice(tags.indexOf(tag), 1);
@@ -410,9 +416,11 @@ ipc.on("delete_tag", (event, arg) => {
 });
 
 ipc.on("add_tag", (event, arg) => {
-  const { deckid, tag } = arg;
+  let { deckid, tag } = arg;
   const deck = pd.deck(deckid);
-  if (!deck || deck.format === tag) return;
+  if (!deck || !tag) return;
+  tag = tag.toLowerCase();
+  if (getReadableFormat(deck.format).toLowerCase() === tag) return;
   if (deck.tags && deck.tags.includes(tag)) return;
 
   const tags = [...deck.tags, tag];
