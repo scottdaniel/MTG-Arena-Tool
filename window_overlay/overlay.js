@@ -997,7 +997,13 @@ $(document).ready(function() {
 
   //
   $(".close").click(function() {
-    ipc_send("overlay_close", overlayIndex);
+    const overlays = [...pd.settings.overlays];
+    const newOverlay = {
+      ...overlays[overlayIndex], // old overlay
+      show: false // new setting
+    };
+    overlays[overlayIndex] = newOverlay;
+    ipc_send("save_user_settings", { overlays });
   });
 
   //
