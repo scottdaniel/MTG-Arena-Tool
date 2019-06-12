@@ -557,7 +557,14 @@ function createMainWindow() {
   tray.setContextMenu(contextMenu);
 
   win.on("resize", () => {
-    saveWindowPos();
+    if (mainTimeout) {
+      clearTimeout(mainTimeout);
+      mainTimeout = null;
+    }
+    mainTimeout = setTimeout(function() {
+      saveWindowPos();
+      mainTimeout = null;
+    }, 500);
   });
 
   win.on("move", function() {
@@ -568,7 +575,7 @@ function createMainWindow() {
     mainTimeout = setTimeout(function() {
       saveWindowPos();
       mainTimeout = null;
-    }, 100);
+    }, 500);
   });
 
   return win;
