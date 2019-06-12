@@ -341,7 +341,7 @@ function appendOverlay(section) {
   topCont.append(topIndex);
   topCont.append(topNext);
   section.append(
-    '<div style="margin: 0px 64px 0px 16px;" class="settings_note">You can have up to 4 overlay windows active, and each window has its own settings.</br>Draft overlay will only show in a draft, while the others will work during any match.</div>'
+    '<div style="margin: 0px 64px 0px 16px;" class="settings_note">You can have up to 5 overlay windows active, and each window has its own settings.</br>Draft overlay will only show in a draft, while the others will work during any match.</div>'
   );
   section.append(topCont);
 
