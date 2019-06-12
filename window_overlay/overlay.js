@@ -1013,6 +1013,7 @@ $(document).ready(function() {
 
   //
   $(".settings").click(function() {
+    ipc_send("renderer_show");
     ipc_send("force_open_overlay_settings", overlayIndex, IPC_MAIN);
   });
 
