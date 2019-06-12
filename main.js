@@ -90,6 +90,7 @@ function startUpdater() {
 
   updaterWindow.webContents.on("did-finish-load", function() {
     updaterWindow.show();
+    updaterWindow.moveTop();
   });
 
   let betaChannel = rememberStore.get("settings.beta_channel");
@@ -278,11 +279,6 @@ function startApp() {
         closeToTray = arg;
         break;
 
-      case "force_open_settings":
-        mainWindow.webContents.send("force_open_settings", true);
-        showWindow();
-        break;
-
       case "set_clipboard":
         clipboard.writeText(arg);
         break;
@@ -454,11 +450,13 @@ function toggleWindow() {
 }
 
 function showWindow() {
-  if (mainWindow && !mainWindow.isVisible()) {
-    mainWindow.show();
+  if (mainWindow) {
+    if (!mainWindow.isVisible()) mainWindow.show();
+    mainWindow.moveTop();
   }
-  if (updaterWindow && !updaterWindow.isVisible()) {
-    updaterWindow.show();
+  if (updaterWindow) {
+    if (!updaterWindow.isVisible()) updaterWindow.show();
+    updaterWindow.moveTop();
   }
 }
 
