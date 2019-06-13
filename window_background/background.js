@@ -30,7 +30,11 @@ const Deck = require("../shared/deck");
 const db = require("../shared/database");
 const pd = require("../shared/player-data");
 const { hypergeometricRange } = require("../shared/stats-fns");
-const { get_rank_index, objectClone } = require("../shared/util");
+const {
+  get_rank_index,
+  getReadableFormat,
+  objectClone
+} = require("../shared/util");
 const {
   HIDDEN_PW,
   IPC_OVERLAY,
@@ -390,7 +394,8 @@ ipc.on("edit_tag", (event, arg) => {
 ipc.on("delete_tag", (event, arg) => {
   const { deckid, tag } = arg;
   const deck = pd.deck(deckid);
-  if (!deck || !deck.tags || !deck.tags.includes(tag)) return;
+  if (!deck || !tag) return;
+  if (!deck.tags || !deck.tags.includes(tag)) return;
 
   const tags = [...deck.tags];
   tags.splice(tags.indexOf(tag), 1);
@@ -404,7 +409,8 @@ ipc.on("delete_tag", (event, arg) => {
 ipc.on("add_tag", (event, arg) => {
   const { deckid, tag } = arg;
   const deck = pd.deck(deckid);
-  if (!deck || deck.format === tag) return;
+  if (!deck || !tag) return;
+  if (getReadableFormat(deck.format) === tag) return;
   if (deck.tags && deck.tags.includes(tag)) return;
 
   const tags = [...deck.tags, tag];
@@ -418,7 +424,8 @@ ipc.on("add_tag", (event, arg) => {
 ipc.on("delete_history_tag", (event, arg) => {
   const { matchid, tag } = arg;
   const match = pd.match(matchid);
-  if (!match || !match.tags || !match.tags.includes(tag)) return;
+  if (!match || !tag) return;
+  if (!match.tags || !match.tags.includes(tag)) return;
 
   const tags = [...match.tags];
   tags.splice(tags.indexOf(tag), 1);
@@ -433,7 +440,7 @@ ipc.on("delete_history_tag", (event, arg) => {
 ipc.on("add_history_tag", (event, arg) => {
   const { matchid, tag } = arg;
   const match = pd.match(matchid);
-  if (!match) return;
+  if (!match || !tag) return;
   if (match.tags && match.tags.includes(tag)) return;
 
   const tags = [...(match.tags || []), tag];

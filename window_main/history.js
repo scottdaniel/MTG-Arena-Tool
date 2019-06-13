@@ -34,6 +34,7 @@ const { DEFAULT_DECK, RANKED_CONST, RANKED_DRAFT, DATE_SEASON } = Aggregator;
 let filters = Aggregator.getDefaultFilters();
 let filteredMatches;
 let sortedHistory;
+const tagPrompt = "Set archetype";
 
 function getNextRank(currentRank) {
   var rankIndex = RANKS.indexOf(currentRank);
@@ -293,15 +294,12 @@ function attachMatchData(listItem, match) {
   listItem.rightBottom.appendChild(tags_div);
 
   // Set tag
-  /*
-  let t = db.events_format[match.eventId];
-  if (t && deck_tags[t]) {
-    deck_tags[t].forEach(val => {
-      tags.push({ tag: val.tag, q: val.average });
-    });
-  }
-  */
-  let tags = [];
+  const totalAgg = getLocalState().totalAgg;
+  const allTags = [...totalAgg.archs, ...db.archetypes.map(arch => arch.name)];
+  const tags = [...new Set(allTags)].map(tag => {
+    const count = totalAgg.archCounts[tag] || 0;
+    return { tag, q: count };
+  });
   if (match.tags) {
     match.tags.forEach(tag => {
       let t = createTag(tag, tags_div, true);
@@ -407,10 +405,7 @@ function renderRanksStats(container, aggregator) {
 function createTag(tag, div, showClose = true) {
   let tagCol = getTagColor(tag);
   let iid = makeId(6);
-  let t = createDivision(
-    ["deck_tag", iid],
-    tag == null ? "Set archetype" : tag
-  );
+  let t = createDivision(["deck_tag", iid], tag || tagPrompt);
   t.style.backgroundColor = tagCol;
 
   if (tag) {
@@ -446,7 +441,7 @@ function createTag(tag, div, showClose = true) {
     });
   } else {
     $(t).on("click", function(e) {
-      if ($(this).html() == "Set archetype") {
+      if ($(this).html() === tagPrompt) {
         t.innerHTML = "";
         let input = $(
           `<input style="min-width: 120px;" id="${iid}" size="1" autocomplete="off" type="text" onFocus="this.select()" class="deck_tag_input"></input>`
@@ -457,8 +452,10 @@ function createTag(tag, div, showClose = true) {
 
         input[0].focus();
         input[0].select();
+        const matchid = jQuery.data($(this)[0], "match");
+        const options = jQuery.data($(this)[0], "autocomplete");
+        const tag = $(this);
 
-        let options = jQuery.data($(this)[0], "autocomplete");
         autocomplete(input[0], options, () => {
           input[0].focus();
           input[0].select();
@@ -468,24 +465,14 @@ function createTag(tag, div, showClose = true) {
           setTimeout(() => {
             input.css("width", $(this).val().length * 8);
           }, 10);
-          if (e.keyCode == 13) {
+          if (e.keyCode === 13) {
             let val = $(this).val();
-            let matchid = jQuery.data(
-              $(this)
-                .parent()
-                .parent()[0],
-              "match"
-            );
-            let masterdiv = $(this)
-              .parent()
-              .parent()
-              .parent()[0];
-            addTag(matchid, val, masterdiv);
-
-            $(this)
-              .parent()
-              .parent()
-              .remove();
+            if (val && val !== tagPrompt) {
+              tag.remove();
+              addTag(matchid, val);
+            } else {
+              tag.html(tagPrompt);
+            }
           }
         });
       }
@@ -544,9 +531,10 @@ function createTag(tag, div, showClose = true) {
   return t;
 }
 
-function addTag(matchid, tag, div) {
+function addTag(matchid, tag) {
   const match = pd.match(matchid);
-  if (!match) return;
+  if (!match || !tag) return;
+  if (tag === tagPrompt) return;
   if (match.tags && match.tags.includes(tag)) return;
 
   ipcSend("add_history_tag", { matchid, tag });
@@ -554,7 +542,8 @@ function addTag(matchid, tag, div) {
 
 function deleteTag(matchid, tag) {
   const match = pd.match(matchid);
-  if (!match || !match.tags || !match.tags.includes(tag)) return;
+  if (!match || !tag) return;
+  if (!match.tags || !match.tags.includes(tag)) return;
 
   ipcSend("delete_history_tag", { matchid, tag });
 }

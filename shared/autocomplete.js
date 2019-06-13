@@ -3,6 +3,7 @@ function autocomplete(inp, arr, _onClick = () => {}) {
   the autocomplete function takes two arguments,
   the text field element and an array of possible autocompleted values:*/
   var currentFocus;
+  var currentActive;
 
   /*
   execute a function when someone writes in the text field:*/
@@ -82,6 +83,7 @@ function autocomplete(inp, arr, _onClick = () => {}) {
         /*
         If the ENTER key is pressed, prevent the form from being submitted,*/
         e.preventDefault();
+        e.stopPropagation();
         if (currentFocus > -1) {
           /*
           and simulate a click on the "active" item:*/
@@ -102,6 +104,8 @@ function autocomplete(inp, arr, _onClick = () => {}) {
     /*
     add class "autocomplete-active":*/
     x[currentFocus].classList.add("autocomplete-active");
+
+    currentActive = x[currentFocus];
   }
 
   function removeActive(x) {
@@ -127,6 +131,12 @@ function autocomplete(inp, arr, _onClick = () => {}) {
   execute a function when someone clicks in the document:*/
   document.addEventListener("click", function (e) {
       closeAllLists(e.target);
+      if (currentActive) {
+        currentActive.click();
+      } else {
+        _onClick();
+        e.stopPropagation();
+      }
   });
 }
 
