@@ -635,7 +635,7 @@ function saveOverlayPos(index) {
   if (!overlays[index] || overlaysResizeLock) return false;
 
   let bounds = overlays[index].getBounds();
-  overlays[index].bounds = bounds;
+  overlays_settings[index].bounds = bounds;
   background.webContents.send("overlayBounds", index, bounds);
   /*
   console.log(
