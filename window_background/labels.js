@@ -696,7 +696,6 @@ function onLabelOutDraftMakePick(entry, json) {
 
 function onLabelInEventCompleteDraft(entry, json) {
   if (!json) return;
-  ipc_send("save_overlay_pos", 1);
   clear_deck();
   ipc_send("set_arena_state", ARENA_MODE_IDLE);
   //ipc_send("renderer_show", 1);
@@ -759,7 +758,6 @@ function onLabelMatchGameRoomStateChangedEvent(entry, json) {
       }
     });
 
-    ipc_send("save_overlay_pos", 1);
     clear_deck();
     ipc_send("set_arena_state", ARENA_MODE_IDLE);
     matchCompletedOnGameNumber = json.finalMatchResult.resultList.length - 1;
