@@ -52,7 +52,7 @@ const overlayCfg = {
   clock: false,
   deck: true,
   lands: true,
-  keyboard_shortcut: false,
+  keyboard_shortcut: true,
   mode: 1,
   ontop: true,
   scale: 100,
