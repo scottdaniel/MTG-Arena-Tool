@@ -457,7 +457,6 @@ function createTag(tag, div, showClose = true) {
         input[0].select();
         const matchid = jQuery.data($(this)[0], "match");
         const options = jQuery.data($(this)[0], "autocomplete");
-        const masterdiv = $(this).parent()[0];
         const tag = $(this);
 
         autocomplete(input[0], options, () => {
@@ -471,25 +470,12 @@ function createTag(tag, div, showClose = true) {
           }, 10);
           if (e.keyCode === 13) {
             let val = $(this).val();
-            tag.remove();
             if (val && val !== tagPrompt) {
+              tag.remove();
               addTag(matchid, val);
             } else {
-              const t = createTag(null, masterdiv, false);
-              jQuery.data(t, "match", matchid);
-              jQuery.data(t, "autocomplete", options);
+              tag.html(tagPrompt);
             }
-          }
-        });
-        input.on("focusout", function() {
-          let val = $(this).val();
-          tag.remove();
-          if (val && val !== tagPrompt) {
-            addTag(matchid, val);
-          } else {
-            const t = createTag(null, masterdiv, false);
-            jQuery.data(t, "match", matchid);
-            jQuery.data(t, "autocomplete", options);
           }
         });
       }
