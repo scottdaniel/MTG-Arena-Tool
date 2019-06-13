@@ -8,7 +8,12 @@ const {
   BLUE,
   GREEN,
   RED,
-  WHITE
+  WHITE,
+  OVERLAY_LEFT,
+  OVERLAY_FULL,
+  OVERLAY_SEEN,
+  OVERLAY_DRAFT,
+  OVERLAY_LOG
 } = require("../shared/constants");
 const db = require("../shared/database");
 
@@ -40,39 +45,78 @@ const playerDataDefault = {
   }
 };
 
+const overlayCfg = {
+  alpha: 1,
+  alpha_back: 1,
+  bounds: { width: 300, height: 600, x: 0, y: 0 },
+  clock: false,
+  deck: true,
+  lands: true,
+  keyboard_shortcut: false,
+  mode: 1,
+  ontop: true,
+  scale: 100,
+  show: true,
+  show_always: false,
+  sideboard: false,
+  title: true,
+  top: true
+};
+
 const defaultCfg = {
   windowBounds: { width: 800, height: 600, x: 0, y: 0 },
-  overlayBounds: { width: 300, height: 600, x: 0, y: 0 },
   cards: { cards_time: 0, cards_before: [], cards: [] },
   cardsNew: {},
   settings: {
-    overlay_sideboard: false,
     sound_priority: false,
     sound_priority_volume: 1,
     cards_quality: "small",
-    show_overlay: true,
-    show_overlay_always: false,
     startup: true,
     close_to_tray: true,
     send_data: true,
     anon_explore: false,
     close_on_match: true,
     cards_size: 2,
-    overlay_alpha: 1,
-    overlay_alpha_back: 1,
-    overlay_scale: 100,
-    overlay_top: true,
-    overlay_title: true,
-    overlay_deck: true,
-    overlay_clock: true,
-    overlay_ontop: true,
-    overlay_lands: true,
     export_format: "$Name,$Count,$Rarity,$SetName,$Collector",
     back_color: "rgba(0,0,0,0.3)",
     back_url: "",
-    right_panel_width: 200,
+    right_panel_width: 400,
     last_open_tab: -1,
-    card_tile_style: CARD_TILE_FLAT
+    card_tile_style: CARD_TILE_FLAT,
+    overlays: [
+      {
+        ...overlayCfg,
+        bounds: { width: 300, height: 600, x: 0, y: 0 },
+        mode: OVERLAY_LEFT,
+        clock: true
+      },
+      {
+        ...overlayCfg,
+        bounds: { width: 300, height: 600, x: 310, y: 0 },
+        mode: OVERLAY_SEEN,
+        clock: false
+      },
+      {
+        ...overlayCfg,
+        bounds: { width: 300, height: 600, x: 0, y: 0 },
+        mode: OVERLAY_DRAFT,
+        clock: false,
+        show: false
+      },
+      {
+        ...overlayCfg,
+        bounds: { width: 300, height: 600, x: 0, y: 0 },
+        mode: OVERLAY_LOG,
+        clock: false,
+        show: false
+      },
+      {
+        ...overlayCfg,
+        bounds: { width: 300, height: 600, x: 0, y: 0 },
+        mode: OVERLAY_FULL,
+        show: false
+      }
+    ]
   },
   economy_index: [],
   economy: {

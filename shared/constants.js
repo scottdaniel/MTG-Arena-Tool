@@ -619,6 +619,17 @@ exports.COLORS_ALL = ["w", "u", "b", "r", "g", "c"];
 exports.COLORS_BRIEF = ["w", "u", "b", "r", "g"];
 exports.RANKS = ["Bronze", "Silver", "Gold", "Platinum", "Diamond", "Mythic"];
 
+exports.OVERLAY_FULL = 0;
+exports.OVERLAY_LEFT = 1;
+exports.OVERLAY_ODDS = 2;
+exports.OVERLAY_SEEN = 3;
+exports.OVERLAY_LOG = 4;
+exports.OVERLAY_DRAFT = 5;
+
+exports.ARENA_MODE_IDLE = 0;
+exports.ARENA_MODE_MATCH = 1;
+exports.ARENA_MODE_DRAFT = 2;
+
 const DRAFT_RANKS = [];
 DRAFT_RANKS[12] = "A+";
 DRAFT_RANKS[11] = "A";
