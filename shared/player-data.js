@@ -183,12 +183,6 @@ class PlayerData {
 
   handleSetData(_event, arg) {
     Object.assign(this, arg);
-    if (arg.tags_colors) {
-      Object.keys(arg.tags_colors).forEach(tag => {
-        const lowerTag = tag.toLowerCase();
-        this.tags_colors[lowerTag] = arg.tags_colors[tag];
-      });
-    }
   }
 
   get cardsSize() {
@@ -239,12 +233,11 @@ class PlayerData {
 
   deck(id) {
     if (!this.deckExists(id)) return false;
-    const tags = (this.decks_tags[id] || []).map(tag => tag.toLowerCase());
     return {
       ...this.decks[id],
       colors: get_deck_colors(this.decks[id]),
       custom: !this.static_decks.includes(id),
-      tags: [...new Set(tags)]
+      tags: this.decks_tags[id] || []
     };
   }
 
@@ -279,12 +272,7 @@ class PlayerData {
 
   match(id) {
     if (!this.matchExists(id)) return false;
-    const tags = (this[id].tags || []).map(tag => tag.toLowerCase());
-    const match = {
-      ...this[id],
-      tags: [...new Set(tags)],
-      type: "match"
-    };
+    const match = { ...this[id], type: "match" };
     if (!match.playerDeck) {
       match.playerDeck = JSON.parse(
         '{"deckTileId":' +

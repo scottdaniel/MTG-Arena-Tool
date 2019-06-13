@@ -400,10 +400,9 @@ ipc.on("edit_tag", (event, arg) => {
 });
 
 ipc.on("delete_tag", (event, arg) => {
-  let { deckid, tag } = arg;
+  const { deckid, tag } = arg;
   const deck = pd.deck(deckid);
   if (!deck || !tag) return;
-  tag = tag.toLowerCase();
   if (!deck.tags || !deck.tags.includes(tag)) return;
 
   const tags = [...deck.tags];
@@ -416,11 +415,10 @@ ipc.on("delete_tag", (event, arg) => {
 });
 
 ipc.on("add_tag", (event, arg) => {
-  let { deckid, tag } = arg;
+  const { deckid, tag } = arg;
   const deck = pd.deck(deckid);
   if (!deck || !tag) return;
-  tag = tag.toLowerCase();
-  if (getReadableFormat(deck.format).toLowerCase() === tag) return;
+  if (getReadableFormat(deck.format) === tag) return;
   if (deck.tags && deck.tags.includes(tag)) return;
 
   const tags = [...deck.tags, tag];
@@ -432,10 +430,9 @@ ipc.on("add_tag", (event, arg) => {
 });
 
 ipc.on("delete_history_tag", (event, arg) => {
-  let { matchid, tag } = arg;
+  const { matchid, tag } = arg;
   const match = pd.match(matchid);
   if (!match || !tag) return;
-  tag = tag.toLowerCase();
   if (!match.tags || !match.tags.includes(tag)) return;
 
   const tags = [...match.tags];
@@ -449,10 +446,9 @@ ipc.on("delete_history_tag", (event, arg) => {
 });
 
 ipc.on("add_history_tag", (event, arg) => {
-  let { matchid, tag } = arg;
+  const { matchid, tag } = arg;
   const match = pd.match(matchid);
   if (!match || !tag) return;
-  tag = tag.toLowerCase();
   if (match.tags && match.tags.includes(tag)) return;
 
   const tags = [...(match.tags || []), tag];

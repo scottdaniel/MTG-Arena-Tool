@@ -34,7 +34,7 @@ const { DEFAULT_DECK, RANKED_CONST, RANKED_DRAFT, DATE_SEASON } = Aggregator;
 let filters = Aggregator.getDefaultFilters();
 let filteredMatches;
 let sortedHistory;
-const tagPrompt = "set archetype";
+const tagPrompt = "Set archetype";
 
 function getNextRank(currentRank) {
   var rankIndex = RANKS.indexOf(currentRank);
@@ -295,10 +295,7 @@ function attachMatchData(listItem, match) {
 
   // Set tag
   const totalAgg = getLocalState().totalAgg;
-  const allTags = [
-    ...totalAgg.archs,
-    ...db.archetypes.map(arch => arch.name.toLowerCase())
-  ];
+  const allTags = [...totalAgg.archs, ...db.archetypes.map(arch => arch.name)];
   const tags = [...new Set(allTags)].map(tag => {
     const count = totalAgg.archCounts[tag] || 0;
     return { tag, q: count };
@@ -537,7 +534,6 @@ function createTag(tag, div, showClose = true) {
 function addTag(matchid, tag) {
   const match = pd.match(matchid);
   if (!match || !tag) return;
-  tag = tag.toLowerCase();
   if (tag === tagPrompt) return;
   if (match.tags && match.tags.includes(tag)) return;
 
@@ -547,7 +543,6 @@ function addTag(matchid, tag) {
 function deleteTag(matchid, tag) {
   const match = pd.match(matchid);
   if (!match || !tag) return;
-  tag = tag.toLowerCase();
   if (!match.tags || !match.tags.includes(tag)) return;
 
   ipcSend("delete_history_tag", { matchid, tag });

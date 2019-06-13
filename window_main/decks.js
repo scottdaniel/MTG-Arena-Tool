@@ -27,7 +27,7 @@ const {
 
 let filters = Aggregator.getDefaultFilters();
 filters.onlyCurrentDecks = true;
-const tagPrompt = "add";
+const tagPrompt = "Add";
 
 function setFilters(selected = {}) {
   if (selected.eventId || selected.date) {
@@ -145,14 +145,14 @@ function openDecksTab(_filters = {}, scrollTop = 0) {
     const t = createTag(null, listItem.center, false);
     jQuery.data(t, "deck", deck.id);
     if (deck.format) {
-      const fText = getReadableFormat(deck.format).toLowerCase();
+      const fText = getReadableFormat(deck.format);
       const t = createTag(fText, listItem.center, false);
       t.style.fontStyle = "italic";
       jQuery.data(t, "deck", deck.id);
     }
     if (deck.tags) {
       deck.tags.forEach(tag => {
-        if (tag !== getReadableFormat(deck.format).toLowerCase()) {
+        if (tag !== getReadableFormat(deck.format)) {
           const t = createTag(tag, listItem.center);
           jQuery.data(t, "deck", deck.id);
         }
@@ -371,8 +371,7 @@ function createTag(tag, div, showClose = true) {
 function addTag(deckid, tag) {
   const deck = pd.deck(deckid);
   if (!deck || !tag) return;
-  tag = tag.toLowerCase();
-  if (getReadableFormat(deck.format).toLowerCase() === tag) return;
+  if (getReadableFormat(deck.format) === tag) return;
   if (tag === tagPrompt) return;
   if (deck.tags && deck.tags.includes(tag)) return;
 
@@ -382,7 +381,6 @@ function addTag(deckid, tag) {
 function deleteTag(deckid, tag) {
   const deck = pd.deck(deckid);
   if (!deck || !tag) return;
-  tag = tag.toLowerCase();
   if (!deck.tags || !deck.tags.includes(tag)) return;
 
   ipcSend("delete_tag", { deckid, tag });
