@@ -38,7 +38,14 @@ const {
   MANA,
   PACK_SIZES,
   IPC_BACKGROUND,
-  IPC_OVERLAY
+  IPC_OVERLAY,
+  IPC_MAIN,
+  OVERLAY_FULL,
+  OVERLAY_LEFT,
+  OVERLAY_ODDS,
+  OVERLAY_SEEN,
+  OVERLAY_DRAFT,
+  OVERLAY_LOG
 } = require("../shared/constants.js");
 
 let landsCard = {
@@ -63,15 +70,9 @@ let matchBeginTime = Date.now();
 let priorityTimers = [];
 let clockMode = 0;
 let draftMode = 1;
-let deckMode = 0;
 let overlayMode = 0;
+let overlayIndex = -1;
 setRenderer(1);
-
-//var turnPhase = 0;
-//var turnStep = 0;
-//var turnNumber = 0;
-//var turnActive = 0;
-//var turnDecision = 0;
 
 let playerSeat = 0;
 let oppName = "";
@@ -243,23 +244,30 @@ function recreateClock() {
     }
   }
 
-  if (overlayMode == 1) {
+  if (overlayMode == OVERLAY_DRAFT) {
     $(".clock_turn").html("");
   }
 
   updateClock();
 }
 
+ipc.on("set_overlay_index", (event, arg) => {
+  overlayIndex = arg;
+});
+
+//
+ipc.on("close", (event, arg) => {
+  close(arg);
+});
+
 //
 ipc.on("set_timer", function(event, arg) {
   if (arg == -1) {
-    //overlayMode = 1;
     matchBeginTime = Date.now();
   } else if (arg !== 0) {
     //matchBeginTime = arg == 0 ? 0 : Date.parse(arg);
     matchBeginTime = Date.parse(arg);
   }
-  //console.log("set time", arg);
 });
 
 ipc.on("set_priority_timer", function(event, arg) {
@@ -279,21 +287,20 @@ ipc.on("action_log", function(event, arg) {
   //console.log(arg.seat, arg.str);
 });
 
-ipc.on("settings_updated", function() {
-  // Alpha does some weird things..
-  /*
-  let alpha = settings.overlay_alpha;
-  $('body').css("background-color", "rgba(0,0,0,"+alpha+")");
-  $('.overlay_wrapper:before').css("opacity", 0.4*alpha);
-  $('.overlay_wrapper').css("opacity", alpha);
-  */
+ipc.on("settings_updated", () => {
+  if (overlayIndex == -1) return;
+
+  let settings = pd.settings.overlays[overlayIndex];
+
+  overlayMode = settings.mode;
+
   change_background(pd.settings.back_url);
 
-  webFrame.setZoomFactor(pd.settings.overlay_scale / 100);
+  webFrame.setZoomFactor(settings.scale / 100);
 
-  $(".overlay_container").css("opacity", pd.settings.overlay_alpha);
-  $(".overlay_wrapper").css("opacity", pd.settings.overlay_alpha_back);
-  if (pd.settings.overlay_alpha_back === 1) {
+  $(".overlay_container").css("opacity", settings.alpha);
+  $(".overlay_wrapper").css("opacity", settings.alpha_back);
+  if (settings.alpha_back === 1) {
     $(".click-through").each(function() {
       $(this).css("pointer-events", "all");
     });
@@ -306,42 +313,32 @@ ipc.on("settings_updated", function() {
   }
 
   $(".top").css("display", "");
+  $(".overlay_title").html("Overlay " + (overlayIndex + 1));
   $(".overlay_deckname").css("display", "");
   $(".overlay_deckcolors").css("display", "");
   $(".overlay_decklist").css("display", "");
-  $(".overlay_clock_spacer").css("display", "");
   $(".overlay_clock_container").css("display", "");
-  $(".overlay_deck_container").attr("style", "");
   $(".overlay_draft_container").attr("style", "");
   $(".overlay_deckname").attr("style", "");
   $(".overlay_deckcolors").attr("style", "");
 
-  if (overlayMode == 0) {
+  if (overlayMode !== OVERLAY_DRAFT) {
     $(".overlay_draft_container").hide();
-    $(".overlay_deck_container").show();
-  }
-  if (overlayMode == 1) {
+  } else {
     $(".overlay_draft_container").show();
-    $(".overlay_deck_container").hide();
   }
 
-  if (!pd.settings.overlay_top) {
+  if (!settings.top) {
     hideDiv(".top");
-    let style = "top: 0px !important;";
-    $(".overlay_deck_container").attr("style", style);
-    $(".overlay_draft_container").attr("style", style);
   }
-  if (!pd.settings.overlay_title) {
+  if (!settings.title) {
     hideDiv(".overlay_deckname");
     hideDiv(".overlay_deckcolors");
   }
-  if (!pd.settings.overlay_deck) {
+  if (!settings.deck) {
     hideDiv(".overlay_decklist");
-    hideDiv(".overlay_deck_container");
-    hideDiv(".overlay_draft_container");
   }
-  if (!pd.settings.overlay_clock || overlayMode == 1) {
-    hideDiv(".overlay_clock_spacer");
+  if (!settings.clock || overlayMode == OVERLAY_DRAFT) {
     hideDiv(".overlay_clock_container");
   }
 
@@ -380,9 +377,13 @@ ipc.on("set_opponent_rank", function(event, rank, title) {
     .attr("title", title);
 });
 
-let changedMode = true;
-
 ipc.on("set_match", (event, arg) => {
+  if (overlayIndex == -1) return;
+  if (overlayMode == OVERLAY_DRAFT) return false;
+  let settings = pd.settings.overlays[overlayIndex];
+
+  if (settings.show == false && settings.show_always == false) return false;
+
   currentMatch = JSON.parse(arg);
 
   currentMatch.oppCards = new Deck(currentMatch.oppCards);
@@ -398,7 +399,9 @@ ipc.on("set_match", (event, arg) => {
 });
 
 function updateView() {
-  overlayMode = 0;
+  if (overlayIndex == -1) return;
+  let settings = pd.settings.overlays[overlayIndex];
+
   let cleanName =
     currentMatch && currentMatch.opponent && currentMatch.opponent.name;
   if (cleanName && cleanName !== "Sparky") {
@@ -406,13 +409,10 @@ function updateView() {
   }
   oppName = cleanName || "Opponent";
 
-  if (overlayMode == 0) {
+  if (overlayMode !== OVERLAY_DRAFT) {
     $(".overlay_draft_container").hide();
-    $(".overlay_deck_container").show();
-  }
-  if (overlayMode == 1) {
+  } else {
     $(".overlay_draft_container").show();
-    $(".overlay_deck_container").hide();
   }
 
   var doscroll = false;
@@ -427,7 +427,6 @@ function updateView() {
   }
 
   $(".overlay_archetype").remove();
-  $(".overlay_deck_container").show();
   $(".overlay_draft_container").hide();
   $(".overlay_decklist").html("");
   $(".overlay_deckcolors").html("");
@@ -438,7 +437,7 @@ function updateView() {
   // Action Log Mode
   //
   deckListDiv = $(".overlay_decklist");
-  if (deckMode == 4) {
+  if (overlayMode == OVERLAY_LOG) {
     $(".overlay_deckname").html("Action Log");
 
     let initalTime = actionLog[0] ? new Date(actionLog[0].time) : new Date();
@@ -484,7 +483,7 @@ function updateView() {
   //
   // Opponent Cards Mode
   //
-  if (deckMode == 3) {
+  if (overlayMode == OVERLAY_SEEN) {
     $('<div class="overlay_archetype"></div>').insertAfter(".overlay_deckname");
     $(".overlay_deckname").html("Played by " + oppName);
     $(".overlay_archetype").html(currentMatch.oppCards.archetype);
@@ -500,7 +499,7 @@ function updateView() {
   //
   // Player Cards Odds Mode
   //
-  if (deckMode == 2) {
+  if (overlayMode == OVERLAY_ODDS) {
     let cardsLeft = currentMatch.playerCardsLeft.mainboard.count();
     deckListDiv.append(
       `<div class="decklist_title">${cardsLeft} cards left</div>`
@@ -511,7 +510,7 @@ function updateView() {
   //
   // Player Full Deck Mode
   //
-  if (deckMode == 1) {
+  if (overlayMode == OVERLAY_FULL) {
     let cardsCount = currentMatch.player.deck.mainboard.count();
     deckListDiv.append(`<div class="decklist_title">${cardsCount} cards</div>`);
     deckToDraw = currentMatch.player.deck;
@@ -520,7 +519,7 @@ function updateView() {
   //
   // Player Cards Left Mode
   //
-  if (deckMode == 0) {
+  if (overlayMode == OVERLAY_LEFT) {
     let cardsLeft = currentMatch.playerCardsLeft.mainboard.count();
     deckListDiv.append(
       `<div class="decklist_title">${cardsLeft} cards left</div>`
@@ -528,7 +527,11 @@ function updateView() {
     deckToDraw = currentMatch.playerCardsLeft;
   }
 
-  if (deckMode !== 3) {
+  if (
+    overlayMode == OVERLAY_ODDS ||
+    overlayMode == OVERLAY_FULL ||
+    overlayMode == OVERLAY_LEFT
+  ) {
     $(".overlay_deckname").html(deckToDraw.name);
     deckToDraw.colors.get().forEach(color => {
       $(".overlay_deckcolors").append(
@@ -540,14 +543,18 @@ function updateView() {
   if (!deckToDraw) return;
 
   let sortFunc = compare_cards;
-  if (deckMode === 2) {
+  if (overlayMode === OVERLAY_ODDS) {
     sortFunc = compare_chances;
   }
 
   let mainCards = deckToDraw.mainboard;
   mainCards.removeDuplicates();
   // group lands
-  if (pd.settings.overlay_lands && deckMode !== 3) {
+  if (
+    settings.lands &&
+    overlayMode !== OVERLAY_DRAFT &&
+    overlayMode !== OVERLAY_LOG
+  ) {
     let landsNumber = 0;
     let landsChance = 0;
     let landsColors = new Colors();
@@ -575,12 +582,9 @@ function updateView() {
   mainCards.get().forEach(card => {
     var grpId = card.id;
     let tile;
-    if (deckMode == 2) {
+    if (overlayMode == OVERLAY_ODDS) {
       let quantity = (card.chance !== undefined ? card.chance : "0") + "%";
-      if (
-        !pd.settings.overlay_lands ||
-        (pd.settings.overlay_lands && quantity !== "0%")
-      ) {
+      if (!settings.lands || (settings.lands && quantity !== "0%")) {
         tile = deckDrawer.cardTile(
           pd.settings.card_tile_style,
           grpId,
@@ -605,7 +609,7 @@ function updateView() {
       attachLandOdds(tile, currentMatch.playerCardsOdds);
     }
   });
-  if (pd.settings.overlay_sideboard && deckToDraw.sideboard.count() > 0) {
+  if (settings.sideboard && deckToDraw.sideboard.count() > 0) {
     deckListDiv.append('<div class="card_tile_separator">Sideboard</div>');
 
     let sideCards = deckToDraw.sideboard;
@@ -614,7 +618,7 @@ function updateView() {
 
     sideCards.get().forEach(function(card) {
       var grpId = card.id;
-      if (deckMode == 2) {
+      if (overlayMode == OVERLAY_ODDS) {
         let tile = deckDrawer.cardTile(
           pd.settings.card_tile_style,
           grpId,
@@ -634,7 +638,7 @@ function updateView() {
     });
   }
 
-  if (deckMode == 2) {
+  if (overlayMode == OVERLAY_ODDS) {
     drawDeckOdds();
   }
 }
@@ -743,13 +747,10 @@ function drawDeckOdds() {
 var currentDraft;
 //
 ipc.on("set_draft_cards", function(event, draft) {
-  if (overlayMode == 0) {
-    overlayMode = 1;
-    clockMode = 1;
-    recreateClock();
-    $(".overlay_draft_container").show();
-    $(".overlay_deck_container").hide();
-  }
+  clockMode = 1;
+  recreateClock();
+  $(".overlay_draft_container").show();
+
   matchBeginTime = Date.now();
   currentDraft = draft;
   //draftPack = pack;
@@ -938,6 +939,20 @@ function change_background(arg) {
   }
 }
 
+function close(bool) {
+  if (overlayIndex == -1) return;
+  // -1 to toggle, else set
+  let _new = bool == -1 ? !pd.settings.overlays[overlayIndex].show : bool;
+
+  const overlays = [...pd.settings.overlays];
+  const newOverlay = {
+    ...overlays[overlayIndex], // old overlay
+    show: _new // new setting
+  };
+  overlays[overlayIndex] = newOverlay;
+  ipc_send("save_user_settings", { overlays });
+}
+
 $(document).ready(function() {
   $(".overlay_draft_container").hide();
   recreateClock();
@@ -1000,37 +1015,19 @@ $(document).ready(function() {
   });
 
   //
-  $(".deck_prev").click(function() {
-    changedMode = true;
-    deckMode -= 1;
-    if (deckMode < 0) {
-      deckMode = 4;
-    }
-    updateView();
-  });
-  //
-  $(".deck_next").click(function() {
-    changedMode = true;
-    deckMode += 1;
-    if (deckMode > 4) {
-      deckMode = 0;
-    }
-    updateView();
-  });
-
-  //
   $(".close").click(function() {
-    ipc_send("overlay_close", 1);
+    close(false);
   });
 
   //
   $(".minimize").click(function() {
-    ipc_send("overlay_minimize", 1);
+    ipc_send("overlay_minimize", overlayIndex);
   });
 
   //
   $(".settings").click(function() {
-    ipc_send("force_open_settings", 1);
+    ipc_send("renderer_show");
+    ipc_send("force_open_overlay_settings", overlayIndex, IPC_MAIN);
   });
 
   $(".overlay_container").hover(
@@ -1038,8 +1035,10 @@ $(document).ready(function() {
       $(".overlay_container").css("opacity", 1);
     },
     function() {
-      if (pd.settings.overlay_alpha !== 1) {
-        $(".overlay_container").css("opacity", pd.settings.overlay_alpha);
+      if (overlayIndex == -1) return;
+      let settings = pd.settings.overlays[overlayIndex];
+      if (settings.alpha !== 1) {
+        $(".overlay_container").css("opacity", settings.alpha);
       }
     }
   );

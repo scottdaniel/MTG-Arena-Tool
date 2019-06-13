@@ -55,7 +55,7 @@ const { openEventsTab } = require("./events");
 const { openEconomyTab } = require("./economy");
 const { openExploreTab, setExploreDecks } = require("./explore");
 const { openCollectionTab } = require("./collection");
-const { openSettingsTab } = require("./settings");
+const { openSettingsTab, setCurrentOverlaySettings } = require("./settings");
 
 let sidebarActive = -2;
 let loggedIn = false;
@@ -264,7 +264,8 @@ ipc.on("settings_updated", function() {
   }
   $(".main_wrapper").css("background-color", pd.settings.back_color);
   if (sidebarActive === 6) {
-    openSettingsTab();
+    const ls = getLocalState();
+    openSettingsTab(-1, ls.lastScrollTop);
   }
   lastSettings = { ...pd.settings };
 });
@@ -303,6 +304,12 @@ ipc.on("hide_notification", function() {
 //
 ipc.on("force_open_settings", function() {
   force_open_settings();
+});
+
+//
+ipc.on("force_open_overlay_settings", function(event, arg) {
+  setCurrentOverlaySettings(arg);
+  force_open_settings(2);
 });
 
 //
@@ -357,7 +364,7 @@ function openTab(tab, filters = {}, dataIndex = 0, scrollTop = 0) {
       openCollectionTab();
       break;
     case 6:
-      openSettingsTab();
+      openSettingsTab(-1, scrollTop);
       break;
     case -1:
       tabClass = "ith";
@@ -528,7 +535,7 @@ ipc.on("popup", function(event, arg, time) {
 });
 
 //
-function force_open_settings() {
+function force_open_settings(section = -1) {
   sidebarActive = 6;
   $(".top_nav_item").each(function() {
     $(this).removeClass("item_selected");
@@ -537,7 +544,7 @@ function force_open_settings() {
     }
   });
   $(".moving_ux").animate({ left: "0px" }, 250, "easeInOutCubic");
-  openSettingsTab();
+  openSettingsTab(section, 0);
 }
 
 //
@@ -550,7 +557,7 @@ function force_open_about() {
     }
   });
   $(".moving_ux").animate({ left: "0px" }, 250, "easeInOutCubic");
-  openSettingsTab(5);
+  openSettingsTab(5, 0);
 }
 
 //

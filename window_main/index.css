@@ -2501,7 +2501,7 @@ a:hover {
 .settings_note {
     color: rgba(250, 229, 210, 1);
     font-size: 14px;
-    margin: 0px 64px 20px 16px !important;
+    margin: 0px 64px 20px 16px;
 }
 
 .deck_visual_stats {
@@ -3225,4 +3225,58 @@ a:hover {
     overflow: hidden;
     background: #B7C89E url(../images/show.png) no-repeat left;
     -webkit-transition: all .25s cubic-bezier(0.2, 0.5, 0.35, 1);
+}
+
+.overlay_section {
+    display: block;
+}
+
+.overlay_section_selector_cont {
+    display: flex;
+    height: 64px;
+    width: 100%;
+    justify-content: space-around;
+}
+
+.overlay_prev {
+    cursor: pointer;
+    background: url(../images/prev.png) no-repeat center;
+    display: block;
+    opacity: 0.5;
+    width: 32px;
+    height: 64px;
+    -webkit-transition: all 0.2s ease-in;
+}
+
+.overlay_prev:hover {
+    opacity: 1;
+}
+
+.overlay_current {
+    height: 64px;
+    line-height: 64px;
+    color: rgba(250, 229, 210, 1);
+    text-align: center;
+    margin-right: auto;
+    font-family: var(--main-font-name);
+}
+
+.overlay_next {
+    cursor: pointer;
+    background: url(../images/next.png) no-repeat center;
+    opacity: 0.5;
+    display: block;
+    width: 32px;
+    height: 64px;
+    -webkit-transition: all 0.2s ease-in;
+}
+
+.overlay_next:hover {
+    opacity: 1;
+}
+
+.overlay_icon {
+    width: 20px;
+    height: 20px;
+    margin: auto 24px auto auto;
 }

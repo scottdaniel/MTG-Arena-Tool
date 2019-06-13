@@ -19,6 +19,14 @@ var rememberStore = new Store({
   defaults: {}
 });
 
+const {
+  ARENA_MODE_IDLE,
+  ARENA_MODE_MATCH,
+  ARENA_MODE_DRAFT,
+  OVERLAY_DRAFT,
+  COLORS_ALL
+} = require("./shared/constants");
+
 app.setAppUserModelId("com.github.manuel777.mtgatool");
 
 // Adds debug features like hotkeys for triggering dev tools and reload
@@ -31,12 +39,17 @@ const debugIPC = false;
 var mainWindow;
 var updaterWindow;
 var background;
-var overlay;
+var overlays = [undefined, undefined, undefined, undefined, undefined];
+var overlaysAlpha = [false, false, false, false, false];
+var overlaysTimeout = [null, null, null, null, null];
+var overlaysResizeLock = true;
+var mainTimeout = null;
+var arenaState = ARENA_MODE_IDLE;
+var overlays_settings = null;
 var tray = null;
 var closeToTray = true;
 let autoLogin = false;
 let launchToTray = false;
-var alphaEnabled = false;
 
 const ipc = electron.ipcMain;
 
@@ -77,6 +90,7 @@ function startUpdater() {
 
   updaterWindow.webContents.on("did-finish-load", function() {
     updaterWindow.show();
+    updaterWindow.moveTop();
   });
 
   let betaChannel = rememberStore.get("settings.beta_channel");
@@ -115,15 +129,18 @@ function installUpdate() {
 
 function startApp() {
   mainWindow = createMainWindow();
-  overlay = createOverlay();
   background = createBackgroundWindow();
 
   globalShortcut.register("Alt+Shift+D", () => {
     if (!background.isVisible()) background.show();
     else background.hide();
     background.toggleDevTools();
-    overlay.toggleDevTools();
     mainWindow.toggleDevTools();
+    overlays.forEach(overlay => {
+      if (overlay) {
+        overlay.toggleDevTools();
+      }
+    });
   });
 
   mainWindow.webContents.once("dom-ready", () => {
@@ -175,17 +192,29 @@ function startApp() {
 
       case "settings_updated":
         mainWindow.webContents.send("settings_updated");
-        overlay.webContents.send("settings_updated");
+        overlays.forEach(overlay => {
+          if (overlay) {
+            overlay.webContents.send("settings_updated");
+          }
+        });
         break;
 
       case "player_data_refresh":
         mainWindow.webContents.send("player_data_refresh");
-        overlay.webContents.send("player_data_refresh");
+        overlays.forEach(overlay => {
+          overlay.webContents.send("player_data_refresh");
+        });
+        break;
+
+      case "player_data_loaded":
+        overlaysResizeLock = false;
         break;
 
       case "set_db":
         mainWindow.webContents.send("set_db", arg);
-        overlay.webContents.send("set_db", arg);
+        overlays.forEach(overlay => {
+          overlay.webContents.send("set_db", arg);
+        });
         if (autoLogin) {
           background.webContents.send("auto_login");
         }
@@ -204,11 +233,27 @@ function startApp() {
         mainWindow.minimize();
         break;
 
-      case "set_opponent_rank":
-        overlay.webContents.send("set_opponent_rank", arg.rank, arg.str);
+      // to main js / window handling
+      case "set_arena_state":
+        arenaState = arg;
+        overlays_settings.forEach(overlaySetSettings);
         break;
 
-      // to main js / window handling
+      case "overlay_close":
+        if (overlays[arg] && overlays[arg].isVisible()) {
+          overlays[arg].hide();
+        }
+        break;
+
+      case "overlay_minimize":
+        if (overlays[arg] && !overlays[arg].isMinimized()) {
+          overlays[arg].minimize();
+        }
+        break;
+
+      case "renderer_set_bounds":
+        mainWindow.setBounds(arg);
+        break;
 
       case "show_background":
         background.show();
@@ -234,47 +279,14 @@ function startApp() {
         closeToTray = arg;
         break;
 
-      case "overlay_show":
-        if (!overlay.isVisible()) {
-          overlay.showInactive();
-        }
-        break;
-
-      case "overlay_close":
-        overlay.hide();
-        break;
-
-      case "overlay_minimize":
-        overlay.minimize();
-        break;
-
-      case "renderer_set_bounds":
-        mainWindow.setBounds(arg);
-        break;
-
-      case "overlay_set_bounds":
-        overlay.setBounds(arg);
-        break;
-
-      case "overlay_set_ontop":
-        overlay.setAlwaysOnTop(arg, "floating");
-        break;
-
-      case "save_overlay_pos":
-        saveOverlayPos();
-        break;
-
-      case "force_open_settings":
-        mainWindow.webContents.send("force_open_settings", true);
-        showWindow();
-        break;
-
       case "set_clipboard":
         clipboard.writeText(arg);
         break;
 
       case "reset_overlay_pos":
-        overlay.setPosition(0, 0);
+        overlays.forEach(overlay => {
+          overlay.setPosition(0, 0);
+        });
         break;
 
       case "updates_check":
@@ -336,14 +348,25 @@ function startApp() {
       default:
         if (to == 0) background.webContents.send(method, arg);
         if (to == 1) mainWindow.webContents.send(method, arg);
-        if (to == 2) overlay.webContents.send(method, arg);
+        if (to == 2) {
+          overlays.forEach(overlay => {
+            if (overlay) {
+              overlay.webContents.send(method, arg);
+            }
+          });
+        }
         break;
     }
   });
 
   //
   ipc.on("set_draft_cards", function(event, pack, picks, packn, pickn) {
-    overlay.webContents.send("set_draft_cards", pack, picks, packn, pickn);
+    overlays_settings.forEach((settings, index) => {
+      if (settings.mode == OVERLAY_DRAFT) {
+        let overlay = overlays[index];
+        overlay.webContents.send("set_draft_cards", pack, picks, packn, pickn);
+      }
+    });
   });
 
   //
@@ -357,16 +380,21 @@ function startApp() {
     turnPriority,
     turnDecision
   ) {
-    overlay.webContents.send(
-      "set_turn",
-      playerSeat,
-      turnPhase,
-      turnStep,
-      turnNumber,
-      turnActive,
-      turnPriority,
-      turnDecision
-    );
+    overlays_settings.forEach((settings, index) => {
+      if (settings.mode !== OVERLAY_DRAFT) {
+        let overlay = overlays[index];
+        overlay.webContents.send(
+          "set_turn",
+          playerSeat,
+          turnPhase,
+          turnStep,
+          turnNumber,
+          turnActive,
+          turnPriority,
+          turnDecision
+        );
+      }
+    });
   });
 }
 
@@ -382,11 +410,9 @@ function setSettings(settings) {
     showWindow();
   }
 
-  var oldAlphaEnabled = alphaEnabled;
-  alphaEnabled = settings.overlay_alpha_back < 1;
-  if (oldAlphaEnabled != alphaEnabled) {
-    recreateOverlay();
-  }
+  overlays_settings = settings.overlays;
+  overlays_settings.forEach(overlaySetSettings);
+
   firstSettingsRead = false;
 }
 
@@ -402,7 +428,7 @@ function onClosed() {
 }
 
 function onOverlayClosed() {
-  overlay = null;
+  //  overlay = null;
 }
 
 function hideWindow() {
@@ -424,11 +450,13 @@ function toggleWindow() {
 }
 
 function showWindow() {
-  if (mainWindow && !mainWindow.isVisible()) {
-    mainWindow.show();
+  if (mainWindow) {
+    if (!mainWindow.isVisible()) mainWindow.show();
+    mainWindow.moveTop();
   }
-  if (updaterWindow && !updaterWindow.isVisible()) {
-    updaterWindow.show();
+  if (updaterWindow) {
+    if (!updaterWindow.isVisible()) updaterWindow.show();
+    updaterWindow.moveTop();
   }
 }
 
@@ -445,17 +473,6 @@ function saveWindowPos() {
   obj.x = Math.floor(pos[0]);
   obj.y = Math.floor(pos[1]);
   background.webContents.send("windowBounds", obj);
-}
-
-function saveOverlayPos() {
-  var obj = {};
-  var bounds = overlay.getBounds();
-  var pos = overlay.getPosition();
-  obj.width = Math.floor(bounds.width);
-  obj.height = Math.floor(bounds.height);
-  obj.x = Math.floor(pos[0]);
-  obj.y = Math.floor(pos[1]);
-  background.webContents.send("overlayBounds", obj);
 }
 
 function createUpdaterWindow() {
@@ -540,24 +557,43 @@ function createMainWindow() {
   tray.setContextMenu(contextMenu);
 
   win.on("resize", () => {
-    saveWindowPos();
+    if (mainTimeout) {
+      clearTimeout(mainTimeout);
+      mainTimeout = null;
+    }
+    mainTimeout = setTimeout(function() {
+      saveWindowPos();
+      mainTimeout = null;
+    }, 500);
+  });
+
+  win.on("move", function() {
+    if (mainTimeout) {
+      clearTimeout(mainTimeout);
+      mainTimeout = null;
+    }
+    mainTimeout = setTimeout(function() {
+      saveWindowPos();
+      mainTimeout = null;
+    }, 500);
   });
 
   return win;
 }
 
-function createOverlay() {
+function createOverlay(settings, index) {
+  let alphaEnabled = settings.alpha_back < 1;
   const over = new electron.BrowserWindow({
     transparent: alphaEnabled,
     frame: false,
-    alwaysOnTop: true,
-    x: 0,
-    y: 0,
-    width: 300,
-    height: 600,
+    alwaysOnTop: settings.ontop,
+    x: settings.bounds.x,
+    y: settings.bounds.y,
+    width: settings.bounds.width,
+    height: settings.bounds.height,
     show: false,
     title: "MTG Arena Tool",
-    icon: "iconoverlay.png",
+    icon: `./resources/icon-overlay-${COLORS_ALL[index]}.png`,
     webPreferences: {
       nodeIntegration: true
     }
@@ -565,27 +601,102 @@ function createOverlay() {
   over.loadURL(`file://${__dirname}/window_overlay/index.html`);
   over.on("closed", onOverlayClosed);
 
-  over.on("resize", () => {
-    saveOverlayPos();
+  over.on("resize", function() {
+    let timer = overlaysTimeout[index];
+    if (timer) {
+      clearTimeout(timer);
+    }
+    overlaysTimeout[index] = setTimeout(function() {
+      saveOverlayPos(index);
+      overlaysTimeout[index] = null;
+    }, 500);
   });
 
-  /*
-  setTimeout( function() {
-    overlay.webContents.send("set_deck", currentDeck);
-    //debug_overlay_show();
-  }, 1000);
-  */
+  over.on("move", function() {
+    //console.log(new Date().getTime());
+    let timer = overlaysTimeout[index];
+    if (timer) {
+      clearTimeout(timer);
+    }
+    overlaysTimeout[index] = setTimeout(function() {
+      saveOverlayPos(index);
+      overlaysTimeout[index] = null;
+    }, 500);
+  });
+
+  over.once("did-finish-load", function() {
+    over.webContents.send("set_overlay_index", index);
+  });
+
   return over;
 }
 
-function recreateOverlay() {
-  if (overlay) {
-    overlay.destroy();
-    overlay = createOverlay();
-    overlay.webContents.once("dom-ready", () => {
-      background.webContents.send("reload_overlay");
+function saveOverlayPos(index) {
+  if (!overlays[index] || overlaysResizeLock) return false;
+
+  let bounds = overlays[index].getBounds();
+  overlays[index].bounds = bounds;
+  background.webContents.send("overlayBounds", index, bounds);
+  /*
+  console.log(
+    `${index} moved to x: ${bounds.x} y: ${bounds.y} w: ${bounds.width} h: ${
+      bounds.height
+    } `
+  );
+  */
+}
+
+function overlaySetSettings(settings, index) {
+  let overlay = overlays[index];
+  if (!overlay) {
+    overlay = createOverlay(settings, index);
+    overlays[index] = overlay;
+    overlaysAlpha[index] = settings.alpha_back < 1;
+  } else {
+    let oldAlphaEnabled = overlaysAlpha[index];
+    let alphaEnabled = settings.alpha_back < 1;
+    if (oldAlphaEnabled != alphaEnabled) {
+      overlay = recreateOverlay(overlay, settings, index);
+    }
+    overlaysAlpha[index] = alphaEnabled;
+  }
+
+  // console.log(overlay);
+  overlay.webContents.send("set_overlay_index", index);
+  if (overlay.isVisible()) {
+    overlay.setBounds(settings.bounds);
+    overlay.setAlwaysOnTop(settings.ontop, "floating");
+  }
+
+  globalShortcut.unregister("Alt+" + (index + 1));
+  if (settings.keyboard_shortcut) {
+    globalShortcut.register("Alt+" + (index + 1), () => {
+      overlay.webContents.send("close", -1);
     });
   }
+
+  const currentModeApplies =
+    (settings.mode === OVERLAY_DRAFT && arenaState === ARENA_MODE_DRAFT) ||
+    (settings.mode !== OVERLAY_DRAFT && arenaState === ARENA_MODE_MATCH);
+
+  const shouldShow =
+    settings.show && (currentModeApplies || settings.show_always);
+
+  if (shouldShow && !overlay.isVisible()) {
+    overlay.showInactive();
+  } else if (!shouldShow && overlay.isVisible()) {
+    overlay.hide();
+  }
+}
+
+function recreateOverlay(overlay, settings, index) {
+  console.log("Recreate overlay: " + index);
+  if (overlay) {
+    overlay.destroy();
+    overlay = createOverlay(settings, index);
+    overlays[index] = overlay;
+  }
+  return overlay;
 }
 
 app.on("window-all-closed", () => {

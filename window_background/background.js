@@ -31,7 +31,12 @@ const db = require("../shared/database");
 const pd = require("../shared/player-data");
 const { hypergeometricRange } = require("../shared/stats-fns");
 const { get_rank_index, objectClone } = require("../shared/util");
-const { HIDDEN_PW, IPC_OVERLAY } = require("../shared/constants");
+const {
+  HIDDEN_PW,
+  IPC_OVERLAY,
+  ARENA_MODE_MATCH,
+  ARENA_MODE_DRAFT
+} = require("../shared/constants");
 const { ipc_send, pd_set, unleakString } = require("./background-util");
 const {
   onLabelOutLogInfo,
@@ -203,28 +208,24 @@ ipc.on("save_app_settings", function(event, arg) {
     rstore.set("email", "");
     rstore.set("token", "");
   }
-
-  loadSettings(updated);
   rstore.set("settings", updated);
-  ipc_send("hide_loading");
-});
 
-//
-ipc.on("reload_overlay", function() {
-  loadSettings();
-  var obj = store.get("overlayBounds");
-  ipc_send("overlay_set_bounds", obj);
+  syncSettings(updated);
+  ipc_send("hide_loading");
 });
 
 //
 ipc.on("set_renderer_state", function(event, arg) {
   ipc_send("ipc_log", "Renderer state: " + arg);
   renderer_state = arg;
-  loadSettings();
+  // first time during bootstrapping that we load
+  // app-level settings into singletons
+  const appSettings = rstore.get("settings");
+  syncSettings(appSettings);
 
   let username = "";
   let password = "";
-  const remember_me = rstore.get("settings").remember_me;
+  const remember_me = pd.settings.remember_me;
 
   if (remember_me) {
     username = rstore.get("email");
@@ -250,8 +251,7 @@ function offlineLogin() {
 
 //
 ipc.on("auto_login", () => {
-  const rSettings = rstore.get("settings");
-  if (!rSettings.auto_login) return;
+  if (!pd.settings.auto_login) return;
 
   tokenAuth = rstore.get("token");
   ipc_send("popup", {
@@ -259,7 +259,7 @@ ipc.on("auto_login", () => {
     time: 0,
     progress: 2
   });
-  if (rSettings.remember_me) {
+  if (pd.settings.remember_me) {
     httpApi.httpAuth(rstore.get("email"), HIDDEN_PW);
   } else {
     offlineLogin();
@@ -285,38 +285,30 @@ ipc.on("request_draft_link", function(event, obj) {
 });
 
 //
-ipc.on("windowBounds", function(event, obj) {
-  store.set("windowBounds", obj);
+ipc.on("windowBounds", (event, windowBounds) => {
+  pd_set({ windowBounds });
+  store.set("windowBounds", windowBounds);
 });
 
 //
-ipc.on("overlayBounds", function(event, obj) {
-  store.set("overlayBounds", obj);
+ipc.on("overlayBounds", (event, index, bounds) => {
+  const overlays = [...pd.settings.overlays];
+  const newOverlay = {
+    ...overlays[index], // old overlay
+    bounds // new bounds
+  };
+  overlays[index] = newOverlay;
+  pd_set({ settings: { ...pd.settings, overlays } });
+  store.set("settings.overlays", overlays);
 });
 
 //
 ipc.on("save_user_settings", function(event, settings) {
+  // console.log("save_user_settings");
   ipc_send("show_loading");
-  const oldSettings = store.get("settings");
-  const updated = { ...oldSettings, ...settings };
-
-  // clean up garbage jQuery data that slipped into some configs
-  // TODO remove this after it has a chance to run everywhere
-  const jQueryGarbageKeys = [
-    "currentTarget",
-    "delegateTarget",
-    "handleObj",
-    "originalEvent",
-    "relatedTarget",
-    "target",
-    "timeStamp",
-    "type",
-    ...Object.keys(updated).filter(key => key.slice(0, 6) === "jQuery")
-  ];
-  jQueryGarbageKeys.forEach(key => delete updated[key]);
-
-  loadSettings(updated);
+  const updated = { ...pd.settings, ...settings };
   store.set("settings", updated);
+  syncSettings(updated);
   ipc_send("hide_loading");
 });
 
@@ -471,7 +463,14 @@ function loadPlayerConfig(playerId, serverData = undefined) {
     name: playerId,
     defaults: pd.defaultCfg
   });
-  const playerData = store.get();
+
+  const savedData = store.get();
+  const playerData = {
+    ...pd,
+    ...savedData,
+    settings: { ...pd.settings, ...savedData.settings }
+  };
+  syncSettings(playerData.settings);
   pd_set(playerData);
 
   ipc_send("popup", {
@@ -508,11 +507,6 @@ function loadPlayerConfig(playerId, serverData = undefined) {
     progress: 2
   });
 
-  // TODO move this into main?
-  const obj = store.get("overlayBounds");
-  ipc_send("overlay_set_bounds", obj);
-  loadSettings();
-
   watchingLog = true;
   stopWatchingLog = startWatchingLog();
   ipc_send("popup", {
@@ -520,6 +514,7 @@ function loadPlayerConfig(playerId, serverData = undefined) {
     time: 3000,
     progress: -1
   });
+  ipc_send("player_data_loaded", true);
 }
 
 function syncUserData(data) {
@@ -586,35 +581,13 @@ function syncUserData(data) {
   if (!firstPass) ipc_send("player_data_refresh");
 }
 
-// Loads and combines settings variables, sends result to display
-function loadSettings(dirtySettings = {}) {
-  // Blends together default, user, app, and optional dirty config
-  // "dirty" config may be a subset, which allows early UI updates
-  //  to make UI responsive without waiting for slow store IO
-  // Since settings have migrated between areas, collisions happen
-  // Order of precedence is: dirty > app > user > defaults
-
-  const settings = {
-    ...pd.settings,
-    ...store.get("settings"),
-    ...rstore.get("settings"),
-    ...dirtySettings
-  };
-
-  //console.log(_settings);
-  //const exeName = path.basename(process.execPath);
-
+// Merges settings and updates singletons across processes
+// (essentially fancy pd_set for settings field only)
+// To persist changes, see "save_user_settings" or "save_app_settings"
+function syncSettings(dirtySettings = {}) {
+  const settings = { ...pd.settings, ...dirtySettings };
   skipFirstPass = settings.skip_firstpass;
   pd_set({ settings });
-
-  ipc_send("overlay_set_ontop", settings.overlay_ontop);
-
-  if (settings.show_overlay == false) {
-    ipc_send("overlay_close", 1);
-  } else if (duringMatch || settings.show_overlay_always) {
-    ipc_send("overlay_show", 1);
-  }
-
   ipc_send("set_settings", settings);
   ipc_send("settings_updated");
 }
@@ -1176,16 +1149,15 @@ function addCustomDeck(customDeck) {
 //
 function createMatch(arg) {
   actionLog(-99, new Date(), "");
-  var obj = store.get("overlayBounds");
 
   currentMatch = _.cloneDeep(currentMatchDefault);
 
-  if (!firstPass && store.get("settings").show_overlay == true) {
-    if (store.get("settings").close_on_match) {
+  if (!firstPass) {
+    if (pd.settings.close_on_match) {
       ipc_send("renderer_hide", 1);
     }
-    ipc_send("overlay_show", 1);
-    ipc_send("overlay_set_bounds", obj);
+
+    ipc_send("set_arena_state", ARENA_MODE_MATCH);
   }
 
   currentMatch.player.originalDeck = originalDeck;
@@ -1231,23 +1203,17 @@ function createMatch(arg) {
 //
 function createDraft() {
   actionLog(-99, new Date(), "");
-  var obj = store.get("overlayBounds");
 
   currentDraft = _.cloneDeep(currentDraftDefault);
   currentMatch = _.cloneDeep(currentMatchDefault);
 
-  if (!firstPass && store.get("settings").show_overlay == true) {
-    if (store.get("settings").close_on_match) {
+  if (!firstPass) {
+    if (pd.settings.close_on_match) {
       ipc_send("renderer_hide", 1);
     }
 
-    ipc_send("overlay_show", 1);
-    ipc_send("overlay_set_bounds", obj);
+    ipc_send("set_arena_state", ARENA_MODE_DRAFT);
   }
-
-  ipc_send("set_draft", true, IPC_OVERLAY);
-  ipc_send("set_timer", -1, IPC_OVERLAY);
-  ipc_send("set_opponent", "", IPC_OVERLAY);
 }
 
 //
@@ -1659,14 +1625,11 @@ function finishLoading() {
 
     if (duringMatch) {
       ipc_send("renderer_hide", 1);
-      ipc_send("overlay_show", 1);
+      ipc_send("set_arena_state", ARENA_MODE_MATCH);
       update_deck(false);
     }
 
-    let obj = store.get("overlayBounds");
-    ipc_send("overlay_set_bounds", obj);
-
-    obj = store.get("windowBounds");
+    let obj = store.get("windowBounds");
     ipc_send("renderer_set_bounds", obj);
 
     ipc_send("initialize", 1);

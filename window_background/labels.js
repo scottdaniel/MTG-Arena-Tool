@@ -37,7 +37,7 @@
     pd
     firstPass
 */
-
+const { ARENA_MODE_IDLE } = require("../shared/constants");
 const db = require("../shared/database");
 const CardsList = require("../shared/cards-list");
 const { get_deck_colors, objectClone, replaceAll } = require("../shared/util");
@@ -698,9 +698,7 @@ function onLabelInEventCompleteDraft(entry, json) {
   if (!json) return;
   ipc_send("save_overlay_pos", 1);
   clear_deck();
-  if (!store.get("settings.show_overlay_always")) {
-    ipc_send("overlay_close", 1);
-  }
+  ipc_send("set_arena_state", ARENA_MODE_IDLE);
   //ipc_send("renderer_show", 1);
 
   currentDraft.draftId = json.Id;
@@ -763,9 +761,7 @@ function onLabelMatchGameRoomStateChangedEvent(entry, json) {
 
     ipc_send("save_overlay_pos", 1);
     clear_deck();
-    if (!store.get("settings.show_overlay_always")) {
-      ipc_send("overlay_close", 1);
-    }
+    ipc_send("set_arena_state", ARENA_MODE_IDLE);
     matchCompletedOnGameNumber = json.finalMatchResult.resultList.length - 1;
     saveMatch(json.finalMatchResult.matchId + "-" + pd.arenaId);
   }
