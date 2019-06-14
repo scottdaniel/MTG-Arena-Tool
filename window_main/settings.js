@@ -595,9 +595,11 @@ function appendVisual(section) {
   label.appendTo(section);
 
   let icd = $('<div class="input_container"></div>');
+  const display =
+    pd.settings.back_url !== "default" ? pd.settings.back_url : "";
   const url_input = $(
-    '<input type="search" id="query_image" autocomplete="off" value="' +
-      pd.settings.back_url +
+    '<input type="search" id="query_image" autocomplete="off" placeholder="https://example.com/photo.png" value="' +
+      display +
       '" />'
   );
   url_input.appendTo(icd);
@@ -826,9 +828,7 @@ function updateUserSettingsBlend(_settings = {}) {
     .spectrum("get")
     .toRgbString();
 
-  const backUrl = byId("query_image").value;
-  if (backUrl === "") changeBackground("default");
-  else changeBackground(backUrl);
+  const backUrl = byId("query_image").value || "default";
 
   pd.settings.overlays.forEach((overlaySettings, index) => {
     const showOverlay = byId(`overlay_${index}_show`).checked;
