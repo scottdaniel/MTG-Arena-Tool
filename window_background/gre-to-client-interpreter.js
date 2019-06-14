@@ -14,10 +14,9 @@ global
   instanceToCardIdMap
   update_deck
 */
-
 const { objectClone } = require("../shared/util");
 
-const { ipcRenderer: ipc } = require("electron");
+const { ipc_send } = require("./background-util");
 
 let actionType = [];
 actionType[0] = "ActionType_None";
@@ -701,16 +700,15 @@ function checkTurnDiff(turnInfo) {
   }
 
   if (!firstPass) {
-    ipc.send(
-      "set_turn",
-      currentMatch.player.seat,
-      turnInfo.phase,
-      turnInfo.step,
-      turnInfo.turnNumber,
-      turnInfo.activePlayer,
-      turnInfo.priorityPlayer,
-      turnInfo.decisionPlayer
-    );
+    ipc_send("set_turn", {
+      playerSeat: currentMatch.player.seat,
+      turnPhase: turnInfo.phase,
+      turnStep: turnInfo.step,
+      turnNumber: turnInfo.turnNumber,
+      turnActive: turnInfo.activePlayer,
+      turnPriority: turnInfo.priorityPlayer,
+      turnDecision: turnInfo.decisionPlayer
+    });
   }
 }
 

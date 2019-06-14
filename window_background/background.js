@@ -225,7 +225,9 @@ ipc.on("set_renderer_state", function(event, arg) {
   // first time during bootstrapping that we load
   // app-level settings into singletons
   const appSettings = rstore.get("settings");
-  syncSettings(appSettings);
+  const settings = { ...pd.settings, ...appSettings };
+  pd_set({ settings });
+  ipc_send("initial_settings", settings);
 
   let username = "";
   let password = "";
@@ -521,7 +523,6 @@ function loadPlayerConfig(playerId, serverData = undefined) {
     time: 3000,
     progress: -1
   });
-  ipc_send("player_data_loaded", true);
 }
 
 function syncUserData(data) {
@@ -596,7 +597,6 @@ function syncSettings(dirtySettings = {}) {
   skipFirstPass = settings.skip_firstpass;
   pd_set({ settings });
   ipc_send("set_settings", settings);
-  ipc_send("settings_updated");
 }
 
 // Set a new log URI
@@ -1048,7 +1048,7 @@ function dataChop(data, startStr, endStr) {
 }
 
 function setDraftCards(json) {
-  ipc.send("set_draft_cards", currentDraft);
+  ipc_send("set_draft_cards", currentDraft);
 }
 
 function actionLogGenerateLink(grpId) {
