@@ -105,9 +105,9 @@ var settingsStore = new Store({
   defaults: settingsCfg
 });
 
-const debugLog = false;
+const debugLog = true;
 const debugNet = true;
-var debugLogSpeed = 0.001;
+var debugLogSpeed = 10.001;
 
 const actionLogDir = path.join(
   (electron.app || electron.remote.app).getPath("userData"),
@@ -585,7 +585,7 @@ function syncUserData(data) {
   store.set("draft_index", draft_index);
   pd_set({ draft_index });
 
-  if (!firstPass) ipc_send("player_data_refresh");
+  if (debugLog || !firstPass) ipc_send("player_data_refresh");
 }
 
 // Merges settings and updates singletons across processes
@@ -914,11 +914,11 @@ async function logLoop() {
   if (!firstPass) {
     ipc_send("log_read", 1);
   }
-
+/*
   if (debugLog) {
     firstPass = false;
   }
-
+*/
   if (renderer_state != 1) {
     // The renderer process is not ready, postpose reading the log
     //ipc_send("ipc_log", "readLog logloopmode: "+logLoopMode+", renderer state:"+renderer_state+", logSize: "+logSize+", prevLogSize: "+prevLogSize);
@@ -1150,7 +1150,7 @@ function addCustomDeck(customDeck) {
     pd_set({ decks_index });
   }
 
-  if (!firstPass) ipc_send("player_data_refresh");
+  if (debugLog || !firstPass) ipc_send("player_data_refresh");
 }
 
 //
@@ -1159,7 +1159,7 @@ function createMatch(arg) {
 
   currentMatch = _.cloneDeep(currentMatchDefault);
 
-  if (!firstPass) {
+  if (debugLog || !firstPass) {
     if (pd.settings.close_on_match) {
       ipc_send("renderer_hide", 1);
     }
@@ -1214,7 +1214,7 @@ function createDraft() {
   currentDraft = _.cloneDeep(currentDraftDefault);
   currentMatch = _.cloneDeep(currentMatchDefault);
 
-  if (!firstPass) {
+  if (debugLog || !firstPass) {
     if (pd.settings.close_on_match) {
       ipc_send("renderer_hide", 1);
     }
@@ -1450,7 +1450,7 @@ function saveEconomyTransaction(transaction) {
     pd_set({ economy_index });
   }
 
-  if (!firstPass) ipc_send("player_data_refresh");
+  if (debugLog || !firstPass) ipc_send("player_data_refresh");
   httpApi.httpSetEconomy(txnData);
 }
 
@@ -1476,7 +1476,7 @@ function saveCourse(json) {
     pd_set({ courses_index });
   }
 
-  if (!firstPass) ipc_send("player_data_refresh");
+  if (debugLog || !firstPass) ipc_send("player_data_refresh");
 }
 
 //
@@ -1563,7 +1563,7 @@ function saveMatch(id) {
     pd_set({ matches_index });
   }
 
-  if (!firstPass) ipc_send("player_data_refresh");
+  if (debugLog || !firstPass) ipc_send("player_data_refresh");
   if (matchCompletedOnGameNumber === gameNumberCompleted) {
     httpApi.httpSetMatch(match);
   }
@@ -1599,7 +1599,7 @@ function saveDraft() {
     pd_set({ draft_index });
   }
 
-  if (!firstPass) ipc_send("player_data_refresh");
+  if (debugLog || !firstPass) ipc_send("player_data_refresh");
   httpApi.httpSetDraft(draftData);
   ipc_send("popup", { text: "Draft saved!", time: 3000 });
 }

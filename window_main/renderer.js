@@ -380,7 +380,8 @@ function openTab(tab, filters = {}, dataIndex = 0, scrollTop = 0) {
       break;
     case -2:
     default:
-      $(".message_center").css("display", "initial");
+      //$(".message_center").css("display", "initial");
+      hideLoadingBars();
       $(".init_loading").show();
       break;
   }
