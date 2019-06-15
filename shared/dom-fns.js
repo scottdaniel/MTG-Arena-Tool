@@ -15,16 +15,33 @@ function queryElementsByClass(selectors, parentNode = document) {
   return [...parentNode.getElementsByClassName(selectors)];
 }
 
-exports.createDivision = createDivision;
-function createDivision(classNames, innerHTML) {
-  // Utility function. Create a <div> element with specified class names and content
-  let div = document.createElement("div");
+exports.createElement = createElement;
+function createElement(type, classNames = [], innerHTML = "", attrs = {}) {
+  // Utility function. Create a <type> element with specified class names and content
+  const el = document.createElement(type);
+  classNames.forEach(className => el.classList.add(className));
+  el.innerHTML = innerHTML;
+  Object.assign(el, attrs);
+  return el;
+}
 
-  if (classNames !== undefined) {
-    classNames.forEach(className => div.classList.add(className));
-  }
-  if (innerHTML !== undefined) {
-    div.innerHTML = innerHTML;
-  }
-  return div;
+exports.createDivision = createDivision;
+exports.createDiv = createDivision;
+function createDivision(classNames, innerHTML, attrs = {}) {
+  return createElement("div", classNames, innerHTML, attrs);
+}
+
+exports.createImg = createImg;
+function createImg(classNames, innerHTML, attrs = {}) {
+  return createElement("img", classNames, innerHTML, attrs);
+}
+
+exports.createInput = createInput;
+function createInput(classNames, innerHTML, attrs = {}) {
+  return createElement("input", classNames, innerHTML, attrs);
+}
+
+exports.createLabel = createLabel;
+function createLabel(classNames, innerHTML, attrs = {}) {
+  return createElement("label", classNames, innerHTML, attrs);
 }
