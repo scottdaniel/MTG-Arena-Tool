@@ -269,7 +269,9 @@ function startApp() {
         break;
 
       case "reset_overlay_pos":
-        overlays.forEach(overlay => overlay.window.setPosition(0, 0));
+        if (arg < overlays.length) {
+          overlays[arg].window.setPosition(0, 0);
+        }
         break;
 
       case "updates_check":
