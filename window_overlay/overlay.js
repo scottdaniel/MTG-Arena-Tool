@@ -251,10 +251,6 @@ function recreateClock() {
   updateClock();
 }
 
-ipc.on("set_overlay_index", (event, arg) => {
-  overlayIndex = arg;
-});
-
 //
 ipc.on("close", (event, arg) => {
   close(arg);
@@ -287,10 +283,9 @@ ipc.on("action_log", function(event, arg) {
   //console.log(arg.seat, arg.str);
 });
 
-ipc.on("settings_updated", () => {
-  if (overlayIndex == -1) return;
-
-  let settings = pd.settings.overlays[overlayIndex];
+ipc.on("settings_updated", (_event, index) => {
+  overlayIndex = index;
+  const settings = pd.settings.overlays[overlayIndex];
 
   overlayMode = settings.mode;
 
@@ -746,7 +741,7 @@ function drawDeckOdds() {
 
 var currentDraft;
 //
-ipc.on("set_draft_cards", function(event, draft) {
+ipc.on("set_draft_cards", (event, draft) => {
   clockMode = 1;
   recreateClock();
   $(".overlay_draft_container").show();
@@ -761,20 +756,12 @@ ipc.on("set_draft_cards", function(event, draft) {
 });
 
 //
-ipc.on("set_turn", function(
-  event,
-  _we,
-  _phase,
-  _step,
-  _number,
-  _active,
-  _priority,
-  _decision
-) {
+ipc.on("set_turn", (event, arg) => {
+  let { playerSeat: _we, turnPriority: _priority } = arg;
   playerSeat = _we;
   if (
     turnPriority != _priority &&
-    _priority == _we &&
+    _priority == playerSeat &&
     pd.settings.sound_priority
   ) {
     //    playBlip();
@@ -793,7 +780,7 @@ ipc.on("set_turn", function(
     recreateClock();
   }
   if (clockMode > 0) {
-    if (turnPriority == _we) {
+    if (turnPriority === playerSeat) {
       $(".clock_turn").html("You have priority.");
     } else {
       $(".clock_turn").html("Opponent has priority.");

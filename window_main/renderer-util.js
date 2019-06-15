@@ -1088,17 +1088,17 @@ function changeBackground(arg = "default", grpId = 0) {
 
   //console.log(arg, grpId, _card);
   if (arg === "default") {
-    $(".top_artist").html("Ghitu Lavarunner by Jesper Ejsing");
-    if (pd.settings.back_url === "") {
-      $(".main_wrapper").css(
-        "background-image",
-        "url(../images/Ghitu-Lavarunner-Dominaria-MtG-Art.jpg)"
-      );
-    } else {
+    if (pd.settings.back_url && pd.settings.back_url !== "default") {
       $(".top_artist").html("");
       $(".main_wrapper").css(
         "background-image",
         "url(" + pd.settings.back_url + ")"
+      );
+    } else {
+      $(".top_artist").html("Ghitu Lavarunner by Jesper Ejsing");
+      $(".main_wrapper").css(
+        "background-image",
+        "url(../images/Ghitu-Lavarunner-Dominaria-MtG-Art.jpg)"
       );
     }
   } else if (_card) {
