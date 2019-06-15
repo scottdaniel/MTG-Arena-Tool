@@ -105,9 +105,9 @@ var settingsStore = new Store({
   defaults: settingsCfg
 });
 
-const debugLog = true;
+const debugLog = false;
 const debugNet = true;
-var debugLogSpeed = 10.001;
+var debugLogSpeed = 0.001;
 
 const actionLogDir = path.join(
   (electron.app || electron.remote.app).getPath("userData"),
