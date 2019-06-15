@@ -1069,7 +1069,7 @@ function toggleVisibility(...ids) {
 exports.addCheckbox = addCheckbox;
 function addCheckbox(div, label, iid, def, func) {
   label = $('<label class="check_container hover_label">' + label + "</label>");
-  label.appendTo(div);
+  label.appendTo($(div));
   var check_new = $('<input type="checkbox" id="' + iid + '" />');
   check_new.on("click", func);
   check_new.appendTo(label);
