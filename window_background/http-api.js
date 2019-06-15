@@ -484,6 +484,10 @@ function httpGetCourse(courseId) {
 
 function httpSetMatch(match) {
   var _id = makeId(6);
+  if (pd.settings.anon_explore == true) {
+    match.player.userid = "000000000000000";
+    match.player.name = "Anonymous";
+  }
   match = JSON.stringify(match);
   httpAsync.push({
     reqId: _id,
