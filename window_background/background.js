@@ -914,7 +914,7 @@ async function logLoop() {
   if (!firstPass) {
     ipc_send("log_read", 1);
   }
-/*
+  /*
   if (debugLog) {
     firstPass = false;
   }
