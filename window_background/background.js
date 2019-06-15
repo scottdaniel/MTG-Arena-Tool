@@ -1662,4 +1662,3 @@ function finishLoading() {
 // start
 httpApi.httpBasic();
 httpApi.httpGetDatabase();
-httpApi.htttpGetStatus();

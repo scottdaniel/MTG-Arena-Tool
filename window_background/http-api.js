@@ -86,7 +86,6 @@ function httpBasic() {
         _headers.method != "auth" &&
         _headers.method != "delete_data" &&
         _headers.method != "get_database" &&
-        _headers.method != "get_status" &&
         debugLog == false
       ) {
         pd_set({ offline: true });
@@ -128,15 +127,6 @@ function httpBasic() {
           port: 443,
           hostname: serverAddress,
           path: "/top_ladder_traditional.json",
-          method: "GET"
-        };
-      } else if (_headers.method == "get_status") {
-        http = require("https");
-        options = {
-          protocol: "https:",
-          port: 443,
-          hostname: "magicthegatheringarena.statuspage.io",
-          path: "/index.json",
           method: "GET"
         };
       } else if (_headers.method_path !== undefined) {
@@ -219,20 +209,6 @@ function httpBasic() {
               });
             }
 
-            if (_headers.method == "get_status") {
-              delete parsedResult.page;
-              delete parsedResult.incidents;
-              parsedResult.components.forEach(function(ob) {
-                delete ob.id;
-                delete ob.page_id;
-                delete ob.group_id;
-                delete ob.showcase;
-                delete ob.description;
-                delete ob.position;
-                delete ob.created_at;
-              });
-              ipc_send("set_status", parsedResult);
-            }
             if (_headers.method == "get_explore") {
               ipc_send("set_explore_decks", parsedResult);
             }
@@ -553,11 +529,6 @@ function httpGetDatabase() {
   httpAsync.push({ reqId: _id, method: "get_database" });
 }
 
-function htttpGetStatus() {
-  var _id = makeId(6);
-  httpAsync.push({ reqId: _id, method: "get_status" });
-}
-
 function httpDraftShareLink(did, exp) {
   var _id = makeId(6);
   httpAsync.push({
@@ -679,7 +650,6 @@ module.exports = {
   httpSetEconomy,
   httpDeleteData,
   httpGetDatabase,
-  htttpGetStatus,
   httpHomeGet,
   httpDraftShareLink,
   httpTournamentGet,
