@@ -159,7 +159,7 @@ function compare_draft_cards(a, b) {
   return 0;
 }
 
-function ipc_send(method, arg, to = IPC_BACKGROUND) {
+function ipcSend(method, arg, to = IPC_BACKGROUND) {
   if (method == "ipc_log") {
     //console.log("IPC LOG", arg);
   }
@@ -726,7 +726,7 @@ function drawDeckOdds() {
     if (oddsSampleSize < 1) {
       oddsSampleSize = cardsLeft - 1;
     }
-    ipc_send("set_odds_samplesize", oddsSampleSize);
+    ipcSend("set_odds_samplesize", oddsSampleSize);
   });
   //
   $(".odds_next").click(function() {
@@ -735,7 +735,7 @@ function drawDeckOdds() {
     if (oddsSampleSize > cardsLeft - 1) {
       oddsSampleSize = 1;
     }
-    ipc_send("set_odds_samplesize", oddsSampleSize);
+    ipcSend("set_odds_samplesize", oddsSampleSize);
   });
 }
 
@@ -937,7 +937,7 @@ function close(bool) {
     show: _new // new setting
   };
   overlays[overlayIndex] = newOverlay;
-  ipc_send("save_user_settings", { overlays });
+  ipcSend("save_user_settings", { overlays });
 }
 
 $(document).ready(function() {
@@ -1008,13 +1008,13 @@ $(document).ready(function() {
 
   //
   $(".minimize").click(function() {
-    ipc_send("overlay_minimize", overlayIndex);
+    ipcSend("overlay_minimize", overlayIndex);
   });
 
   //
   $(".settings").click(function() {
-    ipc_send("renderer_show");
-    ipc_send("force_open_overlay_settings", overlayIndex, IPC_MAIN);
+    ipcSend("renderer_show");
+    ipcSend("force_open_overlay_settings", overlayIndex, IPC_MAIN);
   });
 
   $(".overlay_container").hover(
