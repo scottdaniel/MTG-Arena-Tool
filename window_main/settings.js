@@ -13,6 +13,13 @@ const {
 } = require("../shared/constants");
 const db = require("../shared/database");
 const pd = require("../shared/player-data");
+const {
+  createDiv,
+  createImg,
+  createInput,
+  createLabel,
+  queryElements: $$
+} = require("../shared/dom-fns");
 const deckDrawer = require("../shared/deck-drawer");
 const { createSelect } = require("../shared/select");
 const { get_card_image } = require("../shared/util");
@@ -20,7 +27,6 @@ const byId = id => document.getElementById(id);
 
 const {
   setLocalState,
-  getLocalState,
   addCheckbox,
   changeBackground,
   hideLoadingBars,
@@ -39,7 +45,6 @@ let currentOverlay = 0;
 
 //
 function openSettingsTab(openSection = lastSettingsSection, scrollTop = 0) {
-  const ls = getLocalState();
   if (openSection !== -1) {
     lastSettingsSection = openSection;
   } else {
@@ -47,160 +52,109 @@ function openSettingsTab(openSection = lastSettingsSection, scrollTop = 0) {
   }
   changeBackground("default");
   hideLoadingBars();
-  $("#ux_0").off();
-  $("#history_column").off();
-  $("#ux_0").html("");
-  $("#ux_0").addClass("flex_item");
+  const mainDiv = byId("ux_0");
+  mainDiv.classList.add("flex_item");
+  mainDiv.innerHTML = "";
 
-  const wrap_l = $('<div class="wrapper_column sidebar_column_r"></div>');
-  $(
-    '<div class="settings_nav sn1" style="margin-top: 28px;" >Behaviour</div>'
-  ).appendTo(wrap_l);
-  $('<div class="settings_nav sn2">Overlay</div>').appendTo(wrap_l);
-  $('<div class="settings_nav sn3">Visual</div>').appendTo(wrap_l);
-  $('<div class="settings_nav sn4">Privacy</div>').appendTo(wrap_l);
-  $('<div class="settings_nav sn5">About</div>').appendTo(wrap_l);
+  const wrap_l = createDiv(["wrapper_column", "sidebar_column_r"]);
 
-  if (pd.offline) {
-    $('<div class="settings_nav sn6">Login</div>').appendTo(wrap_l);
-  } else {
-    $('<div class="settings_nav sn6">Logout</div>').appendTo(wrap_l);
-  }
+  wrap_l.appendChild(createDiv(["list_fill"]));
+  wrap_l.appendChild(createDiv(["settings_nav", "sn1"], "Behaviour"));
+  wrap_l.appendChild(createDiv(["settings_nav", "sn2"], "Overlay"));
+  wrap_l.appendChild(createDiv(["settings_nav", "sn3"], "Visual"));
+  wrap_l.appendChild(createDiv(["settings_nav", "sn4"], "Privacy"));
+  wrap_l.appendChild(createDiv(["settings_nav", "sn5"], "About"));
+  wrap_l.appendChild(
+    createDiv(["settings_nav", "sn6"], pd.offline ? "Login" : "Logout")
+  );
+  mainDiv.appendChild(wrap_l);
+  $$(".sn" + openSection)[0].classList.add("nav_selected");
+  $$(".settings_nav").forEach(el =>
+    el.addEventListener("click", function() {
+      const classList = [...this.classList];
+      if (classList.includes("nav_selected")) return;
 
-  const wrap_r = $('<div class="wrapper_column"></div>');
-  const div = $('<div class="settings_page"></div>');
+      $$(".settings_nav").forEach(el => {
+        el.classList.remove("nav_selected");
+      });
+      $$(".settings_section").forEach(el => {
+        el.style.display = "none";
+      });
+
+      if (classList.includes("sn1")) {
+        lastSettingsSection = 1;
+        $$(".ss1")[0].style.display = "block";
+      } else if (classList.includes("sn2")) {
+        lastSettingsSection = 2;
+        $$(".ss2")[0].style.display = "block";
+      } else if (classList.includes("sn3")) {
+        lastSettingsSection = 3;
+        $$(".ss3")[0].style.display = "block";
+      } else if (classList.includes("sn4")) {
+        lastSettingsSection = 4;
+        $$(".ss4")[0].style.display = "block";
+      } else if (classList.includes("sn5")) {
+        lastSettingsSection = 5;
+        $$(".ss5")[0].style.display = "block";
+      } else if (classList.includes("sn6")) {
+        lastSettingsSection = 6;
+        $$(".ss6")[0].style.display = "block";
+      }
+      this.classList.add("nav_selected");
+    })
+  );
+
+  const wrap_r = createDiv(["wrapper_column"]);
+
+  const div = createDiv(["settings_page"]);
   let section;
 
   // BEHAVIOR
-  section = $('<div class="settings_section ss1"></div>');
-  section.appendTo(div);
+  section = createDiv(["settings_section", "ss1"]);
   appendBehaviour(section);
+  div.appendChild(section);
 
   // OVERLAY
-  section = $('<div class="settings_section ss2"></div>');
-  section.appendTo(div);
+  section = createDiv(["settings_section", "ss2"]);
   appendOverlay(section);
+  div.appendChild(section);
 
   // VISUAL
-  section = $('<div class="settings_section ss3"></div>');
-  section.appendTo(div);
+  section = createDiv(["settings_section", "ss3"]);
   appendVisual(section);
+  div.appendChild(section);
 
   // PRIVACY
-  section = $('<div class="settings_section ss4"></div>');
-  section.appendTo(div);
+  section = createDiv(["settings_section", "ss4"]);
   appendPrivacy(section);
+  div.appendChild(section);
 
   // ABOUT
-  section = $('<div class="settings_section ss5" style="height: 100%;"></div>');
-  section.appendTo(div);
+  section = createDiv(["settings_section", "ss5"]);
+  section.style.height = "100%";
   appendAbout(section);
+  div.appendChild(section);
 
   // LOGIN
-  section = $('<div class="settings_section ss6" style="height: 100%;"></div>');
-  section.appendTo(div);
+  section = createDiv(["settings_section", "ss6"]);
+  section.style.height = "100%";
   appendLogin(section);
+  div.appendChild(section);
 
-  div.appendTo(wrap_r);
-
-  $("#ux_0").append(wrap_l);
-  $("#ux_0").append(wrap_r);
-
-  $(".ss" + openSection).show();
-  $(".sn" + openSection).addClass("nav_selected");
-
-  $(".resetOverlayPos").click(function() {
-    ipcSend("reset_overlay_pos", true);
+  wrap_r.appendChild(div);
+  wrap_r.addEventListener("scroll", () => {
+    console.log(wrap_r.scrollTop);
+    setLocalState({ lastScrollTop: wrap_r.scrollTop });
   });
-
-  $(".top_logo_about").click(function() {
-    shell.openExternal("https://mtgatool.com");
-  });
-
-  $(".twitter_link").click(function() {
-    shell.openExternal("https://twitter.com/MEtchegaray7");
-  });
-
-  $(".discord_link").click(function() {
-    shell.openExternal("https://discord.gg/K9bPkJy");
-  });
-
-  $(".git_link").click(function() {
-    shell.openExternal("https://github.com/Manuel-777/MTG-Arena-Tool");
-  });
-
-  $(".release_notes_link").click(function() {
-    shell.openExternal("https://mtgatool.com/release-notes/");
-  });
-
-  $(".donate_link").click(function() {
-    shell.openExternal("https://www.paypal.me/ManuelEtchegaray/10");
-  });
-
-  $(".login_link_about").click(function() {
-    const clearAppSettings = {
-      remember_me: false,
-      auto_login: false,
-      launch_to_tray: false
-    };
-    ipcSend("save_app_settings", clearAppSettings);
-    remote.app.relaunch();
-    remote.app.exit(0);
-  });
-
-  $(".update_link_about").click(function() {
-    ipcSend("updates_check", true);
-  });
-
-  $(".settings_nav").click(function() {
-    if (!$(this).hasClass("nav_selected")) {
-      $(".settings_nav").each(function() {
-        $(this).removeClass("nav_selected");
-      });
-      $(".settings_section").each(function() {
-        $(this).hide();
-      });
-
-      $(this).addClass("nav_selected");
-
-      if ($(this).hasClass("sn1")) {
-        lastSettingsSection = 1;
-        $(".ss1").show();
-      }
-      if ($(this).hasClass("sn2")) {
-        lastSettingsSection = 2;
-        $(".ss2").show();
-      }
-      if ($(this).hasClass("sn3")) {
-        lastSettingsSection = 3;
-        $(".ss3").show();
-      }
-      if ($(this).hasClass("sn4")) {
-        lastSettingsSection = 4;
-        $(".ss4").show();
-      }
-      if ($(this).hasClass("sn5")) {
-        lastSettingsSection = 5;
-        $(".ss5").show();
-      }
-      if ($(this).hasClass("sn6")) {
-        lastSettingsSection = 6;
-        $(".ss6").show();
-      }
-    }
-  });
-
-  const jCont = wrap_r;
+  mainDiv.appendChild(wrap_r);
+  $$(".ss" + openSection)[0].style.display = "block";
   if (scrollTop) {
-    jCont.scrollTop(ls.lastScrollTop);
+    wrap_r.scrollTop = scrollTop;
   }
-  jCont.on("scroll", () => {
-    setLocalState({ lastScrollTop: jCont.scrollTop() });
-  });
 }
 
 function appendBehaviour(section) {
-  section.append('<div class="settings_title">Behaviour</div>');
+  section.appendChild(createDiv(["settings_title"], "Behaviour"));
 
   addCheckbox(
     section,
@@ -237,10 +191,15 @@ function appendBehaviour(section) {
     !pd.settings.skip_firstpass,
     updateUserSettings
   );
-  section.append(`
-      <div class="settings_note">
-      <i>Reading the log on startup can take a while, disabling this will make mtgatool load instantly, but you may have have to play with Arena to load some data, like Rank, wildcards and decklists. <b>This feature makes mtgatool read games when it was closed.</b></i>
-      </div>`);
+  const helpDiv = createDiv(
+    ["settings_note"],
+    `<i>Reading the log on startup can take a while, disabling this will make
+    mtgatool load instantly, but you may have have to play with Arena to load
+    some data, like Rank, wildcards and decklists.
+    <b>This feature makes mtgatool read games when it was closed.</b></i>`
+  );
+  section.appendChild(helpDiv);
+
   addCheckbox(
     section,
     "Close main window on match found",
@@ -263,54 +222,31 @@ function appendBehaviour(section) {
     updateUserSettings
   );
 
-  const sliderSoundVolume = $('<div class="slidecontainer_settings"></div>');
-  sliderSoundVolume.appendTo(section);
-  const sliderSoundVolumeLabel = $(
-    `<label style="width: 400px;">Volume: ${Math.round(
-      pd.settings.sound_priority_volume * 100
-    )}%</label>`
+  const sliderSoundVolume = createDiv(["slidecontainer_settings"]);
+  const sliderSoundVolumeLabel = createLabel(
+    [],
+    "Volume: " + Math.round(pd.settings.sound_priority_volume * 100) + "%"
   );
-  sliderSoundVolumeLabel.appendTo(sliderSoundVolume);
-  const sliderSoundVolumeInput = $(
-    '<input type="range" min="0" max="1" step=".001" value="' +
-      pd.settings.sound_priority_volume +
-      '" class="slider sliderSoundVolume" id="settings_soundpriorityvolume">'
-  );
-  sliderSoundVolumeInput.appendTo(sliderSoundVolume);
+  sliderSoundVolumeLabel.style.width = "400px";
+  sliderSoundVolume.appendChild(sliderSoundVolumeLabel);
 
-  let label = $('<label class="but_container_label">Export Format:</label>');
-  label.appendTo(section);
-  let icd = $('<div class="input_container"></div>');
-  const export_input = $(
-    '<input type="search" id="settings_export_format" autocomplete="off" value="' +
-      pd.settings.export_format +
-      '" />'
-  );
-  export_input.appendTo(icd);
-  icd.appendTo(label);
-
-  section.append(`<div class="settings_note">
-      <i>Possible variables: $Name, $Count, $SetName, $SetCode, $Collector, $Rarity, $Type, $Cmc</i>
-      </div>`);
-
-  export_input.on("keyup", e => {
-    if (e.keyCode === 13) {
-      updateUserSettings();
+  const sliderSoundVolumeInput = createInput(
+    ["slider", "sliderSoundVolume"],
+    "",
+    {
+      id: "settings_soundpriorityvolume",
+      type: "range",
+      min: "0",
+      max: "1",
+      step: ".001",
+      value: pd.settings.sound_priority_volume
     }
-  });
-
-  export_input.on("focusout", () => {
-    updateUserSettings();
-  });
-
-  sliderSoundVolumeInput.off();
-
-  sliderSoundVolumeInput.on("click mousemove", function() {
+  );
+  sliderSoundVolumeInput.addEventListener("input", function() {
     const volume = Math.round(this.value * 100);
-    sliderSoundVolumeLabel.html("Volume: " + volume + "%");
+    sliderSoundVolumeLabel.innerHTML = "Volume: " + volume + "%";
   });
-
-  sliderSoundVolumeInput.on("click mouseup", function() {
+  sliderSoundVolumeInput.addEventListener("change", function() {
     let { Howl, Howler } = require("howler");
     let sound = new Howl({ src: ["../sounds/blip.mp3"] });
     Howler.volume(this.value);
@@ -319,44 +255,100 @@ function appendBehaviour(section) {
       sound_priority_volume: this.value
     });
   });
+  sliderSoundVolume.appendChild(sliderSoundVolumeInput);
+  section.appendChild(sliderSoundVolume);
+
+  const label = createLabel(["but_container_label"], "Export Format:");
+  const icd = createDiv(["input_container"]);
+  const exportInput = createInput([], "", {
+    type: "text",
+    id: "settings_export_format",
+    autocomplete: "off",
+    placeholder: "$Name,$Count,$SetName,$SetCode,$Rarity,$Type",
+    value: pd.settings.export_format
+  });
+  exportInput.addEventListener("keyup", e => {
+    if (e.keyCode === 13) {
+      updateUserSettings();
+    }
+  });
+  exportInput.addEventListener("focusout", () => {
+    updateUserSettings();
+  });
+  icd.appendChild(exportInput);
+  label.appendChild(icd);
+  section.appendChild(label);
+
+  const textDiv = createDiv(
+    ["settings_note"],
+    "<i>Possible variables: $Name, $Count, $SetName, $SetCode, $Collector, $Rarity, $Type, $Cmc</i>"
+  );
+  section.appendChild(textDiv);
 }
 
 function appendOverlay(section) {
-  section.append('<div class="settings_title">Overlays</div>');
+  section.appendChild(createDiv(["settings_title"], "Overlays"));
+  const helpDiv = createDiv(
+    ["settings_note"],
+    `You can have up to 5 overlay windows active, and each window has its own settings.
+<br> Draft overlay will only show in a draft, while the others will work during any match.`
+  );
+  helpDiv.style.margin = "0px 64px 0px 16px";
+  section.appendChild(helpDiv);
 
-  let topCont = $('<div class="overlay_section_selector_cont"></div>');
-  let topPrev = $('<div class="overlay_prev"></div>');
-  let topIcon = $(
-    `<div class="overlay_icon" style="background-color:var(--color-${
+  const topCont = createDiv(["overlay_section_selector_cont"]);
+  const updateContent = () => {
+    $$(".overlay_section").forEach(el => (el.style.display = "none"));
+    $$(".overlay_section_" + currentOverlay)[0].style.display = "block";
+    $$(".overlay_current")[0].innerHTML =
+      "Current overlay settings: " + (currentOverlay + 1);
+    $$(".overlay_icon")[0].style.backgroundColor = `var(--color-${
       COLORS_ALL[currentOverlay]
-    });"></div>`
-  );
-  let topIndex = $(
-    `<div class="overlay_current">Current overlay settings: ${currentOverlay +
-      1}</div>`
-  );
-  let topNext = $('<div class="overlay_next"></div>');
+    })`;
+  };
 
-  topCont.append(topPrev);
-  topCont.append(topIcon);
-  topCont.append(topIndex);
-  topCont.append(topNext);
-  section.append(
-    '<div style="margin: 0px 64px 0px 16px;" class="settings_note">You can have up to 5 overlay windows active, and each window has its own settings.</br>Draft overlay will only show in a draft, while the others will work during any match.</div>'
+  const topPrev = createDiv(["overlay_prev"]);
+  topPrev.addEventListener("click", () => {
+    currentOverlay -= 1;
+    if (currentOverlay < 0) {
+      currentOverlay = pd.settings.overlays.length - 1;
+    }
+    updateContent();
+  });
+  topCont.appendChild(topPrev);
+
+  const topIcon = createDiv(["overlay_icon"]);
+  topIcon.style.backgroundColor = `var(--color-${COLORS_ALL[currentOverlay]})`;
+  topCont.appendChild(topIcon);
+  const topIndex = createDiv(
+    ["overlay_current"],
+    `Current overlay settings: ${currentOverlay + 1}`
   );
-  section.append(topCont);
+  topCont.appendChild(topIndex);
+
+  const topNext = createDiv(["overlay_next"]);
+  topNext.addEventListener("click", () => {
+    currentOverlay += 1;
+    if (currentOverlay >= pd.settings.overlays.length) {
+      currentOverlay = 0;
+    }
+    updateContent();
+  });
+  topCont.appendChild(topNext);
+
+  section.appendChild(topCont);
 
   pd.settings.overlays.forEach((settings, index) => {
-    let overlaySection = $(
-      `<div class="overlay_section overlay_section_${index}"></div>`
-    );
+    const overlaySection = createDiv([
+      "overlay_section",
+      "overlay_section_" + index
+    ]);
 
     if (currentOverlay !== index) {
-      overlaySection.css("display", "none");
+      overlaySection.style.display = "none";
     }
 
-    let label = $('<label class="but_container_label">Mode:</label>');
-    label.appendTo(overlaySection);
+    const label = createLabel(["but_container_label"], "Mode:");
 
     const modeOptions = [];
     modeOptions[OVERLAY_FULL] = "Full Deck";
@@ -367,10 +359,10 @@ function appendOverlay(section) {
     modeOptions[OVERLAY_LOG] = "Action Log";
 
     const modeSelect = createSelect(
-      label[0],
+      label,
       modeOptions,
       modeOptions[settings.mode],
-      function(filter) {
+      filter => {
         pd.settings.overlays[index].mode = modeOptions.indexOf(filter);
         updateUserSettingsBlend();
       },
@@ -378,6 +370,7 @@ function appendOverlay(section) {
     );
     modeSelect.style.width = "180px";
     modeSelect.style.marginLeft = "32px";
+    overlaySection.appendChild(label);
 
     addCheckbox(
       overlaySection,
@@ -450,196 +443,154 @@ function appendOverlay(section) {
       updateUserSettings
     );
 
-    //
-    //
-    const sliderOpacity = $('<div class="slidecontainer_settings"></div>');
-    sliderOpacity.appendTo(overlaySection);
-    const sliderOpacityLabel = $(
-      '<label style="width: 400px; !important" class="card_size_container">Elements transparency: ' +
-        transparencyFromAlpha(settings.alpha) +
-        "%</label>"
+    const sliderOpacity = createDiv(["slidecontainer_settings"]);
+    const sliderOpacityLabel = createLabel(
+      ["card_size_container"],
+      "Elements transparency: " + transparencyFromAlpha(settings.alpha) + "%"
     );
-    sliderOpacityLabel.appendTo(sliderOpacity);
-    const sliderOpacityInput = $(
-      `<input type="range" min="0" max="100" step="5" value="${transparencyFromAlpha(
-        settings.alpha
-      )}" class="slider" id="opacityRange${index}">`
-    );
-    sliderOpacityInput.appendTo(sliderOpacity);
+    sliderOpacityLabel.style.width = "400px";
+    sliderOpacity.appendChild(sliderOpacityLabel);
 
-    sliderOpacityInput.off();
-
-    sliderOpacityInput.on("click mousemove", function() {
-      const overlayAlpha = alphaFromTransparency(parseInt(this.value));
-      sliderOpacityLabel.html(
-        "Elements transparency: " + transparencyFromAlpha(overlayAlpha) + "%"
-      );
+    const sliderOpacityInput = createInput(["slider"], "", {
+      id: "opacityRange" + index,
+      type: "range",
+      min: "0",
+      max: "100",
+      step: "5",
+      value: transparencyFromAlpha(settings.alpha)
     });
-
-    sliderOpacityInput.on("click mouseup", function() {
+    sliderOpacityInput.addEventListener("input", function() {
+      const overlayAlpha = alphaFromTransparency(parseInt(this.value));
+      sliderOpacityLabel.innerHTML =
+        "Elements transparency: " + transparencyFromAlpha(overlayAlpha) + "%";
+    });
+    sliderOpacityInput.addEventListener("change", function() {
       pd.settings.overlays[index].alpha = alphaFromTransparency(
         parseInt(this.value)
       );
       updateUserSettingsBlend();
     });
+    sliderOpacity.appendChild(sliderOpacityInput);
+    overlaySection.appendChild(sliderOpacity);
 
-    //
-    //
-    const sliderOpacityBack = $('<div class="slidecontainer_settings"></div>');
-    sliderOpacityBack.appendTo(overlaySection);
-    const sliderOpacityBackLabel = $(
-      '<label style="width: 400px; !important" class="card_size_container">Background transparency: ' +
+    const sliderOpacityBack = createDiv(["slidecontainer_settings"]);
+    const sliderOpacityBackLabel = createLabel(
+      ["card_size_container"],
+      "Background transparency: " +
         transparencyFromAlpha(settings.alpha_back) +
-        "%</label>"
+        "%"
     );
-    sliderOpacityBackLabel.appendTo(sliderOpacityBack);
-    const sliderOpacityBackInput = $(
-      '<input type="range" min="0" max="100" step="5" value="' +
-        transparencyFromAlpha(settings.alpha_back) +
-        '" class="slider" id="opacityBackRange">'
-    );
-    sliderOpacityBackInput.appendTo(sliderOpacityBack);
+    sliderOpacityBackLabel.style.width = "400px";
+    sliderOpacityBack.appendChild(sliderOpacityBackLabel);
 
-    sliderOpacityBackInput.off();
-
-    sliderOpacityBackInput.on("click mousemove", function() {
-      const overlayAlphaBack = alphaFromTransparency(parseInt(this.value));
-      sliderOpacityBackLabel.html(
-        "Background transparency: " +
-          transparencyFromAlpha(overlayAlphaBack) +
-          "%"
-      );
+    const sliderOpacityBackInput = createInput(["slider"], "", {
+      id: "opacityBackRange",
+      type: "range",
+      min: "0",
+      max: "100",
+      step: "5",
+      value: transparencyFromAlpha(settings.alpha_back)
     });
-
-    sliderOpacityBackInput.on("click mouseup", function() {
+    sliderOpacityBackInput.addEventListener("input", function() {
+      const overlayAlphaBack = alphaFromTransparency(parseInt(this.value));
+      sliderOpacityBackLabel.innerHTML =
+        "Background transparency: " +
+        transparencyFromAlpha(overlayAlphaBack) +
+        "%";
+    });
+    sliderOpacityBackInput.addEventListener("change", function() {
       pd.settings.overlays[index].alpha_back = alphaFromTransparency(
         parseInt(this.value)
       );
       updateUserSettingsBlend();
     });
+    sliderOpacityBack.appendChild(sliderOpacityBackInput);
+    overlaySection.appendChild(sliderOpacityBack);
 
-    //
-    //
-    const sliderScale = $('<div class="slidecontainer_settings"></div>');
-    sliderScale.appendTo(overlaySection);
-    const sliderScaleLabel = $(
-      '<label style="width: 400px; !important" class="card_size_container">Scale: ' +
-        settings.scale +
-        "%</label>"
+    const sliderScale = createDiv(["slidecontainer_settings"]);
+    const sliderScaleLabel = createLabel(
+      ["card_size_container"],
+      "Scale: " + settings.scale + "%"
     );
-    sliderScaleLabel.appendTo(sliderScale);
-    const sliderScaleInput = $(
-      '<input type="range" min="10" max="200" step="10" value="' +
-        settings.scale +
-        '" class="slider" id="scaleRange">'
-    );
-    sliderScaleInput.appendTo(sliderScale);
+    sliderScaleLabel.style.width = "400px";
+    sliderScale.appendChild(sliderScaleLabel);
 
-    sliderScaleInput.off();
-
-    sliderScaleInput.on("click mousemove", function() {
-      sliderScaleLabel.html("Scale: " + parseInt(this.value) + "%");
+    const sliderScaleInput = createInput(["slider"], "", {
+      id: "scaleRange",
+      type: "range",
+      min: "10",
+      max: "200",
+      step: "10",
+      value: settings.scale
     });
-
-    sliderScaleInput.on("click mouseup", function() {
+    sliderScaleInput.addEventListener("input", function() {
+      sliderScaleLabel.innerHTML = "Scale: " + parseInt(this.value) + "%";
+    });
+    sliderScaleInput.addEventListener("change", function() {
       pd.settings.overlays[index].scale = parseInt(this.value);
       updateUserSettingsBlend();
     });
+    sliderScale.appendChild(sliderScaleInput);
+    overlaySection.appendChild(sliderScale);
 
-    //
-    //
-    $(
-      '<div class="button_simple centered resetOverlayPos">Reset Position</div>'
-    ).appendTo(overlaySection);
+    const resetButton = createDiv(
+      ["button_simple", "centered"],
+      "Reset Position"
+    );
+    resetButton.addEventListener("click", function() {
+      ipcSend("reset_overlay_pos", index);
+    });
+    overlaySection.appendChild(resetButton);
 
-    section.append(overlaySection);
-  });
-
-  topPrev.on("click", () => {
-    currentOverlay -= 1;
-    if (currentOverlay < 0) {
-      currentOverlay = pd.settings.overlays.length - 1;
-    }
-    $(".overlay_section").css("display", "none");
-    $(".overlay_section_" + currentOverlay).css("display", "block");
-    $(".overlay_current").html(
-      `Current overlay settings: ${currentOverlay + 1}`
-    );
-    $(".overlay_icon").css(
-      "background-color",
-      `var(--color-${COLORS_ALL[currentOverlay]})`
-    );
-  });
-
-  topNext.on("click", () => {
-    currentOverlay += 1;
-    if (currentOverlay >= pd.settings.overlays.length) {
-      currentOverlay = 0;
-    }
-    $(".overlay_section").css("display", "none");
-    $(".overlay_section_" + currentOverlay).css("display", "block");
-    $(".overlay_current").html(
-      `Current overlay settings: ${currentOverlay + 1}`
-    );
-    $(".overlay_icon").css(
-      "background-color",
-      `var(--color-${COLORS_ALL[currentOverlay]})`
-    );
+    section.appendChild(overlaySection);
   });
 }
 
 function appendVisual(section) {
-  section.append('<div class="settings_title">Visual</div>');
+  let label;
+  section.appendChild(createDiv(["settings_title"], "Visual"));
 
-  let label = $('<label class="but_container_label">Background URL:</label>');
-  label.appendTo(section);
+  label = createLabel(["but_container_label"], "Background URL:");
+  const icd = createDiv(["input_container"]);
+  const urlInput = createInput([], "", {
+    type: "url",
+    id: "query_image",
+    autocomplete: "off",
+    placeholder: "https://example.com/photo.png",
+    value: pd.settings.back_url !== "default" ? pd.settings.back_url : ""
+  });
+  urlInput.addEventListener("keyup", e => {
+    if (e.keyCode === 13) {
+      updateUserSettings();
+    }
+  });
+  urlInput.addEventListener("focusout", () => updateUserSettings());
+  icd.appendChild(urlInput);
+  label.appendChild(icd);
+  section.appendChild(label);
 
-  let icd = $('<div class="input_container"></div>');
-  const display =
-    pd.settings.back_url !== "default" ? pd.settings.back_url : "";
-  const url_input = $(
-    '<input type="search" id="query_image" autocomplete="off" placeholder="https://example.com/photo.png" value="' +
-      display +
-      '" />'
+  label = createLabel(
+    ["but_container_label"],
+    "<span style='margin-right: 32px;'>Background shade:</span>"
   );
-  url_input.appendTo(icd);
-  icd.appendTo(label);
-
-  label = $('<label class="but_container_label">Background shade:</label>');
+  // TODO remove jQuery colorpicker
   const colorPick = $('<input type="text" id="flat" class="color_picker" />');
-  colorPick.appendTo(label);
-  label.appendTo(section);
+  colorPick.appendTo($(label));
   colorPick.spectrum({
     showInitial: true,
     showAlpha: true,
     showButtons: false
   });
   colorPick.spectrum("set", pd.settings.back_color);
-
   colorPick.on("dragstop.spectrum", function(e, color) {
     $(".main_wrapper").css("background-color", color.toRgbString());
     updateUserSettings();
   });
+  section.appendChild(label);
 
-  label = $('<label class="but_container_label">Cards quality:</label>');
-  label.appendTo(section);
-
-  const tagSelect = createSelect(
-    label[0],
-    ["small", "normal", "large"],
-    pd.settings.cards_quality,
-    filter => updateUserSettingsBlend({ cards_quality: filter }),
-    "settings_cards_quality"
-  );
-  tagSelect.style.width = "180px";
-  tagSelect.style.marginLeft = "32px";
-
-  let cardsStyleCont = $(
-    '<label class="but_container_label">Cards style:</label>'
-  );
-
+  label = createLabel(["but_container_label"], "List style:");
   const tagStyleSelect = createSelect(
-    cardsStyleCont[0],
+    label,
     [CARD_TILE_ARENA, CARD_TILE_FLAT],
     pd.settings.card_tile_style,
     filter => updateUserSettingsBlend({ card_tile_style: filter }),
@@ -648,78 +599,69 @@ function appendVisual(section) {
   );
   tagStyleSelect.style.width = "180px";
   tagStyleSelect.style.marginLeft = "32px";
-
-  let tile = deckDrawer.cardTile(pd.settings.card_tile_style, 67518, "a", 4);
+  const tile = deckDrawer.cardTile(pd.settings.card_tile_style, 67518, "a", 4);
   tile.style.width = "auto";
-  cardsStyleCont.append(tile);
-  section.append(cardsStyleCont);
+  label.appendChild(tile);
+  section.appendChild(label);
 
-  const slider = $('<div class="slidecontainer_settings"></div>');
-  slider.appendTo(section);
-  const sliderlabel = $(
-    '<label style="width: 400px; !important" class="card_size_container">Cards size: ' +
-      pd.cardsSize +
-      "px</label>"
+  label = createLabel(["but_container_label"], "Image quality:");
+  const tagSelect = createSelect(
+    label,
+    ["small", "normal", "large"],
+    pd.settings.cards_quality,
+    filter => updateUserSettingsBlend({ cards_quality: filter }),
+    "settings_cards_quality"
   );
-  sliderlabel.appendTo(slider);
-  const sliderInput = $(
-    '<input type="range" min="0" max="20" value="' +
-      pd.settings.cards_size +
-      '" class="slider sliderA" id="myRange">'
+  tagSelect.style.width = "180px";
+  tagSelect.style.marginLeft = "32px";
+  section.appendChild(label);
+
+  const slider = createDiv(["slidecontainer_settings"]);
+  slider.style.marginTop = "20px";
+  const sliderlabel = createLabel(
+    ["card_size_container", "card_size_label"],
+    "Card size: " + pd.cardsSize + "px"
   );
-  sliderInput.appendTo(slider);
+  sliderlabel.style.width = "180px";
+  sliderlabel.style.margin = "0";
+  sliderlabel.style.whiteSpace = "nowrap";
 
-  const d = $(
-    '<div style="width: ' +
-      pd.cardsSize +
-      'px; !important" class="inventory_card_settings"></div>'
-  );
-  const img = $(
-    '<img style="width: ' +
-      pd.cardsSize +
-      'px; !important" class="inventory_card_settings_img"></img>'
-  );
+  slider.appendChild(sliderlabel);
 
-  const card = db.card(67518);
-  img.attr("src", get_card_image(card));
-  img.appendTo(d);
-
-  d.appendTo(slider);
-
-  url_input.on("keyup", function(e) {
-    if (e.keyCode === 13) {
-      updateUserSettings();
-    }
+  const sliderInput = createInput(["slider", "sliderA"], "", {
+    type: "range",
+    min: "0",
+    max: "20",
+    value: pd.settings.cards_size,
+    id: "myRange"
   });
-
-  url_input.on("focusout", function() {
-    updateUserSettings();
-  });
-
-  sliderInput.off();
-
-  sliderInput.on("click mousemove", function() {
+  sliderInput.addEventListener("input", function() {
     const cardSize = 100 + Math.round(parseInt(this.value)) * 10;
-    sliderlabel.html("Cards size: " + cardSize + "px");
-
-    $(".inventory_card_settings").css("width", "");
-    let styles = $(".inventory_card_settings").attr("style");
-    styles += "width: " + cardSize + "px !important;";
-    $(".inventory_card_settings").attr("style", styles);
-
-    $(".inventory_card_settings_img").css("width", "");
-    styles = $(".inventory_card_settings_img").attr("style");
-    styles += "width: " + cardSize + "px !important;";
-    $(".inventory_card_settings_img").attr("style", styles);
+    $$(".card_size_label")[0].innerHTML = "Card size: " + cardSize + "px";
+    $$(".inventory_card_settings")[0].style.width = cardSize + "px";
+    $$(".inventory_card_settings_img")[0].style.width = cardSize + "px";
   });
-
-  sliderInput.on("click mouseup", function() {
+  sliderInput.addEventListener("change", function() {
     updateUserSettingsBlend({ cards_size: Math.round(parseInt(this.value)) });
   });
+  slider.appendChild(sliderInput);
+  section.appendChild(slider);
+
+  label = createLabel(["but_container_label"], "Example card:");
+  const d = createDiv(["inventory_card_settings"]);
+  d.style.width = pd.cardsSize + "px";
+  d.style.alignSelf = "flex-start";
+  const img = createImg(["inventory_card_settings_img"]);
+  img.style.width = pd.cardsSize + "px";
+  const card = db.card(67518);
+  img.src = get_card_image(card);
+  d.appendChild(img);
+  label.appendChild(d);
+  section.appendChild(label);
 }
 
 function appendPrivacy(section) {
-  section.append('<div class="settings_title">Privacy</div>');
+  section.appendChild(createDiv(["settings_title"], "Privacy"));
   addCheckbox(
     section,
     "Anonymous sharing&nbsp;<i>(makes your username anonymous on Explore)</i>",
@@ -735,58 +677,99 @@ function appendPrivacy(section) {
     updateUserSettings
   );
 
-  let label = $('<label class="check_container_but"></label>');
-  label.appendTo(section);
-  let button = $(
-    '<div class="button_simple button_long">Erase my shared data</div>'
+  const label = createLabel(["check_container_but"]);
+  const button = createDiv(
+    ["button_simple", "button_long"],
+    "Erase my shared data"
   );
-  button.on("click", eraseData);
-  button.appendTo(label);
+  button.addEventListener("click", eraseData);
+  label.appendChild(button);
+
+  section.appendChild(label);
 }
 
 function appendAbout(section) {
-  //section.append('<div class="settings_title">About</div>');
+  const about = createDiv(["about"]);
 
-  const about = $('<div class="about"></div>');
-  about.append('<div class="top_logo_about"></div>');
-  about.append(
-    '<div class="message_sub_15 white">By Manuel Etchegaray, 2019</div>'
+  const aboutLogo = createDiv(["top_logo_about"]);
+  aboutLogo.addEventListener("click", () => {
+    shell.openExternal("https://mtgatool.com");
+  });
+  about.appendChild(aboutLogo);
+  about.appendChild(
+    createDiv(["message_sub_15", "white"], "By Manuel Etchegaray, 2019")
   );
-  about.append(
-    '<div class="message_sub_15 white">Version ' +
-      remote.app.getVersion() +
-      "</div>"
+  const versionLink = createDiv(
+    ["message_sub_15", "white", "release_notes_link"],
+    "Version " + remote.app.getVersion()
   );
+  versionLink.addEventListener("click", function() {
+    shell.openExternal("https://mtgatool.com/release-notes/");
+  });
+  about.appendChild(versionLink);
+  about.appendChild(createDiv(["message_updates", "green"], updateState + "."));
+  const updateButton = createDiv(
+    ["button_simple", "centered"],
+    "Check for updates"
+  );
+  updateButton.addEventListener("click", () => ipcSend("updates_check", true));
+  about.appendChild(updateButton);
 
-  about.append('<div class="message_updates green">' + updateState + ".</div>");
-  let button = $(
-    '<div class="button_simple centered update_link_about">Check for updates</div>'
-  );
-  button.appendTo(about);
+  const linkDiv = createDiv(["flex_item"]);
+  linkDiv.style.margin = "64px auto 0px auto";
 
-  about.append(
-    '<div class="flex_item" style="margin: 64px auto 0px auto;"><div class="discord_link"></div><div class="twitter_link"></div><div class="git_link"></div></div>'
+  const discordLink = createDiv(["discord_link"]);
+  discordLink.addEventListener("click", () => {
+    shell.openExternal("https://discord.gg/K9bPkJy");
+  });
+  linkDiv.appendChild(discordLink);
+  const twitterLink = createDiv(["twitter_link"]);
+  twitterLink.addEventListener("click", () => {
+    shell.openExternal("https://twitter.com/MEtchegaray7");
+  });
+  linkDiv.appendChild(twitterLink);
+  const gitLink = createDiv(["git_link"]);
+  gitLink.addEventListener("click", () => {
+    shell.openExternal("https://github.com/Manuel-777/MTG-Arena-Tool");
+  });
+
+  linkDiv.appendChild(gitLink);
+  about.appendChild(linkDiv);
+
+  const supportDiv = createDiv(["message_sub_15", "white"], "Support my work!");
+  supportDiv.style.margin = "24px 0 12px 0";
+  about.appendChild(supportDiv);
+
+  const donateLink = createDiv(
+    ["donate_link"],
+    '<img src="https://www.paypalobjects.com/webstatic/en_US/i/buttons/PP_logo_h_100x26.png" alt="PayPal" />'
   );
-  about.append(
-    '<div class="message_sub_15 white" style="margin: 24px 0 12px 0;">Support my work!</div><div class="donate_link"><img src="https://www.paypalobjects.com/webstatic/en_US/i/buttons/PP_logo_h_100x26.png" alt="PayPal" /></div>'
-  );
-  about.appendTo(section);
+  donateLink.addEventListener("click", () => {
+    shell.openExternal("https://www.paypal.me/ManuelEtchegaray/10");
+  });
+  about.appendChild(donateLink);
+
+  section.appendChild(about);
 }
 
 function appendLogin(section) {
-  const login = $('<div class="about"></div>');
-  let button;
-  if (pd.offline) {
-    button = $(
-      '<div class="button_simple centered login_link_about">Login</div>'
-    );
-  } else {
-    button = $(
-      '<div class="button_simple centered login_link_about">Logout</div>'
-    );
-  }
-  button.appendTo(login);
-  login.appendTo(section);
+  const login = createDiv(["about"]);
+  const loginButton = createDiv(
+    ["button_simple", "centered"],
+    pd.offline ? "Login" : "Logout"
+  );
+  loginButton.addEventListener("click", () => {
+    const clearAppSettings = {
+      remember_me: false,
+      auto_login: false,
+      launch_to_tray: false
+    };
+    ipcSend("save_app_settings", clearAppSettings);
+    remote.app.relaunch();
+    remote.app.exit(0);
+  });
+  login.appendChild(loginButton);
+  section.appendChild(login);
 }
 
 //
@@ -819,59 +802,39 @@ function updateUserSettings() {
 
 //
 function updateUserSettingsBlend(_settings = {}) {
-  const startup = byId("settings_startup").checked;
-  const readonlogin = byId("settings_readlogonlogin").checked;
+  const overlays = pd.settings.overlays.map((settings, index) => {
+    return {
+      ...settings,
+      show: byId(`overlay_${index}_show`).checked,
+      show_always: byId(`overlay_${index}_show_always`).checked,
+      keyboard_shortcut: byId(`overlay_${index}_keyboard_shortcut`).checked,
+      top: byId(`overlay_${index}_top`).checked,
+      title: byId(`overlay_${index}_title`).checked,
+      deck: byId(`overlay_${index}_deck`).checked,
+      clock: byId(`overlay_${index}_clock`).checked,
+      sideboard: byId(`overlay_${index}_sideboard`).checked,
+      ontop: byId(`overlay_${index}_ontop`).checked,
+      lands: byId(`overlay_${index}_lands`).checked
+    };
+  });
 
-  const soundPriority = byId("settings_soundpriority").checked;
-
-  const backColor = $(".color_picker")
+  // TODO remove jQuery colorpicker
+  const back_color = $(".color_picker")
     .spectrum("get")
     .toRgbString();
 
-  const backUrl = byId("query_image").value || "default";
-
-  pd.settings.overlays.forEach((overlaySettings, index) => {
-    const showOverlay = byId(`overlay_${index}_show`).checked;
-    const showOverlayAlways = byId(`overlay_${index}_show_always`).checked;
-    const enableShortcut = byId(`overlay_${index}_keyboard_shortcut`).checked;
-    const overlayOnTop = byId(`overlay_${index}_ontop`).checked;
-    const overlayTop = byId(`overlay_${index}_top`).checked;
-    const overlayTitle = byId(`overlay_${index}_title`).checked;
-    const overlayDeck = byId(`overlay_${index}_deck`).checked;
-    const overlayClock = byId(`overlay_${index}_clock`).checked;
-    const overlaySideboard = byId(`overlay_${index}_sideboard`).checked;
-    const overlayLands = byId(`overlay_${index}_lands`).checked;
-
-    overlaySettings.show = showOverlay;
-    overlaySettings.show_always = showOverlayAlways;
-    overlaySettings.keyboard_shortcut = enableShortcut;
-    overlaySettings.top = overlayTop;
-    overlaySettings.title = overlayTitle;
-    overlaySettings.deck = overlayDeck;
-    overlaySettings.clock = overlayClock;
-    overlaySettings.sideboard = overlaySideboard;
-    overlaySettings.ontop = overlayOnTop;
-    overlaySettings.lands = overlayLands;
-  });
-
-  const closeOnMatch = byId("settings_closeonmatch").checked;
-  const exportFormat = byId("settings_export_format").value;
-  const closeToTray = byId("settings_closetotray").checked;
-  const sendData = byId("settings_senddata").checked;
-  const anonExplore = byId("settings_anon_explore").checked;
-
   ipcSend("save_user_settings", {
-    sound_priority: soundPriority,
-    startup: startup,
-    close_to_tray: closeToTray,
-    send_data: sendData,
-    close_on_match: closeOnMatch,
-    anon_explore: anonExplore,
-    back_color: backColor,
-    back_url: backUrl,
-    export_format: exportFormat,
-    skip_firstpass: !readonlogin,
-    overlays: [...pd.settings.overlays],
+    anon_explore: byId("settings_anon_explore").checked,
+    back_color,
+    back_url: byId("query_image").value || "default",
+    close_on_match: byId("settings_closeonmatch").checked,
+    close_to_tray: byId("settings_closetotray").checked,
+    export_format: byId("settings_export_format").value,
+    send_data: byId("settings_senddata").checked,
+    skip_firstpass: !byId("settings_readlogonlogin").checked,
+    sound_priority: byId("settings_soundpriority").checked,
+    startup: byId("settings_startup").checked,
+    overlays,
     ..._settings
   });
 }
