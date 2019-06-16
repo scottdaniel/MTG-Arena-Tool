@@ -231,7 +231,7 @@ function startApp() {
       case "overlay_minimize":
         overlays.forEach((overlay, index) => {
           if (index !== arg) return;
-          if (overlay.isMinimized()) return;
+          if (overlay.window.isMinimized()) return;
           overlay.window.minimize();
         });
         break;
