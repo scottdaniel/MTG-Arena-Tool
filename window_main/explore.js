@@ -624,7 +624,13 @@ function deckLoad(_deck, index) {
   d = createDivision(["list_deck_name"], _deck.name);
   flt.appendChild(d);
 
-  d = createDivision(["list_deck_name_it"], "by " + _deck.player);
+  let pname =
+    _deck.player.length > 1 ? `Various (${_deck.player.length})` : _deck.player;
+  d = createDivision(["list_deck_name_it"], "by " + pname);
+  if (pname !== _deck.player) {
+    d.style.textDecoration = "underline dotted";
+    d.title = _deck.player;
+  }
   flt.appendChild(d);
 
   _deck.colors.forEach(function(color) {
@@ -643,18 +649,22 @@ function deckLoad(_deck, index) {
   flr.appendChild(d);
 
   let rcont = createDivision(["flex_item"]);
+  rcont.style.marginRight = "16px";
   rcont.style.marginLeft = "auto";
 
   let eventName = createDivision(["list_deck_name_it"], db.events[_deck.event]);
-
-  var playerRank = createDivision(["ranks_16"]);
-  playerRank.style.marginTop = "4px";
-  playerRank.style.backgroundPosition =
-    get_rank_index_16(_deck.rank) * -16 + "px 0px";
-  playerRank.title = _deck.rank;
-
   rcont.appendChild(eventName);
-  rcont.appendChild(playerRank);
+
+  _deck.rank.forEach(_rank => {
+    let rankIcon = createDivision(["ranks_16"]);
+    rankIcon.style.marginTop = "4px";
+    rankIcon.style.backgroundPosition =
+      get_rank_index_16(_rank) * -16 + "px 0px";
+    rankIcon.title = _rank;
+
+    rcont.appendChild(rankIcon);
+  });
+
   flr.appendChild(rcont);
 
   div.appendChild(fll);
