@@ -568,14 +568,19 @@ class OverlayProcess {
     overlay.loadURL(`file://${__dirname}/window_overlay/index.html`);
 
     this.window = overlay;
-    this.updateSettings(settings);
 
     overlay.on("resize", this.handlePositionChange);
     overlay.on("move", this.handlePositionChange);
+
+    overlay.webContents.once("dom-ready", function() {
+      //We need to wait for the overlay to be initialized before we interact with it
+      //console.log(`OVERLAY ${index + 1}:  Init updateSettings`);
+      overlay.webContents.send("settings_updated", index);
+    });
   }
 
   destroy() {
-    console.log(`OVERLAY ${this.index}:  Clean up`);
+    console.log(`OVERLAY ${this.index + 1}:  Clean up`);
     if (this.timeout) clearTimeout(this.timeout);
     this.timeout = null;
     if (this.window) this.window.destroy();
@@ -603,7 +608,7 @@ class OverlayProcess {
 
   updateSettings(settings) {
     const { index } = this;
-    // console.log(`OVERLAY ${index + 1}:  Update settings`);
+    //console.log(`OVERLAY ${index + 1}:  Update settings`);
 
     const alphaEnabled = settings.alpha_back < 1;
     if (this.alphaEnabled !== alphaEnabled) {
