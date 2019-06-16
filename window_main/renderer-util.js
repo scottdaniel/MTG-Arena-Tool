@@ -5,18 +5,28 @@ const _ = require("lodash");
 const striptags = require("striptags");
 
 const {
+  CARD_TYPE_CODES,
+  CARD_TYPES,
+  COLORS_ALL,
   DRAFT_RANKS,
   MANA,
+  MANA_COLORS,
   IPC_MAIN,
   IPC_BACKGROUND
 } = require("../shared/constants");
 const db = require("../shared/database");
 const pd = require("../shared/player-data");
-const { queryElements: $$ } = require("../shared/dom-fns");
+const ConicGradient = require("../shared/conic-gradient");
+const {
+  createDiv,
+  createSpan,
+  queryElements: $$
+} = require("../shared/dom-fns");
 const deckDrawer = require("../shared/deck-drawer");
 const cardTypes = require("../shared/card-types");
 const { addCardHover } = require("../shared/card-hover");
 const {
+  add,
   compare_cards,
   get_card_image,
   get_deck_export,
@@ -262,11 +272,8 @@ function drawCardList(div, cards) {
 
 //
 exports.drawDeckVisual = drawDeckVisual;
-function drawDeckVisual(_div, deck, _stats, openCallback) {
-  // PLACEHOLDER
-  if (!(_div instanceof jQuery)) {
-    _div = $(_div);
-  }
+function drawDeckVisual(_div, deck, openCallback) {
+  _div = $(_div);
   // attempt at sorting visually..
   var newMainDeck = [];
 
@@ -336,9 +343,6 @@ function drawDeckVisual(_div, deck, _stats, openCallback) {
   ).appendTo(typesdiv);
   typesdiv.prependTo(_div.parent());
 
-  if (_stats) {
-    _stats.hide();
-  }
   _div.css("display", "flex");
   _div.css("width", "auto");
   _div.css("margin", "0 auto");
@@ -346,7 +350,7 @@ function drawDeckVisual(_div, deck, _stats, openCallback) {
 
   _div.parent().css("flex-direction", "column");
 
-  if (_stats) {
+  if (openCallback) {
     $('<div class="button_simple openDeck">Normal view</div>').appendTo(
       _div.parent()
     );
@@ -465,6 +469,147 @@ function drawDeckVisual(_div, deck, _stats, openCallback) {
       }
     });
   }
+}
+
+//
+function get_deck_curve(deck) {
+  var curve = [];
+
+  deck.mainDeck.forEach(function(card) {
+    var grpid = card.id;
+    var cmc = db.card(grpid).cmc;
+    if (curve[cmc] == undefined) curve[cmc] = [0, 0, 0, 0, 0, 0];
+
+    let card_cost = db.card(grpid).cost;
+
+    if (db.card(grpid).type.indexOf("Land") == -1) {
+      card_cost.forEach(function(c) {
+        if (c.indexOf("w") !== -1) curve[cmc][1] += card.quantity;
+        if (c.indexOf("u") !== -1) curve[cmc][2] += card.quantity;
+        if (c.indexOf("b") !== -1) curve[cmc][3] += card.quantity;
+        if (c.indexOf("r") !== -1) curve[cmc][4] += card.quantity;
+        if (c.indexOf("g") !== -1) curve[cmc][5] += card.quantity;
+      });
+
+      curve[cmc][0] += card.quantity;
+    }
+  });
+  /*
+  // Do not account sideboard?
+  deck.sideboard.forEach(function(card) {
+    var grpid = card.id;
+    var cmc = db.card(grpid).cmc;
+    if (curve[cmc] == undefined)  curve[cmc] = 0;
+    curve[cmc] += card.quantity
+
+    if (db.card(grpid).rarity !== 'land') {
+      curve[cmc] += card.quantity
+    }
+  });
+  */
+  //console.log(curve);
+  return curve;
+}
+
+//
+exports.deckManaCurve = deckManaCurve;
+function deckManaCurve(deck) {
+  const manaCounts = get_deck_curve(deck);
+  const curveMax = Math.max(
+    ...manaCounts
+      .filter(v => {
+        if (v == undefined) return false;
+        return true;
+      })
+      .map(v => v[0] || 0)
+  );
+  // console.log("deckManaCurve", manaCounts, curveMax);
+
+  const container = createDiv();
+  const curve = createDiv(["mana_curve"]);
+  const numbers = createDiv(["mana_curve_numbers"]);
+
+  manaCounts.forEach((cost, i) => {
+    const total = cost[0];
+    const manaTotal = cost.reduce(add, 0) - total;
+
+    const curveCol = createDiv(["mana_curve_column"]);
+    curveCol.style.height = (total * 100) / curveMax + "%";
+
+    const curveNum = createDiv(["mana_curve_number"], total > 0 ? total : "");
+    curveCol.appendChild(curveNum);
+
+    MANA_COLORS.forEach((mc, ind) => {
+      if (ind < 5 && cost[ind + 1] > 0) {
+        const col = createDiv(["mana_curve_column_color"]);
+        col.style.height = Math.round((cost[ind + 1] / manaTotal) * 100) + "%";
+        col.style.backgroundColor = mc;
+        curveCol.appendChild(col);
+      }
+    });
+
+    curve.appendChild(curveCol);
+
+    const colNum = createDiv(["mana_curve_column_number"]);
+    const numDiv = createDiv(["mana_s16", "mana_" + i]);
+    numDiv.style.margin = "0 auto !important";
+    colNum.appendChild(numDiv);
+    numbers.appendChild(colNum);
+  });
+
+  container.appendChild(curve);
+  container.appendChild(numbers);
+
+  return container;
+}
+
+//
+exports.deckTypesStats = deckTypesStats;
+function deckTypesStats(deck) {
+  const cardTypes = get_deck_types_ammount(deck);
+  const typesContainer = createDiv(["types_container"]);
+  CARD_TYPE_CODES.forEach((cardTypeKey, index) => {
+    const type = createDiv(["type_icon_cont"]);
+    type.appendChild(
+      createDiv(["type_icon", "type_" + cardTypeKey], "", {
+        title: CARD_TYPES[index]
+      })
+    );
+    type.appendChild(createSpan([], cardTypes[cardTypeKey]));
+    typesContainer.appendChild(type);
+  });
+  return typesContainer;
+}
+
+//
+exports.colorPieChart = colorPieChart;
+function colorPieChart(colorCounts, title) {
+  /*
+    used for land / card pie charts.
+    colorCounts should be object with values for each of the color codes wubrgc and total.
+    */
+  // console.log("making colorPieChart", colorCounts, title);
+
+  const stops = [];
+  let start = 0;
+  COLORS_ALL.forEach((colorCode, i) => {
+    const currentColor = MANA_COLORS[i];
+    const stop =
+      start + ((colorCounts[colorCode] || 0) / colorCounts.total) * 100;
+    stops.push(`${currentColor} 0 ${stop}%`);
+    // console.log('\t', start, stop, currentColor);
+    start = stop;
+  });
+  const gradient = new ConicGradient({
+    stops: stops.join(", "),
+    size: 400
+  });
+  const chart = createDiv(
+    ["pie_container"],
+    `<span>${title}</span>
+    <svg class="pie">${gradient.svg}</svg>`
+  );
+  return chart;
 }
 
 //
