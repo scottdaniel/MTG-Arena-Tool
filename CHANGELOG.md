@@ -1,3 +1,27 @@
+## <small>2.7.1 (2019-06-16)</small>
+
+* bugfix main only resets position of specified overlay ([bbec74d](https://github.com/Manuel-777/MTG-Arena-Tool/commit/bbec74d))
+* bugfix overlay position persistence ([cb7f37e](https://github.com/Manuel-777/MTG-Arena-Tool/commit/cb7f37e))
+* create overlay process class ([879b630](https://github.com/Manuel-777/MTG-Arena-Tool/commit/879b630))
+* database update ([3cad39e](https://github.com/Manuel-777/MTG-Arena-Tool/commit/3cad39e))
+* deprecate "set_status" ([a4d14ac](https://github.com/Manuel-777/MTG-Arena-Tool/commit/a4d14ac))
+* disable debug log ([59a2e08](https://github.com/Manuel-777/MTG-Arena-Tool/commit/59a2e08))
+* display multi users in explore ([d1ad453](https://github.com/Manuel-777/MTG-Arena-Tool/commit/d1ad453))
+* dom-fns for other common elements ([bea7956](https://github.com/Manuel-777/MTG-Arena-Tool/commit/bea7956))
+* fix debugLog ([e612a65](https://github.com/Manuel-777/MTG-Arena-Tool/commit/e612a65))
+* initial overlay settings ([da2acb9](https://github.com/Manuel-777/MTG-Arena-Tool/commit/da2acb9))
+* ipcSend ([cbdabe6](https://github.com/Manuel-777/MTG-Arena-Tool/commit/cbdabe6))
+* more robust default background logic ([a0996e9](https://github.com/Manuel-777/MTG-Arena-Tool/commit/a0996e9))
+* overlay minimize ([2ada2bc](https://github.com/Manuel-777/MTG-Arena-Tool/commit/2ada2bc))
+* overlay-process ([3899f1e](https://github.com/Manuel-777/MTG-Arena-Tool/commit/3899f1e))
+* prettier ([baaa1a4](https://github.com/Manuel-777/MTG-Arena-Tool/commit/baaa1a4))
+* remove jQuery from settings page ([c1fc866](https://github.com/Manuel-777/MTG-Arena-Tool/commit/c1fc866))
+* remove unused IPC signal ([e2ddd09](https://github.com/Manuel-777/MTG-Arena-Tool/commit/e2ddd09))
+* renderer-util.addCheckbox works for native DOM nodes ([6650245](https://github.com/Manuel-777/MTG-Arena-Tool/commit/6650245))
+* share anonymously for matches ([2dde8b2](https://github.com/Manuel-777/MTG-Arena-Tool/commit/2dde8b2))
+
+
+
 ## 2.7.0 (2019-06-13)
 
 * add fifth overlay ([31b2d1e](https://github.com/Manuel-777/MTG-Arena-Tool/commit/31b2d1e))
