@@ -24,55 +24,6 @@ var httpAsync = [];
 
 const serverAddress = "mtgatool.com";
 
-function beginSSE() {
-  var source = new EventSource(
-    "https://" + serverAddress + "/api/pull?token=" + tokenAuth
-  );
-  source.onmessage = function(e) {
-    ipc_send("ipc_log", ">> " + e.data);
-
-    let parsed = undefined;
-    try {
-      parsed = JSON.parse(e.data);
-    } catch (e) {
-      //
-    }
-
-    console.log("> ", parsed);
-
-    if (parsed) {
-      parsed.forEach(str => {
-        console.log("heartbeat message:", str);
-        if (typeof str == "string") {
-          //console.log("Notification string:", str);
-          new Notification("MTG Arena Tool", {
-            body: str
-          });
-        } else if (typeof str == "object") {
-          if (str.task) {
-            if (str.task == "sync") {
-              syncUserData(str.value);
-            } else {
-              ipc_send(str.task, str.value);
-            }
-          }
-        }
-      });
-    }
-  };
-
-  source.onopen = function(e) {
-    console.log(">> Connection was opened", e);
-  };
-
-  source.onerror = function(e) {
-    if (e.eventPhase == 2) {
-      //EventSource.CLOSED
-      console.log(">> Connection was closed", e);
-    }
-  };
-}
-
 function httpBasic() {
   var httpAsyncNew = httpAsync.slice(0);
   //var str = ""; httpAsync.forEach( function(h) {str += h.reqId+", "; }); console.log("httpAsync: ", str);
@@ -147,7 +98,7 @@ function httpBasic() {
         };
       }
 
-      if (debugNet && _headers.method !== "heartbeat") {
+      if (debugNet && _headers.method !== "notifications") {
         console.log(
           "SEND >> " + index + ", " + _headers.method,
           _headers,
@@ -180,7 +131,7 @@ function httpBasic() {
         });
         res.on("end", function() {
           if (debugNet) {
-            if (_headers.method !== "heartbeat") {
+            if (_headers.method !== "notifications") {
               ipc_send(
                 "ipc_log",
                 "RECV << " +
@@ -197,6 +148,9 @@ function httpBasic() {
               );
             }
           }
+          if (_headers.method == "notifications") {
+            notificationSetTimeout();
+          }
           try {
             var parsedResult = null;
             try {
@@ -209,6 +163,9 @@ function httpBasic() {
               });
             }
 
+            if (_headers.method == "notifications") {
+              notificationProcess(parsedResult);
+            }
             if (_headers.method == "get_explore") {
               ipc_send("set_explore_decks", parsedResult);
             }
@@ -248,7 +205,7 @@ function httpBasic() {
                 ipc_send("player_data_updated");
                 loadPlayerConfig(pd.arenaId, serverData);
                 ipc_send("set_discord_tag", parsedResult.discord_tag);
-                beginSSE();
+                httpNotificationsPull();
               }
               if (
                 _headers.method == "tou_join" ||
@@ -343,7 +300,7 @@ function httpBasic() {
           }
 
           removeFromHttp(_headers.reqId);
-          if (debugNet && _headers.method !== "heartbeat") {
+          if (debugNet && _headers.method !== "notifications") {
             var str = "";
             httpAsync.forEach(function(h) {
               str += h.reqId + ", ";
@@ -391,6 +348,44 @@ function removeFromHttp(req) {
       httpAsync.splice(i, 1);
     }
   });
+}
+
+function httpNotificationsPull() {
+  var _id = makeId(6);
+  httpAsync.push({
+    reqId: _id,
+    method: "notifications",
+    method_path: "/api/pull.php"
+  });
+}
+
+function notificationProcess(data) {
+  data.notifications.forEach(str => {
+    console.log("notifications message:", str);
+    if (typeof str == "string") {
+      //console.log("Notification string:", str);
+      new Notification("MTG Arena Tool", {
+        body: str
+      });
+    } else if (typeof str == "object") {
+      if (str.task) {
+        if (str.task == "sync") {
+          syncUserData(str.value);
+        } else {
+          ipc_send(str.task, str.value);
+        }
+      }
+    }
+  });
+}
+
+function notificationSetTimeout() {
+  // Here we should probably do some "smarter" pull
+  // Like, check if arena is open at all, if we are in a tourney, if we
+  // just submitted some data that requires notification pull, etc
+  // Based on that adjust the timeout for the next pull or call
+  // this function again if no pull is required.
+  setTimeout(httpNotificationsPull, 10000);
 }
 
 function httpAuth(userName, pass) {
