@@ -147,6 +147,7 @@ var currentMatchDefault = {
   turnInfo: {},
   playerCardsUsed: [],
   oppCardsUsed: [],
+  cardsCast: [],
   player: {
     seat: 1,
     deck: { mainDeck: [], sideboard: [] },

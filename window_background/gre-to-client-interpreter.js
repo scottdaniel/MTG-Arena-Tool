@@ -151,6 +151,13 @@ annotationFunctions.AnnotationType_ZoneTransfer = function(ann, details) {
     let seat = obj.ownerSeatId;
     let playerName = getNameBySeat(seat);
 
+    let cast = {
+      grpId: grpId,
+      turn: currentMatch.turnInfo.turnNumber,
+      player: seat
+    };
+    currentMatch.cardsCast.push(cast);
+
     actionLog(
       seat,
       logTime,
