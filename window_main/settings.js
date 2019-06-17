@@ -143,7 +143,6 @@ function openSettingsTab(openSection = lastSettingsSection, scrollTop = 0) {
 
   wrap_r.appendChild(div);
   wrap_r.addEventListener("scroll", () => {
-    console.log(wrap_r.scrollTop);
     setLocalState({ lastScrollTop: wrap_r.scrollTop });
   });
   mainDiv.appendChild(wrap_r);
