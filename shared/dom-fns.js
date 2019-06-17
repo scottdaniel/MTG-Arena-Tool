@@ -45,3 +45,8 @@ exports.createLabel = createLabel;
 function createLabel(classNames, innerHTML, attrs = {}) {
   return createElement("label", classNames, innerHTML, attrs);
 }
+
+exports.createSpan = createSpan;
+function createSpan(classNames, innerHTML, attrs = {}) {
+  return createElement("span", classNames, innerHTML, attrs);
+}
