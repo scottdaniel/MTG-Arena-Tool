@@ -129,6 +129,9 @@ function startApp() {
     else background.hide();
     background.toggleDevTools();
     mainWindow.toggleDevTools();
+  });
+
+  globalShortcut.register("Alt+Shift+O", () => {
     overlays.forEach(overlay => overlay.window.toggleDevTools());
   });
 
