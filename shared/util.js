@@ -314,7 +314,7 @@ function get_wc_missing(deck, grpid, isSideboard) {
 
   let have = 0;
   arr.forEach(id => {
-    let n = pd.cards[id];
+    let n = pd.cards.cards[id];
     if (n !== undefined) {
       have += n;
     }

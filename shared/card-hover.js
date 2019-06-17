@@ -79,7 +79,7 @@ function attachOwnerhipStars(card, starContainer) {
   starContainer.innerHTML = "";
   starContainer.style.opacity = 1;
 
-  const owned = pd.cards[card.id];
+  const owned = pd.cards.cards[card.id];
   const aquired = pd.cardsNew[card.id];
   starContainer.title = `${owned}/4 copies in collection`;
   if (aquired) {

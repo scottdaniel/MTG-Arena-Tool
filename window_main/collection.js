@@ -37,7 +37,7 @@ let countMode = ALL_CARDS;
 //
 function get_collection_export(exportFormat) {
   let list = "";
-  Object.keys(pd.cards).forEach(key => {
+  Object.keys(pd.cards.cards).forEach(key => {
     let add = exportFormat + "";
     const card = db.card(key);
     if (card) {
@@ -45,7 +45,10 @@ function get_collection_export(exportFormat) {
       name = replaceAll(name, "///", "//");
       add = add.replace("$Name", '"' + name + '"');
 
-      add = add.replace("$Count", pd.cards[key] === 9999 ? 1 : pd.cards[key]);
+      add = add.replace(
+        "$Count",
+        pd.cards.cards[key] === 9999 ? 1 : pd.cards.cards[key]
+      );
 
       add = add.replace("$SetName", card.set);
       add = add.replace("$SetCode", db.sets[card.set].code);
@@ -173,8 +176,8 @@ function get_collection_stats() {
     stats.complete[card.rarity].unique += 1;
 
     // add cards we own
-    if (pd.cards[card.id] !== undefined) {
-      const owned = pd.cards[card.id];
+    if (pd.cards.cards[card.id] !== undefined) {
+      const owned = pd.cards.cards[card.id];
       stats[card.set][card.rarity].owned += owned;
       stats.complete[card.rarity].owned += owned;
       stats[card.set][card.rarity].uniqueOwned += 1;
@@ -868,7 +871,7 @@ function printCards() {
   if (filterUnown) {
     list = db.cardIds;
   } else {
-    list = Object.keys(pd.cards);
+    list = Object.keys(pd.cards.cards);
   }
 
   let keysSorted = [...list];
@@ -911,7 +914,7 @@ function printCards() {
     }
 
     if (filterIncomplete) {
-      const owned = pd.cards[card.id];
+      const owned = pd.cards.cards[card.id];
       if (owned >= 4) {
         continue;
       }
