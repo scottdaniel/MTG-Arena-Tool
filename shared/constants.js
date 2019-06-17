@@ -678,6 +678,16 @@ exports.MANA = {
   8: "x"
 };
 
+exports.RANKS_SORT = {
+  Begginer: 0,
+  Bronze: 1,
+  Silver: 2,
+  Gold: 3,
+  Platinum: 4,
+  Diamond: 5,
+  Mythic: 6
+};
+
 exports.PACK_SIZES = { "Ravnica Allegiance": 14, "Guilds of Ravnica": 14 };
 
 exports.DEFAULT_TILE = 67003;

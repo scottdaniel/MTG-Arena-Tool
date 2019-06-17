@@ -5,7 +5,8 @@ const {
   MANA,
   COLORS_BRIEF,
   DEFAULT_TILE,
-  RANKS
+  RANKS,
+  RANKS_SORT
 } = require("../shared/constants");
 const db = require("../shared/database");
 const { queryElements: $$, createDivision } = require("../shared/dom-fns");
@@ -654,6 +655,8 @@ function deckLoad(_deck, index) {
 
   let eventName = createDivision(["list_deck_name_it"], db.events[_deck.event]);
   rcont.appendChild(eventName);
+
+  _deck.rank.sort((a, b) => RANKS_SORT[a] - RANKS_SORT[b]);
 
   _deck.rank.forEach(_rank => {
     let rankIcon = createDivision(["ranks_16"]);
