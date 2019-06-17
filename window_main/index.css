@@ -2186,7 +2186,6 @@ a:hover {
 }
 
 .change_button_cont {
-    cursor: pointer;
     background: url(../images/timeline.png) no-repeat;
     background-size: 100% 50%;
     width: 64px;
