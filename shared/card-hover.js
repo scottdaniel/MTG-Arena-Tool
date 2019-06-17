@@ -14,7 +14,7 @@ exports.setRenderer = value => {
 // card info for `card`
 exports.addCardHover = addCardHover;
 function addCardHover(element, card) {
-  if (!card || !card.images) return;
+  if (!card || !card.images || card.type == "Special") return;
 
   if (element instanceof jQuery) {
     element = element[0];
