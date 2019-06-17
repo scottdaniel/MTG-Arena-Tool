@@ -1,22 +1,16 @@
-const {
-  MANA,
-  CARD_RARITIES,
-  CARD_TYPE_CODES,
-  CARD_TYPES,
-  COLORS_ALL,
-  MANA_COLORS
-} = require("../shared/constants");
+const { MANA, CARD_RARITIES } = require("../shared/constants");
 const db = require("../shared/database");
 const pd = require("../shared/player-data");
-const ConicGradient = require("../shared/conic-gradient");
-const { createDivision } = require("../shared/dom-fns");
+const {
+  createDiv,
+  createSpan,
+  queryElements: $$
+} = require("../shared/dom-fns");
 const deckDrawer = require("../shared/deck-drawer");
 const {
-  add,
   get_deck_export,
   get_deck_export_txt,
   get_deck_missing,
-  get_deck_types_ammount,
   getBoosterCountEstimate,
   timeSince
 } = require("../shared/util");
@@ -25,6 +19,9 @@ const Aggregator = require("./aggregator");
 const StatsPanel = require("./stats-panel");
 const {
   changeBackground,
+  colorPieChart,
+  deckManaCurve,
+  deckTypesStats,
   drawDeck,
   drawDeckVisual,
   ipcSend,
@@ -32,6 +29,7 @@ const {
   pop
 } = require("./renderer-util");
 
+const byId = id => document.getElementById(id);
 // We need to store a sorted list of card types so we create the card counts in the same order.
 let currentOpenDeck = null;
 let currentFilters = null;
@@ -120,188 +118,83 @@ function get_deck_lands_ammount(deck) {
   return colors;
 }
 
-//
-function get_deck_curve(deck) {
-  var curve = [];
-
-  deck.mainDeck.forEach(function(card) {
-    var grpid = card.id;
-    var cmc = db.card(grpid).cmc;
-    if (curve[cmc] == undefined) curve[cmc] = [0, 0, 0, 0, 0, 0];
-
-    let card_cost = db.card(grpid).cost;
-
-    if (db.card(grpid).type.indexOf("Land") == -1) {
-      card_cost.forEach(function(c) {
-        if (c.indexOf("w") !== -1) curve[cmc][1] += card.quantity;
-        if (c.indexOf("u") !== -1) curve[cmc][2] += card.quantity;
-        if (c.indexOf("b") !== -1) curve[cmc][3] += card.quantity;
-        if (c.indexOf("r") !== -1) curve[cmc][4] += card.quantity;
-        if (c.indexOf("g") !== -1) curve[cmc][5] += card.quantity;
-      });
-
-      curve[cmc][0] += card.quantity;
-    }
-  });
-  /*
-  // Do not account sideboard?
-  deck.sideboard.forEach(function(card) {
-    var grpid = card.id;
-    var cmc = db.card(grpid).cmc;
-    if (curve[cmc] == undefined)  curve[cmc] = 0;
-    curve[cmc] += card.quantity
-
-    if (db.card(grpid).rarity !== 'land') {
-      curve[cmc] += card.quantity
-    }
-  });
-  */
-  //console.log(curve);
-  return curve;
-}
-
-function deckManaCurve(deck) {
-  let manaCounts = get_deck_curve(deck);
-  let curveMax = Math.max(
-    ...manaCounts
-      .filter(v => {
-        if (v == undefined) return false;
-        return true;
-      })
-      .map(v => v[0] || 0)
-  );
-
-  // console.log("deckManaCurve", manaCounts, curveMax);
-
-  let curve = $('<div class="mana_curve"></div>');
-  let numbers = $('<div class="mana_curve_numbers"></div>');
-  manaCounts.forEach((cost, i) => {
-    let total = cost[0];
-    let manaTotal = cost.reduce(add, 0) - total;
-
-    let curve_column = $(
-      `<div style="height: ${(total / curveMax) *
-        100}%;" class="mana_curve_column"><div class="mana_curve_number">${
-        total > 0 ? total : ""
-      }</div></div>`
-    );
-    MANA_COLORS.forEach((mc, ind) => {
-      if (ind < 5 && cost[ind + 1] > 0) {
-        let h = Math.round((cost[ind + 1] / manaTotal) * 100);
-        let col = $(
-          `<div style="height: ${h}%; background-color: ${mc};" class="mana_curve_column_color"></div>`
-        );
-        col.appendTo(curve_column);
-      }
-    });
-
-    curve_column.appendTo(curve);
-
-    numbers.append(
-      $(
-        `<div class="mana_curve_column_number"><div style="margin: 0 auto !important" class="mana_s16 mana_${i}"></div></div>`
-      )
-    );
-  });
-
-  let container = $("<div>").append(curve, numbers);
-  return container;
-}
-
-function colorPieChart(colorCounts, title) {
-  /*
-    used for land / card pie charts.
-    colorCounts should be object with values for each of the color codes wubrgc and total.
-    */
-  // console.log("making colorPieChart", colorCounts, title);
-
-  var stops = [];
-  var start = 0;
-  COLORS_ALL.forEach((colorCode, i) => {
-    let currentColor = MANA_COLORS[i];
-    var stop =
-      start + ((colorCounts[colorCode] || 0) / colorCounts.total) * 100;
-    stops.push(`${currentColor} 0 ${stop}%`);
-    // console.log('\t', start, stop, currentColor);
-    start = stop;
-  });
-  let gradient = new ConicGradient({
-    stops: stops.join(", "),
-    size: 400
-    // Default size: Math.max(innerWidth, innerHeight)
-  });
-  let chart = $(
-    `<div class="pie_container"><span>${title}</span><svg class="pie">${
-      gradient.svg
-    }</svg></div>`
-  );
-  return chart;
-}
-
 function deckStatsSection(deck) {
-  let stats = $('<div class="stats"></div>');
+  const stats = createDiv(["stats"]);
 
-  $(`<div class="button_simple visualView">Visual View</div>
-    <div class="button_simple openHistory">History of changes</div>
-    <div class="button_simple exportDeck">Export to Arena</div>
-    <div class="button_simple exportDeckStandard">Export to .txt</div>`).appendTo(
-    stats
+  const visualView = createDiv(["button_simple", "visualView"], "Visual View");
+  stats.appendChild(visualView);
+  const openHistory = createDiv(
+    ["button_simple", "openHistory"],
+    "History of changes"
   );
-
-  let cardTypes = get_deck_types_ammount(deck);
-  let typesContainer = $('<div class="types_container"></div>');
-  CARD_TYPE_CODES.forEach((cardTypeKey, index) => {
-    $(`<div class="type_icon_cont">
-            <div title="${
-              CARD_TYPES[index]
-            }" class="type_icon type_${cardTypeKey}"></div>
-            <span>${cardTypes[cardTypeKey]}</span>
-        </div>`).appendTo(typesContainer);
+  openHistory.addEventListener("click", () => setChangesTimeline(deck.id));
+  stats.appendChild(openHistory);
+  const exportDeck = createDiv(
+    ["button_simple", "exportDeck"],
+    "Export to Arena"
+  );
+  exportDeck.addEventListener("click", () => {
+    const list = get_deck_export(deck);
+    pop("Copied to clipboard", 2000);
+    ipcSend("set_clipboard", list);
   });
-  typesContainer.appendTo(stats);
+  stats.appendChild(exportDeck);
+  const exportDeckStandard = createDiv(
+    ["button_simple", "exportDeckStandard"],
+    "Export to .txt"
+  );
+  exportDeckStandard.addEventListener("click", () => {
+    const list = get_deck_export_txt(deck);
+    ipcSend("export_txt", { str: list, name: deck.name });
+  });
+  stats.appendChild(exportDeckStandard);
+
+  // Cart Types
+  stats.appendChild(deckTypesStats(deck));
 
   // Mana Curve
-  deckManaCurve(deck).appendTo(stats);
+  stats.appendChild(deckManaCurve(deck));
+
+  // Pie Charts
+  const pieContainer = createDiv(["pie_container_outer"]);
+  stats.appendChild(pieContainer);
 
   // Deck colors
-  let pieContainer = $('<div class="pie_container_outer"></div>');
-  pieContainer.appendTo(stats);
-  let colorCounts = get_deck_colors_ammount(deck);
-  let pieChart;
-  pieChart = colorPieChart(colorCounts, "Mana Symbols");
-  pieChart.appendTo(pieContainer);
+  const colorCounts = get_deck_colors_ammount(deck);
+  pieContainer.appendChild(colorPieChart(colorCounts, "Mana Symbols"));
 
   // Lands colors
-  let landCounts = get_deck_lands_ammount(deck);
-  pieChart = colorPieChart(landCounts, "Mana Sources");
-  pieChart.appendTo(pieContainer);
+  const landCounts = get_deck_lands_ammount(deck);
+  pieContainer.appendChild(colorPieChart(landCounts, "Mana Sources"));
 
   // Deck crafting cost section
-  let ownedWildcards = {
+  const ownedWildcards = {
     common: pd.economy.wcCommon,
     uncommon: pd.economy.wcUncommon,
     rare: pd.economy.wcRare,
     mythic: pd.economy.wcMythic
   };
 
-  let missingWildcards = get_deck_missing(deck);
-  let boosterCost = getBoosterCountEstimate(missingWildcards);
-  let costSection = $(
-    '<div class="wildcards_cost"><span>Wildcards you have/need</span></div>'
-  );
+  const missingWildcards = get_deck_missing(deck);
+  const boosterCost = getBoosterCountEstimate(missingWildcards);
+  const costSection = createDiv(["wildcards_cost"]);
+  costSection.appendChild(createSpan([], "Wildcards you have/need"));
   CARD_RARITIES.forEach(cardRarity => {
-    $(
-      `<div title="${cardRarity}" class="wc_cost wc_${cardRarity}">${
-        ownedWildcards[cardRarity] > 0 ? ownedWildcards[cardRarity] + " / " : ""
-      }${missingWildcards[cardRarity]}</div>`
-    ).appendTo(costSection);
+    const wcText =
+      (ownedWildcards[cardRarity] > 0
+        ? ownedWildcards[cardRarity] + " / "
+        : "") + missingWildcards[cardRarity];
+    costSection.appendChild(
+      createDiv(["wc_cost", "wc_" + cardRarity], wcText, { title: cardRarity })
+    );
   });
-  $(
-    `<div title="Aproximate boosters" class="wc_cost wc_booster">${Math.round(
-      boosterCost
-    )}</div>`
-  ).appendTo(costSection);
-  costSection.appendTo(stats);
+  costSection.appendChild(
+    createDiv(["wc_cost", "wc_booster"], Math.round(boosterCost), {
+      title: "Approximate boosters"
+    })
+  );
+  stats.appendChild(costSection);
+
   return stats;
 }
 
@@ -312,7 +205,7 @@ function openDeck(deck = currentOpenDeck, filters = currentFilters) {
   currentFilters = filters;
 
   // #ux_1 is right side, #ux_0 is left side
-  const mainDiv = document.getElementById("ux_1");
+  const mainDiv = byId("ux_1");
   mainDiv.classList.remove("flex_item");
   mainDiv.innerHTML = "";
 
@@ -323,8 +216,9 @@ function openDeck(deck = currentOpenDeck, filters = currentFilters) {
     showStatsPanel = aggregator.stats.total > 0;
     if (showStatsPanel) {
       mainDiv.classList.add("flex_item");
-      const wrap_r = createDivision(["wrapper_column", "sidebar_column_l"]);
-      wrap_r.setAttribute("id", "stats_column");
+      const wrap_r = createDiv(["wrapper_column", "sidebar_column_l"], "", {
+        id: "stats_column"
+      });
       wrap_r.style.width = pd.settings.right_panel_width + "px";
       wrap_r.style.flex = `0 0 ${pd.settings.right_panel_width}px`;
       const statsPanel = new StatsPanel(
@@ -339,13 +233,13 @@ function openDeck(deck = currentOpenDeck, filters = currentFilters) {
       deck_top_winrate.style.marginTop = "16px";
       deck_top_winrate.style.padding = "12px";
 
-      const drag = createDivision(["dragger"]);
+      const drag = createDiv(["dragger"]);
       wrap_r.appendChild(drag);
       makeResizable(drag, statsPanel.handleResize);
 
       wrap_r.appendChild(deck_top_winrate);
 
-      const wrap_l = createDivision(["wrapper_column"]);
+      const wrap_l = createDiv(["wrapper_column"]);
       wrap_l.setAttribute("id", "deck_column");
       mainDiv.appendChild(wrap_l);
       mainDiv.appendChild(wrap_r);
@@ -353,18 +247,17 @@ function openDeck(deck = currentOpenDeck, filters = currentFilters) {
     }
   }
 
-  const d = document.createElement("div");
-  d.classList.add("list_fill");
+  const d = createDiv(["list_fill"]);
   container.appendChild(d);
 
-  const top = createDivision(["decklist_top"]);
-  top.appendChild(createDivision(["button", "back"]));
-  top.appendChild(createDivision(["deck_name"], deck.name));
+  const top = createDiv(["decklist_top"]);
+  top.appendChild(createDiv(["button", "back"]));
+  top.appendChild(createDiv(["deck_name"], deck.name));
 
-  const deckColors = createDivision(["deck_top_colors"]);
+  const deckColors = createDiv(["deck_top_colors"]);
   deckColors.style.alignSelf = "center";
   deck.colors.forEach(color => {
-    const m = createDivision(["mana_s20", "mana_" + MANA[color]]);
+    const m = createDiv(["mana_s20", "mana_" + MANA[color]]);
     deckColors.appendChild(m);
   });
   top.appendChild(deckColors);
@@ -374,235 +267,154 @@ function openDeck(deck = currentOpenDeck, filters = currentFilters) {
     changeBackground("", tileGrpId);
   }
 
-  const deckListSection = createDivision(["decklist"]);
-  drawDeck($(deckListSection), deck, true);
+  const deckListSection = createDiv(["decklist"]);
+  drawDeck(deckListSection, deck, true);
 
   const statsSection = deckStatsSection(deck);
 
-  const fld = createDivision(["flex_item"]);
+  const fld = createDiv(["flex_item"]);
   fld.appendChild(deckListSection);
-  fld.appendChild(statsSection[0]);
+  fld.appendChild(statsSection);
 
   container.appendChild(top);
   container.appendChild(fld);
 
-  // Attach event handlers
-  $(".visualView").click(() => {
+  $$(".visualView")[0].addEventListener("click", () => {
     if (showStatsPanel) {
-      $("#stats_column").hide();
+      byId("stats_column").style.display = "none";
     }
-    drawDeckVisual(deckListSection, deck, statsSection, openDeck);
+    statsSection.style.display = "none";
+    drawDeckVisual(deckListSection, deck, openDeck);
   });
 
-  $(".openHistory").click(() => setChangesTimeline(deck.id));
-
-  $(".exportDeck").click(() => {
-    const list = get_deck_export(deck);
-    pop("Copied to clipboard", 1000);
-    ipcSend("set_clipboard", list);
-  });
-
-  $(".exportDeckStandard").click(() => {
-    const list = get_deck_export_txt(deck);
-    ipcSend("export_txt", { str: list, name: deck.name });
-  });
-
-  $(".back").click(() => {
+  $$(".back")[0].addEventListener("click", () => {
     changeBackground("default");
+    // TODO find alternative to jQuery animate
     $(".moving_ux").animate({ left: "0px" }, 250, "easeInOutCubic");
   });
 }
 
 //
 function setChangesTimeline(deckId) {
+  const cont = $$(".stats")[0];
+  cont.innerHTML = "";
+
+  const statsButton = createDiv(["button_simple", "openDeck"], "View stats");
+  statsButton.addEventListener("click", () => openDeck());
+  cont.appendChild(statsButton);
+
+  const time = createDiv(["changes_timeline"]);
   const changes = [...pd.deckChanges(deckId)];
   changes.sort(compare_changes);
-
-  var cont = $(".stats");
-  cont.html("");
-
-  var time = $('<div class="changes_timeline"></div>');
-
-  // CURRENT DECK
-  let div = $('<div class="change"></div>');
-  let butbox = $(
-    '<div class="change_button_cont" style="transform: scaleY(-1);"></div>'
-  );
-  let button = $('<div class="change_button"></div>');
-  button.appendTo(butbox);
-  let datbox = $('<div class="change_data"></div>');
-
-  // title
-  let title = $('<div class="change_data_box"></div>');
-  title.html("Current Deck");
-
-  butbox.appendTo(div);
-  datbox.appendTo(div);
-  title.appendTo(datbox);
-  div.appendTo(time);
-
-  butbox.on("mouseenter", function() {
-    button.css("width", "32px");
-    button.css("height", "32px");
-    button.css("top", "calc(50% - 16px)");
-  });
-
-  butbox.on("mouseleave", function() {
-    button.css("width", "24px");
-    button.css("height", "24px");
-    button.css("top", "calc(50% - 12px)");
-  });
-
-  butbox.on("click", function() {
-    var hasc = button.hasClass("change_button_active");
-
-    $(".change_data_box_inside").each(function() {
-      $(this).css("height", "0px");
-    });
-
-    $(".change_button").each(function() {
-      $(this).removeClass("change_button_active");
-    });
-
-    if (!hasc) {
-      button.addClass("change_button_active");
-    }
-  });
-  //
-
-  var cn = 0;
-  changes.forEach(function(change) {
+  const nowChange = {
+    changesMain: [],
+    changesSide: [],
+    date: new Date(),
+    label: "Current Deck"
+  };
+  [nowChange, ...changes].forEach((change, cn, changes) => {
     change.changesMain.sort(compare_changes_inner);
     change.changesSide.sort(compare_changes_inner);
 
-    let div = $('<div class="change"></div>');
-    let butbox;
-    if (cn < changes.length - 1) {
-      butbox = $(
-        '<div style="background-size: 100% 100% !important;" class="change_button_cont"></div>'
-      );
-    } else {
-      butbox = $('<div class="change_button_cont"></div>');
+    const div = createDiv(["change"]);
+
+    const butbox = createDiv(["change_button_cont"]);
+    if (cn === 0) {
+      butbox.style.transform = "scaleY(-1)";
+    } else if (cn < changes.length - 1) {
+      butbox.style.backgroundSize = "100% 100%";
     }
-    var button = $('<div class="change_button"></div>');
-    button.appendTo(butbox);
-    let datbox = $('<div class="change_data"></div>');
+    const button = createDiv(["change_button"]);
+    butbox.appendChild(button);
+    div.appendChild(butbox);
+
+    const datbox = createDiv(["change_data"]);
 
     // title
-    let title = $('<div class="change_data_box"></div>');
-    // inside
-    let data = $('<div class="change_data_box_inside"></div>');
-    var innherH = 54;
-    let nc = 0;
-    if (change.changesMain.length > 0) {
-      let dd = $('<div class="change_item_box"></div>');
-      let separator = deckDrawer.cardSeparator("Mainboard");
-      dd.append(separator);
-      dd.appendTo(data);
-    }
+    const title = createDiv(["change_data_box"]);
 
-    change.changesMain.forEach(function(c) {
+    // inside
+    const data = createDiv(["change_data_box_inside"]);
+    let innherH = 24;
+    let nc = 0;
+    let innerCn = 0;
+    const renderChange = c => {
       innherH += 30;
       if (c.quantity > 0) nc += c.quantity;
-      let dd = $('<div class="change_item_box"></div>');
-      if (c.quantity > 0) {
-        let ic = $('<div class="change_add"></div>');
-        ic.appendTo(dd);
-      } else {
-        let ic = $('<div class="change_remove"></div>');
-        ic.appendTo(dd);
-      }
-
-      let tile = deckDrawer.cardTile(
+      const dd = createDiv(["change_item_box"]);
+      const changeStyle = c.quantity > 0 ? "change_add" : "change_remove";
+      dd.appendChild(createDiv([changeStyle]));
+      const tile = deckDrawer.cardTile(
         pd.settings.card_tile_style,
         c.id,
-        "chm" + cn,
+        innerCn + cn,
         Math.abs(c.quantity)
       );
-      dd.append(tile);
-      dd.appendTo(data);
-    });
+      dd.appendChild(tile);
+      data.appendChild(dd);
+      innerCn++;
+    };
+
+    if (change.changesMain.length > 0) {
+      innherH += 30;
+      const dd = createDiv(["change_item_box"]);
+      const separator = deckDrawer.cardSeparator("Mainboard");
+      dd.appendChild(separator);
+      data.appendChild(dd);
+      change.changesMain.forEach(renderChange);
+    }
 
     if (change.changesSide.length > 0) {
-      let dd = $('<div class="change_item_box"></div>');
-      let separator = deckDrawer.cardSeparator("Sideboard");
-      dd.append(separator);
       innherH += 30;
-      dd.appendTo(data);
+      const dd = createDiv(["change_item_box"]);
+      dd.appendChild(deckDrawer.cardSeparator("Sideboard"));
+      data.appendChild(dd);
+      change.changesSide.forEach(renderChange);
     }
 
-    change.changesSide.forEach(function(c) {
-      innherH += 30;
-      if (c.quantity > 0) nc += c.quantity;
-      let dd = $('<div class="change_item_box"></div>');
-      if (c.quantity > 0) {
-        let ic = $('<div class="change_add"></div>');
-        ic.appendTo(dd);
-      } else {
-        let ic = $('<div class="change_remove"></div>');
-        ic.appendTo(dd);
-      }
+    if (change.label) {
+      title.innerHTML = change.label;
+    } else {
+      title.innerHTML =
+        nc + " changes, " + timeSince(Date.parse(change.date)) + " ago.";
+    }
+    datbox.appendChild(title);
+    datbox.appendChild(data);
+    div.appendChild(datbox);
 
-      let tile = deckDrawer.cardTile(
-        pd.settings.card_tile_style,
-        c.id,
-        "chs" + cn,
-        Math.abs(c.quantity)
-      );
-      dd.append(tile);
-      dd.appendTo(data);
-    });
+    if (cn > 0) {
+      div.style.cursor = "pointer";
 
-    title.html(
-      nc + " changes, " + timeSince(Date.parse(change.date)) + " ago."
-    );
-
-    butbox.appendTo(div);
-    datbox.appendTo(div);
-    title.appendTo(datbox);
-    data.appendTo(datbox);
-    div.appendTo(time);
-
-    butbox.on("mouseenter", function() {
-      button.css("width", "32px");
-      button.css("height", "32px");
-      button.css("top", "calc(50% - 16px)");
-    });
-
-    butbox.on("mouseleave", function() {
-      button.css("width", "24px");
-      button.css("height", "24px");
-      button.css("top", "calc(50% - 12px)");
-    });
-
-    butbox.on("click", function() {
-      // This requires some UX indicators
-      //drawDeck($('.decklist'), {mainDeck: change.previousMain, sideboard: change.previousSide});
-      var hasc = button.hasClass("change_button_active");
-
-      $(".change_data_box_inside").each(function() {
-        $(this).css("height", "0px");
+      div.addEventListener("mouseenter", () => {
+        button.style.width = "32px";
+        button.style.height = "32px";
+        button.style.top = "calc(50% - 16px)";
       });
 
-      $(".change_button").each(function() {
-        $(this).removeClass("change_button_active");
+      div.addEventListener("mouseleave", () => {
+        button.style.width = "24px";
+        button.style.height = "24px";
+        button.style.top = "calc(50% - 12px)";
       });
 
-      if (!hasc) {
-        button.addClass("change_button_active");
-        data.css("height", innherH + "px");
-      }
-    });
-
-    cn++;
+      div.addEventListener("click", () => {
+        // This requires some UX indicators
+        const isActive = [...button.classList].includes("change_button_active");
+        $$(".change_data_box_inside").forEach(el => {
+          el.style.height = "0";
+        });
+        $$(".change_button").forEach(el => {
+          el.classList.remove("change_button_active");
+        });
+        if (!isActive) {
+          button.classList.add("change_button_active");
+          data.style.height = innherH + "px";
+        }
+      });
+    }
+    cont.appendChild(div);
   });
-
-  $('<div class="button_simple openDeck">View stats</div>').appendTo(cont);
-
-  $(".openDeck").click(function() {
-    openDeck();
-  });
-  time.appendTo(cont);
+  cont.appendChild(time);
 }
 
 //
