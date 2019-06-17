@@ -2,7 +2,7 @@ const _ = require("lodash");
 
 const { MANA, CARD_RARITIES } = require("../shared/constants");
 const pd = require("../shared/player-data");
-const { createDivision } = require("../shared/dom-fns");
+const { createDiv, createInput } = require("../shared/dom-fns");
 const {
   get_deck_missing,
   getBoosterCountEstimate,
@@ -25,6 +25,7 @@ const {
   setLocalState
 } = require("./renderer-util");
 
+const byId = id => document.getElementById(id);
 let filters = Aggregator.getDefaultFilters();
 filters.onlyCurrentDecks = true;
 const tagPrompt = "Add";
@@ -50,12 +51,12 @@ function setFilters(selected = {}) {
 function openDecksTab(_filters = {}, scrollTop = 0) {
   hideLoadingBars();
   const ls = getLocalState();
-  const mainDiv = document.getElementById("ux_0");
+  const mainDiv = byId("ux_0");
   mainDiv.classList.add("flex_item");
   mainDiv.innerHTML = "";
   setFilters(_filters);
 
-  const wrap_r = createDivision(["wrapper_column", "sidebar_column_l"]);
+  const wrap_r = createDiv(["wrapper_column", "sidebar_column_l"]);
   wrap_r.style.width = pd.settings.right_panel_width + "px";
   wrap_r.style.flex = `0 0 ${pd.settings.right_panel_width}px`;
   const aggregator = new Aggregator(filters);
@@ -71,25 +72,23 @@ function openDecksTab(_filters = {}, scrollTop = 0) {
   decks_top_winrate.style.marginTop = "16px";
   decks_top_winrate.style.padding = "12px";
 
-  let drag = createDivision(["dragger"]);
+  const drag = createDiv(["dragger"]);
   wrap_r.appendChild(drag);
   makeResizable(drag, statsPanel.handleResize);
 
   wrap_r.appendChild(decks_top_winrate);
 
-  const wrap_l = createDivision(["wrapper_column"]);
+  const wrap_l = createDiv(["wrapper_column"]);
   wrap_l.setAttribute("id", "decks_column");
 
-  let d = document.createElement("div");
-  d.classList.add("list_fill");
+  const d = createDiv(["list_fill"]);
   wrap_l.appendChild(d);
 
   mainDiv.appendChild(wrap_l);
   mainDiv.appendChild(wrap_r);
 
   // Tags and filters
-  let decks_top = document.createElement("div");
-  decks_top.classList.add("decks_top");
+  const decksTop = createDiv(["decks_top"]);
 
   const tags = Aggregator.gatherTags(Object.values(pd.decks));
   const filterPanel = new FilterPanel(
@@ -105,10 +104,8 @@ function openDecksTab(_filters = {}, scrollTop = 0) {
     null,
     true
   );
-  const decks_top_filter = filterPanel.render();
-
-  decks_top.appendChild(decks_top_filter);
-  wrap_l.appendChild(decks_top);
+  decksTop.appendChild(filterPanel.render());
+  wrap_l.appendChild(decksTop);
 
   const decks = [...pd.deckList];
   decks.sort(aggregator.compareDecks);
@@ -142,19 +139,16 @@ function openDecksTab(_filters = {}, scrollTop = 0) {
     listItem.divideLeft();
     listItem.divideRight();
 
-    const t = createTag(null, listItem.center, false);
-    jQuery.data(t, "deck", deck.id);
+    createTag(listItem.center, deck.id, null, false);
     if (deck.format) {
       const fText = getReadableFormat(deck.format);
-      const t = createTag(fText, listItem.center, false);
+      const t = createTag(listItem.center, deck.id, fText, false);
       t.style.fontStyle = "italic";
-      jQuery.data(t, "deck", deck.id);
     }
     if (deck.tags) {
       deck.tags.forEach(tag => {
         if (tag !== getReadableFormat(deck.format)) {
-          const t = createTag(tag, listItem.center);
-          jQuery.data(t, "deck", deck.id);
+          createTag(listItem.center, deck.id, tag);
         }
       });
     }
@@ -175,9 +169,7 @@ function openDecksTab(_filters = {}, scrollTop = 0) {
     CARD_RARITIES.forEach(cardRarity => {
       if (missingWildcards[cardRarity]) {
         n++;
-        wc = document.createElement("div");
-        wc.classList.add("wc_explore_cost");
-        wc.classList.add("wc_" + cardRarity);
+        wc = createDiv(["wc_explore_cost", "wc_" + cardRarity]);
         wc.title = _.capitalize(cardRarity) + " wldcards needed.";
         wc.innerHTML =
           (ownedWildcards[cardRarity] > 0
@@ -189,9 +181,7 @@ function openDecksTab(_filters = {}, scrollTop = 0) {
       }
     });
     if (n !== 0) {
-      let bo = document.createElement("div");
-      bo.classList.add("bo_explore_cost");
-      bo.innerHTML = Math.round(boosterCost);
+      const bo = createDiv(["bo_explore_cost"], Math.round(boosterCost));
       bo.title = "Boosters needed (estimated)";
       listItem.right.appendChild(bo);
     }
@@ -200,17 +190,17 @@ function openDecksTab(_filters = {}, scrollTop = 0) {
       deck.name = deck.name.replace("?=?Loc/Decks/Precon/", "");
     }
 
-    let deckNameDiv = createDivision(["list_deck_name"], deck.name);
+    const deckNameDiv = createDiv(["list_deck_name"], deck.name);
     listItem.leftTop.appendChild(deckNameDiv);
 
     deck.colors.forEach(function(color) {
-      let m = createDivision(["mana_s20", "mana_" + MANA[color]]);
+      const m = createDiv(["mana_s20", "mana_" + MANA[color]]);
       listItem.leftBottom.appendChild(m);
     });
 
     const dwr = aggregator.deckStats[deck.id];
     if (dwr && dwr.total > 0) {
-      let deckWinrateDiv = createDivision(["list_deck_winrate"]);
+      const deckWinrateDiv = createDiv(["list_deck_winrate"]);
       let colClass = getWinrateClass(dwr.winrate);
       deckWinrateDiv.innerHTML = `${dwr.wins}:${
         dwr.losses
@@ -222,9 +212,11 @@ function openDecksTab(_filters = {}, scrollTop = 0) {
       } matches lost`;
       listItem.rightTop.appendChild(deckWinrateDiv);
 
-      let deckWinrateLastDiv = createDivision(["list_deck_winrate"]);
+      const deckWinrateLastDiv = createDiv(
+        ["list_deck_winrate"],
+        "Since last edit: "
+      );
       deckWinrateLastDiv.style.opacity = 0.6;
-      deckWinrateLastDiv.innerHTML = "Since last edit: ";
       const drwr = aggregator.deckRecentStats[deck.id];
       if (drwr && drwr.total > 0) {
         colClass = getWinrateClass(drwr.winrate);
@@ -244,30 +236,31 @@ function openDecksTab(_filters = {}, scrollTop = 0) {
     wrap_l.appendChild(listItem.container);
   });
 
-  const jCont = $(wrap_l);
-  if (scrollTop) {
-    jCont.scrollTop(ls.lastScrollTop);
-  }
-  jCont.on("scroll", () => {
-    setLocalState({ lastScrollTop: jCont.scrollTop() });
+  wrap_l.addEventListener("scroll", function() {
+    setLocalState({ lastScrollTop: wrap_l.scrollTop });
   });
+  if (scrollTop) {
+    wrap_l.scrollTop = scrollTop;
+  }
 }
 
 function openDeckCallback(id, filters) {
   const deck = pd.deck(id);
   if (!deck) return;
   openDeck(deck, { ...filters, deckId: id });
+  // TODO remove jquery.easing
   $(".moving_ux").animate({ left: "-100%" }, 250, "easeInOutCubic");
 }
 
-function createTag(tag, div, showClose = true) {
-  let tagCol = getTagColor(tag);
-  let t = createDivision(["deck_tag"], tag || tagPrompt);
+function createTag(div, deckId, tag, showClose = true) {
+  const tagCol = getTagColor(tag);
+  const t = createDiv(["deck_tag"], tag || tagPrompt);
   t.style.backgroundColor = tagCol;
 
   if (tag) {
-    $(t).on("click", function(e) {
-      var colorPick = $(t);
+    t.addEventListener("click", function(e) {
+      // TODO remove jquery colorpicker
+      const colorPick = $(t);
       colorPick.spectrum({
         showInitial: true,
         showAlpha: false,
@@ -297,70 +290,50 @@ function createTag(tag, div, showClose = true) {
       e.stopPropagation();
     });
   } else {
-    $(t).on("click", function(e) {
-      if ($(this).html() === tagPrompt) {
-        t.innerHTML = "";
-        let input = $(
-          '<input size="1" onFocus="this.select()" class="deck_tag_input"></input>'
-        );
-        $(t).prepend(input);
+    t.addEventListener("click", function(e) {
+      t.innerHTML = "";
+      const input = createInput(["deck_tag_input"], "", {
+        type: "text",
+        autocomplete: "off",
+        placeholder: tagPrompt,
+        size: 1
+      });
+      input.addEventListener("keyup", function(e) {
+        setTimeout(() => {
+          input.style.width = this.value.length * 8 + "px";
+        }, 10);
+        if (e.keyCode === 13) {
+          e.stopPropagation();
+          this.blur();
+        }
+      });
+      input.addEventListener("focusout", function() {
+        const val = this.value;
+        t.innerHTML = "...";
+        t.style.width = "24px";
+        if (val && val !== tagPrompt) {
+          addTag(deckId, val);
+        }
+      });
+      t.appendChild(input);
+      input.focus();
 
-        input[0].focus();
-        input[0].select();
-        const deckid = jQuery.data($(this)[0], "deck");
-        const tag = $(this);
-        input.keydown(function(e) {
-          setTimeout(() => {
-            input.css("width", $(this).val().length * 8);
-          }, 10);
-          if (e.keyCode === 13) {
-            const val = $(this).val();
-            tag.html(tagPrompt);
-            if (val && val !== tagPrompt) {
-              addTag(deckid, val);
-            }
-          }
-        });
-        input.on("focusout", function() {
-          const val = $(this).val();
-          tag.html(tagPrompt);
-          if (val && val !== tagPrompt) {
-            addTag(deckid, val);
-          }
-        });
-      }
       e.stopPropagation();
     });
   }
 
   if (showClose) {
-    let tc = createDivision(["deck_tag_close"]);
-    t.appendChild(tc);
-
-    $(tc).on("click", function(e) {
+    const val = t.innerHTML;
+    const tc = createDiv(["deck_tag_close"]);
+    tc.addEventListener("click", function(e) {
       e.stopPropagation();
-      let deckid = jQuery.data($(this).parent()[0], "deck");
-      let val = $(this)
-        .parent()
-        .text();
-
-      deleteTag(deckid, val);
-
-      $(this).css("width", "0px");
-      $(this).css("margin", "0px");
-      $(this)
-        .parent()
-        .css("opacity", 0);
-      $(this)
-        .parent()
-        .css("font-size", 0);
-      $(this)
-        .parent()
-        .css("margin-right", "0px");
-      $(this)
-        .parent()
-        .css("color", $(this).css("background-color"));
+      tc.style.visibility = "hidden";
+      t.innerHTML = "...";
+      t.style.width = "24px";
+      t.style.paddingRight = "12px";
+      deleteTag(deckId, val);
     });
+    t.appendChild(tc);
   } else {
     t.style.paddingRight = "12px";
   }
