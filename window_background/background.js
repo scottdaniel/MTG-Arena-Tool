@@ -286,6 +286,11 @@ ipc.on("login", function(event, arg) {
 });
 
 //
+ipc.on("unlink_discord", function(event, obj) {
+  httpApi.httpDiscordUnlink();
+});
+
+//
 ipc.on("request_draft_link", function(event, obj) {
   httpApi.httpDraftShareLink(obj.id, obj.expire);
 });

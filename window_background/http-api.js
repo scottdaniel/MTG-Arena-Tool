@@ -6,7 +6,6 @@ global
   db
   pd
   debugNet
-  store
   debugLog
   syncUserData
 */
@@ -163,6 +162,14 @@ function httpBasic() {
               });
             }
 
+            if (_headers.method == "discord_unlink") {
+              ipc_send("popup", {
+                text: "Unlink Ok",
+                time: 1000,
+                progress: -1
+              });
+              ipc_send("set_discord_tag", "");
+            }
             if (_headers.method == "notifications") {
               notificationProcess(parsedResult);
             }
@@ -635,9 +642,19 @@ function httpSyncRequest(data) {
   });
 }
 
+function httpDiscordUnlink() {
+  var _id = makeId(6);
+  httpAsync.unshift({
+    reqId: _id,
+    method: "discord_unlink",
+    method_path: "/api/discord_unlink.php"
+  });
+}
+
 module.exports = {
   httpAuth,
   httpBasic,
+  httpDiscordUnlink,
   httpSubmitCourse,
   httpSetPlayer,
   httpGetExplore,

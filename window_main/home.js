@@ -88,7 +88,7 @@ function openHomeTab(arg, opentab = true) {
   mainDiv.appendChild(title);
   let cont = createDivision(["tournament_list_cont"]);
 
-  if (ls.discordTag === null) {
+  if (ls.discordTag === null || ls.discordTag == "") {
     let but = createDivision(["discord_but"]);
     but.addEventListener("click", () => {
       let url =
@@ -107,6 +107,13 @@ function openHomeTab(arg, opentab = true) {
     fl.style.margin = "auto";
     fl.style.width = "fit-content";
     mainDiv.appendChild(fl);
+
+    let unlinkBut = createDivision(["button_simple", "centered"], "Unlink");
+    mainDiv.appendChild(unlinkBut);
+
+    unlinkBut.addEventListener("click", () => {
+      ipcSend("unlink_discord", true);
+    });
 
     clearHomeInverals();
     listInterval = [];
