@@ -63,6 +63,9 @@ let landsCard = {
   dfc: "None",
   collectible: false,
   craftable: false,
+  images: {
+    art_crop: "../images/type_land.png"
+  },
   dfcId: 0
 };
 

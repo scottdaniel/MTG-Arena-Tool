@@ -264,9 +264,13 @@ function drawCardTileFlat(
 
   const cardTile = createDivision(["card_tile_crop_flat"]);
   try {
-    cardTile.style.backgroundImage = `url(https://img.scryfall.com/cards${
-      card.images["art_crop"]
-    })`;
+    if (card.type == "Special") {
+      cardTile.style.backgroundImage = `url(${card.images["art_crop"]})`;
+    } else {
+      cardTile.style.backgroundImage = `url(https://img.scryfall.com/cards${
+        card.images["art_crop"]
+      })`;
+    }
   } catch (e) {
     console.log(e);
   }
