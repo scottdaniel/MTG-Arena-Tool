@@ -165,6 +165,7 @@ function makeResizable(div, resizeCallback, finalCallback) {
 //
 exports.drawDeck = drawDeck;
 function drawDeck(div, deck, showWildcards = false) {
+  div = $(div);
   div.html("");
   const unique = makeId(4);
 
