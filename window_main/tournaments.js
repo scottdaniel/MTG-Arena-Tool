@@ -735,7 +735,7 @@ function selectTourneyDeck(index) {
   _deck.mainDeck.sort(compare_cards);
   _deck.sideboard.sort(compare_cards);
   // drawDeck requires a jquery div... mmm
-  drawDeck($(".join_decklist"), _deck, true);
+  drawDeck($$(".join_decklist")[0], _deck, true);
 
   $$(".but_join")[0].classList.add("button_simple");
 }
