@@ -19,6 +19,7 @@ const pd = require("../shared/player-data");
 const ConicGradient = require("../shared/conic-gradient");
 const {
   createDiv,
+  createImg,
   createSpan,
   queryElements: $$
 } = require("../shared/dom-fns");
@@ -165,8 +166,7 @@ function makeResizable(div, resizeCallback, finalCallback) {
 //
 exports.drawDeck = drawDeck;
 function drawDeck(div, deck, showWildcards = false) {
-  div = $(div);
-  div.html("");
+  div.innerHTML = "";
   const unique = makeId(4);
 
   // draw maindeck grouped by cardType
@@ -208,7 +208,7 @@ function drawDeck(div, deck, showWildcards = false) {
       const cards = cardsByGroup[group];
       const count = _.sumBy(cards, "quantity");
       const separator = deckDrawer.cardSeparator(`${group} (${count})`);
-      div.append(separator);
+      div.appendChild(separator);
 
       // draw the cards
       _(cards)
@@ -224,7 +224,7 @@ function drawDeck(div, deck, showWildcards = false) {
             deck,
             false
           );
-          div.append(tile);
+          div.appendChild(tile);
         });
     });
 
@@ -232,7 +232,7 @@ function drawDeck(div, deck, showWildcards = false) {
   if (sideboardSize) {
     // draw a separator for the sideboard
     let separator = deckDrawer.cardSeparator(`Sideboard (${sideboardSize})`);
-    div.append(separator);
+    div.appendChild(separator);
 
     // draw the cards
     _(deck.sideboard)
@@ -249,7 +249,7 @@ function drawDeck(div, deck, showWildcards = false) {
           deck,
           true
         );
-        div.append(tile);
+        div.appendChild(tile);
       });
   }
 }
@@ -273,31 +273,35 @@ function drawCardList(div, cards) {
 
 //
 exports.drawDeckVisual = drawDeckVisual;
-function drawDeckVisual(_div, deck, openCallback) {
-  _div = $(_div);
-  // attempt at sorting visually..
-  var newMainDeck = [];
+function drawDeckVisual(container, deck, openCallback) {
+  container.innerHTML = "";
+  container.style.flexDirection = "column";
 
-  for (var cmc = 0; cmc < 21; cmc++) {
-    for (var qq = 4; qq > -1; qq--) {
+  container.appendChild(deckTypesStats(deck));
+
+  // attempt at sorting visually..
+  const newMainDeck = [];
+
+  for (let cmc = 0; cmc < 21; cmc++) {
+    for (let qq = 4; qq > -1; qq--) {
       deck.mainDeck.forEach(function(c) {
-        var grpId = c.id;
-        var card = db.card(grpId);
-        var quantity;
-        if (card.type.indexOf("Land") == -1 && grpId != 67306) {
-          if (card.cmc == cmc) {
+        const grpId = c.id;
+        const card = db.card(grpId);
+        let quantity;
+        if (!card.type.includes("Land") && grpId !== 67306) {
+          if (card.cmc === cmc) {
             quantity = c.quantity;
 
-            if (quantity == qq) {
+            if (quantity === qq) {
               newMainDeck.push(c);
             }
           }
-        } else if (cmc == 20) {
+        } else if (cmc === 20) {
           quantity = c.quantity;
-          if (qq == 0 && quantity > 4) {
+          if (qq === 0 && quantity > 4) {
             newMainDeck.push(c);
           }
-          if (quantity == qq) {
+          if (quantity === qq) {
             newMainDeck.push(c);
           }
         }
@@ -305,170 +309,101 @@ function drawDeckVisual(_div, deck, openCallback) {
     }
   }
 
-  var types = get_deck_types_ammount(deck);
-  var typesdiv = $('<div class="types_container"></div>');
-  $(
-    '<div class="type_icon_cont"><div title="Creatures" class="type_icon type_cre"></div><span>' +
-      types.cre +
-      "</span></div>"
-  ).appendTo(typesdiv);
-  $(
-    '<div class="type_icon_cont"><div title="Lands" class="type_icon type_lan"></div><span>' +
-      types.lan +
-      "</span></div>"
-  ).appendTo(typesdiv);
-  $(
-    '<div class="type_icon_cont"><div title="Instants" class="type_icon type_ins"></div><span>' +
-      types.ins +
-      "</span></div>"
-  ).appendTo(typesdiv);
-  $(
-    '<div class="type_icon_cont"><div title="Sorceries" class="type_icon type_sor"></div><span>' +
-      types.sor +
-      "</span></div>"
-  ).appendTo(typesdiv);
-  $(
-    '<div class="type_icon_cont"><div title="Enchantments" class="type_icon type_enc"></div><span>' +
-      types.enc +
-      "</span></div>"
-  ).appendTo(typesdiv);
-  $(
-    '<div class="type_icon_cont"><div title="Artifacts" class="type_icon type_art"></div><span>' +
-      types.art +
-      "</span></div>"
-  ).appendTo(typesdiv);
-  $(
-    '<div class="type_icon_cont"><div title="Planeswalkers" class="type_icon type_pla"></div><span>' +
-      types.pla +
-      "</span></div>"
-  ).appendTo(typesdiv);
-  typesdiv.prependTo(_div.parent());
+  const listDiv = createDiv(["decklist"]);
+  listDiv.style.display = "flex";
+  listDiv.style.width = "auto";
+  listDiv.style.margin = "0 auto";
 
-  _div.css("display", "flex");
-  _div.css("width", "auto");
-  _div.css("margin", "0 auto");
-  _div.html("");
+  const sz = pd.cardsSize;
+  const mainDiv = createDiv(["visual_mainboard"]);
+  mainDiv.style.display = "flex";
+  mainDiv.style.flexWrap = "wrap";
+  mainDiv.style.alignContent = "start";
+  mainDiv.style.maxWidth = (sz + 6) * 5 + "px";
 
-  _div.parent().css("flex-direction", "column");
-
-  if (openCallback) {
-    $('<div class="button_simple openDeck">Normal view</div>').appendTo(
-      _div.parent()
-    );
-
-    $(".openDeck").click(function() {
-      openCallback();
-    });
-  }
-
-  var sz = pd.cardsSize;
-  let div = $('<div class="visual_mainboard"></div>');
-  div.css("display", "flex");
-  div.css("flex-wrap", "wrap");
-  div.css("align-content", "start");
-  div.css("max-width", (sz + 6) * 5 + "px");
-  div.appendTo(_div);
-
-  //var unique = makeId(4);
-  //var prevIndex = 0;
-
-  var tileNow;
-  var _n = 0;
-  newMainDeck.forEach(function(c) {
-    var grpId = c.id;
-    var card = db.card(grpId);
-
+  let tileNow;
+  let _n = 0;
+  newMainDeck.forEach(c => {
+    const card = db.card(c.id);
     if (c.quantity > 0) {
       let dfc = "";
-      if (card.dfc == "DFC_Back") dfc = "a";
-      if (card.dfc == "DFC_Front") dfc = "b";
-      if (card.dfc == "SplitHalf") dfc = "a";
-      if (dfc != "b") {
+      if (card.dfc === "DFC_Back") dfc = "a";
+      if (card.dfc === "DFC_Front") dfc = "b";
+      if (card.dfc === "SplitHalf") dfc = "a";
+      if (dfc !== "b") {
         for (let i = 0; i < c.quantity; i++) {
-          if (_n % 4 == 0) {
-            tileNow = $('<div class="deck_visual_tile"></div>');
-            tileNow.appendTo(div);
+          if (_n % 4 === 0) {
+            tileNow = createDiv(["deck_visual_tile"]);
+            mainDiv.appendChild(tileNow);
           }
 
-          let d = $(
-            '<div style="width: ' +
-              sz +
-              'px !important;" class="deck_visual_card"></div>'
-          );
-          let img = $(
-            '<img style="width: ' +
-              sz +
-              'px !important;" class="deck_visual_card_img"></img>'
-          );
-
-          img.attr("src", get_card_image(card));
-          img.appendTo(d);
-          d.appendTo(tileNow);
-
+          const d = createDiv(["deck_visual_card"]);
+          d.style.width = sz + "px";
+          const img = createImg(["deck_visual_card_img"], "", {
+            src: get_card_image(card)
+          });
+          img.style.width = sz + "px";
           addCardHover(img, card);
+          d.appendChild(img);
+
+          tileNow.appendChild(d);
           _n++;
         }
       }
     }
   });
+  listDiv.appendChild(mainDiv);
 
-  div = $('<div class="visual_sideboard"></div>');
-  div.css("display", "flex");
-  div.css("flex-wrap", "wrap");
-  div.css("margin-left", "32px");
-  div.css("align-content", "start");
-  div.css("max-width", (sz + 6) * 1.5 + "px");
-  div.appendTo(_div);
+  const sideDiv = createDiv(["visual_sideboard"]);
+  sideDiv.style.display = "flex";
+  sideDiv.style.flexWrap = "wrap";
+  sideDiv.style.marginLeft = "32px";
+  sideDiv.style.alignContent = "start";
+  sideDiv.style.maxWidth = (sz + 6) * 1.5 + "px";
 
-  if (deck.sideboard != undefined) {
-    tileNow = $('<div class="deck_visual_tile_side"></div>');
-    tileNow.css("width", (sz + 6) * 5 + "px");
-    tileNow.appendTo(div);
+  if (deck.sideboard && deck.sideboard.length) {
+    tileNow = createDiv(["deck_visual_tile_side"]);
+    tileNow.style.width = (sz + 6) * 5 + "px";
 
-    if (deck.sideboard.length == 0) {
-      tileNow.css("display", "none");
-    }
-
-    _n = 0;
-    deck.sideboard.forEach(function(c) {
-      var grpId = c.id;
-      var card = db.card(grpId);
+    let _n = 0;
+    deck.sideboard.forEach(c => {
+      const card = db.card(c.id);
       if (c.quantity > 0) {
         let dfc = "";
-        if (card.dfc == "DFC_Back") dfc = "a";
-        if (card.dfc == "DFC_Front") dfc = "b";
-        if (card.dfc == "SplitHalf") dfc = "a";
-        if (dfc != "b") {
+        if (card.dfc === "DFC_Back") dfc = "a";
+        if (card.dfc === "DFC_Front") dfc = "b";
+        if (card.dfc === "SplitHalf") dfc = "a";
+        if (dfc !== "b") {
           for (let i = 0; i < c.quantity; i++) {
-            var d;
-            if (_n % 2 == 1) {
-              d = $(
-                '<div style="width: ' +
-                  sz +
-                  'px !important;" class="deck_visual_card_side"></div>'
-              );
-            } else {
-              d = $(
-                '<div style="margin-left: 60px; width: ' +
-                  sz +
-                  'px !important;" class="deck_visual_card_side"></div>'
-              );
+            const d = createDiv(["deck_visual_card_side"]);
+            d.style.width = sz + "px";
+            if (_n % 2 === 0) {
+              d.style.marginLeft = "60px";
             }
-            let img = $(
-              '<img style="width: ' +
-                sz +
-                'px !important;" class="deck_visual_card_img"></img>'
-            );
-            img.attr("src", get_card_image(card));
-            img.appendTo(d);
-            d.appendTo(tileNow);
 
+            const img = createImg(["deck_visual_card_img"], "", {
+              src: get_card_image(card)
+            });
+            img.style.width = sz + "px";
             addCardHover(img, card);
+            d.appendChild(img);
+
+            tileNow.appendChild(d);
             _n++;
           }
         }
       }
     });
+    sideDiv.appendChild(tileNow);
+  }
+  listDiv.appendChild(sideDiv);
+
+  container.appendChild(listDiv);
+
+  if (openCallback) {
+    const normalButton = createDiv(["button_simple"], "Normal view");
+    normalButton.addEventListener("click", () => openCallback());
+    container.appendChild(normalButton);
   }
 }
 
