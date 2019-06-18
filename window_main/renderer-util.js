@@ -10,6 +10,7 @@ const {
   COLORS_ALL,
   DRAFT_RANKS,
   MANA_COLORS,
+  PACK_SIZES,
   IPC_MAIN,
   IPC_BACKGROUND
 } = require("../shared/constants");
@@ -35,7 +36,6 @@ const {
 } = require("../shared/util");
 
 const byId = id => document.getElementById(id);
-let draftPosition = 1;
 let popTimeout = null;
 // quick and dirty shared state object for main renderer process
 // (for state shared across processes, use database or player-data)
@@ -545,127 +545,109 @@ function colorPieChart(colorCounts, title) {
 
 //
 exports.openDraft = openDraft;
-function openDraft(id) {
-  console.log("OPEN DRAFT", id, draftPosition);
-  $("#ux_1").html("");
-  $("#ux_1").removeClass("flex_item");
+function openDraft(id, draftPosition = 1) {
+  // console.log("OPEN DRAFT", id, draftPosition);
+  const container = byId("ux_1");
+  container.innerHTML = "";
+  container.classList.remove("flex_item");
+
   const draft = pd.draft(id);
-  let tileGrpid = db.sets[draft.set].tile;
-
-  if (draftPosition < 1) draftPosition = 1;
-  if (draftPosition > packSize * 6) draftPosition = packSize * 6;
-
-  var packSize = 14;
-  if (draft.set == "Guilds of Ravnica" || draft.set == "Ravnica Allegiance") {
-    packSize = 15;
-  }
-
-  var pa = Math.floor((draftPosition - 1) / 2 / packSize);
-  var pi = Math.floor(((draftPosition - 1) / 2) % packSize);
-  var key = "pack_" + pa + "pick_" + pi;
-
-  var pack = (draft[key] && draft[key].pack) || [];
-  var pick = (draft[key] && draft[key].pick) || "";
-
-  var top = $(
-    '<div class="decklist_top"><div class="button back"></div><div class="deck_name">' +
-      draft.set +
-      " Draft</div></div>"
-  );
-  let flr = $('<div class="deck_top_colors"></div>');
-  top.append(flr);
-
+  if (!draft) return;
+  const tileGrpid = db.sets[draft.set].tile;
   if (db.card(tileGrpid)) {
     changeBackground("", tileGrpid);
   }
 
-  var cont = $('<div class="flex_item" style="flex-direction: column;"></div>');
-  cont.append(
-    '<div class="draft_nav_container"><div class="draft_nav_prev"></div><div class="draft_nav_next"></div></div>'
-  );
+  const packSize = PACK_SIZES[draft.set] || 14;
+  if (draftPosition < 1) draftPosition = packSize * 6;
+  if (draftPosition > packSize * 6) draftPosition = 1;
+  const pa = Math.floor((draftPosition - 1) / 2 / packSize);
+  const pi = Math.floor(((draftPosition - 1) / 2) % packSize);
+  const key = "pack_" + pa + "pick_" + pi;
+  const pack = (draft[key] && draft[key].pack) || [];
+  const pick = (draft[key] && draft[key].pick) || "";
 
-  $(
-    '<div class="draft_title">Pack ' +
-      (pa + 1) +
-      ", Pick " +
-      (pi + 1) +
-      "</div>"
-  ).appendTo(cont);
+  const d = createDiv(["list_fill"]);
+  container.appendChild(d);
 
-  var slider = $('<div class="slidecontainer"></div>');
-  slider.appendTo(cont);
-  var sliderInput = $(
-    '<input type="range" min="1" max="' +
-      packSize * 6 +
-      '" value="' +
-      draftPosition +
-      '" class="slider" id="draftPosRange">'
-  );
-  sliderInput.appendTo(slider);
+  const top = createDiv(["decklist_top"]);
+  top.appendChild(createDiv(["button", "back"]));
+  top.appendChild(createDiv(["deck_name"], draft.set + " Draft"));
+  top.appendChild(createDiv(["deck_top_colors"]));
+  container.appendChild(top);
 
-  const pdiv = $('<div class="draft_pack_container"></div>');
-  pdiv.appendTo(cont);
+  const cont = createDiv(["flex_item"]);
+  cont.style.flexDirection = "column";
 
-  pack.forEach(function(grpId) {
-    var d = $(
-      '<div style="width: ' +
-        pdiv.cardsSize +
-        'px !important;" class="draft_card"></div>'
-    );
-    var img = $(
-      '<img style="width: ' +
-        pdiv.cardsSize +
-        'px !important;" class="draft_card_img"></img>'
-    );
-    if (grpId == pick && draftPosition % 2 == 0) {
-      img.addClass("draft_card_picked");
-    }
-    var card = db.card(grpId);
-    img.attr("src", get_card_image(card));
-
-    img.appendTo(d);
-    var r = $(
-      '<div style="" class="draft_card_rating">' +
-        DRAFT_RANKS[card.rank] +
-        "</div>"
-    );
-    r.appendTo(d);
-    addCardHover(img, card);
-    d.appendTo(pdiv);
-  });
-
-  $("#ux_1").append(top);
-  $("#ux_1").append(cont);
-
-  var posRange = $("#draftPosRange")[0];
-
-  $(".draft_nav_prev").off();
-  $(".draft_nav_next").off();
-  $("#draftPosRange").off();
-
-  $("#draftPosRange").on("click mousemove", function() {
-    var pa = Math.floor((posRange.value - 1) / 2 / packSize);
-    var pi = Math.floor(((posRange.value - 1) / 2) % packSize);
-    $(".draft_title").html("Pack " + (pa + 1) + ", Pick " + (pi + 1));
-  });
-
-  $("#draftPosRange").on("click mouseup", function() {
-    draftPosition = parseInt(posRange.value);
-    openDraft(id, tileGrpid, draft.set);
-  });
-
-  $(".draft_nav_prev").on("click mouseup", function() {
+  const navCont = createDiv(["draft_nav_container"]);
+  const prevNav = createDiv(["draft_nav_prev"]);
+  prevNav.addEventListener("click", function() {
     draftPosition -= 1;
-    openDraft(id, tileGrpid, draft.set);
+    openDraft(id, draftPosition);
+  });
+  navCont.appendChild(prevNav);
+  const nextNav = createDiv(["draft_nav_next"]);
+  nextNav.addEventListener("click", function() {
+    draftPosition += 1;
+    openDraft(id, draftPosition);
+  });
+  navCont.appendChild(nextNav);
+  cont.appendChild(navCont);
+
+  const title = createDiv(
+    ["draft_title"],
+    "Pack " + (pa + 1) + ", Pick " + (pi + 1)
+  );
+  cont.appendChild(title);
+
+  const slider = createDiv(["slidecontainer"]);
+  const sliderInput = createInput(["slider"], "", {
+    type: "range",
+    min: 1,
+    max: packSize * 6,
+    step: 1,
+    value: draftPosition
+  });
+  sliderInput.addEventListener("input", function() {
+    const pa = Math.floor((this.value - 1) / 2 / packSize);
+    const pi = Math.floor(((this.value - 1) / 2) % packSize);
+    title.innerHTML = "Pack " + (pa + 1) + ", Pick " + (pi + 1);
+  });
+  sliderInput.addEventListener("change", function() {
+    draftPosition = parseInt(this.value);
+    openDraft(id, draftPosition);
+  });
+  slider.appendChild(sliderInput);
+  cont.appendChild(slider);
+
+  const pdiv = createDiv(["draft_pack_container"]);
+  cont.appendChild(pdiv);
+
+  pack.forEach(grpId => {
+    const card = db.card(grpId);
+    const d = createDiv(["draft_card"]);
+    d.style.width = pd.cardsSize + "px";
+
+    const img = createImg(["draft_card_img"], "", {
+      src: get_card_image(card)
+    });
+    img.style.width = pd.cardsSize + "px";
+    if (grpId === pick && draftPosition % 2 === 0) {
+      img.classList.add("draft_card_picked");
+    }
+    addCardHover(img, card);
+    d.appendChild(img);
+
+    d.appendChild(createDiv(["draft_card_rating"], DRAFT_RANKS[card.rank]));
+
+    pdiv.appendChild(d);
   });
 
-  $(".draft_nav_next").on("click mouseup", function() {
-    draftPosition += 1;
-    openDraft(id, tileGrpid, draft.set);
-  });
-  //
-  $(".back").click(function() {
+  container.appendChild(cont);
+
+  $$(".back")[0].addEventListener("click", () => {
     changeBackground("default");
+    // TODO find alternative to jQuery animate
     $(".moving_ux").animate({ left: "0px" }, 250, "easeInOutCubic");
   });
 }
