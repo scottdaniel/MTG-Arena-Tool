@@ -205,12 +205,12 @@ function openMatch(id) {
         } else {
           let separator3 = deckDrawer.cardSeparator("Sideboarded In");
           additionsDiv.append(separator3);
-          drawCardList(additionsDiv, game.sideboardChanges.added);
+          drawCardList(additionsDiv[0], game.sideboardChanges.added);
           additionsDiv.appendTo(sideboardDiv);
           let removalsDiv = $('<div class="cardlist"></div>');
           let separator4 = deckDrawer.cardSeparator("Sideboarded Out");
           removalsDiv.append(separator4);
-          drawCardList(removalsDiv, game.sideboardChanges.removed);
+          drawCardList(removalsDiv[0], game.sideboardChanges.removed);
           removalsDiv.appendTo(sideboardDiv);
         }
 
@@ -232,7 +232,7 @@ function openMatch(id) {
       if (game) {
         game.handsDrawn.forEach((hand, i) => {
           let handDiv = $('<div class="cardlist"></div>');
-          drawCardList(handDiv, hand);
+          drawCardList(handDiv[0], hand);
           handDiv.appendTo(handsDiv);
           if (game.bestOf == 1 && i == 0) {
             let landDiv = $(

@@ -61,16 +61,18 @@ function ipcSend(method, arg, to = IPC_BACKGROUND) {
 //
 exports.pop = pop;
 function pop(str, timeout) {
-  $(".popup").css("opacity", 1);
-  $(".popup").html(str);
-  if (popTimeout != null) {
-    clearTimeout(popTimeout);
-  }
+  const popup = $$(".popup")[0];
+  popup.style.opacity = 1;
+  popup.innerHTML = str;
+
+  if (popTimeout) clearTimeout(popTimeout);
+
   if (timeout < 1) {
     popTimeout = null;
   } else {
     popTimeout = setTimeout(function() {
-      $(".popup").css("opacity", 0);
+      popup.style.opacity = 0;
+      popup.innerHTML = "";
       popTimeout = null;
     }, timeout);
   }
@@ -262,7 +264,7 @@ function drawCardList(div, cards) {
       unique,
       counts[cardId]
     );
-    div.append(tile);
+    div.appendChild(tile);
   });
 }
 
