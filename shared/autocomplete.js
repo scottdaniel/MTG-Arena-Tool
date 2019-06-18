@@ -1,4 +1,4 @@
-function autocomplete(inp, arr, _onClick = () => {}) {
+function autocomplete(inp, arr, _onClick = () => {}, _onBlur = () => {}) {
   /*
   the autocomplete function takes two arguments,
   the text field element and an array of possible autocompleted values:*/
@@ -42,6 +42,7 @@ function autocomplete(inp, arr, _onClick = () => {}) {
           /*
           execute a function when someone clicks on the item value (DIV element):*/
               b.addEventListener("click", function(e) {
+                e.stopPropagation();
                 /*
                 insert the value for the autocomplete text field:*/
                 inp.value = this.getElementsByTagName("input")[0].value;
@@ -49,9 +50,7 @@ function autocomplete(inp, arr, _onClick = () => {}) {
                 close the list of autocompleted values,
                 (or any other open lists of autocompleted values:*/
                 closeAllLists();
-
                 _onClick();
-                e.stopPropagation();
           });
           a.appendChild(b);
         }
@@ -80,11 +79,12 @@ function autocomplete(inp, arr, _onClick = () => {}) {
         and and make the current item more visible:*/
         addActive(x);
       } else if (e.keyCode == 13) {
-        /*
-        If the ENTER key is pressed, prevent the form from being submitted,*/
-        e.preventDefault();
-        e.stopPropagation();
         if (currentFocus > -1) {
+          /*
+          If the ENTER key is pressed and there is an active item,
+          prevent the form from being submitted,*/
+          e.preventDefault();
+          e.stopPropagation();
           /*
           and simulate a click on the "active" item:*/
           if (x) x[currentFocus].click();
@@ -130,12 +130,12 @@ function autocomplete(inp, arr, _onClick = () => {}) {
   /*
   execute a function when someone clicks in the document:*/
   document.addEventListener("click", function (e) {
+      e.stopPropagation();
       closeAllLists(e.target);
       if (currentActive) {
         currentActive.click();
       } else {
-        _onClick();
-        e.stopPropagation();
+        _onBlur();
       }
   });
 }
