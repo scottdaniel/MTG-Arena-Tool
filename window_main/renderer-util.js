@@ -20,6 +20,8 @@ const ConicGradient = require("../shared/conic-gradient");
 const {
   createDiv,
   createImg,
+  createInput,
+  createLabel,
   createSpan,
   queryElements: $$
 } = require("../shared/dom-fns");
@@ -41,6 +43,7 @@ const {
   hypergeometricRange
 } = require("../shared/stats-fns");
 
+const byId = id => document.getElementById(id);
 let draftPosition = 1;
 let popTimeout = null;
 // quick and dirty shared state object for main renderer process
@@ -1137,8 +1140,8 @@ function openActionLog(actionLogId) {
 exports.toggleVisibility = toggleVisibility;
 function toggleVisibility(...ids) {
   ids.forEach(id => {
-    let el = document.getElementById(id);
-    if (el.classList.contains("hidden")) {
+    const el = byId(id);
+    if ([...el.classList].includes("hidden")) {
       el.classList.remove("hidden");
     } else {
       el.classList.add("hidden");
@@ -1148,17 +1151,16 @@ function toggleVisibility(...ids) {
 
 //
 exports.addCheckbox = addCheckbox;
-function addCheckbox(div, label, iid, def, func) {
-  label = $('<label class="check_container hover_label">' + label + "</label>");
-  label.appendTo($(div));
-  var check_new = $('<input type="checkbox" id="' + iid + '" />');
-  check_new.on("click", func);
-  check_new.appendTo(label);
-  check_new.prop("checked", def);
+function addCheckbox(div, label, id, def, func) {
+  const labelEl = createLabel(["check_container", "hover_label"], label);
 
-  var span = $('<span class="checkmark"></span>');
-  span.appendTo(label);
-  return label;
+  const checkbox = createInput([], "", { type: "checkbox", id, checked: def });
+  checkbox.addEventListener("click", func);
+  labelEl.appendChild(checkbox);
+  labelEl.appendChild(createSpan(["checkmark"]));
+
+  div.appendChild(labelEl);
+  return labelEl;
 }
 
 //
