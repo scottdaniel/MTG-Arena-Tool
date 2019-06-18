@@ -1166,49 +1166,44 @@ exports.changeBackground = changeBackground;
 function changeBackground(arg = "default", grpId = 0) {
   let artistLine = "";
   const _card = db.card(grpId);
+  const topArtist = $$(".top_artist")[0];
+  const mainWrapper = $$(".main_wrapper")[0];
 
   //console.log(arg, grpId, _card);
   if (arg === "default") {
     if (pd.settings.back_url && pd.settings.back_url !== "default") {
-      $(".top_artist").html("");
-      $(".main_wrapper").css(
-        "background-image",
-        "url(" + pd.settings.back_url + ")"
-      );
+      topArtist.innerHTML = "";
+      mainWrapper.style.backgroundImage = "url(" + pd.settings.back_url + ")";
     } else {
-      $(".top_artist").html("Ghitu Lavarunner by Jesper Ejsing");
-      $(".main_wrapper").css(
-        "background-image",
-        "url(../images/Ghitu-Lavarunner-Dominaria-MtG-Art.jpg)"
-      );
+      topArtist.innerHTML = "Ghitu Lavarunner by Jesper Ejsing";
+      mainWrapper.style.backgroundImage =
+        "url(../images/Ghitu-Lavarunner-Dominaria-MtG-Art.jpg)";
     }
   } else if (_card) {
     // console.log(_card.images["art_crop"]);
-    $(".main_wrapper").css(
-      "background-image",
-      "url(https://img.scryfall.com/cards" + _card.images["art_crop"] + ")"
-    );
+    mainWrapper.style.backgroundImage =
+      "url(https://img.scryfall.com/cards" + _card.images["art_crop"] + ")";
     try {
       artistLine = _card.name + " by " + _card.artist;
-      $(".top_artist").html(artistLine);
+      topArtist.innerHTML = artistLine;
     } catch (e) {
       console.log(e);
     }
   } else if (fs.existsSync(arg)) {
-    $(".top_artist").html("");
-    $(".main_wrapper").css("background-image", "url(" + arg + ")");
+    topArtist.innerHTML = "";
+    mainWrapper.style.backgroundImage = "url(" + arg + ")";
   } else {
-    $(".top_artist").html("");
-    $.ajax({
-      url: arg,
-      type: "HEAD",
-      error: function() {
-        $(".main_wrapper").css("background-image", "");
-      },
-      success: function() {
-        $(".main_wrapper").css("background-image", "url(" + arg + ")");
+    topArtist.innerHTML = "";
+    const xhr = new XMLHttpRequest();
+    xhr.open("HEAD", arg);
+    xhr.onload = function() {
+      if (xhr.status === 200) {
+        mainWrapper.style.backgroundImage = "url(" + arg + ")";
+      } else {
+        mainWrapper.style.backgroundImage = "";
       }
-    });
+    };
+    xhr.send();
   }
 }
 
