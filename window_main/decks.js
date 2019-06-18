@@ -309,8 +309,6 @@ function createTag(div, deckId, tag, showClose = true) {
       });
       input.addEventListener("focusout", function() {
         const val = this.value;
-        t.innerHTML = "...";
-        t.style.width = "24px";
         if (val && val !== tagPrompt) {
           addTag(deckId, val);
         }
@@ -328,9 +326,6 @@ function createTag(div, deckId, tag, showClose = true) {
     tc.addEventListener("click", function(e) {
       e.stopPropagation();
       tc.style.visibility = "hidden";
-      t.innerHTML = "...";
-      t.style.width = "24px";
-      t.style.paddingRight = "12px";
       deleteTag(deckId, val);
     });
     t.appendChild(tc);
