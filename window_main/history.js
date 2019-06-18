@@ -2,8 +2,12 @@ const autocomplete = require("../shared/autocomplete");
 const { MANA, RANKS } = require("../shared/constants");
 const db = require("../shared/database");
 const pd = require("../shared/player-data");
-const { selectAdd } = require("../shared/select");
-const { createDivision } = require("../shared/dom-fns");
+const { createSelect } = require("../shared/select");
+const {
+  createDiv,
+  createInput,
+  queryElements: $$
+} = require("../shared/dom-fns");
 const {
   get_deck_colors,
   get_rank_index_16,
@@ -30,6 +34,7 @@ const {
   toggleArchived
 } = require("./renderer-util");
 
+const byId = id => document.getElementById(id);
 const { DEFAULT_DECK, RANKED_CONST, RANKED_DRAFT, DATE_SEASON } = Aggregator;
 let filters = Aggregator.getDefaultFilters();
 let filteredMatches;
@@ -37,7 +42,7 @@ let sortedHistory;
 const tagPrompt = "Set archetype";
 
 function getNextRank(currentRank) {
-  var rankIndex = RANKS.indexOf(currentRank);
+  const rankIndex = RANKS.indexOf(currentRank);
   if (rankIndex < RANKS.length - 1) {
     return RANKS[rankIndex + 1];
   } else {
@@ -69,31 +74,28 @@ function setFilters(selected = {}) {
 }
 
 function openHistoryTab(_filters = {}, dataIndex = 25, scrollTop = 0) {
-  var mainDiv = document.getElementById("ux_0");
-  var div, d;
+  const mainDiv = byId("ux_0");
+  mainDiv.innerHTML = "";
   mainDiv.classList.add("flex_item");
 
   sortedHistory = [...pd.history];
   sortedHistory.sort(compare_matches);
+  setFilters(_filters);
+  filteredMatches = new Aggregator(filters);
 
-  mainDiv.innerHTML = "";
-
-  let wrap_r = createDivision(["wrapper_column", "sidebar_column_l"]);
+  const wrap_r = createDiv(["wrapper_column", "sidebar_column_l"]);
   wrap_r.style.width = pd.settings.right_panel_width + "px";
   wrap_r.style.flex = `0 0 ${pd.settings.right_panel_width}px`;
 
-  div = createDivision(["ranks_history"]);
+  const div = createDiv(["ranks_history"]);
   div.style.padding = "0 12px";
-
-  setFilters(_filters);
-  filteredMatches = new Aggregator(filters);
 
   let rankedStats;
   const showingRanked =
     filters.date === DATE_SEASON &&
     (filters.eventId === RANKED_CONST || filters.eventId === RANKED_DRAFT);
   if (showingRanked) {
-    const rankStats = createDivision(["ranks_stats"]);
+    const rankStats = createDiv(["ranks_stats"]);
     renderRanksStats(rankStats, filteredMatches);
     rankStats.style.paddingBottom = "16px";
     div.appendChild(rankStats);
@@ -117,23 +119,15 @@ function openHistoryTab(_filters = {}, dataIndex = 25, scrollTop = 0) {
   const historyTopWinrate = statsPanel.render();
   div.appendChild(historyTopWinrate);
 
-  let wrap_l = createDivision(["wrapper_column"]);
-  wrap_l.setAttribute("id", "history_column");
-
-  d = createDivision(["list_fill"]);
-
-  let drag = createDivision(["dragger"]);
+  const drag = createDiv(["dragger"]);
   wrap_r.appendChild(drag);
   makeResizable(drag, statsPanel.handleResize);
-
   wrap_r.appendChild(div);
-  mainDiv.appendChild(wrap_l);
-  mainDiv.appendChild(wrap_r);
-  wrap_l.appendChild(d);
 
-  const historyColumn = document.getElementById("history_column");
-  const historyTop = createDivision(["history_top"]);
+  const wrap_l = createDiv(["wrapper_column"]);
+  wrap_l.appendChild(createDiv(["list_fill"]));
 
+  const historyTop = createDiv(["history_top"]);
   const eventFilter = { eventId: filters.eventId, date: filters.date };
   const matchesInEvent = new Aggregator(eventFilter);
   const matchesInPartialDeckFilters = new Aggregator({
@@ -141,7 +135,6 @@ function openHistoryTab(_filters = {}, dataIndex = 25, scrollTop = 0) {
     tag: filters.tag,
     colors: filters.colors
   });
-
   const filterPanel = new FilterPanel(
     "history_top",
     selected => openHistoryTab(selected),
@@ -157,14 +150,18 @@ function openHistoryTab(_filters = {}, dataIndex = 25, scrollTop = 0) {
   );
   const historyTopFilter = filterPanel.render();
   historyTop.appendChild(historyTopFilter);
-  historyColumn.appendChild(historyTop);
+  wrap_l.appendChild(historyTop);
+
   const dataScroller = new DataScroller(
-    historyColumn,
+    wrap_l,
     renderData,
     20,
     sortedHistory.length
   );
   dataScroller.render(dataIndex, scrollTop);
+
+  mainDiv.appendChild(wrap_l);
+  mainDiv.appendChild(wrap_r);
 }
 
 // return val = how many rows it rendered into container
@@ -208,7 +205,7 @@ function renderData(container, index) {
     toggleArchived(id);
   };
 
-  let listItem = new ListItem(
+  const listItem = new ListItem(
     tileGrpid,
     match.id,
     clickCallback,
@@ -226,9 +223,6 @@ function renderData(container, index) {
 
   container.appendChild(listItem.container);
 
-  if (match.type == "draft") {
-    addShare(match);
-  }
   //console.log("Load match: ", match_id, match);
   //console.log("Match: ", match.type, match);
   return 1;
@@ -236,41 +230,43 @@ function renderData(container, index) {
 
 function handleOpenMatch(id) {
   openMatch(id);
+  // TODO find alternative to jQuery animate
   $(".moving_ux").animate({ left: "-100%" }, 250, "easeInOutCubic");
 }
 
 function handleOpenDraft(id) {
   openDraft(id);
+  // TODO find alternative to jQuery animate
   $(".moving_ux").animate({ left: "-100%" }, 250, "easeInOutCubic");
 }
 
 function attachMatchData(listItem, match) {
   // Deck name
-  let deckNameDiv = createDivision(["list_deck_name"], match.playerDeck.name);
+  const deckNameDiv = createDiv(["list_deck_name"], match.playerDeck.name);
   listItem.leftTop.appendChild(deckNameDiv);
 
   // Event name
-  let eventNameDiv = createDivision(
+  const eventNameDiv = createDiv(
     ["list_deck_name_it"],
     getReadableEvent(match.eventId)
   );
   listItem.leftTop.appendChild(eventNameDiv);
 
   match.playerDeck.colors.forEach(color => {
-    let m = createDivision(["mana_s20", "mana_" + MANA[color]]);
+    const m = createDiv(["mana_s20", "mana_" + MANA[color]]);
     listItem.leftBottom.appendChild(m);
   });
 
   // Opp name
   if (match.opponent.name == null) match.opponent.name = "-#000000";
-  let oppNameDiv = createDivision(
+  const oppNameDiv = createDiv(
     ["list_match_title"],
     "vs " + match.opponent.name.slice(0, -6)
   );
   listItem.rightTop.appendChild(oppNameDiv);
 
   // Opp rank
-  let oppRank = createDivision(["ranks_16"]);
+  const oppRank = createDiv(["ranks_16"]);
   oppRank.style.marginRight = "0px";
   oppRank.style.backgroundPosition =
     get_rank_index_16(match.opponent.rank) * -16 + "px 0px";
@@ -278,7 +274,7 @@ function attachMatchData(listItem, match) {
   listItem.rightTop.appendChild(oppRank);
 
   // Match time
-  let matchTime = createDivision(
+  const matchTime = createDiv(
     ["list_match_time"],
     timeSince(new Date(match.date)) + " ago - " + toMMSS(match.duration)
   );
@@ -286,12 +282,12 @@ function attachMatchData(listItem, match) {
 
   // Opp colors
   get_deck_colors(match.oppDeck).forEach(color => {
-    var m = createDivision(["mana_s20", "mana_" + MANA[color]]);
+    const m = createDiv(["mana_s20", "mana_" + MANA[color]]);
     listItem.rightBottom.appendChild(m);
   });
 
-  let tags_div = createDivision(["history_tags"]);
-  listItem.rightBottom.appendChild(tags_div);
+  const tagsDiv = createDiv(["history_tags"]);
+  listItem.rightBottom.appendChild(tagsDiv);
 
   // Set tag
   const totalAgg = getLocalState().totalAgg;
@@ -300,25 +296,14 @@ function attachMatchData(listItem, match) {
     const count = totalAgg.archCounts[tag] || 0;
     return { tag, q: count };
   });
-  if (match.tags) {
-    match.tags.forEach(tag => {
-      let t = createTag(tag, tags_div, true);
-      jQuery.data(t, "match", match.id);
-      jQuery.data(t, "autocomplete", tags);
-    });
-    if (match.tags.length == 0) {
-      let t = createTag(null, tags_div, false);
-      jQuery.data(t, "match", match.id);
-      jQuery.data(t, "autocomplete", tags);
-    }
+  if (match.tags && match.tags.length) {
+    match.tags.forEach(tag => createTag(tagsDiv, match.id, tags, tag, true));
   } else {
-    let t = createTag(null, tags_div, false);
-    jQuery.data(t, "match", match.id);
-    jQuery.data(t, "autocomplete", tags);
+    createTag(tagsDiv, match.id, tags, null, false);
   }
 
   // Result
-  let resultDiv = createDivision(
+  const resultDiv = createDiv(
     [
       "list_match_result",
       match.player.win > match.opponent.win ? "green" : "red"
@@ -333,7 +318,7 @@ function attachMatchData(listItem, match) {
     if (match.player.seat == match.onThePlay) {
       onThePlay = true;
     }
-    let div = createDivision([onThePlay ? "ontheplay" : "onthedraw"]);
+    const div = createDiv([onThePlay ? "ontheplay" : "onthedraw"]);
     div.title = onThePlay ? "On the play" : "On the draw";
     listItem.right.after(div);
   }
@@ -342,19 +327,76 @@ function attachMatchData(listItem, match) {
 function attachDraftData(listItem, draft) {
   // console.log("Draft: ", match);
 
-  let draftSetDiv = createDivision(["list_deck_name"], draft.set + " draft");
+  const draftSetDiv = createDiv(["list_deck_name"], draft.set + " draft");
   listItem.leftTop.appendChild(draftSetDiv);
 
-  let draftTimeDiv = createDivision(
+  const draftTimeDiv = createDiv(
     ["list_match_time"],
     timeSince(new Date(draft.date)) + " ago."
   );
   listItem.rightBottom.appendChild(draftTimeDiv);
 
-  let replayDiv = createDivision(["list_match_replay"], "See replay");
+  const replayDiv = createDiv(["list_match_replay"], "See replay");
   listItem.rightTop.appendChild(replayDiv);
 
-  let replayShareButton = createDivision(["list_draft_share", draft.id + "dr"]);
+  const replayShareButton = createDiv(["list_draft_share", draft.id + "dr"]);
+  replayShareButton.addEventListener("click", e => {
+    e.stopPropagation();
+    const wrapper = $$(".dialog_wrapper")[0];
+    wrapper.style.opacity = 1;
+    wrapper.style.pointerEvents = "all";
+    wrapper.style.display = "block";
+
+    const dialog = $$(".dialog")[0];
+    dialog.innerHTML = "";
+    dialog.style.width = "500px";
+    dialog.style.height = "200px";
+    dialog.style.top = "calc(50% - 100px)";
+    dialog.addEventListener("click", function(e) {
+      e.stopPropagation();
+    });
+
+    wrapper.addEventListener("click", function() {
+      wrapper.style.opacity = 0;
+      wrapper.style.pointerEvents = "none";
+
+      setTimeout(() => {
+        wrapper.style.display = "none";
+        dialog.style.width = "400px";
+        dialog.style.height = "160px";
+        dialog.style.top = "calc(50% - 80px)";
+      }, 250);
+    });
+
+    const cont = createDiv(["dialog_container"]);
+
+    cont.append(createDiv(["share_title"], "Link For sharing:"));
+    const icd = createDiv(["share_input_container"]);
+    const linkInput = createInput([], "", {
+      id: "share_input",
+      autocomplete: "off"
+    });
+    linkInput.addEventListener("click", () => linkInput.select());
+    icd.appendChild(linkInput);
+    const but = createDiv(["button_simple"], "Copy");
+    but.addEventListener("click", function() {
+      ipcSend("set_clipboard", byId("share_input").value);
+    });
+    icd.appendChild(but);
+    cont.appendChild(icd);
+
+    cont.appendChild(createDiv(["share_subtitle"], "<i>Expires in: </i>"));
+    createSelect(
+      cont,
+      ["One day", "One week", "One month", "Never"],
+      "",
+      () => draftShareLink(draft.id),
+      "expire_select"
+    );
+
+    dialog.appendChild(cont);
+    draftShareLink(draft.id);
+  });
   listItem.right.after(replayShareButton);
 }
 
@@ -364,53 +406,52 @@ function renderRanksStats(container, aggregator) {
   const { winrate } = aggregator.stats;
 
   const viewingLimitSeason = filters.eventId === RANKED_DRAFT;
-  let seasonName = !viewingLimitSeason ? "constructed" : "limited";
-  let switchSeasonName = viewingLimitSeason ? "constructed" : "limited";
-  let switchSeasonFilters = {
+  const seasonName = !viewingLimitSeason ? "constructed" : "limited";
+  const switchSeasonName = viewingLimitSeason ? "constructed" : "limited";
+  const switchSeasonFilters = {
     ...Aggregator.getDefaultFilters(),
     date: DATE_SEASON,
     eventId: viewingLimitSeason ? RANKED_CONST : RANKED_DRAFT
   };
 
-  let seasonToggleButton = createDivision(
+  const seasonToggleButton = createDiv(
     ["button_simple", "button_thin", "season_toggle"],
     `Show ${switchSeasonName}`
   );
   seasonToggleButton.style.margin = "8px auto";
 
   container.appendChild(seasonToggleButton);
-
-  var title = createDivision(
-    ["ranks_history_title"],
-    `Current ${seasonName} season:`
+  container.appendChild(
+    createDiv(["ranks_history_title"], `Current ${seasonName} season:`)
   );
-  container.appendChild(title);
 
-  let currentRank = viewingLimitSeason
+  const currentRank = viewingLimitSeason
     ? pd.rank.limited.rank
     : pd.rank.constructed.rank;
-  let expected = getStepsUntilNextRank(viewingLimitSeason, winrate);
-  title = createDivision(
-    ["ranks_history_title"],
-    `Games until ${getNextRank(currentRank)}: ${expected}`
+  const expected = getStepsUntilNextRank(viewingLimitSeason, winrate);
+  container.appendChild(
+    createDiv(
+      ["ranks_history_title"],
+      `Games until ${getNextRank(currentRank)}: ${expected}`,
+      { title: `Using ${formatPercent(winrate)} winrate` }
+    )
   );
-  title.title = `Using ${formatPercent(winrate)} winrate`;
-  container.appendChild(title);
 
   seasonToggleButton.addEventListener("click", () => {
     openHistoryTab(switchSeasonFilters);
   });
 }
 
-function createTag(tag, div, showClose = true) {
-  let tagCol = getTagColor(tag);
-  let iid = makeId(6);
-  let t = createDivision(["deck_tag", iid], tag || tagPrompt);
+function createTag(div, matchId, tags, tag, showClose = true) {
+  const tagCol = getTagColor(tag);
+  const iid = makeId(6);
+  const t = createDiv(["deck_tag", iid], tag || tagPrompt);
   t.style.backgroundColor = tagCol;
 
   if (tag) {
-    $(t).on("click", function(e) {
-      var colorPick = $(t);
+    t.addEventListener("click", function(e) {
+      // TODO remove jquery colorpicker
+      const colorPick = $(t);
       colorPick.spectrum({
         showInitial: true,
         showAlpha: false,
@@ -440,94 +481,56 @@ function createTag(tag, div, showClose = true) {
       e.stopPropagation();
     });
   } else {
-    $(t).on("click", function(e) {
-      if ($(this).html() === tagPrompt) {
-        t.innerHTML = "";
-        let input = $(
-          `<input style="min-width: 120px;" id="${iid}" size="1" autocomplete="off" type="text" onFocus="this.select()" class="deck_tag_input"></input>`
-        );
-        let ac = $('<div class="autocomplete"></div>');
-        input.appendTo(ac);
-        $(t).prepend(ac);
-
-        input[0].focus();
-        input[0].select();
-        const matchid = jQuery.data($(this)[0], "match");
-        const options = jQuery.data($(this)[0], "autocomplete");
-        const tag = $(this);
-
-        autocomplete(input[0], options, () => {
-          input[0].focus();
-          input[0].select();
-          input[0].dispatchEvent(new KeyboardEvent("keydown", { keyCode: 13 }));
-        });
-        input.keydown(function(e) {
-          setTimeout(() => {
-            input.css("width", $(this).val().length * 8);
-          }, 10);
-          if (e.keyCode === 13) {
-            let val = $(this).val();
-            if (val && val !== tagPrompt) {
-              tag.remove();
-              addTag(matchid, val);
-            } else {
-              tag.html(tagPrompt);
-            }
+    t.addEventListener("click", function(e) {
+      t.innerHTML = "";
+      const ac = createDiv(["autocomplete"]);
+      const input = createInput(["deck_tag_input"], "", {
+        id: iid,
+        type: "text",
+        autocomplete: "off",
+        placeholder: tagPrompt,
+        size: 1
+      });
+      input.style.minWidth = "120px";
+      input.addEventListener("keyup", function(e) {
+        if (e.keyCode === 13) {
+          e.stopPropagation();
+          const val = this.value;
+          if (val && val !== tagPrompt) {
+            addTag(matchId, val);
           }
-        });
-      }
+        } else {
+          setTimeout(() => {
+            input.style.width = this.value.length * 8 + "px";
+          }, 10);
+        }
+      });
+      const focusAndSave = () => {
+        input.focus();
+        input.dispatchEvent(new KeyboardEvent("keyup", { keyCode: 13 }));
+      };
+      autocomplete(input, tags, focusAndSave, focusAndSave);
+
+      ac.appendChild(input);
+      t.appendChild(ac);
+      input.focus();
+
       e.stopPropagation();
     });
   }
 
-  if (showClose) {
-    let tc = createDivision(["deck_tag_close"]);
-    t.appendChild(tc);
-
-    $(tc).on("click", function(e) {
+  if (showClose && tag) {
+    const tc = createDiv(["deck_tag_close"]);
+    tc.addEventListener("click", function(e) {
       e.stopPropagation();
-      let matchid = jQuery.data($(this).parent()[0], "match");
-      let options = jQuery.data($(this).parent()[0], "autocomplete");
-      let val = $(this)
-        .parent()
-        .text();
-
-      deleteTag(matchid, val);
-
-      $(this).css("width", "0px");
-      $(this).css("margin", "0px");
-      $(this)
-        .parent()
-        .css("opacity", 0);
-      $(this)
-        .parent()
-        .css("font-size", 0);
-      $(this)
-        .parent()
-        .css("margin-right", "0px");
-      $(this)
-        .parent()
-        .css("color", $(this).css("background-color"));
-
-      setTimeout(e => {
-        $(this).remove();
-      }, 200);
-
-      let t = createTag(
-        null,
-        $(this)
-          .parent()
-          .parent()[0],
-        false
-      );
-      jQuery.data(t, "match", matchid);
-      jQuery.data(t, "autocomplete", options);
+      tc.style.visibility = "hidden";
+      deleteTag(matchId, tag);
     });
+    t.appendChild(tc);
   } else {
     t.style.paddingRight = "12px";
   }
   div.appendChild(t);
-
   return t;
 }
 
@@ -600,70 +603,8 @@ function getStepsUntilNextRank(mode, winrate) {
   return "~" + n;
 }
 
-function addShare(_match) {
-  $("." + _match.id + "dr").on("click", e => {
-    e.stopPropagation();
-    $(".dialog_wrapper").css("opacity", 1);
-    $(".dialog_wrapper").css("pointer-events", "all");
-    $(".dialog_wrapper").show();
-    $(".dialog").css("width", "500px");
-    $(".dialog").css("height", "200px");
-    $(".dialog").css("top", "calc(50% - 100px)");
-
-    $(".dialog_wrapper").on("click", function() {
-      console.log(".dialog_wrapper on click");
-      //e.stopPropagation();
-      $(".dialog_wrapper").css("opacity", 0);
-      $(".dialog_wrapper").css("pointer-events", "none");
-      setTimeout(function() {
-        $(".dialog_wrapper").hide();
-        $(".dialog").css("width", "400px");
-        $(".dialog").css("height", "160px");
-        $(".dialog").css("top", "calc(50% - 80px)");
-      }, 250);
-    });
-
-    $(".dialog").on("click", function(e) {
-      e.stopPropagation();
-      console.log(".dialog on click");
-    });
-
-    var dialog = $(".dialog");
-    dialog.html("");
-    var cont = $('<div class="dialog_container"></div>');
-
-    cont.append('<div class="share_title">Link For sharing:</div>');
-    var icd = $('<div class="share_input_container"></div>');
-    var but = $('<div class="button_simple">Copy</div>');
-    var sin = $(
-      '<input id="share_input" onClick="this.setSelectionRange(0, this.value.length)" autofocus autocomplete="off" value="" />'
-    );
-
-    sin.appendTo(icd);
-    but.appendTo(icd);
-    icd.appendTo(cont);
-
-    cont.append('<div class="share_subtitle"><i>Expires in: </i></div>');
-    cont.appendTo(dialog);
-
-    var select = $('<select id="expire_select"></select>');
-    var sortby = ["One day", "One week", "One month", "Never"];
-    for (var i = 0; i < sortby.length; i++) {
-      select.append(
-        '<option value="' + sortby[i] + '">' + sortby[i] + "</option>"
-      );
-    }
-    select.appendTo(cont);
-    selectAdd(select, () => draftShareLink(_match.id));
-
-    but.click(function() {
-      ipcSend("set_clipboard", document.getElementById("share_input").value);
-    });
-  });
-}
-
 function draftShareLink(id) {
-  const shareExpire = document.getElementById("expire_select").value;
+  const shareExpire = byId("expire_select").value;
   let expire = 0;
   switch (shareExpire) {
     case "One day":
