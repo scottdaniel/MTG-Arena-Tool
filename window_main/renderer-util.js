@@ -753,7 +753,7 @@ function openMatch(id) {
   var dl = $('<div class="decklist"></div>');
   flt.appendTo(dl);
 
-  drawDeck(dl, match.playerDeck);
+  drawDeck(dl[0], match.playerDeck);
 
   $(
     '<div class="button_simple centered exportDeckPlayer">Export to Arena</div>'
@@ -812,7 +812,7 @@ function openMatch(id) {
     c.quantity = 9999;
   });
   */
-  drawDeck(odl, match.oppDeck);
+  drawDeck(odl[0], match.oppDeck);
 
   $(
     '<div class="button_simple centered exportDeck">Export to Arena</div>'
@@ -1089,51 +1089,52 @@ function openMatch(id) {
 //
 exports.openActionLog = openActionLog;
 function openActionLog(actionLogId) {
-  $("#ux_2").html("");
-  let top = $(
-    `<div class="decklist_top"><div class="button back actionlog_back"></div><div class="deck_name">Action Log</div><div class="deck_name"></div></div>`
-  );
+  const conatiner = byId("ux_2");
+  conatiner.innerHTML = "";
 
-  let actionLogContainer = $(`<div class="action_log_container"></div>`);
+  const top = createDiv(["decklist_top"]);
+  const backButton = createDiv(["button", "back"]);
+  backButton.addEventListener("click", () => {
+    // TODO remove jquery.easing
+    $(".moving_ux").animate({ left: "-100%" }, 250, "easeInOutCubic");
+  });
+  top.appendChild(backButton);
+  top.appendChild(createDiv(["deck_name"], "Action Log"));
+  top.appendChild(createDiv(["deck_name"]));
+  conatiner.appendChild(top);
 
-  let actionLogFile = path.join(actionLogDir, actionLogId + ".txt");
+  const actionLogContainer = createDiv(["action_log_container"]);
+
+  const actionLogFile = path.join(actionLogDir, actionLogId + ".txt");
   let str = fs.readFileSync(actionLogFile).toString();
 
-  let actionLog = str.split("\n");
+  const actionLog = str.split("\n");
   for (let line = 1; line < actionLog.length - 1; line += 3) {
-    let seat = actionLog[line];
-    let time = actionLog[line + 1];
+    const seat = ("" + actionLog[line]).trim();
+    const time = actionLog[line + 1];
     let str = actionLog[line + 2];
     str = striptags(str, ["log-card", "log-ability"]);
 
-    var boxDiv = $('<div class="actionlog log_p' + seat + '"></div>');
-    var timeDiv = $('<div class="actionlog_time">' + time + "</div>");
-    var strDiv = $('<div class="actionlog_text">' + str + "</div>");
-
-    boxDiv.append(timeDiv);
-    boxDiv.append(strDiv);
-    actionLogContainer.append(boxDiv);
+    const boxDiv = createDiv(["actionlog", "log_p" + seat]);
+    boxDiv.appendChild(createDiv(["actionlog_time"], time));
+    boxDiv.appendChild(createDiv(["actionlog_text"], str));
+    actionLogContainer.appendChild(boxDiv);
   }
 
-  $("#ux_2").append(top);
-  $("#ux_2").append(actionLogContainer);
+  conatiner.appendChild(actionLogContainer);
 
   $$("log-card").forEach(obj => {
-    let grpId = obj.getAttribute("id");
+    const grpId = obj.getAttribute("id");
     addCardHover(obj, db.card(grpId));
   });
 
   $$("log-ability").forEach(obj => {
-    let grpId = obj.getAttribute("id");
-    let abilityText = db.abilities[grpId] || "";
-    obj.title = abilityText;
+    const grpId = obj.getAttribute("id");
+    obj.title = db.abilities[grpId] || "";
   });
 
+  // TODO remove jquery.easing
   $(".moving_ux").animate({ left: "-200%" }, 250, "easeInOutCubic");
-
-  $(".actionlog_back").click(() => {
-    $(".moving_ux").animate({ left: "-100%" }, 250, "easeInOutCubic");
-  });
 }
 
 //
