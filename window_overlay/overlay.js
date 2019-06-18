@@ -484,7 +484,7 @@ function updateView() {
   if (overlayMode == OVERLAY_SEEN) {
     $('<div class="overlay_archetype"></div>').insertAfter(".overlay_deckname");
     $(".overlay_deckname").html("Played by " + oppName);
-    $(".overlay_archetype").html(currentMatch.oppCards.archetype);
+    $(".overlay_archetype").html(currentMatch.oppArchetype);
 
     currentMatch.oppCards.colors.get().forEach(color => {
       $(".overlay_deckcolors").append(
@@ -551,6 +551,7 @@ function updateView() {
   if (
     settings.lands &&
     overlayMode !== OVERLAY_DRAFT &&
+    overlayMode !== OVERLAY_SEEN &&
     overlayMode !== OVERLAY_LOG
   ) {
     let landsNumber = 0;
