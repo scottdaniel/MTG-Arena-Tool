@@ -29,10 +29,10 @@ const {
   ipcSend,
   makeResizable,
   openDraft,
-  openMatch,
   showLoadingBars,
   toggleArchived
 } = require("./renderer-util");
+const { openMatch } = require("./match-details");
 
 const byId = id => document.getElementById(id);
 const { DEFAULT_DECK, RANKED_CONST, RANKED_DRAFT, DATE_SEASON } = Aggregator;

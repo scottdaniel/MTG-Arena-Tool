@@ -18,9 +18,9 @@ const StatsPanel = require("./stats-panel");
 const {
   getEventWinLossClass,
   getLocalState,
-  openMatch,
   toggleArchived
 } = require("./renderer-util");
+const { openMatch } = require("./match-details");
 
 let filters = Aggregator.getDefaultFilters();
 filters.eventId = Aggregator.ALL_EVENT_TRACKS;

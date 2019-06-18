@@ -283,8 +283,7 @@ function openDeck(deck = currentOpenDeck, filters = currentFilters) {
     if (showStatsPanel) {
       byId("stats_column").style.display = "none";
     }
-    statsSection.style.display = "none";
-    drawDeckVisual(deckListSection, deck, openDeck);
+    drawDeckVisual(fld, deck, openDeck);
   });
 
   $$(".back")[0].addEventListener("click", () => {

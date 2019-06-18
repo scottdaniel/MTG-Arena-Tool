@@ -172,7 +172,7 @@ function showTournamentRegister(mainDiv, tou) {
 
     mainDiv.appendChild(deckContainer);
     if (tou.deck) {
-      drawDeckVisual(deckvisual, tou.deck);
+      drawDeckVisual(deckContainer, tou.deck);
     }
 
     if (tou.state !== 4) {
