@@ -697,7 +697,7 @@ function onLabelOutDraftMakePick(entry, json) {
 function onLabelInEventCompleteDraft(entry, json) {
   if (!json) return;
   clear_deck();
-  ipc_send("set_arena_state", ARENA_MODE_IDLE);
+  if (!firstPass) ipc_send("set_arena_state", ARENA_MODE_IDLE);
   //ipc_send("renderer_show", 1);
 
   currentDraft.draftId = json.Id;
@@ -759,7 +759,7 @@ function onLabelMatchGameRoomStateChangedEvent(entry, json) {
     });
 
     clear_deck();
-    ipc_send("set_arena_state", ARENA_MODE_IDLE);
+    if (!firstPass) ipc_send("set_arena_state", ARENA_MODE_IDLE);
     matchCompletedOnGameNumber = json.finalMatchResult.resultList.length - 1;
     saveMatch(json.finalMatchResult.matchId + "-" + pd.arenaId);
   }
