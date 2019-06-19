@@ -305,7 +305,7 @@ function drawFilters() {
       mf = "mana_filter_on";
     }
     const manabutton = createDivision(["mana_filter", mf]);
-    manabutton.style.backgroundImage = "url(../images/${s}20.png)";
+    manabutton.style.backgroundImage = "url(../images/" + s + "20.png)";
     manabutton.addEventListener("click", function() {
       if ([...manabutton.classList].includes("mana_filter_on")) {
         manabutton.classList.remove("mana_filter_on");
