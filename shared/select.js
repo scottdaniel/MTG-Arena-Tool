@@ -69,10 +69,6 @@ function createSelect(
 // list format to allow more style options
 exports.selectAdd = selectAdd;
 function selectAdd(selectElement, callback) {
-  if (selectElement instanceof jQuery) {
-    selectElement = selectElement[0];
-  }
-
   selectElement.classList.add("select-hidden");
 
   // dom structure is
