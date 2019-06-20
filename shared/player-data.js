@@ -53,6 +53,7 @@ const overlayCfg = {
   deck: true,
   lands: true,
   keyboard_shortcut: true,
+  mana_curve: false,
   mode: 1,
   ontop: true,
   scale: 100,
@@ -60,7 +61,8 @@ const overlayCfg = {
   show_always: false,
   sideboard: false,
   title: true,
-  top: true
+  top: true,
+  type_counts: false
 };
 
 const defaultCfg = {
