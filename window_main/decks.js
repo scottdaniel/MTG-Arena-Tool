@@ -1,4 +1,5 @@
 const _ = require("lodash");
+const anime = require("animejs");
 
 const { MANA, CARD_RARITIES } = require("../shared/constants");
 const pd = require("../shared/player-data");
@@ -22,10 +23,11 @@ const {
   hideLoadingBars,
   ipcSend,
   makeResizable,
-  setLocalState
+  resetMainContainer,
+  setLocalState,
+  showColorpicker
 } = require("./renderer-util");
 
-const byId = id => document.getElementById(id);
 let filters = Aggregator.getDefaultFilters();
 filters.onlyCurrentDecks = true;
 const tagPrompt = "Add";
@@ -51,9 +53,8 @@ function setFilters(selected = {}) {
 function openDecksTab(_filters = {}, scrollTop = 0) {
   hideLoadingBars();
   const ls = getLocalState();
-  const mainDiv = byId("ux_0");
+  const mainDiv = resetMainContainer();
   mainDiv.classList.add("flex_item");
-  mainDiv.innerHTML = "";
   setFilters(_filters);
 
   const wrap_r = createDiv(["wrapper_column", "sidebar_column_l"]);
@@ -248,8 +249,12 @@ function openDeckCallback(id, filters) {
   const deck = pd.deck(id);
   if (!deck) return;
   openDeck(deck, { ...filters, deckId: id });
-  // TODO remove jquery.easing
-  $(".moving_ux").animate({ left: "-100%" }, 250, "easeInOutCubic");
+  anime({
+    targets: ".moving_ux",
+    left: "-100%",
+    easing: "easeInOutCubic",
+    duration: 350
+  });
 }
 
 function createTag(div, deckId, tag, showClose = true) {
@@ -259,35 +264,13 @@ function createTag(div, deckId, tag, showClose = true) {
 
   if (tag) {
     t.addEventListener("click", function(e) {
-      // TODO remove jquery colorpicker
-      const colorPick = $(t);
-      colorPick.spectrum({
-        showInitial: true,
-        showAlpha: false,
-        showButtons: false
-      });
-      colorPick.spectrum("set", tagCol);
-      colorPick.spectrum("show");
-
-      colorPick.on("move.spectrum", (e, color) => {
-        const tag = $(this).text();
-        const col = color.toRgbString();
-        $(".deck_tag").each((index, obj) => {
-          if (tag !== $(obj).text()) return;
-          $(obj).css("background-color", col);
-        });
-      });
-
-      colorPick.on("change.spectrum", (e, color) => {
-        const tag = $(this).text();
-        const col = color.toRgbString();
-        ipcSend("edit_tag", { tag, color: col });
-      });
-
-      colorPick.on("hide.spectrum", () => {
-        colorPick.spectrum("destroy");
-      });
       e.stopPropagation();
+      showColorpicker(
+        tagCol,
+        color => (t.style.backgroundColor = color.rgbString),
+        color => ipcSend("edit_tag", { tag, color: color.rgbString }),
+        () => (t.style.backgroundColor = tagCol)
+      );
     });
   } else {
     t.addEventListener("click", function(e) {

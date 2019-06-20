@@ -4,7 +4,7 @@ const { differenceInCalendarDays } = require("date-fns");
 
 const db = require("../shared/database");
 const pd = require("../shared/player-data");
-const { createDivision } = require("../shared/dom-fns");
+const { createDiv } = require("../shared/dom-fns");
 const { createSelect } = require("../shared/select");
 const { addCardHover } = require("../shared/card-hover");
 const {
@@ -18,6 +18,7 @@ const DataScroller = require("./data-scroller");
 const {
   formatNumber,
   formatPercent,
+  resetMainContainer,
   toggleArchived
 } = require("./renderer-util");
 
@@ -132,7 +133,7 @@ function getPrettyContext(context, full = true) {
 }
 
 function openEconomyTab(dataIndex = 25, scrollTop = 0) {
-  const mainDiv = document.getElementById("ux_0");
+  const mainDiv = resetMainContainer();
   createEconomyUI(mainDiv);
   const dataScroller = new DataScroller(
     mainDiv,
@@ -179,28 +180,22 @@ function renderData(container, index) {
   container.appendChild(div);
   rowsAdded++;
 
-  $(".list_economy_awarded").on("mousewheel", function(e) {
-    var delta = parseInt(e.originalEvent.deltaY) / 40;
-    this.scrollLeft += delta;
-    e.preventDefault();
-  });
-
   return rowsAdded;
 }
 
 function createDayHeader(change) {
   daysago = differenceInCalendarDays(new Date(), new Date(change.date));
-  let headerGrid = createDivision(["economy_title"]);
+  let headerGrid = createDiv(["economy_title"]);
 
-  const cont = createDivision(["economy_metric"]);
-  let tx = createDivision();
+  const cont = createDiv(["economy_metric"]);
+  let tx = createDiv();
   tx.style.lineHeight = "64px";
   tx.classList.add("economy_sub");
-  let up = createDivision(["economy_up"]);
-  let down = createDivision(["economy_down"]);
+  let up = createDiv(["economy_up"]);
+  let down = createDiv(["economy_down"]);
 
   // Title
-  let gridTitle = createDivision(["flex_item"]);
+  let gridTitle = createDiv(["flex_item"]);
   gridTitle.style.gridArea = "1 / 1 / auto / 2";
   gridTitle.style.lineHeight = "64px";
 
@@ -220,7 +215,7 @@ function createDayHeader(change) {
   const catx = tx.cloneNode(true);
   catx.innerHTML = formatNumber(dayList[daysago].cardsEarned);
   gridCards.appendChild(icca);
-  const upcontca = createDivision(["economy_delta"]);
+  const upcontca = createDiv(["economy_delta"]);
   upcontca.style.width = "auto";
   upcontca.appendChild(catx);
   upcontca.appendChild(up.cloneNode(true));
@@ -229,18 +224,18 @@ function createDayHeader(change) {
   // Gold
   const gridGold = cont.cloneNode(true);
   gridGold.style.gridArea = "1 / 3 / auto / 4";
-  let icgo = createDivision(["economy_gold_med"]);
+  let icgo = createDiv(["economy_gold_med"]);
   icgo.margin = "3px";
   icgo.title = "Gold";
   gridGold.appendChild(icgo);
 
-  const upcontgo = createDivision(["economy_delta"]);
+  const upcontgo = createDiv(["economy_delta"]);
   tx.innerHTML = formatNumber(dayList[daysago].goldEarned);
   upcontgo.appendChild(tx);
   upcontgo.appendChild(up.cloneNode(true));
   gridGold.appendChild(upcontgo);
 
-  const dncontgo = createDivision(["economy_delta"]);
+  const dncontgo = createDiv(["economy_delta"]);
   let ntx = tx.cloneNode(true);
   ntx.innerHTML = formatNumber(dayList[daysago].goldSpent);
   dncontgo.appendChild(ntx);
@@ -250,19 +245,19 @@ function createDayHeader(change) {
   // Gems
   const gridGems = cont.cloneNode(true);
   gridGems.style.gridArea = "1 / 4 / auto / 5";
-  let icge = createDivision(["economy_gems_med"]);
+  let icge = createDiv(["economy_gems_med"]);
   icge.margin = "3px";
   icge.title = "Gems";
   gridGems.appendChild(icge);
 
-  const upcontge = createDivision(["economy_delta"]);
+  const upcontge = createDiv(["economy_delta"]);
   ntx = tx.cloneNode(true);
   ntx.innerHTML = formatNumber(dayList[daysago].gemsEarned);
   upcontge.appendChild(ntx);
   upcontge.appendChild(up.cloneNode(true));
   gridGems.appendChild(upcontge);
 
-  const dncontge = createDivision(["economy_delta"]);
+  const dncontge = createDiv(["economy_delta"]);
   ntx = tx.cloneNode(true);
   ntx.innerHTML = formatNumber(dayList[daysago].gemsSpent);
   dncontge.appendChild(ntx);
@@ -282,7 +277,7 @@ function createDayHeader(change) {
   const deltaPercent = delta / 100.0;
   vatx.innerHTML = formatPercent(deltaPercent);
   gridVault.appendChild(icva);
-  const upcontva = createDivision(["economy_delta"]);
+  const upcontva = createDiv(["economy_delta"]);
   upcontva.style.width = "auto";
   upcontva.appendChild(vatx);
   upcontva.appendChild(up.cloneNode(true));
@@ -298,8 +293,12 @@ function createDayHeader(change) {
 
 function createChangeRow(change, economyId) {
   // The next ~200 lines of code will add elements to these two containers
-  var flexBottom = createDivision(["flex_bottom"]);
-  var flexRight = createDivision(["tiny_scroll", "list_economy_awarded"]);
+  var flexBottom = createDiv(["flex_bottom"]);
+  var flexRight = createDiv(["tiny_scroll", "list_economy_awarded"]);
+  flexRight.addEventListener("mousewheel", function(e) {
+    this.scrollLeft += parseInt(e.deltaY / 2);
+    e.preventDefault();
+  });
 
   let checkGemsPaid = false;
   let checkGoldPaid = false;
@@ -319,12 +318,12 @@ function createChangeRow(change, economyId) {
     change.delta.boosterDelta.forEach(function(booster) {
       var set = get_colation_set(booster.collationId);
 
-      var bos = createDivision(["set_logo"]);
+      var bos = createDiv(["set_logo"]);
       bos.style.backgroundImage =
         "url(../images/sets/" + db.sets[set].code + ".png)";
       bos.title = set;
 
-      var bon = createDivision();
+      var bon = createDiv();
       bon.style.lineHeight = "32px";
       bon.classList.add("economy_sub");
 
@@ -351,7 +350,7 @@ function createChangeRow(change, economyId) {
     checkGemsPaid = true;
     checkGoldPaid = true;
 
-    bos = createDivision(["economy_ticket_med"]);
+    bos = createDiv(["economy_ticket_med"]);
     bos.title = "Event Entry";
 
     flexRight.appendChild(bos);
@@ -363,11 +362,11 @@ function createChangeRow(change, economyId) {
     const renderWild = count => {
       if (!count) return;
       count = Math.abs(count);
-      bos = createDivision(["economy_wc"]);
+      bos = createDiv(["economy_wc"]);
       bos.title = title;
       bos.style.backgroundImage = "url(../images/" + imgUri + ".png)";
 
-      bon = createDivision();
+      bon = createDiv();
       bon.style.lineHeight = "32px";
       bon.classList.add("economy_sub");
       bon.innerHTML = "x" + count;
@@ -414,10 +413,10 @@ function createChangeRow(change, economyId) {
   }
 
   if (checkGemsPaid && change.delta.gemsDelta != undefined) {
-    bos = createDivision(["economy_gems"]);
+    bos = createDiv(["economy_gems"]);
     bos.title = "Gems";
 
-    bon = createDivision();
+    bon = createDiv();
     bon.style.lineHeight = "32px";
     bon.classList.add("economy_sub");
     bon.innerHTML = formatNumber(Math.abs(change.delta.gemsDelta));
@@ -427,10 +426,10 @@ function createChangeRow(change, economyId) {
   }
 
   if (checkGoldPaid && change.delta.goldDelta != undefined) {
-    bos = createDivision(["economy_gold"]);
+    bos = createDiv(["economy_gold"]);
     bos.title = "Gold";
 
-    bon = createDivision();
+    bon = createDiv();
     bon.style.lineHeight = "32px";
     bon.classList.add("economy_sub");
     bon.innerHTML = formatNumber(Math.abs(change.delta.goldDelta));
@@ -440,10 +439,10 @@ function createChangeRow(change, economyId) {
   }
 
   if (checkGemsEarnt && change.delta.gemsDelta != undefined) {
-    bos = createDivision(["economy_gems_med"]);
+    bos = createDiv(["economy_gems_med"]);
     bos.title = "Gems";
 
-    bon = createDivision();
+    bon = createDiv();
     bon.style.lineHeight = "64px";
     bon.classList.add("economy_sub");
     bon.innerHTML = formatNumber(Math.abs(change.delta.gemsDelta));
@@ -453,10 +452,10 @@ function createChangeRow(change, economyId) {
   }
 
   if (checkGoldEarnt && change.delta.goldDelta != undefined) {
-    bos = createDivision(["economy_gold_med"]);
+    bos = createDiv(["economy_gold_med"]);
     bos.title = "Gold";
 
-    bon = createDivision();
+    bon = createDiv();
     bon.style.lineHeight = "64px";
     bon.classList.add("economy_sub");
     bon.innerHTML = formatNumber(Math.abs(change.delta.goldDelta));
@@ -469,12 +468,12 @@ function createChangeRow(change, economyId) {
     change.delta.boosterDelta.forEach(function(booster) {
       var set = get_colation_set(booster.collationId);
 
-      var bos = createDivision(["set_logo_med"]);
+      var bos = createDiv(["set_logo_med"]);
       bos.style.backgroundImage =
         "url(../images/sets/" + db.sets[set].code + ".png)";
       bos.title = set;
 
-      var bon = createDivision();
+      var bon = createDiv();
       bon.style.lineHeight = "64px";
       bon.classList.add("economy_sub");
       bon.innerHTML = "x" + Math.abs(booster.count);
@@ -486,10 +485,10 @@ function createChangeRow(change, economyId) {
 
   if (checkWildcardsAdded) {
     if (change.delta.wcCommonDelta != undefined) {
-      bos = createDivision(["economy_wc"]);
+      bos = createDiv(["economy_wc"]);
       bos.title = "Common Wildcard";
       bos.style.backgroundImage = "url(../images/wc_common.png)";
-      bon = createDivision();
+      bon = createDiv();
       bon.style.lineHeight = "64px";
       bon.classList.add("economy_sub");
       bon.innerHTML = "x" + Math.abs(change.delta.wcCommonDelta);
@@ -498,10 +497,10 @@ function createChangeRow(change, economyId) {
     }
 
     if (change.delta.wcUncommonDelta != undefined) {
-      bos = createDivision(["economy_wc"]);
+      bos = createDiv(["economy_wc"]);
       bos.title = "Uncommon Wildcard";
       bos.style.backgroundImage = "url(../images/wc_uncommon.png)";
-      bon = createDivision();
+      bon = createDiv();
       bon.style.lineHeight = "64px";
       bon.classList.add("economy_sub");
       bon.innerHTML = "x" + Math.abs(change.delta.wcUncommonDelta);
@@ -510,10 +509,10 @@ function createChangeRow(change, economyId) {
     }
 
     if (change.delta.wcRareDelta != undefined) {
-      bos = createDivision(["economy_wc"]);
+      bos = createDiv(["economy_wc"]);
       bos.title = "Rare Wildcard";
       bos.style.backgroundImage = "url(../images/wc_rare.png)";
-      bon = createDivision();
+      bon = createDiv();
       bon.style.lineHeight = "64px";
       bon.classList.add("economy_sub");
       bon.innerHTML = "x" + Math.abs(change.delta.wcRareDelta);
@@ -521,10 +520,10 @@ function createChangeRow(change, economyId) {
       flexRight.appendChild(bon);
     }
     if (change.delta.wcMythicDelta != undefined) {
-      bos = createDivision(["economy_wc"]);
+      bos = createDiv(["economy_wc"]);
       bos.title = "Mythic Wildcard";
       bos.style.backgroundImage = "url(../images/wc_mythic.png)";
-      bon = createDivision();
+      bon = createDiv();
       bon.style.lineHeight = "64px";
       bon.classList.add("economy_sub");
       bon.innerHTML = "x" + Math.abs(change.delta.wcMythicDelta);
@@ -538,7 +537,7 @@ function createChangeRow(change, economyId) {
     change.delta.cardsAdded.forEach(function(grpId) {
       var card = db.card(grpId);
 
-      var d = createDivision(["inventory_card"]);
+      var d = createDiv(["inventory_card"]);
       d.style.width = "39px";
 
       var img = document.createElement("img");
@@ -583,7 +582,7 @@ function createChangeRow(change, economyId) {
         }
       }
       if (draw) {
-        var d = createDivision(["inventory_card"]);
+        var d = createDiv(["inventory_card"]);
         d.style.width = "39px";
 
         var img = document.createElement("img");
@@ -626,7 +625,7 @@ function createChangeRow(change, economyId) {
     change.delta.artSkinsAdded.forEach(obj => {
       let card = db.cardFromArt(obj.artId);
 
-      bos = createDivision(["economy_skin_art"]);
+      bos = createDiv(["economy_skin_art"]);
       bos.title = card.name + " Skin";
       bos.style.backgroundImage = `url("${get_card_art(card)}")`;
 
@@ -641,25 +640,25 @@ function createChangeRow(change, economyId) {
   //      flexBottom
   //   flexRight
 
-  var flexTop = createDivision(["flex_top", "economy_sub"]);
+  var flexTop = createDiv(["flex_top", "economy_sub"]);
   flexTop.style.lineHeight = "32px";
 
   flexTop.appendChild(
-    createDivision(
+    createDiv(
       [],
       `<span title="${change.originalContext}">${fullContext}</span>`
     )
   );
 
   var niceDate = localDateFormat(new Date(change.date));
-  flexTop.appendChild(createDivision(["list_economy_time"], niceDate));
+  flexTop.appendChild(createDiv(["list_economy_time"], niceDate));
 
-  var flexLeft = createDivision(["flex_item"]);
+  var flexLeft = createDiv(["flex_item"]);
   flexLeft.style.flexDirection = "column";
   flexLeft.appendChild(flexTop);
   flexLeft.appendChild(flexBottom);
 
-  var changeRow = createDivision([economyId, "list_economy"]);
+  var changeRow = createDiv([economyId, "list_economy"]);
   changeRow.appendChild(flexLeft);
   changeRow.appendChild(flexRight);
 
@@ -738,13 +737,10 @@ function createEconomyUI(mainDiv) {
     }
   }
 
-  mainDiv.classList.remove("flex_item");
-  mainDiv.innerHTML = "";
-
-  let div = createDivision(["list_economy_top", "flex_item"]);
+  let div = createDiv(["list_economy_top", "flex_item"]);
 
   //
-  var selectdiv = createDivision();
+  var selectdiv = createDiv();
   selectdiv.style.margin = "auto 64px auto 0px";
   selectdiv.style.display = "flex";
   let options = [...topSelectItems, ...selectItems];
@@ -783,26 +779,26 @@ function createEconomyUI(mainDiv) {
   div.appendChild(selectdiv);
 
   //
-  let icwcc = createDivision(["economy_wc_med", "wc_common"]);
+  let icwcc = createDiv(["economy_wc_med", "wc_common"]);
   icwcc.title = "Common Wildcards";
 
-  let icwcu = createDivision(["economy_wc_med", "wc_uncommon"]);
+  let icwcu = createDiv(["economy_wc_med", "wc_uncommon"]);
   icwcu.title = "Uncommon Wildcards";
 
-  let icwcr = createDivision(["economy_wc_med", "wc_rare"]);
+  let icwcr = createDiv(["economy_wc_med", "wc_rare"]);
   icwcr.title = "Rare Wildcards";
 
-  let icwcm = createDivision(["economy_wc_med", "wc_mythic"]);
+  let icwcm = createDiv(["economy_wc_med", "wc_mythic"]);
   icwcm.title = "Mythic Wildcards";
 
-  let icgo = createDivision(["economy_gold_med"]);
+  let icgo = createDiv(["economy_gold_med"]);
   icgo.title = "Gold";
 
-  let icge = createDivision(["economy_gems_med"]);
+  let icge = createDiv(["economy_gems_med"]);
   icge.style.marginLeft = "24px";
   icge.title = "Gems";
 
-  let tx = createDivision();
+  let tx = createDiv();
   tx.style.lineHeight = "64px";
   tx.classList.add("economy_sub");
 

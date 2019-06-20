@@ -1,3 +1,5 @@
+const anime = require("animejs");
+
 const autocomplete = require("../shared/autocomplete");
 const { MANA, RANKS } = require("../shared/constants");
 const db = require("../shared/database");
@@ -29,6 +31,8 @@ const {
   ipcSend,
   makeResizable,
   openDraft,
+  resetMainContainer,
+  showColorpicker,
   showLoadingBars,
   toggleArchived
 } = require("./renderer-util");
@@ -74,8 +78,7 @@ function setFilters(selected = {}) {
 }
 
 function openHistoryTab(_filters = {}, dataIndex = 25, scrollTop = 0) {
-  const mainDiv = byId("ux_0");
-  mainDiv.innerHTML = "";
+  const mainDiv = resetMainContainer();
   mainDiv.classList.add("flex_item");
 
   sortedHistory = [...pd.history];
@@ -152,6 +155,7 @@ function openHistoryTab(_filters = {}, dataIndex = 25, scrollTop = 0) {
   historyTop.appendChild(historyTopFilter);
   wrap_l.appendChild(historyTop);
 
+  mainDiv.appendChild(wrap_l);
   const dataScroller = new DataScroller(
     wrap_l,
     renderData,
@@ -160,7 +164,6 @@ function openHistoryTab(_filters = {}, dataIndex = 25, scrollTop = 0) {
   );
   dataScroller.render(dataIndex, scrollTop);
 
-  mainDiv.appendChild(wrap_l);
   mainDiv.appendChild(wrap_r);
 }
 
@@ -230,14 +233,22 @@ function renderData(container, index) {
 
 function handleOpenMatch(id) {
   openMatch(id);
-  // TODO find alternative to jQuery animate
-  $(".moving_ux").animate({ left: "-100%" }, 250, "easeInOutCubic");
+  anime({
+    targets: ".moving_ux",
+    left: "-100%",
+    easing: "easeInOutCubic",
+    duration: 350
+  });
 }
 
 function handleOpenDraft(id) {
   openDraft(id);
-  // TODO find alternative to jQuery animate
-  $(".moving_ux").animate({ left: "-100%" }, 250, "easeInOutCubic");
+  anime({
+    targets: ".moving_ux",
+    left: "-100%",
+    easing: "easeInOutCubic",
+    duration: 350
+  });
 }
 
 function attachMatchData(listItem, match) {
@@ -450,35 +461,13 @@ function createTag(div, matchId, tags, tag, showClose = true) {
 
   if (tag) {
     t.addEventListener("click", function(e) {
-      // TODO remove jquery colorpicker
-      const colorPick = $(t);
-      colorPick.spectrum({
-        showInitial: true,
-        showAlpha: false,
-        showButtons: false
-      });
-      colorPick.spectrum("set", tagCol);
-      colorPick.spectrum("show");
-
-      colorPick.on("move.spectrum", (e, color) => {
-        const tag = $(this).text();
-        const col = color.toRgbString();
-        $(".deck_tag").each((index, obj) => {
-          if (tag !== $(obj).text()) return;
-          $(obj).css("background-color", col);
-        });
-      });
-
-      colorPick.on("change.spectrum", (e, color) => {
-        const tag = $(this).text();
-        const col = color.toRgbString();
-        ipcSend("edit_tag", { tag, color: col });
-      });
-
-      colorPick.on("hide.spectrum", () => {
-        colorPick.spectrum("destroy");
-      });
       e.stopPropagation();
+      showColorpicker(
+        tagCol,
+        color => (t.style.backgroundColor = color.rgbString),
+        color => ipcSend("edit_tag", { tag, color: color.rgbString }),
+        () => (t.style.backgroundColor = tagCol)
+      );
     });
   } else {
     t.addEventListener("click", function(e) {

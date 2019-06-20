@@ -2,7 +2,9 @@ const fs = require("fs");
 const path = require("path");
 const { app, ipcRenderer: ipc, remote } = require("electron");
 const _ = require("lodash");
+const anime = require("animejs");
 const striptags = require("striptags");
+const Picker = require("vanilla-picker");
 
 const {
   CARD_TYPE_CODES,
@@ -43,6 +45,7 @@ const localState = {
   authToken: "",
   discordTag: null,
   lastDataIndex: 0,
+  lastScrollHandler: null,
   lastScrollTop: 0,
   exploreData: null
 };
@@ -158,6 +161,20 @@ function makeResizable(div, resizeCallback, finalCallback) {
     },
     false
   );
+}
+
+//
+exports.resetMainContainer = resetMainContainer;
+function resetMainContainer() {
+  const container = byId("ux_0");
+  container.innerHTML = "";
+  container.classList.remove("flex_item");
+  const { lastScrollHandler } = getLocalState();
+  if (lastScrollHandler) {
+    container.removeEventListener("scroll", lastScrollHandler);
+    setLocalState({ lastScrollHandler: null });
+  }
+  return container;
 }
 
 //
@@ -649,8 +666,12 @@ function openDraft(id, draftPosition = 1) {
 
   $$(".back")[0].addEventListener("click", () => {
     changeBackground("default");
-    // TODO find alternative to jQuery animate
-    $(".moving_ux").animate({ left: "0px" }, 250, "easeInOutCubic");
+    anime({
+      targets: ".moving_ux",
+      left: 0,
+      easing: "easeInOutCubic",
+      duration: 350
+    });
   });
 }
 
@@ -663,8 +684,12 @@ function openActionLog(actionLogId) {
   const top = createDiv(["decklist_top"]);
   const backButton = createDiv(["button", "back"]);
   backButton.addEventListener("click", () => {
-    // TODO remove jquery.easing
-    $(".moving_ux").animate({ left: "-100%" }, 250, "easeInOutCubic");
+    anime({
+      targets: ".moving_ux",
+      left: "-100%",
+      easing: "easeInOutCubic",
+      duration: 350
+    });
   });
   top.appendChild(backButton);
   top.appendChild(createDiv(["deck_name"], "Action Log"));
@@ -701,8 +726,12 @@ function openActionLog(actionLogId) {
     obj.title = db.abilities[grpId] || "";
   });
 
-  // TODO remove jquery.easing
-  $(".moving_ux").animate({ left: "-200%" }, 250, "easeInOutCubic");
+  anime({
+    targets: ".moving_ux",
+    left: "-200%",
+    easing: "easeInOutCubic",
+    duration: 350
+  });
 }
 
 //
@@ -776,6 +805,65 @@ function changeBackground(arg = "default", grpId = 0) {
     };
     xhr.send();
   }
+}
+
+//
+exports.showColorpicker = showColorpicker;
+function showColorpicker(
+  color,
+  onChange = () => {},
+  onDone = () => {},
+  onCancel = () => {},
+  pickerOptions = {}
+) {
+  const wrapper = $$(".dialog_wrapper")[0];
+  wrapper.style.opacity = 1;
+  wrapper.style.pointerEvents = "all";
+  wrapper.style.display = "block";
+
+  const dialog = $$(".dialog")[0];
+  dialog.innerHTML = "";
+  dialog.style.width = "260px";
+  dialog.style.height = "320px";
+  dialog.style.top = "calc(50% - 100px)";
+  dialog.addEventListener("mousedown", function(e) {
+    e.stopPropagation();
+  });
+
+  const closeDialog = () => {
+    wrapper.style.opacity = 0;
+    wrapper.style.pointerEvents = "none";
+
+    setTimeout(() => {
+      wrapper.style.display = "none";
+      dialog.style.width = "400px";
+      dialog.style.height = "160px";
+      dialog.style.top = "calc(50% - 80px)";
+    }, 250);
+  };
+
+  wrapper.addEventListener("mousedown", function() {
+    onCancel(color);
+    closeDialog();
+  });
+  // https://vanilla-picker.js.org/gen/Picker.html
+  new Picker({
+    alpha: false,
+    color,
+    parent: dialog,
+    popup: false,
+    onChange,
+    onDone: function(color) {
+      onDone(color);
+      closeDialog();
+    },
+    ...pickerOptions
+  });
+  const pickerWrapper = $$(".picker_wrapper")[0];
+  pickerWrapper.style.alignSelf = "center";
+  pickerWrapper.style.margin = "1px";
+  pickerWrapper.style.backgroundColor = "rgb(0,0,0,0)";
+  pickerWrapper.style.boxShadow = "none";
 }
 
 //

@@ -66,6 +66,7 @@
     "version": "node -p \"require('./package.json').version\""
   },
   "dependencies": {
+    "animejs": "^3.0.1",
     "async": "^2.6.1",
     "chart.js": "^2.8.0",
     "conf": "^2.2.0",
@@ -81,17 +82,15 @@
     "google-protobuf": "^3.7.1",
     "gunzip-file": "^0.1.1",
     "howler": "^2.1.2",
-    "jquery": "^3.4.1",
-    "jquery.easing": "^1.4.1",
     "js-sha1": "^0.6.0",
     "lodash": "^4.17.11",
     "mathjs": "^5.9.0",
     "npm": "^6.9.0",
     "qs": "^6.7.0",
     "queue": "^4.5.1",
-    "spectrum-colorpicker": "^1.8.0",
     "striptags": "^3.1.1",
-    "time-elements": "^2.0.0"
+    "time-elements": "^2.0.0",
+    "vanilla-picker": "^2.8.1"
   },
   "devDependencies": {
     "acorn": "^6.1.1",

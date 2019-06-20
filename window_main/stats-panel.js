@@ -1,5 +1,5 @@
 const { MANA, RANKS } = require("../shared/constants");
-const { createDivision } = require("../shared/dom-fns");
+const { createDiv } = require("../shared/dom-fns");
 const { get_rank_index, toDDHHMMSS, toMMSS } = require("../shared/util");
 
 const {
@@ -23,7 +23,7 @@ class StatsPanel {
     this.showCharts = showCharts;
     this.rankedStats = rankedStats;
     this.isLimited = isLimited;
-    this.container = createDivision([this.prefixId + "_winrate"]);
+    this.container = createDiv([this.prefixId + "_winrate"]);
     this.handleResize = this.handleResize.bind(this);
     this.handleResize(width);
     return this;
@@ -49,14 +49,14 @@ class StatsPanel {
 
   doRender() {
     // Overall winrate
-    const winrateContainer = createDivision([]);
+    const winrateContainer = createDiv([]);
     winrateContainer.style.display = "flex";
     winrateContainer.style.justifyContent = "space-between";
-    const winrateLabel = createDivision(["list_deck_winrate"], "Overall:");
+    const winrateLabel = createDiv(["list_deck_winrate"], "Overall:");
     winrateLabel.style.margin = "0 auto 0 0";
     winrateContainer.appendChild(winrateLabel);
     const wrString = StatsPanel.getWinrateString(this.data.stats);
-    const winrateDiv = createDivision(
+    const winrateDiv = createDiv(
       ["list_deck_winrate"],
       `${this.data.stats.wins}:${this.data.stats.losses} (${wrString})`
     );
@@ -68,18 +68,15 @@ class StatsPanel {
     if (this.rankedStats) this.renderRanked();
 
     // On the play Winrate
-    const playDrawContainer = createDivision([]);
+    const playDrawContainer = createDiv([]);
     playDrawContainer.style.display = "flex";
     playDrawContainer.style.justifyContent = "space-between";
-    const playDrawRateLabel = createDivision(
-      ["list_deck_winrate"],
-      "Play/Draw:"
-    );
+    const playDrawRateLabel = createDiv(["list_deck_winrate"], "Play/Draw:");
     playDrawRateLabel.style.margin = "0 auto 0 0";
     playDrawContainer.appendChild(playDrawRateLabel);
     const playWrString = StatsPanel.getWinrateString(this.data.playStats);
     const drawWrString = StatsPanel.getWinrateString(this.data.drawStats);
-    const playDrawRateDiv = createDivision(
+    const playDrawRateDiv = createDiv(
       ["list_deck_winrate"],
       `${playWrString}/${drawWrString}`
     );
@@ -87,13 +84,13 @@ class StatsPanel {
     playDrawContainer.appendChild(playDrawRateDiv);
     this.container.appendChild(playDrawContainer);
 
-    const matchTimeContainer = createDivision();
+    const matchTimeContainer = createDiv();
     matchTimeContainer.style.display = "flex";
     matchTimeContainer.style.justifyContent = "space-between";
-    const timeLabel = createDivision(["list_match_time"], "Duration:");
+    const timeLabel = createDiv(["list_match_time"], "Duration:");
     timeLabel.style.margin = "0 auto 0 0";
     matchTimeContainer.appendChild(timeLabel);
-    const timeDiv = createDivision(
+    const timeDiv = createDiv(
       ["list_match_time"],
       toMMSS(this.data.stats.duration)
     );
@@ -111,21 +108,21 @@ class StatsPanel {
       const stats = this.rankedStats[rank.toLowerCase()];
       if (!stats || !stats.total) return;
 
-      const winrateContainer = createDivision([]);
+      const winrateContainer = createDiv([]);
       winrateContainer.style.display = "flex";
       winrateContainer.style.justifyContent = "space-between";
       winrateContainer.style.alignItems = "center";
       const rankClass = this.isLimited
         ? "top_limited_rank"
         : "top_constructed_rank";
-      const rankBadge = createDivision([rankClass]);
+      const rankBadge = createDiv([rankClass]);
       rankBadge.style.margin = "0 auto 0 0";
       rankBadge.title = rank;
       rankBadge.style.backgroundPosition = `${get_rank_index(rank, 1) *
         -48}px 0px`;
       winrateContainer.appendChild(rankBadge);
       const wrString = StatsPanel.getWinrateString(stats);
-      const winrateDiv = createDivision(
+      const winrateDiv = createDiv(
         ["list_deck_winrate"],
         `${stats.wins}:${stats.losses} (${wrString})`
       );
@@ -158,7 +155,7 @@ class StatsPanel {
     colorsWinrates.sort(compareWinrates);
 
     if (curveMaxTags || curveMax) {
-      const chartTitle = createDivision(["ranks_history_title"]);
+      const chartTitle = createDiv(["ranks_history_title"]);
       chartTitle.innerHTML = "Frequent Matchups";
       chartTitle.style.marginTop = "24px";
       this.container.appendChild(chartTitle);
@@ -167,21 +164,21 @@ class StatsPanel {
     const getStyleHeight = frac => Math.round(frac * 100) + "%";
 
     const appendChart = (winrates, _curveMax, showTags) => {
-      const curve = createDivision(["mana_curve"]);
-      const numbers = createDivision(["mana_curve_costs"]);
+      const curve = createDiv(["mana_curve"]);
+      const numbers = createDiv(["mana_curve_costs"]);
 
       winrates.forEach(cwr => {
-        const winCol = createDivision(["mana_curve_column", "back_green"]);
+        const winCol = createDiv(["mana_curve_column", "back_green"]);
         winCol.style.height = getStyleHeight(cwr.wins / _curveMax);
         winCol.title = `${cwr.wins} matches won`;
         curve.appendChild(winCol);
 
-        const lossCol = createDivision(["mana_curve_column", "back_red"]);
+        const lossCol = createDiv(["mana_curve_column", "back_red"]);
         lossCol.style.height = getStyleHeight(cwr.losses / _curveMax);
         lossCol.title = `${cwr.losses} matches lost`;
         curve.appendChild(lossCol);
 
-        const curveNumber = createDivision(["mana_curve_column_number"]);
+        const curveNumber = createDiv(["mana_curve_column_number"]);
         let winRate = 0;
         if (cwr.wins) {
           winRate = cwr.wins / (cwr.wins + cwr.losses);
@@ -195,13 +192,13 @@ class StatsPanel {
         } matches lost`;
 
         if (showTags) {
-          const curveTag = createDivision(["mana_curve_tag"], cwr.tag);
+          const curveTag = createDiv(["mana_curve_tag"], cwr.tag);
           curveTag.style.backgroundColor = getTagColor(cwr.tag);
           curveNumber.appendChild(curveTag);
         }
 
         cwr.colors.forEach(color => {
-          const tagColor = createDivision(["mana_s16", "mana_" + MANA[color]]);
+          const tagColor = createDiv(["mana_s16", "mana_" + MANA[color]]);
           tagColor.style.margin = "margin: 0 auto !important";
           curveNumber.appendChild(tagColor);
         });

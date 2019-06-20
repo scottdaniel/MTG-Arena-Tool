@@ -1,4 +1,4 @@
-const { createDivision } = require("../shared/dom-fns");
+const { createDiv } = require("../shared/dom-fns");
 
 const {
   setLocalState,
@@ -17,28 +17,30 @@ class DataScroller {
   }
 
   render(loadMore, scrollTop) {
-    const d = createDivision(["list_fill"]);
+    const d = createDiv(["list_fill"]);
     this.container.appendChild(d);
     this.loaded = 0;
     this.dataIndex = 0;
 
     this.renderRows(loadMore || this.loadAmount);
 
-    const jCont = $(this.container);
     if (scrollTop) {
-      jCont.scrollTop(scrollTop);
+      this.container.scrollTop = scrollTop;
     }
-    jCont.off();
-    jCont.on("scroll", () => {
+    const handler = () => {
       const newLs = {};
-      const desiredHeight = Math.round(jCont.scrollTop() + jCont.innerHeight());
-      if (desiredHeight >= jCont[0].scrollHeight) {
+      const desiredHeight = Math.round(
+        this.container.scrollTop + this.container.offsetHeight
+      );
+      if (desiredHeight >= this.container.scrollHeight) {
         this.renderRows(this.loadAmount);
         newLs.lastDataIndex = this.dataIndex;
       }
-      newLs.lastScrollTop = jCont.scrollTop();
+      newLs.lastScrollTop = this.container.scrollTop;
       setLocalState(newLs);
-    });
+    };
+    this.container.addEventListener("scroll", handler);
+    setLocalState({ lastScrollHandler: handler });
   }
 
   renderRows(loadMore) {

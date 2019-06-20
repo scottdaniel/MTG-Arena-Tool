@@ -1,3 +1,4 @@
+const anime = require("animejs");
 const { remote, shell } = require("electron");
 const Menu = remote.Menu;
 const MenuItem = remote.MenuItem;
@@ -5,7 +6,7 @@ const MenuItem = remote.MenuItem;
 const { COLORS_BRIEF, CARD_RARITIES } = require("../shared/constants");
 const db = require("../shared/database");
 const pd = require("../shared/player-data");
-const { queryElements: $$, createDivision } = require("../shared/dom-fns");
+const { queryElements: $$, createDiv } = require("../shared/dom-fns");
 const { createSelect } = require("../shared/select");
 const { addCardHover, attachOwnerhipStars } = require("../shared/card-hover");
 const {
@@ -19,7 +20,8 @@ const {
 const {
   hideLoadingBars,
   changeBackground,
-  ipcSend
+  ipcSend,
+  resetMainContainer
 } = require("./renderer-util");
 
 let collectionPage = 0;
@@ -227,23 +229,21 @@ function openCollectionTab() {
   mainDiv = document.getElementById("ux_1");
   mainDiv.innerHTML = "";
   mainDiv.classList.remove("flex_item");
-  mainDiv = document.getElementById("ux_0");
-  mainDiv.innerHTML = "";
-  mainDiv.classList.remove("flex_item");
+  mainDiv = resetMainContainer();
 
-  let div = createDivision(["inventory"]);
+  let div = createDiv(["inventory"]);
 
-  let basicFilters = createDivision(["inventory_filters_basic"]);
+  let basicFilters = createDiv(["inventory_filters_basic"]);
 
-  let fll = createDivision(["inventory_flex_half"]);
-  let flr = createDivision(["inventory_flex_half"]);
+  let fll = createDiv(["inventory_flex_half"]);
+  let flr = createDiv(["inventory_flex_half"]);
 
-  let fllt = createDivision(["inventory_flex"]);
-  let fllb = createDivision(["inventory_flex"]);
-  let flrt = createDivision(["inventory_flex"]);
-  let flrb = createDivision(["inventory_flex"]);
+  let fllt = createDiv(["inventory_flex"]);
+  let fllb = createDiv(["inventory_flex"]);
+  let flrt = createDiv(["inventory_flex"]);
+  let flrb = createDiv(["inventory_flex"]);
 
-  let icd = createDivision(["input_container_inventory"]);
+  let icd = createDiv(["input_container_inventory"]);
 
   let label = document.createElement("label");
   label.style.display = "table";
@@ -264,10 +264,10 @@ function openCollectionTab() {
     }
   });
 
-  let searchButton = createDivision(["button_simple", "button_thin"], "Search");
+  let searchButton = createDiv(["button_simple", "button_thin"], "Search");
   flrt.appendChild(searchButton);
 
-  let advancedButton = createDivision(
+  let advancedButton = createDiv(
     ["button_simple", "button_thin"],
     "Advanced Filters"
   );
@@ -293,19 +293,13 @@ function openCollectionTab() {
     "query_select"
   );
 
-  let exp = createDivision(
-    ["button_simple", "button_thin"],
-    "Export Collection"
-  );
+  let exp = createDiv(["button_simple", "button_thin"], "Export Collection");
   fllb.appendChild(exp);
 
-  let reset = createDivision(["button_simple", "button_thin"], "Reset");
+  let reset = createDiv(["button_simple", "button_thin"], "Reset");
   flrb.appendChild(reset);
 
-  let stats = createDivision(
-    ["button_simple", "button_thin"],
-    "Collection Stats"
-  );
+  let stats = createDiv(["button_simple", "button_thin"], "Collection Stats");
   flrb.appendChild(stats);
 
   exp.addEventListener("click", () => {
@@ -328,11 +322,11 @@ function openCollectionTab() {
   basicFilters.appendChild(flr);
 
   // "ADVANCED" FILTERS
-  let filters = createDivision(["inventory_filters"]);
+  let filters = createDiv(["inventory_filters"]);
 
-  let flex = createDivision(["inventory_flex_half"]);
+  let flex = createDiv(["inventory_flex_half"]);
 
-  icd = createDivision(["input_container_inventory"]);
+  icd = createDiv(["input_container_inventory"]);
   icd.style.paddingBottom = "8px";
 
   // Type line input
@@ -350,10 +344,10 @@ function openCollectionTab() {
   flex.appendChild(icd);
   filters.appendChild(flex);
 
-  let sets = createDivision(["sets_container"]);
+  let sets = createDiv(["sets_container"]);
 
   orderedSets.forEach(set => {
-    let setbutton = createDivision(["set_filter", "set_filter_on"]);
+    let setbutton = createDiv(["set_filter", "set_filter_on"]);
     setbutton.style.backgroundImage = `url(../images/sets/${
       db.sets[set].code
     }.png)`;
@@ -373,11 +367,11 @@ function openCollectionTab() {
   });
   filters.appendChild(sets);
 
-  let manas = createDivision(["sets_container"]);
+  let manas = createDiv(["sets_container"]);
   let ms = ["w", "u", "b", "r", "g"];
   ms.forEach(function(s, i) {
     let mi = [1, 2, 3, 4, 5];
-    let manabutton = createDivision(["mana_filter_search", "mana_filter_on"]);
+    let manabutton = createDiv(["mana_filter_search", "mana_filter_on"]);
     manabutton.style.backgroundImage = `url(../images/${s}64.png)`;
 
     manas.appendChild(manabutton);
@@ -394,8 +388,8 @@ function openCollectionTab() {
   });
   filters.appendChild(manas);
 
-  let main_but_cont = createDivision(["main_buttons_container"]);
-  let cont = createDivision(["buttons_container"]);
+  let main_but_cont = createDiv(["main_buttons_container"]);
+  let cont = createDiv(["buttons_container"]);
 
   addCheckboxSearch(
     cont,
@@ -424,7 +418,7 @@ function openCollectionTab() {
   addCheckboxSearch(cont, "Exclude unselected colors", "query_exclude", false);
   main_but_cont.appendChild(cont);
 
-  cont = createDivision(["buttons_container"]);
+  cont = createDiv(["buttons_container"]);
   addCheckboxSearch(
     cont,
     '<div class="wc_common wc_search_icon"></div>Common',
@@ -451,8 +445,8 @@ function openCollectionTab() {
   );
   main_but_cont.appendChild(cont);
 
-  cont = createDivision(["buttons_container"]);
-  icd = createDivision(["input_container_inventory", "auto_width"]);
+  cont = createDiv(["buttons_container"]);
+  icd = createDiv(["input_container_inventory", "auto_width"]);
 
   label = document.createElement("label");
   label.style.display = "table";
@@ -487,7 +481,7 @@ function openCollectionTab() {
   main_but_cont.appendChild(cont);
   filters.appendChild(main_but_cont);
 
-  searchButton = createDivision(["button_simple", "button_thin"], "Search");
+  searchButton = createDiv(["button_simple", "button_thin"], "Search");
   searchButton.style.margin = "24px auto";
   filters.appendChild(searchButton);
 
@@ -601,28 +595,33 @@ function exportCollection() {
 
 //
 function printStats() {
-  $(".moving_ux").animate({ left: "-100%" }, 250, "easeInOutCubic");
+  anime({
+    targets: ".moving_ux",
+    left: "-100%",
+    easing: "easeInOutCubic",
+    duration: 350
+  });
   let mainDiv = document.getElementById("ux_1");
   mainDiv.innerHTML = "";
   mainDiv.classList.remove("flex_item");
   const stats = get_collection_stats();
 
-  let top = createDivision(["decklist_top"]);
-  top.appendChild(createDivision(["button", "back"]));
-  top.appendChild(createDivision(["deck_name"], "Collection Statistics"));
-  top.appendChild(createDivision(["deck_top_colors"]));
+  let top = createDiv(["decklist_top"]);
+  top.appendChild(createDiv(["button", "back"]));
+  top.appendChild(createDiv(["deck_name"], "Collection Statistics"));
+  top.appendChild(createDiv(["deck_top_colors"]));
 
   //changeBackground("", 67574);
 
-  const flex = createDivision(["flex_item"]);
-  const mainstats = createDivision(["main_stats"]);
+  const flex = createDiv(["flex_item"]);
+  const mainstats = createDiv(["main_stats"]);
 
   let completionLabel = document.createElement("label");
   completionLabel.innerHTML = "Sets Completion";
   mainstats.appendChild(completionLabel);
 
   // Counting Mode Selector
-  const countModeDiv = createDivision(["stats_count_div"]);
+  const countModeDiv = createDiv(["stats_count_div"]);
   const countModeSelect = createSelect(
     countModeDiv,
     [ALL_CARDS, SINGLETONS, FULL_SETS],
@@ -650,7 +649,7 @@ function printStats() {
       mainstats.appendChild(rs);
     });
 
-  const substats = createDivision(["main_stats", "sub_stats"]);
+  const substats = createDiv(["main_stats", "sub_stats"]);
 
   flex.appendChild(mainstats);
   flex.appendChild(substats);
@@ -661,7 +660,12 @@ function printStats() {
   //
   $$(".back")[0].addEventListener("click", () => {
     changeBackground("default");
-    $(".moving_ux").animate({ left: "0px" }, 250, "easeInOutCubic");
+    anime({
+      targets: ".moving_ux",
+      left: 0,
+      easing: "easeInOutCubic",
+      duration: 350
+    });
   });
 }
 
@@ -728,11 +732,8 @@ function renderSetStats(setStats, setIconCode, setName) {
         (chanceBoosterHasRare * setStats["rare"].uniqueWanted) /
         possibleRares
       ).toLocaleString([], { style: "percent", maximumSignificantDigits: 2 });
-      let rareWantedDiv = createDivision(["stats_set_completion"]);
-      let rareWantedIcon = createDivision([
-        "stats_set_icon",
-        "bo_explore_cost"
-      ]);
+      let rareWantedDiv = createDiv(["stats_set_completion"]);
+      let rareWantedIcon = createDiv(["stats_set_icon", "bo_explore_cost"]);
       rareWantedIcon.style.height = "30px";
       let rareWantedSpan = document.createElement("span");
       rareWantedSpan.innerHTML = `<i>~${chanceBoosterRareWanted} chance next booster has ${wantedText} rare.</i>`;
@@ -748,11 +749,8 @@ function renderSetStats(setStats, setIconCode, setName) {
         (chanceBoosterHasMythic * setStats["mythic"].uniqueWanted) /
         possibleMythics
       ).toLocaleString([], { style: "percent", maximumSignificantDigits: 2 });
-      let mythicWantedDiv = createDivision(["stats_set_completion"]);
-      let mythicWantedIcon = createDivision([
-        "stats_set_icon",
-        "bo_explore_cost"
-      ]);
+      let mythicWantedDiv = createDiv(["stats_set_completion"]);
+      let mythicWantedIcon = createDiv(["stats_set_icon", "bo_explore_cost"]);
       mythicWantedIcon.style.height = "30px";
       let mythicWantedSpan = document.createElement("span");
       mythicWantedSpan.innerHTML = `<i>~${chanceBoosterMythicWanted} chance next booster has ${wantedText} mythic.</i>`;
@@ -786,17 +784,17 @@ function renderCompletionDiv(countStats, image, title) {
   }
   const completionRatio = numerator / denominator;
 
-  const completionDiv = createDivision(["stats_set_completion"]);
+  const completionDiv = createDiv(["stats_set_completion"]);
 
-  let setIcon = createDivision(["stats_set_icon"]);
+  let setIcon = createDiv(["stats_set_icon"]);
   setIcon.style.backgroundImage = `url(../images/${image})`;
   let setIconSpan = document.createElement("span");
   setIconSpan.innerHTML = title;
   setIcon.appendChild(setIconSpan);
   completionDiv.appendChild(setIcon);
 
-  const wrapperDiv = createDivision([]);
-  const detailsDiv = createDivision(["stats_set_details"]);
+  const wrapperDiv = createDiv([]);
+  const detailsDiv = createDiv(["stats_set_details"]);
 
   const percentSpan = document.createElement("span");
   percentSpan.innerHTML = completionRatio.toLocaleString([], {
@@ -818,7 +816,7 @@ function renderCompletionDiv(countStats, image, title) {
   wrapperDiv.appendChild(detailsDiv);
   completionDiv.appendChild(wrapperDiv);
 
-  let setBar = createDivision(["stats_set_bar"]);
+  let setBar = createDiv(["stats_set_bar"]);
   setBar.style.width = Math.round(completionRatio * 100) + "%";
 
   completionDiv.appendChild(setBar);
@@ -843,7 +841,7 @@ function printCards() {
   div = $$(".inventory")[0];
   div.innerHTML = "";
 
-  let paging = createDivision(["paging_container"]);
+  let paging = createDiv(["paging_container"]);
   div.appendChild(paging);
 
   let filterName = document.getElementById("query_name").value.toLowerCase();
@@ -1011,7 +1009,7 @@ function printCards() {
       continue;
     }
 
-    const cardDiv = createDivision(["inventory_card"]);
+    const cardDiv = createDiv(["inventory_card"]);
     cardDiv.style.width = pd.cardsSize + "px";
     attachOwnerhipStars(card, cardDiv);
 
@@ -1041,14 +1039,14 @@ function printCards() {
     div.appendChild(cardDiv);
   }
 
-  let paging_bottom = createDivision(["paging_container"]);
+  let paging_bottom = createDiv(["paging_container"]);
   div.appendChild(paging_bottom);
   let but, butClone;
   if (collectionPage <= 0) {
-    but = createDivision(["paging_button_disabled"], " < ");
+    but = createDiv(["paging_button_disabled"], " < ");
     butClone = but.cloneNode(true);
   } else {
-    but = createDivision(["paging_button"], " < ");
+    but = createDiv(["paging_button"], " < ");
 
     but.addEventListener("click", () => {
       printCollectionPage(collectionPage - 1);
@@ -1064,7 +1062,7 @@ function printCards() {
 
   let totalPages = Math.ceil(totalCards / 100);
   for (let n = 0; n < totalPages; n++) {
-    but = createDivision(["paging_button"], n + 1);
+    but = createDiv(["paging_button"], n + 1);
     if (collectionPage == n) {
       but.classList.add("paging_active");
     }
@@ -1082,10 +1080,10 @@ function printCards() {
     paging_bottom.append(butClone);
   }
   if (collectionPage >= totalPages - 1) {
-    but = createDivision(["paging_button_disabled"], " > ");
+    but = createDiv(["paging_button_disabled"], " > ");
     butClone = but.cloneNode(true);
   } else {
-    but = createDivision(["paging_button"], " > ");
+    but = createDiv(["paging_button"], " > ");
     but.addEventListener("click", () => {
       printCollectionPage(collectionPage + 1);
     });

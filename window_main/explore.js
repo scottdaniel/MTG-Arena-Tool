@@ -1,4 +1,5 @@
 const _ = require("lodash");
+const anime = require("animejs");
 
 const {
   CARD_RARITIES,
@@ -9,7 +10,7 @@ const {
   RANKS_SORT
 } = require("../shared/constants");
 const db = require("../shared/database");
-const { queryElements: $$, createDivision } = require("../shared/dom-fns");
+const { queryElements: $$, createDiv } = require("../shared/dom-fns");
 const { createSelect } = require("../shared/select");
 const {
   getReadableEvent,
@@ -26,6 +27,7 @@ const {
   getWinrateClass,
   hideLoadingBars,
   ipcSend,
+  resetMainContainer,
   setLocalState,
   showLoadingBars
 } = require("./renderer-util");
@@ -68,26 +70,23 @@ function openExploreTab() {
     setLocalState({ exploreData });
   }
 
-  const mainDiv = document.getElementById("ux_0");
+  const mainDiv = resetMainContainer();
   let d;
-
-  mainDiv.classList.remove("flex_item");
-  mainDiv.innerHTML = "";
 
   let divFill = document.createElement("div");
   divFill.classList.add("list_fill");
   mainDiv.appendChild(divFill);
 
-  let exploreFiltersContainer = createDivision(["explore_buttons_container"]);
-  let exploreFiltersSelects = createDivision([
+  let exploreFiltersContainer = createDiv(["explore_buttons_container"]);
+  let exploreFiltersSelects = createDiv([
     "explore_buttons_row",
     "explore_buttons_top"
   ]);
-  let exploreFiltersButtons = createDivision([
+  let exploreFiltersButtons = createDiv([
     "explore_buttons_row",
     "explore_buttons_middle"
   ]);
-  let exploreFiltersInputs = createDivision([
+  let exploreFiltersInputs = createDiv([
     "explore_buttons_row",
     "explore_buttons_bottom"
   ]);
@@ -96,7 +95,7 @@ function openExploreTab() {
   exploreFiltersContainer.appendChild(exploreFiltersInputs);
   mainDiv.appendChild(exploreFiltersContainer);
 
-  let exploreList = createDivision(["explore_list"]);
+  let exploreList = createDiv(["explore_list"]);
   exploreList.id = "explore_list";
   mainDiv.appendChild(exploreList);
 
@@ -120,8 +119,7 @@ function openExploreTab() {
     queryExplore();
   }
 
-  $(mainDiv).off();
-  $(mainDiv).on("scroll", () => {
+  const handler = () => {
     const { exploreData } = getLocalState();
     // do not spam server after reaching end of results
     if (exploreData.results_terminated) return;
@@ -131,7 +129,9 @@ function openExploreTab() {
     ) {
       queryExplore();
     }
-  });
+  };
+  mainDiv.addEventListener("scroll", handler);
+  setLocalState({ lastScrollHandler: handler });
 }
 
 function getEventPrettyName(event) {
@@ -259,15 +259,15 @@ function drawFilters() {
    *  Only owned filter
    **/
   let lab = addCheckbox(
-    $(buttonsMiddle),
+    buttonsMiddle,
     "Only owned",
     "settings_owned",
     onlyOwned,
     () => null
   );
-  lab.css("align-self", "center");
-  lab.css("margin-left", "0px");
-  lab.css("margin-right", "32px");
+  lab.style.alignSelf = "center";
+  lab.style.marginLeft = 0;
+  lab.style.marginRight = "32px";
 
   /**
    * Wildcards filters
@@ -297,69 +297,65 @@ function drawFilters() {
   /**
    *  Mana filter
    **/
-  var manas = $('<div class="mana_filters_explore"></div>');
+  const manas = createDiv(["mana_filters_explore"]);
   COLORS_BRIEF.forEach(function(s, i) {
-    var mi = [1, 2, 3, 4, 5];
-    var mf = "";
+    const mi = [1, 2, 3, 4, 5];
+    let mf = "";
     if (!inputMana.includes(mi[i])) {
       mf = "mana_filter_on";
     }
-    var manabutton = $(
-      `<div class="mana_filter ${mf}" style="background-image: url(../images/${s}20.png)"></div>`
-    );
-    manabutton.appendTo(manas);
-    manabutton.click(function() {
-      if (manabutton.hasClass("mana_filter_on")) {
-        manabutton.removeClass("mana_filter_on");
+    const manabutton = createDiv(["mana_filter", mf]);
+    manabutton.style.backgroundImage = "url(../images/" + s + "20.png)";
+    manabutton.addEventListener("click", function() {
+      if ([...manabutton.classList].includes("mana_filter_on")) {
+        manabutton.classList.remove("mana_filter_on");
         inputMana.push(mi[i]);
       } else {
-        manabutton.addClass("mana_filter_on");
+        manabutton.classList.add("mana_filter_on");
         let n = inputMana.indexOf(mi[i]);
         if (n > -1) {
           inputMana.splice(n, 1);
         }
       }
     });
+    manas.appendChild(manabutton);
   });
-  manas.appendTo(buttonsBottom);
+  buttonsBottom.appendChild(manas);
 
   /**
    *  Rank filter
    **/
   if (inputFilterType !== "Events") {
-    var ranks_filters = $('<div class="mana_filters_explore"></div>');
+    const ranks_filters = createDiv(["mana_filters_explore"]);
     RANKS.forEach(function(rr, index) {
-      var mf = "";
+      let mf = "";
       if (!inputRanks.includes(rr)) {
         mf = "rank_filter_on";
       }
-      var rankbutton = $(
-        `<div title="${rr}" class="rank_filter ${mf}" style="background-position: ${(index +
-          1) *
-          -16}px 0px; background-image: url(../images/ranks_16.png)"></div>`
-      );
-
-      rankbutton.appendTo(ranks_filters);
-      rankbutton.click(function() {
-        if (rankbutton.hasClass("rank_filter_on")) {
-          rankbutton.removeClass("rank_filter_on");
+      const rankbutton = createDiv(["rank_filter", mf], "", { title: rr });
+      rankbutton.style.backgroundPosition = (index + 1) * -16 + "px 0px";
+      rankbutton.style.backgroundImage = "url(../images/ranks_16.png)";
+      rankbutton.addEventListener("click", function() {
+        if ([...rankbutton.classList].includes("rank_filter_on")) {
+          rankbutton.classList.remove("rank_filter_on");
           inputRanks.push(rr);
         } else {
-          rankbutton.addClass("rank_filter_on");
+          rankbutton.classList.add("rank_filter_on");
           let n = inputRanks.indexOf(rr);
           if (n > -1) {
             inputRanks.splice(n, 1);
           }
         }
       });
+      ranks_filters.appendChild(rankbutton);
     });
-    ranks_filters.appendTo(buttonsBottom);
+    buttonsBottom.appendChild(ranks_filters);
   }
 
   /**
    * Search button.
    **/
-  let searchButton = createDivision(["button_simple"], "Search");
+  let searchButton = createDiv(["button_simple"], "Search");
   searchButton.id = "explore_query_button";
   searchButton.margin = "0px !important;";
   buttonsBottom.appendChild(searchButton);
@@ -409,12 +405,9 @@ function handleNewSearch() {
 
 //
 function wildcardsInput(_class, _id, _default) {
-  let inputContainer = createDivision([
-    "input_container_explore",
-    "auto_width"
-  ]);
+  let inputContainer = createDiv(["input_container_explore", "auto_width"]);
 
-  let label = createDivision([_class, "wc_search_icon"]);
+  let label = createDiv([_class, "wc_search_icon"]);
   label.style.display = "table";
   label.style.justifySelf = "center";
   label.style.marginRight = "0px";
@@ -444,7 +437,7 @@ function queryExplore() {
   const exploreList = document.getElementById("explore_list");
   let loadMessage = document.getElementById("explore_load_message");
   if (!loadMessage) {
-    loadMessage = createDivision(["text_centered", "white"], "Loading...");
+    loadMessage = createDiv(["text_centered", "white"], "Loading...");
     loadMessage.id = "explore_load_message";
     exploreList.appendChild(loadMessage);
   }
@@ -553,7 +546,7 @@ function deckLoad(_deck, index) {
   var mainDiv = document.getElementById("explore_list");
   index = "result_" + index;
 
-  var flcf = createDivision(["flex_item"]);
+  var flcf = createDiv(["flex_item"]);
   flcf.style.width = "20%";
   flcf.style.justifyContent = "center";
 
@@ -563,10 +556,7 @@ function deckLoad(_deck, index) {
   CARD_RARITIES.forEach(rarity => {
     const key = rarity[0];
     if (_deck.wildcards.hasOwnProperty(key) && _deck.wildcards[key] > 0) {
-      wc = createDivision(
-        ["wc_explore_cost", "wc_" + rarity],
-        _deck.wildcards[key]
-      );
+      wc = createDiv(["wc_explore_cost", "wc_" + rarity], _deck.wildcards[key]);
       wc.title = _.capitalize(rarity) + " wildcards needed.";
       flcf.appendChild(wc);
       n++;
@@ -574,10 +564,10 @@ function deckLoad(_deck, index) {
   });
 
   if (n == 0) {
-    wc = createDivision(["wc_complete"]);
+    wc = createDiv(["wc_complete"]);
     flcf.appendChild(wc);
   } else {
-    let bo = createDivision(["bo_explore_cost"], Math.round(boosterCost));
+    let bo = createDiv(["bo_explore_cost"], Math.round(boosterCost));
     bo.title = "Boosters needed (estimated)";
     flcf.appendChild(bo);
   }
@@ -597,37 +587,37 @@ function deckLoad(_deck, index) {
     tileGrpid = DEFAULT_TILE;
   }
 
-  var tile = createDivision([index + "t", "deck_tile"]);
+  var tile = createDiv([index + "t", "deck_tile"]);
   tile.style.backgroundImage =
     "url(https://img.scryfall.com/cards" +
     db.card(tileGrpid).images["art_crop"] +
     ")";
 
-  var div = createDivision([index, "list_deck"]);
+  var div = createDiv([index, "list_deck"]);
 
-  var fll = createDivision(["flex_item"]);
+  var fll = createDiv(["flex_item"]);
 
-  var flc = createDivision(["flex_item"]);
+  var flc = createDiv(["flex_item"]);
   flc.style.flexDirection = "column";
   flc.style.width = "40%";
 
-  var flr = createDivision(["flex_item"]);
+  var flr = createDiv(["flex_item"]);
   flr.style.flexDirection = "column";
   flr.style.justifyContent = "center";
   flr.style.overflow = "hidden";
   flr.style.width = "40%";
 
-  var flt = createDivision(["flex_top"]);
+  var flt = createDiv(["flex_top"]);
 
-  var flb = createDivision(["flex_bottom"]);
+  var flb = createDiv(["flex_bottom"]);
 
   let d;
-  d = createDivision(["list_deck_name"], _deck.name);
+  d = createDiv(["list_deck_name"], _deck.name);
   flt.appendChild(d);
 
   let pname =
     _deck.player.length > 1 ? `Various (${_deck.player.length})` : _deck.player;
-  d = createDivision(["list_deck_name_it"], "by " + pname);
+  d = createDiv(["list_deck_name_it"], "by " + pname);
   if (pname !== _deck.player) {
     d.style.textDecoration = "underline dotted";
     d.title = _deck.player;
@@ -635,12 +625,12 @@ function deckLoad(_deck, index) {
   flt.appendChild(d);
 
   _deck.colors.forEach(function(color) {
-    let manaIcon = createDivision(["mana_s20", "mana_" + MANA[color]]);
+    let manaIcon = createDiv(["mana_s20", "mana_" + MANA[color]]);
     flb.appendChild(manaIcon);
   });
 
   let colClass = getWinrateClass((1 / _deck.mt) * _deck.mw);
-  d = createDivision(
+  d = createDiv(
     ["list_deck_record"],
     `${_deck.mw}:${_deck.ml} <span class="${colClass}_bright">(${Math.round(
       (100 / _deck.mt) * _deck.mw
@@ -649,17 +639,17 @@ function deckLoad(_deck, index) {
 
   flr.appendChild(d);
 
-  let rcont = createDivision(["flex_item"]);
+  let rcont = createDiv(["flex_item"]);
   rcont.style.marginRight = "16px";
   rcont.style.marginLeft = "auto";
 
-  let eventName = createDivision(["list_deck_name_it"], db.events[_deck.event]);
+  let eventName = createDiv(["list_deck_name_it"], db.events[_deck.event]);
   rcont.appendChild(eventName);
 
   _deck.rank.sort((a, b) => RANKS_SORT[a] - RANKS_SORT[b]);
 
   _deck.rank.forEach(_rank => {
-    let rankIcon = createDivision(["ranks_16"]);
+    let rankIcon = createDiv(["ranks_16"]);
     rankIcon.style.marginTop = "4px";
     rankIcon.style.backgroundPosition =
       get_rank_index_16(_rank) * -16 + "px 0px";
@@ -680,21 +670,26 @@ function deckLoad(_deck, index) {
 
   mainDiv.appendChild(div);
 
-  $("." + index).on("mouseenter", function() {
-    $("." + index + "t").css("opacity", 1);
-    $("." + index + "t").css("width", "200px");
+  div.addEventListener("mouseenter", function() {
+    tile.style.opacity = 1;
+    tile.style.width = "200px";
   });
 
-  $("." + index).on("mouseleave", function() {
-    $("." + index + "t").css("opacity", 0.66);
-    $("." + index + "t").css("width", "128px");
+  div.addEventListener("mouseleave", function() {
+    tile.style.opacity = 0.66;
+    tile.style.width = "128px";
   });
 
-  $("." + index).on("click", function() {
+  div.addEventListener("click", function() {
     _deck.mainDeck = removeDuplicates(_deck.mainDeck).sort(compare_cards);
     _deck.sideboard = removeDuplicates(_deck.sideboard).sort(compare_cards);
     openDeck(_deck, null);
-    $(".moving_ux").animate({ left: "-100%" }, 250, "easeInOutCubic");
+    anime({
+      targets: ".moving_ux",
+      left: "-100%",
+      easing: "easeInOutCubic",
+      duration: 350
+    });
   });
 }
 

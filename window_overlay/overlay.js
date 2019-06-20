@@ -18,7 +18,6 @@ if (!remote.app.isPackaged) {
 const TransparencyMouseFix = require("electron-transparency-mouse-fix");
 const fs = require("fs");
 const striptags = require("striptags");
-const $ = (window.$ = window.jQuery = require("jquery"));
 
 const db = require("../shared/database");
 const pd = require("../shared/player-data");
@@ -31,7 +30,7 @@ const {
   attachOwnerhipStars,
   setRenderer
 } = require("../shared/card-hover");
-const { queryElements: $$, createDivision } = require("../shared/dom-fns");
+const { queryElements: $$, createDiv } = require("../shared/dom-fns");
 
 const {
   DRAFT_RANKS,
@@ -174,15 +173,15 @@ window.setInterval(() => {
 }, 250);
 
 function updateClock() {
-  var hh, mm, ss;
-  if (matchBeginTime == 0) {
+  let hh, mm, ss;
+  if (matchBeginTime === 0) {
     hh = 0;
     mm = 0;
     ss = 0;
-  } else if (clockMode == 0) {
+  } else if (clockMode === 0) {
     let time = priorityTimers[1] / 1000;
-    let now = new Date();
-    if (turnPriority == 1 && time > 0) {
+    const now = new Date();
+    if (turnPriority === 1 && time > 0) {
       time += (now - new Date(priorityTimers[0])) / 1000;
     }
 
@@ -190,10 +189,10 @@ function updateClock() {
     mm = ("0" + mm).slice(-2);
     ss = Math.floor(time % 60);
     ss = ("0" + ss).slice(-2);
-    $(".clock_priority_1").html(mm + ":" + ss);
+    $$(".clock_priority_1")[0].innerHTML = mm + ":" + ss;
 
     time = priorityTimers[2] / 1000;
-    if (turnPriority == 2 && time > 0) {
+    if (turnPriority === 2 && time > 0) {
       time += (now - new Date(priorityTimers[0])) / 1000;
     }
 
@@ -201,54 +200,56 @@ function updateClock() {
     mm = ("0" + mm).slice(-2);
     ss = Math.floor(time % 60);
     ss = ("0" + ss).slice(-2);
-    $(".clock_priority_2").html(mm + ":" + ss);
-  } else if (clockMode == 1) {
-    var diff = Math.floor((Date.now() - matchBeginTime) / 1000);
+    $$(".clock_priority_2")[0].innerHTML = mm + ":" + ss;
+  } else if (clockMode === 1) {
+    const diff = Math.floor((Date.now() - matchBeginTime) / 1000);
     hh = Math.floor(diff / 3600);
     mm = Math.floor((diff % 3600) / 60);
     ss = Math.floor(diff % 60);
     hh = ("0" + hh).slice(-2);
     mm = ("0" + mm).slice(-2);
     ss = ("0" + ss).slice(-2);
-    $(".clock_elapsed").html(hh + ":" + mm + ":" + ss);
-  } else if (clockMode == 2) {
-    $(".clock_elapsed").html(new Date().toLocaleTimeString());
+    $$(".clock_elapsed")[0].innerHTML = hh + ":" + mm + ":" + ss;
+  } else if (clockMode === 2) {
+    $$(".clock_elapsed")[0].innerHTML = new Date().toLocaleTimeString();
   }
 }
 
 function recreateClock() {
-  if (clockMode == 0) {
-    let p1 = $('<div class="clock_priority_1"></div>');
-    let p2 = $('<div class="clock_priority_2"></div>');
+  const clockTurn = $$(".clock_turn")[0];
+  const clockElapsed = $$(".clock_elapsed")[0];
+
+  if (clockMode === 0) {
+    const p1 = createDiv(["clock_priority_1"]);
+    const p2 = createDiv(["clock_priority_2"]);
     let p1name = oppName;
     let p2name = "You";
     if (playerSeat == 1) {
       p1name = "You";
       p2name = oppName;
     }
-    $(".clock_turn").html(
-      `<div class="clock_pname1 ${
-        turnPriority == 1 ? "pname_priority" : ""
-      }">${p1name}</div><div class="clock_pname2 ${
-        turnPriority == 2 ? "pname_priority" : ""
-      }">${p2name}</div>`
-    );
-    $(".clock_elapsed").html("");
-    $(".clock_elapsed").append(p1);
-    $(".clock_elapsed").append(p2);
+    clockTurn.innerHTML = `<div class="clock_pname1 ${
+      turnPriority == 1 ? "pname_priority" : ""
+    }">${p1name}</div><div class="clock_pname2 ${
+      turnPriority == 2 ? "pname_priority" : ""
+    }">${p2name}</div>`;
+
+    clockElapsed.innerHTML = "";
+    clockElapsed.appendChild(p1);
+    clockElapsed.appendChild(p2);
   } else {
-    $(".clock_turn").html("");
-    $(".clock_elapsed").html("");
+    clockTurn.innerHTML = "";
+    clockElapsed.innerHTML = "";
 
     if (turnPriority == playerSeat) {
-      $(".clock_turn").html("You have priority.");
+      clockTurn.innerHTML = "You have priority.";
     } else {
-      $(".clock_turn").html("Opponent has priority.");
+      clockTurn.innerHTML = "Opponent has priority.";
     }
   }
 
-  if (overlayMode == OVERLAY_DRAFT) {
-    $(".clock_turn").html("");
+  if (overlayMode === OVERLAY_DRAFT) {
+    clockTurn.innerHTML = "";
   }
 
   updateClock();
@@ -289,72 +290,56 @@ ipc.on("action_log", function(event, arg) {
 ipc.on("settings_updated", (_event, index) => {
   overlayIndex = index;
   const settings = pd.settings.overlays[overlayIndex];
-
   overlayMode = settings.mode;
-
-  change_background(pd.settings.back_url);
 
   webFrame.setZoomFactor(settings.scale / 100);
 
-  $(".overlay_container").css("opacity", settings.alpha);
-  $(".overlay_wrapper").css("opacity", settings.alpha_back);
+  $$(".overlay_container")[0].style.opacity = settings.alpha;
+  $$(".overlay_wrapper")[0].style.opacity = settings.alpha_back;
   if (settings.alpha_back === 1) {
-    $(".click-through").each(function() {
-      $(this).css("pointer-events", "all");
-    });
-    $(document.body).css("background-color", "rgba(0,0,0,1)");
+    $$(".click-through").forEach(el => (el.style.pointerEvents = "all"));
+    document.body.style.backgroundColor = "rgba(0,0,0,1)";
   } else {
-    $(".click-through").each(function() {
-      $(this).css("pointer-events", "inherit");
-    });
-    $(document.body).css("background-color", "rgba(0,0,0,0)");
+    $$(".click-through").forEach(el => (el.style.pointerEvents = "inherit"));
+    document.body.style.backgroundColor = "rgba(0,0,0,0)";
   }
+  change_background(pd.settings.back_url);
 
-  $(".top").css("display", "");
-  $(".overlay_title").html("Overlay " + (overlayIndex + 1));
-  $(".overlay_deckname").css("display", "");
-  $(".overlay_deckcolors").css("display", "");
-  $(".overlay_decklist").css("display", "");
-  $(".overlay_clock_container").css("display", "");
-  $(".overlay_draft_container").attr("style", "");
-  $(".overlay_deckname").attr("style", "");
-  $(".overlay_deckcolors").attr("style", "");
+  $$(".overlay_title")[0].innerHTML = "Overlay " + (overlayIndex + 1);
+
+  $$(".top")[0].style.display = "";
+  $$(".overlay_deckname")[0].style.display = "";
+  $$(".overlay_deckcolors")[0].style.display = "";
+  $$(".overlay_decklist")[0].style.display = "";
+  $$(".overlay_clock_container")[0].style.display = "";
+
+  $$(".overlay_draft_container")[0].style = "";
+  $$(".overlay_deckname")[0].style = "";
+  $$(".overlay_deckcolors")[0].style = "";
 
   if (overlayMode !== OVERLAY_DRAFT) {
-    $(".overlay_draft_container").hide();
+    $$(".overlay_draft_container")[0].style.display = "none";
   } else {
-    $(".overlay_draft_container").show();
+    $$(".overlay_draft_container")[0].style.display = "";
   }
 
   if (!settings.top) {
-    hideDiv(".top");
+    $$(".top")[0].style.display = "none";
   }
   if (!settings.title) {
-    hideDiv(".overlay_deckname");
-    hideDiv(".overlay_deckcolors");
+    $$(".overlay_deckname")[0].style.display = "none";
+    $$(".overlay_deckcolors")[0].style.display = "none";
   }
   if (!settings.deck) {
-    hideDiv(".overlay_decklist");
+    $$(".overlay_decklist")[0].style.display = "none";
   }
   if (!settings.clock || overlayMode == OVERLAY_DRAFT) {
-    hideDiv(".overlay_clock_container");
+    $$(".overlay_clock_container")[0].style.display = "none";
   }
 
   if (currentMatch) {
     updateView();
   }
-});
-
-function hideDiv(div) {
-  let _style = $(div).attr("style");
-  if (_style == undefined) _style = "";
-  _style += "display: none !important;";
-  $(div).attr("style", _style);
-}
-
-//
-ipc.on("set_hover", function(event, arg) {
-  hoverCard(arg);
 });
 
 //
@@ -365,14 +350,16 @@ ipc.on("set_opponent", function(event, arg) {
   }
   oppName = cleanName || "Opponent";
   recreateClock();
-  $(".top_username").html(oppName);
+  if ($$(".top_username")[0]) {
+    $$(".top_username")[0].innerHTML = oppName;
+  }
 });
 
 //
 ipc.on("set_opponent_rank", function(event, rank, title) {
-  $(".top_rank")
-    .css("background-position", rank * -48 + "px 0px")
-    .attr("title", title);
+  const topRank = $$(".top_rank")[0];
+  topRank.style.backgroundPosition = rank * -48 + "px 0px";
+  topRank.title = title;
 });
 
 ipc.on("set_match", (event, arg) => {
@@ -408,68 +395,64 @@ function updateView() {
   oppName = cleanName || "Opponent";
 
   if (overlayMode !== OVERLAY_DRAFT) {
-    $(".overlay_draft_container").hide();
+    $$(".overlay_draft_container")[0].style.display = "none";
   } else {
-    $(".overlay_draft_container").show();
+    $$(".overlay_draft_container")[0].style.display = "";
   }
 
-  var doscroll = false;
-  if (
+  const container = $$(".overlay_decklist")[0];
+  const doscroll =
     Math.round(
-      $(".overlay_decklist")[0].scrollHeight - $(".overlay_decklist").height()
-    ) -
-      Math.round($(".overlay_decklist").scrollTop()) <
-    32
-  ) {
-    doscroll = true;
-  }
+      container.scrollHeight - container.offsetHeight - container.scrollTop
+    ) < 32;
 
-  $(".overlay_archetype").remove();
-  $(".overlay_draft_container").hide();
-  $(".overlay_decklist").html("");
-  $(".overlay_deckcolors").html("");
+  if ($$(".overlay_archetype")[0]) {
+    $$(".overlay_archetype")[0].remove();
+  }
+  $$(".overlay_draft_container")[0].style.display = "none";
+  $$(".overlay_decklist")[0].innerHTML = "";
+  $$(".overlay_deckcolors")[0].innerHTML = "";
 
   let deckListDiv;
 
   //
   // Action Log Mode
   //
-  deckListDiv = $(".overlay_decklist");
+  deckListDiv = $$(".overlay_decklist")[0];
   if (overlayMode == OVERLAY_LOG) {
-    $(".overlay_deckname").html("Action Log");
+    $$(".overlay_deckname")[0].innerHTML = "Action Log";
 
     let initalTime = actionLog[0] ? new Date(actionLog[0].time) : new Date();
     actionLog.forEach(log => {
-      var _date = new Date(log.time);
-      var hh = ("0" + _date.getHours()).slice(-2);
-      var mm = ("0" + _date.getMinutes()).slice(-2);
-      var ss = ("0" + _date.getSeconds()).slice(-2);
+      const _date = new Date(log.time);
+      const hh = ("0" + _date.getHours()).slice(-2);
+      const mm = ("0" + _date.getMinutes()).slice(-2);
+      const ss = ("0" + _date.getSeconds()).slice(-2);
+      const secondsPast = Math.round((_date - initalTime) / 1000);
 
-      let secondsPast = Math.round((_date - initalTime) / 1000);
+      const box = createDiv(["actionlog", "log_p" + log.seat]);
+      const time = createDiv(["actionlog_time"], secondsPast + "s", {
+        title: `${hh}:${mm}:${ss}`
+      });
+      const str = createDiv(["actionlog_text"], log.str);
 
-      var box = $('<div class="actionlog log_p' + log.seat + '"></div>');
-      var time = $(
-        `<div title="${hh}:${mm}:${ss}" class="actionlog_time">${secondsPast}s</div>`
-      );
-      var str = $('<div class="actionlog_text">' + log.str + "</div>");
-
-      box.append(time);
-      box.append(str);
-      deckListDiv.append(box);
+      box.appendChild(time);
+      box.appendChild(str);
+      deckListDiv.appendChild(box);
     });
 
     if (doscroll) {
-      deckListDiv.scrollTop(deckListDiv[0].scrollHeight);
+      deckListDiv.scrollTop = deckListDiv.scrollHeight;
     }
 
     $$("log-card").forEach(obj => {
-      let grpId = obj.getAttribute("id");
+      const grpId = obj.getAttribute("id");
       addCardHover(obj, db.card(grpId));
     });
 
     $$("log-ability").forEach(obj => {
-      let grpId = obj.getAttribute("id");
-      let abilityText = db.abilities[grpId] || "";
+      const grpId = obj.getAttribute("id");
+      const abilityText = db.abilities[grpId] || "";
       obj.title = abilityText;
     });
 
@@ -482,15 +465,21 @@ function updateView() {
   // Opponent Cards Mode
   //
   if (overlayMode == OVERLAY_SEEN) {
-    $('<div class="overlay_archetype"></div>').insertAfter(".overlay_deckname");
-    $(".overlay_deckname").html("Played by " + oppName);
-    $(".overlay_archetype").html(currentMatch.oppArchetype);
+    const deckName = $$(".overlay_deckname")[0];
+    deckName.parentNode.insertBefore(
+      createDiv(["overlay_archetype"]),
+      deckName.nextSibling
+    );
+    deckName.innerHTML = "Played by " + oppName;
+    $$(".overlay_archetype")[0].innerHTML = currentMatch.oppArchetype;
 
-    currentMatch.oppCards.colors.get().forEach(color => {
-      $(".overlay_deckcolors").append(
-        '<div class="mana_s20 mana_' + MANA[color] + '"></div>'
+    currentMatch.oppCards.colors
+      .get()
+      .forEach(color =>
+        $$(".overlay_deckcolors")[0].appendChild(
+          createDiv(["mana_s20", "mana_" + MANA[color]])
+        )
       );
-    });
     deckToDraw = currentMatch.oppCards;
   }
 
@@ -499,8 +488,8 @@ function updateView() {
   //
   if (overlayMode == OVERLAY_ODDS) {
     let cardsLeft = currentMatch.playerCardsLeft.mainboard.count();
-    deckListDiv.append(
-      `<div class="decklist_title">${cardsLeft} cards left</div>`
+    deckListDiv.appendChild(
+      createDiv(["decklist_title"], cardsLeft + " cards left")
     );
     deckToDraw = currentMatch.playerCardsLeft;
   }
@@ -510,7 +499,9 @@ function updateView() {
   //
   if (overlayMode == OVERLAY_FULL) {
     let cardsCount = currentMatch.player.deck.mainboard.count();
-    deckListDiv.append(`<div class="decklist_title">${cardsCount} cards</div>`);
+    deckListDiv.appendChild(
+      createDiv(["decklist_title"], cardsCount + " cards")
+    );
     deckToDraw = currentMatch.player.deck;
   }
 
@@ -519,8 +510,8 @@ function updateView() {
   //
   if (overlayMode == OVERLAY_LEFT) {
     let cardsLeft = currentMatch.playerCardsLeft.mainboard.count();
-    deckListDiv.append(
-      `<div class="decklist_title">${cardsLeft} cards left</div>`
+    deckListDiv.appendChild(
+      createDiv(["decklist_title"], cardsLeft + " cards left")
     );
     deckToDraw = currentMatch.playerCardsLeft;
   }
@@ -530,12 +521,14 @@ function updateView() {
     overlayMode == OVERLAY_FULL ||
     overlayMode == OVERLAY_LEFT
   ) {
-    $(".overlay_deckname").html(deckToDraw.name);
-    deckToDraw.colors.get().forEach(color => {
-      $(".overlay_deckcolors").append(
-        '<div class="mana_s20 mana_' + MANA[color] + '"></div>'
+    $$(".overlay_deckname")[0].innerHTML = deckToDraw.name;
+    deckToDraw.colors
+      .get()
+      .forEach(color =>
+        $$(".overlay_deckcolors")[0].appendChild(
+          createDiv(["mana_s20", "mana_" + MANA[color]])
+        )
       );
-    });
   }
 
   if (!deckToDraw) return;
@@ -579,28 +572,26 @@ function updateView() {
   }
   mainCards.get().sort(sortFunc);
   mainCards.get().forEach(card => {
-    var grpId = card.id;
     let tile;
-    if (overlayMode == OVERLAY_ODDS) {
+    if (overlayMode === OVERLAY_ODDS) {
       let quantity = (card.chance !== undefined ? card.chance : "0") + "%";
       if (!settings.lands || (settings.lands && quantity !== "0%")) {
         tile = deckDrawer.cardTile(
           pd.settings.card_tile_style,
-          grpId,
+          card.id,
           "a",
           quantity
         );
-        deckListDiv.append(tile);
       }
     } else {
       tile = deckDrawer.cardTile(
         pd.settings.card_tile_style,
-        grpId,
+        card.id,
         "a",
         card.quantity
       );
-      deckListDiv.append(tile);
     }
+    if (tile) deckListDiv.appendChild(tile);
 
     // This is hackish.. the way we insert our custom elements in the
     // array of cards is wrong in the first place :()
@@ -609,30 +600,29 @@ function updateView() {
     }
   });
   if (settings.sideboard && deckToDraw.sideboard.count() > 0) {
-    deckListDiv.append('<div class="card_tile_separator">Sideboard</div>');
+    deckListDiv.appendChild(createDiv(["card_tile_separator"], "Sideboard"));
 
-    let sideCards = deckToDraw.sideboard;
+    const sideCards = deckToDraw.sideboard;
     sideCards.removeDuplicates();
     sideCards.get().sort(sortFunc);
 
     sideCards.get().forEach(function(card) {
-      var grpId = card.id;
-      if (overlayMode == OVERLAY_ODDS) {
-        let tile = deckDrawer.cardTile(
+      if (overlayMode === OVERLAY_ODDS) {
+        const tile = deckDrawer.cardTile(
           pd.settings.card_tile_style,
-          grpId,
+          card.id,
           "a",
           "0%"
         );
-        deckListDiv.append(tile);
+        deckListDiv.appendChild(tile);
       } else {
-        let tile = deckDrawer.cardTile(
+        const tile = deckDrawer.cardTile(
           pd.settings.card_tile_style,
-          grpId,
+          card.id,
           "a",
           card.quantity
         );
-        deckListDiv.append(tile);
+        if (tile) deckListDiv.appendChild(tile);
       }
     });
   }
@@ -643,11 +633,11 @@ function updateView() {
 }
 
 function attachLandOdds(tile, odds) {
-  let landsDiv = createDivision(["lands_div"]);
+  let landsDiv = createDiv(["lands_div"]);
 
   let createManaChanceDiv = function(odds, color) {
-    let cont = createDivision(["mana_cont"], odds + "%");
-    let div = createDivision(["mana_s16", "flex_end", "mana_" + color]);
+    let cont = createDiv(["mana_cont"], odds + "%");
+    let div = createDiv(["mana_s16", "flex_end", "mana_" + color]);
     cont.appendChild(div);
     landsDiv.appendChild(cont);
   };
@@ -674,57 +664,79 @@ function attachLandOdds(tile, odds) {
 }
 
 function drawDeckOdds() {
-  let deckListDiv = $(".overlay_decklist");
-  deckListDiv.append(`
-          <div class="overlay_samplesize_container">
-              <div class="odds_prev click-on"></div>
-              <div class="odds_number">Sample size: ${oddsSampleSize}</div>
-              <div class="odds_next click-on"></div>
-          </div>
-       `);
+  let deckListDiv = $$(".overlay_decklist")[0];
 
-  deckListDiv.append('<div class="chance_title"></div>'); // Add some space
+  const navCont = createDiv(["overlay_samplesize_container"]);
+  navCont.appendChild(createDiv(["odds_prev", "click-on"]));
+  navCont.appendChild(
+    createDiv(["odds_number"], "Sample size: " + oddsSampleSize)
+  );
+  navCont.appendChild(createDiv(["odds_next", "click-on"]));
+  deckListDiv.appendChild(navCont);
+
+  deckListDiv.appendChild(createDiv(["chance_title"])); // Add some space
 
   let cardOdds = currentMatch.playerCardsOdds;
 
-  deckListDiv.append(
-    '<div class="chance_title">Creature: ' +
-      (cardOdds.chanceCre != undefined ? cardOdds.chanceCre : "0") +
-      "%</div>"
+  deckListDiv.appendChild(
+    createDiv(
+      ["chance_title"],
+      "Creature: " +
+        (cardOdds.chanceCre != undefined ? cardOdds.chanceCre : "0") +
+        "%"
+    )
   );
-  deckListDiv.append(
-    '<div class="chance_title">Instant: ' +
-      (cardOdds.chanceIns != undefined ? cardOdds.chanceIns : "0") +
-      "%</div>"
+  deckListDiv.appendChild(
+    createDiv(
+      ["chance_title"],
+      "Instant: " +
+        (cardOdds.chanceIns != undefined ? cardOdds.chanceIns : "0") +
+        "%"
+    )
   );
-  deckListDiv.append(
-    '<div class="chance_title">Sorcery: ' +
-      (cardOdds.chanceSor != undefined ? cardOdds.chanceSor : "0") +
-      "%</div>"
+  deckListDiv.appendChild(
+    createDiv(
+      ["chance_title"],
+      "Sorcery: " +
+        (cardOdds.chanceSor != undefined ? cardOdds.chanceSor : "0") +
+        "%"
+    )
   );
-  deckListDiv.append(
-    '<div class="chance_title">Artifact: ' +
-      (cardOdds.chanceArt != undefined ? cardOdds.chanceArt : "0") +
-      "%</div>"
+  deckListDiv.appendChild(
+    createDiv(
+      ["chance_title"],
+      "Artifact: " +
+        (cardOdds.chanceArt != undefined ? cardOdds.chanceArt : "0") +
+        "%"
+    )
   );
-  deckListDiv.append(
-    '<div class="chance_title">Enchantment: ' +
-      (cardOdds.chanceEnc != undefined ? cardOdds.chanceEnc : "0") +
-      "%</div>"
+  deckListDiv.appendChild(
+    createDiv(
+      ["chance_title"],
+      "Enchantment: " +
+        (cardOdds.chanceEnc != undefined ? cardOdds.chanceEnc : "0") +
+        "%"
+    )
   );
-  deckListDiv.append(
-    '<div class="chance_title">Planeswalker: ' +
-      (cardOdds.chancePla != undefined ? cardOdds.chancePla : "0") +
-      "%</div>"
+  deckListDiv.appendChild(
+    createDiv(
+      ["chance_title"],
+      "Planeswalker: " +
+        (cardOdds.chancePla != undefined ? cardOdds.chancePla : "0") +
+        "%"
+    )
   );
-  deckListDiv.append(
-    '<div class="chance_title">Land: ' +
-      (cardOdds.chanceLan != undefined ? cardOdds.chanceLan : "0") +
-      "%</div>"
+  deckListDiv.appendChild(
+    createDiv(
+      ["chance_title"],
+      "Land: " +
+        (cardOdds.chanceLan != undefined ? cardOdds.chanceLan : "0") +
+        "%"
+    )
   );
 
   //
-  $(".odds_prev").click(function() {
+  $$(".odds_prev")[0].addEventListener("click", function() {
     let cardsLeft = currentMatch.playerCardsLeft.mainboard.count();
     oddsSampleSize -= 1;
     if (oddsSampleSize < 1) {
@@ -733,7 +745,7 @@ function drawDeckOdds() {
     ipcSend("set_odds_samplesize", oddsSampleSize);
   });
   //
-  $(".odds_next").click(function() {
+  $$(".odds_next")[0].addEventListener("click", function() {
     let cardsLeft = currentMatch.playerCardsLeft.mainboard.count();
     oddsSampleSize += 1;
     if (oddsSampleSize > cardsLeft - 1) {
@@ -748,7 +760,7 @@ var currentDraft;
 ipc.on("set_draft_cards", (event, draft) => {
   clockMode = 1;
   recreateClock();
-  $(".overlay_draft_container").show();
+  $$(".overlay_draft_container")[0].style.display = "";
 
   matchBeginTime = Date.now();
   currentDraft = draft;
@@ -785,9 +797,9 @@ ipc.on("set_turn", (event, arg) => {
   }
   if (clockMode > 0) {
     if (turnPriority === playerSeat) {
-      $(".clock_turn").html("You have priority.");
+      $$(".clock_turn")[0].innerHTML = "You have priority.";
     } else {
-      $(".clock_turn").html("Opponent has priority.");
+      $$(".clock_turn")[0].innerHTML = "Opponent has priority.";
     }
   }
 });
@@ -803,33 +815,33 @@ function setDraft(_packN = -1, _pickN = -1) {
     packN = _packN;
     pickN = _pickN;
   }
-  $(".overlay_decklist").html("");
-  $(".overlay_deckcolors").html("");
+  $$(".overlay_decklist")[0].innerHTML = "";
+  $$(".overlay_deckcolors")[0].innerHTML = "";
   let title = "Pack " + (packN + 1) + " - Pick " + (pickN + 1);
   if (packN === currentDraft.packNumber && pickN === currentDraft.pickNumber) {
     title += " - Current";
   }
-  $(".overlay_deckname").html(title);
+  $$(".overlay_deckname")[0].innerHTML = title;
 
   let colors;
   if (draftMode == 0) {
     colors = get_ids_colors(currentDraft.pickedCards);
     colors.forEach(function(color) {
-      $(".overlay_deckcolors").append(
-        '<div class="mana_s20 mana_' + MANA[color] + '"></div>'
+      $$(".overlay_deckcolors")[0].appendChild(
+        createDiv(["mana_s20", "mana_" + MANA[color]])
       );
     });
 
     currentDraft.pickedCards.sort(compare_draft_cards);
 
     currentDraft.pickedCards.forEach(function(grpId) {
-      let tile = deckDrawer.cardTile(
+      const tile = deckDrawer.cardTile(
         pd.settings.card_tile_style,
         grpId,
         "a",
         1
       );
-      $(".overlay_decklist").append(tile);
+      $$(".overlay_decklist")[0].appendChild(tile);
     });
   } else if (draftMode == 1) {
     let key = "pack_" + packN + "pick_" + pickN;
@@ -845,8 +857,8 @@ function setDraft(_packN = -1, _pickN = -1) {
     console.log("Key", key, currentDraft);
     colors = get_ids_colors(draftPack);
     colors.forEach(function(color) {
-      $(".overlay_deckcolors").append(
-        '<div class="mana_s20 mana_' + MANA[color] + '"></div>'
+      $$(".overlay_deckcolors")[0].appendChild(
+        createDiv(["mana_s20", "mana_" + MANA[color]])
       );
     });
 
@@ -856,18 +868,18 @@ function setDraft(_packN = -1, _pickN = -1) {
       const card = db.card(grpId) || { id: grpId, rank: 0 };
       const rank = card.rank;
 
-      const od = $(".overlay_decklist");
-      const cont = $('<div class="overlay_card_quantity"></div>');
-      attachOwnerhipStars(card, cont[0]);
+      const od = $$(".overlay_decklist")[0];
+      const cont = createDiv(["overlay_card_quantity"]);
+      attachOwnerhipStars(card, cont);
+      od.appendChild(cont);
 
-      cont.appendTo(od);
-      let tile = deckDrawer.cardTile(
+      const tile = deckDrawer.cardTile(
         pd.settings.card_tile_style,
         grpId,
         "a",
         DRAFT_RANKS[rank]
       );
-      od.append(tile);
+      od.appendChild(tile);
       if (grpId == pick) {
         tile.style.backgroundColor = "rgba(250, 229, 210, 0.66)";
       }
@@ -891,42 +903,27 @@ function compare_draft_picks(a, b) {
   return 0;
 }
 
-function hoverCard(grpId) {
-  if (grpId == undefined) {
-    $(".overlay_hover").css("opacity", 0);
-  } else {
-    //let dfc = '';
-    //if (db.card(grpId).dfc == 'DFC_Back') dfc = 'a';
-    //if (db.card(grpId).dfc == 'DFC_Front')  dfc = 'b';
-    //if (db.card(grpId).dfc == 'SplitHalf')  dfc = 'a';
-    $(".overlay_hover").css("opacity", 1);
-    $(".overlay_hover").attr(
-      "src",
-      "https://img.scryfall.com/cards" + db.card(grpId).images["normal"]
-    );
-    setTimeout(function() {
-      $(".overlay_hover").css("opacity", 0);
-    }, 10000);
-  }
-}
-
-function change_background(arg) {
+function change_background(arg = "default") {
   if (!arg) return;
-  if (arg == "default" || arg == "") {
-    $(".overlay_bg_image").css("background-image", "");
-  } else if (fs.existsSync(arg)) {
-    $(".overlay_bg_image").css("background-image", "url(" + arg + ")");
+  const mainWrapper = $$(".overlay_bg_image")[0];
+  if (arg === "default") {
+    if (pd.settings.back_url && pd.settings.back_url !== "default") {
+      mainWrapper.style.backgroundImage = "url(" + pd.settings.back_url + ")";
+    } else {
+      mainWrapper.style.backgroundImage =
+        "url(../images/Ghitu-Lavarunner-Dominaria-MtG-Art.jpg)";
+    }
   } else {
-    $.ajax({
-      url: arg,
-      type: "HEAD",
-      error: function() {
-        $(".overlay_bg_image").css("background-image", "");
-      },
-      success: function() {
-        $(".overlay_bg_image").css("background-image", "url(" + arg + ")");
+    const xhr = new XMLHttpRequest();
+    xhr.open("HEAD", arg);
+    xhr.onload = function() {
+      if (xhr.status === 200) {
+        mainWrapper.style.backgroundImage = "url(" + arg + ")";
+      } else {
+        mainWrapper.style.backgroundImage = "";
       }
-    });
+    };
+    xhr.send();
   }
 }
 
@@ -944,11 +941,23 @@ function close(bool) {
   ipcSend("save_user_settings", { overlays });
 }
 
-$(document).ready(function() {
-  $(".overlay_draft_container").hide();
+function ready(fn) {
+  if (
+    document.attachEvent
+      ? document.readyState === "complete"
+      : document.readyState !== "loading"
+  ) {
+    fn();
+  } else {
+    document.addEventListener("DOMContentLoaded", fn);
+  }
+}
+
+ready(function() {
+  $$(".overlay_draft_container")[0].style.display = "none";
   recreateClock();
   //
-  $(".clock_prev").click(function() {
+  $$(".clock_prev")[0].addEventListener("click", function() {
     clockMode -= 1;
     if (clockMode < 0) {
       clockMode = 2;
@@ -956,7 +965,7 @@ $(document).ready(function() {
     recreateClock();
   });
   //
-  $(".clock_next").click(function() {
+  $$(".clock_next")[0].addEventListener("click", function() {
     clockMode += 1;
     if (clockMode > 2) {
       clockMode = 0;
@@ -965,7 +974,7 @@ $(document).ready(function() {
   });
 
   //
-  $(".draft_prev").click(function() {
+  $$(".draft_prev")[0].addEventListener("click", function() {
     pickN -= 1;
     let packSize = (currentDraft && PACK_SIZES[currentDraft.set]) || 14;
 
@@ -981,7 +990,7 @@ $(document).ready(function() {
     setDraft(packN, pickN);
   });
   //
-  $(".draft_next").click(function() {
+  $$(".draft_next")[0].addEventListener("click", function() {
     pickN += 1;
     let packSize = (currentDraft && PACK_SIZES[currentDraft.set]) || 14;
 
@@ -1006,31 +1015,29 @@ $(document).ready(function() {
   });
 
   //
-  $(".close").click(function() {
+  $$(".close")[0].addEventListener("click", function() {
     close(false);
   });
 
   //
-  $(".minimize").click(function() {
+  $$(".minimize")[0].addEventListener("click", function() {
     ipcSend("overlay_minimize", overlayIndex);
   });
 
   //
-  $(".settings").click(function() {
+  $$(".settings")[0].addEventListener("click", function() {
     ipcSend("renderer_show");
     ipcSend("force_open_overlay_settings", overlayIndex, IPC_MAIN);
   });
 
-  $(".overlay_container").hover(
-    function() {
-      $(".overlay_container").css("opacity", 1);
-    },
-    function() {
-      if (overlayIndex == -1) return;
-      let settings = pd.settings.overlays[overlayIndex];
-      if (settings.alpha !== 1) {
-        $(".overlay_container").css("opacity", settings.alpha);
-      }
+  $$(".overlay_container")[0].addEventListener("mouseenter", () => {
+    $$(".overlay_container")[0].style.opacity = 1;
+  });
+  $$(".overlay_container")[0].addEventListener("mouseleave", () => {
+    if (overlayIndex == -1) return;
+    let settings = pd.settings.overlays[overlayIndex];
+    if (settings.alpha !== 1) {
+      $$(".overlay_container")[0].style.opacity = settings.alpha;
     }
-  );
+  });
 });
