@@ -3,7 +3,11 @@ const { remote, shell } = require("electron");
 const Menu = remote.Menu;
 const MenuItem = remote.MenuItem;
 
-const { COLORS_BRIEF, CARD_RARITIES, EASING_DEFAULT } = require("../shared/constants");
+const {
+  COLORS_BRIEF,
+  CARD_RARITIES,
+  EASING_DEFAULT
+} = require("../shared/constants");
 const db = require("../shared/database");
 const pd = require("../shared/player-data");
 const { queryElements: $$, createDiv } = require("../shared/dom-fns");
