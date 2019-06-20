@@ -155,6 +155,7 @@ function openHistoryTab(_filters = {}, dataIndex = 25, scrollTop = 0) {
   historyTop.appendChild(historyTopFilter);
   wrap_l.appendChild(historyTop);
 
+  mainDiv.appendChild(wrap_l);
   const dataScroller = new DataScroller(
     wrap_l,
     renderData,
@@ -163,7 +164,6 @@ function openHistoryTab(_filters = {}, dataIndex = 25, scrollTop = 0) {
   );
   dataScroller.render(dataIndex, scrollTop);
 
-  mainDiv.appendChild(wrap_l);
   mainDiv.appendChild(wrap_r);
 }
 
