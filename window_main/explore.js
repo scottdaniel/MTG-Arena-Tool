@@ -301,11 +301,11 @@ function drawFilters() {
   const manas = createDiv(["mana_filters_explore"]);
   COLORS_BRIEF.forEach(function(s, i) {
     const mi = [1, 2, 3, 4, 5];
-    let mf = "";
+    let classes = ["mana_filter"];
     if (!inputMana.includes(mi[i])) {
-      mf = "mana_filter_on";
+      classes.push("mana_filter_on");
     }
-    const manabutton = createDiv(["mana_filter", mf]);
+    const manabutton = createDiv(classes);
     manabutton.style.backgroundImage = "url(../images/" + s + "20.png)";
     manabutton.addEventListener("click", function() {
       if ([...manabutton.classList].includes("mana_filter_on")) {
@@ -329,11 +329,11 @@ function drawFilters() {
   if (inputFilterType !== "Events") {
     const ranks_filters = createDiv(["mana_filters_explore"]);
     RANKS.forEach(function(rr, index) {
-      let mf = "";
+      let classes = ["rank_filter"];
       if (!inputRanks.includes(rr)) {
-        mf = "rank_filter_on";
+        classes.push("rank_filter_on");
       }
-      const rankbutton = createDiv(["rank_filter", mf], "", { title: rr });
+      const rankbutton = createDiv(classes, "", { title: rr });
       rankbutton.style.backgroundPosition = (index + 1) * -16 + "px 0px";
       rankbutton.style.backgroundImage = "url(../images/ranks_16.png)";
       rankbutton.addEventListener("click", function() {
