@@ -10,6 +10,8 @@ const {
 } = require("../shared/dom-fns");
 const deckDrawer = require("../shared/deck-drawer");
 const {
+  deckManaCurve,
+  deckTypesStats,
   get_deck_export,
   get_deck_export_txt,
   get_deck_missing,
@@ -22,8 +24,6 @@ const StatsPanel = require("./stats-panel");
 const {
   changeBackground,
   colorPieChart,
-  deckManaCurve,
-  deckTypesStats,
   drawDeck,
   drawDeckVisual,
   ipcSend,

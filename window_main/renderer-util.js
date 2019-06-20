@@ -7,8 +7,6 @@ const striptags = require("striptags");
 const Picker = require("vanilla-picker");
 
 const {
-  CARD_TYPE_CODES,
-  CARD_TYPES,
   COLORS_ALL,
   DRAFT_RANKS,
   MANA_COLORS,
@@ -31,12 +29,7 @@ const {
 const deckDrawer = require("../shared/deck-drawer");
 const cardTypes = require("../shared/card-types");
 const { addCardHover } = require("../shared/card-hover");
-const {
-  add,
-  get_card_image,
-  get_deck_types_ammount,
-  makeId
-} = require("../shared/util");
+const { deckTypesStats, get_card_image, makeId } = require("../shared/util");
 
 const byId = id => document.getElementById(id);
 let popTimeout = null;
@@ -420,116 +413,6 @@ function drawDeckVisual(container, deck, openCallback) {
     normalButton.addEventListener("click", () => openCallback());
     container.appendChild(normalButton);
   }
-}
-
-//
-function get_deck_curve(deck) {
-  var curve = [];
-
-  deck.mainDeck.forEach(function(card) {
-    var grpid = card.id;
-    var cmc = db.card(grpid).cmc;
-    if (curve[cmc] == undefined) curve[cmc] = [0, 0, 0, 0, 0, 0];
-
-    let card_cost = db.card(grpid).cost;
-
-    if (db.card(grpid).type.indexOf("Land") == -1) {
-      card_cost.forEach(function(c) {
-        if (c.indexOf("w") !== -1) curve[cmc][1] += card.quantity;
-        if (c.indexOf("u") !== -1) curve[cmc][2] += card.quantity;
-        if (c.indexOf("b") !== -1) curve[cmc][3] += card.quantity;
-        if (c.indexOf("r") !== -1) curve[cmc][4] += card.quantity;
-        if (c.indexOf("g") !== -1) curve[cmc][5] += card.quantity;
-      });
-
-      curve[cmc][0] += card.quantity;
-    }
-  });
-  /*
-  // Do not account sideboard?
-  deck.sideboard.forEach(function(card) {
-    var grpid = card.id;
-    var cmc = db.card(grpid).cmc;
-    if (curve[cmc] == undefined)  curve[cmc] = 0;
-    curve[cmc] += card.quantity
-
-    if (db.card(grpid).rarity !== 'land') {
-      curve[cmc] += card.quantity
-    }
-  });
-  */
-  //console.log(curve);
-  return curve;
-}
-
-//
-exports.deckManaCurve = deckManaCurve;
-function deckManaCurve(deck) {
-  const manaCounts = get_deck_curve(deck);
-  const curveMax = Math.max(
-    ...manaCounts
-      .filter(v => {
-        if (v == undefined) return false;
-        return true;
-      })
-      .map(v => v[0] || 0)
-  );
-  // console.log("deckManaCurve", manaCounts, curveMax);
-
-  const container = createDiv();
-  const curve = createDiv(["mana_curve"]);
-  const numbers = createDiv(["mana_curve_numbers"]);
-
-  manaCounts.forEach((cost, i) => {
-    const total = cost[0];
-    const manaTotal = cost.reduce(add, 0) - total;
-
-    const curveCol = createDiv(["mana_curve_column"]);
-    curveCol.style.height = (total * 100) / curveMax + "%";
-
-    const curveNum = createDiv(["mana_curve_number"], total > 0 ? total : "");
-    curveCol.appendChild(curveNum);
-
-    MANA_COLORS.forEach((mc, ind) => {
-      if (ind < 5 && cost[ind + 1] > 0) {
-        const col = createDiv(["mana_curve_column_color"]);
-        col.style.height = Math.round((cost[ind + 1] / manaTotal) * 100) + "%";
-        col.style.backgroundColor = mc;
-        curveCol.appendChild(col);
-      }
-    });
-
-    curve.appendChild(curveCol);
-
-    const colNum = createDiv(["mana_curve_column_number"]);
-    const numDiv = createDiv(["mana_s16", "mana_" + i]);
-    numDiv.style.margin = "0 auto !important";
-    colNum.appendChild(numDiv);
-    numbers.appendChild(colNum);
-  });
-
-  container.appendChild(curve);
-  container.appendChild(numbers);
-
-  return container;
-}
-
-//
-exports.deckTypesStats = deckTypesStats;
-function deckTypesStats(deck) {
-  const cardTypes = get_deck_types_ammount(deck);
-  const typesContainer = createDiv(["types_container"]);
-  CARD_TYPE_CODES.forEach((cardTypeKey, index) => {
-    const type = createDiv(["type_icon_cont"]);
-    type.appendChild(
-      createDiv(["type_icon", "type_" + cardTypeKey], "", {
-        title: CARD_TYPES[index]
-      })
-    );
-    type.appendChild(createSpan([], cardTypes[cardTypeKey]));
-    typesContainer.appendChild(type);
-  });
-  return typesContainer;
 }
 
 //
