@@ -396,7 +396,7 @@ function renderSeat(
 
   const fltrb = createDiv(["flex_bottom"]);
   if (isWinner) {
-    fltrb.appendChild(createDiv(["list_match_player_left", "green"], "Winner"));
+    fltrb.appendChild(createDiv([divClass, "green"], "Winner"));
   }
   fltr.appendChild(fltrb);
   flt.appendChild(fltr);
