@@ -1377,6 +1377,7 @@ function getOppDeck() {
     console.log(_deck.colors);
     currentMatch.oppArchetype = getColorArchetype(_deck.colors);
   }
+  deckSave.archetype = currentMatch.oppArchetype;
 
   return deckSave;
 }
