@@ -3,6 +3,7 @@ const anime = require("animejs");
 const { queryElements: $$, createDiv } = require("../shared/dom-fns");
 const { createSelect } = require("../shared/select");
 const deckDrawer = require("../shared/deck-drawer");
+const { EASING_DEFAULT } = require("../shared/constants.js");
 const {
   compare_cards,
   get_deck_export,
@@ -40,7 +41,7 @@ function tournamentCreate() {
   anime({
     targets: ".moving_ux",
     left: "-100%",
-    easing: "easeInOutCubic",
+    easing: EASING_DEFAULT,
     duration: 350
   });
   let mainDiv = $$("#ux_1")[0];
@@ -62,7 +63,7 @@ function tournamentCreate() {
     anime({
       targets: ".moving_ux",
       left: 0,
-      easing: "easeInOutCubic",
+      easing: EASING_DEFAULT,
       duration: 350
     });
   });
@@ -169,7 +170,7 @@ function tournamentOpen(t) {
     anime({
       targets: ".moving_ux",
       left: 0,
-      easing: "easeInOutCubic",
+      easing: EASING_DEFAULT,
       duration: 350
     });
   });

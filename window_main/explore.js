@@ -7,7 +7,8 @@ const {
   COLORS_BRIEF,
   DEFAULT_TILE,
   RANKS,
-  RANKS_SORT
+  RANKS_SORT,
+  EASING_DEFAULT
 } = require("../shared/constants");
 const db = require("../shared/database");
 const { queryElements: $$, createDiv } = require("../shared/dom-fns");
@@ -687,7 +688,7 @@ function deckLoad(_deck, index) {
     anime({
       targets: ".moving_ux",
       left: "-100%",
-      easing: "easeInOutCubic",
+      easing: EASING_DEFAULT,
       duration: 350
     });
   });

@@ -1,6 +1,6 @@
 const anime = require("animejs");
 
-const { MANA } = require("../shared/constants");
+const { MANA, EASING_DEFAULT } = require("../shared/constants");
 const pd = require("../shared/player-data");
 const { createDiv, queryElementsByClass } = require("../shared/dom-fns");
 const {
@@ -296,7 +296,7 @@ function handleOpenMatch(id) {
   anime({
     targets: ".moving_ux",
     left: "-100%",
-    easing: "easeInOutCubic",
+    easing: EASING_DEFAULT,
     duration: 350
   });
 }

@@ -3,7 +3,7 @@ const { remote, shell } = require("electron");
 const Menu = remote.Menu;
 const MenuItem = remote.MenuItem;
 
-const { COLORS_BRIEF, CARD_RARITIES } = require("../shared/constants");
+const { COLORS_BRIEF, CARD_RARITIES, EASING_DEFAULT } = require("../shared/constants");
 const db = require("../shared/database");
 const pd = require("../shared/player-data");
 const { queryElements: $$, createDiv } = require("../shared/dom-fns");
@@ -598,7 +598,7 @@ function printStats() {
   anime({
     targets: ".moving_ux",
     left: "-100%",
-    easing: "easeInOutCubic",
+    easing: EASING_DEFAULT,
     duration: 350
   });
   let mainDiv = document.getElementById("ux_1");
@@ -663,7 +663,7 @@ function printStats() {
     anime({
       targets: ".moving_ux",
       left: 0,
-      easing: "easeInOutCubic",
+      easing: EASING_DEFAULT,
       duration: 350
     });
   });

@@ -694,3 +694,5 @@ exports.DEFAULT_TILE = 67003;
 
 exports.CARD_TILE_ARENA = 0;
 exports.CARD_TILE_FLAT = 1;
+
+exports.EASING_DEFAULT = "cubicBezier(0.570, 0.165, 0.210, 0.990)";

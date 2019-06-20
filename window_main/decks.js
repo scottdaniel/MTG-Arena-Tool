@@ -1,7 +1,7 @@
 const _ = require("lodash");
 const anime = require("animejs");
 
-const { MANA, CARD_RARITIES } = require("../shared/constants");
+const { MANA, CARD_RARITIES, EASING_DEFAULT } = require("../shared/constants");
 const pd = require("../shared/player-data");
 const { createDiv, createInput } = require("../shared/dom-fns");
 const {
@@ -252,7 +252,7 @@ function openDeckCallback(id, filters) {
   anime({
     targets: ".moving_ux",
     left: "-100%",
-    easing: "easeInOutCubic",
+    easing: EASING_DEFAULT,
     duration: 350
   });
 }

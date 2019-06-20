@@ -1,6 +1,6 @@
 const anime = require("animejs");
 
-const { MANA, CARD_RARITIES } = require("../shared/constants");
+const { MANA, CARD_RARITIES, EASING_DEFAULT } = require("../shared/constants");
 const db = require("../shared/database");
 const pd = require("../shared/player-data");
 const {
@@ -293,7 +293,7 @@ function openDeck(deck = currentOpenDeck, filters = currentFilters) {
     anime({
       targets: ".moving_ux",
       left: 0,
-      easing: "easeInOutCubic",
+      easing: EASING_DEFAULT,
       duration: 350
     });
   });

@@ -18,7 +18,7 @@ if (!remote.app.isPackaged) {
 const anime = require("animejs");
 require("time-elements");
 
-const { HIDDEN_PW } = require("../shared/constants");
+const { HIDDEN_PW, EASING_DEFAULT } = require("../shared/constants");
 const pd = require("../shared/player-data");
 const {
   createDiv,
@@ -192,7 +192,7 @@ ipc.on("open_course_deck", function(event, arg) {
   anime({
     targets: ".moving_ux",
     left: "-100%",
-    easing: "easeInOutCubic",
+    easing: EASING_DEFAULT,
     duration: 350
   });
   arg = arg.CourseDeck;
@@ -480,7 +480,7 @@ function force_open_settings(section = -1) {
   anime({
     targets: ".moving_ux",
     left: 0,
-    easing: "easeInOutCubic",
+    easing: EASING_DEFAULT,
     duration: 350
   });
   $$(".top_nav_item").forEach(el => el.classList.remove("item_selected"));
@@ -493,7 +493,7 @@ function force_open_about() {
   anime({
     targets: ".moving_ux",
     left: 0,
-    easing: "easeInOutCubic",
+    easing: EASING_DEFAULT,
     duration: 350
   });
   $$(".top_nav_item").forEach(el => el.classList.remove("item_selected"));
@@ -597,7 +597,7 @@ ready(function() {
         anime({
           targets: ".moving_ux",
           left: 0,
-          easing: "easeInOutCubic",
+          easing: EASING_DEFAULT,
           duration: 350
         });
         let filters = {};
@@ -639,7 +639,7 @@ ready(function() {
         anime({
           targets: ".moving_ux",
           left: 0,
-          easing: "easeInOutCubic",
+          easing: EASING_DEFAULT,
           duration: 350
         });
       }
@@ -666,7 +666,7 @@ ipc.on("tou_set", function(event, arg) {
   anime({
     targets: ".moving_ux",
     left: "-100%",
-    easing: "easeInOutCubic",
+    easing: EASING_DEFAULT,
     duration: 350
   });
 });

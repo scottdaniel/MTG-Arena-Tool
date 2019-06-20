@@ -1,7 +1,7 @@
 const anime = require("animejs");
 
 const autocomplete = require("../shared/autocomplete");
-const { MANA, RANKS } = require("../shared/constants");
+const { MANA, RANKS, EASING_DEFAULT } = require("../shared/constants");
 const db = require("../shared/database");
 const pd = require("../shared/player-data");
 const { createSelect } = require("../shared/select");
@@ -236,7 +236,7 @@ function handleOpenMatch(id) {
   anime({
     targets: ".moving_ux",
     left: "-100%",
-    easing: "easeInOutCubic",
+    easing: EASING_DEFAULT,
     duration: 350
   });
 }
@@ -246,7 +246,7 @@ function handleOpenDraft(id) {
   anime({
     targets: ".moving_ux",
     left: "-100%",
-    easing: "easeInOutCubic",
+    easing: EASING_DEFAULT,
     duration: 350
   });
 }

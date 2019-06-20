@@ -2,7 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const anime = require("animejs");
 
-const { MANA } = require("../shared/constants");
+const { MANA, EASING_DEFAULT } = require("../shared/constants");
 const db = require("../shared/database");
 const pd = require("../shared/player-data");
 const { createDiv, queryElements: $$ } = require("../shared/dom-fns");
@@ -344,7 +344,7 @@ function openMatch(id) {
     anime({
       targets: ".moving_ux",
       left: 0,
-      easing: "easeInOutCubic",
+      easing: EASING_DEFAULT,
       duration: 350
     });
   });
