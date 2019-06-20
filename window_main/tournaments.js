@@ -1,6 +1,6 @@
 const anime = require("animejs");
 
-const { queryElements: $$, createDivision } = require("../shared/dom-fns");
+const { queryElements: $$, createDiv } = require("../shared/dom-fns");
 const { createSelect } = require("../shared/select");
 const deckDrawer = require("../shared/deck-drawer");
 const {
@@ -47,10 +47,10 @@ function tournamentCreate() {
   mainDiv.innerHTML = "";
   mainDiv.classList.remove("flex_item");
   // Top navigation stuff
-  let top = createDivision(["decklist_top"]);
-  let buttonBack = createDivision(["button", "back"]);
-  let topTitle = createDivision(["deck_name"], "Create Tournament");
-  let topStatus = createDivision(["tou_top_status"]);
+  let top = createDiv(["decklist_top"]);
+  let buttonBack = createDiv(["button", "back"]);
+  let topTitle = createDiv(["deck_name"], "Create Tournament");
+  let topStatus = createDiv(["tou_top_status"]);
   top.appendChild(buttonBack);
   top.appendChild(topTitle);
   top.appendChild(topStatus);
@@ -95,13 +95,13 @@ function tournamentOpen(t) {
     record = stats.w + " - " + stats.d + " - " + stats.l;
   }
 
-  let topButtonBack = createDivision(["button", "back"]);
-  let topDeckName = createDivision(["deck_name"], tou.name);
-  let top = createDivision(["decklist_top"]);
+  let topButtonBack = createDiv(["button", "back"]);
+  let topDeckName = createDiv(["deck_name"], tou.name);
+  let top = createDiv(["decklist_top"]);
   top.appendChild(topButtonBack);
   top.appendChild(topDeckName);
 
-  let flr = createDivision(["tou_top_status", "state_clock"]);
+  let flr = createDiv(["tou_top_status", "state_clock"]);
   flr.style.alignSelf = "center";
 
   let state = "";
@@ -154,7 +154,7 @@ function tournamentOpen(t) {
   top.appendChild(flr);
   mainDiv.appendChild(top);
 
-  let desc = createDivision(["tou_desc"], tou.desc);
+  let desc = createDiv(["tou_desc"], tou.desc);
   desc.style.alignSelf = "center";
   mainDiv.appendChild(desc);
 
@@ -183,8 +183,8 @@ function showTournamentRegister(mainDiv, tou) {
 
   let buttonDrop, buttonJoin;
   if (joined) {
-    let deckContainer = createDivision(["flex_item"]);
-    let deckvisual = createDivision(["decklist"]);
+    let deckContainer = createDiv(["flex_item"]);
+    let deckvisual = createDiv(["decklist"]);
     deckContainer.appendChild(deckvisual);
 
     mainDiv.appendChild(deckContainer);
@@ -193,11 +193,11 @@ function showTournamentRegister(mainDiv, tou) {
     }
 
     if (tou.state !== 4) {
-      buttonDrop = createDivision(["button_simple", "but_drop"], "Drop");
+      buttonDrop = createDiv(["button_simple", "but_drop"], "Drop");
       mainDiv.appendChild(buttonDrop);
     }
   } else {
-    let deckSelectContainer = createDivision(["flex_item"]);
+    let deckSelectContainer = createDiv(["flex_item"]);
 
     // filter to current decks in Arena with no missing cards
     const validDecks = pd.deckList
@@ -222,19 +222,19 @@ function showTournamentRegister(mainDiv, tou) {
 
     if (tou.state == 0) {
       if (tou.password) {
-        let cont = createDivision([
+        let cont = createDiv([
           "input_login_container",
           "tourney_pwd_container"
         ]);
 
-        let lockIcon = createDivision(["status_locked", "input_lock"]);
+        let lockIcon = createDiv(["status_locked", "input_lock"]);
 
         let pwdInput = document.createElement("input");
         pwdInput.id = "tourney_pass";
         pwdInput.autocomplete = "off";
         pwdInput.type = "password";
 
-        let lockedMsg = createDivision(
+        let lockedMsg = createDiv(
           ["tou_desc"],
           "This tournament is password protected."
         );
@@ -246,26 +246,23 @@ function showTournamentRegister(mainDiv, tou) {
         mainDiv.appendChild(cont);
       }
 
-      buttonJoin = createDivision(
-        ["button_simple_disabled", "but_join"],
-        "Join"
-      );
+      buttonJoin = createDiv(["button_simple_disabled", "but_join"], "Join");
       mainDiv.appendChild(buttonJoin);
     }
 
-    let joinDecklist = createDivision(["join_decklist"]);
+    let joinDecklist = createDiv(["join_decklist"]);
     mainDiv.appendChild(joinDecklist);
   }
 
-  let list = createDivision(["tou_list_players"]);
-  let pJoined = createDivision(
+  let list = createDiv(["tou_list_players"]);
+  let pJoined = createDiv(
     ["tou_list_player_name", "tou_list_player_name_title"],
     "Players joined:"
   );
   list.appendChild(pJoined);
 
   tou.players.forEach(p => {
-    let pName = createDivision(["tou_list_player_name"], p.slice(0, -6));
+    let pName = createDiv(["tou_list_player_name"], p.slice(0, -6));
     list.appendChild(pName);
   });
   list.appendChild(document.createElement("br"));
@@ -304,38 +301,38 @@ function showTournamentStarted(mainDiv, tou) {
   }
 
   if (tou.state !== 4) {
-    let div = createDivision(["tou_reload"]);
+    let div = createDiv(["tou_reload"]);
     mainDiv.appendChild(div);
     div.addEventListener("click", () => {
       tournamentOpen(tou);
     });
   }
   if (joined) {
-    let touRecordDiv = createDivision(["tou_record", "green"], record);
+    let touRecordDiv = createDiv(["tou_record", "green"], record);
     mainDiv.appendChild(touRecordDiv);
 
     if (tou.state !== 4) {
-      let onMtgaDiv = createDivision(
+      let onMtgaDiv = createDiv(
         ["tou_opp"],
         `<span>On MTGA: </span><span style="margin-left: 10px; color: rgb(250, 229, 210);">${urlDecode(
           tou.current_opponent
         )}`
       );
-      let copyMtgaButton = createDivision(["copy_button", "copy_mtga"]);
+      let copyMtgaButton = createDiv(["copy_button", "copy_mtga"]);
       onMtgaDiv.appendChild(copyMtgaButton);
       mainDiv.appendChild(onMtgaDiv);
 
-      let onDiscordDiv = createDivision(
+      let onDiscordDiv = createDiv(
         ["tou_opp"],
         `<span>On Discord: </span><span style="margin-left: 10px; color: rgb(250, 229, 210);">${urlDecode(
           tou.current_opponent_discord
         )}`
       );
-      let copyDiscordButton = createDivision(["copy_button", "copy_discord"]);
+      let copyDiscordButton = createDiv(["copy_button", "copy_discord"]);
       onDiscordDiv.appendChild(copyDiscordButton);
       mainDiv.appendChild(onDiscordDiv);
 
-      let lastSeenDiv = createDivision(["tou_opp", "tou_opp_sub"]);
+      let lastSeenDiv = createDiv(["tou_opp", "tou_opp_sub"]);
       let clockSpan = document.createElement("span");
       clockSpan.classList.add("last_seen_clock");
       lastSeenDiv.appendChild(clockSpan);
@@ -368,24 +365,24 @@ function showTournamentStarted(mainDiv, tou) {
       tou.current_opponent !== "bye" &&
       tou.current_opponent !== ""
     ) {
-      let checks = createDivision(["tou_checks"]);
+      let checks = createDiv(["tou_checks"]);
       checks.appendChild(generateChecks(tou.current_check, tou.current_seat));
       mainDiv.appendChild(checks);
     }
   }
 
-  let tabs = createDivision(["tou_tabs_cont"]);
-  let tab_rounds = createDivision(
+  let tabs = createDiv(["tou_tabs_cont"]);
+  let tab_rounds = createDiv(
     ["tou_tab", "tab_a", "tou_tab_selected"],
     "Rounds"
   );
-  let tab_standings = createDivision(["tou_tab", "tab_b"], "Standings");
+  let tab_standings = createDiv(["tou_tab", "tab_b"], "Standings");
 
   tabs.appendChild(tab_rounds);
   tabs.appendChild(tab_standings);
 
   if (joined) {
-    let tab_decklist = createDivision(["tou_tab", "tab_c"], "Decklist");
+    let tab_decklist = createDiv(["tou_tab", "tab_c"], "Decklist");
     tabs.appendChild(tab_decklist);
   }
 
@@ -443,7 +440,7 @@ function sort_top(a, b) {
 }
 
 function createMatchDiv(match) {
-  let matchContainerDiv = createDivision(["tou_match_cont"]);
+  let matchContainerDiv = createDiv(["tou_match_cont"]);
   let p1wc = "tou_score_loss";
   let p2wc = "tou_score_loss";
   if (match.winner == 1) p1wc = "tou_score_win";
@@ -463,25 +460,25 @@ function createMatchDiv(match) {
   }
 
   let s = "";
-  let p1 = createDivision(
+  let p1 = createDiv(
     ["tou_match_p", match.p1 + "pn"],
     match.p1.slice(0, -6) + d1
   );
   if (match.check[0] == true) p1.style.borderLeft = "solid 4px #b7c89e";
   else p1.style.borderLeft = "solid 4px #dd8263";
-  let p1w = createDivision([p1wc, "tou_match_score"], match.p1w);
+  let p1w = createDiv([p1wc, "tou_match_score"], match.p1w);
   p1.appendChild(p1w);
 
   s = "";
   if (match.p2 == "BYE#00000") s = 'style="color: rgba(250, 229, 210, 0.65);"';
 
-  let p2 = createDivision(
+  let p2 = createDiv(
     ["tou_match_p", match.p2 + "pn"],
     match.p2.slice(0, -6) + d2
   );
   if (match.check[1] == true) p2.style.borderLeft = "solid 4px #b7c89e";
   else p2.style.borderLeft = "solid 4px #dd8263";
-  let p2w = createDivision([p2wc, "tou_match_score"], match.p2w);
+  let p2w = createDiv([p2wc, "tou_match_score"], match.p2w);
   p2.appendChild(p2w);
 
   matchContainerDiv.appendChild(p1);
@@ -490,17 +487,17 @@ function createMatchDiv(match) {
 }
 
 function createRoundsTab(joined) {
-  let tab_cont_a = createDivision(["tou_cont_a", "tou_cont_div"]);
+  let tab_cont_a = createDiv(["tou_cont_a", "tou_cont_div"]);
 
   // DRAW TOP 8
   if (tou.top > 0 && tou.state >= 3) {
-    let top_cont = createDivision(["tou_top"]);
-    let tou_cont_a = createDivision(["tou_top_cont"]);
-    let tou_cont_b = createDivision(["tou_top_cont"]);
-    let tou_cont_c = createDivision(["tou_top_cont"]);
+    let top_cont = createDiv(["tou_top"]);
+    let tou_cont_a = createDiv(["tou_top_cont"]);
+    let tou_cont_b = createDiv(["tou_top_cont"]);
+    let tou_cont_c = createDiv(["tou_top_cont"]);
 
-    let roundTitle = createDivision(["tou_round_title"], "Top " + tou.top);
-    let roundContainer = createDivision(["tou_round_cont"]);
+    let roundTitle = createDiv(["tou_round_title"], "Top " + tou.top);
+    let roundContainer = createDiv(["tou_round_cont"]);
 
     let topMatches = tou["round_top"].sort(sort_top);
 
@@ -530,8 +527,8 @@ function createRoundsTab(joined) {
   for (let i = tou.currentRound; i >= 0; i--) {
     let rname = "round_" + i;
     if (tou[rname] !== undefined) {
-      let roundTitle = createDivision(["tou_round_title"], "Round " + (i + 1));
-      let roundContainer = createDivision(["tou_round_cont"]);
+      let roundTitle = createDiv(["tou_round_title"], "Round " + (i + 1));
+      let roundContainer = createDiv(["tou_round_cont"]);
 
       tou[rname].forEach(match => {
         let matchContainerDiv = createMatchDiv(match);
@@ -544,7 +541,7 @@ function createRoundsTab(joined) {
 
   // DRAW DROP
   if (joined) {
-    let dropButton = createDivision(["button_simple", "but_drop"], "Drop");
+    let dropButton = createDiv(["button_simple", "but_drop"], "Drop");
     tab_cont_a.appendChild(dropButton);
     dropButton.addEventListener("click", () => {
       ipcSend("tou_drop", tou._id);
@@ -555,7 +552,7 @@ function createRoundsTab(joined) {
 }
 
 function createStandingsTab(joined) {
-  let tab_cont_b = createDivision(["tou_cont_b", "tou_cont_div"]);
+  let tab_cont_b = createDiv(["tou_cont_b", "tou_cont_div"]);
   tab_cont_b.style.height = "0px";
 
   tou.players.sort(function(a, b) {
@@ -576,23 +573,23 @@ function createStandingsTab(joined) {
     return 0;
   });
 
-  let desc = createDivision(
+  let desc = createDiv(
     ["tou_desc"],
     "Points are updated only when a round ends."
   );
   tab_cont_b.appendChild(desc);
 
-  let line = createDivision(["tou_stand_line_title", "line_dark"]);
-  let linePos = createDivision(["tou_stand_cell"], "Pos");
-  let lineName = createDivision(["tou_stand_cell"], "Name");
-  let lineWarn = createDivision(["tou_stand_cell", "tou_center"], "Warn");
-  let linePoints = createDivision(["tou_stand_cell", "tou_center"], "Points");
-  let lineScore = createDivision(["tou_stand_cell", "tou_center"], "Score");
-  let lineMatches = createDivision(["tou_stand_cell", "tou_center"], "Matches");
-  let lineGames = createDivision(["tou_stand_cell", "tou_center"], "Games");
-  let lineOMW = createDivision(["tou_stand_cell", "tou_center"], "OMW");
-  let lineGW = createDivision(["tou_stand_cell", "tou_center"], "GW");
-  let lineOGW = createDivision(["tou_stand_cell", "tou_center"], "OGW");
+  let line = createDiv(["tou_stand_line_title", "line_dark"]);
+  let linePos = createDiv(["tou_stand_cell"], "Pos");
+  let lineName = createDiv(["tou_stand_cell"], "Name");
+  let lineWarn = createDiv(["tou_stand_cell", "tou_center"], "Warn");
+  let linePoints = createDiv(["tou_stand_cell", "tou_center"], "Points");
+  let lineScore = createDiv(["tou_stand_cell", "tou_center"], "Score");
+  let lineMatches = createDiv(["tou_stand_cell", "tou_center"], "Matches");
+  let lineGames = createDiv(["tou_stand_cell", "tou_center"], "Games");
+  let lineOMW = createDiv(["tou_stand_cell", "tou_center"], "OMW");
+  let lineGW = createDiv(["tou_stand_cell", "tou_center"], "GW");
+  let lineOGW = createDiv(["tou_stand_cell", "tou_center"], "OGW");
 
   linePos.style.gridArea = `1 / 1 / auto / 3`;
   lineName.style.gridArea = `1 / 3 / auto / 4`;
@@ -621,14 +618,14 @@ function createStandingsTab(joined) {
   tou.players.forEach(function(pname, index) {
     let stat = tou.playerStats[pname];
     if (index % 2) {
-      line = createDivision(["tou_stand_line", "line_dark"]);
+      line = createDiv(["tou_stand_line", "line_dark"]);
     } else {
-      line = createDivision(["tou_stand_line"]);
+      line = createDiv(["tou_stand_line"]);
     }
 
-    let linePos = createDivision(["tou_stand_cell"], index + 1);
+    let linePos = createDiv(["tou_stand_cell"], index + 1);
 
-    let lineFlag = createDivision(["tou_stand_cell"]);
+    let lineFlag = createDiv(["tou_stand_cell"]);
 
     let flag = document.createElement("img");
     flag.src = "blank.gif";
@@ -637,36 +634,33 @@ function createStandingsTab(joined) {
     flag.classList.add("flag-" + tou.flags[pname].toLowerCase());
     lineFlag.appendChild(flag);
 
-    let lineName = createDivision(
+    let lineName = createDiv(
       ["tou_stand_cell"],
       pname.slice(0, -6) +
         " " +
         (tou.drops.indexOf(pname) !== -1 ? " (drop)" : "")
     );
 
-    let lineWarn = createDivision(
+    let lineWarn = createDiv(
       ["tou_stand_cell", "tou_center"],
       tou.warnings[pname] ? tou.warnings[pname] : "-"
     );
-    let linePoints = createDivision(["tou_stand_cell", "tou_center"], stat.mp);
-    let lineScore = createDivision(
+    let linePoints = createDiv(["tou_stand_cell", "tou_center"], stat.mp);
+    let lineScore = createDiv(
       ["tou_stand_cell", "tou_center"],
       `${stat.w}-${stat.d}-${stat.l}`
     );
-    let lineMatches = createDivision(
-      ["tou_stand_cell", "tou_center"],
-      stat.rpl
-    );
-    let lineGames = createDivision(["tou_stand_cell", "tou_center"], stat.gpl);
-    let lineOMW = createDivision(
+    let lineMatches = createDiv(["tou_stand_cell", "tou_center"], stat.rpl);
+    let lineGames = createDiv(["tou_stand_cell", "tou_center"], stat.gpl);
+    let lineOMW = createDiv(
       ["tou_stand_cell", "tou_center"],
       `${Math.round(stat.omwp * 10000) / 100}%`
     );
-    let lineGW = createDivision(
+    let lineGW = createDiv(
       ["tou_stand_cell", "tou_center"],
       `${Math.round(stat.gwp * 10000) / 100}%`
     );
-    let lineOGW = createDivision(
+    let lineOGW = createDiv(
       ["tou_stand_cell", "tou_center"],
       `${Math.round(stat.ogwp * 10000) / 100}%`
     );
@@ -702,13 +696,13 @@ function createStandingsTab(joined) {
 }
 
 function createDecklistTab() {
-  let tab_cont_c = createDivision(["tou_cont_c", "tou_cont_div"]);
+  let tab_cont_c = createDiv(["tou_cont_c", "tou_cont_div"]);
   tab_cont_c.style.height = "0px";
 
-  let decklistCont = createDivision(["sideboarder_container"]);
+  let decklistCont = createDiv(["sideboarder_container"]);
   drawSideboardDeck(decklistCont);
 
-  let buttonExport = createDivision(
+  let buttonExport = createDiv(
     ["button_simple", "exportDeck"],
     "Export to Arena"
   );
@@ -733,12 +727,12 @@ function tournamentSetState(state) {
 }
 
 function generateChecks(state, seat) {
-  let checks = createDivision(["tou_check_cont"]);
+  let checks = createDiv(["tou_check_cont"]);
 
   state.forEach((c, index) => {
     let ch;
     let ss = index % 2;
-    ch = createDivision(["tou_check", c ? "green_bright_bg" : "red_bright_bg"]);
+    ch = createDiv(["tou_check", c ? "green_bright_bg" : "red_bright_bg"]);
     ch.title = ss == seat ? "You" : tou.current_opponent.slice(0, -6);
     checks.appendChild(ch);
   });
@@ -762,7 +756,7 @@ function drawSideboardDeck(div) {
   div.innerHTML = "";
   div.style.dsiplay = "flex";
 
-  let mainboardDiv = createDivision(["decklist_divided"]);
+  let mainboardDiv = createDiv(["decklist_divided"]);
 
   currentDeck.mainDeck.sort(compare_cards);
   currentDeck.sideboard.sort(compare_cards);
@@ -787,7 +781,7 @@ function drawSideboardDeck(div) {
     }
   });
 
-  let sideboardDiv = createDivision(["decklist_divided"]);
+  let sideboardDiv = createDiv(["decklist_divided"]);
 
   if (currentDeck.sideboard != undefined) {
     if (currentDeck.sideboard.length > 0) {

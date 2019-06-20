@@ -1,6 +1,6 @@
 const db = require("../shared/database");
 const pd = require("../shared/player-data");
-const { createDivision, queryElements: $$ } = require("../shared/dom-fns");
+const { createDiv, queryElements: $$ } = require("../shared/dom-fns");
 const { get_card_image } = require("../shared/util");
 
 let renderer = 0;
@@ -88,8 +88,6 @@ function attachOwnerhipStars(card, starContainer) {
     if (i < owned) color = "green";
     if (aquired && i >= owned - aquired && i < owned) color = "orange";
 
-    starContainer.appendChild(
-      createDivision([`inventory_card_quantity_${color}`])
-    );
+    starContainer.appendChild(createDiv([`inventory_card_quantity_${color}`]));
   }
 }

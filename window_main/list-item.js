@@ -1,6 +1,6 @@
 const { DEFAULT_TILE } = require("../shared/constants");
 const db = require("../shared/database");
-const { createDivision } = require("../shared/dom-fns");
+const { createDiv } = require("../shared/dom-fns");
 
 class ListItem {
   constructor(_grpId, _id, _onClick, _onDelete = false, isArchived = false) {
@@ -11,19 +11,19 @@ class ListItem {
 
     this.id = _id;
 
-    this.container = createDivision(["list_item_container", _id]);
-    this.left = createDivision(["list_item_left"]);
-    this.center = createDivision(["list_item_center"]);
-    this.right = createDivision(["list_item_right"]);
+    this.container = createDiv(["list_item_container", _id]);
+    this.left = createDiv(["list_item_left"]);
+    this.center = createDiv(["list_item_center"]);
+    this.right = createDiv(["list_item_right"]);
     const archiveClass = isArchived
       ? "list_item_unarchive"
       : "list_item_archive";
-    this.deleteButton = createDivision([archiveClass]);
+    this.deleteButton = createDiv([archiveClass]);
     this.deleteButton.title = isArchived
       ? "restore"
       : "archive (will not delete data)";
     let cardObj = db.card(_grpId || DEFAULT_TILE);
-    this.imageContainer = createDivision(["list_item_image"]);
+    this.imageContainer = createDiv(["list_item_image"]);
     try {
       this.imageContainer.style.backgroundImage = `url(https://img.scryfall.com/cards${
         cardObj.images["art_crop"]
@@ -76,24 +76,24 @@ class ListItem {
   }
 
   divideLeft() {
-    this.leftTop = createDivision(["flex_top"]);
-    this.leftBottom = createDivision(["flex_bottom"]);
+    this.leftTop = createDiv(["flex_top"]);
+    this.leftBottom = createDiv(["flex_bottom"]);
     this.left.style.flexDirection = "column";
     this.left.appendChild(this.leftTop);
     this.left.appendChild(this.leftBottom);
   }
 
   divideCenter() {
-    this.centerTop = createDivision(["flex_top"]);
-    this.centerBottom = createDivision(["flex_bottom"]);
+    this.centerTop = createDiv(["flex_top"]);
+    this.centerBottom = createDiv(["flex_bottom"]);
     this.center.style.flexDirection = "column";
     this.center.appendChild(this.centerTop);
     this.center.appendChild(this.centerBottom);
   }
 
   divideRight() {
-    this.rightTop = createDivision(["flex_top"]);
-    this.rightBottom = createDivision(["flex_bottom"]);
+    this.rightTop = createDiv(["flex_top"]);
+    this.rightBottom = createDiv(["flex_bottom"]);
     this.right.style.flexDirection = "column";
     this.right.appendChild(this.rightTop);
     this.right.appendChild(this.rightBottom);

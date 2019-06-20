@@ -1,7 +1,7 @@
 const { shell } = require("electron");
 const db = require("../shared/database");
 const pd = require("../shared/player-data");
-const { queryElements: $$, createDivision } = require("../shared/dom-fns");
+const { queryElements: $$, createDiv } = require("../shared/dom-fns");
 const { addCardHover } = require("../shared/card-hover");
 const { toHHMMSS, toDDHHMMSS, timestamp } = require("../shared/util");
 const { tournamentCreate } = require("./tournaments");
@@ -44,25 +44,22 @@ function openHomeTab(arg, opentab = true) {
   }
 
   if (usersActive) {
-    let d = createDivision(["list_fill"]);
+    let d = createDiv(["list_fill"]);
     mainDiv.appendChild(d);
-    let title = createDivision(["card_tile_separator"], "General");
+    let title = createDiv(["card_tile_separator"], "General");
     mainDiv.appendChild(title);
-    let users = createDivision(
-      ["text_centered"],
-      "Users active: " + usersActive
-    );
+    let users = createDiv(["text_centered"], "Users active: " + usersActive);
     users.setAttribute("tooltip-content", "In the last 24 hours.");
     users.setAttribute("tooltip-bottom", "");
     users.style.textAlign = "center";
 
-    let daily = createDivision(
+    let daily = createDiv(
       ["text_centered", "white", "daily_left"],
       "Daily rewards end: -"
     );
     daily.style.textAlign = "center";
 
-    let weekly = createDivision(
+    let weekly = createDiv(
       ["text_centered", "white", "weekly_left"],
       "Weekly rewards end: -"
     );
@@ -85,14 +82,14 @@ function openHomeTab(arg, opentab = true) {
     mainDiv.appendChild(weekly);
   }
 
-  let d = createDivision(["list_fill"]);
+  let d = createDiv(["list_fill"]);
   mainDiv.appendChild(d);
-  let title = createDivision(["card_tile_separator"], "Tournaments");
+  let title = createDiv(["card_tile_separator"], "Tournaments");
   mainDiv.appendChild(title);
-  let cont = createDivision(["tournament_list_cont"]);
+  let cont = createDiv(["tournament_list_cont"]);
 
   if (ls.discordTag === null || ls.discordTag == "") {
-    let but = createDivision(["discord_but"]);
+    let but = createDiv(["discord_but"]);
     but.addEventListener("click", () => {
       let url =
         "https://discordapp.com/api/oauth2/authorize?client_id=531626302004789280&redirect_uri=http%3A%2F%2Fmtgatool.com%2Fdiscord%2F&response_type=code&scope=identify%20email&state=" +
@@ -103,7 +100,7 @@ function openHomeTab(arg, opentab = true) {
     cont.appendChild(but);
   } else {
     let dname = ls.discordTag.split("#")[0];
-    let fl = createDivision(
+    let fl = createDiv(
       ["flex_item"],
       `<div class="discord_icon"></div><div class="top_username discord_username">${dname}</div><div class="discord_message">Your discord tag will be visible to your opponents.</div>`
     );
@@ -111,7 +108,7 @@ function openHomeTab(arg, opentab = true) {
     fl.style.width = "fit-content";
     mainDiv.appendChild(fl);
 
-    let unlinkBut = createDivision(["button_simple", "centered"], "Unlink");
+    let unlinkBut = createDiv(["button_simple", "centered"], "Unlink");
     mainDiv.appendChild(unlinkBut);
 
     unlinkBut.addEventListener("click", () => {
@@ -123,11 +120,11 @@ function openHomeTab(arg, opentab = true) {
     if (tournaments_list) {
       // Create tournament button
       if (pd.name === "Manuel777#63494") {
-        let div = createDivision(["tou_container"]);
+        let div = createDiv(["tou_container"]);
         div.id = "create";
         div.style.justifyContent = "center";
-        let createBut = createDivision(["tou_create_but"]);
-        let nam = createDivision(["tou_name"], "Create tournament");
+        let createBut = createDiv(["tou_create_but"]);
+        let nam = createDiv(["tou_name"], "Create tournament");
         nam.style.width = "auto";
 
         div.appendChild(createBut);
@@ -137,10 +134,10 @@ function openHomeTab(arg, opentab = true) {
 
       // Tournaments list
       tournaments_list.forEach(function(tou, index) {
-        let div = createDivision(["tou_container"]);
+        let div = createDiv(["tou_container"]);
         div.id = tou._id;
 
-        let stat = createDivision(["top_status"]);
+        let stat = createDiv(["top_status"]);
         if (tou.password) {
           stat.classList.add("status_locked");
         } else {
@@ -216,14 +213,11 @@ function openHomeTab(arg, opentab = true) {
           stateb = "Winner: " + tou.winner.slice(0, -6);
         }
 
-        let nam = createDivision(["tou_name"], tou.name);
-        let fo = createDivision(["tou_cell"], tou.format);
-        let st = createDivision(["tou_state", "list_state_" + index], state);
-        let stb = createDivision(
-          ["tou_cell"],
-          tou.players.length + " players."
-        );
-        let pln = createDivision(["tou_cell", "list_stateb_" + index], stateb);
+        let nam = createDiv(["tou_name"], tou.name);
+        let fo = createDiv(["tou_cell"], tou.format);
+        let st = createDiv(["tou_state", "list_state_" + index], state);
+        let stb = createDiv(["tou_cell"], tou.players.length + " players.");
+        let pln = createDiv(["tou_cell", "list_stateb_" + index], stateb);
         pln.style.width = "140px";
         div.appendChild(stat);
         div.appendChild(nam);
@@ -260,16 +254,16 @@ function openHomeTab(arg, opentab = true) {
   });
 
   if (topWildcards) {
-    d = createDivision(["list_fill"]);
+    d = createDiv(["list_fill"]);
     mainDiv.appendChild(d);
-    title = createDivision(["card_tile_separator"], "Top Wildcards redeemed");
+    title = createDiv(["card_tile_separator"], "Top Wildcards redeemed");
     title.setAttribute("tooltip-content", "In the last 15 days.");
     title.setAttribute("tooltip-bottom", "");
     mainDiv.appendChild(title);
 
-    let setsContainer = createDivision(["top_wildcards_sets_cont"]);
+    let setsContainer = createDiv(["top_wildcards_sets_cont"]);
     orderedSets.forEach(set => {
-      let setbutton = createDivision(["set_filter"]);
+      let setbutton = createDiv(["set_filter"]);
       if (filteredWildcardsSet !== set) {
         setbutton.classList.add("set_filter_on");
       }
@@ -293,26 +287,26 @@ function openHomeTab(arg, opentab = true) {
     });
 
     mainDiv.appendChild(setsContainer);
-    cont = createDivision(["top_wildcards_cont"]);
+    cont = createDiv(["top_wildcards_cont"]);
 
     let cell;
-    cell = createDivision(["line_dark", "line_bottom_border"], "Top");
+    cell = createDiv(["line_dark", "line_bottom_border"], "Top");
     cell.style.gridArea = `1 / 1 / auto / 3`;
     cont.appendChild(cell);
 
-    cell = createDivision(["line_dark", "line_bottom_border"]);
+    cell = createDiv(["line_dark", "line_bottom_border"]);
     cell.style.gridArea = `1 / 3 / auto / 4`;
     cont.appendChild(cell);
 
-    cell = createDivision(["line_dark", "line_bottom_border"], "Name");
+    cell = createDiv(["line_dark", "line_bottom_border"], "Name");
     cell.style.gridArea = `1 / 4 / auto / 5`;
     cont.appendChild(cell);
 
-    cell = createDivision(["line_dark", "line_bottom_border"], "Ammount");
+    cell = createDiv(["line_dark", "line_bottom_border"], "Ammount");
     cell.style.gridArea = `1 / 5 / auto / 6`;
     cont.appendChild(cell);
 
-    cell = createDivision(["line_dark", "line_bottom_border"]);
+    cell = createDiv(["line_dark", "line_bottom_border"]);
     cell.style.gridArea = `1 / 6 / auto / 8`;
     cont.appendChild(cell);
 
@@ -320,12 +314,12 @@ function openHomeTab(arg, opentab = true) {
       let card = db.card(wc.grpId);
       let ld = index % 2 ? "line_dark" : "line_light";
 
-      cell = createDivision([ld], index + 1);
+      cell = createDiv([ld], index + 1);
       cell.style.gridArea = `${index + 2} / 1 / auto / auto`;
       cell.style.textAlign = "center";
       cont.appendChild(cell);
 
-      cell = createDivision(["top_wildcards_set_icon", ld]);
+      cell = createDiv(["top_wildcards_set_icon", ld]);
       cell.style.backgroundImage = `url(../images/sets/${
         db.sets[card.set].code
       }.png)`;
@@ -333,31 +327,31 @@ function openHomeTab(arg, opentab = true) {
       cell.style.gridArea = `${index + 2} / 2 / auto / auto`;
       cont.appendChild(cell);
 
-      cell = createDivision(["top_wildcards_set_icon", ld]);
+      cell = createDiv(["top_wildcards_set_icon", ld]);
       cell.style.backgroundImage = `url(../images/wc_${wc.rarity}.png)`;
       cell.title = wc.rarity;
       cell.style.gridArea = `${index + 2} / 3 / auto / auto`;
       cont.appendChild(cell);
 
-      cell = createDivision([ld], card.name);
+      cell = createDiv([ld], card.name);
       cell.style.gridArea = `${index + 2} / 4 / auto / auto`;
       cell.style.textDecoration = "underline dotted";
       cont.appendChild(cell);
       addCardHover(cell, card);
 
-      cell = createDivision([ld], wc.quantity);
+      cell = createDiv([ld], wc.quantity);
       cell.style.gridArea = `${index + 2} / 5 / auto / auto`;
       cont.appendChild(cell);
 
       if (wc.change == 0) {
-        cell = createDivision([ld]);
+        cell = createDiv([ld]);
       } else {
-        cell = createDivision([wc.change < 0 ? "arrow_down" : "arrow_up", ld]);
+        cell = createDiv([wc.change < 0 ? "arrow_down" : "arrow_up", ld]);
       }
       cell.style.gridArea = `${index + 2} / 6 / auto / auto`;
       cont.appendChild(cell);
 
-      cell = createDivision([ld], (wc.change > 0 ? "+" : "") + wc.change);
+      cell = createDiv([ld], (wc.change > 0 ? "+" : "") + wc.change);
       if (wc.change == 0) cell.innerHTML = "-";
       cell.style.gridArea = `${index + 2} / 7 / auto / auto`;
       cont.appendChild(cell);

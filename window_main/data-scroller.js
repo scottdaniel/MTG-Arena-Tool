@@ -1,4 +1,4 @@
-const { createDivision } = require("../shared/dom-fns");
+const { createDiv } = require("../shared/dom-fns");
 
 const {
   setLocalState,
@@ -17,7 +17,7 @@ class DataScroller {
   }
 
   render(loadMore, scrollTop) {
-    const d = createDivision(["list_fill"]);
+    const d = createDiv(["list_fill"]);
     this.container.appendChild(d);
     this.loaded = 0;
     this.dataIndex = 0;

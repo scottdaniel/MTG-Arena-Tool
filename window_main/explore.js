@@ -10,7 +10,7 @@ const {
   RANKS_SORT
 } = require("../shared/constants");
 const db = require("../shared/database");
-const { queryElements: $$, createDivision } = require("../shared/dom-fns");
+const { queryElements: $$, createDiv } = require("../shared/dom-fns");
 const { createSelect } = require("../shared/select");
 const {
   getReadableEvent,
@@ -77,16 +77,16 @@ function openExploreTab() {
   divFill.classList.add("list_fill");
   mainDiv.appendChild(divFill);
 
-  let exploreFiltersContainer = createDivision(["explore_buttons_container"]);
-  let exploreFiltersSelects = createDivision([
+  let exploreFiltersContainer = createDiv(["explore_buttons_container"]);
+  let exploreFiltersSelects = createDiv([
     "explore_buttons_row",
     "explore_buttons_top"
   ]);
-  let exploreFiltersButtons = createDivision([
+  let exploreFiltersButtons = createDiv([
     "explore_buttons_row",
     "explore_buttons_middle"
   ]);
-  let exploreFiltersInputs = createDivision([
+  let exploreFiltersInputs = createDiv([
     "explore_buttons_row",
     "explore_buttons_bottom"
   ]);
@@ -95,7 +95,7 @@ function openExploreTab() {
   exploreFiltersContainer.appendChild(exploreFiltersInputs);
   mainDiv.appendChild(exploreFiltersContainer);
 
-  let exploreList = createDivision(["explore_list"]);
+  let exploreList = createDiv(["explore_list"]);
   exploreList.id = "explore_list";
   mainDiv.appendChild(exploreList);
 
@@ -297,14 +297,14 @@ function drawFilters() {
   /**
    *  Mana filter
    **/
-  const manas = createDivision(["mana_filters_explore"]);
+  const manas = createDiv(["mana_filters_explore"]);
   COLORS_BRIEF.forEach(function(s, i) {
     const mi = [1, 2, 3, 4, 5];
     let mf = "";
     if (!inputMana.includes(mi[i])) {
       mf = "mana_filter_on";
     }
-    const manabutton = createDivision(["mana_filter", mf]);
+    const manabutton = createDiv(["mana_filter", mf]);
     manabutton.style.backgroundImage = "url(../images/" + s + "20.png)";
     manabutton.addEventListener("click", function() {
       if ([...manabutton.classList].includes("mana_filter_on")) {
@@ -326,13 +326,13 @@ function drawFilters() {
    *  Rank filter
    **/
   if (inputFilterType !== "Events") {
-    const ranks_filters = createDivision(["mana_filters_explore"]);
+    const ranks_filters = createDiv(["mana_filters_explore"]);
     RANKS.forEach(function(rr, index) {
       let mf = "";
       if (!inputRanks.includes(rr)) {
         mf = "rank_filter_on";
       }
-      const rankbutton = createDivision(["rank_filter", mf], "", { title: rr });
+      const rankbutton = createDiv(["rank_filter", mf], "", { title: rr });
       rankbutton.style.backgroundPosition = (index + 1) * -16 + "px 0px";
       rankbutton.style.backgroundImage = "url(../images/ranks_16.png)";
       rankbutton.addEventListener("click", function() {
@@ -355,7 +355,7 @@ function drawFilters() {
   /**
    * Search button.
    **/
-  let searchButton = createDivision(["button_simple"], "Search");
+  let searchButton = createDiv(["button_simple"], "Search");
   searchButton.id = "explore_query_button";
   searchButton.margin = "0px !important;";
   buttonsBottom.appendChild(searchButton);
@@ -405,12 +405,9 @@ function handleNewSearch() {
 
 //
 function wildcardsInput(_class, _id, _default) {
-  let inputContainer = createDivision([
-    "input_container_explore",
-    "auto_width"
-  ]);
+  let inputContainer = createDiv(["input_container_explore", "auto_width"]);
 
-  let label = createDivision([_class, "wc_search_icon"]);
+  let label = createDiv([_class, "wc_search_icon"]);
   label.style.display = "table";
   label.style.justifySelf = "center";
   label.style.marginRight = "0px";
@@ -440,7 +437,7 @@ function queryExplore() {
   const exploreList = document.getElementById("explore_list");
   let loadMessage = document.getElementById("explore_load_message");
   if (!loadMessage) {
-    loadMessage = createDivision(["text_centered", "white"], "Loading...");
+    loadMessage = createDiv(["text_centered", "white"], "Loading...");
     loadMessage.id = "explore_load_message";
     exploreList.appendChild(loadMessage);
   }
@@ -549,7 +546,7 @@ function deckLoad(_deck, index) {
   var mainDiv = document.getElementById("explore_list");
   index = "result_" + index;
 
-  var flcf = createDivision(["flex_item"]);
+  var flcf = createDiv(["flex_item"]);
   flcf.style.width = "20%";
   flcf.style.justifyContent = "center";
 
@@ -559,10 +556,7 @@ function deckLoad(_deck, index) {
   CARD_RARITIES.forEach(rarity => {
     const key = rarity[0];
     if (_deck.wildcards.hasOwnProperty(key) && _deck.wildcards[key] > 0) {
-      wc = createDivision(
-        ["wc_explore_cost", "wc_" + rarity],
-        _deck.wildcards[key]
-      );
+      wc = createDiv(["wc_explore_cost", "wc_" + rarity], _deck.wildcards[key]);
       wc.title = _.capitalize(rarity) + " wildcards needed.";
       flcf.appendChild(wc);
       n++;
@@ -570,10 +564,10 @@ function deckLoad(_deck, index) {
   });
 
   if (n == 0) {
-    wc = createDivision(["wc_complete"]);
+    wc = createDiv(["wc_complete"]);
     flcf.appendChild(wc);
   } else {
-    let bo = createDivision(["bo_explore_cost"], Math.round(boosterCost));
+    let bo = createDiv(["bo_explore_cost"], Math.round(boosterCost));
     bo.title = "Boosters needed (estimated)";
     flcf.appendChild(bo);
   }
@@ -593,37 +587,37 @@ function deckLoad(_deck, index) {
     tileGrpid = DEFAULT_TILE;
   }
 
-  var tile = createDivision([index + "t", "deck_tile"]);
+  var tile = createDiv([index + "t", "deck_tile"]);
   tile.style.backgroundImage =
     "url(https://img.scryfall.com/cards" +
     db.card(tileGrpid).images["art_crop"] +
     ")";
 
-  var div = createDivision([index, "list_deck"]);
+  var div = createDiv([index, "list_deck"]);
 
-  var fll = createDivision(["flex_item"]);
+  var fll = createDiv(["flex_item"]);
 
-  var flc = createDivision(["flex_item"]);
+  var flc = createDiv(["flex_item"]);
   flc.style.flexDirection = "column";
   flc.style.width = "40%";
 
-  var flr = createDivision(["flex_item"]);
+  var flr = createDiv(["flex_item"]);
   flr.style.flexDirection = "column";
   flr.style.justifyContent = "center";
   flr.style.overflow = "hidden";
   flr.style.width = "40%";
 
-  var flt = createDivision(["flex_top"]);
+  var flt = createDiv(["flex_top"]);
 
-  var flb = createDivision(["flex_bottom"]);
+  var flb = createDiv(["flex_bottom"]);
 
   let d;
-  d = createDivision(["list_deck_name"], _deck.name);
+  d = createDiv(["list_deck_name"], _deck.name);
   flt.appendChild(d);
 
   let pname =
     _deck.player.length > 1 ? `Various (${_deck.player.length})` : _deck.player;
-  d = createDivision(["list_deck_name_it"], "by " + pname);
+  d = createDiv(["list_deck_name_it"], "by " + pname);
   if (pname !== _deck.player) {
     d.style.textDecoration = "underline dotted";
     d.title = _deck.player;
@@ -631,12 +625,12 @@ function deckLoad(_deck, index) {
   flt.appendChild(d);
 
   _deck.colors.forEach(function(color) {
-    let manaIcon = createDivision(["mana_s20", "mana_" + MANA[color]]);
+    let manaIcon = createDiv(["mana_s20", "mana_" + MANA[color]]);
     flb.appendChild(manaIcon);
   });
 
   let colClass = getWinrateClass((1 / _deck.mt) * _deck.mw);
-  d = createDivision(
+  d = createDiv(
     ["list_deck_record"],
     `${_deck.mw}:${_deck.ml} <span class="${colClass}_bright">(${Math.round(
       (100 / _deck.mt) * _deck.mw
@@ -645,17 +639,17 @@ function deckLoad(_deck, index) {
 
   flr.appendChild(d);
 
-  let rcont = createDivision(["flex_item"]);
+  let rcont = createDiv(["flex_item"]);
   rcont.style.marginRight = "16px";
   rcont.style.marginLeft = "auto";
 
-  let eventName = createDivision(["list_deck_name_it"], db.events[_deck.event]);
+  let eventName = createDiv(["list_deck_name_it"], db.events[_deck.event]);
   rcont.appendChild(eventName);
 
   _deck.rank.sort((a, b) => RANKS_SORT[a] - RANKS_SORT[b]);
 
   _deck.rank.forEach(_rank => {
-    let rankIcon = createDivision(["ranks_16"]);
+    let rankIcon = createDiv(["ranks_16"]);
     rankIcon.style.marginTop = "4px";
     rankIcon.style.backgroundPosition =
       get_rank_index_16(_rank) * -16 + "px 0px";

@@ -2,7 +2,7 @@ const anime = require("animejs");
 
 const { MANA } = require("../shared/constants");
 const pd = require("../shared/player-data");
-const { createDivision, queryElementsByClass } = require("../shared/dom-fns");
+const { createDiv, queryElementsByClass } = require("../shared/dom-fns");
 const {
   compare_cards,
   get_deck_colors,
@@ -32,7 +32,7 @@ let sortedEvents;
 
 function openEventsTab(_filters, dataIndex = 25, scrollTop = 0) {
   const mainDiv = resetMainContainer();
-  const d = createDivision(["list_fill"]);
+  const d = createDiv(["list_fill"]);
   mainDiv.appendChild(d);
 
   sortedEvents = [...pd.events];
@@ -40,7 +40,7 @@ function openEventsTab(_filters, dataIndex = 25, scrollTop = 0) {
   filters = { ...filters, ..._filters };
   filteredMatches = new Aggregator(filters);
 
-  const eventsTop = createDivision(["events_top"]);
+  const eventsTop = createDiv(["events_top"]);
   eventsTop.style.display = "flex";
   eventsTop.style.width = "100%";
   eventsTop.style.alignItems = "center";
@@ -117,7 +117,7 @@ function renderData(container, index) {
   listItem.divideRight();
   attachEventData(listItem, course);
 
-  var divExp = createDivision([course.id + "exp", "list_event_expand"]);
+  var divExp = createDiv([course.id + "exp", "list_event_expand"]);
 
   container.appendChild(listItem.container);
   container.appendChild(divExp);
@@ -184,29 +184,27 @@ function getCourseStats(course) {
 
 function attachEventData(listItem, course) {
   let deckName = getReadableEvent(course.InternalEventName);
-  let deckNameDiv = createDivision(["list_deck_name"], deckName);
+  let deckNameDiv = createDiv(["list_deck_name"], deckName);
   listItem.leftTop.appendChild(deckNameDiv);
 
   course.CourseDeck.colors.forEach(color => {
-    let m = createDivision(["mana_s20", `mana_${MANA[color]}`]);
+    let m = createDiv(["mana_s20", `mana_${MANA[color]}`]);
     listItem.leftBottom.appendChild(m);
   });
 
   var eventState = course.CurrentEventState;
   if (eventState == "DoneWithMatches" || eventState == 2) {
-    listItem.rightTop.appendChild(
-      createDivision(["list_event_phase"], "Completed")
-    );
+    listItem.rightTop.appendChild(createDiv(["list_event_phase"], "Completed"));
   } else {
     listItem.rightTop.appendChild(
-      createDivision(["list_event_phase_red"], "In progress")
+      createDiv(["list_event_phase_red"], "In progress")
     );
   }
 
   const stats = getCourseStats(course);
 
   listItem.rightBottom.appendChild(
-    createDivision(
+    createDiv(
       ["list_match_time"],
       timeSince(new Date(course.date)) + " ago - " + toMMSS(stats.duration)
     )
@@ -226,7 +224,7 @@ function attachEventData(listItem, course) {
     CurrentLosses: losses
   });
 
-  let resultDiv = createDivision(["list_match_result", winLossClass], wl);
+  let resultDiv = createDiv(["list_match_result", winLossClass], wl);
   resultDiv.style.marginLeft = "8px";
   listItem.right.after(resultDiv);
 }
@@ -245,11 +243,11 @@ function createMatchRow(match) {
   matchRow.divideLeft();
   matchRow.divideRight();
 
-  let deckNameDiv = createDivision(["list_deck_name"], match.playerDeck.name);
+  let deckNameDiv = createDiv(["list_deck_name"], match.playerDeck.name);
   matchRow.leftTop.appendChild(deckNameDiv);
 
   match.playerDeck.colors.forEach(color => {
-    var m = createDivision(["mana_s20", "mana_" + MANA[color]]);
+    var m = createDiv(["mana_s20", "mana_" + MANA[color]]);
     matchRow.leftBottom.appendChild(m);
   });
 
@@ -257,34 +255,34 @@ function createMatchRow(match) {
   if (match.opponent.name == null) {
     match.opponent.name = "-#000000";
   }
-  let oppNameDiv = createDivision(
+  let oppNameDiv = createDiv(
     ["list_match_title"],
     "vs " + match.opponent.name.slice(0, -6)
   );
   matchRow.rightTop.appendChild(oppNameDiv);
 
-  var oppRankDiv = createDivision(["ranks_16"]);
+  var oppRankDiv = createDiv(["ranks_16"]);
   oppRankDiv.style.backgroundPosition = `${get_rank_index_16(
     match.opponent.rank
   ) * -16}px 0px`;
   oppRankDiv.title = match.opponent.rank + " " + match.opponent.tier;
   matchRow.rightTop.appendChild(oppRankDiv);
 
-  let timeDiv = createDivision(
+  let timeDiv = createDiv(
     ["list_match_time"],
     timeSince(new Date(match.date)) + " ago - " + toMMSS(match.duration)
   );
   matchRow.rightBottom.appendChild(timeDiv);
 
   get_deck_colors(match.oppDeck).forEach(function(color) {
-    var m = createDivision(["mana_s20", "mana_" + MANA[color]]);
+    var m = createDiv(["mana_s20", "mana_" + MANA[color]]);
     matchRow.rightBottom.appendChild(m);
   });
 
   matchRow.rightBottom.style.marginRight = "16px";
 
   var winLossClass = match.player.win > match.opponent.win ? "green" : "red";
-  let resultDiv = createDivision(
+  let resultDiv = createDiv(
     ["list_match_result", winLossClass],
     match.player.win + ":" + match.opponent.win
   );

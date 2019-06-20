@@ -1,7 +1,7 @@
 const _ = require("lodash");
 const { shell } = require("electron");
 const db = require("./database.js");
-const { createDivision } = require("../shared/dom-fns");
+const { createDiv } = require("../shared/dom-fns");
 const { addCardHover } = require("../shared/card-hover");
 const { get_wc_missing, get_set_scryfall } = require("../shared/util");
 
@@ -66,7 +66,7 @@ function rankingClassName(ranking) {
 }
 
 exports.cardSeparator = function(str) {
-  return createDivision(["card_tile_separator"], str);
+  return createDiv(["card_tile_separator"], str);
 };
 
 exports.cardTile = function(
@@ -113,7 +113,7 @@ function drawCardTileArena(
   deck,
   isSideboard
 ) {
-  const cont = createDivision(["card_tile_container", "click-on"]);
+  const cont = createDiv(["card_tile_container", "click-on"]);
   cont.dataset["grpId"] = grpId;
   cont.dataset["id"] = indent;
   cont.dataset["quantity"] = quantity;
@@ -127,17 +127,14 @@ function drawCardTileArena(
     //
     const col = rankingClassName(quantity);
     cont.appendChild(
-      createDivision(["card_tile_odds", col], `<span>${quantity}</span>`)
+      createDiv(["card_tile_odds", col], `<span>${quantity}</span>`)
     );
   } else if (quantity == 9999) {
     ww = 32;
     ll = 17;
 
     //
-    const quantityDiv = createDivision(
-      ["card_tile_quantity"],
-      `<span>1</span>`
-    );
+    const quantityDiv = createDiv(["card_tile_quantity"], `<span>1</span>`);
     quantityDiv.style.cssText =
       "color: rgba(255, 255, 255, 0); min-width: 0px; width: 0px;";
     cont.appendChild(quantityDiv);
@@ -146,7 +143,7 @@ function drawCardTileArena(
     ll = 49;
 
     //
-    const quantityDiv = createDivision(
+    const quantityDiv = createDiv(
       ["card_tile_quantity"],
       `<span>${quantity}</span>`
     );
@@ -154,20 +151,18 @@ function drawCardTileArena(
   }
 
   //
-  const cardTile = createDivision(["card_tile", frameClassName(card)]);
+  const cardTile = createDiv(["card_tile", frameClassName(card)]);
   cardTile.id = `t${grpId + indent}`;
   cardTile.style.cssText = `min-width: calc(100% - ${ww}px);`;
   // cardTile.style.minWidth = `calc(100% - ${ww}px)`;
 
   //
-  const fl = createDivision(["flex_item"]);
-  fl.appendChild(
-    createDivision(["card_tile_name"], card ? card.name : "Unknown")
-  );
+  const fl = createDiv(["flex_item"]);
+  fl.appendChild(createDiv(["card_tile_name"], card ? card.name : "Unknown"));
   cardTile.appendChild(fl);
 
   //
-  const fl2 = createDivision(["flex_item"]);
+  const fl2 = createDiv(["flex_item"]);
   fl2.style.lineHeight = "26px";
 
   if (card) {
@@ -181,7 +176,7 @@ function drawCardTileArena(
         }
         prevc = /^\d+$/.test(cost);
       }
-      fl2.appendChild(createDivision(["mana_s16", "flex_end", `mana_${cost}`]));
+      fl2.appendChild(createDiv(["mana_s16", "flex_end", `mana_${cost}`]));
     });
   }
   cardTile.appendChild(fl2);
@@ -189,7 +184,7 @@ function drawCardTileArena(
   cont.appendChild(cardTile);
 
   // Glow hover
-  const glow = createDivision(["card_tile_glow"]);
+  const glow = createDiv(["card_tile_glow"]);
   glow.id = `t${grpId + indent}`;
   glow.style.cssText = `min-width: calc(100% - ${ww}px); left: calc(0px - 100% + ${ll}px)`;
 
@@ -220,7 +215,7 @@ function drawCardTileArena(
     if (card && card.type.indexOf("Basic Land") == -1) {
       const missing = get_wc_missing(deck, grpId, isSideboard);
       if (missing > 0) {
-        const asasdf = createDivision(["not_owned_sprite"]);
+        const asasdf = createDiv(["not_owned_sprite"]);
         const xoff = rarities[card.rarity] * -24;
         const yoff = missing * -24;
         asasdf.style.cssText = `background-position: ${xoff}px ${yoff}px; left: calc(0px - 100% + ${ww -
@@ -242,7 +237,7 @@ function drawCardTileFlat(
   deck,
   isSideboard
 ) {
-  const cont = createDivision(["card_tile_container_flat", "click-on"]);
+  const cont = createDiv(["card_tile_container_flat", "click-on"]);
   cont.dataset["grpId"] = grpId;
   cont.dataset["id"] = indent;
   cont.dataset["quantity"] = quantity;
@@ -250,19 +245,19 @@ function drawCardTileFlat(
   if (!isNumber(quantity)) {
     // Text quantity
     const col = rankingClassName(quantity);
-    const quantityDiv = createDivision(["card_tile_odds_flat", col], quantity);
+    const quantityDiv = createDiv(["card_tile_odds_flat", col], quantity);
     cont.appendChild(quantityDiv);
   } else if (quantity == 9999) {
     // Undefined Quantity
-    const quantityDiv = createDivision(["card_tile_quantity_flat"], 1);
+    const quantityDiv = createDiv(["card_tile_quantity_flat"], 1);
     cont.appendChild(quantityDiv);
   } else {
     // Normal Quantity
-    const quantityDiv = createDivision(["card_tile_quantity_flat"], quantity);
+    const quantityDiv = createDiv(["card_tile_quantity_flat"], quantity);
     cont.appendChild(quantityDiv);
   }
 
-  const cardTile = createDivision(["card_tile_crop_flat"]);
+  const cardTile = createDiv(["card_tile_crop_flat"]);
   try {
     if (card.type == "Special") {
       cardTile.style.backgroundImage = `url(${card.images["art_crop"]})`;
@@ -293,10 +288,10 @@ function drawCardTileFlat(
   cardTile.style.borderImage = `linear-gradient(to bottom, var(--color-${colorA}) 30%, var(--color-${colorB}) 70%) 1 100%`;
 
   let name = card ? card.name : "Unknown";
-  let cardName = createDivision(["card_tile_name_flat"], name);
+  let cardName = createDiv(["card_tile_name_flat"], name);
   cont.appendChild(cardName);
 
-  const cardCost = createDivision(["cart_tile_mana_flat"]);
+  const cardCost = createDiv(["cart_tile_mana_flat"]);
   if (card) {
     let prevc = true;
     const hasSplitCost = card.dfc === "SplitHalf";
@@ -308,9 +303,7 @@ function drawCardTileFlat(
         }
         prevc = /^\d+$/.test(cost);
       }
-      cardCost.appendChild(
-        createDivision(["mana_s16", "flex_end", `mana_${cost}`])
-      );
+      cardCost.appendChild(createDiv(["mana_s16", "flex_end", `mana_${cost}`]));
     });
   }
   cont.appendChild(cardCost);
@@ -341,7 +334,7 @@ function drawCardTileFlat(
     if (card && card.type.indexOf("Basic Land") == -1) {
       const missing = get_wc_missing(deck, grpId, isSideboard);
       if (missing > 0) {
-        const asasdf = createDivision(["not_owned_sprite_flat"]);
+        const asasdf = createDiv(["not_owned_sprite_flat"]);
         const xoff = rarities[card.rarity] * -24;
         const yoff = missing * -24;
         asasdf.style.cssText = `background-position: ${xoff}px ${yoff}px;);`;

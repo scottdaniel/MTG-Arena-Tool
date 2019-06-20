@@ -25,9 +25,8 @@ function createElement(type, classNames = [], innerHTML = "", attrs = {}) {
   return el;
 }
 
-exports.createDivision = createDivision;
-exports.createDiv = createDivision;
-function createDivision(classNames, innerHTML, attrs = {}) {
+exports.createDiv = createDiv;
+function createDiv(classNames, innerHTML, attrs = {}) {
   return createElement("div", classNames, innerHTML, attrs);
 }
 

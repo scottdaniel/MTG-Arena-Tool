@@ -1,6 +1,6 @@
 const { COLORS_ALL, COLORS_BRIEF } = require("../shared/constants");
 const pd = require("../shared/player-data");
-const { createDivision } = require("../shared/dom-fns");
+const { createDiv } = require("../shared/dom-fns");
 const { createSelect } = require("../shared/select");
 const {
   getReadableEvent,
@@ -107,15 +107,15 @@ class FilterPanel {
   }
 
   render() {
-    const container = createDivision([this.prefixId + "_filter"]);
+    const container = createDiv([this.prefixId + "_filter"]);
     container.style.display = "flex";
     container.style.width = "100%";
     container.style.alignItems = "center";
     container.style.justifyContent = "space-between";
 
-    const columnA = createDivision([]);
+    const columnA = createDiv([]);
 
-    const dataCont = createDivision([]);
+    const dataCont = createDiv([]);
 
     dataCont.style.display = "flex";
     const dateSelect = createSelect(
@@ -171,10 +171,10 @@ class FilterPanel {
 
     const showColumnB = this.tags.length || this.showManaFilter;
     if (showColumnB) {
-      const columnB = createDivision([]);
+      const columnB = createDiv([]);
 
       if (this.tags.length || this.decks.length) {
-        const deckFiltersCont = createDivision([]);
+        const deckFiltersCont = createDiv([]);
         deckFiltersCont.style.display = "flex";
         deckFiltersCont.style.width = "100%";
         deckFiltersCont.style.alignItems = "center";
@@ -209,7 +209,7 @@ class FilterPanel {
           );
           deckSelect.style.width = "180px";
         } else {
-          const deckSpacer = createDivision([]);
+          const deckSpacer = createDiv([]);
           deckSpacer.style.width = "180px";
           deckFiltersCont.appendChild(deckSpacer);
         }
@@ -218,7 +218,7 @@ class FilterPanel {
       }
 
       if (this.showManaFilter) {
-        const manas = createDivision([this.prefixId + "_query_mana"]);
+        const manas = createDiv([this.prefixId + "_query_mana"]);
         manas.style.display = "flex";
         manas.style.margin = "8px";
         manas.style.width = "150px";
@@ -228,7 +228,7 @@ class FilterPanel {
           if (!this.filters.colors[code]) {
             filterClasses.push("mana_filter_on");
           }
-          var manabutton = createDivision(filterClasses);
+          var manabutton = createDiv(filterClasses);
           manabutton.style.backgroundImage = `url(../images/${code}20.png)`;
           manabutton.style.width = "30px";
           manabutton.addEventListener("click", () => {
@@ -251,7 +251,7 @@ class FilterPanel {
 
     const showColumnC = this.archs.length || this.showOppManaFilter;
     if (showColumnC) {
-      const columnC = createDivision([]);
+      const columnC = createDiv([]);
 
       if (this.archs.length) {
         const archSelect = createSelect(
@@ -270,7 +270,7 @@ class FilterPanel {
       }
 
       if (this.showOppManaFilter) {
-        const manas = createDivision([this.prefixId + "_query_mana"]);
+        const manas = createDiv([this.prefixId + "_query_mana"]);
         manas.style.display = "flex";
         manas.style.margin = "8px";
         manas.style.width = "150px";
@@ -280,7 +280,7 @@ class FilterPanel {
           if (!this.filters.oppColors[code]) {
             filterClasses.push("mana_filter_on");
           }
-          var manabutton = createDivision(filterClasses);
+          var manabutton = createDiv(filterClasses);
           manabutton.style.backgroundImage = `url(../images/${code}20.png)`;
           manabutton.style.width = "30px";
           manabutton.addEventListener("click", () => {
@@ -301,7 +301,7 @@ class FilterPanel {
       container.appendChild(columnC);
     } else {
       // spacer
-      const opSpacer = createDivision([]);
+      const opSpacer = createDiv([]);
       opSpacer.style.width = "180px";
       container.appendChild(opSpacer);
     }
