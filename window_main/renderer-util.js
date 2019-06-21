@@ -633,11 +633,21 @@ function toggleVisibility(...ids) {
 
 //
 exports.addCheckbox = addCheckbox;
-function addCheckbox(div, label, id, def, func) {
+function addCheckbox(div, label, id, def, func, disabled = false) {
   const labelEl = createLabel(["check_container", "hover_label"], label);
+  if (disabled) {
+    labelEl.classList.remove("hover_label");
+    labelEl.style.cursor = "default";
+    labelEl.style.opacity = 0.4;
+  }
 
-  const checkbox = createInput([], "", { type: "checkbox", id, checked: def });
-  checkbox.addEventListener("click", func);
+  const checkbox = createInput([], "", {
+    type: "checkbox",
+    id,
+    checked: def,
+    disabled
+  });
+  if (!disabled) checkbox.addEventListener("click", func);
   labelEl.appendChild(checkbox);
   labelEl.appendChild(createSpan(["checkmark"]));
 

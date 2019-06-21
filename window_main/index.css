@@ -1828,7 +1828,6 @@ a:hover {
 .check_container input {
     position: absolute;
     opacity: 0;
-    cursor: pointer;
 }
 
 /* Create a custom checkbox */
@@ -1844,7 +1843,7 @@ a:hover {
 }
 
 /* On mouse-over, add a grey background color */
-.check_container:hover input ~ .checkmark {
+.check_container:hover input:enabled ~ .checkmark {
     background-color: var(--color-mid-50);
     border: 1px solid var(--color-light);
 }
