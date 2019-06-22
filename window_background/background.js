@@ -1644,7 +1644,7 @@ function setDraftData(data) {
 //
 function endDraft(data) {
   duringDraft = false;
-  if (!firstPass) ipc_send("set_arena_state", ARENA_MODE_IDLE);
+  if (debugLog || !firstPass) ipc_send("set_arena_state", ARENA_MODE_IDLE);
   httpApi.httpSetDraft(data);
   ipc_send("popup", { text: "Draft saved!", time: 3000 });
 }
