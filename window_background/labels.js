@@ -22,12 +22,11 @@
     saveEconomyTransaction
     matchBeginTime
     createMatch
-    draftSet
-    currentDraft
     createDraft
-    setDraftCards
+    endDraft
+    setDraftData
+    startDraft
     clear_deck
-    saveDraft
     duringMatch
     playerWin
     draws
@@ -214,6 +213,14 @@ function onLabelOutLogInfo(entry, json) {
       matchGameStats[gameNumberCompleted - 1] = game;
 
       saveMatch(mid);
+    }
+  }
+  if (json.params.messageName === "Client.SceneChange") {
+    const { toSceneName } = json.params.payloadObject;
+    if (toSceneName === "Home") {
+      if (!firstPass) ipc_send("set_arena_state", ARENA_MODE_IDLE);
+      duringMatch = false;
+      endDraft();
     }
   }
 }
@@ -635,74 +642,85 @@ function onLabelOutEventAIPractice(entry, json) {
   select_deck(deck);
 }
 
-function onLabelInDraftDraftStatus(entry, json) {
-  if (!json) return;
-
-  if (json.eventName != undefined) {
-    for (let set in db.sets) {
-      let setCode = db.sets[set]["code"];
-      if (json.eventName.indexOf(setCode) !== -1) {
-        draftSet = set;
-      }
+function getDraftSet(eventName) {
+  if (!eventName) return "";
+  for (let set in db.sets) {
+    const setCode = db.sets[set].code;
+    if (eventName.includes(setCode)) {
+      return set;
     }
   }
+  return "";
+}
 
-  if (
-    currentDraft == undefined ||
-    (json.packNumber == 0 && json.pickNumber <= 0)
-  ) {
-    createDraft();
-  }
-  currentDraft.packNumber = json.packNumber;
-  currentDraft.pickNumber = json.pickNumber;
-  currentDraft.pickedCards = json.pickedCards;
-  currentDraft.currentPack = json.draftPack.slice(0);
-  setDraftCards(currentDraft);
+function getDraftData(id) {
+  const draftData = pd.draft(id) || {
+    ...createDraft(),
+    id,
+    draftId: id,
+    date: new Date(),
+    owner: pd.name
+  };
+  return draftData;
+}
+
+function onLabelInDraftDraftStatus(entry, json) {
+  // console.log("LABEL:  Draft status ", json);
+  if (!json) return;
+  startDraft();
+  const { draftId, eventName } = json;
+  const data = {
+    ...getDraftData(draftId),
+    ...json,
+    currentPack: (json.draftPack || []).slice(0)
+  };
+  data.draftId = data.id;
+  data.set = getDraftSet(eventName) || data.set;
+  setDraftData(data);
 }
 
 function onLabelInDraftMakePick(entry, json) {
+  // console.log("LABEL:  Make pick > ", json);
   if (!json) return;
-  // store pack in recording
-  if (json.eventName != undefined) {
-    for (let set in db.sets) {
-      let setCode = db.sets[set]["code"];
-      if (json.eventName.indexOf(setCode) !== -1) {
-        currentDraft.set = set;
-      }
-    }
-  }
-
-  if (json.draftPack != undefined) {
-    if (currentDraft == undefined) {
-      createDraft();
-    }
-    currentDraft.packNumber = json.packNumber;
-    currentDraft.pickNumber = json.pickNumber;
-    currentDraft.pickedCards = json.pickedCards;
-    currentDraft.currentPack = json.draftPack.slice(0);
-    setDraftCards(currentDraft);
-  }
+  const { draftId, eventName } = json;
+  startDraft();
+  const data = {
+    ...getDraftData(draftId),
+    ...json,
+    currentPack: (json.draftPack || []).slice(0)
+  };
+  data.draftId = data.id;
+  data.set = getDraftSet(eventName) || data.set;
+  setDraftData(data);
 }
 
 function onLabelOutDraftMakePick(entry, json) {
-  if (!json) return;
-  // store pick in recording
-  var value = {};
-  value.pick = json.params.cardId;
-  value.pack = currentDraft.currentPack;
-  var key = "pack_" + json.params.packNumber + "pick_" + json.params.pickNumber;
-  currentDraft[key] = value;
+  // console.log("LABEL:  Make pick < ", json);
+  if (!json || !json.params) return;
+  const { draftId, packNumber, pickNumber, cardId } = json.params;
+  const key = "pack_" + packNumber + "pick_" + pickNumber;
+  const data = getDraftData(draftId);
+  data[key] = {
+    pick: cardId,
+    pack: data.currentPack
+  };
+  setDraftData(data);
 }
 
 function onLabelInEventCompleteDraft(entry, json) {
+  // console.log("LABEL:  Complete draft ", json);
   if (!json) return;
-  clear_deck();
-  if (!firstPass) ipc_send("set_arena_state", ARENA_MODE_IDLE);
-  //ipc_send("renderer_show", 1);
-
-  currentDraft.draftId = json.Id;
-  console.log("Complete draft", json);
-  saveDraft();
+  const toolId = json.Id + "-draft";
+  const savedData = getDraftData(toolId);
+  const draftId = json.ModuleInstanceData.DraftInfo.DraftId;
+  const data = {
+    ...savedData,
+    ...getDraftData(draftId),
+    ...json
+  };
+  data.id = toolId;
+  setDraftData(data);
+  endDraft(data);
 }
 
 function onLabelMatchGameRoomStateChangedEvent(entry, json) {
