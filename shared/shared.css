@@ -221,7 +221,7 @@ label {
     top: -200%;
 }
 .loading_r {
-    background-color: #DD8263;
+    background-color: var(--color-r);
     animation-delay: 1.2s;
     top: -300%;
 }
