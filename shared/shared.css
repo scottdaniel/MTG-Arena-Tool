@@ -15,6 +15,21 @@
   --color-g: #B7C89E;
   --color-c: #B6A59E;
   --color-m: #FFCD70;
+  --color-highlight: #d2e7fa;
+
+  --color-light: rgba(250, 229, 210, 1);
+  --color-light-20: rgba(250, 229, 210, 0.20);
+  --color-light-40: rgba(250, 229, 210, 0.40);
+  --color-light-50: rgba(250, 229, 210, 0.50);
+  --color-light-66: rgba(250, 229, 210, 0.66);
+  --color-light-75: rgba(250, 229, 210, 0.75);
+
+  --color-mid: rgba(145, 121, 97, 1);
+  --color-mid-20: rgba(145, 121, 97, 0.20);
+  --color-mid-40: rgba(145, 121, 97, 0.40);
+  --color-mid-50: rgba(145, 121, 97, 0.50);
+  --color-mid-66: rgba(145, 121, 97, 0.66);
+  --color-mid-75: rgba(145, 121, 97, 0.75);
 }
 
 html {
@@ -36,13 +51,13 @@ body {
 
 label {
     font-family: var(--main-font-name);
-    color: rgba(250, 229, 210, 1);
+    color: var(--color-light);
     margin: auto 0;
 }
 
 
 .hover_label {
-    color: rgba(250, 229, 210, 0.8) !important;
+    color: var(--color-light-75) !important;
 }
 
 .hover_label:hover {
@@ -152,7 +167,7 @@ label {
 
 
 .loading_bar {
-    background-color: #B7C89E;
+    background-color: var(--color-g);
     overflow: hidden;
     width: 100%;
     height: 4px;
@@ -163,7 +178,7 @@ label {
 }
 
 .loading_bar_main {
-    background-color: #B7C89E;
+    background-color: var(--color-g);
     overflow: hidden;
     width: calc(100% - 4px);
     height: 4px;
@@ -191,17 +206,17 @@ label {
 }
 
 .loading_w {
-    background-color: #E7CA8E;
+    background-color: var(--color-w);
     animation-delay: 0s;
     top: 0px;
 }
 .loading_u {
-    background-color: #AABEDF;
+    background-color: var(--color-u);
     animation-delay: 0.4s;
     top: -100%;
 }
 .loading_b {
-    background-color: #A18E87;
+    background-color: var(--color-b);
     animation-delay: 0.8s;
     top: -200%;
 }
@@ -211,7 +226,7 @@ label {
     top: -300%;
 }
 .loading_g {
-    background-color: #B7C89E;
+    background-color: var(--color-g);
     animation-delay: 1.6s;
     top: -400%;
 }
@@ -233,25 +248,25 @@ label {
 }
 
 @keyframes color {
-    0%  {background-color: #E7CA8E;}
-    19% {background-color: #E7CA8E;}
+    0%  {background-color: var(--color-w);}
+    19% {background-color: var(--color-w);}
 
-    20% {background-color: #AABEDF;}
-    39% {background-color: #AABEDF;}
+    20% {background-color: var(--color-u);}
+    39% {background-color: var(--color-u);}
 
-    40% {background-color: #A18E87;}
-    59% {background-color: #A18E87;}
+    40% {background-color: var(--color-b);}
+    59% {background-color: var(--color-b);}
 
-    60% {background-color: #DD8263;}
-    79% {background-color: #DD8263;}
+    60% {background-color: var(--color-r);}
+    79% {background-color: var(--color-r);}
 
-    80% {background-color: #B7C89E;}
-    99% {background-color: #B7C89E;}
+    80% {background-color: var(--color-g);}
+    99% {background-color: var(--color-g);}
 }
 
 
 .black_bright {
-    color: #A18E87 !important;  
+    color: var(--color-b) !important;  
 }
 
 .green_bright {
@@ -275,11 +290,11 @@ label {
 }
 
 .white_bright {
-    color: #FAE5D2 !important;
+    color: var(--color-light) !important;
 }
 
 .black_bright_bg {
-    background-color: #A18E87 !important;  
+    background-color: var(--color-b) !important;  
 }
 
 .green_bright_bg {
@@ -303,7 +318,7 @@ label {
 }
 
 .white_bright_bg {
-    background-color: #FAE5D2 !important;
+    background-color: var(--color-light) !important;
 }
 
 .back_green {
@@ -315,7 +330,7 @@ label {
 }
 
 .back-white {
-    background-color: #FAE5D2 !important;
+    background-color: var(--color-light) !important;
 }
 
 .green {
@@ -335,7 +350,7 @@ label {
 }
 
 .white {
-    color: #FAE5D2 !important;
+    color: var(--color-light) !important;
 }
 
 .auto_width {
@@ -454,7 +469,7 @@ label {
 .top_artist {
     line-height: 32px;
     font-family:  var(--main-font-name-it);
-    color: rgba(250, 229, 210, 0.4);
+    color: var(--color-light-40);
 }
 
 
@@ -820,7 +835,7 @@ span {
 }
 
 .card_tile_separator {
-    color: rgba(250, 229, 210, 1);
+    color: var(--color-light);
     max-width: 800px;
     margin: auto;
     height: 32px;
@@ -867,7 +882,7 @@ span {
     padding: 0;
     list-style: none;
     background-color: hsla(29, 22%, 30%, 1);
-    border: 1px solid rgba(250, 229, 210, 0.5);
+    border: 1px solid var(--color-light-50);
     border-top: 0px;
 }
 

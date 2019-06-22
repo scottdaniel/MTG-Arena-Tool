@@ -9,7 +9,7 @@ relative-time, local-time {
   font-family: var(--main-font-name-it);
   white-space: nowrap;
   font-weight: 300;
-  color: rgba(250, 229, 210, 0.5);
+  color: var(--color-light-50);
 }
 
 .top_status, .top_status_span {
@@ -21,7 +21,7 @@ relative-time, local-time {
 
 .status_item {
     display: flex;
-    color: #fae5d2;
+    color: var(--color-light);
 }
 
 .top_status_pop {
@@ -29,7 +29,7 @@ relative-time, local-time {
     pointer-events: none;
     display: grid;
     padding: 12px;
-    color: #fae5d2;
+    color: var(--color-light);
     width: 240px;
     opacity: 0;
     background-color: rgba(0, 0, 0, 0.75);
@@ -155,12 +155,12 @@ relative-time, local-time {
     width: 200px;
     height: 32px;
     border-radius: 3px;
-    color: #fae5d2 !important;
+    color: var(--color-light) !important;
     font-size: 16px;
     text-align: center;
     line-height: 32px;
     border: 1px solid rgba(250, 226, 210, 0.5);
-    background-color: rgba(145, 121, 97, 0.4);
+    background-color: var(--color-mid-40);
     /* box-shadow: 0px 2px 5px 0px rgba(0, 0, 0, 0.8); */
     -webkit-transition: all .1s ease-in;
     font-family: var(--main-font-name);
@@ -177,14 +177,14 @@ relative-time, local-time {
     text-align: center;
     line-height: 32px;
     border: 1px solid rgba(250, 226, 210, 0.5);
-    background-color: rgba(145, 121, 97, 0.4);
+    background-color: var(--color-mid-40);
     -webkit-transition: all .1s ease-in;
-    color: rgba(250, 229, 210, 0.4);
+    color: var(--color-light-40);
     font-family: var(--main-font-name);
 }
 
 .disabled:hover {
-    background-color: rgba(145, 121, 97, 0.4) !important;
+    background-color: var(--color-mid-40) !important;
     box-shadow: 0px 6px 15px 0px rgba(0, 0, 0, 0) !important;
     border: 1px solid rgba(250, 226, 210, 0.5) !important;
 }
@@ -208,19 +208,19 @@ relative-time, local-time {
 }
 
 .button_simple:hover {
-    background-color: rgba(145, 121, 97, 1);
+    background-color: var(--color-mid);
     box-shadow: 0px 6px 15px 0px rgba(0, 0, 0, 0.3);
     border: 1px solid rgba(250, 226, 210, 1);
 }
 
 .button_simple:active {
-    background-color: rgba(145, 121, 97, 1);
+    background-color: var(--color-mid);
     line-height: 34px;
     box-shadow: 0px 3px 8px 0px rgba(0, 0, 0, 0.6);
 }
 
 .top_username {
-    color: #FAE5D2;
+    color: var(--color-light);
     font-size: 20px;
     margin-left: 8px;
     align-self: center;
@@ -229,7 +229,7 @@ relative-time, local-time {
 }
 
 .top_username_id {
-    color: rgba(250, 229, 210, 0.35);
+    color: var(--color-light-40);
     font-size: 20px;
     margin-right: 32px;
     align-self: center;
@@ -284,9 +284,9 @@ relative-time, local-time {
     height: 64px;
     display: flex;
     z-index: 10;
-    background-color: rgba(145, 121, 97, 0.25);
+    background-color: var(--color-mid-20);
     box-shadow: 0px 6px 20px 6px rgba(0, 0, 0, 0.2);
-    border-bottom: solid 1px rgba(250, 229, 210, 0.5);
+    border-bottom: solid 1px var(--color-light-50);
     -webkit-transition: all .5s ease-in-out;
 }
 
@@ -368,7 +368,7 @@ span.top_nav_item_text {
     line-height: 64px;
     white-space: nowrap;
     text-align: center;
-    color: #FAE5D2;
+    color: var(--color-light);
     background-position-y: 64px;
     background-size: 100% 100%;
     background-repeat: no-repeat;
@@ -453,6 +453,7 @@ span.top_nav_item_text {
 
 
 .visualView, .openDeck, .openHistory, .exportDeck, .exportDeckStandard, .centered {
+        display: block;
     margin: 16px auto !important;
 }
 
@@ -557,7 +558,7 @@ span.top_nav_item_text {
     text-align: right;
     font-family:  var(--main-font-name-it);
     font-size: 16px;
-    color: rgba(250, 229, 210, 1);
+    color: var(--color-light);
 }
 
 .list_match_time {
@@ -571,7 +572,7 @@ span.top_nav_item_text {
     text-align: right;
     font-weight: 300;
     font-size: 16px;
-    color: rgba(250, 229, 210, 0.5);
+    color: var(--color-light-50);
 }
 
 
@@ -591,7 +592,7 @@ font-family:  var(--main-font-name);
     font-size: 20px;
     line-height: 64px;
     margin-right: 32px;
-    color: rgba(250, 229, 210, 0.8);
+    color: var(--color-light-75);
 }
 
 .list_match_player_left {
@@ -599,7 +600,7 @@ font-family:  var(--main-font-name);
     align-self: center;
     margin-left: 16px;
     font-family:  var(--main-font-name-it);
-    color: #FAE5D2;
+    color: var(--color-light);
 }
 
 .list_match_player_right {
@@ -607,7 +608,7 @@ font-family:  var(--main-font-name);
     align-self: center;
     margin-right: 16px;
     font-family:  var(--main-font-name-it);
-    color: #FAE5D2;
+    color: var(--color-light);
 }
 
 .list_economy_top {
@@ -646,7 +647,7 @@ font-family:  var(--main-font-name);
     text-align: right;
     font-family:  var(--main-font-name-it);
     font-size: 16px;
-    color: rgba(250, 229, 210, 1);
+    color: var(--color-light);
 }
 
 .list_economy_awarded {
@@ -745,7 +746,7 @@ a:hover {
 .message_small {
     text-align: center;
     margin-bottom: 6;
-    color: #fae5d2;
+    color: var(--color-light);
     font-family: "Lato";
 }
 
@@ -807,7 +808,7 @@ a:hover {
     white-space: nowrap;
     align-self: center;
     margin-left: 2px;
-    color: #FAE5D2;
+    color: var(--color-light);
 }
 
 .list_deck_name_it {
@@ -816,7 +817,7 @@ a:hover {
     margin-left: 8px;
     margin-right: 16px;
     margin-top: 2px;
-    color: #FAE5D2;
+    color: var(--color-light);
     line-height: 32px;
     text-align: -webkit-left;
     font-size: 16px;
@@ -832,7 +833,7 @@ a:hover {
     margin-left: 8px;
     text-align: right;
     margin-right: 16px;
-    color: #FAE5D2;
+    color: var(--color-light);
     font-family:  var(--main-font-name-it);
     opacity: 0.5;
 }
@@ -843,7 +844,7 @@ a:hover {
     margin-right: 18px;
     line-height: 32px;
     font-family: var(--sub-font-name);
-    color: #FAE5D2;
+    color: var(--color-light);
     font-weight: 300;
     text-align: right;
 }
@@ -853,7 +854,7 @@ a:hover {
     text-align: right;
     margin-right: 16px;
     line-height: 24px;
-    color: #FAE5D2;
+    color: var(--color-light);
     font-weight: 300;
     height: 24px;
     font-family: var(--sub-font-name);
@@ -890,7 +891,7 @@ a:hover {
     align-self: center;
     width: 33%;
     text-align: center;
-    color: #FAE5D2;
+    color: var(--color-light);
     font-size: 22px;
     text-shadow: 0px 4px 16px rgb(0, 0, 0);
 }
@@ -972,19 +973,19 @@ a:hover {
     align-items: flex-end;
     height: 128px;
     padding: 16px 0 4px 0;
-    border-bottom: 2px solid rgba(250, 229, 210, 0.8);
+    border-bottom: 2px solid var(--color-light-75);
     width: 100%;
 }
 
 .mana_curve_column {
-    color: #fae5d2;
+    color: var(--color-light);
     justify-content: space-around;
     width: -webkit-fill-available;
     flex-direction: column;
     margin: 0px 2px;
     display: flex;
     flex-direction: column;
-    background-color: rgba(250, 229, 210, 0.8);
+    background-color: var(--color-light-75);
 }
 
 .mana_curve_number {
@@ -1016,7 +1017,7 @@ a:hover {
     font-size: 12px;
     line-height: 20px;
     text-align: center;
-    color: #FAE5D2;
+    color: var(--color-light);
     width: 100%;
     font-family: "belerenbold";
 }
@@ -1079,7 +1080,7 @@ a:hover {
     margin-bottom: 12px;
     font-family:  var(--main-font-name);
     font-size: 16px;
-    color: #FAE5D2;
+    color: var(--color-light);
 }
 
 .pie {
@@ -1099,7 +1100,7 @@ a:hover {
 .wc_cost {
     font-family:  var(--sub-font-name);
     text-indent: 48px;
-    color: #FAE5D2;
+    color: var(--color-light);
     min-width: 120px;
     line-height: 29px;
     height: 24px;
@@ -1110,7 +1111,7 @@ a:hover {
 
 .wc_explore_cost {
     font-family:  var(--sub-font-name);
-    color: #FAE5D2;
+    color: var(--color-light);
     width: 40px;
     line-height: 80px;
     height: 64px;
@@ -1121,7 +1122,7 @@ a:hover {
 
 .bo_explore_cost {
     font-family:  var(--sub-font-name);
-    color: #FAE5D2;
+    color: var(--color-light);
     width: 40px;
     line-height: 80px;
     height: 64px;
@@ -1215,7 +1216,7 @@ a:hover {
 }
 
 .inventory_card_img:hover {
-    border: 2px solid rgba(250, 229, 210, 0.66);
+    border: 2px solid var(--color-light-66);
     margin: -2px 0 -2px -2px;
 }
 
@@ -1311,9 +1312,9 @@ a:hover {
     text-align: center;
     line-height: 24px;
     border-radius: 4px;
-    color: rgba(250, 229, 210, 0.5);
-    border: 1px solid rgba(250, 229, 210, 0.5);
-    background-color: rgba(145, 121, 97, 0.4);
+    color: var(--color-light-50);
+    border: 1px solid var(--color-light-50);
+    background-color: var(--color-mid-40);
     -webkit-transition: all .2s ease-in;
 }
 
@@ -1324,20 +1325,20 @@ a:hover {
     text-align: center;
     line-height: 24px;
     border-radius: 4px;
-    color: rgba(250, 229, 210, 0.2);
-    background-color: rgba(145, 121, 97, 0.4);
+    color: var(--color-light-20);
+    background-color: var(--color-mid-40);
 }
 
 .paging_button:hover {
-    background-color: rgba(145, 121, 97, 1);
-    border: 1px solid rgba(250, 229, 210, 1);
-    color: rgba(250, 229, 210, 1);
+    background-color: var(--color-mid);
+    border: 1px solid var(--color-light);
+    color: var(--color-light);
 }
 
 .paging_active {
-    background-color: rgba(145, 121, 97, 1);
-    border: 1px solid rgba(250, 229, 210, 1);
-    color: rgba(250, 229, 210, 1);
+    background-color: var(--color-mid);
+    border: 1px solid var(--color-light);
+    color: var(--color-light);
 }
 
 
@@ -1374,7 +1375,7 @@ a:hover {
     font-size: 15px;
     position: relative;
     margin-left: 36px;
-    color: #fae5d2;
+    color: var(--color-light);
     -webkit-transition: all .2s ease-in;
 }
 
@@ -1391,7 +1392,7 @@ a:hover {
     line-height: 24px;
     margin: 0 6px;
     font-size: 13px;
-    color: #fae5d2;
+    color: var(--color-light);
     -webkit-transition: all .2s ease-in;
 }
 
@@ -1412,7 +1413,7 @@ a:hover {
     font-size: 15px;
     position: relative;
     margin-left: 36px;
-    color: #fae5d2;
+    color: var(--color-light);
 }
 
 .stats_set_bar {
@@ -1533,17 +1534,17 @@ a:hover {
     padding: 0px 16px;
     grid-template-columns: auto 15% 25% 25% 15%;
     margin-left: 2px;
-    color: #FAE5D2;
+    color: var(--color-light);
     line-height: 64px;
     font-family: 'belerenbold' !important;
     font-size: 16px;
-    background-color: rgba(145, 121, 97, 0.2);
+    background-color: var(--color-mid-20);
 }
 
 .economy_sub {
     margin-left: 2px;
     font-family: var(--sub-font-name);
-    color: #FAE5D2;
+    color: var(--color-light);
 }
 
 .economy_wc {
@@ -1716,13 +1717,13 @@ a:hover {
 }
 
 .input_container input, .input_container_inventory input, .input_container_explore input {
-    background-color: rgba(145, 121, 97, 0.35);
-    border: 1px solid rgba(250, 229, 210, 0.5);
+    background-color: var(--color-mid-40);
+    border: 1px solid var(--color-light-50);
     display: inline-table;
     margin-left: 16px;
     border-radius: 5px;
     /* border-style: hidden; */
-    color: #fae5d2;
+    color: var(--color-light);
     height: 24px;
     width: 100%;
     font-size: 14px;
@@ -1744,11 +1745,11 @@ a:hover {
 }
 
 .input_login_container input {
-    background-color: rgba(145, 121, 97, 0.35);
-    border: 1px solid rgba(250, 229, 210, 0.5);
+    background-color: var(--color-mid-40);
+    border: 1px solid var(--color-light-50);
     display: inline-table;
     border-radius: 5px;
-    color: #fae5d2;
+    color: var(--color-light);
     height: 24px;
     width: 100%;
     font-size: 14px;
@@ -1774,8 +1775,8 @@ a:hover {
 .settings_title {
     font-family:  var(--main-font-name-it);
     font-size: 20px;
-    border-bottom: solid rgba(250, 229, 210, 0.28) 2px;
-    color: #fae5d2;
+    border-bottom: solid var(--color-light-20) 2px;
+    color: var(--color-light);
     margin: 24px 64px 14px 12px;
     padding-bottom: 2px;
 }
@@ -1837,20 +1838,20 @@ a:hover {
     left: 0;
     height: 20px;
     width: 20px;
-    background-color: rgba(145, 121, 97, 0);
-    border: 1px solid rgba(250, 229, 210, 0.5);
+    background-color: rgba(0, 0, 0, 0);
+    border: 1px solid var(--color-light-50);
     -webkit-transition: all .15s ease-in-out;
 }
 
 /* On mouse-over, add a grey background color */
 .check_container:hover input ~ .checkmark {
-    background-color: rgba(145, 121, 97, 0.5);
-    border: 1px solid rgba(250, 229, 210, 1);
+    background-color: var(--color-mid-50);
+    border: 1px solid var(--color-light);
 }
 
 /* When the checkbox is checked, add a blue background */
 .check_container input:checked ~ .checkmark {
-    background-color: rgba(145, 121, 97, 1);
+    background-color: var(--color-mid);
 }
 
 /* Create the checkmark/indicator (hidden when not checked) */
@@ -1889,7 +1890,7 @@ a:hover {
     text-align: center;
     font-family:  var(--main-font-name-it);
     font-size: 20px;
-    color: rgba(250, 229, 210, 1);
+    color: var(--color-light);
 }
 
 .draft_pack_container {
@@ -1923,15 +1924,15 @@ a:hover {
     text-align: center;
     color: #ffffff;
     border-radius: 8px;
-    border: solid 1px rgba(250, 229, 210, 0.8);
-    background-color: rgba(145, 121, 97, 0.75);
+    border: solid 1px var(--color-light-75);
+    background-color: var(--color-mid-75);
     position: relative;
     top: -24px;
     left: calc(50% - 16px);
 }
 
 .draft_card_img:hover {
-    border: 2px solid rgba(250, 229, 210, 0.66);
+    border: 2px solid var(--color-light-66);
     margin: -2px 0 -2px -2px;
 }
 
@@ -1959,14 +1960,14 @@ a:hover {
     width: 100%;
     border-radius: 16px;
     height: 12px;
-    background: rgba(145, 121, 97, 0.5);
+    background: var(--color-mid-50);
     outline: none;
     opacity: 1;
     transition: all 0.2s cubic-bezier(0.35, 0.12, 0.5, 1.0);
 }
 
 .slider:hover {
-    background: rgba(145, 121, 97, 0.66);
+    background: var(--color-mid-66);
 }
 
 .slider::-webkit-slider-thumb {
@@ -1975,19 +1976,19 @@ a:hover {
     width: 22px;
     height: 22px;
     border-radius: 12px;
-    background: rgba(145, 121, 97, 1);
+    background: var(--color-mid);
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.35, 0.12, 0.5, 1.0);
 }
 
 .slider::-webkit-slider-thumb:hover {
-    background: #fae5d2;
-    box-shadow: 0 0 0px 4px rgba(250, 229, 210, 0.2);
+    background: var(--color-light);
+    box-shadow: 0 0 0px 4px var(--color-light-20);
 }
 
 .slider::-webkit-slider-thumb:active {
-    background: #fae5d2;
-    box-shadow: 0 0 0px 10px rgba(250, 229, 210, 0.4);
+    background: var(--color-light);
+    box-shadow: 0 0 0px 10px var(--color-light-40);
 }
 
 .draft_nav_container {
@@ -2058,15 +2059,12 @@ a:hover {
     max-width: 220px;
     border-width: 2px;
     border-style: none solid none none;
-    border-image: linear-gradient(to bottom, rgba(250, 229, 210, 0) 10px, rgba(250, 229, 210, 0.5) 10px, rgba(250, 229, 210, 0)) 1 100%;
+    border-image: linear-gradient(to bottom, rgba(250, 229, 210, 0) 10px, var(--color-light-50) 10px, rgba(250, 229, 210, 0)) 1 100%;
 }
 
 .sidebar_column_l {
     border-width: 2px;
     border-style: none none none solid;
-    /*
-    border-image: linear-gradient(to bottom, rgba(250, 229, 210, 0) 10px, rgba(250, 229, 210, 0.5) 10px, rgba(250, 229, 210, 0)) 1 100%;
-    */
 }
 
 .ranks_history {
@@ -2074,13 +2072,6 @@ a:hover {
     display: flex;
     flex-direction: column;
     margin-top: 16px;
-    /*
-    justify-content: space-evenly;
-    display: flex;
-    height: 96px;
-    background-color: rgba(255, 255, 255, 0.1);
-    border-bottom: solid 1px rgba(250, 229, 210, 0.36);
-    */
 }
 
 .ranks_history_badge {
@@ -2097,7 +2088,7 @@ a:hover {
     -webkit-user-select: none;
     align-self: center;
     margin-top: 8px;
-    color: #FAE5D2;
+    color: var(--color-light);
     text-align: center;
 }
 
@@ -2122,8 +2113,8 @@ a:hover {
     margin: auto;
     width: 400px;
     height: 160px;
-    background-color: rgba(145, 121, 97, 0.5);
-    border: 1px solid rgba(250, 229, 210, 0.5);
+    background-color: var(--color-mid-50);
+    border: 1px solid var(--color-light-50);
     border-radius: 5px;
     box-shadow: 0px 2px 16px 0px black;
     -webkit-transition: all .15s cubic-bezier(1, 0.35, 0.35, 1);
@@ -2216,7 +2207,7 @@ a:hover {
     margin-top: 12px;
     line-height: 24px;
     font-size: 20px;
-    color: rgba(250, 229, 210, 1);
+    color: var(--color-light);
     width: 100%;
     height: 24px;
     -webkit-transition: all .25s cubic-bezier(0.2, 0.5, 0.35, 1);
@@ -2250,7 +2241,7 @@ a:hover {
 .change_title {
     font-size: 16px;
     line-height: 24px;
-    color: rgba(250, 229, 210, 1);
+    color: var(--color-light);
 }
 
 
@@ -2280,7 +2271,7 @@ a:hover {
 }
 
 .select_button {
-    color: #FAE5D2;
+    color: var(--color-light);
     overflow: hidden;
     line-height: 32px;
     text-indent: 16px;
@@ -2288,8 +2279,8 @@ a:hover {
     width: inherit;
     height: 32px;
     border-radius: 6px;
-    background-color: rgba(145, 121, 97, 0.2);
-    border: 1px solid rgba(250, 229, 210, 0.5);
+    background-color: var(--color-mid-20);
+    border: 1px solid var(--color-light-50);
     -webkit-transition: all .25s cubic-bezier(0.2, 0.5, 0.35, 1);
 }
 
@@ -2298,31 +2289,31 @@ a:hover {
     width: 0px;
     height: 0;
     border: 7px solid transparent;
-    border-color: #FAE5D2 transparent transparent transparent;
+    border-color: var(--color-light) transparent transparent transparent;
     position: absolute;
     top: 12px;
     right: 8px;
 }
 
 .select_button:hover {
-    background-color: rgba(145, 121, 97, 0.5);
-    border: 1px solid rgba(250, 229, 210, 1);
+    background-color: var(--color-mid-50);
+    border: 1px solid var(--color-light);
 }
 
 .select_button:active, .select_button.active {
     border-radius: 6px 6px 0px 0px;
     border-bottom: 0px;
-    background-color: rgba(145, 121, 97, .5);
+    background-color: var(--color-mid-50);
 }
 
 .select_button:active:after, .select_button.active:after {
     top: 5px;
-    border-color: transparent transparent #FAE5D2 transparent
+    border-color: transparent transparent var(--color-light) transparent
 }
 
 .select_options_container {
     display: none;
-    color: #FAE5D2;
+    color: var(--color-light);
     cursor: pointer;
     position: absolute;
     max-height: 384px;
@@ -2335,7 +2326,7 @@ a:hover {
     margin: -2px;
     padding: 0px;
     background-color: hsla(29, 22%, 30%, 1);
-    border: 1px solid rgba(250, 229, 210, 0.5);
+    border: 1px solid var(--color-light-50);
     border-top: 0px;
     box-shadow: rgba(0, 0, 0, 0.25) 0px 10px 16px 0px;
 }
@@ -2345,16 +2336,16 @@ a:hover {
     justify-content: space-between;
     align-items: center;
     white-space: nowrap;
-    color: #FAE5D2;
+    color: var(--color-light);
     margin: 0;
     height: 33px;
     padding: 0 12px;
-    border-top: 1px solid rgba(145, 121, 97, 0.5);
+    border-top: 1px solid var(--color-mid-50);
     -webkit-transition: all .25s cubic-bezier(0.2, 0.5, 0.35, 1);
 }
 
 .select_option:hover {
-    background: rgba(250, 229, 210, 0.5);
+    background: var(--color-light-50);
 }
 
 
@@ -2371,7 +2362,7 @@ a:hover {
     display: inline-block;
     position: relative;
     font-size: 14px;
-    color: #FAE5D2;
+    color: var(--color-light);
     width: 240px;
     height: 32px;
     margin: auto 0;
@@ -2384,8 +2375,8 @@ a:hover {
     right: 0;
     bottom: 0;
     left: 0;
-    background-color: rgba(145, 121, 97, 0.2);
-    border: 1px solid rgba(250, 229, 210, 0.5);
+    background-color: var(--color-mid-20);
+    border: 1px solid var(--color-light-50);
     padding: 8px 15px;
     -webkit-transition: all .25s cubic-bezier(0.2, 0.5, 0.35, 1);
 }
@@ -2395,27 +2386,27 @@ a:hover {
     width: 0;
     height: 0;
     border: 7px solid transparent;
-    border-color: #FAE5D2 transparent transparent transparent;
+    border-color: var(--color-light) transparent transparent transparent;
     position: absolute;
     top: 12px;
     right: 10px;
 }
 
 .select-styled:hover {
-    background-color: rgba(145, 121, 97, 0.5);
-    border: 1px solid rgba(250, 229, 210, 1);
+    background-color: var(--color-mid-50);
+    border: 1px solid var(--color-light);
 }
 
 .select-styled:active, .select-styled.active {
     border-radius: 6px 6px 0px 0px;
     border-bottom: 0px;
-    background-color: rgba(145, 121, 97, .5);
+    background-color: var(--color-mid-50);
 }
 
 
 .select-styled:active:after, .select-styled.active:after {
     top: 5px;
-    border-color: transparent transparent #FAE5D2 transparent
+    border-color: transparent transparent var(--color-light) transparent
 }
 
 .select-styled.active + .select-options {
@@ -2436,7 +2427,7 @@ a:hover {
     padding: 0;
     list-style: none;
     background-color: hsla(29, 22%, 30%, 1);
-    border: 1px solid rgba(250, 229, 210, 0.5);
+    border: 1px solid var(--color-light-50);
     border-top: 0px;
     box-shadow: rgba(0, 0, 0, 0.25) 0px 10px 16px 0px;
 }
@@ -2445,12 +2436,12 @@ a:hover {
     margin: 0;
     padding: 7px 0;
     text-indent: 15px;
-    border-top: 1px solid rgba(145, 121, 97, 0.5);
+    border-top: 1px solid var(--color-mid-50);
     -webkit-transition: all .25s cubic-bezier(0.2, 0.5, 0.35, 1);
 }
 
 .select-options li:hover {
-    background: rgba(250, 229, 210, 0.5);
+    background: var(--color-light-50);
 }
 
 .select-options li[rel="hide"] {
@@ -2466,7 +2457,7 @@ a:hover {
     left: calc(50% - 200px);
     position: absolute;
     background: rgba(0, 0, 0, 0.7);
-    color: rgba(250, 229, 210, 1);
+    color: var(--color-light);
     text-align: center;
     line-height: 30px;
     width: 400px;
@@ -2479,7 +2470,7 @@ a:hover {
 
 .settings_nav {
     cursor: pointer;
-    color: rgba(250, 229, 210, 0.5);
+    color: var(--color-light-50);
     font-size: 18px;
     line-height: 40px;
     height: 40px;
@@ -2489,7 +2480,7 @@ a:hover {
 }
 
 .settings_nav:hover, .nav_selected {
-    color: rgba(250, 229, 210, 0.9);
+    color: var(--color-light-75);
     margin-left: 32px;
 }
 
@@ -2498,7 +2489,7 @@ a:hover {
 }
 
 .settings_note {
-    color: rgba(250, 229, 210, 1);
+    color: var(--color-light);
     font-size: 14px;
     margin: 0px 64px 20px 16px;
 }
@@ -2527,7 +2518,6 @@ a:hover {
 }
 
 .deck_visual_card_img:hover {
-    /*border: 2px solid rgba(250, 229, 210, 0.66);*/
     box-shadow: 0 5px 14px 2px rgba(0, 0, 0, 0.25);
     margin: -24px 0 -2px 0px;
 }
@@ -2564,7 +2554,7 @@ a:hover {
     width: 100%;
     margin-top: 32px;
     margin-bottom: 20px;
-    color: #FAE5D2;
+    color: var(--color-light);
     font-size: 20px;
     text-align: center;
 }
@@ -2582,7 +2572,7 @@ a:hover {
     line-height: 16px;
     font-family: var(--main-font-name-it);
     opacity: 0.8;
-    color: #fae5d2;
+    color: var(--color-light);
 }
 
 .discord_but {
@@ -2669,7 +2659,7 @@ a:hover {
 
 .tou_name {
     width: 200px;
-    color: rgba(250, 229, 210, 1);
+    color: var(--color-light);
     font-size: 14px;
     font-weight: bold;
     line-height: 32px;
@@ -2680,7 +2670,7 @@ a:hover {
     align-self: center;
     font-weight: 300;
     font-size: 16px;
-    color: rgba(250, 229, 210, 0.85);
+    color: var(--color-light-75);
     text-align: center;
     margin: 14px 120px;
     font-family: var(--sub-font-name-it);
@@ -2688,7 +2678,7 @@ a:hover {
 
 .tou_state {
     width: 150px;
-    color: rgba(250, 229, 210, 0.8);
+    color: var(--color-light-75);
     font-size: 14px;
     line-height: 32px;
     margin-right: 16px;
@@ -2696,14 +2686,14 @@ a:hover {
 
 .tou_cell {
     width: 100px;
-    color: rgba(250, 229, 210, 0.8);
+    color: var(--color-light-75);
     font-size: 14px;
     line-height: 32px;
     margin-right: 16px;
 }
 
 .tou_top_status {
-    color: rgba(250, 229, 210, 0.75);
+    color: var(--color-light-75);
     width: 33%;
     justify-content: flex-end;
     align-self: center;
@@ -2720,7 +2710,7 @@ a:hover {
 }
 
 .tou_opp {
-    color: rgba(250, 229, 210, 0.8);
+    color: var(--color-light-75);
     justify-content: center;
     display: flex;
     font-size: 18px;
@@ -2774,7 +2764,7 @@ a:hover {
 
 .tou_tab {
     cursor: pointer;
-    color: rgba(250, 229, 210, 0.5);
+    color: var(--color-light-50);
     width: 120px;
     text-align: center;
     line-height: 32px;
@@ -2788,7 +2778,7 @@ a:hover {
 
 .tou_tab:hover, .tou_tab_selected {
     border-bottom: solid 1px rgba(210, 231, 250, 1);
-    color: rgba(250, 229, 210, 1);
+    color: var(--color-light);
 }
 
 .tou_round_cont {
@@ -2805,7 +2795,7 @@ a:hover {
     height: 32px;
     line-height: 32px;
     margin: 20px auto;
-    color: rgba(250, 229, 210, 0.8);
+    color: var(--color-light-75);
     font-size: 20px;
     font-family: "belerenbold";
     text-align: center;
@@ -2826,7 +2816,7 @@ a:hover {
 	display: flex;
 	height: 40px;
 	font-family: "belerenbold";
-	color: rgba(250, 229, 210, 1);
+	color: var(--color-light);
 	line-height: 40px;
 	text-align: left;
 	text-indent: 16px;
@@ -2835,13 +2825,13 @@ a:hover {
 }
 
 .tou_match_score {
-    color: #fae5d2;
+    color: var(--color-light);
     text-align: center;
     line-height: 40px;
     margin-left: auto;
     width: 40px;
     text-indent: 0px;
-    background-color: rgba(145, 121, 97, 0.4);
+    background-color: var(--color-mid-40);
 }
 
 .tou_cont_b, .tou_cont_a {
@@ -2854,7 +2844,7 @@ a:hover {
 }
 
 .tou_score_win {
-    background-color: rgba(145, 121, 97, 1);
+    background-color: var(--color-mid);
 }
 
 .tou_stand_line {
@@ -2864,8 +2854,8 @@ a:hover {
     height: 28px;
     max-width: 800px;
     margin: 0 auto;
-    color: #fae5d2;
-    background-color: rgba(145, 121, 97, 0.4);
+    color: var(--color-light);
+    background-color: var(--color-mid-40);
     grid-template-columns: 5% 5% 20% 7% 1fr 9% 1fr 1fr 1fr 1fr 1fr;
 }
 
@@ -2875,10 +2865,10 @@ a:hover {
     height: 32px;
     max-width: 800px;
     margin: 0 auto;
-    color: #fae5d2;
-    background-color: rgba(145, 121, 97, 0.4);
+    color: var(--color-light);
+    background-color: var(--color-mid-40);
     margin-top: 32px;
-    border-bottom: solid 1px rgba(250, 229, 210, 0.8);
+    border-bottom: solid 1px var(--color-light-75);
     grid-template-columns: 5% 5% 20% 7% 1fr 9% 1fr 1fr 1fr 1fr 1fr;
 }
 
@@ -2900,12 +2890,12 @@ a:hover {
 
 .tou_list_player_name_title {
     font-size: 16px !important;
-    color: #fae5d2 !important;
+    color: var(--color-light) !important;
     margin-bottom: 4px !important;
 }
 
 .tou_list_player_name {
-    color: rgba(250, 229, 210, 0.85);
+    color: var(--color-light-75));
     font-size: 14px;
     text-align: center;
     margin-bottom: 2px;
@@ -2926,15 +2916,15 @@ a:hover {
 }
 
 .line_light {
-    background-color: rgba(145, 121, 97, 0.4);
+    background-color: var(--color-mid-40);
 }
 
 .line_dark {
-    background-color: rgba(145, 121, 97, 0.2);
+    background-color: var(--color-mid-20);
 }
 
 .line_bottom_border {
-    border-bottom: 1px solid #FAE5D2;
+    border-bottom: 1px solid var(--color-light);
 }
 
 .tou_stand_name {
@@ -2972,7 +2962,7 @@ a:hover {
 }
 
 .tournament_title {
-    color: rgba(250, 229, 210, 0.85);
+    color: var(--color-light-75));
     text-align: center;
     margin-top: 16px;
     font-family: Beleren;
@@ -2999,7 +2989,7 @@ a:hover {
 
 [tooltip-top], [tooltip-bottom], [tooltip-bottomright] {
     position: relative;
-    color: #FAE5D2;
+    color: var(--color-light);
     text-decoration: underline dotted;
 }
 
@@ -3075,21 +3065,21 @@ a:hover {
 .library_hand {
     grid-column: 2 / span 4;
     grid-row-start: 1;
-    color: #FAE5D2;
+    color: var(--color-light);
     display: flex;
     align-items: center;
     justify-content: center;
     text-align: center;
-    background-color: rgba(145, 121, 97, 0.2);
+    background-color: var(--color-mid-20);
 }
 
 .library_header {
     border-bottom: 1px solid;
-    background-color: rgba(145, 121, 97, 0.2);
+    background-color: var(--color-mid-20);
 }
 
 .library_stat, .library_header {
-    color: #FAE5D2;
+    color: var(--color-light);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -3098,7 +3088,7 @@ a:hover {
 
 .library_footnote {
     grid-column: 2 / span 4;
-    color: #FAE5D2;
+    color: var(--color-light);
     margin-right: auto;
 }
 
@@ -3118,7 +3108,7 @@ a:hover {
     line-height: 24px;
     font-size: 14px;
     grid-template-columns: 32px 48px 48px auto 32px 32px 32px;
-    color: #fae5d2;
+    color: var(--color-light);
 }
 
 .top_wildcards_sets_cont {
@@ -3155,7 +3145,7 @@ a:hover {
 }
 
 .dragger {
-    background-color: rgba(250, 229, 210, 0.75);
+    background-color: var(--color-light-75);
     position: absolute;
     width: 3px;
     height: 100%;
@@ -3254,7 +3244,7 @@ a:hover {
 .overlay_current {
     height: 64px;
     line-height: 64px;
-    color: rgba(250, 229, 210, 1);
+    color: var(--color-light);
     text-align: center;
     margin-right: auto;
     font-family: var(--main-font-name);
