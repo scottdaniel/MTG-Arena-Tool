@@ -35,6 +35,7 @@
     oppId
     pd
     firstPass
+    debugLog
 */
 const { ARENA_MODE_IDLE } = require("../shared/constants");
 const _ = require("lodash");
@@ -295,6 +296,7 @@ function onLabelInEventGetCombinedRankInfo(entry, json) {
   rank.limited.drawn = json.limitedMatchesDrawn;
 
   pd_set({ rank });
+  if (debugLog || !firstPass) store.set("rank", rank);
   ipc_send("player_data_updated");
 }
 
@@ -320,6 +322,7 @@ function onLabelRankUpdated(entry, json) {
   }
 
   pd_set({ rank });
+  if (debugLog || !firstPass) store.set("rank", rank);
   ipc_send("player_data_updated");
 }
 
@@ -327,20 +330,17 @@ function onLabelInDeckGetDeckLists(entry, json) {
   if (!json) return;
 
   const decks = { ...pd.decks };
-  // decks_index is for backwards compatibility
-  // (just in case bleeding edge folks need to revert)
-  const decks_index = [...pd.decks_index];
   const static_decks = [];
   json.forEach(deck => {
-    if (!decks_index.includes(deck.id)) {
-      decks_index.push(deck.id);
-    }
-    decks[deck.id] = { ...(pd.deck(deck.id) || {}), ...deck };
+    const deckData = { ...(pd.deck(deck.id) || {}), ...deck };
+    decks[deck.id] = deckData;
+    if (debugLog || !firstPass) store.set("decks." + deck.id, deckData);
     static_decks.push(deck.id);
   });
 
-  pd_set({ decks, decks_index, static_decks });
-  if (!firstPass) ipc_send("player_data_refresh");
+  pd_set({ decks, static_decks });
+  if (debugLog || !firstPass) store.set("static_decks", static_decks);
+  if (debugLog || !firstPass) ipc_send("player_data_refresh");
 }
 
 function onLabelInDeckGetDeckListsV3(entry, json) {
@@ -476,13 +476,15 @@ function onLabelInDeckUpdateDeck(entry, json) {
     (deltaDeck.changesMain.length || deltaDeck.changesSide.length);
 
   if (foundNewDeckChange) {
-    store.set("deck_changes." + changeId, deltaDeck);
+    if (debugLog || !firstPass)
+      store.set("deck_changes." + changeId, deltaDeck);
     const deck_changes = { ...pd.deck_changes, [changeId]: deltaDeck };
     const deck_changes_index = [...pd.deck_changes_index];
     if (!deck_changes_index.includes(changeId)) {
       deck_changes_index.push(changeId);
     }
-    store.set("deck_changes_index", deck_changes_index);
+    if (debugLog || !firstPass)
+      store.set("deck_changes_index", deck_changes_index);
 
     pd_set({ deck_changes, deck_changes_index });
     if (!firstPass) ipc_send("player_data_refresh");
@@ -549,7 +551,8 @@ function onLabelInPlayerInventoryGetPlayerInventory(entry, json) {
     wcMythic: json.wcMythic
   };
   pd_set({ economy });
-  if (!firstPass) ipc_send("player_data_refresh");
+  if (debugLog || !firstPass) store.set("economy", economy);
+  if (debugLog || !firstPass) ipc_send("player_data_refresh");
 }
 
 function onLabelInPlayerInventoryGetPlayerCardsV3(entry, json) {
@@ -573,7 +576,7 @@ function onLabelInPlayerInventoryGetPlayerCardsV3(entry, json) {
     cards: json
   };
 
-  store.set("cards", cards);
+  if (debugLog || !firstPass) store.set("cards", cards);
 
   const cardsNew = {};
   Object.keys(json).forEach(function(key) {
