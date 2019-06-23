@@ -22,27 +22,8 @@ const playerDataDefault = {
   userName: "",
   arenaId: "",
   arenaVersion: "",
-  offline: false,
   patreon: false,
-  patreon_tier: 0,
-  rank: {
-    constructed: {
-      rank: "",
-      tier: 0,
-      step: 0,
-      won: 0,
-      lost: 0,
-      drawn: 0
-    },
-    limited: {
-      rank: "",
-      tier: 0,
-      step: 0,
-      won: 0,
-      lost: 0,
-      drawn: 0
-    }
-  }
+  patreon_tier: 0
 };
 
 const overlayCfg = {
@@ -85,6 +66,7 @@ const defaultCfg = {
     right_panel_width: 400,
     last_open_tab: -1,
     card_tile_style: CARD_TILE_FLAT,
+    skip_firstpass: false,
     overlays: [
       {
         ...overlayCfg,
@@ -131,6 +113,25 @@ const defaultCfg = {
     wcRare: 0,
     wcMythic: 0
   },
+  offline: false,
+  rank: {
+    constructed: {
+      rank: "",
+      tier: 0,
+      step: 0,
+      won: 0,
+      lost: 0,
+      drawn: 0
+    },
+    limited: {
+      rank: "",
+      tier: 0,
+      step: 0,
+      won: 0,
+      lost: 0,
+      drawn: 0
+    }
+  },
   deck_changes: {},
   deck_changes_index: [],
   courses_index: [],
@@ -139,7 +140,6 @@ const defaultCfg = {
   gems_history: [],
   gold_history: [],
   decks: {},
-  decks_index: [],
   decks_tags: {},
   decks_last_used: [],
   static_decks: [],
@@ -258,6 +258,23 @@ class PlayerData {
 
   get history() {
     return [...this.matches, ...this.drafts];
+  }
+
+  get data() {
+    const data = {};
+    const blacklistKeys = [
+      "defaultCfg",
+      "overlayCfg",
+      "windowBounds",
+      ...Object.keys(playerDataDefault)
+    ];
+    Object.entries(this).forEach(([key, value]) => {
+      if (value instanceof Function) return;
+      if (blacklistKeys.includes(key)) return;
+      data[key] = value;
+    });
+    console.log(data);
+    return data;
   }
 
   change(id) {
