@@ -39,7 +39,8 @@ const {
   HIDDEN_PW,
   IPC_OVERLAY,
   ARENA_MODE_MATCH,
-  ARENA_MODE_DRAFT
+  ARENA_MODE_DRAFT,
+  ARENA_MODE_IDLE
 } = require("../shared/constants");
 const { ipc_send, pd_set, unleakString } = require("./background-util");
 const {
@@ -175,16 +176,12 @@ var currentDraftDefault = {
   eventId: "",
   draftId: "",
   set: "",
-  owner: ""
+  owner: "",
+  pickedCards: [],
+  packNumber: 0,
+  pickNumber: 0,
+  currentPack: []
 };
-
-var currentDraft = null;
-/*
-var currentDraft = undefined;
-var currentDraftPack = undefined;
-var draftSet = "";
-var draftId = undefined;
-*/
 
 var currentMatch = null;
 
@@ -193,6 +190,7 @@ var originalDeck = new Deck();
 
 var currentDeck = new Deck();
 var duringMatch = false;
+let duringDraft = false;
 var matchBeginTime = 0;
 var matchGameStats = [];
 var matchCompletedOnGameNumber = 0;
@@ -1053,10 +1051,6 @@ function dataChop(data, startStr, endStr) {
   return data;
 }
 
-function setDraftCards(json) {
-  ipc_send("set_draft_cards", currentDraft);
-}
-
 function actionLogGenerateLink(grpId) {
   var card = db.card(grpId);
   return '<log-card id="' + grpId + '">' + card.name + "</log-card>";
@@ -1211,22 +1205,6 @@ function createMatch(arg) {
   }
 
   ipc_send("set_priority_timer", currentMatch.priorityTimers, IPC_OVERLAY);
-}
-
-//
-function createDraft() {
-  actionLog(-99, new Date(), "");
-
-  currentDraft = _.cloneDeep(currentDraftDefault);
-  currentMatch = _.cloneDeep(currentMatchDefault);
-
-  if (debugLog || !firstPass) {
-    if (pd.settings.close_on_match) {
-      ipc_send("renderer_hide", 1);
-    }
-
-    ipc_send("set_arena_state", ARENA_MODE_DRAFT);
-  }
 }
 
 //
@@ -1626,26 +1604,33 @@ function saveMatch(id) {
 }
 
 //
-function saveDraft() {
-  if (!currentDraft || !currentDraft.draftId) {
-    console.log("Couldnt save undefined draft:", currentDraft);
+function createDraft() {
+  return _.cloneDeep(currentDraftDefault);
+}
+
+//
+function startDraft() {
+  if (debugLog || !firstPass) {
+    if (pd.settings.close_on_match) {
+      ipc_send("renderer_hide", 1);
+    }
+    ipc_send("set_arena_state", ARENA_MODE_DRAFT);
+  }
+  duringDraft = true;
+}
+
+//
+function setDraftData(data) {
+  if (!data || !data.id) {
+    console.log("Couldnt save undefined draft:", data);
     return;
   }
+  // console.log("Set draft data:", data);
+  ipc_send("set_draft_cards", data);
 
-  const id = currentDraft.draftId + "-draft";
-  const draftData = {
-    date: new Date(),
-    // preserve custom fields if possible
-    ...(pd.draft(id) || {}),
-    ...currentDraft,
-    draftId: id,
-    id,
-    owner: pd.name
-  };
-  // console.log("Save draft:", currentDraft);
-
-  store.set(id, draftData);
-  pd_set({ [id]: draftData });
+  const { id } = data;
+  store.set(id, data);
+  pd_set({ [id]: data, cards: pd.cards, cardsNew: pd.cardsNew });
 
   if (!pd.draft_index.includes(id)) {
     const draft_index = [...pd.draft_index, id];
@@ -1654,7 +1639,13 @@ function saveDraft() {
   }
 
   if (debugLog || !firstPass) ipc_send("player_data_refresh");
-  httpApi.httpSetDraft(draftData);
+}
+
+//
+function endDraft(data) {
+  duringDraft = false;
+  if (debugLog || !firstPass) ipc_send("set_arena_state", ARENA_MODE_IDLE);
+  httpApi.httpSetDraft(data);
   ipc_send("popup", { text: "Draft saved!", time: 3000 });
 }
 
@@ -1685,10 +1676,14 @@ function finishLoading() {
     });
 
     if (duringMatch) {
-      ipc_send("renderer_hide", 1);
+      if (pd.settings.close_on_match) {
+        ipc_send("renderer_hide", 1);
+      }
       ipc_send("set_arena_state", ARENA_MODE_MATCH);
       update_deck(false);
     }
+
+    if (duringDraft) ipc_send("set_arena_state", ARENA_MODE_DRAFT);
 
     ipc_send("renderer_set_bounds", pd.windowBounds);
     ipc_send("initialize", 1);
