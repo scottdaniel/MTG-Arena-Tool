@@ -37,6 +37,7 @@
     firstPass
 */
 const { ARENA_MODE_IDLE } = require("../shared/constants");
+const _ = require("lodash");
 const db = require("../shared/database");
 const CardsList = require("../shared/cards-list");
 const { get_deck_colors, objectClone, replaceAll } = require("../shared/util");
@@ -51,7 +52,6 @@ const {
   parseWotcTime,
   pd_set
 } = require("./background-util");
-
 //
 function convert_deck_from_v3(deck) {
   return JSON.parse(JSON.stringify(deck), (key, value) => {
@@ -203,6 +203,8 @@ function onLabelOutLogInfo(entry, json) {
         }
       });
 
+      game.cardsCast = _.cloneDeep(currentMatch.cardsCast);
+      currentMatch.cardsCast = [];
       game.deckSize = deckSize;
       game.landsInDeck = landsInDeck;
       game.multiCardPositions = multiCardPositions;
