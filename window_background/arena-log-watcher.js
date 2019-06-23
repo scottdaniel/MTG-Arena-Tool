@@ -1,12 +1,9 @@
-/*
-global
-  skipFirstPass
-*/
 const fs = require("fs");
 const { promisify } = require("util");
 const { StringDecoder } = require("string_decoder");
 const queue = require("queue");
 const ArenaLogDecoder = require("./arena-log-decoder");
+const pd = require("../shared/player-data");
 
 const fsAsync = {
   close: promisify(fs.close),
@@ -52,7 +49,7 @@ function start({ path, chunkSize, onLogEntry, onError, onFinish }) {
       position = 0;
     }
     while (position < size) {
-      if (!skipFirstPass) {
+      if (!pd.settings.skip_firstpass) {
         const buffer = await readChunk(
           path,
           position,
