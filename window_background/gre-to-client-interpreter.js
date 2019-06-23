@@ -683,7 +683,8 @@ function checkTurnDiff(turnInfo) {
   if (
     turnInfo.turnNumber &&
     turnInfo.turnNumber == 1 &&
-    turnInfo.activePlayer
+    turnInfo.activePlayer && 
+    currentMatch.game == 1
   ) {
     currentMatch.onThePlay = turnInfo.activePlayer;
   }
