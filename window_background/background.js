@@ -481,7 +481,14 @@ function loadPlayerConfig(playerId, serverData = undefined) {
   const playerData = {
     ...pd,
     ...savedData,
-    settings: { ...pd.settings, ...savedData.settings }
+    settings: {
+      ...pd.settings,
+      ...savedData.settings,
+      overlays: savedData.settings.overlays.map(overlay => {
+        // include new default overlay settings
+        return { ...pd.overlayCfg, ...overlay };
+      })
+    }
   };
   syncSettings(playerData.settings);
   pd_set(playerData);

@@ -219,7 +219,8 @@ class PlayerData {
     Object.assign(this, {
       ...playerDataDefault,
       ...defaultCfg,
-      defaultCfg: { ...defaultCfg }
+      defaultCfg: { ...defaultCfg },
+      overlayCfg: { ...overlayCfg }
     });
 
     PlayerData.instance = this;
