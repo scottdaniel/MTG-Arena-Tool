@@ -59,6 +59,7 @@ const { openEconomyTab } = require("./economy");
 const { openExploreTab, setExploreDecks } = require("./explore");
 const { openCollectionTab } = require("./collection");
 const { openSettingsTab, setCurrentOverlaySettings } = require("./settings");
+const { showWhatsNew } = require("./whats-new");
 
 const byId = id => document.getElementById(id);
 let sidebarActive = -2;
@@ -354,6 +355,8 @@ ipc.on("initialize", function() {
   const totalAgg = createAllMatches();
   setLocalState({ totalAgg });
   openTab(sidebarActive);
+
+  //showWhatsNew();
 
   $$(".top_nav")[0].classList.remove("hidden");
   $$(".overflow_ux")[0].classList.remove("hidden");

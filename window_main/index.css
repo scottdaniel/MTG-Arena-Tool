@@ -3268,3 +3268,106 @@ a:hover {
     height: 20px;
     margin: auto 24px auto auto;
 }
+
+.wnew_image {
+    width: -webkit-fill-available;
+    height: -webkit-fill-available;
+    background-position: center;
+    background-size: cover;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.wnew_image_cont {
+    width: 100%;
+    height: 100%;
+}
+
+.wnew_scroller {
+    height: 60%;
+    position: relative;
+    display: flex;
+    overflow: hidden;
+    -webkit-transition: all .2s ease-in;
+}
+
+.wnew_title {
+    font-family: var(--main-font-name-it);
+    font-size: 32px;
+    text-align: center;
+    padding-bottom: 8px;
+    color: var(--color-u);
+}
+
+.wnew_sub_version {
+    font-family: var(--sub-font-name-it);
+    font-size: 14px;
+    text-align: center;
+    padding-bottom: 8px;
+    color: var(--color-light-50);
+}
+
+.wnew_image_title {
+    font-family: var(--sub-font-name-it);
+    font-size: 28px;
+    color: var(--color-light);
+    padding: 16px;
+    background-color: rgba(0,0,0,0.5);
+}
+
+.wnew_image_desc {
+    font-family: var(--sub-font-name-it);
+    font-size: 15px;
+    color: var(--color-w);
+    padding: 10px;
+    background-color: rgba(0,0,0,0.5);
+}
+
+.wnew_prev, .wnew_next {
+    pointer-events: all;
+    margin: 0 12px;
+    position: absolute;
+    cursor: pointer;
+    z-index: 51;
+    opacity: 0.5;
+    width: calc(50% - 24px);
+    height: 60%;
+    -webkit-transition: all .2s ease-in;
+}
+
+.wnew_prev:hover, .wnew_next:hover {
+    opacity: 1;
+}
+
+.wnew_prev {
+    background: url(../images/prev.png) no-repeat;
+    background-position: left;
+}
+
+.wnew_next {
+    background: url(../images/next.png) no-repeat;
+    background-position: right;
+    left: 50%;
+}
+
+.wnew_scroller_pos_cont {
+    margin: 24px auto 0 auto;
+    display: flex;
+}
+
+.wnew_pos_ball {
+    width: 8px;
+    height: 8px;
+    margin: 4px;
+    border-radius: 50%;
+    background-color: var(--color-w);
+    -webkit-transition: all .2s ease-in;
+}
+
+.wnew_pos_ball_selected {
+    width: 12px;
+    height: 12px;
+    margin: 2px 4px;
+}
