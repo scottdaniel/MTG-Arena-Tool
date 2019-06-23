@@ -96,7 +96,7 @@ function showWhatsNew() {
   });
 
   dialog.appendChild(title);
-  dialog.appendChild(subVersion); 
+  dialog.appendChild(subVersion);
   dialog.appendChild(scrollerContainer);
   dialog.appendChild(scrollerPosCont);
   dialog.appendChild(prev);
