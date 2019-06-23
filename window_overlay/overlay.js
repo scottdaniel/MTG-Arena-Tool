@@ -16,7 +16,6 @@ if (!remote.app.isPackaged) {
 }
 
 const TransparencyMouseFix = require("electron-transparency-mouse-fix");
-const fs = require("fs");
 const striptags = require("striptags");
 
 const db = require("../shared/database");
@@ -24,7 +23,12 @@ const pd = require("../shared/player-data");
 const Deck = require("../shared/deck.js");
 const Colors = require("../shared/colors");
 const deckDrawer = require("../shared/deck-drawer");
-const { compare_cards, get_card_type_sort } = require("../shared/util");
+const {
+  compare_cards,
+  deckManaCurve,
+  deckTypesStats,
+  get_card_type_sort
+} = require("../shared/util");
 const {
   addCardHover,
   attachOwnerhipStars,
@@ -44,7 +48,9 @@ const {
   OVERLAY_ODDS,
   OVERLAY_SEEN,
   OVERLAY_DRAFT,
-  OVERLAY_LOG
+  OVERLAY_LOG,
+  OVERLAY_DRAFT_BREW,
+  OVERLAY_DRAFT_MODES
 } = require("../shared/constants.js");
 
 let landsCard = {
@@ -71,7 +77,6 @@ let landsCard = {
 let matchBeginTime = Date.now();
 let priorityTimers = [];
 let clockMode = 0;
-let draftMode = 1;
 let overlayMode = 0;
 let overlayIndex = -1;
 setRenderer(1);
@@ -248,7 +253,7 @@ function recreateClock() {
     }
   }
 
-  if (overlayMode === OVERLAY_DRAFT) {
+  if (OVERLAY_DRAFT_MODES.includes(overlayMode)) {
     clockTurn.innerHTML = "";
   }
 
@@ -288,6 +293,9 @@ ipc.on("action_log", function(event, arg) {
 });
 
 ipc.on("settings_updated", (_event, index) => {
+  if (overlayIndex !== index) {
+    console.log("OVERLAY INDEX: " + (index + 1));
+  }
   overlayIndex = index;
   const settings = pd.settings.overlays[overlayIndex];
   overlayMode = settings.mode;
@@ -306,39 +314,26 @@ ipc.on("settings_updated", (_event, index) => {
   change_background(pd.settings.back_url);
 
   $$(".overlay_title")[0].innerHTML = "Overlay " + (overlayIndex + 1);
+  $$(".top")[0].style.display = settings.top ? "" : "none";
 
-  $$(".top")[0].style.display = "";
-  $$(".overlay_deckname")[0].style.display = "";
-  $$(".overlay_deckcolors")[0].style.display = "";
-  $$(".overlay_decklist")[0].style.display = "";
-  $$(".overlay_clock_container")[0].style.display = "";
-
-  $$(".overlay_draft_container")[0].style = "";
+  $$(".overlay_deckname")[0].innerHTML = "";
   $$(".overlay_deckname")[0].style = "";
+  $$(".overlay_deckname")[0].style.display = settings.title ? "" : "none";
+  $$(".overlay_deckcolors")[0].innerHTML = "";
   $$(".overlay_deckcolors")[0].style = "";
+  $$(".overlay_deckcolors")[0].style.display = settings.title ? "" : "none";
 
-  if (overlayMode !== OVERLAY_DRAFT) {
-    $$(".overlay_draft_container")[0].style.display = "none";
+  $$(".overlay_decklist")[0].innerHTML = "";
+  $$(".overlay_decklist")[0].style.display = settings.deck ? "" : "none";
+
+  const showClock =
+    settings.clock && !OVERLAY_DRAFT_MODES.includes(overlayMode);
+  $$(".overlay_clock_container")[0].style.display = showClock ? "" : "none";
+
+  if (OVERLAY_DRAFT_MODES.includes(overlayMode)) {
+    updateDraftView();
   } else {
-    $$(".overlay_draft_container")[0].style.display = "";
-  }
-
-  if (!settings.top) {
-    $$(".top")[0].style.display = "none";
-  }
-  if (!settings.title) {
-    $$(".overlay_deckname")[0].style.display = "none";
-    $$(".overlay_deckcolors")[0].style.display = "none";
-  }
-  if (!settings.deck) {
-    $$(".overlay_decklist")[0].style.display = "none";
-  }
-  if (!settings.clock || overlayMode == OVERLAY_DRAFT) {
-    $$(".overlay_clock_container")[0].style.display = "none";
-  }
-
-  if (currentMatch) {
-    updateView();
+    updateMatchView();
   }
 });
 
@@ -364,7 +359,7 @@ ipc.on("set_opponent_rank", function(event, rank, title) {
 
 ipc.on("set_match", (event, arg) => {
   if (overlayIndex == -1) return;
-  if (overlayMode == OVERLAY_DRAFT) return false;
+  if (OVERLAY_DRAFT_MODES.includes(overlayMode)) return false;
   let settings = pd.settings.overlays[overlayIndex];
 
   if (settings.show == false && settings.show_always == false) return false;
@@ -380,11 +375,12 @@ ipc.on("set_match", (event, arg) => {
   currentMatch.player.deck = new Deck(currentMatch.player.deck);
   currentMatch.player.originalDeck = new Deck(currentMatch.player.originalDeck);
 
-  updateView();
+  updateMatchView();
 });
 
-function updateView() {
-  if (overlayIndex == -1) return;
+function updateMatchView() {
+  if (overlayIndex === -1) return;
+  if (!currentMatch) return;
   let settings = pd.settings.overlays[overlayIndex];
 
   let cleanName =
@@ -393,12 +389,6 @@ function updateView() {
     cleanName = cleanName.slice(0, -6);
   }
   oppName = cleanName || "Opponent";
-
-  if (overlayMode !== OVERLAY_DRAFT) {
-    $$(".overlay_draft_container")[0].style.display = "none";
-  } else {
-    $$(".overlay_draft_container")[0].style.display = "";
-  }
 
   const container = $$(".overlay_decklist")[0];
   const doscroll =
@@ -409,9 +399,10 @@ function updateView() {
   if ($$(".overlay_archetype")[0]) {
     $$(".overlay_archetype")[0].remove();
   }
-  $$(".overlay_draft_container")[0].style.display = "none";
+
   $$(".overlay_decklist")[0].innerHTML = "";
   $$(".overlay_deckcolors")[0].innerHTML = "";
+  $$(".overlay_deckname")[0].innerHTML = "";
 
   let deckListDiv;
 
@@ -543,9 +534,7 @@ function updateView() {
   // group lands
   if (
     settings.lands &&
-    overlayMode !== OVERLAY_DRAFT &&
-    overlayMode !== OVERLAY_SEEN &&
-    overlayMode !== OVERLAY_LOG
+    [OVERLAY_FULL, OVERLAY_LEFT, OVERLAY_ODDS].includes(overlayMode)
   ) {
     let landsNumber = 0;
     let landsChance = 0;
@@ -627,8 +616,17 @@ function updateView() {
     });
   }
 
-  if (overlayMode == OVERLAY_ODDS) {
+  if (overlayMode === OVERLAY_ODDS) {
     drawDeckOdds();
+    return;
+  }
+
+  const deck = deckToDraw.getSave();
+  if (settings.type_counts) {
+    deckListDiv.appendChild(deckTypesStats(deck));
+  }
+  if (settings.mana_curve) {
+    deckListDiv.appendChild(deckManaCurve(deck));
   }
 }
 
@@ -760,15 +758,9 @@ var currentDraft;
 ipc.on("set_draft_cards", (event, draft) => {
   clockMode = 1;
   recreateClock();
-  $$(".overlay_draft_container")[0].style.display = "";
-
   matchBeginTime = Date.now();
   currentDraft = draft;
-  //draftPack = pack;
-  //draftPick = picks;
-  //packN = packn;
-  //pickN = pickn;
-  setDraft(currentDraft.packNumber, currentDraft.pickNumber);
+  updateDraftView(currentDraft.packNumber, currentDraft.pickNumber);
 });
 
 //
@@ -807,55 +799,115 @@ ipc.on("set_turn", (event, arg) => {
 let packN;
 let pickN;
 
-function setDraft(_packN = -1, _pickN = -1) {
-  if (_packN == -1 || _pickN == -1) {
+function updateDraftView(_packN = -1, _pickN = -1) {
+  if (overlayIndex === -1) return;
+  if (!currentDraft) return;
+  const settings = pd.settings.overlays[overlayIndex];
+  if (_packN === -1 || _pickN === -1) {
     packN = currentDraft.packNumber;
     pickN = currentDraft.pickNumber;
   } else {
     packN = _packN;
     pickN = _pickN;
   }
+  const key = "pack_" + packN + "pick_" + pickN;
+  // console.log("Key", key, currentDraft);
   $$(".overlay_decklist")[0].innerHTML = "";
   $$(".overlay_deckcolors")[0].innerHTML = "";
-  let title = "Pack " + (packN + 1) + " - Pick " + (pickN + 1);
-  if (packN === currentDraft.packNumber && pickN === currentDraft.pickNumber) {
-    title += " - Current";
-  }
-  $$(".overlay_deckname")[0].innerHTML = title;
 
-  let colors;
-  if (draftMode == 0) {
-    colors = get_ids_colors(currentDraft.pickedCards);
-    colors.forEach(function(color) {
-      $$(".overlay_deckcolors")[0].appendChild(
-        createDiv(["mana_s20", "mana_" + MANA[color]])
-      );
+  if (overlayMode === OVERLAY_DRAFT) {
+    const titleDiv = $$(".overlay_deckname")[0];
+    titleDiv.style.display = "";
+    let title = "Pack " + (packN + 1) + " - Pick " + (pickN + 1);
+    if (
+      packN === currentDraft.packNumber &&
+      pickN === currentDraft.pickNumber
+    ) {
+      title += " - Current";
+    }
+    titleDiv.innerHTML = title;
+
+    // if (draftMode == 0) {
+    //   colors = get_ids_colors(currentDraft.pickedCards);
+    //   colors.forEach(function(color) {
+    //     $$(".overlay_deckcolors")[0].appendChild(
+    //       createDiv(["mana_s20", "mana_" + MANA[color]])
+    //     );
+    //   });
+
+    //   currentDraft.pickedCards.sort(compare_draft_cards);
+
+    //   currentDraft.pickedCards.forEach(function(grpId) {
+    //     const tile = deckDrawer.cardTile(
+    //       pd.settings.card_tile_style,
+    //       grpId,
+    //       "a",
+    //       1
+    //     );
+    //     $$(".overlay_decklist")[0].appendChild(tile);
+    //   });
+    // }
+
+    const controlCont = createDiv(["overlay_draft_container", "click-on"]);
+
+    const draftPrev = createDiv(["draft_prev"]);
+    draftPrev.addEventListener("click", function() {
+      pickN -= 1;
+      let packSize = (currentDraft && PACK_SIZES[currentDraft.set]) || 14;
+
+      if (pickN < 0) {
+        pickN = packSize;
+        packN -= 1;
+      }
+      if (packN < 0) {
+        pickN = currentDraft.pickNumber;
+        packN = currentDraft.packNumber;
+      }
+
+      updateDraftView(packN, pickN);
     });
+    controlCont.appendChild(draftPrev);
 
-    currentDraft.pickedCards.sort(compare_draft_cards);
+    controlCont.appendChild(createDiv(["draft_title"]));
 
-    currentDraft.pickedCards.forEach(function(grpId) {
-      const tile = deckDrawer.cardTile(
-        pd.settings.card_tile_style,
-        grpId,
-        "a",
-        1
-      );
-      $$(".overlay_decklist")[0].appendChild(tile);
+    const draftNext = createDiv(["draft_next"]);
+    draftNext.addEventListener("click", function() {
+      pickN += 1;
+      let packSize = (currentDraft && PACK_SIZES[currentDraft.set]) || 14;
+
+      if (pickN > packSize) {
+        pickN = 0;
+        packN += 1;
+      }
+
+      if (pickN > currentDraft.pickNumber && packN == currentDraft.packNumber) {
+        pickN = 0;
+        packN = 0;
+      }
+
+      if (
+        packN > currentDraft.packNumber ||
+        (pickN == currentDraft.pickNumber && packN == currentDraft.packNumber)
+      ) {
+        updateDraftView();
+      } else {
+        updateDraftView(packN, pickN);
+      }
     });
-  } else if (draftMode == 1) {
-    let key = "pack_" + packN + "pick_" + pickN;
+    controlCont.appendChild(draftNext);
+
+    titleDiv.appendChild(controlCont);
+
     let draftPack = currentDraft[key];
     let pick = "";
     if (!draftPack) {
-      draftPack = currentDraft.currentPack;
+      draftPack = currentDraft.currentPack || [];
     } else {
       pick = draftPack.pick;
       draftPack = draftPack.pack;
     }
 
-    console.log("Key", key, currentDraft);
-    colors = get_ids_colors(draftPack);
+    const colors = get_ids_colors(draftPack);
     colors.forEach(function(color) {
       $$(".overlay_deckcolors")[0].appendChild(
         createDiv(["mana_s20", "mana_" + MANA[color]])
@@ -864,14 +916,16 @@ function setDraft(_packN = -1, _pickN = -1) {
 
     draftPack.sort(compare_draft_picks);
 
+    const deckListDiv = $$(".overlay_decklist")[0];
+    deckListDiv.style.display = "";
+
     draftPack.forEach(grpId => {
       const card = db.card(grpId) || { id: grpId, rank: 0 };
       const rank = card.rank;
 
-      const od = $$(".overlay_decklist")[0];
       const cont = createDiv(["overlay_card_quantity"]);
       attachOwnerhipStars(card, cont);
-      od.appendChild(cont);
+      deckListDiv.appendChild(cont);
 
       const tile = deckDrawer.cardTile(
         pd.settings.card_tile_style,
@@ -879,11 +933,46 @@ function setDraft(_packN = -1, _pickN = -1) {
         "a",
         DRAFT_RANKS[rank]
       );
-      od.appendChild(tile);
+      deckListDiv.appendChild(tile);
       if (grpId == pick) {
         tile.style.backgroundColor = "rgba(250, 229, 210, 0.66)";
       }
     });
+  } else if (overlayMode === OVERLAY_DRAFT_BREW) {
+    const deckListDiv = $$(".overlay_decklist")[0];
+    const deckToDraw = new Deck(
+      { name: "All Picks" },
+      currentDraft.pickedCards
+    );
+
+    $$(".overlay_deckname")[0].innerHTML = deckToDraw.name;
+    deckToDraw.colors
+      .get()
+      .forEach(color =>
+        $$(".overlay_deckcolors")[0].appendChild(
+          createDiv(["mana_s20", "mana_" + MANA[color]])
+        )
+      );
+    const mainCards = deckToDraw.mainboard;
+    mainCards.removeDuplicates();
+    mainCards.get().sort(compare_cards);
+    mainCards.get().forEach(card => {
+      const tile = deckDrawer.cardTile(
+        pd.settings.card_tile_style,
+        card.id,
+        "a",
+        card.quantity
+      );
+      if (tile) deckListDiv.appendChild(tile);
+    });
+
+    const deck = deckToDraw.getSave();
+    if (settings.type_counts) {
+      deckListDiv.appendChild(deckTypesStats(deck));
+    }
+    if (settings.mana_curve) {
+      deckListDiv.appendChild(deckManaCurve(deck));
+    }
   }
 }
 
@@ -954,9 +1043,7 @@ function ready(fn) {
 }
 
 ready(function() {
-  $$(".overlay_draft_container")[0].style.display = "none";
   recreateClock();
-  //
   $$(".clock_prev")[0].addEventListener("click", function() {
     clockMode -= 1;
     if (clockMode < 0) {
@@ -964,7 +1051,6 @@ ready(function() {
     }
     recreateClock();
   });
-  //
   $$(".clock_next")[0].addEventListener("click", function() {
     clockMode += 1;
     if (clockMode > 2) {
@@ -973,58 +1059,14 @@ ready(function() {
     recreateClock();
   });
 
-  //
-  $$(".draft_prev")[0].addEventListener("click", function() {
-    pickN -= 1;
-    let packSize = (currentDraft && PACK_SIZES[currentDraft.set]) || 14;
-
-    if (pickN < 0) {
-      pickN = packSize;
-      packN -= 1;
-    }
-    if (packN < 0) {
-      pickN = currentDraft.pickNumber;
-      packN = currentDraft.packNumber;
-    }
-
-    setDraft(packN, pickN);
-  });
-  //
-  $$(".draft_next")[0].addEventListener("click", function() {
-    pickN += 1;
-    let packSize = (currentDraft && PACK_SIZES[currentDraft.set]) || 14;
-
-    if (pickN > packSize) {
-      pickN = 0;
-      packN += 1;
-    }
-
-    if (pickN > currentDraft.pickNumber && packN == currentDraft.packNumber) {
-      pickN = 0;
-      packN = 0;
-    }
-
-    if (
-      packN > currentDraft.packNumber ||
-      (pickN == currentDraft.pickNumber && packN == currentDraft.packNumber)
-    ) {
-      setDraft();
-    } else {
-      setDraft(packN, pickN);
-    }
-  });
-
-  //
   $$(".close")[0].addEventListener("click", function() {
     close(false);
   });
 
-  //
   $$(".minimize")[0].addEventListener("click", function() {
     ipcSend("overlay_minimize", overlayIndex);
   });
 
-  //
   $$(".settings")[0].addEventListener("click", function() {
     ipcSend("renderer_show");
     ipcSend("force_open_overlay_settings", overlayIndex, IPC_MAIN);

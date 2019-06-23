@@ -5,7 +5,7 @@ const {
   ARENA_MODE_IDLE,
   ARENA_MODE_MATCH,
   ARENA_MODE_DRAFT,
-  OVERLAY_DRAFT,
+  OVERLAY_DRAFT_MODES,
   COLORS_ALL
 } = require("../shared/constants");
 
@@ -120,10 +120,13 @@ class OverlayProcess {
 
   updateVisible() {
     const { settings, window: overlay } = this;
+    if (!settings) return;
 
     const currentModeApplies =
-      (settings.mode === OVERLAY_DRAFT && arenaState === ARENA_MODE_DRAFT) ||
-      (settings.mode !== OVERLAY_DRAFT && arenaState === ARENA_MODE_MATCH);
+      (OVERLAY_DRAFT_MODES.includes(settings.mode) &&
+        arenaState === ARENA_MODE_DRAFT) ||
+      (!OVERLAY_DRAFT_MODES.includes(settings.mode) &&
+        arenaState === ARENA_MODE_MATCH);
 
     const shouldShow =
       settings.show && (currentModeApplies || settings.show_always);

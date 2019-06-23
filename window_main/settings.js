@@ -8,7 +8,9 @@ const {
   OVERLAY_ODDS,
   OVERLAY_SEEN,
   OVERLAY_DRAFT,
+  OVERLAY_DRAFT_BREW,
   OVERLAY_LOG,
+  OVERLAY_DRAFT_MODES,
   COLORS_ALL
 } = require("../shared/constants");
 const db = require("../shared/database");
@@ -355,8 +357,9 @@ function appendOverlay(section) {
     modeOptions[OVERLAY_LEFT] = "Cards Left";
     modeOptions[OVERLAY_ODDS] = "Cards Odds";
     modeOptions[OVERLAY_SEEN] = "Cards Seen";
-    modeOptions[OVERLAY_DRAFT] = "Draft";
+    modeOptions[OVERLAY_DRAFT] = "Draft Pick";
     modeOptions[OVERLAY_LOG] = "Action Log";
+    modeOptions[OVERLAY_DRAFT_BREW] = "Draft Brew";
 
     const modeSelect = createSelect(
       label,
@@ -412,35 +415,56 @@ function appendOverlay(section) {
       "Show title",
       `overlay_${index}_title`,
       settings.title,
-      updateUserSettings
+      updateUserSettings,
+      settings.mode === OVERLAY_DRAFT
     );
     addCheckbox(
       overlaySection,
       "Show deck/lists",
       `overlay_${index}_deck`,
       settings.deck,
-      updateUserSettings
+      updateUserSettings,
+      settings.mode === OVERLAY_DRAFT
     );
     addCheckbox(
       overlaySection,
       "Show clock",
       `overlay_${index}_clock`,
       settings.clock,
-      updateUserSettings
+      updateUserSettings,
+      OVERLAY_DRAFT_MODES.includes(settings.mode)
     );
     addCheckbox(
       overlaySection,
       "Show sideboard",
       `overlay_${index}_sideboard`,
       settings.sideboard,
-      updateUserSettings
+      updateUserSettings,
+      ![OVERLAY_FULL, OVERLAY_LEFT, OVERLAY_ODDS].includes(settings.mode)
     );
     addCheckbox(
       overlaySection,
       "Compact lands",
       `overlay_${index}_lands`,
       settings.lands,
-      updateUserSettings
+      updateUserSettings,
+      ![OVERLAY_FULL, OVERLAY_LEFT, OVERLAY_ODDS].includes(settings.mode)
+    );
+    addCheckbox(
+      overlaySection,
+      "Type counts",
+      `overlay_${index}_type_counts`,
+      settings.type_counts,
+      updateUserSettings,
+      [OVERLAY_LOG, OVERLAY_ODDS, OVERLAY_DRAFT].includes(settings.mode)
+    );
+    addCheckbox(
+      overlaySection,
+      "Mana curve",
+      `overlay_${index}_mana_curve`,
+      settings.mana_curve,
+      updateUserSettings,
+      [OVERLAY_LOG, OVERLAY_ODDS, OVERLAY_DRAFT].includes(settings.mode)
     );
 
     const sliderOpacity = createDiv(["slidecontainer_settings"]);
@@ -818,7 +842,9 @@ function updateUserSettingsBlend(_settings = {}) {
       clock: byId(`overlay_${index}_clock`).checked,
       sideboard: byId(`overlay_${index}_sideboard`).checked,
       ontop: byId(`overlay_${index}_ontop`).checked,
-      lands: byId(`overlay_${index}_lands`).checked
+      lands: byId(`overlay_${index}_lands`).checked,
+      type_counts: byId(`overlay_${index}_type_counts`).checked,
+      mana_curve: byId(`overlay_${index}_mana_curve`).checked
     };
   });
 

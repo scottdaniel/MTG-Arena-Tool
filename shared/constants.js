@@ -625,6 +625,11 @@ exports.OVERLAY_ODDS = 2;
 exports.OVERLAY_SEEN = 3;
 exports.OVERLAY_LOG = 4;
 exports.OVERLAY_DRAFT = 5;
+exports.OVERLAY_DRAFT_BREW = 6;
+exports.OVERLAY_DRAFT_MODES = [
+  exports.OVERLAY_DRAFT,
+  exports.OVERLAY_DRAFT_BREW
+];
 
 exports.ARENA_MODE_IDLE = 0;
 exports.ARENA_MODE_MATCH = 1;

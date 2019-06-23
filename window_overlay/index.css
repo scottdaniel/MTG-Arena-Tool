@@ -107,11 +107,10 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: space-around;
-    bottom: 0;
     width: 100%;
     height: 64px;
     min-height: 64px;
-    top: 64px;
+    top: 0;
     z-index: 40;
 }
 
@@ -311,4 +310,133 @@ body {
     justify-content: space-between;
     flex-flow: row-reverse;
     overflow: hidden;
+}
+
+.mana_curve_container {
+    margin: 6px auto;
+    max-width: 630px;
+    padding-left: 12px;
+    padding-right: 12px;
+    width: calc(100% - 24px);
+}
+
+.mana_curve {
+    display: flex;
+    align-items: flex-end;
+    height: 96px;
+    margin: 0px 4px;
+    padding-bottom: 4px;
+    border-bottom: 2px solid rgba(250, 229, 210, 0.8);
+    width: 100%;
+}
+
+.mana_curve_column {
+    color: #fae5d2;
+    justify-content: space-around;
+    width: -webkit-fill-available;
+    flex-direction: column;
+    margin: 0px 4px;
+    display: flex;
+    flex-direction: column;
+    background-color: rgba(250, 229, 210, 0.8);
+}
+
+.mana_curve_number {
+    opacity: 1;
+    position: relative;
+    height: 0px;
+    top: calc(50% - 8px);
+    text-align: center;
+    font-size: 16px;
+    font-weight: bold;
+    text-shadow: 3px 3px 3px #000000ad;
+    font-family: Beleren;
+}
+
+.mana_curve_numbers {
+    display: flex;
+    align-items: flex-end;
+    height: 24px;
+    width: 100%;
+}
+
+.mana_curve_costs {
+    display: flex;
+    align-items: flex-start;
+    width: 100%;
+
+}
+
+.mana_curve_column_number {
+    font-size: 12px;
+    line-height: 20px;
+    text-align: center;
+    color: #FAE5D2;
+    width: 100%;
+    font-family: "belerenbold";
+}
+
+.mana_curve_column span {
+  align-self: flex-end;
+}
+
+.types_container {
+    margin: 6px auto;
+    max-width: 630px;
+    padding-left: 12px;
+    padding-right: 12px;
+    width: calc(100% - 24px);
+    display: flex;
+    justify-content: space-between;
+}
+
+.type_icon_cont {
+    display: flex;
+    flex-direction: column;
+}
+
+.type_icon {
+    width: 32px;
+    height: 32px;
+    margin-bottom: 8px;
+}
+
+.type_art { background-image: url(../images/type_artifact.png); }
+.type_cre { background-image: url(../images/type_creature.png); }
+.type_enc { background-image: url(../images/type_enchantment.png); }
+.type_ins { background-image: url(../images/type_instant.png); }
+.type_lan { background-image: url(../images/type_land.png); }
+.type_pla { background-image: url(../images/type_planeswalker.png); }
+.type_sor { background-image: url(../images/type_sorcery.png); }
+
+.pie_container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 16px auto;
+    height: 160px;
+}
+
+.pie_container_outer {
+    width: 100%;
+    display: flex;
+    flex-direction: initial;
+    align-items: center;
+    margin: 16px auto;
+    height: 160px;
+}
+
+.pie_container span, .wildcards_cost span , .types_container span {
+    text-align: center;
+    display: block;
+    margin-bottom: 12px;
+    font-family:  var(--main-font-name);
+    font-size: 16px;
+    color: #FAE5D2;
+}
+
+.pie {
+  width: 128px; height: 128px;
+  border-radius: 50%;
 }
