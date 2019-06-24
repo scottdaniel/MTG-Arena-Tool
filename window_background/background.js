@@ -493,15 +493,20 @@ function loadPlayerConfig(playerId, serverData = undefined) {
   });
 
   const savedData = store.get();
+  const savedOverlays = savedData.settings.overlays || [];
   const playerData = {
     ...pd,
     ...savedData,
     settings: {
       ...pd.settings,
       ...savedData.settings,
-      overlays: savedData.settings.overlays.map(overlay => {
-        // include new default overlay settings
-        return { ...pd.overlayCfg, ...overlay };
+      overlays: pd.settings.overlays.map((overlay, index) => {
+        if (index < savedOverlays.length) {
+          // blend in new default overlay settings
+          return { ...overlay, ...savedOverlays[index] };
+        } else {
+          return overlay;
+        }
       })
     }
   };
