@@ -1,3 +1,35 @@
+## <small>2.7.3 (2019-06-24)</small>
+
+* add draft charts and new mode to settings page ([316146c](https://github.com/Manuel-777/MTG-Arena-Tool/commit/316146c))
+* add new draft charts and new mode to overlay ([fcdbec3](https://github.com/Manuel-777/MTG-Arena-Tool/commit/fcdbec3))
+* add patron link to settings page ([fe5731a](https://github.com/Manuel-777/MTG-Arena-Tool/commit/fe5731a))
+* arena-log-watcher uses pd.settings ([ed0e13b](https://github.com/Manuel-777/MTG-Arena-Tool/commit/ed0e13b))
+* better settings page description of skip_firstpass ([cabce20](https://github.com/Manuel-777/MTG-Arena-Tool/commit/cabce20))
+* bugfix background.loadPlayerConfig handles new overlay default fields ([fae7059](https://github.com/Manuel-777/MTG-Arena-Tool/commit/fae7059))
+* bugfix endDraft handles debugLog ([1f92769](https://github.com/Manuel-777/MTG-Arena-Tool/commit/1f92769))
+* color variables ([f3bb872](https://github.com/Manuel-777/MTG-Arena-Tool/commit/f3bb872))
+* comment out log statement ([861c463](https://github.com/Manuel-777/MTG-Arena-Tool/commit/861c463))
+* constants.OVERLAY_DRAFT_BREW and OVERLAY_DRAFT_MODES ([b0a6984](https://github.com/Manuel-777/MTG-Arena-Tool/commit/b0a6984))
+* database.activeEvents default ([c71b11e](https://github.com/Manuel-777/MTG-Arena-Tool/commit/c71b11e))
+* more color variables ([10b589d](https://github.com/Manuel-777/MTG-Arena-Tool/commit/10b589d))
+* move deckManaCurve and deckTypesStats to shared util ([08dd0ed](https://github.com/Manuel-777/MTG-Arena-Tool/commit/08dd0ed))
+* optimize background firstPass ([b329117](https://github.com/Manuel-777/MTG-Arena-Tool/commit/b329117))
+* player-data defaults and data getter ([8cf2289](https://github.com/Manuel-777/MTG-Arena-Tool/commit/8cf2289))
+* prettier ([f110caa](https://github.com/Manuel-777/MTG-Arena-Tool/commit/f110caa))
+* prettier ([3a38217](https://github.com/Manuel-777/MTG-Arena-Tool/commit/3a38217))
+* prettier whats new ([65fd9c8](https://github.com/Manuel-777/MTG-Arena-Tool/commit/65fd9c8))
+* refactor background draft label processing ([6cf7484](https://github.com/Manuel-777/MTG-Arena-Tool/commit/6cf7484))
+* renderer-util.addCheckbox supports disabled inputs ([8df6557](https://github.com/Manuel-777/MTG-Arena-Tool/commit/8df6557))
+* renderer.updateTopBar ([26343ca](https://github.com/Manuel-777/MTG-Arena-Tool/commit/26343ca))
+* save cards cast ([9983884](https://github.com/Manuel-777/MTG-Arena-Tool/commit/9983884))
+* Show whats new only once after updating ([a7b8d95](https://github.com/Manuel-777/MTG-Arena-Tool/commit/a7b8d95))
+* traditional standard onThePlay fix ([60072dc](https://github.com/Manuel-777/MTG-Arena-Tool/commit/60072dc))
+* whats new dialog ([1308355](https://github.com/Manuel-777/MTG-Arena-Tool/commit/1308355))
+* whats new link in about ([87b1eec](https://github.com/Manuel-777/MTG-Arena-Tool/commit/87b1eec))
+* bugfix: do not treat offline status as data ([5ff8ac2](https://github.com/Manuel-777/MTG-Arena-Tool/commit/5ff8ac2))
+
+
+
 ## <small>2.7.2 (2019-06-20)</small>
 
 * add vanilla-picker dependency ([f1d1e9a](https://github.com/Manuel-777/MTG-Arena-Tool/commit/f1d1e9a))
