@@ -1664,9 +1664,25 @@ function setDraftData(data) {
 }
 
 //
+function clearDraftData(draftId) {
+  if (pd.draftExists(draftId)) {
+    if (pd.draft_index.includes(draftId)) {
+      const draft_index = [...pd.draft_index];
+      draft_index.splice(draft_index.indexOf(draftId), 1);
+      pd_set({ draft_index });
+      if (debugLog || !firstPass) store.set("draft_index", draft_index);
+    }
+    pd_set({ [draftId]: null });
+    // Note: we must always run delete, regardless of firstpass
+    store.delete(draftId);
+  }
+}
+
+//
 function endDraft(data) {
   duringDraft = false;
   if (debugLog || !firstPass) ipc_send("set_arena_state", ARENA_MODE_IDLE);
+  if (!data) return;
   httpApi.httpSetDraft(data);
   ipc_send("popup", { text: "Draft saved!", time: 3000 });
 }
