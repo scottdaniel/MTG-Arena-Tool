@@ -22,6 +22,7 @@ const playerDataDefault = {
   userName: "",
   arenaId: "",
   arenaVersion: "",
+  offline: false,
   patreon: false,
   patreon_tier: 0
 };
@@ -113,7 +114,6 @@ const defaultCfg = {
     wcRare: 0,
     wcMythic: 0
   },
-  offline: false,
   rank: {
     constructed: {
       rank: "",
