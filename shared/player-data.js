@@ -273,7 +273,7 @@ class PlayerData {
       if (blacklistKeys.includes(key)) return;
       data[key] = value;
     });
-    console.log(data);
+    // console.log(data);
     return data;
   }
 
