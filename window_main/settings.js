@@ -188,18 +188,21 @@ function appendBehaviour(section) {
   );
   addCheckbox(
     section,
-    "Read log on login",
+    "Read entire Arena log during launch",
     "settings_readlogonlogin",
     !pd.settings.skip_firstpass,
     updateUserSettings
   );
   const helpDiv = createDiv(
     ["settings_note"],
-    `<i>Reading the log on startup can take a while, disabling this will make
-    mtgatool load instantly, but you may have have to play with Arena to load
-    some data, like Rank, wildcards and decklists.
-    <b>This feature makes mtgatool read games when it was closed.</b></i>`
+    `<p><i>Enabling this ensures that mtgatool will not miss any data still
+    available in your Arena log, even when mtgatool is launched while Arena is
+    running <b>(Recommended)</b>.</p>
+    <p>Disabling this will make mtgatool launch more quickly by skipping your
+    preexisting Arena log and only reading new log data. <b>This may miss data
+    if you launch mtgatool during an Arena session.</i></p>`
   );
+  helpDiv.style.paddingLeft = "35px";
   section.appendChild(helpDiv);
 
   addCheckbox(

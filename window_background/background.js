@@ -546,10 +546,10 @@ function syncUserData(data) {
       doc.id = id;
       delete doc._id;
       courses_index.push(id);
-      store.set(id, doc);
+      if (debugLog || !firstPass) store.set(id, doc);
       pd_set({ [id]: doc });
     });
-  store.set("courses_index", courses_index);
+  if (debugLog || !firstPass) store.set("courses_index", courses_index);
   pd_set({ courses_index });
 
   // Sync Matches
@@ -561,10 +561,10 @@ function syncUserData(data) {
       doc.id = id;
       delete doc._id;
       matches_index.push(id);
-      store.set(id, doc);
+      if (debugLog || !firstPass) store.set(id, doc);
       pd_set({ [id]: doc });
     });
-  store.set("matches_index", matches_index);
+  if (debugLog || !firstPass) store.set("matches_index", matches_index);
   pd_set({ matches_index });
 
   // Sync Economy
@@ -576,10 +576,10 @@ function syncUserData(data) {
       doc.id = id;
       delete doc._id;
       economy_index.push(id);
-      store.set(id, doc);
+      if (debugLog || !firstPass) store.set(id, doc);
       pd_set({ [id]: doc });
     });
-  store.set("economy_index", economy_index);
+  if (debugLog || !firstPass) store.set("economy_index", economy_index);
   pd_set({ economy_index });
 
   // Sync Drafts
@@ -591,10 +591,10 @@ function syncUserData(data) {
       doc.id = id;
       delete doc._id;
       draft_index.push(id);
-      store.set(id, doc);
+      if (debugLog || !firstPass) store.set(id, doc);
       pd_set({ [id]: doc });
     });
-  store.set("draft_index", draft_index);
+  if (debugLog || !firstPass) store.set("draft_index", draft_index);
   pd_set({ draft_index });
 
   if (debugLog || !firstPass) ipc_send("player_data_refresh");
@@ -605,7 +605,6 @@ function syncUserData(data) {
 // To persist changes, see "save_user_settings" or "save_app_settings"
 function syncSettings(dirtySettings = {}) {
   const settings = { ...pd.settings, ...dirtySettings };
-  skipFirstPass = settings.skip_firstpass;
   pd_set({ settings });
   ipc_send("set_settings", settings);
 }
@@ -655,7 +654,6 @@ function startWatchingLog() {
 }
 
 let skipMatch = false;
-let skipFirstPass = false;
 
 function onLogEntryFound(entry) {
   if (debugLog) {
@@ -680,7 +678,7 @@ function onLogEntryFound(entry) {
     if (firstPass) {
       updateLoading(entry);
     }
-    if ((firstPass && !skipFirstPass) || !firstPass) {
+    if ((firstPass && !pd.settings.skip_firstpass) || !firstPass) {
       try {
         switch (entry.label) {
           case "Log.Info":
@@ -1146,14 +1144,14 @@ function addCustomDeck(customDeck) {
   };
 
   pd_set({ decks: { ...pd.decks, [customDeck.id]: deckData } });
-  store.set("decks." + id, deckData);
+  if (debugLog || !firstPass) store.set("decks." + id, deckData);
 
   // decks_index is for backwards compatibility
   // (just in case bleeding edge folks need to revert)
   const decks_index = [...pd.decks_index];
   if (!decks_index.includes(id)) {
     decks_index.push(id);
-    store.set("decks_index", decks_index);
+    if (debugLog || !firstPass) store.set("decks_index", decks_index);
     pd_set({ decks_index });
   }
 
@@ -1480,12 +1478,12 @@ function saveEconomyTransaction(transaction) {
     ...transaction
   };
 
-  store.set(id, txnData);
+  if (debugLog || !firstPass) store.set(id, txnData);
   pd_set({ [id]: txnData });
 
   if (!pd.economy_index.includes(id)) {
     const economy_index = [...pd.economy_index, id];
-    store.set("economy_index", economy_index);
+    if (debugLog || !firstPass) store.set("economy_index", economy_index);
     pd_set({ economy_index });
   }
 
@@ -1506,12 +1504,12 @@ function saveCourse(json) {
     ...json
   };
 
-  store.set(id, eventData);
+  if (debugLog || !firstPass) store.set(id, eventData);
   pd_set({ [id]: eventData });
 
   if (!pd.courses_index.includes(id)) {
     const courses_index = [...pd.courses_index, id];
-    store.set("courses_index", courses_index);
+    if (debugLog || !firstPass) store.set("courses_index", courses_index);
     pd_set({ courses_index });
   }
 
@@ -1579,7 +1577,7 @@ function saveMatch(id) {
     match.tags = [match.oppDeck.archetype];
   }
 
-  match.date = new Date();
+  match.date = match.date || new Date();
   match.bestOf = currentMatch.bestOf;
 
   match.gameStats = matchGameStats;
@@ -1593,12 +1591,12 @@ function saveMatch(id) {
 
   // console.log("Save match:", match);
 
-  store.set(id, match);
+  if (debugLog || !firstPass) store.set(id, match);
   pd_set({ [id]: match });
 
   if (!pd.matches_index.includes(id)) {
     const matches_index = [...pd.matches_index, id];
-    store.set("matches_index", matches_index);
+    if (debugLog || !firstPass) store.set("matches_index", matches_index);
     pd_set({ matches_index });
   }
 
@@ -1636,12 +1634,12 @@ function setDraftData(data) {
   ipc_send("set_draft_cards", data);
 
   const { id } = data;
-  store.set(id, data);
+  if (debugLog || !firstPass) store.set(id, data);
   pd_set({ [id]: data, cards: pd.cards, cardsNew: pd.cardsNew });
 
   if (!pd.draft_index.includes(id)) {
     const draft_index = [...pd.draft_index, id];
-    store.set("draft_index", draft_index);
+    if (debugLog || !firstPass) store.set("draft_index", draft_index);
     pd_set({ draft_index });
   }
 
@@ -1672,6 +1670,7 @@ function updateLoading(entry) {
 function finishLoading() {
   if (firstPass) {
     firstPass = false;
+    store.set(pd.data);
     logReadEnd = new Date();
     let logReadElapsed = (logReadEnd - logReadStart) / 1000;
     ipc_send("ipc_log", `Log read in ${logReadElapsed}s`);

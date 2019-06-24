@@ -130,43 +130,52 @@ function showLogin() {
 }
 
 //
-ipc.on("player_data_updated", () => {
-  if (sidebarActive != -99) {
+function updateTopBar() {
+  if (pd.name) {
     $$(".top_username")[0].innerHTML = pd.name.slice(0, -6);
     $$(".top_username_id")[0].innerHTML = pd.name.slice(-6);
+  }
 
+  if (pd.rank) {
     let rankOffset;
-    let constructed = pd.rank.constructed;
+    const constructed = pd.rank.constructed;
     rankOffset = get_rank_index(constructed.rank, constructed.tier);
-    let constructedRankIcon = $$(".top_constructed_rank")[0];
+    const constructedRankIcon = $$(".top_constructed_rank")[0];
     constructedRankIcon.style.backgroundPosition = rankOffset * -48 + "px 0px";
     constructedRankIcon.setAttribute(
       "title",
       constructed.rank + " " + constructed.tier
     );
 
-    let limited = pd.rank.limited;
+    const limited = pd.rank.limited;
     rankOffset = get_rank_index(limited.rank, limited.tier);
-    let limitedRankIcon = $$(".top_limited_rank")[0];
+    const limitedRankIcon = $$(".top_limited_rank")[0];
     limitedRankIcon.style.backgroundPosition = rankOffset * -48 + "px 0px";
     limitedRankIcon.setAttribute("title", limited.rank + " " + limited.tier);
+  }
 
-    let patreonIcon = $$(".top_patreon")[0];
-    if (pd.patreon) {
-      let xoff = -40 * pd.patreon_tier;
-      let title = "Patreon Basic Tier";
+  const patreonIcon = $$(".top_patreon")[0];
+  if (pd.patreon) {
+    const xoff = -40 * pd.patreon_tier;
+    let title = "Patreon Basic Tier";
 
-      if (pd.patreon_tier == 1) title = "Patreon Standard Tier";
-      if (pd.patreon_tier == 2) title = "Patreon Modern Tier";
-      if (pd.patreon_tier == 3) title = "Patreon Legacy Tier";
-      if (pd.patreon_tier == 4) title = "Patreon Vintage Tier";
+    if (pd.patreon_tier === 1) title = "Patreon Standard Tier";
+    if (pd.patreon_tier === 2) title = "Patreon Modern Tier";
+    if (pd.patreon_tier === 3) title = "Patreon Legacy Tier";
+    if (pd.patreon_tier === 4) title = "Patreon Vintage Tier";
 
-      patreonIcon.style.backgroundPosition = xoff + "px 0px";
-      patreonIcon.setAttribute("title", title);
-      patreonIcon.style.display = "block";
-    } else {
-      patreonIcon.style.display = "none";
-    }
+    patreonIcon.style.backgroundPosition = xoff + "px 0px";
+    patreonIcon.setAttribute("title", title);
+    patreonIcon.style.display = "block";
+  } else {
+    patreonIcon.style.display = "none";
+  }
+}
+
+//
+ipc.on("player_data_updated", () => {
+  if (sidebarActive != -99) {
+    updateTopBar();
   }
 });
 
@@ -339,17 +348,15 @@ function openTab(tab, filters = {}, dataIndex = 0, scrollTop = 0) {
       $$(".init_loading")[0].style.display = "block";
       break;
   }
-  $$("." + tabClass)[0].classList.add("item_selected");
+  if ($$("." + tabClass)[0])
+    $$("." + tabClass)[0].classList.add("item_selected");
   ipcSend("save_user_settings", { last_open_tab: tab });
 }
 
 //
 ipc.on("initialize", function() {
   showLoadingBars();
-  if (pd.name) {
-    $$(".top_username")[0].innerHTML = pd.name.slice(0, -6);
-    $$(".top_username_id")[0].innerHTML = pd.name.slice(-6);
-  }
+  updateTopBar();
 
   sidebarActive = pd.settings.last_open_tab;
   const totalAgg = createAllMatches();
