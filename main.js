@@ -85,6 +85,7 @@ function startUpdater() {
     updaterWindow.moveTop();
   });
 
+  autoUpdater.allowDowngrade = true;
   let betaChannel = rememberStore.get("settings.beta_channel");
   if (betaChannel) {
     autoUpdater.allowPrerelease = true;
@@ -119,10 +120,14 @@ function installUpdate() {
   autoUpdater.quitAndInstall(true, true);
 }
 
+let appStarted = false;
+
 function startApp() {
+  if (appStarted) return;
   mainWindow = createMainWindow();
   background = createBackgroundWindow();
   setBackground(background);
+  appStarted = true;
 
   globalShortcut.register("Alt+Shift+D", () => {
     if (!background.isVisible()) background.show();
