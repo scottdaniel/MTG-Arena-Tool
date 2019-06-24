@@ -1,7 +1,7 @@
 const { createDiv, queryElements } = require("../shared/dom-fns");
 const { remote } = require("electron");
 
-const upToVersion = "2.7.3";
+// We should clear this on releases and fill as we add new features
 const screens = [
   {
     title: "Multiple Overlays",
@@ -24,6 +24,8 @@ const screens = [
 let selectedScreen = 0;
 
 function showWhatsNew() {
+  // Only show if we actually do have stuff to show
+  if (screens.length == 0) return;
   const dialog = queryElements(".dialog")[0];
   dialog.innerHTML = "";
   dialog.style.width = "80vw";

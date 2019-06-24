@@ -76,10 +76,16 @@ const {
   onLabelRankUpdated
 } = require("./labels");
 
+const toolVersion = electron.remote.app
+  .getVersion()
+  .split(".")
+  .reduce((acc, cur) => +acc * 256 + +cur);
+
 const rememberCfg = {
   email: "",
   token: "",
   settings: {
+    toolVersion: toolVersion,
     auto_login: false,
     launch_to_tray: false,
     remember_me: true,
@@ -206,6 +212,7 @@ var lastDeckUpdate = new Date();
 ipc.on("save_app_settings", function(event, arg) {
   ipc_send("show_loading");
   const rSettings = rstore.get("settings");
+  rSettings.toolVersion = toolVersion;
   const updated = { ...rSettings, ...arg };
 
   if (!updated.remember_me) {
@@ -228,6 +235,14 @@ ipc.on("set_renderer_state", function(event, arg) {
   const settings = { ...pd.settings, ...appSettings };
   pd_set({ settings });
   ipc_send("initial_settings", settings);
+
+  // Check if it is the first time we open this version
+  if (
+    appSettings.toolVersion == undefined ||
+    toolVersion > appSettings.toolVersion
+  ) {
+    ipc_send("show_whats_new");
+  }
 
   let username = "";
   let password = "";
@@ -1583,10 +1598,7 @@ function saveMatch(id) {
   match.gameStats = matchGameStats;
 
   // Convert string "2.2.19" into number for easy comparison, 1 byte per part, allowing for versions up to 255.255.255
-  match.toolVersion = electron.remote.app
-    .getVersion()
-    .split(".")
-    .reduce((acc, cur) => +acc * 256 + +cur);
+  match.toolVersion = toolVersion;
   match.toolRunFromSource = !electron.remote.app.isPackaged;
 
   // console.log("Save match:", match);

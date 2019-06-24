@@ -288,6 +288,12 @@ ipc.on("prefill_auth_form", function(event, arg) {
   byId("signin_pass").value = arg.password;
 });
 
+let isNew = false;
+//
+ipc.on("show_whats_new", function(event, arg) {
+  isNew = true;
+});
+
 //
 function rememberMe() {
   const rSettings = {
@@ -363,7 +369,10 @@ ipc.on("initialize", function() {
   setLocalState({ totalAgg });
   openTab(sidebarActive);
 
-  //showWhatsNew();
+  if (isNew) {
+    ipcSend("save_app_settings", {});
+    showWhatsNew();
+  }
 
   $$(".top_nav")[0].classList.remove("hidden");
   $$(".overflow_ux")[0].classList.remove("hidden");
