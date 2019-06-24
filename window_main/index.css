@@ -2119,11 +2119,11 @@ a:hover {
     margin: auto;
     width: 400px;
     height: 160px;
-    background-color: var(--color-mid-50);
+    background-color: var(--color-back);
     border: 1px solid var(--color-light-50);
     border-radius: 5px;
     box-shadow: 0px 2px 16px 0px black;
-    -webkit-transition: all .15s cubic-bezier(1, 0.35, 0.35, 1);
+    -webkit-transition: all .25s cubic-bezier(1, 0.35, 0.35, 1);
 }
 
 .dialog_container {
@@ -3293,7 +3293,7 @@ a:hover {
 }
 
 .wnew_scroller {
-    height: 60%;
+    height: 70%;
     position: relative;
     display: flex;
     overflow: hidden;
@@ -3321,15 +3321,15 @@ a:hover {
     font-size: 28px;
     color: var(--color-light);
     padding: 16px;
-    background-color: rgba(0,0,0,0.5);
+    background-color: rgba(0,0,0,0.6);
 }
 
 .wnew_image_desc {
     font-family: var(--sub-font-name-it);
     font-size: 15px;
-    color: var(--color-w);
+    color: var(--color-light);
     padding: 10px;
-    background-color: rgba(0,0,0,0.5);
+    background-color: rgba(0,0,0,0.6)
 }
 
 .wnew_prev, .wnew_next {

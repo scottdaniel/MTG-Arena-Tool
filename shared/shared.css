@@ -30,6 +30,8 @@
   --color-mid-50: rgba(145, 121, 97, 0.50);
   --color-mid-66: rgba(145, 121, 97, 0.66);
   --color-mid-75: rgba(145, 121, 97, 0.75);
+
+  --color-back: rgba(51, 40, 30, 0.75);
 }
 
 html {

@@ -371,7 +371,9 @@ ipc.on("initialize", function() {
 
   if (isNew) {
     ipcSend("save_app_settings", {});
-    showWhatsNew();
+    setTimeout(() => {
+      showWhatsNew();
+    }, 1000);
   }
 
   $$(".top_nav")[0].classList.remove("hidden");

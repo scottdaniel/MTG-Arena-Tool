@@ -360,6 +360,7 @@ function attachDraftData(listItem, draft) {
 
     const dialog = $$(".dialog")[0];
     dialog.innerHTML = "";
+    dialog.style.opacity = 1;
     dialog.style.width = "500px";
     dialog.style.height = "200px";
     dialog.style.top = "calc(50% - 100px)";

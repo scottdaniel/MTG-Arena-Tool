@@ -17,7 +17,7 @@ const screens = [
   {
     title: "Customize everything",
     desciption: "Customize every aspect of each window.",
-    image: "02.png"
+    image: "03.png"
   }
 ];
 
@@ -28,9 +28,10 @@ function showWhatsNew() {
   if (screens.length == 0) return;
   const dialog = queryElements(".dialog")[0];
   dialog.innerHTML = "";
+  dialog.style.opacity = 1;
   dialog.style.width = "80vw";
-  dialog.style.height = "70vh";
-  dialog.style.top = "15vh";
+  dialog.style.height = "80vh";
+  dialog.style.top = "10vh";
   dialog.style.justifyContent = "center";
   dialog.style.overflow = "hidden";
   dialog.addEventListener("click", function(e) {
