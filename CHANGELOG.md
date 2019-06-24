@@ -1,3 +1,11 @@
+## <small>2.7.4 (2019-06-24)</small>
+
+* bugfix background draft edge cases ([269679c](https://github.com/Manuel-777/MTG-Arena-Tool/commit/269679c))
+* bugfix background handles player configs without multiple overlays yet ([88c0962](https://github.com/Manuel-777/MTG-Arena-Tool/commit/88c0962))
+* dont let updater to start twice ([999bb1d](https://github.com/Manuel-777/MTG-Arena-Tool/commit/999bb1d))
+
+
+
 ## <small>2.7.3 (2019-06-24)</small>
 
 * add draft charts and new mode to settings page ([316146c](https://github.com/Manuel-777/MTG-Arena-Tool/commit/316146c))
