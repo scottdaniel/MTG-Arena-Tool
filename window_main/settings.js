@@ -23,6 +23,7 @@ const {
   queryElements: $$
 } = require("../shared/dom-fns");
 const deckDrawer = require("../shared/deck-drawer");
+const { showWhatsNew } = require("./whats-new");
 const { createSelect } = require("../shared/select");
 const { get_card_image } = require("../shared/util");
 const byId = id => document.getElementById(id);
@@ -743,8 +744,16 @@ function appendAbout(section) {
     ["button_simple", "centered"],
     "Check for updates"
   );
+
   updateButton.addEventListener("click", () => ipcSend("updates_check", true));
   about.appendChild(updateButton);
+
+  const whatsNewLink = createDiv(
+    ["message_sub_15", "white", "release_notes_link"],
+    "What's new?"
+  );
+  whatsNewLink.addEventListener("click", showWhatsNew);
+  about.appendChild(whatsNewLink);
 
   const linkDiv = createDiv(["flex_item"]);
   linkDiv.style.margin = "64px auto 0px auto";
