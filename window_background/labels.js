@@ -21,6 +21,7 @@
     store
     saveEconomyTransaction
     matchBeginTime
+    clearDraftData
     createMatch
     createDraft
     endDraft
@@ -673,7 +674,11 @@ function onLabelInDraftDraftStatus(entry, json) {
   // console.log("LABEL:  Draft status ", json);
   if (!json) return;
   startDraft();
-  const { draftId, eventName } = json;
+  const { draftId, eventName, packNumber, pickNumber, pickedCards } = json;
+  if (packNumber === 0 && pickNumber === 0 && pickedCards.length === 0) {
+    // ensure new drafts have clear working-space
+    clearDraftData(draftId);
+  }
   const data = {
     ...getDraftData(draftId),
     ...json,
@@ -724,6 +729,9 @@ function onLabelInEventCompleteDraft(entry, json) {
     ...json
   };
   data.id = toolId;
+  // clear working-space draft data
+  clearDraftData(draftId);
+  // save final version of draft
   setDraftData(data);
   endDraft(data);
 }
