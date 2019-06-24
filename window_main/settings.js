@@ -768,6 +768,10 @@ function appendAbout(section) {
   supportDiv.style.margin = "24px 0 12px 0";
   about.appendChild(supportDiv);
 
+  const donateBar = createDiv();
+  donateBar.style.display = "flex";
+  donateBar.style.alignItems = "center";
+
   const donateLink = createDiv(
     ["donate_link"],
     '<img src="https://www.paypalobjects.com/webstatic/en_US/i/buttons/PP_logo_h_100x26.png" alt="PayPal" />'
@@ -775,7 +779,17 @@ function appendAbout(section) {
   donateLink.addEventListener("click", () => {
     shell.openExternal("https://www.paypal.me/ManuelEtchegaray/10");
   });
-  about.appendChild(donateLink);
+  donateBar.appendChild(donateLink);
+
+  const patreonLink = createDiv(
+    ["patreon_link"],
+    '<img src="https://c5.patreon.com/external/logo/become_a_patron_button.png" alt="Patreon" />'
+  );
+  patreonLink.addEventListener("click", () => {
+    shell.openExternal("https://www.patreon.com/mtgatool");
+  });
+  donateBar.appendChild(patreonLink);
+  about.appendChild(donateBar);
 
   section.appendChild(about);
 }

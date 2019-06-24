@@ -91,7 +91,14 @@ relative-time, local-time {
     cursor: pointer;
     width: 100px;
     height: 26px;
-    margin: 0 auto;
+    margin: auto 12px auto auto;
+}
+
+.patreon_link {
+    cursor: pointer;
+    width: 217px;
+    height: 51px;
+    margin: auto auto auto 12px;
 }
 
 .twitter_link {
