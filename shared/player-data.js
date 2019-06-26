@@ -137,14 +137,11 @@ const defaultCfg = {
   courses_index: [],
   matches_index: [],
   draft_index: [],
-  gems_history: [],
-  gold_history: [],
   decks: {},
   decks_tags: {},
   decks_last_used: [],
   static_decks: [],
-  tags_colors: {},
-  wildcards_history: []
+  tags_colors: {}
 };
 
 // cloned from util to avoid circular dependency
@@ -205,12 +202,12 @@ class PlayerData {
     this.handleSetData = this.handleSetData.bind(this);
     if (ipc) ipc.on("set_player_data", this.handleSetData);
 
-    this.change = this.change.bind(this);
+    this.transaction = this.transaction.bind(this);
     this.deck = this.deck.bind(this);
     this.draft = this.draft.bind(this);
     this.event = this.event.bind(this);
     this.match = this.match.bind(this);
-    this.changeExists = this.changeExists.bind(this);
+    this.transactionExists = this.transactionExists.bind(this);
     this.deckExists = this.deckExists.bind(this);
     this.deckChangeExists = this.deckChangeExists.bind(this);
     this.draftExists = this.draftExists.bind(this);
@@ -236,37 +233,42 @@ class PlayerData {
     return 100 + this.settings.cards_size * 10;
   }
 
-  get changes() {
-    return this.economy_index.filter(this.changeExists).map(this.change);
+  get transactionList() {
+    return this.economy_index
+      .filter(this.transactionExists)
+      .map(this.transaction);
   }
 
   get deckList() {
     return Object.keys(this.decks).map(this.deck);
   }
 
-  get drafts() {
+  get draftList() {
     return this.draft_index.filter(this.draftExists).map(this.draft);
   }
 
-  get events() {
+  get eventList() {
     return this.courses_index.filter(this.eventExists).map(this.event);
   }
 
-  get matches() {
+  get matchList() {
     return this.matches_index.filter(this.matchExists).map(this.match);
   }
 
   get history() {
-    return [...this.matches, ...this.drafts];
+    return [...this.matchList, ...this.draftList];
   }
 
   get data() {
     const data = {};
     const blacklistKeys = [
+      ...Object.keys(playerDataDefault),
       "defaultCfg",
+      "gems_history",
+      "gold_history",
       "overlayCfg",
-      "windowBounds",
-      ...Object.keys(playerDataDefault)
+      "wildcards_history",
+      "windowBounds"
     ];
     Object.entries(this).forEach(([key, value]) => {
       if (value instanceof Function) return;
@@ -277,8 +279,8 @@ class PlayerData {
     return data;
   }
 
-  change(id) {
-    if (!this.changeExists(id)) return false;
+  transaction(id) {
+    if (!this.transactionExists(id)) return false;
     return {
       ...this[id],
       // Some old data stores the raw original context in ".originalContext"
@@ -287,7 +289,7 @@ class PlayerData {
     };
   }
 
-  changeExists(id) {
+  transactionExists(id) {
     return this.economy_index.includes(id) && id in this;
   }
 

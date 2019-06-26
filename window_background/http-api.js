@@ -15,7 +15,7 @@ const async = require("async");
 const qs = require("qs");
 
 const { makeId } = require("../shared/util");
-const { ipc_send, pd_set } = require("./background-util");
+const { ipc_send, setData } = require("./background-util");
 
 let metadataState = false;
 
@@ -38,7 +38,7 @@ function httpBasic() {
         _headers.method != "get_database" &&
         debugLog == false
       ) {
-        pd_set({ offline: true });
+        setData({ offline: true });
         callback({
           message: "Settings dont allow sending data! > " + _headers.method
         });
@@ -208,7 +208,7 @@ function httpBasic() {
                   serverData.drafts = parsedResult.drafts;
                   serverData.economy = parsedResult.economy;
                 }
-                pd_set(data);
+                setData(data);
                 ipc_send("player_data_updated");
                 loadPlayerConfig(pd.arenaId, serverData);
                 ipc_send("set_discord_tag", parsedResult.discord_tag);
@@ -397,7 +397,7 @@ function notificationSetTimeout() {
 
 function httpAuth(userName, pass) {
   var _id = makeId(6);
-  pd_set({ userName });
+  setData({ userName });
   httpAsync.push({
     reqId: _id,
     method: "auth",

@@ -149,8 +149,7 @@ function renderData(container, index) {
   // for performance reasons, we leave changes order mostly alone
   // to display most-recent-first, we use a reverse index
   const revIndex = sortedChanges.length - index - 1;
-  const economyId = sortedChanges[revIndex];
-  const change = pd.change(economyId);
+  const change = sortedChanges[revIndex];
 
   if (change === undefined) return 0;
   if (change.archived && !showArchived) return 0;
@@ -176,7 +175,7 @@ function renderData(container, index) {
     rowsAdded++;
   }
 
-  var div = createChangeRow(change, economyId);
+  const div = createChangeRow(change, change.id);
   container.appendChild(div);
   rowsAdded++;
 
@@ -691,15 +690,14 @@ function createChangeRow(change, economyId) {
 function createEconomyUI(mainDiv) {
   daysago = -999;
   dayList = [];
-  sortedChanges = [...pd.economy_index];
+  sortedChanges = [...pd.transactionList];
   sortedChanges.sort(compare_economy);
 
   var topSelectItems = ["All", "Day Summaries"];
   var selectItems = [];
 
   for (var n = 0; n < sortedChanges.length; n++) {
-    const economyId = sortedChanges[n];
-    const change = pd.change(economyId);
+    const change = sortedChanges[n];
     if (change === undefined) continue;
     if (change.archived && !showArchived) continue;
 
@@ -841,15 +839,8 @@ function createEconomyUI(mainDiv) {
   daysago = -1;
 }
 
-// Compare two economy events OR the IDs of two economy events.
-// If two IDs are specified then events are retrieved from `economyHistory`
+// Compare two economy events
 function compare_economy(a, b) {
-  if (a === undefined) return 0;
-  if (b === undefined) return 0;
-
-  a = pd.change(a);
-  b = pd.change(b);
-
   if (a === undefined) return 0;
   if (b === undefined) return 0;
 

@@ -52,7 +52,7 @@ const {
   ipc_send,
   normaliseFields,
   parseWotcTime,
-  pd_set
+  setData
 } = require("./background-util");
 //
 function convert_deck_from_v3(deck) {
@@ -296,7 +296,7 @@ function onLabelInEventGetCombinedRankInfo(entry, json) {
   rank.limited.lost = json.limitedMatchesLost;
   rank.limited.drawn = json.limitedMatchesDrawn;
 
-  pd_set({ rank });
+  setData({ rank });
   if (debugLog || !firstPass) store.set("rank", rank);
   ipc_send("player_data_updated");
 }
@@ -322,7 +322,7 @@ function onLabelRankUpdated(entry, json) {
     rank.limited.step = json.newStep;
   }
 
-  pd_set({ rank });
+  setData({ rank });
   if (debugLog || !firstPass) store.set("rank", rank);
   ipc_send("player_data_updated");
 }
@@ -339,7 +339,7 @@ function onLabelInDeckGetDeckLists(entry, json) {
     static_decks.push(deck.id);
   });
 
-  pd_set({ decks, static_decks });
+  setData({ decks, static_decks });
   if (debugLog || !firstPass) store.set("static_decks", static_decks);
   if (debugLog || !firstPass) ipc_send("player_data_refresh");
 }
@@ -487,7 +487,7 @@ function onLabelInDeckUpdateDeck(entry, json) {
     if (debugLog || !firstPass)
       store.set("deck_changes_index", deck_changes_index);
 
-    pd_set({ deck_changes, deck_changes_index });
+    setData({ deck_changes, deck_changes_index });
     if (!firstPass) ipc_send("player_data_refresh");
   }
 }
@@ -551,7 +551,7 @@ function onLabelInPlayerInventoryGetPlayerInventory(entry, json) {
     wcRare: json.wcRare,
     wcMythic: json.wcMythic
   };
-  pd_set({ economy });
+  setData({ economy });
   if (debugLog || !firstPass) store.set("economy", economy);
   if (debugLog || !firstPass) ipc_send("player_data_refresh");
 }
@@ -589,7 +589,7 @@ function onLabelInPlayerInventoryGetPlayerCardsV3(entry, json) {
     }
   });
 
-  pd_set({ cards, cardsNew });
+  setData({ cards, cardsNew });
   if (!firstPass) ipc_send("player_data_refresh");
 }
 
