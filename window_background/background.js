@@ -42,7 +42,7 @@ const {
   ARENA_MODE_DRAFT,
   ARENA_MODE_IDLE
 } = require("../shared/constants");
-const { ipc_send, pd_set, unleakString } = require("./background-util");
+const { ipc_send, setData, unleakString } = require("./background-util");
 const {
   onLabelOutLogInfo,
   onLabelGreToClient,
@@ -233,7 +233,7 @@ ipc.on("set_renderer_state", function(event, arg) {
   // app-level settings into singletons
   const appSettings = rstore.get("settings");
   const settings = { ...pd.settings, ...appSettings };
-  pd_set({ settings });
+  setData({ settings });
   ipc_send("initial_settings", settings);
 
   // Check if it is the first time we open this version
@@ -265,7 +265,7 @@ ipc.on("set_renderer_state", function(event, arg) {
 });
 
 function offlineLogin() {
-  pd_set({ userName: "", offline: true });
+  setData({ userName: "", offline: true });
   ipc_send("auth", { ok: true, user: -1 });
   loadPlayerConfig(pd.arenaId);
 }
@@ -312,7 +312,7 @@ ipc.on("request_draft_link", function(event, obj) {
 
 //
 ipc.on("windowBounds", (event, windowBounds) => {
-  pd_set({ windowBounds });
+  setData({ windowBounds });
   store.set("windowBounds", windowBounds);
 });
 
@@ -324,7 +324,7 @@ ipc.on("overlayBounds", (event, index, bounds) => {
     bounds // new bounds
   };
   overlays[index] = newOverlay;
-  pd_set({ settings: { ...pd.settings, overlays } });
+  setData({ settings: { ...pd.settings, overlays } });
   store.set("settings.overlays", overlays);
 });
 
@@ -352,7 +352,7 @@ ipc.on("toggle_deck_archived", function(event, arg) {
   deckData.archived = !deckData.archived;
   const decks = { ...pd.decks, [id]: deckData };
 
-  pd_set({ decks });
+  setData({ decks });
   store.set("decks." + id, deckData);
   ipc_send("player_data_refresh");
   ipc_send("hide_loading");
@@ -367,7 +367,7 @@ ipc.on("toggle_archived", function(event, arg) {
   const data = { ...item };
   data.archived = !data.archived;
 
-  pd_set({ [id]: data });
+  setData({ [id]: data });
   store.set(id, data);
   ipc_send("player_data_refresh");
   ipc_send("hide_loading");
@@ -407,7 +407,7 @@ ipc.on("tou_drop", function(event, arg) {
 
 ipc.on("edit_tag", (event, arg) => {
   const { tag, color } = arg;
-  pd_set({ tags_colors: { ...pd.tags_colors, [tag]: color } });
+  setData({ tags_colors: { ...pd.tags_colors, [tag]: color } });
   store.set("tags_colors." + tag, color);
   ipc_send("player_data_refresh");
 });
@@ -422,7 +422,7 @@ ipc.on("delete_tag", (event, arg) => {
   tags.splice(tags.indexOf(tag), 1);
 
   const decks_tags = { ...pd.decks_tags, [deckid]: tags };
-  pd_set({ decks_tags });
+  setData({ decks_tags });
   store.set("decks_tags." + deckid, tags);
   ipc_send("player_data_refresh");
 });
@@ -437,7 +437,7 @@ ipc.on("add_tag", (event, arg) => {
   const tags = [...deck.tags, tag];
 
   const decks_tags = { ...pd.decks_tags, [deckid]: tags };
-  pd_set({ decks_tags });
+  setData({ decks_tags });
   store.set("decks_tags." + deckid, tags);
   ipc_send("player_data_refresh");
 });
@@ -453,7 +453,7 @@ ipc.on("delete_history_tag", (event, arg) => {
 
   const matchData = { ...match, tags };
 
-  pd_set({ [matchid]: matchData });
+  setData({ [matchid]: matchData });
   store.set(matchid + ".tags", tags);
   ipc_send("player_data_refresh");
 });
@@ -466,7 +466,7 @@ ipc.on("add_history_tag", (event, arg) => {
 
   const tags = [...(match.tags || []), tag];
 
-  pd_set({ [matchid]: { ...match, tags } });
+  setData({ [matchid]: { ...match, tags } });
   store.set(matchid + ".tags", tags);
   ipc_send("player_data_refresh");
   httpApi.httpSetDeckTag(tag, match.oppDeck.mainDeck, match.eventId);
@@ -511,7 +511,7 @@ function loadPlayerConfig(playerId, serverData = undefined) {
     }
   };
   syncSettings(playerData.settings);
-  pd_set(playerData);
+  setData(playerData);
 
   ipc_send("popup", {
     text: "Player history loaded.",
@@ -567,10 +567,10 @@ function syncUserData(data) {
       delete doc._id;
       courses_index.push(id);
       if (debugLog || !firstPass) store.set(id, doc);
-      pd_set({ [id]: doc });
+      setData({ [id]: doc });
     });
   if (debugLog || !firstPass) store.set("courses_index", courses_index);
-  pd_set({ courses_index });
+  setData({ courses_index });
 
   // Sync Matches
   const matches_index = [...pd.matches_index];
@@ -582,25 +582,25 @@ function syncUserData(data) {
       delete doc._id;
       matches_index.push(id);
       if (debugLog || !firstPass) store.set(id, doc);
-      pd_set({ [id]: doc });
+      setData({ [id]: doc });
     });
   if (debugLog || !firstPass) store.set("matches_index", matches_index);
-  pd_set({ matches_index });
+  setData({ matches_index });
 
   // Sync Economy
   const economy_index = [...pd.economy_index];
   data.economy
-    .filter(doc => !pd.changeExists(doc._id))
+    .filter(doc => !pd.transactionExists(doc._id))
     .forEach(doc => {
       const id = doc._id;
       doc.id = id;
       delete doc._id;
       economy_index.push(id);
       if (debugLog || !firstPass) store.set(id, doc);
-      pd_set({ [id]: doc });
+      setData({ [id]: doc });
     });
   if (debugLog || !firstPass) store.set("economy_index", economy_index);
-  pd_set({ economy_index });
+  setData({ economy_index });
 
   // Sync Drafts
   const draft_index = [...pd.draft_index];
@@ -612,20 +612,20 @@ function syncUserData(data) {
       delete doc._id;
       draft_index.push(id);
       if (debugLog || !firstPass) store.set(id, doc);
-      pd_set({ [id]: doc });
+      setData({ [id]: doc });
     });
   if (debugLog || !firstPass) store.set("draft_index", draft_index);
-  pd_set({ draft_index });
+  setData({ draft_index });
 
   if (debugLog || !firstPass) ipc_send("player_data_refresh");
 }
 
 // Merges settings and updates singletons across processes
-// (essentially fancy pd_set for settings field only)
+// (essentially fancy setData for settings field only)
 // To persist changes, see "save_user_settings" or "save_app_settings"
 function syncSettings(dirtySettings = {}) {
   const settings = { ...pd.settings, ...dirtySettings };
-  pd_set({ settings });
+  setData({ settings });
   ipc_send("set_settings", settings);
 }
 
@@ -689,7 +689,7 @@ function onLogEntryFound(entry) {
       arenaVersion: entry.socket.ClientVersion,
       name: entry.socket.PlayerScreenName
     };
-    pd_set(data);
+    setData(data);
     ipc_send("player_data_updated");
   } else if (entry.playerId && entry.playerId !== pd.arenaId) {
     return;
@@ -1012,7 +1012,7 @@ async function logLoop() {
   for (let key in parsedData) {
     ipc_send("ipc_log", `Initial log parse: ${key}=${parsedData[key]}`);
   }
-  pd_set(parsedData);
+  setData(parsedData);
   ipc_send("player_data_updated");
 
   if (pd.arenaId) {
@@ -1163,7 +1163,7 @@ function addCustomDeck(customDeck) {
     ...customDeck
   };
 
-  pd_set({ decks: { ...pd.decks, [customDeck.id]: deckData } });
+  setData({ decks: { ...pd.decks, [customDeck.id]: deckData } });
   if (debugLog || !firstPass) store.set("decks." + id, deckData);
 
   // decks_index is for backwards compatibility
@@ -1172,7 +1172,7 @@ function addCustomDeck(customDeck) {
   if (!decks_index.includes(id)) {
     decks_index.push(id);
     if (debugLog || !firstPass) store.set("decks_index", decks_index);
-    pd_set({ decks_index });
+    setData({ decks_index });
   }
 
   if (debugLog || !firstPass) ipc_send("player_data_refresh");
@@ -1494,17 +1494,17 @@ function saveEconomyTransaction(transaction) {
   const id = transaction.id;
   const txnData = {
     // preserve custom fields if possible
-    ...(pd.change(id) || {}),
+    ...(pd.transaction(id) || {}),
     ...transaction
   };
 
   if (debugLog || !firstPass) store.set(id, txnData);
-  pd_set({ [id]: txnData });
+  setData({ [id]: txnData });
 
   if (!pd.economy_index.includes(id)) {
     const economy_index = [...pd.economy_index, id];
     if (debugLog || !firstPass) store.set("economy_index", economy_index);
-    pd_set({ economy_index });
+    setData({ economy_index });
   }
 
   if (debugLog || !firstPass) ipc_send("player_data_refresh");
@@ -1525,12 +1525,12 @@ function saveCourse(json) {
   };
 
   if (debugLog || !firstPass) store.set(id, eventData);
-  pd_set({ [id]: eventData });
+  setData({ [id]: eventData });
 
   if (!pd.courses_index.includes(id)) {
     const courses_index = [...pd.courses_index, id];
     if (debugLog || !firstPass) store.set("courses_index", courses_index);
-    pd_set({ courses_index });
+    setData({ courses_index });
   }
 
   if (debugLog || !firstPass) ipc_send("player_data_refresh");
@@ -1609,12 +1609,12 @@ function saveMatch(id) {
   // console.log("Save match:", match);
 
   if (debugLog || !firstPass) store.set(id, match);
-  pd_set({ [id]: match });
+  setData({ [id]: match });
 
   if (!pd.matches_index.includes(id)) {
     const matches_index = [...pd.matches_index, id];
     if (debugLog || !firstPass) store.set("matches_index", matches_index);
-    pd_set({ matches_index });
+    setData({ matches_index });
   }
 
   if (debugLog || !firstPass) ipc_send("player_data_refresh");
@@ -1652,12 +1652,12 @@ function setDraftData(data) {
 
   const { id } = data;
   if (debugLog || !firstPass) store.set(id, data);
-  pd_set({ [id]: data, cards: pd.cards, cardsNew: pd.cardsNew });
+  setData({ [id]: data, cards: pd.cards, cardsNew: pd.cardsNew });
 
   if (!pd.draft_index.includes(id)) {
     const draft_index = [...pd.draft_index, id];
     if (debugLog || !firstPass) store.set("draft_index", draft_index);
-    pd_set({ draft_index });
+    setData({ draft_index });
   }
 
   if (debugLog || !firstPass) ipc_send("player_data_refresh");
@@ -1669,10 +1669,10 @@ function clearDraftData(draftId) {
     if (pd.draft_index.includes(draftId)) {
       const draft_index = [...pd.draft_index];
       draft_index.splice(draft_index.indexOf(draftId), 1);
-      pd_set({ draft_index });
+      setData({ draft_index });
       if (debugLog || !firstPass) store.set("draft_index", draft_index);
     }
-    pd_set({ [draftId]: null });
+    setData({ [draftId]: null });
     // Note: we must always run delete, regardless of firstpass
     store.delete(draftId);
   }

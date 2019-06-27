@@ -77,7 +77,12 @@ function ipc_send(method, arg, to = IPC_MAIN) {
   ipc.send("ipc_switch", method, IPC_BACKGROUND, arg, to);
 }
 
-const dataBlacklist = ["changes", "drafts", "events", "matches"];
+const dataBlacklist = [
+  "transactionList",
+  "draftList",
+  "eventList",
+  "matchList"
+];
 
 const overlayWhitelist = [
   "name",
@@ -94,7 +99,7 @@ const overlayWhitelist = [
 
 // convenience fn to update player data singletons in all processes
 // (update is destructive, be sure to use spread syntax if necessary)
-function pd_set(data) {
+function setData(data) {
   const cleanData = _.omit(data, dataBlacklist);
   pd.handleSetData(null, cleanData);
   ipc_send("set_player_data", cleanData, IPC_MAIN);
@@ -106,6 +111,6 @@ module.exports = {
   ipc_send,
   normaliseFields,
   parseWotcTime,
-  pd_set,
+  setData,
   unleakString
 };

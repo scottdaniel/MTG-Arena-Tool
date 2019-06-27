@@ -35,7 +35,7 @@ function openEventsTab(_filters, dataIndex = 25, scrollTop = 0) {
   const d = createDiv(["list_fill"]);
   mainDiv.appendChild(d);
 
-  sortedEvents = [...pd.events];
+  sortedEvents = [...pd.eventList];
   sortedEvents.sort(compare_courses);
   filters = { ...filters, ..._filters };
   filteredMatches = new Aggregator(filters);
