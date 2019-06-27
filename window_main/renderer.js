@@ -356,7 +356,6 @@ function openTab(tab, filters = {}, dataIndex = 0, scrollTop = 0) {
   }
   if ($$("." + tabClass)[0])
     $$("." + tabClass)[0].classList.add("item_selected");
-  ipcSend("save_user_settings", { last_open_tab: tab });
 }
 
 //
@@ -656,6 +655,7 @@ ready(function() {
           };
         }
         openTab(sidebarActive, filters);
+        ipcSend("save_user_settings", { last_open_tab: sidebarActive });
       } else {
         anime({
           targets: ".moving_ux",
