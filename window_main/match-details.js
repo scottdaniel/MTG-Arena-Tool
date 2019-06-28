@@ -1,6 +1,8 @@
 const fs = require("fs");
 const path = require("path");
+const sha1 = require("js-sha1");
 const anime = require("animejs");
+const _ = require("lodash");
 
 const { MANA, EASING_DEFAULT } = require("../shared/constants");
 const db = require("../shared/database");
@@ -83,6 +85,7 @@ function openMatch(id) {
   const isLimited = db.ranked_events.includes(match.eventId);
   renderSeat(
     fld,
+    match.id,
     match.player,
     match.playerDeck,
     match.player.win > match.opponent.win,
@@ -90,6 +93,7 @@ function openMatch(id) {
   );
   renderSeat(
     fld,
+    match.id,
     match.opponent,
     match.oppDeck,
     match.opponent.win > match.player.win,
@@ -353,6 +357,7 @@ function openMatch(id) {
 //
 function renderSeat(
   container,
+  matchId,
   player,
   deck,
   isWinner,
@@ -402,6 +407,34 @@ function renderSeat(
   flt.appendChild(fltr);
 
   decklist.insertBefore(flt, decklist.firstChild);
+
+  const id = sha1(matchId + "-" + player.id);
+  if (!id || !pd.deckExists(id)) {
+    const importDeck = createDiv(
+      ["button_simple", "centered"],
+      "Add to My Decks"
+    );
+    importDeck.addEventListener("click", function() {
+      ipcSend(
+        "import_custom_deck",
+        JSON.stringify({
+          id,
+          ..._.pick(deck, [
+            "description",
+            "format",
+            "colors",
+            "mainDeck",
+            "sideboard"
+          ]),
+          name: deckName,
+          deckTileId: deck.deckTileId || deck.tile,
+          lastUpdated: new Date().toISOString(),
+          tags: [deck.archetype]
+        })
+      );
+    });
+    decklist.appendChild(importDeck);
+  }
 
   const arenaExport = createDiv(
     ["button_simple", "centered", "exportDeckPlayer"],
