@@ -144,6 +144,12 @@ const defaultCfg = {
   tags_colors: {}
 };
 
+const defaultDeck = JSON.parse(
+  '{"deckTileId":' +
+    DEFAULT_TILE +
+    ',"description":null,"format":"Standard","colors":[],"id":"00000000-0000-0000-0000-000000000000","isValid":false,"lastUpdated":"2018-05-31T00:06:29.7456958","lockedForEdit":false,"lockedForUse":false,"mainDeck":[],"name":"Undefined","resourceId":"00000000-0000-0000-0000-000000000000","sideboard":[]}'
+);
+
 // cloned from util to avoid circular dependency
 // TODO refactor to recombine
 function get_deck_colors(deck) {
@@ -218,8 +224,7 @@ class PlayerData {
     Object.assign(this, {
       ...playerDataDefault,
       ...defaultCfg,
-      defaultCfg: { ...defaultCfg },
-      overlayCfg: { ...overlayCfg }
+      defaultCfg: { ...defaultCfg }
     });
 
     PlayerData.instance = this;
@@ -338,22 +343,20 @@ class PlayerData {
 
   match(id) {
     if (!this.matchExists(id)) return false;
-    const match = { ...this[id], type: "match" };
-    if (!match.playerDeck) {
-      match.playerDeck = JSON.parse(
-        '{"deckTileId":' +
-          DEFAULT_TILE +
-          ',"description":null,"format":"Standard","colors":[],"id":"00000000-0000-0000-0000-000000000000","isValid":false,"lastUpdated":"2018-05-31T00:06:29.7456958","lockedForEdit":false,"lockedForUse":false,"mainDeck":[],"name":"Undefined","resourceId":"00000000-0000-0000-0000-000000000000","sideboard":[]}'
-      );
-    }
+    const matchData = this[id];
+    const playerDeck = { ...defaultDeck, ...matchData.playerDeck };
+    playerDeck.colors = get_deck_colors(playerDeck);
 
-    if (match.playerDeck.mainDeck) {
-      match.playerDeck.colors = get_deck_colors(match.playerDeck);
-    }
-    if (match.oppDeck && match.oppDeck.mainDeck) {
-      match.oppDeck.colors = get_deck_colors(match.oppDeck);
-    }
-    return match;
+    const oppDeck = { ...defaultDeck, ...matchData.oppDeck };
+    oppDeck.colors = get_deck_colors(oppDeck);
+
+    return {
+      ...matchData,
+      id,
+      oppDeck,
+      playerDeck,
+      type: "match"
+    };
   }
 
   matchExists(id) {
