@@ -18,7 +18,20 @@ if (!remote.app.isPackaged) {
 const anime = require("animejs");
 require("time-elements");
 
-const { HIDDEN_PW, EASING_DEFAULT } = require("../shared/constants");
+const {
+  HIDDEN_PW,
+  EASING_DEFAULT,
+  MAIN_LOGIN,
+  MAIN_HOME,
+  MAIN_DECKS,
+  MAIN_HISTORY,
+  MAIN_EVENTS,
+  MAIN_EXPLORE,
+  MAIN_ECONOMY,
+  MAIN_COLLECTION,
+  MAIN_SETTINGS,
+  MAIN_UPDATE
+} = require("../shared/constants");
 const pd = require("../shared/player-data");
 const {
   createDiv,
@@ -62,7 +75,7 @@ const { openSettingsTab, setCurrentOverlaySettings } = require("./settings");
 const { showWhatsNew } = require("./whats-new");
 
 const byId = id => document.getElementById(id);
-let sidebarActive = -2;
+let sidebarActive = MAIN_LOGIN;
 let loggedIn = false;
 let canLogin = false;
 let lastSettings = {};
@@ -89,7 +102,7 @@ ipc.on("auth", function(event, arg) {
 //
 ipc.on("set_discord_tag", (event, arg) => {
   setLocalState({ discordTag: arg });
-  if (sidebarActive == -1) {
+  if (sidebarActive === MAIN_HOME) {
     openHomeTab(null, true);
   }
 });
@@ -174,7 +187,7 @@ function updateTopBar() {
 
 //
 ipc.on("player_data_updated", () => {
-  if (sidebarActive != -99) {
+  if (sidebarActive !== MAIN_LOGIN) {
     updateTopBar();
   }
 });
@@ -183,7 +196,7 @@ ipc.on("player_data_updated", () => {
 ipc.on("set_home", function(event, arg) {
   hideLoadingBars();
 
-  if (sidebarActive === -1) {
+  if (sidebarActive === MAIN_HOME) {
     console.log("Home", arg);
     openHomeTab(arg);
   }
@@ -192,7 +205,7 @@ ipc.on("set_home", function(event, arg) {
 //
 ipc.on("set_explore_decks", function(event, arg) {
   hideLoadingBars();
-  if (sidebarActive == 3) {
+  if (sidebarActive === MAIN_EXPLORE) {
     setExploreDecks(arg);
   }
 });
@@ -223,7 +236,7 @@ ipc.on("settings_updated", function() {
     changeBackground();
   }
   $$(".main_wrapper")[0].style.backgroundColor = pd.settings.back_color;
-  if (sidebarActive === 6) {
+  if (sidebarActive === MAIN_SETTINGS) {
     const ls = getLocalState();
     openSettingsTab(-1, ls.lastScrollTop);
   }
@@ -238,7 +251,7 @@ ipc.on("player_data_refresh", () => {
 
 //
 ipc.on("set_update_state", function(event, arg) {
-  if (sidebarActive == 9) {
+  if (sidebarActive === MAIN_UPDATE) {
     openSettingsTab(5);
   }
 });
@@ -279,6 +292,20 @@ ipc.on("force_open_overlay_settings", function(event, arg) {
 //
 ipc.on("force_open_about", function() {
   force_open_about();
+});
+
+//
+ipc.on("force_open_tab", function(event, arg) {
+  changeBackground("default");
+  anime({
+    targets: ".moving_ux",
+    left: 0,
+    easing: EASING_DEFAULT,
+    duration: 350
+  });
+  $$(".top_nav_item").forEach(el => el.classList.remove("item_selected"));
+  openTab(arg);
+  ipcSend("save_user_settings", { last_open_tab: sidebarActive });
 });
 
 //
@@ -496,7 +523,7 @@ ipc.on("popup", function(event, arg, time) {
 
 //
 function force_open_settings(section = -1) {
-  sidebarActive = 6;
+  sidebarActive = MAIN_SETTINGS;
   anime({
     targets: ".moving_ux",
     left: 0,
@@ -509,7 +536,7 @@ function force_open_settings(section = -1) {
 
 //
 function force_open_about() {
-  sidebarActive = 9;
+  sidebarActive = MAIN_UPDATE;
   anime({
     targets: ".moving_ux",
     left: 0,
@@ -622,23 +649,23 @@ ready(function() {
         });
         let filters = {};
         if (classList.includes("ith")) {
-          sidebarActive = -1;
+          sidebarActive = MAIN_HOME;
         } else if (classList.includes("it0")) {
-          sidebarActive = 0;
+          sidebarActive = MAIN_DECKS;
         } else if (classList.includes("it1")) {
-          sidebarActive = 1;
+          sidebarActive = MAIN_HISTORY;
         } else if (classList.includes("it2")) {
-          sidebarActive = 2;
+          sidebarActive = MAIN_EVENTS;
         } else if (classList.includes("it3")) {
-          sidebarActive = 3;
+          sidebarActive = MAIN_EXPLORE;
         } else if (classList.includes("it4")) {
-          sidebarActive = 4;
+          sidebarActive = MAIN_ECONOMY;
         } else if (classList.includes("it5")) {
-          sidebarActive = 5;
+          sidebarActive = MAIN_COLLECTION;
         } else if (classList.includes("it6")) {
-          sidebarActive = 6;
+          sidebarActive = MAIN_SETTINGS;
         } else if (classList.includes("it7")) {
-          sidebarActive = 1;
+          sidebarActive = MAIN_HISTORY;
           filters = {
             ...getDefaultFilters(),
             date: DATE_SEASON,
@@ -646,7 +673,7 @@ ready(function() {
             rankedMode: true
           };
         } else if (classList.includes("it8")) {
-          sidebarActive = 1;
+          sidebarActive = MAIN_HISTORY;
           filters = {
             ...getDefaultFilters(),
             date: DATE_SEASON,
