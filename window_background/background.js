@@ -606,7 +606,7 @@ function syncUserData(data) {
     });
   if (debugLog || !firstPass) store.set("draft_index", draft_index);
 
-  setData({ courses_index, draft_index, matches_index });
+  setData({ courses_index, draft_index, economy_index, matches_index });
 }
 
 // Merges settings and updates singletons across processes
