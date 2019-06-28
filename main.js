@@ -143,14 +143,14 @@ function startApp() {
   mainWindow.webContents.once("dom-ready", () => {
     mainLoaded = true;
     if (backLoaded == true) {
-      background.webContents.send("set_renderer_state", 1);
+      background.webContents.send("start_background");
     }
   });
 
   background.webContents.once("dom-ready", () => {
     backLoaded = true;
     if (mainLoaded == true) {
-      background.webContents.send("set_renderer_state", 1);
+      background.webContents.send("start_background");
     }
   });
 
