@@ -112,6 +112,7 @@ var settingsStore = new Store({
   defaults: settingsCfg
 });
 
+let logLoopInterval = null;
 const debugLog = false;
 const debugNet = false;
 var debugLogSpeed = 0.001;
@@ -191,7 +192,6 @@ var currentDraftDefault = {
 
 var currentMatch = null;
 
-var renderer_state = 0;
 var originalDeck = new Deck();
 
 var currentDeck = new Deck();
@@ -226,15 +226,20 @@ ipc.on("save_app_settings", function(event, arg) {
 });
 
 //
-ipc.on("set_renderer_state", function(event, arg) {
-  ipc_send("ipc_log", "Renderer state: " + arg);
-  renderer_state = arg;
+ipc.on("start_background", function() {
   // first time during bootstrapping that we load
   // app-level settings into singletons
   const appSettings = rstore.get("settings");
   const settings = { ...pd.settings, ...appSettings };
   setData({ settings });
   ipc_send("initial_settings", settings);
+
+  // start initial log parse
+  logLoopInterval = window.setInterval(attemptLogLoop, 250);
+
+  // start http
+  httpApi.httpBasic();
+  httpApi.httpGetDatabase();
 
   // Check if it is the first time we open this version
   if (
@@ -912,7 +917,6 @@ function onLogEntryFound(entry) {
 }
 
 // Old parser
-let logLoopInterval = window.setInterval(attemptLogLoop, 250);
 async function attemptLogLoop() {
   try {
     await logLoop();
@@ -948,11 +952,6 @@ async function logLoop() {
     firstPass = false;
   }
 */
-  if (renderer_state != 1) {
-    // The renderer process is not ready, postpose reading the log
-    //ipc_send("ipc_log", "readLog logloopmode: "+logLoopMode+", renderer state:"+renderer_state+", logSize: "+logSize+", prevLogSize: "+prevLogSize);
-    return;
-  }
 
   const { size } = await mtgaLog.stat(logUri);
 
@@ -1699,7 +1698,7 @@ function updateLoading(entry) {
   }
 }
 
-///
+//
 function finishLoading() {
   if (firstPass) {
     firstPass = false;
@@ -1744,7 +1743,3 @@ function finishLoading() {
     });
   }
 }
-
-// start
-httpApi.httpBasic();
-httpApi.httpGetDatabase();
