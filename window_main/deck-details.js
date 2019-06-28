@@ -1,4 +1,5 @@
 const anime = require("animejs");
+const _ = require("lodash");
 
 const { MANA, CARD_RARITIES, EASING_DEFAULT } = require("../shared/constants");
 const db = require("../shared/database");
@@ -125,12 +126,43 @@ function deckStatsSection(deck) {
 
   const visualView = createDiv(["button_simple", "visualView"], "Visual View");
   stats.appendChild(visualView);
-  const openHistory = createDiv(
-    ["button_simple", "openHistory"],
-    "History of changes"
-  );
-  openHistory.addEventListener("click", () => setChangesTimeline(deck.id));
-  stats.appendChild(openHistory);
+
+  const id = deck.id || deck._id;
+  if (!id || !pd.deckExists(id)) {
+    const importDeck = createDiv(
+      ["button_simple", "centered"],
+      "Add to My Decks"
+    );
+    importDeck.addEventListener("click", function() {
+      ipcSend(
+        "import_custom_deck",
+        JSON.stringify({
+          id,
+          ..._.pick(deck, [
+            "description",
+            "format",
+            "colors",
+            "mainDeck",
+            "name",
+            "sideboard"
+          ]),
+          deckTileId: deck.deckTileId || deck.tile,
+          lastUpdated: new Date().toISOString()
+        })
+      );
+    });
+    stats.appendChild(importDeck);
+  }
+
+  if (pd.deckChanges(deck.id).length) {
+    const openHistory = createDiv(
+      ["button_simple", "openHistory"],
+      "History of changes"
+    );
+    openHistory.addEventListener("click", () => setChangesTimeline(deck.id));
+    stats.appendChild(openHistory);
+  }
+
   const exportDeck = createDiv(
     ["button_simple", "exportDeck"],
     "Export to Arena"
@@ -264,7 +296,7 @@ function openDeck(deck = currentOpenDeck, filters = currentFilters) {
   });
   top.appendChild(deckColors);
 
-  const tileGrpId = deck.deckTileId;
+  const tileGrpId = deck.deckTileId || deck.tile;
   if (db.card(tileGrpId)) {
     changeBackground("", tileGrpId);
   }
