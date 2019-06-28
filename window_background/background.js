@@ -36,11 +36,13 @@ const {
   objectClone
 } = require("../shared/util");
 const {
-  HIDDEN_PW,
-  IPC_OVERLAY,
   ARENA_MODE_MATCH,
   ARENA_MODE_DRAFT,
-  ARENA_MODE_IDLE
+  ARENA_MODE_IDLE,
+  DEFAULT_TILE,
+  HIDDEN_PW,
+  IPC_OVERLAY,
+  MAIN_DECKS
 } = require("../shared/constants");
 const { ipc_send, setData, unleakString } = require("./background-util");
 const {
@@ -126,6 +128,18 @@ if (!fs.existsSync(actionLogDir)) {
 
 var firstPass = true;
 var tokenAuth = undefined;
+
+const deckDefault = {
+  deckTileId: DEFAULT_TILE,
+  description: "",
+  format: "Standard",
+  colors: [],
+  id: "00000000-0000-0000-0000-000000000000",
+  lastUpdated: "2018-05-31T00:06:29.7456958",
+  mainDeck: [],
+  name: "Undefined",
+  sideboard: []
+};
 
 var currentMatchDefault = {
   eventId: "",
@@ -341,6 +355,21 @@ ipc.on("save_user_settings", function(event, settings) {
 //
 ipc.on("delete_data", function() {
   httpApi.httpDeleteData();
+});
+
+//
+ipc.on("import_custom_deck", function(event, arg) {
+  ipc_send("show_loading");
+  const data = JSON.parse(arg);
+  const id = data.id;
+  if (!id || pd.deckExists(id)) return;
+  const deckData = {
+    ...objectClone(deckDefault),
+    ...data
+  };
+  addCustomDeck(deckData);
+  ipc_send("force_open_tab", MAIN_DECKS);
+  ipc_send("hide_loading");
 });
 
 //
