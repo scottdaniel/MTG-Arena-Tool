@@ -131,6 +131,10 @@ function showLogin() {
 
 //
 function updateTopBar() {
+  if (pd.offline || !pd.settings.send_data) {
+    $$(".unlink")[0].style.display = "block";
+  }
+
   if (pd.name) {
     $$(".top_username")[0].innerHTML = pd.name.slice(0, -6);
     $$(".top_username_id")[0].innerHTML = pd.name.slice(-6);
@@ -566,7 +570,6 @@ ready(function() {
 
   $$(".offline_link")[0].addEventListener("click", function() {
     ipcSend("login", { username: "", password: "" });
-    $$(".unlink")[0].style.display = "block";
   });
 
   $$(".forgot_link")[0].addEventListener("click", function() {
