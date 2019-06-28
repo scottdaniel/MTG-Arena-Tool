@@ -177,13 +177,6 @@ function updateTopBar() {
 }
 
 //
-ipc.on("player_data_updated", () => {
-  if (sidebarActive != -99) {
-    updateTopBar();
-  }
-});
-
-//
 ipc.on("set_home", function(event, arg) {
   hideLoadingBars();
 
@@ -237,6 +230,9 @@ ipc.on("settings_updated", function() {
 //
 ipc.on("player_data_refresh", () => {
   const ls = getLocalState();
+  if (sidebarActive !== -99) {
+    updateTopBar();
+  }
   openTab(sidebarActive, {}, ls.lastDataIndex, ls.lastScrollTop);
 });
 

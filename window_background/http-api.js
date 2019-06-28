@@ -208,8 +208,7 @@ function httpBasic() {
                   serverData.drafts = parsedResult.drafts;
                   serverData.economy = parsedResult.economy;
                 }
-                setData(data);
-                ipc_send("player_data_updated");
+                setData(data, false);
                 loadPlayerConfig(pd.arenaId, serverData);
                 ipc_send("set_discord_tag", parsedResult.discord_tag);
                 httpNotificationsPull();
@@ -397,7 +396,7 @@ function notificationSetTimeout() {
 
 function httpAuth(userName, pass) {
   var _id = makeId(6);
-  setData({ userName });
+  setData({ userName }, false);
   httpAsync.push({
     reqId: _id,
     method: "auth",
