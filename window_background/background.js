@@ -537,7 +537,7 @@ function loadPlayerConfig(playerId, serverData = undefined) {
       })
     }
   };
-  syncSettings(playerData.settings, false);
+  syncSettings(playerData.settings, true);
   setData(playerData, false);
 
   ipc_send("popup", {
@@ -1720,9 +1720,9 @@ function finishLoading() {
       }
       ipc_send("set_arena_state", ARENA_MODE_MATCH);
       update_deck(false);
+    } else if (duringDraft) {
+      ipc_send("set_arena_state", ARENA_MODE_DRAFT);
     }
-
-    if (duringDraft) ipc_send("set_arena_state", ARENA_MODE_DRAFT);
 
     ipc_send("renderer_set_bounds", pd.windowBounds);
     ipc_send("set_settings", pd.settings);
