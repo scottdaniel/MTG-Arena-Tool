@@ -115,6 +115,7 @@ var settingsStore = new Store({
 });
 
 let logLoopInterval = null;
+const debugArenaID = undefined;
 const debugLog = false;
 const debugNet = false;
 var debugLogSpeed = 0.001;
@@ -254,6 +255,7 @@ ipc.on("start_background", function() {
   // start http
   httpApi.httpBasic();
   httpApi.httpGetDatabase();
+  ipc_send("popup", { text: "Downloading metadata", time: 0 });
 
   // Check if it is the first time we open this version
   if (
@@ -1002,7 +1004,9 @@ async function logLoop() {
     // Get player Id
     let strCheck = '"playerId": "';
     if (value.includes(strCheck)) {
-      parsedData.arenaId = unleakString(dataChop(value, strCheck, '"'));
+      parsedData.arenaId = debugArenaID
+        ? debugArenaID
+        : unleakString(dataChop(value, strCheck, '"'));
     }
 
     // Get User name
