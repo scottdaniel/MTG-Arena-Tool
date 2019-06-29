@@ -1528,6 +1528,8 @@ function saveMatch(id) {
     }
   });
 
+  if (currentMatch.eventId === "AIBotMatch") return;
+
   const match = pd.match(id) || {};
   match.onThePlay = currentMatch.onThePlay;
   match.id = currentMatch.matchId;
