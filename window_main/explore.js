@@ -395,7 +395,7 @@ function handleNewSearch() {
     filteredMana: inputMana,
     filteredranks: inputRanks
   };
-  const q = $$(".settings_owned");
+  const q = $$("#settings_owned");
   if (q.length) {
     exploreData.onlyOwned = q[0].checked;
   }
