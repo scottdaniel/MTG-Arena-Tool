@@ -701,3 +701,14 @@ exports.CARD_TILE_ARENA = 0;
 exports.CARD_TILE_FLAT = 1;
 
 exports.EASING_DEFAULT = "cubicBezier(0.570, 0.165, 0.210, 0.990)";
+
+exports.MAIN_LOGIN = -2;
+exports.MAIN_HOME = -1;
+exports.MAIN_DECKS = 0;
+exports.MAIN_HISTORY = 1;
+exports.MAIN_EVENTS = 2;
+exports.MAIN_EXPLORE = 3;
+exports.MAIN_ECONOMY = 4;
+exports.MAIN_COLLECTION = 5;
+exports.MAIN_SETTINGS = 6;
+exports.MAIN_UPDATE = 9;
