@@ -740,7 +740,7 @@ function deckManaCurve(deck) {
 
     const colNum = createDiv(["mana_curve_column_number"]);
     const numDiv = createDiv(["mana_s16", "mana_" + i]);
-    numDiv.style.margin = "0 auto !important";
+    numDiv.style.margin = "auto";
     colNum.appendChild(numDiv);
     numbers.appendChild(colNum);
   });

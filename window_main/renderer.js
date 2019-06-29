@@ -144,6 +144,10 @@ function showLogin() {
 
 //
 function updateTopBar() {
+  if (pd.offline || !pd.settings.send_data) {
+    $$(".unlink")[0].style.display = "block";
+  }
+
   if (pd.name) {
     $$(".top_username")[0].innerHTML = pd.name.slice(0, -6);
     $$(".top_username_id")[0].innerHTML = pd.name.slice(-6);
@@ -184,13 +188,6 @@ function updateTopBar() {
     patreonIcon.style.display = "none";
   }
 }
-
-//
-ipc.on("player_data_updated", () => {
-  if (sidebarActive !== MAIN_LOGIN) {
-    updateTopBar();
-  }
-});
 
 //
 ipc.on("set_home", function(event, arg) {
@@ -246,6 +243,9 @@ ipc.on("settings_updated", function() {
 //
 ipc.on("player_data_refresh", () => {
   const ls = getLocalState();
+  if (sidebarActive !== MAIN_LOGIN) {
+    updateTopBar();
+  }
   openTab(sidebarActive, {}, ls.lastDataIndex, ls.lastScrollTop);
 });
 
@@ -593,7 +593,6 @@ ready(function() {
 
   $$(".offline_link")[0].addEventListener("click", function() {
     ipcSend("login", { username: "", password: "" });
-    $$(".unlink")[0].style.display = "block";
   });
 
   $$(".forgot_link")[0].addEventListener("click", function() {

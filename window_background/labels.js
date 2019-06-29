@@ -222,7 +222,7 @@ function onLabelOutLogInfo(entry, json) {
   if (json.params.messageName === "Client.SceneChange") {
     const { toSceneName } = json.params.payloadObject;
     if (toSceneName === "Home") {
-      if (!firstPass) ipc_send("set_arena_state", ARENA_MODE_IDLE);
+      if (debugLog || !firstPass) ipc_send("set_arena_state", ARENA_MODE_IDLE);
       duringMatch = false;
       endDraft();
     }
@@ -298,7 +298,6 @@ function onLabelInEventGetCombinedRankInfo(entry, json) {
 
   setData({ rank });
   if (debugLog || !firstPass) store.set("rank", rank);
-  ipc_send("player_data_updated");
 }
 
 function onLabelInEventGetActiveEvents(entry, json) {
@@ -324,7 +323,6 @@ function onLabelRankUpdated(entry, json) {
 
   setData({ rank });
   if (debugLog || !firstPass) store.set("rank", rank);
-  ipc_send("player_data_updated");
 }
 
 function onLabelInDeckGetDeckLists(entry, json) {
@@ -341,7 +339,6 @@ function onLabelInDeckGetDeckLists(entry, json) {
 
   setData({ decks, static_decks });
   if (debugLog || !firstPass) store.set("static_decks", static_decks);
-  if (debugLog || !firstPass) ipc_send("player_data_refresh");
 }
 
 function onLabelInDeckGetDeckListsV3(entry, json) {
@@ -488,7 +485,6 @@ function onLabelInDeckUpdateDeck(entry, json) {
       store.set("deck_changes_index", deck_changes_index);
 
     setData({ deck_changes, deck_changes_index });
-    if (!firstPass) ipc_send("player_data_refresh");
   }
 }
 
@@ -553,7 +549,6 @@ function onLabelInPlayerInventoryGetPlayerInventory(entry, json) {
   };
   setData({ economy });
   if (debugLog || !firstPass) store.set("economy", economy);
-  if (debugLog || !firstPass) ipc_send("player_data_refresh");
 }
 
 function onLabelInPlayerInventoryGetPlayerCardsV3(entry, json) {
@@ -590,7 +585,6 @@ function onLabelInPlayerInventoryGetPlayerCardsV3(entry, json) {
   });
 
   setData({ cards, cardsNew });
-  if (!firstPass) ipc_send("player_data_refresh");
 }
 
 function onLabelInEventDeckSubmit(entry, json) {
@@ -790,7 +784,7 @@ function onLabelMatchGameRoomStateChangedEvent(entry, json) {
     });
 
     clear_deck();
-    if (!firstPass) ipc_send("set_arena_state", ARENA_MODE_IDLE);
+    if (debugLog || !firstPass) ipc_send("set_arena_state", ARENA_MODE_IDLE);
     matchCompletedOnGameNumber = json.finalMatchResult.resultList.length - 1;
     saveMatch(json.finalMatchResult.matchId + "-" + pd.arenaId);
   }

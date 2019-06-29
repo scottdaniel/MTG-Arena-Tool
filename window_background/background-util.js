@@ -1,5 +1,7 @@
 /*
 global
+  debugLog
+  firstPass
   logLanguage
 */
 // Utility functions that belong only to background
@@ -99,12 +101,13 @@ const overlayWhitelist = [
 
 // convenience fn to update player data singletons in all processes
 // (update is destructive, be sure to use spread syntax if necessary)
-function setData(data) {
+function setData(data, refresh = debugLog || !firstPass) {
   const cleanData = _.omit(data, dataBlacklist);
   pd.handleSetData(null, cleanData);
   ipc_send("set_player_data", cleanData, IPC_MAIN);
   const overlayData = _.pick(cleanData, overlayWhitelist);
   ipc_send("set_player_data", overlayData, IPC_OVERLAY);
+  if (refresh) ipc_send("player_data_refresh");
 }
 
 module.exports = {

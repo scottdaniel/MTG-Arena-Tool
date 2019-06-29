@@ -199,7 +199,7 @@ class StatsPanel {
 
         cwr.colors.forEach(color => {
           const tagColor = createDiv(["mana_s16", "mana_" + MANA[color]]);
-          tagColor.style.margin = "margin: 0 auto !important";
+          tagColor.style.margin = "3px auto 3px auto";
           curveNumber.appendChild(tagColor);
         });
         numbers.append(curveNumber);
