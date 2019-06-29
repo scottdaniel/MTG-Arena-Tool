@@ -141,6 +141,7 @@ const defaultCfg = {
   decks_tags: {},
   decks_last_used: [],
   static_decks: [],
+  static_events: [],
   tags_colors: {}
 };
 
@@ -334,7 +335,11 @@ class PlayerData {
 
   event(id) {
     if (!this.eventExists(id)) return false;
-    return { ...this[id], type: "Event" };
+    return {
+      ...this[id],
+      custom: !this.static_events.includes(id),
+      type: "Event"
+    };
   }
 
   eventExists(id) {
