@@ -117,7 +117,7 @@ function getPrettyContext(context, full = true) {
   if (context == undefined || !context) {
     return "-";
   }
-  
+
   if (context.startsWith("Event.Prize")) {
     var eventCode = context.substring(12);
     return full ? `Event Prize: ${getReadableEvent(eventCode)}` : "Event Prize";

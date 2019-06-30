@@ -100,19 +100,23 @@ function renderData(container, index) {
     return 0;
   }
 
-  var tileGrpid = course.CourseDeck.deckTileId;
+  const tileGrpid = course.CourseDeck.deckTileId;
+  let listItem;
+  if (course.custom) {
+    const archiveCallback = id => {
+      toggleArchived(id);
+    };
 
-  const archiveCallback = id => {
-    toggleArchived(id);
-  };
-
-  const listItem = new ListItem(
-    tileGrpid,
-    course.id,
-    expandEvent,
-    archiveCallback,
-    course.archived
-  );
+    listItem = new ListItem(
+      tileGrpid,
+      course.id,
+      expandEvent,
+      archiveCallback,
+      course.archived
+    );
+  } else {
+    listItem = new ListItem(tileGrpid, course.id, expandEvent);
+  }
   listItem.divideLeft();
   listItem.divideRight();
   attachEventData(listItem, course);
@@ -193,7 +197,7 @@ function attachEventData(listItem, course) {
   });
 
   var eventState = course.CurrentEventState;
-  if (eventState == "DoneWithMatches" || eventState == 2) {
+  if (course.custom || eventState === "DoneWithMatches" || eventState === 2) {
     listItem.rightTop.appendChild(createDiv(["list_event_phase"], "Completed"));
   } else {
     listItem.rightTop.appendChild(

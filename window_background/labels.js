@@ -349,13 +349,18 @@ function onLabelInDeckGetDeckListsV3(entry, json) {
 function onLabelInEventGetPlayerCourses(entry, json) {
   if (!json) return;
 
+  const static_events = [];
   json.forEach(course => {
     if (course.CurrentEventState != "PreMatch") {
       if (course.CourseDeck != null) {
         addCustomDeck(course.CourseDeck);
       }
     }
+    if (course.Id) static_events.push(course.Id);
   });
+
+  setData({ static_events });
+  if (debugLog || !firstPass) store.set("static_events", static_events);
 }
 
 function onLabelInEventGetPlayerCoursesV2(entry, json) {
