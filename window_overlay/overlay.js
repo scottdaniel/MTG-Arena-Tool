@@ -37,6 +37,7 @@ const {
 const { queryElements: $$, createDiv } = require("../shared/dom-fns");
 
 const {
+  COLORS_ALL,
   DRAFT_RANKS,
   MANA,
   PACK_SIZES,
@@ -315,6 +316,9 @@ ipc.on("settings_updated", (_event, index) => {
 
   $$(".overlay_title")[0].innerHTML = "Overlay " + (overlayIndex + 1);
   $$(".top")[0].style.display = settings.top ? "" : "none";
+  $$(".overlay_icon")[0].style.backgroundColor = `var(--color-${
+    COLORS_ALL[overlayIndex]
+  })`;
 
   $$(".overlay_deckname")[0].innerHTML = "";
   $$(".overlay_deckname")[0].style = "";
@@ -406,11 +410,9 @@ function updateMatchView() {
 
   let deckListDiv;
 
-  //
-  // Action Log Mode
-  //
   deckListDiv = $$(".overlay_decklist")[0];
-  if (overlayMode == OVERLAY_LOG) {
+  if (overlayMode === OVERLAY_LOG) {
+    // Action Log Mode
     $$(".overlay_deckname")[0].innerHTML = "Action Log";
 
     let initalTime = actionLog[0] ? new Date(actionLog[0].time) : new Date();
@@ -452,10 +454,32 @@ function updateMatchView() {
 
   let deckToDraw = false;
 
-  //
-  // Opponent Cards Mode
-  //
-  if (overlayMode == OVERLAY_SEEN) {
+  if (overlayMode === OVERLAY_FULL) {
+    // Full Deck Mode
+    let cardsCount = currentMatch.player.deck.mainboard.count();
+    deckListDiv.appendChild(
+      createDiv(["decklist_title"], "Full Deck: " + cardsCount + " cards")
+    );
+    deckToDraw = currentMatch.player.deck;
+  } else if (overlayMode === OVERLAY_LEFT) {
+    // Library Mode
+    let cardsLeft = currentMatch.playerCardsLeft.mainboard.count();
+    deckListDiv.appendChild(
+      createDiv(["decklist_title"], "Library: " + cardsLeft + " cards")
+    );
+    deckToDraw = currentMatch.playerCardsLeft;
+  } else if (overlayMode === OVERLAY_ODDS) {
+    // Next Draw Odds Mode
+    let cardsLeft = currentMatch.playerCardsLeft.mainboard.count();
+    deckListDiv.appendChild(
+      createDiv(
+        ["decklist_title"],
+        `Next Draw: ${oddsSampleSize}/${cardsLeft} cards`
+      )
+    );
+    deckToDraw = currentMatch.playerCardsLeft;
+  } else if (overlayMode === OVERLAY_SEEN) {
+    // Opponent Cards Mode
     const deckName = $$(".overlay_deckname")[0];
     deckName.parentNode.insertBefore(
       createDiv(["overlay_archetype"]),
@@ -474,44 +498,10 @@ function updateMatchView() {
     deckToDraw = currentMatch.oppCards;
   }
 
-  //
-  // Player Cards Odds Mode
-  //
-  if (overlayMode == OVERLAY_ODDS) {
-    let cardsLeft = currentMatch.playerCardsLeft.mainboard.count();
-    deckListDiv.appendChild(
-      createDiv(["decklist_title"], cardsLeft + " cards left")
-    );
-    deckToDraw = currentMatch.playerCardsLeft;
-  }
+  if (!deckToDraw) return;
 
-  //
-  // Player Full Deck Mode
-  //
-  if (overlayMode == OVERLAY_FULL) {
-    let cardsCount = currentMatch.player.deck.mainboard.count();
-    deckListDiv.appendChild(
-      createDiv(["decklist_title"], cardsCount + " cards")
-    );
-    deckToDraw = currentMatch.player.deck;
-  }
-
-  //
-  // Player Cards Left Mode
-  //
-  if (overlayMode == OVERLAY_LEFT) {
-    let cardsLeft = currentMatch.playerCardsLeft.mainboard.count();
-    deckListDiv.appendChild(
-      createDiv(["decklist_title"], cardsLeft + " cards left")
-    );
-    deckToDraw = currentMatch.playerCardsLeft;
-  }
-
-  if (
-    overlayMode == OVERLAY_ODDS ||
-    overlayMode == OVERLAY_FULL ||
-    overlayMode == OVERLAY_LEFT
-  ) {
+  // Deck colors
+  if ([OVERLAY_ODDS, OVERLAY_FULL, OVERLAY_LEFT].includes(overlayMode)) {
     $$(".overlay_deckname")[0].innerHTML = deckToDraw.name;
     deckToDraw.colors
       .get()
@@ -521,8 +511,6 @@ function updateMatchView() {
         )
       );
   }
-
-  if (!deckToDraw) return;
 
   let sortFunc = compare_cards;
   if (overlayMode === OVERLAY_ODDS) {
@@ -827,28 +815,8 @@ function updateDraftView(_packN = -1, _pickN = -1) {
     }
     titleDiv.innerHTML = title;
 
-    // if (draftMode == 0) {
-    //   colors = get_ids_colors(currentDraft.pickedCards);
-    //   colors.forEach(function(color) {
-    //     $$(".overlay_deckcolors")[0].appendChild(
-    //       createDiv(["mana_s20", "mana_" + MANA[color]])
-    //     );
-    //   });
-
-    //   currentDraft.pickedCards.sort(compare_draft_cards);
-
-    //   currentDraft.pickedCards.forEach(function(grpId) {
-    //     const tile = deckDrawer.cardTile(
-    //       pd.settings.card_tile_style,
-    //       grpId,
-    //       "a",
-    //       1
-    //     );
-    //     $$(".overlay_decklist")[0].appendChild(tile);
-    //   });
-    // }
-
     const controlCont = createDiv(["overlay_draft_container", "click-on"]);
+    if (settings.top) controlCont.style.top = "32px";
 
     const draftPrev = createDiv(["draft_prev"]);
     draftPrev.addEventListener("click", function() {
