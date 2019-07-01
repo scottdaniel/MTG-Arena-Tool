@@ -296,52 +296,61 @@ function appendOverlay(section) {
   section.appendChild(createDiv(["settings_title"], "Overlays"));
   const helpDiv = createDiv(
     ["settings_note"],
-    `You can have up to 5 overlay windows active, and each window has its own settings.
-<br> Draft overlay will only show in a draft, while the others will work during any match.`
+    `You can enable up to 5 independent overlay windows. Customize each overlay
+    using the settings below.`
   );
   helpDiv.style.margin = "0px 64px 0px 16px";
   section.appendChild(helpDiv);
 
-  const topCont = createDiv(["overlay_section_selector_cont"]);
-  const updateContent = () => {
-    $$(".overlay_section").forEach(el => (el.style.display = "none"));
-    $$(".overlay_section_" + currentOverlay)[0].style.display = "block";
-    $$(".overlay_current")[0].innerHTML =
-      "Current overlay settings: " + (currentOverlay + 1);
-    $$(".overlay_icon")[0].style.backgroundColor = `var(--color-${
-      COLORS_ALL[currentOverlay]
+  const topCont = createDiv(["overlay_section_selector_cont", "top_nav_icons"]);
+
+  pd.settings.overlays.forEach((settings, index) => {
+    const overlaySettingsNav = createDiv([
+      "overlay_settings_nav",
+      "top_nav_item",
+      "osn" + index
+    ]);
+    if (currentOverlay === index) {
+      overlaySettingsNav.classList.add("item_selected");
+    }
+    overlaySettingsNav.style.maxWidth = "160px";
+    overlaySettingsNav.style.display = "flex";
+
+    const overlaySettingsIcon = createDiv(["overlay_icon"]);
+    overlaySettingsIcon.style.backgroundColor = `var(--color-${
+      COLORS_ALL[index]
     })`;
-  };
+    overlaySettingsIcon.style.flexShrink = 0;
+    overlaySettingsNav.appendChild(overlaySettingsIcon);
+    overlaySettingsNav.appendChild(
+      createDiv(["overlay_label"], "Overlay " + (index + 1))
+    );
+    overlaySettingsNav.addEventListener("click", function() {
+      const classList = [...this.classList];
+      if (classList.includes("item_selected")) return;
 
-  const topPrev = createDiv(["overlay_prev"]);
-  topPrev.addEventListener("click", () => {
-    currentOverlay -= 1;
-    if (currentOverlay < 0) {
-      currentOverlay = pd.settings.overlays.length - 1;
-    }
-    updateContent();
+      $$(".overlay_settings_nav").forEach(el => {
+        el.classList.remove("item_selected");
+      });
+      $$(".overlay_section").forEach(el => (el.style.display = "none"));
+
+      if (classList.includes("osn0")) {
+        currentOverlay = 0;
+      } else if (classList.includes("osn1")) {
+        currentOverlay = 1;
+      } else if (classList.includes("osn2")) {
+        currentOverlay = 2;
+      } else if (classList.includes("osn3")) {
+        currentOverlay = 3;
+      } else if (classList.includes("osn4")) {
+        currentOverlay = 4;
+      }
+
+      $$(".overlay_section_" + currentOverlay)[0].style.display = "block";
+      this.classList.add("item_selected");
+    });
+    topCont.appendChild(overlaySettingsNav);
   });
-  topCont.appendChild(topPrev);
-
-  const topIcon = createDiv(["overlay_icon"]);
-  topIcon.style.backgroundColor = `var(--color-${COLORS_ALL[currentOverlay]})`;
-  topCont.appendChild(topIcon);
-  const topIndex = createDiv(
-    ["overlay_current"],
-    `Current overlay settings: ${currentOverlay + 1}`
-  );
-  topCont.appendChild(topIndex);
-
-  const topNext = createDiv(["overlay_next"]);
-  topNext.addEventListener("click", () => {
-    currentOverlay += 1;
-    if (currentOverlay >= pd.settings.overlays.length) {
-      currentOverlay = 0;
-    }
-    updateContent();
-  });
-  topCont.appendChild(topNext);
-
   section.appendChild(topCont);
 
   pd.settings.overlays.forEach((settings, index) => {
@@ -358,12 +367,20 @@ function appendOverlay(section) {
 
     const modeOptions = [];
     modeOptions[OVERLAY_FULL] = "Full Deck";
-    modeOptions[OVERLAY_LEFT] = "Cards Left";
-    modeOptions[OVERLAY_ODDS] = "Cards Odds";
-    modeOptions[OVERLAY_SEEN] = "Cards Seen";
+    modeOptions[OVERLAY_LEFT] = "Library";
+    modeOptions[OVERLAY_ODDS] = "Next Draw";
+    modeOptions[OVERLAY_SEEN] = "Opponent";
     modeOptions[OVERLAY_DRAFT] = "Draft Pick";
     modeOptions[OVERLAY_LOG] = "Action Log";
     modeOptions[OVERLAY_DRAFT_BREW] = "Draft Brew";
+
+    addCheckbox(
+      overlaySection,
+      "Enable overlay " + (index + 1),
+      `overlay_${index}_show`,
+      settings.show,
+      updateUserSettings
+    );
 
     const modeSelect = createSelect(
       label,
@@ -379,23 +396,38 @@ function appendOverlay(section) {
     modeSelect.style.marginLeft = "32px";
     overlaySection.appendChild(label);
 
+    const modeHelp = [];
+    modeHelp[OVERLAY_FULL] =
+      "Shows your complete deck. Usually only shown during a match.";
+    modeHelp[OVERLAY_LEFT] =
+      "Shows your remaining library. Usually only shown during a match.";
+    modeHelp[OVERLAY_ODDS] =
+      "Shows probabilities for your next draw. Usually only shown during a match.";
+    modeHelp[OVERLAY_SEEN] =
+      "Shows your Opponent's cards that you have seen. Usually only shown during a match.";
+    modeHelp[OVERLAY_DRAFT] =
+      "Shows the cards in each draft pack/pick. Usually only shown during a draft.";
+    modeHelp[OVERLAY_LOG] =
+      "Shows detailed play-by-play match history. Usually only shown during a match.";
+    modeHelp[OVERLAY_DRAFT_BREW] =
+      "Shows your partially complete draft brew (all previous picks). Usually only shown during a draft.";
+    const modeHelpDiv = createDiv(
+      ["settings_note"],
+      `<p><i>${modeHelp[settings.mode]}</i></p>`
+    );
+    modeHelpDiv.style.paddingLeft = "76px";
+    overlaySection.appendChild(modeHelpDiv);
+
     addCheckbox(
       overlaySection,
-      "Always on top",
+      "Always on top when shown",
       `overlay_${index}_ontop`,
       settings.ontop,
       updateUserSettings
     );
     addCheckbox(
       overlaySection,
-      "Show overlay",
-      `overlay_${index}_show`,
-      settings.show,
-      updateUserSettings
-    );
-    addCheckbox(
-      overlaySection,
-      "Persistent overlay&nbsp;<i>(useful for OBS setup)</i>",
+      "Always show overlay&nbsp;<i>(useful for OBS setup)</i>",
       `overlay_${index}_show_always`,
       settings.show_always,
       updateUserSettings
@@ -432,14 +464,6 @@ function appendOverlay(section) {
     );
     addCheckbox(
       overlaySection,
-      "Show clock",
-      `overlay_${index}_clock`,
-      settings.clock,
-      updateUserSettings,
-      OVERLAY_DRAFT_MODES.includes(settings.mode)
-    );
-    addCheckbox(
-      overlaySection,
       "Show sideboard",
       `overlay_${index}_sideboard`,
       settings.sideboard,
@@ -456,7 +480,15 @@ function appendOverlay(section) {
     );
     addCheckbox(
       overlaySection,
-      "Type counts",
+      "Show clock",
+      `overlay_${index}_clock`,
+      settings.clock,
+      updateUserSettings,
+      OVERLAY_DRAFT_MODES.includes(settings.mode)
+    );
+    addCheckbox(
+      overlaySection,
+      "Show type counts",
       `overlay_${index}_type_counts`,
       settings.type_counts,
       updateUserSettings,
@@ -464,7 +496,7 @@ function appendOverlay(section) {
     );
     addCheckbox(
       overlaySection,
-      "Mana curve",
+      "Show mana curve",
       `overlay_${index}_mana_curve`,
       settings.mana_curve,
       updateUserSettings,
