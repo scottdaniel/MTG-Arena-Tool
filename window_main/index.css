@@ -1539,7 +1539,7 @@ a:hover {
 .economy_title {
     display: grid;
     padding: 0px 16px;
-    grid-template-columns: auto 15% 25% 25% 15%;
+    grid-template-columns: auto 10% 20% 20% 10% 10% 10%;
     margin-left: 2px;
     color: var(--color-light);
     line-height: 64px;

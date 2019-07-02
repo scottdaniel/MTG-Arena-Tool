@@ -35,7 +35,9 @@ class economyDay {
     goldSpent = 0,
     gemsSpent = 0,
     cardsEarned = 0,
-    vaultProgress = 0.0
+    vaultProgress = 0.0,
+    expEarned = 0,
+    orbsEarned = 0
   ) {
     this.goldEarned = goldEarned;
     this.gemsEarned = gemsEarned;
@@ -43,6 +45,8 @@ class economyDay {
     this.gemsSpent = gemsSpent;
     this.cardsEarned = cardsEarned;
     this.vaultProgress = vaultProgress;
+    this.expEarned = expEarned;
+    this.orbsEarned = orbsEarned;
   }
 }
 
@@ -286,11 +290,41 @@ function createDayHeader(change) {
   upcontva.appendChild(up.cloneNode(true));
   gridVault.appendChild(upcontva);
 
+  // Experience
+  const gridExp = cont.cloneNode(true);
+  gridExp.style.gridArea = "1 / 6 / auto / 7";
+  const icxp = tx.cloneNode(true);
+  icxp.innerHTML = "XP:";
+  const xptx = tx.cloneNode(true);
+  xptx.innerHTML = formatNumber(dayList[daysago].expEarned);
+  gridExp.appendChild(icxp);
+  const upcontxp = createDiv(["economy_delta"]);
+  upcontxp.style.width = "auto";
+  upcontxp.appendChild(xptx);
+  upcontxp.appendChild(up.cloneNode(true));
+  gridExp.appendChild(upcontxp);
+
+  // Orbs
+  const gridOrbs = cont.cloneNode(true);
+  gridOrbs.style.gridArea = "1 / 7 / auto / 8";
+  const icorb = tx.cloneNode(true);
+  icorb.innerHTML = "Orbs:";
+  const orbtx = tx.cloneNode(true);
+  orbtx.innerHTML = formatNumber(dayList[daysago].orbsEarned);
+  gridOrbs.appendChild(icorb);
+  const upcontorb = createDiv(["economy_delta"]);
+  upcontorb.style.width = "auto";
+  upcontorb.appendChild(orbtx);
+  upcontorb.appendChild(up.cloneNode(true));
+  gridOrbs.appendChild(upcontorb);
+
   headerGrid.appendChild(gridTitle);
   headerGrid.appendChild(gridCards);
   headerGrid.appendChild(gridGold);
   headerGrid.appendChild(gridGems);
   headerGrid.appendChild(gridVault);
+  headerGrid.appendChild(gridExp);
+  headerGrid.appendChild(gridOrbs);
   return headerGrid;
 }
 
@@ -415,7 +449,7 @@ function createChangeRow(change, economyId) {
     checkSkinsAdded = true;
   }
 
-  if (checkGemsPaid && change.delta.gemsDelta != undefined) {
+  if (checkGemsPaid && change.delta && change.delta.gemsDelta !== undefined) {
     bos = createDiv(["economy_gems"]);
     bos.title = "Gems";
 
@@ -428,7 +462,7 @@ function createChangeRow(change, economyId) {
     flexBottom.appendChild(bon);
   }
 
-  if (checkGoldPaid && change.delta.goldDelta != undefined) {
+  if (checkGoldPaid && change.delta && change.delta.goldDelta !== undefined) {
     bos = createDiv(["economy_gold"]);
     bos.title = "Gold";
 
@@ -441,7 +475,7 @@ function createChangeRow(change, economyId) {
     flexBottom.appendChild(bon);
   }
 
-  if (checkGemsEarnt && change.delta.gemsDelta != undefined) {
+  if (checkGemsEarnt && change.delta && change.delta.gemsDelta !== undefined) {
     bos = createDiv(["economy_gems_med"]);
     bos.title = "Gems";
 
@@ -454,7 +488,7 @@ function createChangeRow(change, economyId) {
     flexRight.appendChild(bon);
   }
 
-  if (checkGoldEarnt && change.delta.goldDelta != undefined) {
+  if (checkGoldEarnt && change.delta && change.delta.goldDelta !== undefined) {
     bos = createDiv(["economy_gold_med"]);
     bos.title = "Gold";
 
@@ -467,7 +501,29 @@ function createChangeRow(change, economyId) {
     flexRight.appendChild(bon);
   }
 
-  if (checkBoosterAdded && change.delta.boosterDelta != undefined) {
+  if (change.trackDiff) {
+    const expDelta = Math.abs(
+      change.trackDiff.currentExp || 0 - change.trackDiff.oldExp || 0
+    );
+    bon = createDiv(["economy_sub"], formatNumber(expDelta) + " XP");
+    bon.style.lineHeight = "64px";
+    flexRight.appendChild(bon);
+  }
+
+  if (change.orbDiff) {
+    const orbDelta = Math.abs(
+      change.orbDiff.currentOrbCount || 0 - change.orbDiff.oldOrbCount || 0
+    );
+    bon = createDiv(["economy_sub"], formatNumber(orbDelta) + " Orbs");
+    bon.style.lineHeight = "64px";
+    flexRight.appendChild(bon);
+  }
+
+  if (
+    checkBoosterAdded &&
+    change.delta &&
+    change.delta.boosterDelta !== undefined
+  ) {
     change.delta.boosterDelta.forEach(function(booster) {
       var set = get_colation_set(booster.collationId);
 
@@ -486,7 +542,7 @@ function createChangeRow(change, economyId) {
     });
   }
 
-  if (checkWildcardsAdded) {
+  if (checkWildcardsAdded && change.delta) {
     if (change.delta.wcCommonDelta != undefined) {
       bos = createDiv(["economy_wc"]);
       bos.title = "Common Wildcard";
@@ -535,7 +591,7 @@ function createChangeRow(change, economyId) {
     }
   }
 
-  if (checkCardsAdded && change.delta.cardsAdded != undefined) {
+  if (checkCardsAdded && change.delta && change.delta.cardsAdded != undefined) {
     change.delta.cardsAdded.sort(collectionSortRarity);
     change.delta.cardsAdded.forEach(function(grpId) {
       var card = db.card(grpId);
@@ -624,7 +680,11 @@ function createChangeRow(change, economyId) {
     });
   }
 
-  if (checkSkinsAdded && change.delta.artSkinsAdded != undefined) {
+  if (
+    checkSkinsAdded &&
+    change.delta &&
+    change.delta.artSkinsAdded != undefined
+  ) {
     change.delta.artSkinsAdded.forEach(obj => {
       let card = db.cardFromArt(obj.artId);
 
@@ -718,24 +778,38 @@ function createEconomyUI(mainDiv) {
       selectItems.push(selectVal);
     }
 
-    if (change.delta.gemsDelta != undefined) {
-      if (change.delta.gemsDelta > 0)
-        dayList[daysago].gemsEarned += change.delta.gemsDelta;
-      else dayList[daysago].gemsSpent += Math.abs(change.delta.gemsDelta);
-    }
-    if (change.delta.goldDelta != undefined) {
-      if (change.delta.goldDelta > 0)
-        dayList[daysago].goldEarned += change.delta.goldDelta;
-      else dayList[daysago].goldSpent += Math.abs(change.delta.goldDelta);
+    if (change.delta) {
+      if (change.delta.gemsDelta != undefined) {
+        if (change.delta.gemsDelta > 0)
+          dayList[daysago].gemsEarned += change.delta.gemsDelta;
+        else dayList[daysago].gemsSpent += Math.abs(change.delta.gemsDelta);
+      }
+      if (change.delta.goldDelta != undefined) {
+        if (change.delta.goldDelta > 0)
+          dayList[daysago].goldEarned += change.delta.goldDelta;
+        else dayList[daysago].goldSpent += Math.abs(change.delta.goldDelta);
 
-      // console.log(economyId, "> ", change.date, " > ", change.delta.goldDelta);
+        // console.log(economyId, "> ", change.date, " > ", change.delta.goldDelta);
+      }
+
+      if (change.delta && change.delta.cardsAdded) {
+        dayList[daysago].cardsEarned += change.delta.cardsAdded.length;
+      }
+      if (change.delta && change.delta.vaultProgressDelta) {
+        dayList[daysago].vaultProgress += change.delta.vaultProgressDelta;
+      }
     }
 
-    if (change.delta && change.delta.cardsAdded) {
-      dayList[daysago].cardsEarned += change.delta.cardsAdded.length;
+    if (change.trackDiff) {
+      dayList[daysago].expEarned += Math.abs(
+        change.trackDiff.currentExp || 0 - change.trackDiff.oldExp || 0
+      );
     }
-    if (change.delta && change.delta.vaultProgressDelta) {
-      dayList[daysago].vaultProgress += change.delta.vaultProgressDelta;
+
+    if (change.orbDiff) {
+      dayList[daysago].orbsEarned += Math.abs(
+        change.orbDiff.currentOrbCount || 0 - change.orbDiff.oldOrbCount || 0
+      );
     }
   }
 
@@ -836,6 +910,16 @@ function createEconomyUI(mainDiv) {
 
   ntx = tx.cloneNode(true);
   ntx.innerHTML = `Vault: ${pd.economy.vault}%`;
+  ntx.style.marginLeft = "32px";
+  div.appendChild(ntx);
+
+  ntx = tx.cloneNode(true);
+  ntx.innerHTML = `XP: ${pd.economy.currentExp || 0}`;
+  ntx.style.marginLeft = "32px";
+  div.appendChild(ntx);
+
+  ntx = tx.cloneNode(true);
+  ntx.innerHTML = `Orbs: ${pd.economy.currentOrbCount || 0}`;
   ntx.style.marginLeft = "32px";
   div.appendChild(ntx);
 
