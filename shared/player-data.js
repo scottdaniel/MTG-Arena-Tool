@@ -112,7 +112,9 @@ const defaultCfg = {
     wcCommon: 0,
     wcUncommon: 0,
     wcRare: 0,
-    wcMythic: 0
+    wcMythic: 0,
+    currentExp: 0,
+    currentOrbCount: 0
   },
   rank: {
     constructed: {
