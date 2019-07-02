@@ -75,7 +75,8 @@ const {
   onLabelMatchGameRoomStateChangedEvent,
   onLabelInEventGetSeasonAndRankDetail,
   onLabelGetPlayerInventoryGetRewardSchedule,
-  onLabelRankUpdated
+  onLabelRankUpdated,
+  onLabelTrackProgressUpdated
 } = require("./labels");
 
 const toolVersion = electron.remote.app
@@ -839,6 +840,11 @@ function onLogEntryFound(entry) {
               json = entry.json();
               onLabelInPlayerInventoryGetPlayerCardsV3(entry, json);
             }
+            break;
+
+          case "TrackProgress.Updated":
+            json = entry.json();
+            onLabelTrackProgressUpdated(entry, json);
             break;
 
           case "Event.DeckSubmit":

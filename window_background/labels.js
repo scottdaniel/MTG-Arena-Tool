@@ -593,6 +593,53 @@ function onLabelInPlayerInventoryGetPlayerCardsV3(entry, json) {
   setData({ cards, cardsNew });
 }
 
+//
+function onLabelTrackProgressUpdated(entry, json) {
+  if (!json) return;
+  // console.log(json);
+  const economy = { ...pd.economy };
+  json.forEach(entry => {
+    if (!entry.trackDiff) return; // ignore rewardWebDiff updates for now
+
+    const transaction = {
+      context: "Track Progress",
+      timestamp: entry.timestamp,
+      date: parseWotcTime(entry.timestamp),
+      ...entry
+    };
+
+    const trackDiff = minifiedDelta(transaction.trackDiff);
+    if (trackDiff.inventoryDelta) {
+      // this is redundant data, removing to save space
+      delete trackDiff.inventoryDelta;
+    }
+    transaction.trackDiff = trackDiff;
+    if (trackDiff.currentLevel) {
+      economy.currentLevel = trackDiff.currentLevel;
+    }
+    if (trackDiff.currentExp) {
+      economy.currentExp = trackDiff.currentExp;
+    }
+
+    if (transaction.orbDiff) {
+      const orbDiff = minifiedDelta(transaction.orbDiff);
+      transaction.orbDiff = orbDiff;
+      if (orbDiff.currentOrbCount) {
+        economy.currentOrbCount = orbDiff.currentOrbCount;
+      }
+    }
+
+    // Construct a unique ID
+    transaction.id = sha1(
+      entry.timestamp + JSON.stringify(transaction.trackDiff)
+    );
+    saveEconomyTransaction(transaction);
+  });
+  // console.log(economy);
+  setData({ economy });
+  if (debugLog || !firstPass) store.set("economy", economy);
+}
+
 function onLabelInEventDeckSubmit(entry, json) {
   if (!json) return;
   select_deck(json);
@@ -867,5 +914,6 @@ module.exports = {
   onLabelMatchGameRoomStateChangedEvent,
   onLabelInEventGetSeasonAndRankDetail,
   onLabelGetPlayerInventoryGetRewardSchedule,
-  onLabelRankUpdated
+  onLabelRankUpdated,
+  onLabelTrackProgressUpdated
 };
