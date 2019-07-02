@@ -116,7 +116,7 @@ function httpBasic() {
         );
       }
 
-      console.log("POST", _headers);
+      // console.log("POST", _headers);
       var post_data = qs.stringify(_headers);
       options.headers = {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -333,7 +333,7 @@ function httpBasic() {
         ipc_send("ipc_log", e.message);
       });
       req.write(post_data);
-      console.log(req);
+      // console.log(req);
       req.end();
     },
     function(err) {
