@@ -503,7 +503,7 @@ function createChangeRow(change, economyId) {
 
   if (change.trackDiff) {
     const expDelta = Math.abs(
-      change.trackDiff.currentExp || 0 - change.trackDiff.oldExp || 0
+      (change.trackDiff.currentExp || 0) - (change.trackDiff.oldExp || 0)
     );
     bon = createDiv(["economy_sub"], formatNumber(expDelta) + " XP");
     bon.style.lineHeight = "64px";
@@ -512,7 +512,7 @@ function createChangeRow(change, economyId) {
 
   if (change.orbDiff) {
     const orbDelta = Math.abs(
-      change.orbDiff.currentOrbCount || 0 - change.orbDiff.oldOrbCount || 0
+      (change.orbDiff.currentOrbCount || 0) - (change.orbDiff.oldOrbCount || 0)
     );
     bon = createDiv(["economy_sub"], formatNumber(orbDelta) + " Orbs");
     bon.style.lineHeight = "64px";
@@ -802,13 +802,14 @@ function createEconomyUI(mainDiv) {
 
     if (change.trackDiff) {
       dayList[daysago].expEarned += Math.abs(
-        change.trackDiff.currentExp || 0 - change.trackDiff.oldExp || 0
+        (change.trackDiff.currentExp || 0) - (change.trackDiff.oldExp || 0)
       );
     }
 
     if (change.orbDiff) {
       dayList[daysago].orbsEarned += Math.abs(
-        change.orbDiff.currentOrbCount || 0 - change.orbDiff.oldOrbCount || 0
+        (change.orbDiff.currentOrbCount || 0) -
+          (change.orbDiff.oldOrbCount || 0)
       );
     }
   }
