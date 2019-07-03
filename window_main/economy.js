@@ -444,7 +444,7 @@ function createChangeRow(change, economyId) {
     checkSkinsAdded = true;
   }
 
-  if (checkGemsPaid && change.delta && change.delta.gemsDelta !== undefined) {
+  if (checkGemsPaid && change.delta.gemsDelta != undefined) {
     bos = createDiv(["economy_gems"]);
     bos.title = "Gems";
 
@@ -457,7 +457,7 @@ function createChangeRow(change, economyId) {
     flexBottom.appendChild(bon);
   }
 
-  if (checkGoldPaid && change.delta && change.delta.goldDelta !== undefined) {
+  if (checkGoldPaid && change.delta.goldDelta != undefined) {
     bos = createDiv(["economy_gold"]);
     bos.title = "Gold";
 
@@ -470,7 +470,7 @@ function createChangeRow(change, economyId) {
     flexBottom.appendChild(bon);
   }
 
-  if (checkGemsEarnt && change.delta && change.delta.gemsDelta !== undefined) {
+  if (checkGemsEarnt && change.delta.gemsDelta != undefined) {
     bos = createDiv(["economy_gems_med"]);
     bos.title = "Gems";
 
@@ -483,7 +483,7 @@ function createChangeRow(change, economyId) {
     flexRight.appendChild(bon);
   }
 
-  if (checkGoldEarnt && change.delta && change.delta.goldDelta !== undefined) {
+  if (checkGoldEarnt && change.delta.goldDelta != undefined) {
     bos = createDiv(["economy_gold_med"]);
     bos.title = "Gold";
 
@@ -518,11 +518,7 @@ function createChangeRow(change, economyId) {
     flexRight.appendChild(bon);
   }
 
-  if (
-    checkBoosterAdded &&
-    change.delta &&
-    change.delta.boosterDelta !== undefined
-  ) {
+  if (checkBoosterAdded && change.delta.boosterDelta != undefined) {
     change.delta.boosterDelta.forEach(function(booster) {
       var set = get_colation_set(booster.collationId);
 
@@ -541,7 +537,7 @@ function createChangeRow(change, economyId) {
     });
   }
 
-  if (checkWildcardsAdded && change.delta) {
+  if (checkWildcardsAdded) {
     if (change.delta.wcCommonDelta != undefined) {
       bos = createDiv(["economy_wc"]);
       bos.title = "Common Wildcard";
@@ -590,7 +586,7 @@ function createChangeRow(change, economyId) {
     }
   }
 
-  if (checkCardsAdded && change.delta && change.delta.cardsAdded != undefined) {
+  if (checkCardsAdded && change.delta.cardsAdded != undefined) {
     change.delta.cardsAdded.sort(collectionSortRarity);
     change.delta.cardsAdded.forEach(function(grpId) {
       var card = db.card(grpId);
@@ -679,11 +675,7 @@ function createChangeRow(change, economyId) {
     });
   }
 
-  if (
-    checkSkinsAdded &&
-    change.delta &&
-    change.delta.artSkinsAdded != undefined
-  ) {
+  if (checkSkinsAdded && change.delta.artSkinsAdded != undefined) {
     change.delta.artSkinsAdded.forEach(obj => {
       let card = db.cardFromArt(obj.artId);
 
@@ -777,26 +769,24 @@ function createEconomyUI(mainDiv) {
       selectItems.push(selectVal);
     }
 
-    if (change.delta) {
-      if (change.delta.gemsDelta != undefined) {
-        if (change.delta.gemsDelta > 0)
-          dayList[daysago].gemsEarned += change.delta.gemsDelta;
-        else dayList[daysago].gemsSpent += Math.abs(change.delta.gemsDelta);
-      }
-      if (change.delta.goldDelta != undefined) {
-        if (change.delta.goldDelta > 0)
-          dayList[daysago].goldEarned += change.delta.goldDelta;
-        else dayList[daysago].goldSpent += Math.abs(change.delta.goldDelta);
+    if (change.delta.gemsDelta != undefined) {
+      if (change.delta.gemsDelta > 0)
+        dayList[daysago].gemsEarned += change.delta.gemsDelta;
+      else dayList[daysago].gemsSpent += Math.abs(change.delta.gemsDelta);
+    }
+    if (change.delta.goldDelta != undefined) {
+      if (change.delta.goldDelta > 0)
+        dayList[daysago].goldEarned += change.delta.goldDelta;
+      else dayList[daysago].goldSpent += Math.abs(change.delta.goldDelta);
 
-        // console.log(economyId, "> ", change.date, " > ", change.delta.goldDelta);
-      }
+      // console.log(economyId, "> ", change.date, " > ", change.delta.goldDelta);
+    }
 
-      if (change.delta && change.delta.cardsAdded) {
-        dayList[daysago].cardsEarned += change.delta.cardsAdded.length;
-      }
-      if (change.delta && change.delta.vaultProgressDelta) {
-        dayList[daysago].vaultProgress += change.delta.vaultProgressDelta;
-      }
+    if (change.delta.cardsAdded) {
+      dayList[daysago].cardsEarned += change.delta.cardsAdded.length;
+    }
+    if (change.delta.vaultProgressDelta) {
+      dayList[daysago].vaultProgress += change.delta.vaultProgressDelta;
     }
 
     if (change.trackDiff) {

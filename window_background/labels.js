@@ -605,6 +605,7 @@ function onLabelTrackProgressUpdated(entry, json) {
       context: "Track Progress",
       timestamp: entry.timestamp,
       date: parseWotcTime(entry.timestamp),
+      delta: {},
       ...entry
     };
 
