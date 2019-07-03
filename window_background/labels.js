@@ -491,6 +491,11 @@ function onLabelInDeckUpdateDeck(entry, json) {
 
     setData({ deck_changes, deck_changes_index });
   }
+
+  const deckData = { ..._deck, ...json };
+  const decks = { ...pd.decks, [json.id]: deckData };
+  if (debugLog || !firstPass) store.set("decks." + json.id, deckData);
+  setData({ decks });
 }
 
 function onLabelInDeckUpdateDeckV3(entry, json) {
