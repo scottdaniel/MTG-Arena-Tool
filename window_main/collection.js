@@ -170,7 +170,9 @@ function get_collection_stats() {
   };
 
   for (var set in db.sets) {
-    stats[set] = new SetStats(set);
+    if (set !== "") {
+      stats[set] = new SetStats(set);
+    }
   }
 
   db.cardList.forEach(card => {
