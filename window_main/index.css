@@ -1647,8 +1647,8 @@ a:hover {
 .economy_orb {
     background-repeat: no-repeat;
     margin: auto 4px;
-    width: 28px;
-    height: 28px;
+    width: 20px;
+    height: 20px;
     background-image: url(../images/orb.png);
     background-size: contain;
 }
