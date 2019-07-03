@@ -514,7 +514,7 @@ function minifiedDelta(delta) {
 
 // Called for all "Inventory.Updated" labels
 function onLabelInventoryUpdated(entry, transaction) {
-  // if (!transaction) return;
+  if (!transaction) return;
 
   // Store this in case there are any future date parsing issues
   transaction.timestamp = entry.timestamp;
@@ -543,6 +543,7 @@ function onLabelInPlayerInventoryGetPlayerInventory(entry, json) {
   if (!json) return;
   logTime = parseWotcTime(entry.timestamp);
   const economy = {
+    ...pd.economy,
     gold: json.gold,
     gems: json.gems,
     vault: json.vaultProgress,
@@ -815,14 +816,25 @@ function onLabelInEventGetSeasonAndRankDetail(entry, json) {
 function onLabelGetPlayerInventoryGetRewardSchedule(entry, json) {
   if (!json) return;
 
-  if (!json.dailyReset.endsWith("Z")) json.dailyReset = json.dailyReset + "Z";
-  if (!json.weeklyReset.endsWith("Z"))
-    json.weeklyReset = json.weeklyReset + "Z";
+  const data = {
+    daily: db.rewards_daily_ends.toISOString(),
+    weekly: db.rewards_weekly_ends.toISOString()
+  };
 
-  ipc_send("set_reward_resets", {
-    daily: json.dailyReset,
-    weekly: json.weeklyReset
-  });
+  if (json.dailyReset) {
+    if (!json.dailyReset.endsWith("Z")) json.dailyReset = json.dailyReset + "Z";
+    data.daily = json.dailyReset;
+  }
+
+  // deprecated, leaving around for backwards compatibility for now
+  // TODO handle week-based reward track system
+  if (json.weeklyReset) {
+    if (!json.weeklyReset.endsWith("Z"))
+      json.weeklyReset = json.weeklyReset + "Z";
+    data.weekly = json.weeklyReset;
+  }
+
+  ipc_send("set_reward_resets", data);
 }
 
 module.exports = {
