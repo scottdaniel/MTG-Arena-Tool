@@ -1,5 +1,6 @@
 const electron = require("electron");
 const ipc = electron.ipcRenderer;
+const _ = require("lodash");
 
 const {
   CARD_TILE_FLAT,
@@ -286,6 +287,16 @@ class PlayerData {
       if (blacklistKeys.includes(key)) return;
       data[key] = value;
     });
+
+    const settingsBlacklistKeys = [
+      "toolVersion",
+      "auto_login",
+      "launch_to_tray",
+      "remember_me",
+      "beta_channel"
+    ];
+    data.settings = _.omit(data.settings, settingsBlacklistKeys);
+
     // console.log(data);
     return data;
   }

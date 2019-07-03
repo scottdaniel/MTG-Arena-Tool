@@ -525,21 +525,24 @@ function loadPlayerConfig(playerId, serverData = undefined) {
 
   const savedData = store.get();
   const savedOverlays = savedData.settings.overlays || [];
+  const appSettings = rstore.get("settings");
+  const settings = {
+    ...pd.settings,
+    ...savedData.settings,
+    ...appSettings,
+    overlays: pd.settings.overlays.map((overlay, index) => {
+      if (index < savedOverlays.length) {
+        // blend in new default overlay settings
+        return { ...overlay, ...savedOverlays[index] };
+      } else {
+        return overlay;
+      }
+    })
+  };
   const playerData = {
     ...pd,
     ...savedData,
-    settings: {
-      ...pd.settings,
-      ...savedData.settings,
-      overlays: pd.settings.overlays.map((overlay, index) => {
-        if (index < savedOverlays.length) {
-          // blend in new default overlay settings
-          return { ...overlay, ...savedOverlays[index] };
-        } else {
-          return overlay;
-        }
-      })
-    }
+    settings
   };
   syncSettings(playerData.settings, true);
   setData(playerData, false);
