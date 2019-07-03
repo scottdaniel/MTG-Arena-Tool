@@ -192,17 +192,16 @@ function renderData(container, index) {
 
 function createDayHeader(change) {
   daysago = differenceInCalendarDays(new Date(), new Date(change.date));
-  let headerGrid = createDiv(["economy_title"]);
+  const headerGrid = createDiv(["economy_title"]);
 
-  const cont = createDiv(["economy_metric"]);
-  let tx = createDiv();
+  const tx = createDiv(["economy_sub"]);
   tx.style.lineHeight = "64px";
-  tx.classList.add("economy_sub");
-  let up = createDiv(["economy_up"]);
-  let down = createDiv(["economy_down"]);
+  let ntx;
+  const up = createDiv(["economy_up"], "", { title: "increase" });
+  const down = createDiv(["economy_down"], "", { title: "decrease" });
 
   // Title
-  let gridTitle = createDiv(["flex_item"]);
+  const gridTitle = createDiv(["flex_item"]);
   gridTitle.style.gridArea = "1 / 1 / auto / 2";
   gridTitle.style.lineHeight = "64px";
 
@@ -213,13 +212,12 @@ function createDayHeader(change) {
     date = new Date(date.setHours(0, 0, 0, 0));
     gridTitle.innerHTML = localDayDateFormat(date);
   }
+  headerGrid.appendChild(gridTitle);
 
   // Cards
-  const gridCards = cont.cloneNode(true);
+  const gridCards = createDiv(["economy_metric"]);
   gridCards.style.gridArea = "1 / 2 / auto / 3";
-  const icca = createDiv(["economy_card"]);
-  icca.margin = "3px";
-  icca.title = "Cards";
+  const icca = createDiv(["economy_card"], "", { title: "Cards" });
   const catx = tx.cloneNode(true);
   catx.innerHTML = formatNumber(dayList[daysago].cardsEarned);
   gridCards.appendChild(icca);
@@ -228,34 +226,50 @@ function createDayHeader(change) {
   upcontca.appendChild(catx);
   upcontca.appendChild(up.cloneNode(true));
   gridCards.appendChild(upcontca);
+  headerGrid.appendChild(gridCards);
+
+  // Vault
+  const gridVault = createDiv(["economy_metric"]);
+  gridVault.style.gridArea = "1 / 3 / auto / 4";
+  gridVault.appendChild(createDiv(["economy_vault"], "", { title: "Vault" }));
+  const vatx = tx.cloneNode(true);
+  const rawDelta = dayList[daysago].vaultProgress;
+  // Assume vault can only be redeemed once per day
+  // Rely on modulo arithmetic to derive pure vault gain
+  const delta = rawDelta < 0 ? rawDelta + 100 : rawDelta;
+  const deltaPercent = delta / 100.0;
+  vatx.innerHTML = formatPercent(deltaPercent);
+  const upcontva = createDiv(["economy_delta"]);
+  upcontva.style.width = "auto";
+  upcontva.appendChild(vatx);
+  upcontva.appendChild(up.cloneNode(true));
+  gridVault.appendChild(upcontva);
+  headerGrid.appendChild(gridVault);
 
   // Gold
-  const gridGold = cont.cloneNode(true);
-  gridGold.style.gridArea = "1 / 3 / auto / 4";
-  let icgo = createDiv(["economy_gold_med"]);
-  icgo.margin = "3px";
-  icgo.title = "Gold";
-  gridGold.appendChild(icgo);
+  const gridGold = createDiv(["economy_metric"]);
+  gridGold.style.gridArea = "1 / 4 / auto / 5";
+  gridGold.appendChild(createDiv(["economy_gold_med"], "", { title: "Gold" }));
 
   const upcontgo = createDiv(["economy_delta"]);
-  tx.innerHTML = formatNumber(dayList[daysago].goldEarned);
-  upcontgo.appendChild(tx);
+  ntx = tx.cloneNode(true);
+  ntx.innerHTML = formatNumber(dayList[daysago].goldEarned);
+  upcontgo.appendChild(ntx);
   upcontgo.appendChild(up.cloneNode(true));
   gridGold.appendChild(upcontgo);
 
   const dncontgo = createDiv(["economy_delta"]);
-  let ntx = tx.cloneNode(true);
+  ntx = tx.cloneNode(true);
   ntx.innerHTML = formatNumber(dayList[daysago].goldSpent);
   dncontgo.appendChild(ntx);
   dncontgo.appendChild(down.cloneNode(true));
   gridGold.appendChild(dncontgo);
+  headerGrid.appendChild(gridGold);
 
   // Gems
-  const gridGems = cont.cloneNode(true);
-  gridGems.style.gridArea = "1 / 4 / auto / 5";
-  let icge = createDiv(["economy_gems_med"]);
-  icge.margin = "3px";
-  icge.title = "Gems";
+  const gridGems = createDiv(["economy_metric"]);
+  gridGems.style.gridArea = "1 / 5 / auto / 6";
+  let icge = createDiv(["economy_gems_med"], "", { title: "Gems" });
   gridGems.appendChild(icge);
 
   const upcontge = createDiv(["economy_delta"]);
@@ -271,26 +285,10 @@ function createDayHeader(change) {
   dncontge.appendChild(ntx);
   dncontge.appendChild(down.cloneNode(true));
   gridGems.appendChild(dncontge);
-
-  // Vault
-  const gridVault = cont.cloneNode(true);
-  gridVault.style.gridArea = "1 / 5 / auto / 6";
-  gridVault.appendChild(createDiv(["economy_vault"], "", { title: "Vault" }));
-  const vatx = tx.cloneNode(true);
-  const rawDelta = dayList[daysago].vaultProgress;
-  // Assume vault can only be redeemed once per day
-  // Rely on modulo arithmetic to derive pure vault gain
-  const delta = rawDelta < 0 ? rawDelta + 100 : rawDelta;
-  const deltaPercent = delta / 100.0;
-  vatx.innerHTML = formatPercent(deltaPercent);
-  const upcontva = createDiv(["economy_delta"]);
-  upcontva.style.width = "auto";
-  upcontva.appendChild(vatx);
-  upcontva.appendChild(up.cloneNode(true));
-  gridVault.appendChild(upcontva);
+  headerGrid.appendChild(gridGems);
 
   // Experience
-  const gridExp = cont.cloneNode(true);
+  const gridExp = createDiv(["economy_metric"]);
   gridExp.style.gridArea = "1 / 6 / auto / 7";
   gridExp.appendChild(createDiv(["economy_exp"], "", { title: "Experience" }));
   const xptx = tx.cloneNode(true);
@@ -300,9 +298,10 @@ function createDayHeader(change) {
   upcontxp.appendChild(xptx);
   upcontxp.appendChild(up.cloneNode(true));
   gridExp.appendChild(upcontxp);
+  headerGrid.appendChild(gridExp);
 
   // Orbs
-  const gridOrbs = cont.cloneNode(true);
+  const gridOrbs = createDiv(["economy_metric"]);
   gridOrbs.style.gridArea = "1 / 7 / auto / 8";
   gridOrbs.appendChild(createDiv(["economy_orb"], "", { title: "Orbs" }));
   const orbtx = tx.cloneNode(true);
@@ -312,14 +311,8 @@ function createDayHeader(change) {
   upcontorb.appendChild(orbtx);
   upcontorb.appendChild(up.cloneNode(true));
   gridOrbs.appendChild(upcontorb);
-
-  headerGrid.appendChild(gridTitle);
-  headerGrid.appendChild(gridCards);
-  headerGrid.appendChild(gridGold);
-  headerGrid.appendChild(gridGems);
-  headerGrid.appendChild(gridVault);
-  headerGrid.appendChild(gridExp);
   headerGrid.appendChild(gridOrbs);
+
   return headerGrid;
 }
 
@@ -849,7 +842,13 @@ function createEconomyUI(mainDiv) {
   tx.classList.add("economy_sub");
   let ntx;
 
-  //
+  const icva = createDiv(["economy_vault"], "", { title: "Vault" });
+  icva.style.marginLeft = "24px";
+  div.appendChild(icva);
+  ntx = tx.cloneNode(true);
+  ntx.innerHTML = pd.economy.vault + "%";
+  div.appendChild(ntx);
+
   const icwcc = createDiv(["economy_wc_med", "wc_common"]);
   icwcc.title = "Common Wildcards";
   div.appendChild(icwcc);
@@ -891,13 +890,6 @@ function createEconomyUI(mainDiv) {
   div.appendChild(icge);
   ntx = tx.cloneNode(true);
   ntx.innerHTML = formatNumber(pd.economy.gems);
-  div.appendChild(ntx);
-
-  const icva = createDiv(["economy_vault"], "", { title: "Vault" });
-  icva.style.marginLeft = "24px";
-  div.appendChild(icva);
-  ntx = tx.cloneNode(true);
-  ntx.innerHTML = pd.economy.vault + "%";
   div.appendChild(ntx);
 
   const iclvl = createDiv(

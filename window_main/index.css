@@ -1539,7 +1539,7 @@ a:hover {
 .economy_title {
     display: grid;
     padding: 0px 16px;
-    grid-template-columns: auto 10% 20% 20% 10% 10% 10%;
+    grid-template-columns: auto 10% 10% 20% 20% 10% 10%;
     margin-left: 2px;
     color: var(--color-light);
     line-height: 64px;
@@ -1641,6 +1641,7 @@ a:hover {
     width: 28px;
     height: 28px;
     background-image: url(../images/card.png);
+    background-position: center;
     background-size: contain;
 }
 
