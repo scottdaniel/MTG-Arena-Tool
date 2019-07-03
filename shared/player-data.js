@@ -113,6 +113,9 @@ const defaultCfg = {
     wcUncommon: 0,
     wcRare: 0,
     wcMythic: 0,
+    trackName: "",
+    trackTier: 0,
+    currentLevel: 0,
     currentExp: 0,
     currentOrbCount: 0
   },

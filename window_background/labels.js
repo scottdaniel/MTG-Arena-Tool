@@ -594,6 +594,23 @@ function onLabelInPlayerInventoryGetPlayerCardsV3(entry, json) {
 }
 
 //
+function onLabelInProgressionGetPlayerProgress(entry, json) {
+  if (!json || !json.activeBattlePass) return;
+  logTime = parseWotcTime(entry.timestamp);
+  const activeTrack = json.activeBattlePass;
+  const economy = {
+    ...pd.economy,
+    trackName: activeTrack.trackName,
+    trackTier: activeTrack.currentTier,
+    currentLevel: activeTrack.currentLevel,
+    currentExp: activeTrack.currentExp,
+    currentOrbCount: activeTrack.currentOrbCount
+  };
+  setData({ economy });
+  if (debugLog || !firstPass) store.set("economy", economy);
+}
+
+//
 function onLabelTrackProgressUpdated(entry, json) {
   if (!json) return;
   // console.log(json);
@@ -615,17 +632,24 @@ function onLabelTrackProgressUpdated(entry, json) {
       delete trackDiff.inventoryDelta;
     }
     transaction.trackDiff = trackDiff;
-    if (trackDiff.currentLevel) {
+
+    if (entry.trackName) {
+      economy.trackName = entry.trackName;
+    }
+    if (entry.trackTier !== undefined) {
+      economy.trackTier = entry.trackTier;
+    }
+    if (trackDiff.currentLevel !== undefined) {
       economy.currentLevel = trackDiff.currentLevel;
     }
-    if (trackDiff.currentExp) {
+    if (trackDiff.currentExp !== undefined) {
       economy.currentExp = trackDiff.currentExp;
     }
 
     if (transaction.orbDiff) {
       const orbDiff = minifiedDelta(transaction.orbDiff);
       transaction.orbDiff = orbDiff;
-      if (orbDiff.currentOrbCount) {
+      if (orbDiff.currentOrbCount !== undefined) {
         economy.currentOrbCount = orbDiff.currentOrbCount;
       }
     }
@@ -902,6 +926,7 @@ module.exports = {
   onLabelInventoryUpdated,
   onLabelInPlayerInventoryGetPlayerInventory,
   onLabelInPlayerInventoryGetPlayerCardsV3,
+  onLabelInProgressionGetPlayerProgress,
   onLabelInEventDeckSubmit,
   onLabelInEventDeckSubmitV3,
   onLabelInEventGetActiveEvents,

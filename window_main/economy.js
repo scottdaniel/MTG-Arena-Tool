@@ -900,6 +900,17 @@ function createEconomyUI(mainDiv) {
   ntx.innerHTML = pd.economy.vault + "%";
   div.appendChild(ntx);
 
+  const iclvl = createDiv(
+    ["economy_sub"],
+    "L" + (pd.economy.currentLevel + 1),
+    {
+      title: `Mastery Level (${pd.economy.trackName})`
+    }
+  );
+  iclvl.style.marginLeft = "24px";
+  iclvl.style.lineHeight = "64px";
+  div.appendChild(iclvl);
+
   const icxp = createDiv(["economy_exp"], "", { title: "Experience" });
   icxp.style.marginLeft = "24px";
   div.appendChild(icxp);

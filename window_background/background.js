@@ -62,6 +62,7 @@ const {
   onLabelInventoryUpdated,
   onLabelInPlayerInventoryGetPlayerInventory,
   onLabelInPlayerInventoryGetPlayerCardsV3,
+  onLabelInProgressionGetPlayerProgress,
   onLabelInEventDeckSubmit,
   onLabelInEventDeckSubmitV3,
   onLabelInEventGetActiveEvents,
@@ -839,6 +840,13 @@ function onLogEntryFound(entry) {
             if (entry.arrow == "<==") {
               json = entry.json();
               onLabelInPlayerInventoryGetPlayerCardsV3(entry, json);
+            }
+            break;
+
+          case "Progression.GetPlayerProgress":
+            if (entry.arrow == "<==") {
+              json = entry.json();
+              onLabelInProgressionGetPlayerProgress(entry, json);
             }
             break;
 
