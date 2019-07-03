@@ -221,7 +221,9 @@ function openCollectionTab() {
   filteredMana = [];
   orderedSets = [];
   for (let set in db.sets) {
-    orderedSets.push(set);
+    if (set !== "") {
+      orderedSets.push(set);
+    }
   }
 
   orderedSets.sort((a, b) => {
@@ -650,6 +652,7 @@ function printStats() {
   orderedSets
     .slice()
     .reverse()
+    .filter(set => set !== "")
     .forEach(set => {
       let rs = renderSetStats(stats[set], db.sets[set].code, set);
       mainstats.appendChild(rs);
