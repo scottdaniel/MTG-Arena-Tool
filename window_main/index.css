@@ -1626,7 +1626,34 @@ a:hover {
     background-size: contain;
 }
 
-.economy_skin {
+.economy_vault {
+    background-repeat: no-repeat;
+    margin: auto 4px;
+    width: 28px;
+    height: 28px;
+    background-image: url(../images/vault.png);
+    background-size: contain;
+}
+
+.economy_card {
+    background-repeat: no-repeat;
+    margin: auto 4px;
+    width: 28px;
+    height: 28px;
+    background-image: url(../images/card.png);
+    background-size: contain;
+}
+
+.economy_orb {
+    background-repeat: no-repeat;
+    margin: auto 4px;
+    width: 28px;
+    height: 28px;
+    background-image: url(../images/orb.png);
+    background-size: contain;
+}
+
+.economy_exp {
     background-repeat: no-repeat;
     margin: auto 4px;
     margin-left: 16px;

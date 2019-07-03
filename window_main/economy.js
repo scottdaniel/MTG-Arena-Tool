@@ -217,8 +217,9 @@ function createDayHeader(change) {
   // Cards
   const gridCards = cont.cloneNode(true);
   gridCards.style.gridArea = "1 / 2 / auto / 3";
-  const icca = tx.cloneNode(true);
-  icca.innerHTML = "Cards:";
+  const icca = createDiv(["economy_card"]);
+  icca.margin = "3px";
+  icca.title = "Cards";
   const catx = tx.cloneNode(true);
   catx.innerHTML = formatNumber(dayList[daysago].cardsEarned);
   gridCards.appendChild(icca);
@@ -274,8 +275,7 @@ function createDayHeader(change) {
   // Vault
   const gridVault = cont.cloneNode(true);
   gridVault.style.gridArea = "1 / 5 / auto / 6";
-  const icva = tx.cloneNode(true);
-  icva.innerHTML = "Vault:";
+  gridVault.appendChild(createDiv(["economy_vault"], "", { title: "Vault" }));
   const vatx = tx.cloneNode(true);
   const rawDelta = dayList[daysago].vaultProgress;
   // Assume vault can only be redeemed once per day
@@ -283,7 +283,6 @@ function createDayHeader(change) {
   const delta = rawDelta < 0 ? rawDelta + 100 : rawDelta;
   const deltaPercent = delta / 100.0;
   vatx.innerHTML = formatPercent(deltaPercent);
-  gridVault.appendChild(icva);
   const upcontva = createDiv(["economy_delta"]);
   upcontva.style.width = "auto";
   upcontva.appendChild(vatx);
@@ -293,11 +292,9 @@ function createDayHeader(change) {
   // Experience
   const gridExp = cont.cloneNode(true);
   gridExp.style.gridArea = "1 / 6 / auto / 7";
-  const icxp = tx.cloneNode(true);
-  icxp.innerHTML = "XP:";
+  gridExp.appendChild(createDiv(["economy_exp"], "", { title: "Experience" }));
   const xptx = tx.cloneNode(true);
   xptx.innerHTML = formatNumber(dayList[daysago].expEarned);
-  gridExp.appendChild(icxp);
   const upcontxp = createDiv(["economy_delta"]);
   upcontxp.style.width = "auto";
   upcontxp.appendChild(xptx);
@@ -307,11 +304,9 @@ function createDayHeader(change) {
   // Orbs
   const gridOrbs = cont.cloneNode(true);
   gridOrbs.style.gridArea = "1 / 7 / auto / 8";
-  const icorb = tx.cloneNode(true);
-  icorb.innerHTML = "Orbs:";
+  gridOrbs.appendChild(createDiv(["economy_orb"], "", { title: "Orbs" }));
   const orbtx = tx.cloneNode(true);
   orbtx.innerHTML = formatNumber(dayList[daysago].orbsEarned);
-  gridOrbs.appendChild(icorb);
   const upcontorb = createDiv(["economy_delta"]);
   upcontorb.style.width = "auto";
   upcontorb.appendChild(orbtx);
@@ -855,73 +850,74 @@ function createEconomyUI(mainDiv) {
   //$$("#query_select.select_button")[0].innerHTML = filterEconomy;
   div.appendChild(selectdiv);
 
-  //
-  let icwcc = createDiv(["economy_wc_med", "wc_common"]);
-  icwcc.title = "Common Wildcards";
-
-  let icwcu = createDiv(["economy_wc_med", "wc_uncommon"]);
-  icwcu.title = "Uncommon Wildcards";
-
-  let icwcr = createDiv(["economy_wc_med", "wc_rare"]);
-  icwcr.title = "Rare Wildcards";
-
-  let icwcm = createDiv(["economy_wc_med", "wc_mythic"]);
-  icwcm.title = "Mythic Wildcards";
-
-  let icgo = createDiv(["economy_gold_med"]);
-  icgo.title = "Gold";
-
-  let icge = createDiv(["economy_gems_med"]);
-  icge.style.marginLeft = "24px";
-  icge.title = "Gems";
-
-  let tx = createDiv();
+  const tx = createDiv();
   tx.style.lineHeight = "64px";
   tx.classList.add("economy_sub");
+  let ntx;
 
+  //
+  const icwcc = createDiv(["economy_wc_med", "wc_common"]);
+  icwcc.title = "Common Wildcards";
   div.appendChild(icwcc);
-  let ntx = tx.cloneNode(true);
+  ntx = tx.cloneNode(true);
   ntx.innerHTML = formatNumber(pd.economy.wcCommon);
   div.appendChild(ntx);
 
+  const icwcu = createDiv(["economy_wc_med", "wc_uncommon"]);
+  icwcu.title = "Uncommon Wildcards";
   div.appendChild(icwcu);
   ntx = tx.cloneNode(true);
   ntx.innerHTML = formatNumber(pd.economy.wcUncommon);
   div.appendChild(ntx);
 
+  const icwcr = createDiv(["economy_wc_med", "wc_rare"]);
+  icwcr.title = "Rare Wildcards";
   div.appendChild(icwcr);
   ntx = tx.cloneNode(true);
   ntx.innerHTML = formatNumber(pd.economy.wcRare);
   div.appendChild(ntx);
 
+  const icwcm = createDiv(["economy_wc_med", "wc_mythic"]);
+  icwcm.title = "Mythic Wildcards";
   div.appendChild(icwcm);
   ntx = tx.cloneNode(true);
   ntx.innerHTML = formatNumber(pd.economy.wcMythic);
   div.appendChild(ntx);
 
+  const icgo = createDiv(["economy_gold_med"]);
+  icgo.title = "Gold";
   div.appendChild(icgo);
   ntx = tx.cloneNode(true);
   ntx.innerHTML = formatNumber(pd.economy.gold);
   div.appendChild(ntx);
 
+  const icge = createDiv(["economy_gems_med"]);
+  icge.style.marginLeft = "24px";
+  icge.title = "Gems";
   div.appendChild(icge);
   ntx = tx.cloneNode(true);
   ntx.innerHTML = formatNumber(pd.economy.gems);
   div.appendChild(ntx);
 
+  const icva = createDiv(["economy_vault"], "", { title: "Vault" });
+  icva.style.marginLeft = "24px";
+  div.appendChild(icva);
   ntx = tx.cloneNode(true);
-  ntx.innerHTML = `Vault: ${pd.economy.vault}%`;
-  ntx.style.marginLeft = "32px";
+  ntx.innerHTML = pd.economy.vault + "%";
   div.appendChild(ntx);
 
+  const icxp = createDiv(["economy_exp"], "", { title: "Experience" });
+  icxp.style.marginLeft = "24px";
+  div.appendChild(icxp);
   ntx = tx.cloneNode(true);
-  ntx.innerHTML = `XP: ${pd.economy.currentExp || 0}`;
-  ntx.style.marginLeft = "32px";
+  ntx.innerHTML = pd.economy.currentExp || 0;
   div.appendChild(ntx);
 
+  const icorb = createDiv(["economy_orb"], "", { title: "Orbs" });
+  icorb.style.marginLeft = "24px";
+  div.appendChild(icorb);
   ntx = tx.cloneNode(true);
-  ntx.innerHTML = `Orbs: ${pd.economy.currentOrbCount || 0}`;
-  ntx.style.marginLeft = "32px";
+  ntx.innerHTML = pd.economy.currentOrbCount || 0;
   div.appendChild(ntx);
 
   mainDiv.appendChild(div);
