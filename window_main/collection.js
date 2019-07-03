@@ -170,7 +170,9 @@ function get_collection_stats() {
   };
 
   for (var set in db.sets) {
-    stats[set] = new SetStats(set);
+    if (set !== "") {
+      stats[set] = new SetStats(set);
+    }
   }
 
   db.cardList.forEach(card => {
@@ -219,7 +221,9 @@ function openCollectionTab() {
   filteredMana = [];
   orderedSets = [];
   for (let set in db.sets) {
-    orderedSets.push(set);
+    if (set !== "") {
+      orderedSets.push(set);
+    }
   }
 
   orderedSets.sort((a, b) => {
@@ -648,6 +652,7 @@ function printStats() {
   orderedSets
     .slice()
     .reverse()
+    .filter(set => set !== "")
     .forEach(set => {
       let rs = renderSetStats(stats[set], db.sets[set].code, set);
       mainstats.appendChild(rs);

@@ -3303,6 +3303,11 @@ a:hover {
     margin: auto 24px auto auto;
 }
 
+.overlay_label {
+    margin: auto auto auto 0;
+    flex-shrink: 1;
+}
+
 .wnew_image {
     width: -webkit-fill-available;
     height: -webkit-fill-available;

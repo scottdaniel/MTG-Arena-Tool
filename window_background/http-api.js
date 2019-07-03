@@ -155,6 +155,9 @@ function httpBasic() {
             try {
               parsedResult = JSON.parse(results);
             } catch (e) {
+              if (debugNet) {
+                console.log(results);
+              }
               ipc_send("popup", {
                 text: `Error parsing response. (${_headers.method})`,
                 time: 2000,
