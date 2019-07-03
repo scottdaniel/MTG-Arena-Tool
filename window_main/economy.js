@@ -502,10 +502,12 @@ function createChangeRow(change, economyId) {
       flexRight.appendChild(iclvl);
     }
 
-    const expDelta = Math.abs(
-      (change.trackDiff.currentExp || 0) - (change.trackDiff.oldExp || 0)
-    );
+    let expDelta =
+      (change.trackDiff.currentExp || 0) - (change.trackDiff.oldExp || 0);
     if (expDelta) {
+      // Rely on modulo arithmetic to derive pure exp gain
+      if (expDelta < 0) expDelta += 1000;
+
       flexRight.appendChild(
         createDiv(["economy_exp"], "", { title: "Experience" })
       );
@@ -797,9 +799,11 @@ function createEconomyUI(mainDiv) {
     }
 
     if (change.trackDiff) {
-      dayList[daysago].expEarned += Math.abs(
-        (change.trackDiff.currentExp || 0) - (change.trackDiff.oldExp || 0)
-      );
+      let expDelta =
+        (change.trackDiff.currentExp || 0) - (change.trackDiff.oldExp || 0);
+      // Rely on modulo arithmetic to derive pure exp gain
+      if (expDelta < 0) expDelta += 1000;
+      dayList[daysago].expEarned += expDelta;
     }
 
     if (change.orbDiff) {
