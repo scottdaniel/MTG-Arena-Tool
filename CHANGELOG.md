@@ -1,3 +1,39 @@
+## <small>2.7.5 (2019-07-03)</small>
+
+* add overlay top bar icon and minor patches ([45f5e32](https://github.com/Manuel-777/MTG-Arena-Tool/commit/45f5e32))
+* align mana icons ([585735e](https://github.com/Manuel-777/MTG-Arena-Tool/commit/585735e))
+* background.deckDefault and import_custom_deck ([22a4ffc](https://github.com/Manuel-777/MTG-Arena-Tool/commit/22a4ffc))
+* bugfix dialogs ([a7947f8](https://github.com/Manuel-777/MTG-Arena-Tool/commit/a7947f8))
+* bugfix ensure unlink icon visible when offline ([04b76be](https://github.com/Manuel-777/MTG-Arena-Tool/commit/04b76be))
+* bugfix labels.onLabelGetPlayerInventoryGetRewardSchedule handles new json ([9a1d0fb](https://github.com/Manuel-777/MTG-Arena-Tool/commit/9a1d0fb))
+* bugfix overlays launch properly when tool starts mid match ([1db2bda](https://github.com/Manuel-777/MTG-Arena-Tool/commit/1db2bda))
+* bugfix renderer only saves last tab on user click ([7420c8a](https://github.com/Manuel-777/MTG-Arena-Tool/commit/7420c8a))
+* bugfix syncUserData ([c7659eb](https://github.com/Manuel-777/MTG-Arena-Tool/commit/c7659eb))
+* centralize background start logic ([8df69ab](https://github.com/Manuel-777/MTG-Arena-Tool/commit/8df69ab))
+* centralize player_data_refresh in background-util.setData ([5ae5284](https://github.com/Manuel-777/MTG-Arena-Tool/commit/5ae5284))
+* collection fixes ([4a023c0](https://github.com/Manuel-777/MTG-Arena-Tool/commit/4a023c0))
+* constants for main window process tabs ([590ce1b](https://github.com/Manuel-777/MTG-Arena-Tool/commit/590ce1b))
+* debug arena ID ([483bf34](https://github.com/Manuel-777/MTG-Arena-Tool/commit/483bf34))
+* deck-details Add to My Decks button ([c705caf](https://github.com/Manuel-777/MTG-Arena-Tool/commit/c705caf))
+* do not save practice matches ([a50e385](https://github.com/Manuel-777/MTG-Arena-Tool/commit/a50e385))
+* fix explore unowned ([1cea8d3](https://github.com/Manuel-777/MTG-Arena-Tool/commit/1cea8d3))
+* m20 icon ([576f411](https://github.com/Manuel-777/MTG-Arena-Tool/commit/576f411))
+* match-details Add to My Decks button ([55db6f8](https://github.com/Manuel-777/MTG-Arena-Tool/commit/55db6f8))
+* overlay settings page tweaks ([4676a23](https://github.com/Manuel-777/MTG-Arena-Tool/commit/4676a23))
+* player-data does not mutate match on access ([f3c0c21](https://github.com/Manuel-777/MTG-Arena-Tool/commit/f3c0c21))
+* remove broken weekly reward timer from home page ([93d261d](https://github.com/Manuel-777/MTG-Arena-Tool/commit/93d261d))
+* rename player-data fns and pd_set ([57b53dc](https://github.com/Manuel-777/MTG-Arena-Tool/commit/57b53dc))
+* renderer.force_open_tab and sidebarActive constants ([2fc974c](https://github.com/Manuel-777/MTG-Arena-Tool/commit/2fc974c))
+* show http errors ([4bb91c4](https://github.com/Manuel-777/MTG-Arena-Tool/commit/4bb91c4))
+* static_events enables archival logic and lore completion ([901f665](https://github.com/Manuel-777/MTG-Arena-Tool/commit/901f665))
+* SVG mana icons ([e668f48](https://github.com/Manuel-777/MTG-Arena-Tool/commit/e668f48))
+* undefined context ([60fb25b](https://github.com/Manuel-777/MTG-Arena-Tool/commit/60fb25b))
+* update database ([60da84b](https://github.com/Manuel-777/MTG-Arena-Tool/commit/60da84b))
+* Update database.json ([f5f236d](https://github.com/Manuel-777/MTG-Arena-Tool/commit/f5f236d))
+* vertical mana simbols ([893f6b7](https://github.com/Manuel-777/MTG-Arena-Tool/commit/893f6b7))
+
+
+
 ## <small>2.7.4 (2019-06-24)</small>
 
 * bugfix background draft edge cases ([269679c](https://github.com/Manuel-777/MTG-Arena-Tool/commit/269679c))
