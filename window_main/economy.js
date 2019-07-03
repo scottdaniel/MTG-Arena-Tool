@@ -497,19 +497,23 @@ function createChangeRow(change, economyId) {
   }
 
   if (change.trackDiff) {
+    flexRight.appendChild(
+      createDiv(["economy_exp"], "", { title: "Experience" })
+    );
     const expDelta = Math.abs(
       (change.trackDiff.currentExp || 0) - (change.trackDiff.oldExp || 0)
     );
-    bon = createDiv(["economy_sub"], formatNumber(expDelta) + " XP");
+    bon = createDiv(["economy_sub"], formatNumber(expDelta));
     bon.style.lineHeight = "64px";
     flexRight.appendChild(bon);
   }
 
   if (change.orbDiff) {
+    flexRight.appendChild(createDiv(["economy_orb"], "", { title: "Orbs" }));
     const orbDelta = Math.abs(
       (change.orbDiff.currentOrbCount || 0) - (change.orbDiff.oldOrbCount || 0)
     );
-    bon = createDiv(["economy_sub"], formatNumber(orbDelta) + " Orbs");
+    bon = createDiv(["economy_sub"], formatNumber(orbDelta));
     bon.style.lineHeight = "64px";
     flexRight.appendChild(bon);
   }
