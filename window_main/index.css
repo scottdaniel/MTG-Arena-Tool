@@ -2486,7 +2486,7 @@ a:hover {
 }
 
 .settings_nav:hover, .nav_selected {
-    color: var(--color-light-75);
+    color: var(--color-light);
     margin-left: 32px;
 }
 
@@ -3229,8 +3229,9 @@ a:hover {
 .overlay_section_selector_cont {
     display: flex;
     height: 64px;
-    width: 100%;
     justify-content: space-around;
+    border-bottom: solid var(--color-light-20) 2px;
+    margin: 24px 64px 14px 12px;
 }
 
 .overlay_prev {
@@ -3273,6 +3274,7 @@ a:hover {
 .overlay_icon {
     width: 20px;
     height: 20px;
+    border-radius: 50%;
     margin: auto 24px auto auto;
 }
 
