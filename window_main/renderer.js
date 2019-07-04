@@ -502,7 +502,7 @@ ipc.on("offline", function() {
 function showOfflineSplash() {
   hideLoadingBars();
   byId("ux_0").innerHTML =
-    '<div class="message_center" style="display: flex; position: fixed;"><div class="message_unlink"></div><div class="message_big red">Oops, you are offline!</div><div class="message_sub_16 white">You can <a class="signup_link">sign up</a> to access online features.</div></div>';
+    '<div class="message_center_offline" style="display: flex; position: fixed;"><div class="message_unlink"></div><div class="message_big red">Oops, you are offline!</div><div class="message_sub_16 white">You can <a class="signup_link">sign up</a> to access online features.</div></div>';
   $$(".signup_link")[0].addEventListener("click", function() {
     shell.openExternal("https://mtgatool.com/signup/");
   });

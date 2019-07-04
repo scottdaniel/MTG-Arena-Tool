@@ -700,7 +700,7 @@ a:hover {
     height: 128px;
 }
 
-.message_center {
+.message_center, .message_center_offline {
     position: absolute;
     top: -48px;
     left: 0;
