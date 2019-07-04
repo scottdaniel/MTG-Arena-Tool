@@ -286,9 +286,9 @@ ipc.on("start_background", function() {
 });
 
 function offlineLogin() {
-  setData({ userName: "", offline: true }, false);
   ipc_send("auth", { ok: true, user: -1 });
   loadPlayerConfig(pd.arenaId);
+  setData({ userName: "", offline: true });
 }
 
 //

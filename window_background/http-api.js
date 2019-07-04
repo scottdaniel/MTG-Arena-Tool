@@ -32,7 +32,7 @@ function httpBasic() {
       var _headers = value;
 
       if (
-        pd.settings.send_data == false &&
+        (pd.settings.send_data == false || pd.offline == true) &&
         _headers.method != "auth" &&
         _headers.method != "delete_data" &&
         _headers.method != "get_database" &&
