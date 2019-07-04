@@ -502,7 +502,11 @@ function updateMatchView() {
   if (!deckToDraw) return;
 
   // Deck colors
-  if ([OVERLAY_ODDS, OVERLAY_MIXED, OVERLAY_FULL, OVERLAY_LEFT].includes(overlayMode)) {
+  if (
+    [OVERLAY_ODDS, OVERLAY_MIXED, OVERLAY_FULL, OVERLAY_LEFT].includes(
+      overlayMode
+    )
+  ) {
     $$(".overlay_deckname")[0].innerHTML = deckToDraw.name;
     deckToDraw.colors
       .get()
@@ -523,7 +527,9 @@ function updateMatchView() {
   // group lands
   if (
     settings.lands &&
-    [OVERLAY_FULL, OVERLAY_LEFT, OVERLAY_ODDS, OVERLAY_MIXED].includes(overlayMode)
+    [OVERLAY_FULL, OVERLAY_LEFT, OVERLAY_ODDS, OVERLAY_MIXED].includes(
+      overlayMode
+    )
   ) {
     let landsNumber = 0;
     let landsChance = 0;
