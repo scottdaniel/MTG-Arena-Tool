@@ -78,6 +78,7 @@ app.on("ready", () => {
 });
 
 function startUpdater() {
+  if (!app.isPackaged) return;
   updaterWindow = createUpdaterWindow();
 
   updaterWindow.webContents.on("did-finish-load", function() {
@@ -123,7 +124,13 @@ function installUpdate() {
 let appStarted = false;
 
 function startApp() {
-  if (appStarted) return;
+  if (appStarted) {
+    if (updaterWindow) {
+      updaterWindow.destroy();
+      updaterWindow = undefined;
+    }
+    return;
+  }
   mainWindow = createMainWindow();
   background = createBackgroundWindow();
   setBackground(background);
