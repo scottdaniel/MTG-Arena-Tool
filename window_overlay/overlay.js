@@ -47,6 +47,7 @@ const {
   OVERLAY_FULL,
   OVERLAY_LEFT,
   OVERLAY_ODDS,
+  OVERLAY_MIXED,
   OVERLAY_SEEN,
   OVERLAY_DRAFT,
   OVERLAY_LOG,
@@ -468,7 +469,7 @@ function updateMatchView() {
       createDiv(["decklist_title"], "Library: " + cardsLeft + " cards")
     );
     deckToDraw = currentMatch.playerCardsLeft;
-  } else if (overlayMode === OVERLAY_ODDS) {
+  } else if (overlayMode === OVERLAY_ODDS || overlayMode === OVERLAY_MIXED) {
     // Next Draw Odds Mode
     let cardsLeft = currentMatch.playerCardsLeft.mainboard.count();
     deckListDiv.appendChild(
@@ -501,7 +502,7 @@ function updateMatchView() {
   if (!deckToDraw) return;
 
   // Deck colors
-  if ([OVERLAY_ODDS, OVERLAY_FULL, OVERLAY_LEFT].includes(overlayMode)) {
+  if ([OVERLAY_ODDS, OVERLAY_MIXED, OVERLAY_FULL, OVERLAY_LEFT].includes(overlayMode)) {
     $$(".overlay_deckname")[0].innerHTML = deckToDraw.name;
     deckToDraw.colors
       .get()
@@ -513,7 +514,7 @@ function updateMatchView() {
   }
 
   let sortFunc = compare_cards;
-  if (overlayMode === OVERLAY_ODDS) {
+  if (overlayMode === OVERLAY_ODDS || overlayMode == OVERLAY_MIXED) {
     sortFunc = compare_chances;
   }
 
@@ -522,7 +523,7 @@ function updateMatchView() {
   // group lands
   if (
     settings.lands &&
-    [OVERLAY_FULL, OVERLAY_LEFT, OVERLAY_ODDS].includes(overlayMode)
+    [OVERLAY_FULL, OVERLAY_LEFT, OVERLAY_ODDS, OVERLAY_MIXED].includes(overlayMode)
   ) {
     let landsNumber = 0;
     let landsChance = 0;
@@ -550,7 +551,17 @@ function updateMatchView() {
   mainCards.get().sort(sortFunc);
   mainCards.get().forEach(card => {
     let tile;
-    if (overlayMode === OVERLAY_ODDS) {
+    if (overlayMode === OVERLAY_MIXED) {
+      let odds = (card.chance !== undefined ? card.chance : "0") + "%";
+      let q = card.quantity;
+
+      if (!settings.lands || (settings.lands && odds !== "0%")) {
+        tile = deckDrawer.cardTile(pd.settings.card_tile_style, card.id, "a", {
+          quantity: q,
+          odds: odds
+        });
+      }
+    } else if (overlayMode === OVERLAY_ODDS) {
       let quantity = (card.chance !== undefined ? card.chance : "0") + "%";
       if (!settings.lands || (settings.lands && quantity !== "0%")) {
         tile = deckDrawer.cardTile(
@@ -584,7 +595,7 @@ function updateMatchView() {
     sideCards.get().sort(sortFunc);
 
     sideCards.get().forEach(function(card) {
-      if (overlayMode === OVERLAY_ODDS) {
+      if (overlayMode === OVERLAY_ODDS || overlayMode === OVERLAY_MIXED) {
         const tile = deckDrawer.cardTile(
           pd.settings.card_tile_style,
           card.id,
@@ -604,7 +615,7 @@ function updateMatchView() {
     });
   }
 
-  if (overlayMode === OVERLAY_ODDS) {
+  if (overlayMode === OVERLAY_ODDS || overlayMode === OVERLAY_MIXED) {
     drawDeckOdds();
     return;
   }

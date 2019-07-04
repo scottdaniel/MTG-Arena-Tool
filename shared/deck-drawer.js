@@ -120,7 +120,16 @@ function drawCardTileArena(
 
   let ww, ll;
 
-  if (!isNumber(quantity)) {
+  if (typeof quantity === "object") {
+    ww = 64;
+    ll = 48;
+
+    //
+    const col = rankingClassName(quantity.quantity);
+    cont.appendChild(
+      createDiv(["card_tile_odds", col], `<span>${quantity.quantity}</span>`)
+    );
+  } else if (!isNumber(quantity)) {
     ww = 64;
     ll = 48;
 
@@ -242,7 +251,20 @@ function drawCardTileFlat(
   cont.dataset["id"] = indent;
   cont.dataset["quantity"] = quantity;
 
-  if (!isNumber(quantity)) {
+  if (typeof quantity === "object") {
+    // Mixed quantity (odds and quantity)
+    const quantityDiv = createDiv(["card_tile_odds_flat"]);
+
+    const numberDiv = createDiv(
+      ["card_tile_odds_flat_half"],
+      quantity.quantity
+    );
+    const oddsDiv = createDiv(["card_tile_odds_flat_half_dark"], quantity.odds);
+
+    quantityDiv.appendChild(numberDiv);
+    quantityDiv.appendChild(oddsDiv);
+    cont.appendChild(quantityDiv);
+  } else if (!isNumber(quantity)) {
     // Text quantity
     const col = rankingClassName(quantity);
     const quantityDiv = createDiv(["card_tile_odds_flat", col], quantity);

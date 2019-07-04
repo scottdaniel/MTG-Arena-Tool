@@ -626,6 +626,7 @@ exports.OVERLAY_SEEN = 3;
 exports.OVERLAY_LOG = 4;
 exports.OVERLAY_DRAFT = 5;
 exports.OVERLAY_DRAFT_BREW = 6;
+exports.OVERLAY_MIXED = 7;
 exports.OVERLAY_DRAFT_MODES = [
   exports.OVERLAY_DRAFT,
   exports.OVERLAY_DRAFT_BREW
