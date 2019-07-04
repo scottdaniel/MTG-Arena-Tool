@@ -264,25 +264,6 @@ ipc.on("start_background", function() {
   ) {
     ipc_send("show_whats_new");
   }
-
-  let username = "";
-  let password = "";
-  const remember_me = pd.settings.remember_me;
-
-  if (remember_me) {
-    username = rstore.get("email");
-    const token = rstore.get("token");
-    if (username != "" && token != "") {
-      password = HIDDEN_PW;
-      tokenAuth = token;
-    }
-  }
-
-  ipc_send("prefill_auth_form", {
-    username,
-    password,
-    remember_me
-  });
 });
 
 function offlineLogin() {
@@ -290,23 +271,6 @@ function offlineLogin() {
   loadPlayerConfig(pd.arenaId);
   setData({ userName: "", offline: true });
 }
-
-//
-ipc.on("auto_login", () => {
-  if (!pd.settings.auto_login) return;
-
-  tokenAuth = rstore.get("token");
-  ipc_send("popup", {
-    text: "Logging in automatically...",
-    time: 0,
-    progress: 2
-  });
-  if (pd.settings.remember_me) {
-    httpApi.httpAuth(rstore.get("email"), HIDDEN_PW);
-  } else {
-    offlineLogin();
-  }
-});
 
 //
 ipc.on("login", function(event, arg) {
@@ -333,6 +297,7 @@ ipc.on("request_draft_link", function(event, obj) {
 
 //
 ipc.on("windowBounds", (event, windowBounds) => {
+  if (firstPass) return;
   setData({ windowBounds }, false);
   store.set("windowBounds", windowBounds);
 });
@@ -544,6 +509,7 @@ function loadPlayerConfig(playerId, serverData = undefined) {
   };
   syncSettings(playerData.settings, true);
   setData(playerData, false);
+  ipc_send("renderer_set_bounds", pd.windowBounds);
 
   ipc_send("popup", {
     text: "Player history loaded.",
@@ -1036,15 +1002,55 @@ async function logLoop() {
     ipc_send("ipc_log", `Initial log parse: ${key}=${parsedData[key]}`);
   }
   setData(parsedData, false);
-  ipc_send("popup", { text: "Found Arena log for " + pd.name, time: 0 });
 
-  if (pd.arenaId) {
-    clearInterval(logLoopInterval);
-  }
   prevLogSize = size;
 
-  if (firstPass && pd.name === null) {
-    ipc_send("popup", { text: "output_log contains no player data", time: 0 });
+  if (!pd.arenaId || !pd.name) {
+    ipc_send("popup", {
+      text: "output_log.txt contains no player data",
+      time: 0
+    });
+    return;
+  }
+
+  ipc_send("popup", { text: "Found Arena log for " + pd.name, time: 0 });
+  clearInterval(logLoopInterval);
+
+  let username = "";
+  let password = "";
+  const { auto_login, remember_me } = pd.settings;
+  if (remember_me) {
+    username = rstore.get("email");
+    const token = rstore.get("token");
+    if (username != "" && token != "") {
+      password = HIDDEN_PW;
+      tokenAuth = token;
+    }
+  }
+
+  ipc_send("prefill_auth_form", {
+    username,
+    password,
+    remember_me
+  });
+  ipc_send("show_login", true);
+
+  if (auto_login) {
+    if (remember_me && username && tokenAuth) {
+      ipc_send("popup", {
+        text: "Logging in automatically...",
+        time: 0,
+        progress: 2
+      });
+      httpApi.httpAuth(username, HIDDEN_PW);
+    } else {
+      ipc_send("popup", {
+        text: "Launching offline mode automatically...",
+        time: 0,
+        progress: 2
+      });
+      offlineLogin();
+    }
   }
 }
 
@@ -1731,9 +1737,9 @@ function finishLoading() {
       ipc_send("set_arena_state", ARENA_MODE_DRAFT);
     }
 
-    ipc_send("renderer_set_bounds", pd.windowBounds);
     ipc_send("set_settings", pd.settings);
-    ipc_send("initialize", 1);
+    ipc_send("initialize");
+    ipc_send("player_data_refresh");
 
     if (pd.name) {
       httpApi.httpSetPlayer(

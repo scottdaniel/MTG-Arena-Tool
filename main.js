@@ -35,7 +35,6 @@ var mainTimeout = null;
 
 var tray = null;
 var closeToTray = true;
-let autoLogin = false;
 let launchToTray = false;
 
 const ipc = electron.ipcMain;
@@ -209,9 +208,6 @@ function startApp() {
       case "set_db":
         mainWindow.webContents.send("set_db", arg);
         overlayMux();
-        if (autoLogin) {
-          background.webContents.send("auto_login");
-        }
         break;
 
       case "popup":
@@ -355,7 +351,6 @@ function startApp() {
 function initialize(settings) {
   console.log("MAIN:  Initializing");
   closeToTray = settings.close_to_tray;
-  autoLogin = settings.auto_login;
   launchToTray = settings.launch_to_tray;
   if (!launchToTray) showWindow();
 }
@@ -366,7 +361,6 @@ function setSettings(settings) {
     openAtLogin: settings.startup
   });
   closeToTray = settings.close_to_tray;
-  autoLogin = settings.auto_login;
   launchToTray = settings.launch_to_tray;
   mainWindow.webContents.send("settings_updated");
 

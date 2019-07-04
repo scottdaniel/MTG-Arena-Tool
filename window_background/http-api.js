@@ -38,7 +38,7 @@ function httpBasic() {
         _headers.method != "get_database" &&
         debugLog == false
       ) {
-        setData({ offline: true });
+        if (!pd.offline) setData({ offline: true });
         callback({
           message: "Settings dont allow sending data! > " + _headers.method
         });
@@ -255,7 +255,9 @@ function httpBasic() {
                 });
                 db.handleSetDb(null, results);
                 ipc_send("set_db", results);
-                ipc_send("show_login", true);
+                // autologin users may beat the metadata request
+                // manually trigger a UI refresh just in case
+                ipc_send("player_data_refresh");
               }
             } else if (_headers.method == "tou_join") {
               ipc_send("popup", {
@@ -319,9 +321,6 @@ function httpBasic() {
         });
       });
       req.on("error", function(e) {
-        if (_headers.method == "get_database") {
-          ipc_send("show_login", true);
-        }
         console.error(`problem with request: ${e.message}`);
         if (!metadataState) {
           ipc_send("popup", {
