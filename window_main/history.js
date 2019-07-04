@@ -5,11 +5,7 @@ const { MANA, RANKS, EASING_DEFAULT } = require("../shared/constants");
 const db = require("../shared/database");
 const pd = require("../shared/player-data");
 const { createSelect } = require("../shared/select");
-const {
-  createDiv,
-  createInput,
-  queryElements: $$
-} = require("../shared/dom-fns");
+const { createDiv, createInput } = require("../shared/dom-fns");
 const {
   get_deck_colors,
   get_rank_index_16,
@@ -30,6 +26,7 @@ const {
   getTagColor,
   ipcSend,
   makeResizable,
+  openDialog,
   openDraft,
   resetMainContainer,
   showColorpicker,
@@ -353,36 +350,10 @@ function attachDraftData(listItem, draft) {
   const replayShareButton = createDiv(["list_draft_share", draft.id + "dr"]);
   replayShareButton.addEventListener("click", e => {
     e.stopPropagation();
-    const wrapper = $$(".dialog_wrapper")[0];
-    wrapper.style.opacity = 1;
-    wrapper.style.pointerEvents = "all";
-    wrapper.style.display = "block";
+    const cont = createDiv(["dialog_content"]);
+    cont.style.width = "500px";
 
-    const dialog = $$(".dialog")[0];
-    dialog.innerHTML = "";
-    dialog.style.opacity = 1;
-    dialog.style.width = "500px";
-    dialog.style.height = "200px";
-    dialog.style.top = "calc(50% - 100px)";
-    dialog.addEventListener("click", function(e) {
-      e.stopPropagation();
-    });
-
-    wrapper.addEventListener("click", function() {
-      wrapper.style.opacity = 0;
-      wrapper.style.pointerEvents = "none";
-
-      setTimeout(() => {
-        wrapper.style.display = "none";
-        dialog.style.width = "400px";
-        dialog.style.height = "160px";
-        dialog.style.top = "calc(50% - 80px)";
-      }, 250);
-    });
-
-    const cont = createDiv(["dialog_container"]);
-
-    cont.append(createDiv(["share_title"], "Link For sharing:"));
+    cont.append(createDiv(["share_title"], "Link for sharing:"));
     const icd = createDiv(["share_input_container"]);
     const linkInput = createInput([], "", {
       id: "share_input",
@@ -406,7 +377,7 @@ function attachDraftData(listItem, draft) {
       "expire_select"
     );
 
-    dialog.appendChild(cont);
+    openDialog(cont);
     draftShareLink(draft.id);
   });
   listItem.right.after(replayShareButton);

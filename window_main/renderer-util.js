@@ -33,6 +33,7 @@ const { deckTypesStats, get_card_image, makeId } = require("../shared/util");
 
 const byId = id => document.getElementById(id);
 let popTimeout = null;
+let dialogHandler = null;
 // quick and dirty shared state object for main renderer process
 // (for state shared across processes, use database or player-data)
 const localState = {
@@ -702,6 +703,65 @@ function changeBackground(arg = "default", grpId = 0) {
 }
 
 //
+exports.openDialog = openDialog;
+function openDialog(content, onClose = () => {}) {
+  const wrapper = $$(".dialog_wrapper")[0];
+  dialogHandler = () => {
+    onClose();
+    closeDialog();
+  };
+  wrapper.style.pointerEvents = "all";
+  wrapper.addEventListener("mousedown", dialogHandler);
+  anime({
+    targets: ".dialog_wrapper",
+    opacity: 1,
+    display: "block",
+    easing: EASING_DEFAULT,
+    duration: 150
+  });
+
+  const dialog = $$(".dialog")[0];
+  dialog.innerHTML = "";
+  dialog.appendChild(content);
+  const halfHeight = (content.offsetHeight || 0) / 2;
+  dialog.addEventListener("mousedown", e => e.stopPropagation());
+  dialog.style.width = content.offsetWidth + 32 + "px";
+  // dialog.style.height = content.offsetHeight + 32 + "px";
+  dialog.style.top = `calc(50% - ${halfHeight}px)`;
+  anime({
+    targets: ".dialog",
+    opacity: 1,
+    easing: EASING_DEFAULT,
+    duration: 250
+  });
+}
+
+//
+exports.closeDialog = closeDialog;
+function closeDialog() {
+  const wrapper = $$(".dialog_wrapper")[0];
+  anime({
+    targets: ".dialog_wrapper",
+    opacity: 0,
+    display: "hidden",
+    easing: EASING_DEFAULT,
+    duration: 150
+  });
+  wrapper.style.pointerEvents = "none";
+  wrapper.removeEventListener("mousedown", dialogHandler);
+  dialogHandler = null;
+
+  const dialog = $$(".dialog")[0];
+  anime({
+    targets: ".dialog",
+    opacity: 0,
+    easing: EASING_DEFAULT,
+    duration: 250
+  });
+  setTimeout(() => (dialog.innerHTML = ""), 250);
+}
+
+//
 exports.showColorpicker = showColorpicker;
 function showColorpicker(
   color,
@@ -710,41 +770,13 @@ function showColorpicker(
   onCancel = () => {},
   pickerOptions = {}
 ) {
-  const wrapper = $$(".dialog_wrapper")[0];
-  wrapper.style.opacity = 1;
-  wrapper.style.pointerEvents = "all";
-  wrapper.style.display = "block";
-
-  const dialog = $$(".dialog")[0];
-  dialog.innerHTML = "";
-  dialog.style.width = "260px";
-  dialog.style.height = "320px";
-  dialog.style.top = "calc(50% - 100px)";
-  dialog.addEventListener("mousedown", function(e) {
-    e.stopPropagation();
-  });
-
-  const closeDialog = () => {
-    wrapper.style.opacity = 0;
-    wrapper.style.pointerEvents = "none";
-
-    setTimeout(() => {
-      wrapper.style.display = "none";
-      dialog.style.width = "400px";
-      dialog.style.height = "160px";
-      dialog.style.top = "calc(50% - 80px)";
-    }, 250);
-  };
-
-  wrapper.addEventListener("mousedown", function() {
-    onCancel(color);
-    closeDialog();
-  });
+  const cont = createDiv(["dialog_content"]);
+  cont.style.width = "250px";
   // https://vanilla-picker.js.org/gen/Picker.html
   new Picker({
     alpha: false,
     color,
-    parent: dialog,
+    parent: cont,
     popup: false,
     onChange,
     onDone: function(color) {
@@ -753,9 +785,8 @@ function showColorpicker(
     },
     ...pickerOptions
   });
+  openDialog(cont, () => onCancel(color));
   const pickerWrapper = $$(".picker_wrapper")[0];
-  pickerWrapper.style.alignSelf = "center";
-  pickerWrapper.style.margin = "1px";
   pickerWrapper.style.backgroundColor = "rgb(0,0,0,0)";
   pickerWrapper.style.boxShadow = "none";
 }

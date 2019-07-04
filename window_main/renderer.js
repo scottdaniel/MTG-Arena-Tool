@@ -47,9 +47,11 @@ const {
 
 const {
   changeBackground,
+  closeDialog,
   getLocalState,
   hideLoadingBars,
   ipcSend,
+  openDialog,
   pop,
   resetMainContainer,
   setLocalState,
@@ -421,31 +423,13 @@ ipc.on("no_log", function(event, arg) {
       '</div><div class="message_sub_16 white">if it does, try closing MTG Arena and deleting it.</div>';
   } else if (!logDialogOpen) {
     logDialogOpen = true;
-    $$(".dialog_wrapper")[0].style.opacity = 1;
-    $$(".dialog_wrapper")[0].style.pointerEvents = "all";
-    $$(".dialog_wrapper")[0].style.display = "block";
-    $$(".dialog")[0].style.width = "600px";
-    $$(".dialog")[0].style.height = "200px";
-    $$(".dialog")[0].style.top = "calc(50% - 100px)";
 
-    $$(".dialog_wrapper")[0].addEventListener("click", function() {
-      // console.log(".dialog_wrapper on click");
-      //e.stopPropagation();
-      hideDialog();
-    });
+    const cont = createDiv(["dialog_content"]);
+    cont.style.width = "600px";
 
-    $$(".dialog")[0].addEventListener("click", function(e) {
-      e.stopPropagation();
-      // console.log(".dialog on click");
-    });
-
-    const dialog = $$(".dialog")[0];
-    dialog.innerHTML = "";
-
-    const cont = createDiv(["dialog_container"]);
-    cont.appendChild(
-      createDiv(["share_title"], "Enter output_log.txt location:")
-    );
+    const title = createDiv(["share_title"], "Enter output_log.txt location:");
+    title.style.margin = "12px auto";
+    cont.appendChild(title);
     const icd = createDiv(["share_input_container"]);
     const sin = createInput([], "", {
       id: "log_input",
@@ -456,42 +440,23 @@ ipc.on("no_log", function(event, arg) {
     sin.style.borderRadius = "3px";
     sin.style.height = "28px";
     sin.style.fontSize = "14px";
+    sin.style.margin = 0;
     icd.appendChild(sin);
     cont.appendChild(icd);
-    dialog.appendChild(cont);
 
     const but = createDiv(["button_simple"], "Save");
+    but.style.marginLeft = "auto";
+    but.style.marginRight = "auto";
     but.addEventListener("click", function() {
       ipcSend("set_log", byId("log_input").value);
-      // console.log(".dialog_wrapper on click");
-      //e.stopPropagation();
-      hideDialog();
+      closeDialog();
+      logDialogOpen = false;
     });
-    dialog.appendChild(but);
+    cont.appendChild(but);
+
+    openDialog(cont, () => (logDialogOpen = false));
   }
 });
-
-//
-ipc.on("log_ok", function() {
-  logDialogOpen = false;
-  hideDialog();
-});
-
-//
-let dialogTimeout = null;
-function hideDialog() {
-  $$(".dialog_wrapper")[0].style.opacity = 0;
-  $$(".dialog_wrapper")[0].style.pointerEvents = "none";
-  if (dialogTimeout) clearTimeout(dialogTimeout);
-  dialogTimeout = setTimeout(function() {
-    $$(".dialog_wrapper")[0].style.display = "none";
-    $$(".dialog")[0].style.width = "500px";
-    $$(".dialog")[0].style.height = "160px";
-    $$(".dialog")[0].style.top = "calc(50% - 80px)";
-    logDialogOpen = false;
-    dialogTimeout = null;
-  }, 250);
-}
 
 //
 ipc.on("offline", function() {

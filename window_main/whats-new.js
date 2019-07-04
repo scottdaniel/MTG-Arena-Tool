@@ -1,5 +1,7 @@
-const { createDiv, queryElements } = require("../shared/dom-fns");
 const { remote } = require("electron");
+
+const { createDiv, queryElements } = require("../shared/dom-fns");
+const { openDialog } = require("./renderer-util");
 
 // We should clear this on releases and fill as we add new features
 const screens = [
@@ -26,17 +28,11 @@ let selectedScreen = 0;
 function showWhatsNew() {
   // Only show if we actually do have stuff to show
   if (screens.length == 0) return;
-  const dialog = queryElements(".dialog")[0];
-  dialog.innerHTML = "";
-  dialog.style.opacity = 1;
-  dialog.style.width = "80vw";
-  dialog.style.height = "80vh";
-  dialog.style.top = "10vh";
-  dialog.style.justifyContent = "center";
-  dialog.style.overflow = "hidden";
-  dialog.addEventListener("click", function(e) {
-    e.stopPropagation();
-  });
+  const cont = createDiv(["dialog_content"]);
+  cont.style.width = "80vw";
+  cont.style.height = "80vh";
+  cont.style.justifyContent = "center";
+  cont.style.overflow = "hidden";
 
   let title = createDiv(["wnew_title"], "What is new?");
   let subVersion = createDiv(
@@ -45,7 +41,7 @@ function showWhatsNew() {
   );
   let scrollerContainer = createDiv(["wnew_scroller"]);
   scrollerContainer.style.width = screens.length * 100 + "%";
-  scrollerContainer.style.left = selectedScreen * -100 + "%";
+  scrollerContainer.style.left = 100 + selectedScreen * -100 + "%";
 
   let scrollerPosCont = createDiv(["wnew_scroller_pos_cont"]);
   let prev = createDiv(["wnew_prev"]);
@@ -74,7 +70,7 @@ function showWhatsNew() {
 
   let updateScroller = function() {
     let scrollerContainer = queryElements(".wnew_scroller")[0];
-    scrollerContainer.style.left = selectedScreen * -100 + "%";
+    scrollerContainer.style.left = 100 + selectedScreen * -100 + "%";
 
     screens.forEach((sc, index) => {
       let pName = ".pos_ball_" + index;
@@ -98,29 +94,14 @@ function showWhatsNew() {
     updateScroller();
   });
 
-  dialog.appendChild(title);
-  dialog.appendChild(subVersion);
-  dialog.appendChild(scrollerContainer);
-  dialog.appendChild(scrollerPosCont);
-  dialog.appendChild(prev);
-  dialog.appendChild(next);
+  cont.appendChild(title);
+  cont.appendChild(subVersion);
+  cont.appendChild(scrollerContainer);
+  cont.appendChild(scrollerPosCont);
+  cont.appendChild(prev);
+  cont.appendChild(next);
 
-  const wrapper = queryElements(".dialog_wrapper")[0];
-  wrapper.style.opacity = 1;
-  wrapper.style.pointerEvents = "all";
-  wrapper.style.display = "block";
-
-  wrapper.addEventListener("click", function() {
-    wrapper.style.opacity = 0;
-    wrapper.style.pointerEvents = "none";
-
-    setTimeout(() => {
-      wrapper.style.display = "none";
-      dialog.style.width = "400px";
-      dialog.style.height = "160px";
-      dialog.style.top = "calc(50% - 80px)";
-    }, 250);
-  });
+  openDialog(cont);
 }
 
 module.exports = { showWhatsNew };
