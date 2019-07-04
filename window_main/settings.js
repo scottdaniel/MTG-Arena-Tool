@@ -169,7 +169,7 @@ function appendBehaviour(section) {
   );
   addCheckbox(
     section,
-    "Login automatically",
+    "Login/offline mode automatically",
     "settings_autologin",
     pd.settings.auto_login,
     updateAppSettings
@@ -747,7 +747,7 @@ function appendPrivacy(section) {
   );
   addCheckbox(
     section,
-    "Online sharing&nbsp;<i>(when disabled, blocks any connections with our servers)</i>",
+    "Online sharing&nbsp;<i>(when disabled, uses offline mode and only contacts our servers to fetch Arena metadata)</i>",
     "settings_senddata",
     pd.settings.send_data,
     updateUserSettings
