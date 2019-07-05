@@ -233,7 +233,7 @@ label {
     top: -400%;
 }
 
-.signup_link {
+.signup_link, .privacy_link, .launch_login_link{
     color: rgb(220, 195, 150);
     cursor: pointer;
 }
