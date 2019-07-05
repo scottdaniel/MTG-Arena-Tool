@@ -47,9 +47,11 @@ const {
 
 const {
   changeBackground,
+  closeDialog,
   getLocalState,
   hideLoadingBars,
   ipcSend,
+  openDialog,
   pop,
   resetMainContainer,
   setLocalState,
@@ -143,7 +145,30 @@ function showLogin() {
 }
 
 //
+function updateNavIcons() {
+  if ($$(".top_nav_icons")[0].offsetWidth < 530) {
+    if (!top_compact) {
+      $$("span.top_nav_item_text").forEach(el => (el.style.opacity = 0));
+      $$(".top_nav_icon").forEach(el => (el.style.display = "block"));
+      $$(".top_nav_icon").forEach(el => (el.style.opacity = 1));
+      top_compact = true;
+    }
+  } else {
+    if (top_compact) {
+      $$("span.top_nav_item_text").forEach(el => (el.style.opacity = 1));
+      $$(".top_nav_icon").forEach(el => (el.style.opacity = 0));
+      window.setTimeout(() => {
+        $$(".top_nav_icon").forEach(el => (el.style.display = "none"));
+      }, 500);
+      top_compact = false;
+    }
+  }
+}
+
+//
 function updateTopBar() {
+  updateNavIcons();
+
   if (pd.offline || !pd.settings.send_data) {
     $$(".unlink")[0].style.display = "block";
   }
@@ -242,10 +267,15 @@ ipc.on("settings_updated", function() {
 
 //
 ipc.on("player_data_refresh", () => {
+  if (sidebarActive === MAIN_LOGIN) return;
   const ls = getLocalState();
-  if (sidebarActive !== MAIN_LOGIN) {
-    updateTopBar();
-  }
+  updateTopBar();
+  anime({
+    targets: ".moving_ux",
+    left: 0,
+    easing: EASING_DEFAULT,
+    duration: 350
+  });
   openTab(sidebarActive, {}, ls.lastDataIndex, ls.lastScrollTop);
 });
 
@@ -421,31 +451,13 @@ ipc.on("no_log", function(event, arg) {
       '</div><div class="message_sub_16 white">if it does, try closing MTG Arena and deleting it.</div>';
   } else if (!logDialogOpen) {
     logDialogOpen = true;
-    $$(".dialog_wrapper")[0].style.opacity = 1;
-    $$(".dialog_wrapper")[0].style.pointerEvents = "all";
-    $$(".dialog_wrapper")[0].style.display = "block";
-    $$(".dialog")[0].style.width = "600px";
-    $$(".dialog")[0].style.height = "200px";
-    $$(".dialog")[0].style.top = "calc(50% - 100px)";
 
-    $$(".dialog_wrapper")[0].addEventListener("click", function() {
-      // console.log(".dialog_wrapper on click");
-      //e.stopPropagation();
-      hideDialog();
-    });
+    const cont = createDiv(["dialog_content"]);
+    cont.style.width = "600px";
 
-    $$(".dialog")[0].addEventListener("click", function(e) {
-      e.stopPropagation();
-      // console.log(".dialog on click");
-    });
-
-    const dialog = $$(".dialog")[0];
-    dialog.innerHTML = "";
-
-    const cont = createDiv(["dialog_container"]);
-    cont.appendChild(
-      createDiv(["share_title"], "Enter output_log.txt location:")
-    );
+    const title = createDiv(["share_title"], "Enter output_log.txt location:");
+    title.style.margin = "12px auto";
+    cont.appendChild(title);
     const icd = createDiv(["share_input_container"]);
     const sin = createInput([], "", {
       id: "log_input",
@@ -456,42 +468,23 @@ ipc.on("no_log", function(event, arg) {
     sin.style.borderRadius = "3px";
     sin.style.height = "28px";
     sin.style.fontSize = "14px";
+    sin.style.margin = 0;
     icd.appendChild(sin);
     cont.appendChild(icd);
-    dialog.appendChild(cont);
 
     const but = createDiv(["button_simple"], "Save");
+    but.style.marginLeft = "auto";
+    but.style.marginRight = "auto";
     but.addEventListener("click", function() {
       ipcSend("set_log", byId("log_input").value);
-      // console.log(".dialog_wrapper on click");
-      //e.stopPropagation();
-      hideDialog();
+      closeDialog();
+      logDialogOpen = false;
     });
-    dialog.appendChild(but);
+    cont.appendChild(but);
+
+    openDialog(cont, () => (logDialogOpen = false));
   }
 });
-
-//
-ipc.on("log_ok", function() {
-  logDialogOpen = false;
-  hideDialog();
-});
-
-//
-let dialogTimeout = null;
-function hideDialog() {
-  $$(".dialog_wrapper")[0].style.opacity = 0;
-  $$(".dialog_wrapper")[0].style.pointerEvents = "none";
-  if (dialogTimeout) clearTimeout(dialogTimeout);
-  dialogTimeout = setTimeout(function() {
-    $$(".dialog_wrapper")[0].style.display = "none";
-    $$(".dialog")[0].style.width = "500px";
-    $$(".dialog")[0].style.height = "160px";
-    $$(".dialog")[0].style.top = "calc(50% - 80px)";
-    logDialogOpen = false;
-    dialogTimeout = null;
-  }, 250);
-}
 
 //
 ipc.on("offline", function() {
@@ -501,8 +494,28 @@ ipc.on("offline", function() {
 //
 function showOfflineSplash() {
   hideLoadingBars();
-  byId("ux_0").innerHTML =
-    '<div class="message_center" style="display: flex; position: fixed;"><div class="message_unlink"></div><div class="message_big red">Oops, you are offline!</div><div class="message_sub_16 white">You can <a class="signup_link">sign up</a> to access online features.</div></div>';
+  byId("ux_0").innerHTML = `
+  <div class="message_center_offline" style="display: flex; position: fixed;">
+    <div class="message_unlink"></div>
+    <div class="message_big red">Oops, you are offline!</div>
+    <div class="message_sub_16 white">To access online features:</div>
+    <div class="message_sub_16 white">If you are logged in, you may need to <a class="privacy_link">enable online sharing</a> and restart.</div>
+    <div class="message_sub_16 white">If you are in offline mode, you can <a class="launch_login_link">login to your account</a>.</div>
+    <div class="message_sub_16 white">If you need an account, you can <a class="signup_link">sign up here</a>.</div>
+  </div>`;
+  $$(".privacy_link")[0].addEventListener("click", function() {
+    force_open_settings(4);
+  });
+  $$(".launch_login_link")[0].addEventListener("click", function() {
+    const clearAppSettings = {
+      remember_me: false,
+      auto_login: false,
+      launch_to_tray: false
+    };
+    ipcSend("save_app_settings", clearAppSettings);
+    remote.app.relaunch();
+    remote.app.exit(0);
+  });
   $$(".signup_link")[0].addEventListener("click", function() {
     shell.openExternal("https://mtgatool.com/signup/");
   });
@@ -553,25 +566,7 @@ let resizeTimer;
 window.addEventListener("resize", () => {
   hideLoadingBars();
   clearTimeout(resizeTimer);
-  resizeTimer = setTimeout(() => {
-    if ($$(".top_nav_icons")[0].offsetWidth < 530) {
-      if (!top_compact) {
-        $$("span.top_nav_item_text").forEach(el => (el.style.opacity = 0));
-        $$(".top_nav_icon").forEach(el => (el.style.display = "block"));
-        $$(".top_nav_icon").forEach(el => (el.style.opacity = 1));
-        top_compact = true;
-      }
-    } else {
-      if (top_compact) {
-        $$("span.top_nav_item_text").forEach(el => (el.style.opacity = 1));
-        $$(".top_nav_icon").forEach(el => (el.style.opacity = 0));
-        window.setTimeout(() => {
-          $$(".top_nav_icon").forEach(el => (el.style.display = "none"));
-        }, 500);
-        top_compact = false;
-      }
-    }
-  }, 100);
+  resizeTimer = setTimeout(updateNavIcons, 100);
 });
 
 function ready(fn) {

@@ -233,7 +233,7 @@ label {
     top: -400%;
 }
 
-.signup_link {
+.signup_link, .privacy_link, .launch_login_link{
     color: rgb(220, 195, 150);
     cursor: pointer;
 }
@@ -779,10 +779,28 @@ span {
 }
 
 .card_tile_quantity_flat {
-    font-size: 14px;
+    font-size: 15px;
     min-width: 32px;
     color: white;
     line-height: 31px;
+    text-align: center;
+}
+
+.card_tile_odds_flat_half {
+    font-size: 12px;
+    min-width: 32px;
+    line-height: 14px;
+    color: white;
+    height: 50%;
+    text-align: center;
+}
+
+.card_tile_odds_flat_half_dark {
+    font-size: 12px;
+    min-width: 32px;
+    color: var(--color-light-66);
+    line-height: 14px;
+    height: 50%;
     text-align: center;
 }
 

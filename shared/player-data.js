@@ -280,7 +280,8 @@ class PlayerData {
       "gold_history",
       "overlayCfg",
       "wildcards_history",
-      "windowBounds"
+      "windowBounds",
+      "offline"
     ];
     Object.entries(this).forEach(([key, value]) => {
       if (value instanceof Function) return;

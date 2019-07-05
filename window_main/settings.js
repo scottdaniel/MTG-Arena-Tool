@@ -6,6 +6,7 @@ const {
   OVERLAY_FULL,
   OVERLAY_LEFT,
   OVERLAY_ODDS,
+  OVERLAY_MIXED,
   OVERLAY_SEEN,
   OVERLAY_DRAFT,
   OVERLAY_DRAFT_BREW,
@@ -168,7 +169,7 @@ function appendBehaviour(section) {
   );
   addCheckbox(
     section,
-    "Login automatically",
+    "Login/offline mode automatically",
     "settings_autologin",
     pd.settings.auto_login,
     updateAppSettings
@@ -369,6 +370,7 @@ function appendOverlay(section) {
     modeOptions[OVERLAY_FULL] = "Full Deck";
     modeOptions[OVERLAY_LEFT] = "Library";
     modeOptions[OVERLAY_ODDS] = "Next Draw";
+    modeOptions[OVERLAY_MIXED] = "Library and Odds";
     modeOptions[OVERLAY_SEEN] = "Opponent";
     modeOptions[OVERLAY_DRAFT] = "Draft Pick";
     modeOptions[OVERLAY_LOG] = "Action Log";
@@ -403,6 +405,8 @@ function appendOverlay(section) {
       "Shows your remaining library. Usually only shown during a match.";
     modeHelp[OVERLAY_ODDS] =
       "Shows probabilities for your next draw. Usually only shown during a match.";
+    modeHelp[OVERLAY_MIXED] =
+      "Shows probabilities for your next draw and your remaining library. Usually only shown during a match.";
     modeHelp[OVERLAY_SEEN] =
       "Shows your Opponent's cards that you have seen. Usually only shown during a match.";
     modeHelp[OVERLAY_DRAFT] =
@@ -468,7 +472,9 @@ function appendOverlay(section) {
       `overlay_${index}_sideboard`,
       settings.sideboard,
       updateUserSettings,
-      ![OVERLAY_FULL, OVERLAY_LEFT, OVERLAY_ODDS].includes(settings.mode)
+      ![OVERLAY_FULL, OVERLAY_LEFT, OVERLAY_ODDS, OVERLAY_MIXED].includes(
+        settings.mode
+      )
     );
     addCheckbox(
       overlaySection,
@@ -476,7 +482,9 @@ function appendOverlay(section) {
       `overlay_${index}_lands`,
       settings.lands,
       updateUserSettings,
-      ![OVERLAY_FULL, OVERLAY_LEFT, OVERLAY_ODDS].includes(settings.mode)
+      ![OVERLAY_FULL, OVERLAY_LEFT, OVERLAY_ODDS, OVERLAY_MIXED].includes(
+        settings.mode
+      )
     );
     addCheckbox(
       overlaySection,
@@ -492,7 +500,9 @@ function appendOverlay(section) {
       `overlay_${index}_type_counts`,
       settings.type_counts,
       updateUserSettings,
-      [OVERLAY_LOG, OVERLAY_ODDS, OVERLAY_DRAFT].includes(settings.mode)
+      [OVERLAY_LOG, OVERLAY_ODDS, OVERLAY_MIXED, OVERLAY_DRAFT].includes(
+        settings.mode
+      )
     );
     addCheckbox(
       overlaySection,
@@ -500,7 +510,9 @@ function appendOverlay(section) {
       `overlay_${index}_mana_curve`,
       settings.mana_curve,
       updateUserSettings,
-      [OVERLAY_LOG, OVERLAY_ODDS, OVERLAY_DRAFT].includes(settings.mode)
+      [OVERLAY_LOG, OVERLAY_ODDS, OVERLAY_MIXED, OVERLAY_DRAFT].includes(
+        settings.mode
+      )
     );
 
     const sliderOpacity = createDiv(["slidecontainer_settings"]);
@@ -735,7 +747,7 @@ function appendPrivacy(section) {
   );
   addCheckbox(
     section,
-    "Online sharing&nbsp;<i>(when disabled, blocks any connections with our servers)</i>",
+    "Online sharing&nbsp;<i>(when disabled, uses offline mode and only contacts our servers to fetch Arena metadata)</i>",
     "settings_senddata",
     pd.settings.send_data,
     updateUserSettings
