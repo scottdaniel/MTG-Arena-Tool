@@ -1,3 +1,20 @@
+## <small>2.7.6 (2019-07-05)</small>
+
+* better help on offline splash page ([05f5087](https://github.com/Manuel-777/MTG-Arena-Tool/commit/05f5087))
+* bugfix duplicate app settings in user settings ([c2375c7](https://github.com/Manuel-777/MTG-Arena-Tool/commit/c2375c7))
+* bugfix labels.onLabelInDeckUpdateDeck immediately updates deck data ([45f5282](https://github.com/Manuel-777/MTG-Arena-Tool/commit/45f5282))
+* common code for dialogs ([d24ab6b](https://github.com/Manuel-777/MTG-Arena-Tool/commit/d24ab6b))
+* fix check for updates ([3f57d6d](https://github.com/Manuel-777/MTG-Arena-Tool/commit/3f57d6d))
+* message center class conflict ([e890b3d](https://github.com/Manuel-777/MTG-Arena-Tool/commit/e890b3d))
+* Mixed overlay mode ([97cbe69](https://github.com/Manuel-777/MTG-Arena-Tool/commit/97cbe69))
+* move autologin from set_db to end of initial logLoop ([eb6b589](https://github.com/Manuel-777/MTG-Arena-Tool/commit/eb6b589))
+* offline fixes ([6a29e31](https://github.com/Manuel-777/MTG-Arena-Tool/commit/6a29e31))
+* overlay settings style ([658b4f3](https://github.com/Manuel-777/MTG-Arena-Tool/commit/658b4f3))
+* prettier ([201b9bf](https://github.com/Manuel-777/MTG-Arena-Tool/commit/201b9bf))
+* update settings page help text ([64b65be](https://github.com/Manuel-777/MTG-Arena-Tool/commit/64b65be))
+
+
+
 ## <small>2.7.5 (2019-07-03)</small>
 
 * add overlay top bar icon and minor patches ([45f5e32](https://github.com/Manuel-777/MTG-Arena-Tool/commit/45f5e32))
