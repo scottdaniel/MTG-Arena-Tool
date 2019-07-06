@@ -556,7 +556,8 @@ function onLabelInPlayerInventoryGetPlayerInventory(entry, json) {
     wcCommon: json.wcCommon,
     wcUncommon: json.wcUncommon,
     wcRare: json.wcRare,
-    wcMythic: json.wcMythic
+    wcMythic: json.wcMythic,
+    boosters: json.boosters
   };
   setData({ economy });
   if (debugLog || !firstPass) store.set("economy", economy);

@@ -861,6 +861,17 @@ function createEconomyUI(mainDiv) {
   tx.classList.add("economy_sub");
   let ntx;
 
+  const icbo = createDiv(["economy_wc_med", "wc_booster"], "", {
+    title: "Boosters"
+  });
+  icbo.style.marginLeft = "24px";
+  div.appendChild(icbo);
+  ntx = tx.cloneNode(true);
+  let total = 0;
+  pd.economy.boosters.forEach(booster => (total += booster.count));
+  ntx.innerHTML = total;
+  div.appendChild(ntx);
+
   const icva = createDiv(["economy_vault"], "", { title: "Vault" });
   icva.style.marginLeft = "24px";
   div.appendChild(icva);

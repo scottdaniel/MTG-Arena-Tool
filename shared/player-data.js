@@ -118,7 +118,8 @@ const defaultCfg = {
     trackTier: 0,
     currentLevel: 0,
     currentExp: 0,
-    currentOrbCount: 0
+    currentOrbCount: 0,
+    boosters: []
   },
   rank: {
     constructed: {
