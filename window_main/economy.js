@@ -22,6 +22,7 @@ const {
   toggleArchived
 } = require("./renderer-util");
 
+const byId = id => document.getElementById(id);
 var filterEconomy = "All";
 let showArchived = false;
 var daysago = 0;
@@ -56,9 +57,9 @@ const economyTransactionContextsMap = {
   "Event.Season.Constructed.Payout": "Constructed Season Rewards",
   "Event.Season.Limited.Payout": "Limited Season Rewards",
   "PlayerReward.OnMatchCompletedDaily": "Player Rewards",
-  PurchasedCosmetic: "Cosmetic Purchase", // eslint-disable-line prettier/prettier
+  PurchasedCosmetic: "Cosmetic Purchase",
   "Quest.Completed": "Quest Completed",
-  Store: "Store Transaction", // eslint-disable-line prettier/prettier
+  Store: "Store Transaction",
   "Store.Fulfillment": "Store Transaction",
   "Store.Fulfillment.Chest": "Store Transaction",
   "Store.Fulfillment.Boosters": "Store Booster Purchase",
@@ -187,6 +188,13 @@ function renderData(container, index) {
 
   const div = createChangeRow(change, change.id);
   container.appendChild(div);
+  const flexRight = byId(change.id);
+  if (flexRight.scrollWidth > flexRight.clientWidth) {
+    flexRight.addEventListener("mousewheel", function(e) {
+      this.scrollLeft += parseInt(e.deltaY / 2);
+      e.preventDefault();
+    });
+  }
   rowsAdded++;
 
   return rowsAdded;
@@ -308,10 +316,8 @@ function createDayHeader(change) {
 function createChangeRow(change, economyId) {
   // The next ~200 lines of code will add elements to these two containers
   var flexBottom = createDiv(["flex_bottom"]);
-  var flexRight = createDiv(["tiny_scroll", "list_economy_awarded"]);
-  flexRight.addEventListener("mousewheel", function(e) {
-    this.scrollLeft += parseInt(e.deltaY / 2);
-    e.preventDefault();
+  var flexRight = createDiv(["tiny_scroll", "list_economy_awarded"], "", {
+    id: economyId
   });
 
   let checkGemsPaid = false;
