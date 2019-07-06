@@ -818,7 +818,7 @@ function createEconomyUI(mainDiv) {
   const div = createDiv(["list_economy_top", "flex_item"]);
 
   const selectdiv = createDiv();
-  selectdiv.style.margin = "auto 64px auto 0px";
+  selectdiv.style.margin = "auto auto auto 0px";
   selectdiv.style.display = "flex";
   const select = createSelect(
     selectdiv,

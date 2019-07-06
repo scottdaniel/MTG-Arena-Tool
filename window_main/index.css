@@ -619,6 +619,7 @@ font-family:  var(--main-font-name);
 }
 
 .list_economy_top {
+    margin-right: 16px;
     justify-content: center;
 }
 
@@ -1640,7 +1641,7 @@ a:hover {
     margin: auto 4px;
     width: 28px;
     height: 28px;
-    background-image: url(../images/card.png);
+    background-image: url(../images/card_icon.png);
     background-position: center;
     background-size: contain;
 }
