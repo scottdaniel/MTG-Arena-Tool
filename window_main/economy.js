@@ -763,10 +763,10 @@ function createEconomyUI(mainDiv) {
   sortedChanges = [...pd.transactionList];
   sortedChanges.sort(compare_economy);
 
-  var topSelectItems = ["All", "Day Summaries"];
-  var selectItems = [];
+  const topSelectItems = ["All", "Day Summaries"];
+  const contextCounts = {};
 
-  for (var n = 0; n < sortedChanges.length; n++) {
+  for (let n = 0; n < sortedChanges.length; n++) {
     const change = sortedChanges[n];
     if (change === undefined) continue;
     if (change.archived && !showArchived) continue;
@@ -780,9 +780,7 @@ function createEconomyUI(mainDiv) {
     }
 
     const selectVal = getPrettyContext(change.context, false);
-    if (!selectItems.includes(selectVal)) {
-      selectItems.push(selectVal);
-    }
+    contextCounts[selectVal] = (contextCounts[selectVal] || 0) + 1;
 
     if (change.delta.gemsDelta != undefined) {
       if (change.delta.gemsDelta > 0)
@@ -812,25 +810,29 @@ function createEconomyUI(mainDiv) {
       dayList[daysago].expEarned += expDelta;
     }
   }
+  const selectItems = Object.keys(contextCounts);
+  selectItems.sort(
+    (a, b) => contextCounts[b] - contextCounts[a] || a.localeCompare(b)
+  );
 
-  let div = createDiv(["list_economy_top", "flex_item"]);
+  const div = createDiv(["list_economy_top", "flex_item"]);
 
-  //
-  var selectdiv = createDiv();
+  const selectdiv = createDiv();
   selectdiv.style.margin = "auto 64px auto 0px";
   selectdiv.style.display = "flex";
-  let options = [...topSelectItems, ...selectItems];
-
-  // console.log("filterEconomy", filterEconomy);
-  let select = createSelect(
+  const select = createSelect(
     selectdiv,
-    options,
+    [...topSelectItems, ...selectItems],
     filterEconomy,
     res => {
       filterEconomy = res;
       openEconomyTab();
     },
-    "query_select"
+    "query_select",
+    context =>
+      context in contextCounts
+        ? `${context} (${contextCounts[context]})`
+        : context
   );
 
   const archiveCont = document.createElement("label");
