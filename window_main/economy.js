@@ -56,13 +56,17 @@ const economyTransactionContextsMap = {
   "Event.Season.Constructed.Payout": "Constructed Season Rewards",
   "Event.Season.Limited.Payout": "Limited Season Rewards",
   "PlayerReward.OnMatchCompletedDaily": "Player Rewards",
+  PurchasedCosmetic: "Cosmetic Purchase", // eslint-disable-line prettier/prettier
   "Quest.Completed": "Quest Completed",
-  "Store.Fulfillment": "Store",
-  "Store.Fulfillment.Chest": "Chest Redeem",
-  "Store.Fulfillment.Boosters": "Booster Redeem",
+  Store: "Store Transaction", // eslint-disable-line prettier/prettier
+  "Store.Fulfillment": "Store Transaction",
+  "Store.Fulfillment.Chest": "Store Transaction",
+  "Store.Fulfillment.Boosters": "Store Booster Purchase",
+  "Store.Fulfillment.Gems": "Store Gems Purchase",
   "WildCard.Redeem": "Redeem Wildcard",
   "Vault.Complete": "Vault Opening",
-  "PlayerReward.OnMatchCompletedWeekly": "Weekly rewards"
+  "PlayerReward.OnMatchCompletedWeekly": "Weekly Rewards",
+  "PlayerProgression.OrbSpend": "Orb Spend"
 };
 
 function localDateFormat(date) {
@@ -346,11 +350,19 @@ function createChangeRow(change, economyId) {
     checkWildcardsAdded = true;
     checkCardsAdded = true;
     checkAetherized = true;
-  } else if (fullContext === "Store") {
-    checkGemsPaid = true;
-    checkGoldPaid = true;
+  } else if (
+    fullContext.includes("Store") ||
+    fullContext.includes("Purchase")
+  ) {
+    if (change.delta.goldDelta > 0) checkGoldEarnt = true;
+    if (change.delta.goldDelta < 0) checkGoldPaid = true;
+    if (change.delta.gemsDelta > 0) checkGemsEarnt = true;
+    if (change.delta.gemsDelta < 0) checkGemsPaid = true;
+
     checkBoosterAdded = true;
+    checkWildcardsAdded = true;
     checkCardsAdded = true;
+    checkSkinsAdded = true;
     checkAetherized = true;
   } else if (fullContext === "Booster Redeem") {
     checkGemsPaid = true;
@@ -422,7 +434,7 @@ function createChangeRow(change, economyId) {
     checkSkinsAdded = true;
   }
 
-  if (checkGemsPaid && change.delta.gemsDelta != undefined) {
+  if (checkGemsPaid && change.delta.gemsDelta) {
     bos = createDiv(["economy_gems"]);
     bos.title = "Gems";
 
@@ -435,7 +447,7 @@ function createChangeRow(change, economyId) {
     flexBottom.appendChild(bon);
   }
 
-  if (checkGoldPaid && change.delta.goldDelta != undefined) {
+  if (checkGoldPaid && change.delta.goldDelta) {
     bos = createDiv(["economy_gold"]);
     bos.title = "Gold";
 
@@ -448,7 +460,7 @@ function createChangeRow(change, economyId) {
     flexBottom.appendChild(bon);
   }
 
-  if (checkGemsEarnt && change.delta.gemsDelta != undefined) {
+  if (checkGemsEarnt && change.delta.gemsDelta) {
     bos = createDiv(["economy_gems_med"]);
     bos.title = "Gems";
 
@@ -461,7 +473,7 @@ function createChangeRow(change, economyId) {
     flexRight.appendChild(bon);
   }
 
-  if (checkGoldEarnt && change.delta.goldDelta != undefined) {
+  if (checkGoldEarnt && change.delta.goldDelta) {
     bos = createDiv(["economy_gold_med"]);
     bos.title = "Gold";
 
@@ -515,7 +527,7 @@ function createChangeRow(change, economyId) {
     }
   }
 
-  if (checkBoosterAdded && change.delta.boosterDelta != undefined) {
+  if (checkBoosterAdded && change.delta.boosterDelta) {
     change.delta.boosterDelta.forEach(function(booster) {
       var set = get_colation_set(booster.collationId);
 
@@ -535,7 +547,7 @@ function createChangeRow(change, economyId) {
   }
 
   if (checkWildcardsAdded) {
-    if (change.delta.wcCommonDelta != undefined) {
+    if (change.delta.wcCommonDelta) {
       bos = createDiv(["economy_wc"]);
       bos.title = "Common Wildcard";
       bos.style.backgroundImage = "url(../images/wc_common.png)";
@@ -547,7 +559,7 @@ function createChangeRow(change, economyId) {
       flexRight.appendChild(bon);
     }
 
-    if (change.delta.wcUncommonDelta != undefined) {
+    if (change.delta.wcUncommonDelta) {
       bos = createDiv(["economy_wc"]);
       bos.title = "Uncommon Wildcard";
       bos.style.backgroundImage = "url(../images/wc_uncommon.png)";
@@ -559,7 +571,7 @@ function createChangeRow(change, economyId) {
       flexRight.appendChild(bon);
     }
 
-    if (change.delta.wcRareDelta != undefined) {
+    if (change.delta.wcRareDelta) {
       bos = createDiv(["economy_wc"]);
       bos.title = "Rare Wildcard";
       bos.style.backgroundImage = "url(../images/wc_rare.png)";
@@ -570,7 +582,7 @@ function createChangeRow(change, economyId) {
       flexRight.appendChild(bos);
       flexRight.appendChild(bon);
     }
-    if (change.delta.wcMythicDelta != undefined) {
+    if (change.delta.wcMythicDelta) {
       bos = createDiv(["economy_wc"]);
       bos.title = "Mythic Wildcard";
       bos.style.backgroundImage = "url(../images/wc_mythic.png)";
@@ -583,7 +595,7 @@ function createChangeRow(change, economyId) {
     }
   }
 
-  if (checkCardsAdded && change.delta.cardsAdded != undefined) {
+  if (checkCardsAdded && change.delta.cardsAdded !== undefined) {
     change.delta.cardsAdded.sort(collectionSortRarity);
     change.delta.cardsAdded.forEach(function(grpId) {
       var card = db.card(grpId);
@@ -618,7 +630,7 @@ function createChangeRow(change, economyId) {
     });
   }
 
-  if (checkAetherized && change.aetherizedCards != undefined) {
+  if (checkAetherized && change.aetherizedCards !== undefined) {
     change.aetherizedCards.forEach(function(obj) {
       var grpId = obj.grpId;
       var card = db.card(grpId);
@@ -672,7 +684,7 @@ function createChangeRow(change, economyId) {
     });
   }
 
-  if (checkSkinsAdded && change.delta.artSkinsAdded != undefined) {
+  if (checkSkinsAdded && change.delta.artSkinsAdded !== undefined) {
     change.delta.artSkinsAdded.forEach(obj => {
       let card = db.cardFromArt(obj.artId);
 
