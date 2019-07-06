@@ -1539,7 +1539,7 @@ a:hover {
 .economy_title {
     display: grid;
     padding: 0px 16px;
-    grid-template-columns: auto 10% 10% 20% 20% 10% 10%;
+    grid-template-columns: auto 10% 15% 20% 20% 15%;
     margin-left: 2px;
     color: var(--color-light);
     line-height: 64px;
@@ -1647,7 +1647,7 @@ a:hover {
 
 .economy_orb {
     background-repeat: no-repeat;
-    margin: auto 4px;
+    margin: auto 4px auto 16px;
     width: 20px;
     height: 20px;
     background-image: url(../images/orb.png);

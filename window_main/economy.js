@@ -36,8 +36,7 @@ class economyDay {
     gemsSpent = 0,
     cardsEarned = 0,
     vaultProgress = 0.0,
-    expEarned = 0,
-    orbsEarned = 0
+    expEarned = 0
   ) {
     this.goldEarned = goldEarned;
     this.gemsEarned = gemsEarned;
@@ -46,7 +45,6 @@ class economyDay {
     this.cardsEarned = cardsEarned;
     this.vaultProgress = vaultProgress;
     this.expEarned = expEarned;
-    this.orbsEarned = orbsEarned;
   }
 }
 
@@ -300,19 +298,6 @@ function createDayHeader(change) {
   gridExp.appendChild(upcontxp);
   headerGrid.appendChild(gridExp);
 
-  // Orbs
-  const gridOrbs = createDiv(["economy_metric"]);
-  gridOrbs.style.gridArea = "1 / 7 / auto / 8";
-  gridOrbs.appendChild(createDiv(["economy_orb"], "", { title: "Orbs" }));
-  const orbtx = tx.cloneNode(true);
-  orbtx.innerHTML = formatNumber(dayList[daysago].orbsEarned);
-  const upcontorb = createDiv(["economy_delta"]);
-  upcontorb.style.width = "auto";
-  upcontorb.appendChild(orbtx);
-  upcontorb.appendChild(up.cloneNode(true));
-  gridOrbs.appendChild(upcontorb);
-  headerGrid.appendChild(gridOrbs);
-
   return headerGrid;
 }
 
@@ -517,14 +502,17 @@ function createChangeRow(change, economyId) {
     }
   }
 
-  if (change.orbDiff) {
-    flexRight.appendChild(createDiv(["economy_orb"], "", { title: "Orbs" }));
+  if (change.orbCountDiff) {
     const orbDelta = Math.abs(
-      (change.orbDiff.currentOrbCount || 0) - (change.orbDiff.oldOrbCount || 0)
+      (change.orbCountDiff.currentOrbCount || 0) -
+        (change.orbCountDiff.oldOrbCount || 0)
     );
-    bon = createDiv(["economy_sub"], formatNumber(orbDelta));
-    bon.style.lineHeight = "64px";
-    flexRight.appendChild(bon);
+    if (orbDelta) {
+      flexRight.appendChild(createDiv(["economy_orb"], "", { title: "Orbs" }));
+      bon = createDiv(["economy_sub"], formatNumber(orbDelta));
+      bon.style.lineHeight = "64px";
+      flexRight.appendChild(bon);
+    }
   }
 
   if (checkBoosterAdded && change.delta.boosterDelta != undefined) {
@@ -805,13 +793,6 @@ function createEconomyUI(mainDiv) {
       if (expDelta < 0) expDelta += 1000;
       dayList[daysago].expEarned += expDelta;
     }
-
-    if (change.orbDiff) {
-      dayList[daysago].orbsEarned += Math.abs(
-        (change.orbDiff.currentOrbCount || 0) -
-          (change.orbDiff.oldOrbCount || 0)
-      );
-    }
   }
 
   let div = createDiv(["list_economy_top", "flex_item"]);
@@ -923,13 +904,6 @@ function createEconomyUI(mainDiv) {
   div.appendChild(icxp);
   ntx = tx.cloneNode(true);
   ntx.innerHTML = pd.economy.currentExp || 0;
-  div.appendChild(ntx);
-
-  const icorb = createDiv(["economy_orb"], "", { title: "Orbs" });
-  icorb.style.marginLeft = "24px";
-  div.appendChild(icorb);
-  ntx = tx.cloneNode(true);
-  ntx.innerHTML = pd.economy.currentOrbCount || 0;
   div.appendChild(ntx);
 
   mainDiv.appendChild(div);
