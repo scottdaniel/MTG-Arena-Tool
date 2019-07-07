@@ -334,6 +334,7 @@ ipc.on("force_open_tab", function(event, arg) {
     duration: 350
   });
   $$(".top_nav_item").forEach(el => el.classList.remove("item_selected"));
+  setLocalState({ lastDataIndex: 0, lastScrollTop: 0 });
   openTab(arg);
   ipcSend("save_user_settings", { last_open_tab: sidebarActive });
 });
@@ -675,6 +676,7 @@ ready(function() {
             rankedMode: true
           };
         }
+        setLocalState({ lastDataIndex: 0, lastScrollTop: 0 });
         openTab(sidebarActive, filters);
         ipcSend("save_user_settings", { last_open_tab: sidebarActive });
       } else {

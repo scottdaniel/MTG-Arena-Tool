@@ -619,6 +619,7 @@ font-family:  var(--main-font-name);
 }
 
 .list_economy_top {
+    margin-right: 16px;
     justify-content: center;
 }
 
@@ -1539,7 +1540,7 @@ a:hover {
 .economy_title {
     display: grid;
     padding: 0px 16px;
-    grid-template-columns: auto 15% 25% 25% 15%;
+    grid-template-columns: auto 10% 15% 20% 20% 15%;
     margin-left: 2px;
     color: var(--color-light);
     line-height: 64px;
@@ -1626,7 +1627,35 @@ a:hover {
     background-size: contain;
 }
 
-.economy_skin {
+.economy_vault {
+    background-repeat: no-repeat;
+    margin: auto 4px;
+    width: 28px;
+    height: 28px;
+    background-image: url(../images/vault.png);
+    background-size: contain;
+}
+
+.economy_card {
+    background-repeat: no-repeat;
+    margin: auto 4px;
+    width: 28px;
+    height: 28px;
+    background-image: url(../images/card_icon.png);
+    background-position: center;
+    background-size: contain;
+}
+
+.economy_orb {
+    background-repeat: no-repeat;
+    margin: auto 4px auto 16px;
+    width: 20px;
+    height: 20px;
+    background-image: url(../images/orb.png);
+    background-size: contain;
+}
+
+.economy_exp {
     background-repeat: no-repeat;
     margin: auto 4px;
     margin-left: 16px;

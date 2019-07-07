@@ -556,7 +556,8 @@ function onLabelInPlayerInventoryGetPlayerInventory(entry, json) {
     wcCommon: json.wcCommon,
     wcUncommon: json.wcUncommon,
     wcRare: json.wcRare,
-    wcMythic: json.wcMythic
+    wcMythic: json.wcMythic,
+    boosters: json.boosters
   };
   setData({ economy });
   if (debugLog || !firstPass) store.set("economy", economy);
@@ -596,6 +597,78 @@ function onLabelInPlayerInventoryGetPlayerCardsV3(entry, json) {
   });
 
   setData({ cards, cardsNew });
+}
+
+//
+function onLabelInProgressionGetPlayerProgress(entry, json) {
+  if (!json || !json.activeBattlePass) return;
+  logTime = parseWotcTime(entry.timestamp);
+  const activeTrack = json.activeBattlePass;
+  const economy = {
+    ...pd.economy,
+    trackName: activeTrack.trackName,
+    trackTier: activeTrack.currentTier,
+    currentLevel: activeTrack.currentLevel,
+    currentExp: activeTrack.currentExp,
+    currentOrbCount: activeTrack.currentOrbCount
+  };
+  setData({ economy });
+  if (debugLog || !firstPass) store.set("economy", economy);
+}
+
+//
+function onLabelTrackProgressUpdated(entry, json) {
+  if (!json) return;
+  // console.log(json);
+  const economy = { ...pd.economy };
+  json.forEach(entry => {
+    if (!entry.trackDiff) return; // ignore rewardWebDiff updates for now
+
+    const transaction = {
+      context: "Track Progress",
+      timestamp: entry.timestamp,
+      date: parseWotcTime(entry.timestamp),
+      delta: {},
+      ...entry
+    };
+
+    const trackDiff = minifiedDelta(transaction.trackDiff);
+    if (trackDiff.inventoryDelta) {
+      // this is redundant data, removing to save space
+      delete trackDiff.inventoryDelta;
+    }
+    transaction.trackDiff = trackDiff;
+
+    if (entry.trackName) {
+      economy.trackName = entry.trackName;
+    }
+    if (entry.trackTier !== undefined) {
+      economy.trackTier = entry.trackTier;
+    }
+    if (trackDiff.currentLevel !== undefined) {
+      economy.currentLevel = trackDiff.currentLevel;
+    }
+    if (trackDiff.currentExp !== undefined) {
+      economy.currentExp = trackDiff.currentExp;
+    }
+
+    if (transaction.orbDiff) {
+      const orbDiff = minifiedDelta(transaction.orbDiff);
+      transaction.orbDiff = orbDiff;
+      if (orbDiff.currentOrbCount !== undefined) {
+        economy.currentOrbCount = orbDiff.currentOrbCount;
+      }
+    }
+
+    // Construct a unique ID
+    transaction.id = sha1(
+      entry.timestamp + JSON.stringify(transaction.trackDiff)
+    );
+    saveEconomyTransaction(transaction);
+  });
+  // console.log(economy);
+  setData({ economy });
+  if (debugLog || !firstPass) store.set("economy", economy);
 }
 
 function onLabelInEventDeckSubmit(entry, json) {
@@ -859,6 +932,7 @@ module.exports = {
   onLabelInventoryUpdated,
   onLabelInPlayerInventoryGetPlayerInventory,
   onLabelInPlayerInventoryGetPlayerCardsV3,
+  onLabelInProgressionGetPlayerProgress,
   onLabelInEventDeckSubmit,
   onLabelInEventDeckSubmitV3,
   onLabelInEventGetActiveEvents,
@@ -872,5 +946,6 @@ module.exports = {
   onLabelMatchGameRoomStateChangedEvent,
   onLabelInEventGetSeasonAndRankDetail,
   onLabelGetPlayerInventoryGetRewardSchedule,
-  onLabelRankUpdated
+  onLabelRankUpdated,
+  onLabelTrackProgressUpdated
 };

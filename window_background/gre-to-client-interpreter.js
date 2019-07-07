@@ -89,7 +89,7 @@ function processAnnotations() {
         }
       });
     } catch (e) {
-      console.log(ann, e);
+      // console.log(ann, e);
       processedOk = false;
     }
 

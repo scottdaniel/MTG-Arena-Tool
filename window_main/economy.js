@@ -22,6 +22,7 @@ const {
   toggleArchived
 } = require("./renderer-util");
 
+const byId = id => document.getElementById(id);
 var filterEconomy = "All";
 let showArchived = false;
 var daysago = 0;
@@ -35,7 +36,8 @@ class economyDay {
     goldSpent = 0,
     gemsSpent = 0,
     cardsEarned = 0,
-    vaultProgress = 0.0
+    vaultProgress = 0.0,
+    expEarned = 0
   ) {
     this.goldEarned = goldEarned;
     this.gemsEarned = gemsEarned;
@@ -43,6 +45,7 @@ class economyDay {
     this.gemsSpent = gemsSpent;
     this.cardsEarned = cardsEarned;
     this.vaultProgress = vaultProgress;
+    this.expEarned = expEarned;
   }
 }
 
@@ -54,13 +57,17 @@ const economyTransactionContextsMap = {
   "Event.Season.Constructed.Payout": "Constructed Season Rewards",
   "Event.Season.Limited.Payout": "Limited Season Rewards",
   "PlayerReward.OnMatchCompletedDaily": "Player Rewards",
+  PurchasedCosmetic: "Cosmetic Purchase",
   "Quest.Completed": "Quest Completed",
-  "Store.Fulfillment": "Store",
-  "Store.Fulfillment.Chest": "Chest Redeem",
-  "Store.Fulfillment.Boosters": "Booster Redeem",
+  Store: "Store Transaction",
+  "Store.Fulfillment": "Store Transaction",
+  "Store.Fulfillment.Chest": "Store Transaction",
+  "Store.Fulfillment.Boosters": "Store Booster Purchase",
+  "Store.Fulfillment.Gems": "Store Gems Purchase",
   "WildCard.Redeem": "Redeem Wildcard",
   "Vault.Complete": "Vault Opening",
-  "PlayerReward.OnMatchCompletedWeekly": "Weekly rewards"
+  "PlayerReward.OnMatchCompletedWeekly": "Weekly Rewards",
+  "PlayerProgression.OrbSpend": "Orb Spend"
 };
 
 function localDateFormat(date) {
@@ -181,6 +188,13 @@ function renderData(container, index) {
 
   const div = createChangeRow(change, change.id);
   container.appendChild(div);
+  const flexRight = byId(change.id);
+  if (flexRight.scrollWidth > flexRight.clientWidth) {
+    flexRight.addEventListener("mousewheel", function(e) {
+      this.scrollLeft += parseInt(e.deltaY / 2);
+      e.preventDefault();
+    });
+  }
   rowsAdded++;
 
   return rowsAdded;
@@ -188,17 +202,16 @@ function renderData(container, index) {
 
 function createDayHeader(change) {
   daysago = differenceInCalendarDays(new Date(), new Date(change.date));
-  let headerGrid = createDiv(["economy_title"]);
+  const headerGrid = createDiv(["economy_title"]);
 
-  const cont = createDiv(["economy_metric"]);
-  let tx = createDiv();
+  const tx = createDiv(["economy_sub"]);
   tx.style.lineHeight = "64px";
-  tx.classList.add("economy_sub");
-  let up = createDiv(["economy_up"]);
-  let down = createDiv(["economy_down"]);
+  let ntx;
+  const up = createDiv(["economy_up"], "", { title: "increase" });
+  const down = createDiv(["economy_down"], "", { title: "decrease" });
 
   // Title
-  let gridTitle = createDiv(["flex_item"]);
+  const gridTitle = createDiv(["flex_item"]);
   gridTitle.style.gridArea = "1 / 1 / auto / 2";
   gridTitle.style.lineHeight = "64px";
 
@@ -209,12 +222,12 @@ function createDayHeader(change) {
     date = new Date(date.setHours(0, 0, 0, 0));
     gridTitle.innerHTML = localDayDateFormat(date);
   }
+  headerGrid.appendChild(gridTitle);
 
   // Cards
-  const gridCards = cont.cloneNode(true);
+  const gridCards = createDiv(["economy_metric"]);
   gridCards.style.gridArea = "1 / 2 / auto / 3";
-  const icca = tx.cloneNode(true);
-  icca.innerHTML = "Cards:";
+  const icca = createDiv(["economy_card"], "", { title: "Cards" });
   const catx = tx.cloneNode(true);
   catx.innerHTML = formatNumber(dayList[daysago].cardsEarned);
   gridCards.appendChild(icca);
@@ -223,34 +236,50 @@ function createDayHeader(change) {
   upcontca.appendChild(catx);
   upcontca.appendChild(up.cloneNode(true));
   gridCards.appendChild(upcontca);
+  headerGrid.appendChild(gridCards);
+
+  // Vault
+  const gridVault = createDiv(["economy_metric"]);
+  gridVault.style.gridArea = "1 / 3 / auto / 4";
+  gridVault.appendChild(createDiv(["economy_vault"], "", { title: "Vault" }));
+  const vatx = tx.cloneNode(true);
+  const rawDelta = dayList[daysago].vaultProgress;
+  // Assume vault can only be redeemed once per day
+  // Rely on modulo arithmetic to derive pure vault gain
+  const delta = rawDelta < 0 ? rawDelta + 100 : rawDelta;
+  const deltaPercent = delta / 100.0;
+  vatx.innerHTML = formatPercent(deltaPercent);
+  const upcontva = createDiv(["economy_delta"]);
+  upcontva.style.width = "auto";
+  upcontva.appendChild(vatx);
+  upcontva.appendChild(up.cloneNode(true));
+  gridVault.appendChild(upcontva);
+  headerGrid.appendChild(gridVault);
 
   // Gold
-  const gridGold = cont.cloneNode(true);
-  gridGold.style.gridArea = "1 / 3 / auto / 4";
-  let icgo = createDiv(["economy_gold_med"]);
-  icgo.margin = "3px";
-  icgo.title = "Gold";
-  gridGold.appendChild(icgo);
+  const gridGold = createDiv(["economy_metric"]);
+  gridGold.style.gridArea = "1 / 4 / auto / 5";
+  gridGold.appendChild(createDiv(["economy_gold_med"], "", { title: "Gold" }));
 
   const upcontgo = createDiv(["economy_delta"]);
-  tx.innerHTML = formatNumber(dayList[daysago].goldEarned);
-  upcontgo.appendChild(tx);
+  ntx = tx.cloneNode(true);
+  ntx.innerHTML = formatNumber(dayList[daysago].goldEarned);
+  upcontgo.appendChild(ntx);
   upcontgo.appendChild(up.cloneNode(true));
   gridGold.appendChild(upcontgo);
 
   const dncontgo = createDiv(["economy_delta"]);
-  let ntx = tx.cloneNode(true);
+  ntx = tx.cloneNode(true);
   ntx.innerHTML = formatNumber(dayList[daysago].goldSpent);
   dncontgo.appendChild(ntx);
   dncontgo.appendChild(down.cloneNode(true));
   gridGold.appendChild(dncontgo);
+  headerGrid.appendChild(gridGold);
 
   // Gems
-  const gridGems = cont.cloneNode(true);
-  gridGems.style.gridArea = "1 / 4 / auto / 5";
-  let icge = createDiv(["economy_gems_med"]);
-  icge.margin = "3px";
-  icge.title = "Gems";
+  const gridGems = createDiv(["economy_metric"]);
+  gridGems.style.gridArea = "1 / 5 / auto / 6";
+  let icge = createDiv(["economy_gems_med"], "", { title: "Gems" });
   gridGems.appendChild(icge);
 
   const upcontge = createDiv(["economy_delta"]);
@@ -266,41 +295,29 @@ function createDayHeader(change) {
   dncontge.appendChild(ntx);
   dncontge.appendChild(down.cloneNode(true));
   gridGems.appendChild(dncontge);
-
-  // Vault
-  const gridVault = cont.cloneNode(true);
-  gridVault.style.gridArea = "1 / 5 / auto / 6";
-  const icva = tx.cloneNode(true);
-  icva.innerHTML = "Vault:";
-  const vatx = tx.cloneNode(true);
-  const rawDelta = dayList[daysago].vaultProgress;
-  // Assume vault can only be redeemed once per day
-  // Rely on modulo arithmetic to derive pure vault gain
-  const delta = rawDelta < 0 ? rawDelta + 100 : rawDelta;
-  const deltaPercent = delta / 100.0;
-  vatx.innerHTML = formatPercent(deltaPercent);
-  gridVault.appendChild(icva);
-  const upcontva = createDiv(["economy_delta"]);
-  upcontva.style.width = "auto";
-  upcontva.appendChild(vatx);
-  upcontva.appendChild(up.cloneNode(true));
-  gridVault.appendChild(upcontva);
-
-  headerGrid.appendChild(gridTitle);
-  headerGrid.appendChild(gridCards);
-  headerGrid.appendChild(gridGold);
   headerGrid.appendChild(gridGems);
-  headerGrid.appendChild(gridVault);
+
+  // Experience
+  const gridExp = createDiv(["economy_metric"]);
+  gridExp.style.gridArea = "1 / 6 / auto / 7";
+  gridExp.appendChild(createDiv(["economy_exp"], "", { title: "Experience" }));
+  const xptx = tx.cloneNode(true);
+  xptx.innerHTML = formatNumber(dayList[daysago].expEarned);
+  const upcontxp = createDiv(["economy_delta"]);
+  upcontxp.style.width = "auto";
+  upcontxp.appendChild(xptx);
+  upcontxp.appendChild(up.cloneNode(true));
+  gridExp.appendChild(upcontxp);
+  headerGrid.appendChild(gridExp);
+
   return headerGrid;
 }
 
 function createChangeRow(change, economyId) {
   // The next ~200 lines of code will add elements to these two containers
   var flexBottom = createDiv(["flex_bottom"]);
-  var flexRight = createDiv(["tiny_scroll", "list_economy_awarded"]);
-  flexRight.addEventListener("mousewheel", function(e) {
-    this.scrollLeft += parseInt(e.deltaY / 2);
-    e.preventDefault();
+  var flexRight = createDiv(["tiny_scroll", "list_economy_awarded"], "", {
+    id: economyId
   });
 
   let checkGemsPaid = false;
@@ -339,11 +356,19 @@ function createChangeRow(change, economyId) {
     checkWildcardsAdded = true;
     checkCardsAdded = true;
     checkAetherized = true;
-  } else if (fullContext === "Store") {
-    checkGemsPaid = true;
-    checkGoldPaid = true;
+  } else if (
+    fullContext.includes("Store") ||
+    fullContext.includes("Purchase")
+  ) {
+    if (change.delta.goldDelta > 0) checkGoldEarnt = true;
+    if (change.delta.goldDelta < 0) checkGoldPaid = true;
+    if (change.delta.gemsDelta > 0) checkGemsEarnt = true;
+    if (change.delta.gemsDelta < 0) checkGemsPaid = true;
+
     checkBoosterAdded = true;
+    checkWildcardsAdded = true;
     checkCardsAdded = true;
+    checkSkinsAdded = true;
     checkAetherized = true;
   } else if (fullContext === "Booster Redeem") {
     checkGemsPaid = true;
@@ -415,7 +440,7 @@ function createChangeRow(change, economyId) {
     checkSkinsAdded = true;
   }
 
-  if (checkGemsPaid && change.delta.gemsDelta != undefined) {
+  if (checkGemsPaid && change.delta.gemsDelta) {
     bos = createDiv(["economy_gems"]);
     bos.title = "Gems";
 
@@ -428,7 +453,7 @@ function createChangeRow(change, economyId) {
     flexBottom.appendChild(bon);
   }
 
-  if (checkGoldPaid && change.delta.goldDelta != undefined) {
+  if (checkGoldPaid && change.delta.goldDelta) {
     bos = createDiv(["economy_gold"]);
     bos.title = "Gold";
 
@@ -441,7 +466,7 @@ function createChangeRow(change, economyId) {
     flexBottom.appendChild(bon);
   }
 
-  if (checkGemsEarnt && change.delta.gemsDelta != undefined) {
+  if (checkGemsEarnt && change.delta.gemsDelta) {
     bos = createDiv(["economy_gems_med"]);
     bos.title = "Gems";
 
@@ -454,7 +479,7 @@ function createChangeRow(change, economyId) {
     flexRight.appendChild(bon);
   }
 
-  if (checkGoldEarnt && change.delta.goldDelta != undefined) {
+  if (checkGoldEarnt && change.delta.goldDelta) {
     bos = createDiv(["economy_gold_med"]);
     bos.title = "Gold";
 
@@ -467,7 +492,48 @@ function createChangeRow(change, economyId) {
     flexRight.appendChild(bon);
   }
 
-  if (checkBoosterAdded && change.delta.boosterDelta != undefined) {
+  if (change.trackDiff) {
+    const lvlDelta = Math.abs(
+      (change.trackDiff.currentLevel || 0) - (change.trackDiff.oldLevel || 0)
+    );
+    if (lvlDelta) {
+      const iclvl = createDiv(["economy_sub"], `+${lvlDelta} ML`, {
+        title: `+${lvlDelta} Mastery Level (${pd.economy.trackName})`
+      });
+      iclvl.style.marginLeft = "24px";
+      iclvl.style.lineHeight = "64px";
+      flexRight.appendChild(iclvl);
+    }
+
+    let expDelta =
+      (change.trackDiff.currentExp || 0) - (change.trackDiff.oldExp || 0);
+    if (expDelta) {
+      // Rely on modulo arithmetic to derive pure exp gain
+      if (expDelta < 0) expDelta += 1000;
+
+      flexRight.appendChild(
+        createDiv(["economy_exp"], "", { title: "Experience" })
+      );
+      bon = createDiv(["economy_sub"], formatNumber(expDelta));
+      bon.style.lineHeight = "64px";
+      flexRight.appendChild(bon);
+    }
+  }
+
+  if (change.orbCountDiff) {
+    const orbDelta = Math.abs(
+      (change.orbCountDiff.currentOrbCount || 0) -
+        (change.orbCountDiff.oldOrbCount || 0)
+    );
+    if (orbDelta) {
+      flexRight.appendChild(createDiv(["economy_orb"], "", { title: "Orbs" }));
+      bon = createDiv(["economy_sub"], formatNumber(orbDelta));
+      bon.style.lineHeight = "64px";
+      flexRight.appendChild(bon);
+    }
+  }
+
+  if (checkBoosterAdded && change.delta.boosterDelta) {
     change.delta.boosterDelta.forEach(function(booster) {
       var set = get_colation_set(booster.collationId);
 
@@ -487,7 +553,7 @@ function createChangeRow(change, economyId) {
   }
 
   if (checkWildcardsAdded) {
-    if (change.delta.wcCommonDelta != undefined) {
+    if (change.delta.wcCommonDelta) {
       bos = createDiv(["economy_wc"]);
       bos.title = "Common Wildcard";
       bos.style.backgroundImage = "url(../images/wc_common.png)";
@@ -499,7 +565,7 @@ function createChangeRow(change, economyId) {
       flexRight.appendChild(bon);
     }
 
-    if (change.delta.wcUncommonDelta != undefined) {
+    if (change.delta.wcUncommonDelta) {
       bos = createDiv(["economy_wc"]);
       bos.title = "Uncommon Wildcard";
       bos.style.backgroundImage = "url(../images/wc_uncommon.png)";
@@ -511,7 +577,7 @@ function createChangeRow(change, economyId) {
       flexRight.appendChild(bon);
     }
 
-    if (change.delta.wcRareDelta != undefined) {
+    if (change.delta.wcRareDelta) {
       bos = createDiv(["economy_wc"]);
       bos.title = "Rare Wildcard";
       bos.style.backgroundImage = "url(../images/wc_rare.png)";
@@ -522,7 +588,7 @@ function createChangeRow(change, economyId) {
       flexRight.appendChild(bos);
       flexRight.appendChild(bon);
     }
-    if (change.delta.wcMythicDelta != undefined) {
+    if (change.delta.wcMythicDelta) {
       bos = createDiv(["economy_wc"]);
       bos.title = "Mythic Wildcard";
       bos.style.backgroundImage = "url(../images/wc_mythic.png)";
@@ -535,7 +601,7 @@ function createChangeRow(change, economyId) {
     }
   }
 
-  if (checkCardsAdded && change.delta.cardsAdded != undefined) {
+  if (checkCardsAdded && change.delta.cardsAdded !== undefined) {
     change.delta.cardsAdded.sort(collectionSortRarity);
     change.delta.cardsAdded.forEach(function(grpId) {
       var card = db.card(grpId);
@@ -570,7 +636,7 @@ function createChangeRow(change, economyId) {
     });
   }
 
-  if (checkAetherized && change.aetherizedCards != undefined) {
+  if (checkAetherized && change.aetherizedCards !== undefined) {
     change.aetherizedCards.forEach(function(obj) {
       var grpId = obj.grpId;
       var card = db.card(grpId);
@@ -624,7 +690,7 @@ function createChangeRow(change, economyId) {
     });
   }
 
-  if (checkSkinsAdded && change.delta.artSkinsAdded != undefined) {
+  if (checkSkinsAdded && change.delta.artSkinsAdded !== undefined) {
     change.delta.artSkinsAdded.forEach(obj => {
       let card = db.cardFromArt(obj.artId);
 
@@ -697,10 +763,10 @@ function createEconomyUI(mainDiv) {
   sortedChanges = [...pd.transactionList];
   sortedChanges.sort(compare_economy);
 
-  var topSelectItems = ["All", "Day Summaries"];
-  var selectItems = [];
+  const topSelectItems = ["All", "Day Summaries"];
+  const contextCounts = {};
 
-  for (var n = 0; n < sortedChanges.length; n++) {
+  for (let n = 0; n < sortedChanges.length; n++) {
     const change = sortedChanges[n];
     if (change === undefined) continue;
     if (change.archived && !showArchived) continue;
@@ -714,9 +780,7 @@ function createEconomyUI(mainDiv) {
     }
 
     const selectVal = getPrettyContext(change.context, false);
-    if (!selectItems.includes(selectVal)) {
-      selectItems.push(selectVal);
-    }
+    contextCounts[selectVal] = (contextCounts[selectVal] || 0) + 1;
 
     if (change.delta.gemsDelta != undefined) {
       if (change.delta.gemsDelta > 0)
@@ -731,32 +795,44 @@ function createEconomyUI(mainDiv) {
       // console.log(economyId, "> ", change.date, " > ", change.delta.goldDelta);
     }
 
-    if (change.delta && change.delta.cardsAdded) {
+    if (change.delta.cardsAdded) {
       dayList[daysago].cardsEarned += change.delta.cardsAdded.length;
     }
-    if (change.delta && change.delta.vaultProgressDelta) {
+    if (change.delta.vaultProgressDelta) {
       dayList[daysago].vaultProgress += change.delta.vaultProgressDelta;
     }
+
+    if (change.trackDiff) {
+      let expDelta =
+        (change.trackDiff.currentExp || 0) - (change.trackDiff.oldExp || 0);
+      // Rely on modulo arithmetic to derive pure exp gain
+      if (expDelta < 0) expDelta += 1000;
+      dayList[daysago].expEarned += expDelta;
+    }
   }
+  const selectItems = Object.keys(contextCounts);
+  selectItems.sort(
+    (a, b) => contextCounts[b] - contextCounts[a] || a.localeCompare(b)
+  );
 
-  let div = createDiv(["list_economy_top", "flex_item"]);
+  const div = createDiv(["list_economy_top", "flex_item"]);
 
-  //
-  var selectdiv = createDiv();
-  selectdiv.style.margin = "auto 64px auto 0px";
+  const selectdiv = createDiv();
+  selectdiv.style.margin = "auto auto auto 0px";
   selectdiv.style.display = "flex";
-  let options = [...topSelectItems, ...selectItems];
-
-  // console.log("filterEconomy", filterEconomy);
-  let select = createSelect(
+  const select = createSelect(
     selectdiv,
-    options,
+    [...topSelectItems, ...selectItems],
     filterEconomy,
     res => {
       filterEconomy = res;
       openEconomyTab();
     },
-    "query_select"
+    "query_select",
+    context =>
+      context in contextCounts
+        ? `${context} (${contextCounts[context]})`
+        : context
   );
 
   const archiveCont = document.createElement("label");
@@ -780,63 +856,85 @@ function createEconomyUI(mainDiv) {
   //$$("#query_select.select_button")[0].innerHTML = filterEconomy;
   div.appendChild(selectdiv);
 
-  //
-  let icwcc = createDiv(["economy_wc_med", "wc_common"]);
-  icwcc.title = "Common Wildcards";
-
-  let icwcu = createDiv(["economy_wc_med", "wc_uncommon"]);
-  icwcu.title = "Uncommon Wildcards";
-
-  let icwcr = createDiv(["economy_wc_med", "wc_rare"]);
-  icwcr.title = "Rare Wildcards";
-
-  let icwcm = createDiv(["economy_wc_med", "wc_mythic"]);
-  icwcm.title = "Mythic Wildcards";
-
-  let icgo = createDiv(["economy_gold_med"]);
-  icgo.title = "Gold";
-
-  let icge = createDiv(["economy_gems_med"]);
-  icge.style.marginLeft = "24px";
-  icge.title = "Gems";
-
-  let tx = createDiv();
+  const tx = createDiv();
   tx.style.lineHeight = "64px";
   tx.classList.add("economy_sub");
+  let ntx;
 
+  const icbo = createDiv(["economy_wc_med", "wc_booster"], "", {
+    title: "Boosters"
+  });
+  icbo.style.marginLeft = "24px";
+  div.appendChild(icbo);
+  ntx = tx.cloneNode(true);
+  let total = 0;
+  pd.economy.boosters.forEach(booster => (total += booster.count));
+  ntx.innerHTML = total;
+  div.appendChild(ntx);
+
+  const icva = createDiv(["economy_vault"], "", { title: "Vault" });
+  icva.style.marginLeft = "24px";
+  div.appendChild(icva);
+  ntx = tx.cloneNode(true);
+  ntx.innerHTML = pd.economy.vault + "%";
+  div.appendChild(ntx);
+
+  const icwcc = createDiv(["economy_wc_med", "wc_common"]);
+  icwcc.title = "Common Wildcards";
   div.appendChild(icwcc);
-  let ntx = tx.cloneNode(true);
+  ntx = tx.cloneNode(true);
   ntx.innerHTML = formatNumber(pd.economy.wcCommon);
   div.appendChild(ntx);
 
+  const icwcu = createDiv(["economy_wc_med", "wc_uncommon"]);
+  icwcu.title = "Uncommon Wildcards";
   div.appendChild(icwcu);
   ntx = tx.cloneNode(true);
   ntx.innerHTML = formatNumber(pd.economy.wcUncommon);
   div.appendChild(ntx);
 
+  const icwcr = createDiv(["economy_wc_med", "wc_rare"]);
+  icwcr.title = "Rare Wildcards";
   div.appendChild(icwcr);
   ntx = tx.cloneNode(true);
   ntx.innerHTML = formatNumber(pd.economy.wcRare);
   div.appendChild(ntx);
 
+  const icwcm = createDiv(["economy_wc_med", "wc_mythic"]);
+  icwcm.title = "Mythic Wildcards";
   div.appendChild(icwcm);
   ntx = tx.cloneNode(true);
   ntx.innerHTML = formatNumber(pd.economy.wcMythic);
   div.appendChild(ntx);
 
+  const icgo = createDiv(["economy_gold_med"]);
+  icgo.title = "Gold";
   div.appendChild(icgo);
   ntx = tx.cloneNode(true);
   ntx.innerHTML = formatNumber(pd.economy.gold);
   div.appendChild(ntx);
 
+  const icge = createDiv(["economy_gems_med"]);
+  icge.style.marginLeft = "24px";
+  icge.title = "Gems";
   div.appendChild(icge);
   ntx = tx.cloneNode(true);
   ntx.innerHTML = formatNumber(pd.economy.gems);
   div.appendChild(ntx);
 
+  const masteryLevel = pd.economy.currentLevel + 1;
+  const iclvl = createDiv(["economy_sub"], "ML" + masteryLevel, {
+    title: `Mastery Level ${masteryLevel} (${pd.economy.trackName})`
+  });
+  iclvl.style.marginLeft = "24px";
+  iclvl.style.lineHeight = "64px";
+  div.appendChild(iclvl);
+
+  const icxp = createDiv(["economy_exp"], "", { title: "Experience" });
+  icxp.style.marginLeft = "24px";
+  div.appendChild(icxp);
   ntx = tx.cloneNode(true);
-  ntx.innerHTML = `Vault: ${pd.economy.vault}%`;
-  ntx.style.marginLeft = "32px";
+  ntx.innerHTML = pd.economy.currentExp || 0;
   div.appendChild(ntx);
 
   mainDiv.appendChild(div);
