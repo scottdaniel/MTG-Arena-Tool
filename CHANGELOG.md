@@ -1,3 +1,34 @@
+## 2.8.0 (2019-07-07)
+
+* add boosters to economy total ([25ecf43](https://github.com/Manuel-777/MTG-Arena-Tool/commit/25ecf43))
+* add default delta field to track progress txns ([2e684d4](https://github.com/Manuel-777/MTG-Arena-Tool/commit/2e684d4))
+* Add track level to economy page ([691c80c](https://github.com/Manuel-777/MTG-Arena-Tool/commit/691c80c))
+* add xp and orbs to economy model ([0284643](https://github.com/Manuel-777/MTG-Arena-Tool/commit/0284643))
+* add xp and orbs to economy page ([aba1a8a](https://github.com/Manuel-777/MTG-Arena-Tool/commit/aba1a8a))
+* bugfix economy exp and orb math ([69f8e9f](https://github.com/Manuel-777/MTG-Arena-Tool/commit/69f8e9f))
+* bugfix economy page horizontal scroll only when necessary ([5e9d43f](https://github.com/Manuel-777/MTG-Arena-Tool/commit/5e9d43f))
+* bugfix labels.onLabelGetPlayerInventoryGetRewardSchedule handles new json ([ff6f804](https://github.com/Manuel-777/MTG-Arena-Tool/commit/ff6f804))
+* bugfix mastery level experience modulo math ([39db0d3](https://github.com/Manuel-777/MTG-Arena-Tool/commit/39db0d3))
+* bugfix tab navigation should reset scroll ([ccf84e4](https://github.com/Manuel-777/MTG-Arena-Tool/commit/ccf84e4))
+* convert all economy page metrics to icons ([5b48792](https://github.com/Manuel-777/MTG-Arena-Tool/commit/5b48792))
+* economy page context filter upgrade ([d9902c5](https://github.com/Manuel-777/MTG-Arena-Tool/commit/d9902c5))
+* economy page handles new transaction contexts ([67689ac](https://github.com/Manuel-777/MTG-Arena-Tool/commit/67689ac))
+* economy page transactions use icons ([95be7c3](https://github.com/Manuel-777/MTG-Arena-Tool/commit/95be7c3))
+* economy row transactions show mastery level changes ([c9f909f](https://github.com/Manuel-777/MTG-Arena-Tool/commit/c9f909f))
+* flat icons, some style ([4021fb1](https://github.com/Manuel-777/MTG-Arena-Tool/commit/4021fb1))
+* group similar metrics on economy page ([03e7a77](https://github.com/Manuel-777/MTG-Arena-Tool/commit/03e7a77))
+* onLabelTrackProgressUpdated ([d5d0134](https://github.com/Manuel-777/MTG-Arena-Tool/commit/d5d0134))
+* orb ([50b1165](https://github.com/Manuel-777/MTG-Arena-Tool/commit/50b1165))
+* reduce background console chatter ([c7069ef](https://github.com/Manuel-777/MTG-Arena-Tool/commit/c7069ef))
+* remove broken weekly reward timer from home page ([4b19b2b](https://github.com/Manuel-777/MTG-Arena-Tool/commit/4b19b2b))
+* remove orbs from headers, bugfix orbs in rows ([bf89296](https://github.com/Manuel-777/MTG-Arena-Tool/commit/bf89296))
+* smaller orb icons ([2c1bd08](https://github.com/Manuel-777/MTG-Arena-Tool/commit/2c1bd08))
+* Update orb.png ([d0c4bba](https://github.com/Manuel-777/MTG-Arena-Tool/commit/d0c4bba))
+* whats new ([fcdcc39](https://github.com/Manuel-777/MTG-Arena-Tool/commit/fcdcc39))
+* Whats new style ([c296457](https://github.com/Manuel-777/MTG-Arena-Tool/commit/c296457))
+
+
+
 ## <small>2.7.6 (2019-07-05)</small>
 
 * better help on offline splash page ([05f5087](https://github.com/Manuel-777/MTG-Arena-Tool/commit/05f5087))
