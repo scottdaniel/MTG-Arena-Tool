@@ -45,7 +45,7 @@ class OverlayProcess {
       frame: false,
       show: false,
       title: "MTG Arena Tool",
-      icon: `../resources/icon-overlay-${COLORS_ALL[index]}.png`,
+      icon: `resources/icon-overlay-${COLORS_ALL[index]}.png`,
       webPreferences: {
         nodeIntegration: true
       }
