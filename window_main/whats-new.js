@@ -9,6 +9,11 @@ const screens = [
     title: "Mixed overlay",
     desciption: "Now you can see cards left and odds in the same overlay!",
     image: "01.png"
+  },
+  {
+    title: "Mastery track rewards",
+    desciption: "Track your experience and mastery track rewards in Economy",
+    image: "02.png"
   }
 ];
 
