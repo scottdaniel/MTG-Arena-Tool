@@ -298,6 +298,11 @@ ipc.on("request_draft_link", function(event, obj) {
 });
 
 //
+ipc.on("request_log_link", function(event, obj) {
+  httpApi.httpLogShareLink(obj.id, obj.log, obj.expire);
+});
+
+//
 ipc.on("windowBounds", (event, windowBounds) => {
   if (firstPass) return;
   setData({ windowBounds }, false);

@@ -7,7 +7,12 @@ const _ = require("lodash");
 const { MANA, EASING_DEFAULT } = require("../shared/constants");
 const db = require("../shared/database");
 const pd = require("../shared/player-data");
-const { createDiv, queryElements: $$ } = require("../shared/dom-fns");
+const { createSelect } = require("../shared/select");
+const {
+  createDiv,
+  createInput,
+  queryElements: $$
+} = require("../shared/dom-fns");
 const deckDrawer = require("../shared/deck-drawer");
 const {
   get_deck_export,
@@ -26,7 +31,9 @@ const {
   drawCardList,
   drawDeck,
   ipcSend,
+  openDialog,
   openActionLog,
+  showLoadingBars,
   toggleVisibility
 } = require("./renderer-util");
 
@@ -74,10 +81,46 @@ function openMatch(id) {
       ["button_simple", "openLog"],
       "Action log"
     );
+    actionLogButton.style.marginLeft = "auto";
     actionLogButton.addEventListener("click", function() {
       openActionLog(id, mainDiv);
     });
     flc.appendChild(actionLogButton);
+
+    const actionLogShareButton = createDiv(["list_log_share", match.id + "al"]);
+    actionLogShareButton.addEventListener("click", e => {
+      e.stopPropagation();
+      const cont = createDiv(["dialog_content"]);
+      cont.style.width = "500px";
+
+      cont.append(createDiv(["share_title"], "Link for sharing:"));
+      const icd = createDiv(["share_input_container"]);
+      const linkInput = createInput([], "", {
+        id: "share_input",
+        autocomplete: "off"
+      });
+      linkInput.addEventListener("click", () => linkInput.select());
+      icd.appendChild(linkInput);
+      const but = createDiv(["button_simple"], "Copy");
+      but.addEventListener("click", function() {
+        ipcSend("set_clipboard", byId("share_input").value);
+      });
+      icd.appendChild(but);
+      cont.appendChild(icd);
+
+      cont.appendChild(createDiv(["share_subtitle"], "<i>Expires in: </i>"));
+      createSelect(
+        cont,
+        ["One day", "One week", "One month", "Never"],
+        "",
+        () => logShareLink(match.id),
+        "expire_select"
+      );
+
+      openDialog(cont);
+      logShareLink(match.id);
+    });
+    flc.appendChild(actionLogShareButton);
   }
   mainDiv.appendChild(flc);
 
@@ -352,6 +395,33 @@ function openMatch(id) {
       duration: 350
     });
   });
+}
+
+function logShareLink(id) {
+  const actionLogFile = path.join(actionLogDir, id + ".txt");
+  let log = fs.readFileSync(actionLogFile).toString("base64");
+
+  const shareExpire = byId("expire_select").value;
+  let expire = 0;
+  switch (shareExpire) {
+    case "One day":
+      expire = 0;
+      break;
+    case "One week":
+      expire = 1;
+      break;
+    case "One month":
+      expire = 2;
+      break;
+    case "Never":
+      expire = -1;
+      break;
+    default:
+      expire = 0;
+      break;
+  }
+  showLoadingBars();
+  ipcSend("request_log_link", { expire, log, id });
 }
 
 //

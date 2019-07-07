@@ -530,7 +530,17 @@ span.top_nav_item_text {
     -webkit-transition: all .2s ease-in;
 }
 
-.list_draft_share:hover {
+.list_log_share {
+    cursor: pointer;
+    opacity: 0.75;
+    width: 40px;
+    height: 40px;
+    margin: auto auto auto 8px;
+    background: url(file:///C:/Users/Manuh/Desktop/MTG%20Arena%20Tool/MTG-Arena-Tool/window_main/../images/share.png);
+    -webkit-transition: all .2s ease-in;
+}
+
+.list_draft_share:hover, .list_log_share:hover {
     opacity: 0.9;
 }
 
