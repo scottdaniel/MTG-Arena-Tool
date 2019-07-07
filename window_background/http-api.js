@@ -277,7 +277,10 @@ function httpBasic() {
               parsedResult.ok == false &&
               parsedResult.error != undefined
             ) {
-              if (_headers.method == "share_draft" || _headers.method == "share_log") {
+              if (
+                _headers.method == "share_draft" ||
+                _headers.method == "share_log"
+              ) {
                 ipc_send("popup", {
                   text: parsedResult.error,
                   time: 3000
