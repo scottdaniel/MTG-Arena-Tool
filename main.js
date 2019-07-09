@@ -223,6 +223,7 @@ function startApp() {
 
       // to main js / window handling
       case "set_arena_state":
+        overlayMux();
         //setArenaState(arg);
         //overlay.updateVisible();
         break;

@@ -36,13 +36,14 @@ const {
 const { queryElements, createDiv } = require("../shared/dom-fns");
 
 const {
-  COLORS_ALL,
+  ARENA_MODE_IDLE,
+  ARENA_MODE_MATCH,
+  ARENA_MODE_DRAFT,
   DRAFT_RANKS,
   MANA,
   PACK_SIZES,
   IPC_BACKGROUND,
   IPC_OVERLAY,
-  IPC_MAIN,
   OVERLAY_FULL,
   OVERLAY_LEFT,
   OVERLAY_ODDS,
@@ -88,10 +89,15 @@ let oddsSampleSize = 1;
 let actionLog = [];
 
 let currentMatch = null;
+let arenaState = ARENA_MODE_IDLE;
 
 function ipcSend(method, arg, to = IPC_BACKGROUND) {
   ipc.send("ipc_switch", method, IPC_OVERLAY, arg, to);
 }
+
+ipc.on("set_arena_state", function(event, arg) {
+  arenaState = arg;
+});
 
 ipc.on("set_timer", function(event, arg) {
   if (arg == -1) {
@@ -129,7 +135,7 @@ ipc.on("settings_updated", () => {
     overlayDom.style.width = _overlay.bounds.width + "px";
     overlayDom.style.left = _overlay.bounds.x + "px";
     overlayDom.style.top = _overlay.bounds.y + "px";
-    overlayDom.style.opacity = _overlay.show ? "1" : "0";
+    overlayDom.style.opacity = getVisible(_overlay);
 
     let deckNameDom = `#overlay_${index + 1} .overlay_deckname`;
     let deckColorsDom = `#overlay_${index + 1} .overlay_deckcolors`;
@@ -162,6 +168,21 @@ ipc.on("settings_updated", () => {
     }
   });
 });
+
+function getVisible(settings) {
+  if (!settings) return;
+
+  const currentModeApplies =
+    (OVERLAY_DRAFT_MODES.includes(settings.mode) &&
+      arenaState === ARENA_MODE_DRAFT) ||
+    (!OVERLAY_DRAFT_MODES.includes(settings.mode) &&
+      arenaState === ARENA_MODE_MATCH);
+
+  const shouldShow =
+    settings.show && (currentModeApplies || settings.show_always);
+
+  return shouldShow ? "1" : "0";
+}
 
 function setIgnoreTrue() {
   remote.getCurrentWindow().setIgnoreMouseEvents(true, { forward: true });
