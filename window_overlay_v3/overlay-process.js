@@ -13,7 +13,7 @@ class OverlayProcess {
     let area = display.workArea;
 
     const overlay = new electron.BrowserWindow({
-      transparent: false,
+      transparent: true,
       x: area.x,
       y: area.y,
       width: area.width,
@@ -21,14 +21,14 @@ class OverlayProcess {
       frame: false,
       show: true,
       skipTaskbar: true,
-      fullScreen: true,
+      focusable: false,
       title: "MTG Arena Tool",
       webPreferences: {
         nodeIntegration: true
       }
     });
     overlay.loadURL(`file://${__dirname}/index.html`);
-    //overlay.setIgnoreMouseEvents(true, { forward: true });
+    overlay.setIgnoreMouseEvents(true, { forward: true });
 
     this.window = overlay;
 

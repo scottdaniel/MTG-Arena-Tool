@@ -1,3 +1,7 @@
+/*
+globals
+  $
+*/
 const { ipcRenderer: ipc, webFrame, remote } = require("electron");
 
 if (!remote.app.isPackaged) {
@@ -115,23 +119,29 @@ ipc.on("set_priority_timer", function(event, arg) {
   }
 });
 
-ipc.on("edit", event => {
+ipc.on("edit", () => {
   editMode = !editMode;
 
   if (editMode) {
     pd.settings.overlays.forEach((_overlay, index) => {
       let overlayDom = document.getElementById("overlay_" + (index + 1));
+      $(overlayDom)
+        .draggable()
+        .resizable()
+        .on("resize", (event, ui) => {
+          console.log(ui.left, ui.top, ui.width, ui.height);
+        });
+
       overlayDom.classList.add("editable");
-      overlayDom.removeEventListener("mouseenter", setIgnoreFalse);
-      overlayDom.removeEventListener("mouseleave", setIgnoreTrue);
-      if (_overlay.show) {
-        overlayDom.addEventListener("mouseenter", setIgnoreFalse);
-        overlayDom.addEventListener("mouseleave", setIgnoreTrue);
-      }
+      setIgnoreFalse();
     });
   } else {
     pd.settings.overlays.forEach((_overlay, index) => {
       let overlayDom = document.getElementById("overlay_" + (index + 1));
+      $(overlayDom)
+        .draggable("destroy")
+        .resizable("destroy");
+
       overlayDom.classList.remove("editable");
     });
     settingsUpdated();

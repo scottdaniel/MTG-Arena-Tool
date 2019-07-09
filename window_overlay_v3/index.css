@@ -2,6 +2,7 @@ body {
     pointer-events: none;
     background-color: rgba(0, 0, 0, 0.01) !important;
     overflow: hidden;
+    -webkit-app-region: no-drag;
 }
 
 .click-on {
@@ -19,9 +20,9 @@ body {
 .overlay_container {
     border-radius: 3px;
     overflow: hidden;
-    position: absolute;
+    position: absolute !important;
     background-color: rgba(0, 0, 0, 0);
-    -webkit-transition: all 0.2s ease-in;
+    /*-webkit-transition: all 0.2s ease-in;*/
 }
 
 .editable {
@@ -41,7 +42,6 @@ body {
 
 .overlay_deckname {
     background-color: rgba(0,0,0,0.75);
-    -webkit-app-region: drag;
     padding: 12px 0 0 0;
     text-align: center;
     color: #fae5d2;
@@ -51,7 +51,6 @@ body {
     font-size: 14px;
     background-color: rgba(0,0,0,0.75);
     opacity: 1;
-    -webkit-app-region: drag;
     padding: 4px 0 0 0;
     text-align: center;
     color: #fae5d2;
@@ -59,7 +58,6 @@ body {
 
 .overlay_deckcolors {
     background-color: rgba(0,0,0,0.75);
-    -webkit-app-region: drag;
     height: 24px;
     display: flex;
     justify-content: center;
@@ -105,7 +103,6 @@ body {
 }
 
 .overlay_clock_container {
-    -webkit-app-region: drag;
     position: relative;
     display: flex;
     flex-direction: column;
@@ -209,7 +206,6 @@ body {
 .draft_prev,
 .deck_prev,
 .odds_prev {
-    -webkit-app-region: no-drag;
     position: absolute;
     cursor: pointer;
     background: url(../images/prev.png) no-repeat center;
@@ -226,7 +222,6 @@ body {
 .draft_next,
 .deck_next,
 .odds_next {
-    -webkit-app-region: no-drag;
     cursor: pointer;
     position: absolute;
     background: url(../images/next.png) no-repeat center;
