@@ -582,22 +582,18 @@ function ready(fn) {
   }
 }
 
-ipc.on("enable_login", () => {
-  loginEnable();
+ipc.on("toggle_login", (event, arg) => {
+  loginToggle(arg);
 });
 
-ipc.on("disable_login", () => {
-  loginDisable();
-});
-
-function loginDisable() {
-  canLogin = false;
-  $$(".login_link")[0].classList.add("disabled");
-}
-
-function loginEnable() {
-  canLogin = true;
-  $$(".login_link")[0].classList.remove("disabled");
+function loginToggle(toggle) {
+  if (toggle) {
+    canLogin = true;
+    $$(".login_link")[0].classList.remove("disabled");
+  } else {
+    canLogin = false;
+    $$(".login_link")[0].classList.add("disabled");
+  }
 }
 
 ready(function() {
@@ -621,7 +617,7 @@ ready(function() {
         pass = sha1(pass);
       }
       ipcSend("login", { username: user, password: pass });
-      loginDisable();
+      loginToggle(false);
     }
   }
 

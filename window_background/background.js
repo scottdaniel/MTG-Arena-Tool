@@ -1055,7 +1055,7 @@ async function logLoop() {
   ipc_send("show_login", true);
 
   if (auto_login) {
-    ipc_send("disable_login", true);
+    ipc_send("toggle_login", false);
     if (remember_me && username && tokenAuth) {
       ipc_send("popup", {
         text: "Logging in automatically...",

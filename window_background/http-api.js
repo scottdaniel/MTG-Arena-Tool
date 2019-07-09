@@ -291,7 +291,7 @@ function httpBasic() {
                 rstore.set("email", "");
                 rstore.set("token", "");
                 ipc_send("auth", {});
-                ipc_send("enable_login", true);
+                ipc_send("toggle_login", true);
                 ipc_send("clear_pwd", 1);
                 ipc_send("popup", {
                   text: `Error: ${parsedResult.error}`,
