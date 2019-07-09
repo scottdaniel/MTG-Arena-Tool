@@ -217,11 +217,13 @@ function settingsUpdated() {
     //queryElements(deckListDom)[0].innerHTML = "";
     queryElements(deckListDom)[0].style.display = _overlay.deck ? "" : "none";
 
-    setTimeout(function() {
-      queryElements(deckListDom)[0].style.display = getVisible(_overlay, true)
-        ? ""
-        : "none";
-    }, 200);
+    if (_overlay.deck) {
+      setTimeout(function() {
+        queryElements(deckListDom)[0].style.display = getVisible(_overlay, true)
+          ? ""
+          : "none";
+      }, 200);
+    }
 
     const showClock =
       _overlay.clock && !OVERLAY_DRAFT_MODES.includes(_overlay.mode);
@@ -248,7 +250,7 @@ function settingsUpdated() {
   });
 }
 
-function getVisible(settings, useBool = false) {
+function getVisible(settings, getBool = false) {
   if (!settings) return;
 
   const currentModeApplies =
@@ -260,7 +262,7 @@ function getVisible(settings, useBool = false) {
   const shouldShow =
     settings.show && (currentModeApplies || settings.show_always);
 
-  if (useBool) return shouldShow;
+  if (getBool) return shouldShow;
   return shouldShow ? "1" : "0";
 }
 
