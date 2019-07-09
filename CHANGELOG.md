@@ -1,3 +1,14 @@
+## <small>2.8.1 (2019-07-09)</small>
+
+* action log share ([1eb5177](https://github.com/Manuel-777/MTG-Arena-Tool/commit/1eb5177))
+* dont allow double login ([37ec53a](https://github.com/Manuel-777/MTG-Arena-Tool/commit/37ec53a))
+* overlay icons fix ([eb7d2ea](https://github.com/Manuel-777/MTG-Arena-Tool/commit/eb7d2ea))
+* prettier ([fc2da3a](https://github.com/Manuel-777/MTG-Arena-Tool/commit/fc2da3a))
+* Update database.json ([bd3cfcd](https://github.com/Manuel-777/MTG-Arena-Tool/commit/bd3cfcd))
+* use single functions ([a818ac9](https://github.com/Manuel-777/MTG-Arena-Tool/commit/a818ac9))
+
+
+
 ## 2.8.0 (2019-07-07)
 
 * add boosters to economy total ([25ecf43](https://github.com/Manuel-777/MTG-Arena-Tool/commit/25ecf43))
