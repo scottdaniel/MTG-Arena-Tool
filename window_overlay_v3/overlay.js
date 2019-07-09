@@ -90,6 +90,7 @@ let actionLog = [];
 
 let currentMatch = null;
 let arenaState = ARENA_MODE_IDLE;
+let editMode = false;
 
 function ipcSend(method, arg, to = IPC_BACKGROUND) {
   ipc.send("ipc_switch", method, IPC_OVERLAY, arg, to);
@@ -114,6 +115,29 @@ ipc.on("set_priority_timer", function(event, arg) {
   }
 });
 
+ipc.on("edit", event => {
+  editMode = !editMode;
+
+  if (editMode) {
+    pd.settings.overlays.forEach((_overlay, index) => {
+      let overlayDom = document.getElementById("overlay_" + (index + 1));
+      overlayDom.classList.add("editable");
+      overlayDom.removeEventListener("mouseenter", setIgnoreFalse);
+      overlayDom.removeEventListener("mouseleave", setIgnoreTrue);
+      if (_overlay.show) {
+        overlayDom.addEventListener("mouseenter", setIgnoreFalse);
+        overlayDom.addEventListener("mouseleave", setIgnoreTrue);
+      }
+    });
+  } else {
+    pd.settings.overlays.forEach((_overlay, index) => {
+      let overlayDom = document.getElementById("overlay_" + (index + 1));
+      overlayDom.classList.remove("editable");
+    });
+    settingsUpdated();
+  }
+});
+
 ipc.on("close", (event, arg) => {
   close(arg.action, arg.index);
 });
@@ -129,8 +153,11 @@ ipc.on("action_log", function(event, arg) {
   //console.log(arg.seat, arg.str);
 });
 
-ipc.on("settings_updated", () => {
+ipc.on("settings_updated", settingsUpdated);
+
+function settingsUpdated() {
   webFrame.setZoomFactor(pd.settings.overlays[0].scale / 100);
+  if (editMode) return;
   pd.settings.overlays.forEach((_overlay, index) => {
     let overlayDom = document.getElementById("overlay_" + (index + 1));
     //console.log(index, overlay);
@@ -171,7 +198,7 @@ ipc.on("settings_updated", () => {
       overlayDom.addEventListener("mouseleave", setIgnoreTrue);
     }
   });
-});
+}
 
 function getVisible(settings) {
   if (!settings) return;

@@ -13,7 +13,7 @@ class OverlayProcess {
     let area = display.workArea;
 
     const overlay = new electron.BrowserWindow({
-      transparent: true,
+      transparent: false,
       x: area.x,
       y: area.y,
       width: area.width,
@@ -21,21 +21,26 @@ class OverlayProcess {
       frame: false,
       show: true,
       skipTaskbar: true,
-      focusable: false,
+      fullScreen: true,
       title: "MTG Arena Tool",
       webPreferences: {
         nodeIntegration: true
       }
     });
     overlay.loadURL(`file://${__dirname}/index.html`);
-    overlay.setIgnoreMouseEvents(true, { forward: true });
+    //overlay.setIgnoreMouseEvents(true, { forward: true });
 
     this.window = overlay;
 
     overlay.webContents.once("dom-ready", function() {
       //We need to wait for the overlay to be initialized before we interact with it
-      //console.log(`OVERLAY ${index + 1}:  Init updateSettings`);
       overlay.webContents.send("settings_updated");
+
+      // Toggle edit mode
+      // This should have its own setting to turn on / off or change the key maybe
+      globalShortcut.register("Alt+E", () => {
+        overlay.webContents.send("edit", true);
+      });
     });
   }
 }

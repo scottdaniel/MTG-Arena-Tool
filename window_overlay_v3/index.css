@@ -24,6 +24,10 @@ body {
     -webkit-transition: all 0.2s ease-in;
 }
 
+.editable {
+    border: 2px var(--color-g) dashed;
+}
+
 .overlay_decklist {
     overflow-x: hidden;
     overflow-y: auto;
