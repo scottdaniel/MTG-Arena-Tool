@@ -582,6 +582,24 @@ function ready(fn) {
   }
 }
 
+ipc.on("enable_login", () => {
+  loginEnable();
+});
+
+ipc.on("disable_login", () => {
+  loginDisable();
+});
+
+function loginDisable() {
+  canLogin = false;
+  $$(".login_link")[0].classList.add("disabled");
+}
+
+function loginEnable() {
+  canLogin = true;
+  $$(".login_link")[0].classList.remove("disabled");
+}
+
 ready(function() {
   $$(".signup_link")[0].addEventListener("click", function() {
     shell.openExternal("https://mtgatool.com/signup/");
@@ -603,7 +621,7 @@ ready(function() {
         pass = sha1(pass);
       }
       ipcSend("login", { username: user, password: pass });
-      canLogin = false;
+      loginDisable();
     }
   }
 
