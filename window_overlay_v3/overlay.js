@@ -198,7 +198,7 @@ function settingsUpdated() {
     overlayDom.style.top = _overlay.bounds.y + "px";
     overlayDom.style.opacity = getVisible(_overlay);
 
-    //change_background(index, pd.settings.back_url);
+    change_background(index, pd.settings.back_url);
 
     let deckNameDom = `#overlay_${index + 1} .overlay_deckname`;
     let deckColorsDom = `#overlay_${index + 1} .overlay_deckcolors`;
@@ -988,7 +988,9 @@ function recreateClock(index) {
 function change_background(index, arg = "default") {
   if (!arg) return;
 
-  const mainWrapper = queryElements(`#overlay_${index + 1}`)[0];
+  const mainWrapper = queryElements(
+    `#overlay_${index + 1} .overlay_bg_image`
+  )[0];
   if (arg === "default") {
     if (pd.settings.back_url && pd.settings.back_url !== "default") {
       mainWrapper.style.backgroundImage = "url(" + pd.settings.back_url + ")";
@@ -1039,14 +1041,20 @@ ready(function() {
   //
   queryElements(".overlay_container").forEach(node => {
     node.innerHTML = `
-      <div class="overlay_deckname"></div>
-      <div class="overlay_deckcolors"></div>
-      <div class="overlay_decklist"></div>
-      <div class="overlay_clock_container">
-          <div class="clock_prev"></div>
-          <div class="clock_turn"></div>
-          <div class="clock_elapsed"></div>
-          <div class="clock_next"></div>
+      <div class="outer_wrapper">
+          <div class="overlay_wrapper overlay_bg_image" >
+          </div>
+      </div>
+      <div class="outer_wrapper">
+        <div class="overlay_deckname"></div>
+        <div class="overlay_deckcolors"></div>
+        <div class="overlay_decklist"></div>
+        <div class="overlay_clock_container">
+            <div class="clock_prev"></div>
+            <div class="clock_turn"></div>
+            <div class="clock_elapsed"></div>
+            <div class="clock_next"></div>
+        </div>
       </div>`;
   });
 });
