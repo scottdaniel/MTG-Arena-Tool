@@ -141,6 +141,7 @@ ipc.on("edit", () => {
 
       overlayDom.classList.remove("editable");
     });
+    setIgnoreTrue();
     saveOverlaysPosition();
   }
 });
@@ -220,12 +221,14 @@ function settingsUpdated() {
 
     // Only issue with this is when two overlays are on top of eachother
     // But when we allow editing the layour we should not allow that
+    /*
     overlayDom.removeEventListener("mouseenter", setIgnoreFalse);
     overlayDom.removeEventListener("mouseleave", setIgnoreTrue);
     if (_overlay.show) {
       overlayDom.addEventListener("mouseenter", setIgnoreFalse);
       overlayDom.addEventListener("mouseleave", setIgnoreTrue);
     }
+    */
   });
 }
 
