@@ -127,10 +127,7 @@ ipc.on("edit", () => {
       let overlayDom = document.getElementById("overlay_" + (index + 1));
       $(overlayDom)
         .draggable()
-        .resizable()
-        .on("resize", (event, ui) => {
-          console.log(ui.left, ui.top, ui.width, ui.height);
-        });
+        .resizable();
 
       overlayDom.classList.add("editable");
       setIgnoreFalse();
@@ -144,9 +141,31 @@ ipc.on("edit", () => {
 
       overlayDom.classList.remove("editable");
     });
-    settingsUpdated();
+    saveOverlaysPosition();
   }
 });
+
+function saveOverlaysPosition() {
+  // Update each overlay with the new dimensions
+  const overlays = [...pd.settings.overlays];
+
+  overlays.forEach((_overlay, index) => {
+    let overlayDom = document.getElementById("overlay_" + (index + 1));
+    let _new = _overlay.bounds;
+    _new.height = parseInt(overlayDom.style.height);
+    _new.width = parseInt(overlayDom.style.width);
+    _new.x = parseInt(overlayDom.style.left);
+    _new.y = parseInt(overlayDom.style.top);
+
+    const newOverlay = {
+      ...overlays[index], // old overlay
+      bounds: _new // new setting
+    };
+    overlays[index] = newOverlay;
+  });
+
+  ipcSend("save_user_settings", { overlays });
+}
 
 ipc.on("close", (event, arg) => {
   close(arg.action, arg.index);
