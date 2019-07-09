@@ -198,26 +198,36 @@ function settingsUpdated() {
     overlayDom.style.top = _overlay.bounds.y + "px";
     overlayDom.style.opacity = getVisible(_overlay);
 
+    //change_background(index, pd.settings.back_url);
+
     let deckNameDom = `#overlay_${index + 1} .overlay_deckname`;
     let deckColorsDom = `#overlay_${index + 1} .overlay_deckcolors`;
     let deckListDom = `#overlay_${index + 1} .overlay_decklist`;
     let clockDom = `#overlay_${index + 1} .overlay_clock_container`;
 
-    queryElements(deckNameDom)[0].innerHTML = "";
+    //queryElements(deckNameDom)[0].innerHTML = "";
     queryElements(deckNameDom)[0].style = "";
     queryElements(deckNameDom)[0].style.display = _overlay.title ? "" : "none";
-    queryElements(deckColorsDom)[0].innerHTML = "";
+    //queryElements(deckColorsDom)[0].innerHTML = "";
     queryElements(deckColorsDom)[0].style = "";
     queryElements(deckColorsDom)[0].style.display = _overlay.title
       ? ""
       : "none";
 
-    queryElements(deckListDom)[0].innerHTML = "";
+    //queryElements(deckListDom)[0].innerHTML = "";
     queryElements(deckListDom)[0].style.display = _overlay.deck ? "" : "none";
 
     const showClock =
       _overlay.clock && !OVERLAY_DRAFT_MODES.includes(_overlay.mode);
     queryElements(clockDom)[0].style.display = showClock ? "" : "none";
+
+    if (_overlay.show || _overlay.show_always) {
+      if (OVERLAY_DRAFT_MODES.includes(_overlay.mode)) {
+        updateDraftView(index);
+      } else {
+        updateMatchView(index);
+      }
+    }
 
     // Only issue with this is when two overlays are on top of eachother
     // But when we allow editing the layour we should not allow that
@@ -801,7 +811,7 @@ function updateDraftView(index, _packN = -1, _pickN = -1) {
 
     const colors = get_ids_colors(draftPack);
     colors.forEach(function(color) {
-      $$(".overlay_deckcolors")[0].appendChild(
+      queryElements(deckColorsDom)[0].appendChild(
         createDiv(["mana_s20", "mana_" + MANA[color]])
       );
     });
@@ -964,6 +974,31 @@ function recreateClock(index) {
   }
 
   updateClock();
+}
+
+function change_background(index, arg = "default") {
+  if (!arg) return;
+
+  const mainWrapper = queryElements(`#overlay_${index + 1}`)[0];
+  if (arg === "default") {
+    if (pd.settings.back_url && pd.settings.back_url !== "default") {
+      mainWrapper.style.backgroundImage = "url(" + pd.settings.back_url + ")";
+    } else {
+      mainWrapper.style.backgroundImage =
+        "url(../images/Ghitu-Lavarunner-Dominaria-MtG-Art.jpg)";
+    }
+  } else {
+    const xhr = new XMLHttpRequest();
+    xhr.open("HEAD", arg);
+    xhr.onload = function() {
+      if (xhr.status === 200) {
+        mainWrapper.style.backgroundImage = "url(" + arg + ")";
+      } else {
+        mainWrapper.style.backgroundImage = "";
+      }
+    };
+    xhr.send();
+  }
 }
 
 function close(bool, index) {

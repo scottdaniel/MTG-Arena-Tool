@@ -18,15 +18,32 @@ body {
 }
 
 .overlay_container {
-    border-radius: 3px;
+    background-position: center;
+    border-radius: 4px;
+    background-size: cover;
     overflow: hidden;
     position: absolute !important;
     background-color: rgba(0, 0, 0, 0);
-    /*-webkit-transition: all 0.2s ease-in;*/
+    -webkit-transition: all 0.2s ease-in;
 }
+
+/*
+.overlay_container:after {
+    background: url(../images/background_overlay.png);
+    content: ' ';
+    top: 0;
+    left: 0;
+    width: calc(100% - 0px);
+    height: calc(100% - 0px);
+    position: absolute;
+    background-size: 100% 100%;
+    z-index: 1;
+}
+*/
 
 .editable {
     border: 2px var(--color-g) dashed;
+    -webkit-transition: none !important;
 }
 
 .overlay_decklist {
@@ -42,7 +59,7 @@ body {
 
 .overlay_deckname {
     background-color: rgba(0,0,0,0.75);
-    padding: 12px 0 0 0;
+    padding: 4px 0 0 0;
     text-align: center;
     color: #fae5d2;
 }
@@ -62,7 +79,8 @@ body {
     display: flex;
     justify-content: center;
     padding-top: 4px;
-    margin: 0 0 auto 0;
+    padding-bottom: 4px;
+    margin: 0 0 1px 0;
 }
 
 .overlay_separator {
