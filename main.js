@@ -358,6 +358,15 @@ function setSettings(settings) {
   launchToTray = settings.launch_to_tray;
   mainWindow.webContents.send("settings_updated");
 
+  settings.overlays.forEach((_settings, index) => {
+    globalShortcut.unregister("Alt+" + (index + 1));
+    if (_settings.keyboard_shortcut) {
+      globalShortcut.register("Alt+" + (index + 1), () => {
+        overlay.window.webContents.send("close", { action: -1, index: index });
+      });
+    }
+  });
+
   // Send settings update
   overlay.window.setAlwaysOnTop(settings.overlays[0].ontop, "floating");
   overlay.window.webContents.send("settings_updated");

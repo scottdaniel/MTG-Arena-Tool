@@ -114,6 +114,10 @@ ipc.on("set_priority_timer", function(event, arg) {
   }
 });
 
+ipc.on("close", (event, arg) => {
+  close(arg.action, arg.index);
+});
+
 ipc.on("action_log", function(event, arg) {
   arg.str = striptags(arg.str, ["log-card", "log-ability"]);
 
@@ -901,6 +905,19 @@ function recreateClock(index) {
   }
 
   updateClock();
+}
+
+function close(bool, index) {
+  // -1 to toggle, else set
+  let _new = bool == -1 ? !pd.settings.overlays[index].show : bool;
+
+  const overlays = [...pd.settings.overlays];
+  const newOverlay = {
+    ...overlays[index], // old overlay
+    show: _new // new setting
+  };
+  overlays[index] = newOverlay;
+  ipcSend("save_user_settings", { overlays });
 }
 
 function ready(fn) {
