@@ -30,7 +30,7 @@ const debugIPC = false;
 var mainWindow;
 var updaterWindow;
 var background;
-var overlays = [];
+let overlay = null;
 var mainTimeout = null;
 
 var tray = null;
@@ -41,12 +41,6 @@ const ipc = electron.ipcMain;
 
 var mainLoaded = false;
 var backLoaded = false;
-
-const {
-  OverlayProcess,
-  setArenaState,
-  setBackground
-} = require("./window_overlay/overlay-process.js");
 
 const singleLock = app.requestSingleInstanceLock();
 
@@ -132,7 +126,10 @@ function startApp() {
   }
   mainWindow = createMainWindow();
   background = createBackgroundWindow();
-  setBackground(background);
+
+  const overlayProcess = require("./window_overlay_v3/overlay-process.js");
+  overlay = new overlayProcess();
+
   appStarted = true;
 
   globalShortcut.register("Alt+Shift+D", () => {
@@ -143,7 +140,7 @@ function startApp() {
   });
 
   globalShortcut.register("Alt+Shift+O", () => {
-    overlays.forEach(overlay => overlay.window.toggleDevTools());
+    overlay.window.toggleDevTools();
   });
 
   mainWindow.webContents.once("dom-ready", () => {
@@ -168,8 +165,9 @@ function startApp() {
   }
 
   ipc.on("ipc_switch", function(event, method, from, arg, to) {
-    const overlayMux = () =>
-      overlays.forEach(overlay => overlay.window.webContents.send(method, arg));
+    const overlayMux = () => {
+      overlay.window.webContents.send(method, arg);
+    };
 
     if (debugIPC && method != "log_read") {
       if (
@@ -225,8 +223,8 @@ function startApp() {
 
       // to main js / window handling
       case "set_arena_state":
-        setArenaState(arg);
-        overlays.forEach(overlay => overlay.updateVisible());
+        //setArenaState(arg);
+        //overlay.updateVisible();
         break;
 
       case "set_draft_cards":
@@ -238,11 +236,8 @@ function startApp() {
         break;
 
       case "overlay_minimize":
-        overlays.forEach((overlay, index) => {
-          if (index !== arg) return;
-          if (overlay.window.isMinimized()) return;
-          overlay.window.minimize();
-        });
+        if (overlay.window.isMinimized()) return;
+        overlay.window.minimize();
         break;
 
       case "renderer_set_bounds":
@@ -278,9 +273,7 @@ function startApp() {
         break;
 
       case "reset_overlay_pos":
-        if (arg < overlays.length) {
-          overlays[arg].window.setPosition(0, 0);
-        }
+        overlay.window.setPosition(0, 0);
         break;
 
       case "updates_check":
@@ -364,13 +357,9 @@ function setSettings(settings) {
   launchToTray = settings.launch_to_tray;
   mainWindow.webContents.send("settings_updated");
 
-  settings.overlays.forEach((overlaySettings, index) => {
-    if (index < overlays.length) {
-      overlays[index].updateSettings(overlaySettings);
-    } else {
-      overlays.push(new OverlayProcess(overlaySettings, index));
-    }
-  });
+  // Send settings update
+  overlay.window.setAlwaysOnTop(settings.overlays[0].ontop, "floating");
+  overlay.window.webContents.send("settings_updated");
 }
 
 // Catch exceptions
