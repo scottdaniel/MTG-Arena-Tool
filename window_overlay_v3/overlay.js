@@ -204,6 +204,11 @@ function settingsUpdated() {
     let deckColorsDom = `#overlay_${index + 1} .overlay_deckcolors`;
     let deckListDom = `#overlay_${index + 1} .overlay_decklist`;
     let clockDom = `#overlay_${index + 1} .overlay_clock_container`;
+    let bgImageDom = `#overlay_${index + 1} .overlay_bg_image`;
+    let elementsDom = `#overlay_${index + 1} .elements_wrapper`;
+
+    queryElements(bgImageDom)[0].style.opacity = _overlay.alpha_back.toString();
+    queryElements(elementsDom)[0].style.opacity = _overlay.alpha.toString();
 
     //queryElements(deckNameDom)[0].innerHTML = "";
     queryElements(deckNameDom)[0].style = "";
@@ -1045,7 +1050,7 @@ ready(function() {
           <div class="overlay_wrapper overlay_bg_image" >
           </div>
       </div>
-      <div class="outer_wrapper">
+      <div class="outer_wrapper elements_wrapper">
         <div class="overlay_deckname"></div>
         <div class="overlay_deckcolors"></div>
         <div class="overlay_decklist"></div>
