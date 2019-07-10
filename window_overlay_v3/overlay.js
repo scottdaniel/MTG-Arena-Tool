@@ -43,11 +43,13 @@ const {
   ARENA_MODE_IDLE,
   ARENA_MODE_MATCH,
   ARENA_MODE_DRAFT,
+  COLORS_ALL,
   DRAFT_RANKS,
   MANA,
   PACK_SIZES,
   IPC_BACKGROUND,
   IPC_OVERLAY,
+  IPC_MAIN,
   OVERLAY_FULL,
   OVERLAY_LEFT,
   OVERLAY_ODDS,
@@ -130,7 +132,7 @@ ipc.on("edit", () => {
         .resizable();
 
       overlayDom.classList.add("editable");
-      setIgnoreFalse();
+      setIgnoreFalse(true);
     });
   } else {
     pd.settings.overlays.forEach((_overlay, index) => {
@@ -141,7 +143,7 @@ ipc.on("edit", () => {
 
       overlayDom.classList.remove("editable");
     });
-    setIgnoreTrue();
+    setIgnoreTrue(true);
     saveOverlaysPosition();
   }
 });
@@ -271,12 +273,16 @@ function getVisible(settings, getBool = false) {
   return shouldShow ? "1" : "0";
 }
 
-function setIgnoreTrue() {
-  remote.getCurrentWindow().setIgnoreMouseEvents(true, { forward: true });
+function setIgnoreTrue(force = false) {
+  if (!editMode || force) {
+    remote.getCurrentWindow().setIgnoreMouseEvents(true, { forward: true });
+  }
 }
 
-function setIgnoreFalse() {
-  remote.getCurrentWindow().setIgnoreMouseEvents(false);
+function setIgnoreFalse(force = false) {
+  if (!editMode || force) {
+    remote.getCurrentWindow().setIgnoreMouseEvents(false);
+  }
 }
 
 ipc.on("set_draft_cards", (event, draft) => {
@@ -637,11 +643,21 @@ function drawDeckOdds(index) {
   let deckListDiv = queryElements(deckListDom)[0];
 
   const navCont = createDiv(["overlay_samplesize_container"]);
-  navCont.appendChild(createDiv(["odds_prev", "click-on"]));
+
+  let oddsPrev = createDiv(["odds_prev", "click-on"]);
+  let oddsNext = createDiv(["odds_next", "click-on"]);
+  // Allow clicks
+  oddsPrev.addEventListener("mouseenter", setIgnoreFalse);
+  oddsPrev.addEventListener("mouseleave", setIgnoreTrue);
+  oddsNext.addEventListener("mouseenter", setIgnoreFalse);
+  oddsNext.addEventListener("mouseleave", setIgnoreTrue);
+
+  navCont.appendChild(oddsPrev);
   navCont.appendChild(
     createDiv(["odds_number"], "Sample size: " + oddsSampleSize)
   );
-  navCont.appendChild(createDiv(["odds_next", "click-on"]));
+  navCont.appendChild(oddsNext);
+
   deckListDiv.appendChild(navCont);
 
   deckListDiv.appendChild(createDiv(["chance_title"])); // Add some space
@@ -1043,7 +1059,6 @@ function ready(fn) {
 }
 
 ready(function() {
-  //
   queryElements(".overlay_container").forEach(node => {
     node.innerHTML = `
       <div class="outer_wrapper">
@@ -1060,8 +1075,42 @@ ready(function() {
             <div class="clock_elapsed"></div>
             <div class="clock_next"></div>
         </div>
+      </div>
+      <div class="outer_wrapper top_nav_wrapper">
+        <div class="flex_item overlay_icon"></div>
+        <div class="button settings" style="margin: 0;"></div>
+        <div class="button close" style="margin-right: 4px;"></div>
       </div>`;
   });
+  // Force a dom refresh
+  queryElements(".overlay_container")[0].style.display = "none";
+  queryElements(".overlay_container")[0].style.display = "";
+
+  setTimeout(() => {
+    pd.settings.overlays.forEach((_overlay, index) => {
+      let iconDom = `#overlay_${index + 1} .overlay_icon`;
+      let settingsDom = `#overlay_${index + 1} .settings`;
+      let closeDom = `#overlay_${index + 1} .close`;
+
+      queryElements(iconDom)[0].style.backgroundColor = `var(--color-${
+        COLORS_ALL[index]
+      })`;
+
+      queryElements(settingsDom)[0].addEventListener("click", function() {
+        ipcSend("renderer_show");
+        ipcSend("force_open_overlay_settings", index, IPC_MAIN);
+      });
+      queryElements(closeDom)[0].addEventListener("click", function() {
+        close(-1, index);
+      });
+    });
+    queryElements(".button").forEach(el =>
+      el.addEventListener("mouseenter", setIgnoreFalse)
+    );
+    queryElements(".button").forEach(el =>
+      el.addEventListener("mouseleave", setIgnoreTrue)
+    );
+  }, 500);
 });
 
 function get_ids_colors(list) {
