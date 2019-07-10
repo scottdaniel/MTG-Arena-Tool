@@ -3,7 +3,9 @@ const { globalShortcut, screen } = require("electron");
 
 class OverlayProcess {
   constructor() {
-    this.createWindow();
+    setTimeout(() => {
+      this.createWindow();
+    }, 1000);
     return this;
   }
 
