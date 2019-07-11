@@ -23,6 +23,10 @@ const {
 } = require("./renderer-util");
 
 const byId = id => document.getElementById(id);
+const vaultPercentFormat = {
+  minimumFractionDigits: 1,
+  maximumFractionDigits: 1
+};
 var filterEconomy = "All";
 let showArchived = false;
 var daysago = 0;
@@ -254,7 +258,7 @@ function createDayHeader(change) {
   gridVault.appendChild(createDiv(["economy_vault"], "", { title: "Vault" }));
   const vatx = tx.cloneNode(true);
   const deltaPercent = dayList[daysago].vaultProgress / 100.0;
-  vatx.innerHTML = formatPercent(deltaPercent);
+  vatx.innerHTML = formatPercent(deltaPercent, vaultPercentFormat);
   const upcontva = createDiv(["economy_delta"]);
   upcontva.style.width = "auto";
   upcontva.appendChild(vatx);
@@ -665,7 +669,8 @@ function createChangeRow(change, economyId) {
           // only uncommons and commons go to vault
           let vaultProgressDelta =
             card.rarity === "uncommon" ? 1 / 300 : 1 / 900;
-          img.title = "Vault:+" + formatPercent(vaultProgressDelta);
+          img.title =
+            "Vault:+" + formatPercent(vaultProgressDelta, vaultPercentFormat);
         }
 
         d.appendChild(img);
@@ -873,7 +878,7 @@ function createEconomyUI(mainDiv) {
   icva.style.marginLeft = "24px";
   div.appendChild(icva);
   ntx = tx.cloneNode(true);
-  ntx.innerHTML = pd.economy.vault + "%";
+  ntx.innerHTML = formatPercent(pd.economy.vault / 100, vaultPercentFormat);
   div.appendChild(ntx);
 
   const icwcc = createDiv(["economy_wc_med", "wc_common"]);
