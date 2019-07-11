@@ -5,6 +5,12 @@ body {
     -webkit-app-region: no-drag;
 }
 
+.main_wrapper, .overlay_wrapper, .outer_wrapper {
+    padding: 0 !important;
+    height: 100% !important;
+    width: 100% !important;
+}
+
 .click-on {
     pointer-events: all;
 }
@@ -19,7 +25,7 @@ body {
 
 .overlay_container {
     background-position: center;
-    border-radius: 12px;
+    border-radius: 4px;
     background-size: cover;
     overflow: hidden;
     position: absolute !important;
