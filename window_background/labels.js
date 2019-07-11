@@ -621,15 +621,15 @@ function onLabelTrackProgressUpdated(entry, json) {
   if (!json) return;
   // console.log(json);
   const economy = { ...pd.economy };
-  json.forEach(entry => {
-    if (!entry.trackDiff) return; // ignore rewardWebDiff updates for now
+  json.forEach(track => {
+    if (!track.trackDiff) return; // ignore rewardWebDiff updates for now
 
     const transaction = {
       context: "Track Progress",
       timestamp: entry.timestamp,
       date: parseWotcTime(entry.timestamp),
       delta: {},
-      ...entry
+      ...track
     };
 
     const trackDiff = minifiedDelta(transaction.trackDiff);
@@ -639,11 +639,11 @@ function onLabelTrackProgressUpdated(entry, json) {
     }
     transaction.trackDiff = trackDiff;
 
-    if (entry.trackName) {
-      economy.trackName = entry.trackName;
+    if (track.trackName) {
+      economy.trackName = track.trackName;
     }
-    if (entry.trackTier !== undefined) {
-      economy.trackTier = entry.trackTier;
+    if (track.trackTier !== undefined) {
+      economy.trackTier = track.trackTier;
     }
     if (trackDiff.currentLevel !== undefined) {
       economy.currentLevel = trackDiff.currentLevel;
