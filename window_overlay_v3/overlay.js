@@ -208,14 +208,15 @@ function settingsUpdated() {
     let clockDom = `#overlay_${index + 1} .overlay_clock_container`;
     let bgImageDom = `#overlay_${index + 1} .overlay_bg_image`;
     let elementsDom = `#overlay_${index + 1} .elements_wrapper`;
+    let topDom = `#overlay_${index + 1} .top_nav_wrapper`;
 
     queryElements(bgImageDom)[0].style.opacity = _overlay.alpha_back.toString();
     queryElements(elementsDom)[0].style.opacity = _overlay.alpha.toString();
 
-    //queryElements(deckNameDom)[0].innerHTML = "";
+    queryElements(topDom)[0].style = "";
+    queryElements(topDom)[0].style.display = _overlay.top ? "" : "none";
     queryElements(deckNameDom)[0].style = "";
     queryElements(deckNameDom)[0].style.display = _overlay.title ? "" : "none";
-    //queryElements(deckColorsDom)[0].innerHTML = "";
     queryElements(deckColorsDom)[0].style = "";
     queryElements(deckColorsDom)[0].style.display = _overlay.title
       ? ""
