@@ -671,6 +671,47 @@ function onLabelTrackProgressUpdated(entry, json) {
   if (debugLog || !firstPass) store.set("economy", economy);
 }
 
+//
+function onLabelTrackRewardTierUpdated(entry, json) {
+  if (!json) return;
+  // console.log(json);
+  const economy = { ...pd.economy };
+
+  const transaction = {
+    context: "Track.RewardTier.Updated",
+    timestamp: entry.timestamp,
+    date: parseWotcTime(entry.timestamp),
+    delta: {},
+    ...json
+  };
+
+  if (transaction.inventoryDelta) {
+    // this is redundant data, removing to save space
+    delete transaction.inventoryDelta;
+  }
+  if (transaction.newTier !== undefined) {
+    economy.trackTier = transaction.newTier;
+  }
+
+  if (transaction.orbCountDiff) {
+    const orbDiff = minifiedDelta(transaction.orbCountDiff);
+    transaction.orbCountDiff = orbDiff;
+    if (orbDiff.currentOrbCount !== undefined) {
+      economy.currentOrbCount = orbDiff.currentOrbCount;
+    }
+  }
+
+  // Construct a unique ID
+  transaction.id = sha1(
+    entry.timestamp + transaction.oldTier + transaction.newTier
+  );
+  saveEconomyTransaction(transaction);
+
+  // console.log(economy);
+  setData({ economy });
+  if (debugLog || !firstPass) store.set("economy", economy);
+}
+
 function onLabelInEventDeckSubmit(entry, json) {
   if (!json) return;
   select_deck(json);
@@ -947,5 +988,6 @@ module.exports = {
   onLabelInEventGetSeasonAndRankDetail,
   onLabelGetPlayerInventoryGetRewardSchedule,
   onLabelRankUpdated,
-  onLabelTrackProgressUpdated
+  onLabelTrackProgressUpdated,
+  onLabelTrackRewardTierUpdated
 };
