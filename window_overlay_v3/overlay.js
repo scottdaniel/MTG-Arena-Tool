@@ -39,6 +39,11 @@ const {
 } = require("../shared/card-hover");
 const { queryElements, createDiv } = require("../shared/dom-fns");
 
+//const activeWin = require("active-win");
+//(async () => {
+//  console.log(await activeWin());
+//})();
+
 const {
   ARENA_MODE_IDLE,
   ARENA_MODE_MATCH,

@@ -45,6 +45,18 @@ class OverlayProcess {
       });
     });
   }
+
+  showWindow() {
+    const display = screen.getPrimaryDisplay();
+    let area = display.workArea;
+    this.window.setSize(area.width, area.height);
+    this.window.setPosition(area.x, area.y);
+  }
+
+  hideWindow() {
+    this.window.setSize(5, 5);
+    this.window.setPosition(-10, -10);
+  }
 }
 
 module.exports = OverlayProcess;
