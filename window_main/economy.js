@@ -66,13 +66,15 @@ const economyTransactionContextsMap = {
   Store: "Store Transaction",
   "Store.Fulfillment": "Store Transaction",
   "Store.Fulfillment.Chest": "Store Transaction",
+  "Store.Fulfillment.Chest.ProgressionRewards": "Store Transaction",
   "Store.Fulfillment.Boosters": "Store Booster Purchase",
   "Store.Fulfillment.Gems": "Store Gems Purchase",
   "WildCard.Redeem": "Redeem Wildcard",
   "Vault.Complete": "Vault Opening",
   "PlayerReward.OnMatchCompletedWeekly": "Weekly Rewards",
   "PlayerProgression.OrbSpend": "Orb Spend",
-  "Track.Progress": "Track Progress"
+  "Track.Progress": "Track Progress",
+  "Track.RewardTier.Updated": "Mastery Pass Purchase"
 };
 
 const trackCodeMap = {
