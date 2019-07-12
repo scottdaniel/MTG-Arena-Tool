@@ -71,7 +71,13 @@ const economyTransactionContextsMap = {
   "WildCard.Redeem": "Redeem Wildcard",
   "Vault.Complete": "Vault Opening",
   "PlayerReward.OnMatchCompletedWeekly": "Weekly Rewards",
-  "PlayerProgression.OrbSpend": "Orb Spend"
+  "PlayerProgression.OrbSpend": "Orb Spend",
+  "Track.Progress": "Track Progress"
+};
+
+const trackCodeMap = {
+  BattlePass_M20: "Core Set 2020",
+  EarlyPlayerProgression: "New Player Experience"
 };
 
 function localDateFormat(date) {
@@ -91,6 +97,10 @@ function localDayDateFormat(date) {
     day="numeric">
     ${date.toDateString()}
   </local-time>`;
+}
+
+function getReadableTrack(trackCode) {
+  return trackCodeMap[trackCode] || trackCode;
 }
 
 function getReadableQuest(questCode) {
@@ -129,19 +139,26 @@ function getPrettyContext(context, full = true) {
     return "-";
   }
 
+  if (context.startsWith("Track.Progress")) {
+    const trackCode = context.substring(15);
+    return full
+      ? `Track Progress: ${getReadableTrack(trackCode)}`
+      : "Track Progress";
+  }
+
   if (context.startsWith("Event.Prize")) {
-    var eventCode = context.substring(12);
+    const eventCode = context.substring(12);
     return full ? `Event Prize: ${getReadableEvent(eventCode)}` : "Event Prize";
   }
 
   if (context.startsWith("Quest.Completed")) {
-    var questCode = context.substring(16);
+    const questCode = context.substring(16);
     return full
       ? `Quest Completed: ${getReadableQuest(questCode)}`
       : "Quest Completed";
   }
 
-  var pretty = economyTransactionContextsMap[context];
+  const pretty = economyTransactionContextsMap[context];
 
   // If there's no valid pretty context keep the code as is.
   return pretty || context;

@@ -625,7 +625,7 @@ function onLabelTrackProgressUpdated(entry, json) {
     if (!track.trackDiff) return; // ignore rewardWebDiff updates for now
 
     const transaction = {
-      context: "Track Progress",
+      context: "Track.Progress." + (track.trackName || ""),
       timestamp: entry.timestamp,
       date: parseWotcTime(entry.timestamp),
       delta: {},
