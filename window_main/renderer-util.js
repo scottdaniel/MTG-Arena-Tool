@@ -793,10 +793,9 @@ function showColorpicker(
 
 //
 exports.formatPercent = formatPercent;
-function formatPercent(value, config = {}) {
+function formatPercent(value, config = { maximumSignificantDigits: 2 }) {
   return value.toLocaleString([], {
     style: "percent",
-    maximumSignificantDigits: 2,
     ...config
   });
 }

@@ -23,6 +23,10 @@ const {
 } = require("./renderer-util");
 
 const byId = id => document.getElementById(id);
+const vaultPercentFormat = {
+  minimumFractionDigits: 1,
+  maximumFractionDigits: 1
+};
 var filterEconomy = "All";
 let showArchived = false;
 var daysago = 0;
@@ -62,12 +66,20 @@ const economyTransactionContextsMap = {
   Store: "Store Transaction",
   "Store.Fulfillment": "Store Transaction",
   "Store.Fulfillment.Chest": "Store Transaction",
+  "Store.Fulfillment.Chest.ProgressionRewards": "Store Transaction",
   "Store.Fulfillment.Boosters": "Store Booster Purchase",
   "Store.Fulfillment.Gems": "Store Gems Purchase",
   "WildCard.Redeem": "Redeem Wildcard",
   "Vault.Complete": "Vault Opening",
   "PlayerReward.OnMatchCompletedWeekly": "Weekly Rewards",
-  "PlayerProgression.OrbSpend": "Orb Spend"
+  "PlayerProgression.OrbSpend": "Orb Spend",
+  "Track.Progress": "Track Progress",
+  "Track.RewardTier.Updated": "Mastery Pass Purchase"
+};
+
+const trackCodeMap = {
+  BattlePass_M20: "Core Set 2020",
+  EarlyPlayerProgression: "New Player Experience"
 };
 
 function localDateFormat(date) {
@@ -87,6 +99,10 @@ function localDayDateFormat(date) {
     day="numeric">
     ${date.toDateString()}
   </local-time>`;
+}
+
+function getReadableTrack(trackCode) {
+  return trackCodeMap[trackCode] || trackCode;
 }
 
 function getReadableQuest(questCode) {
@@ -125,19 +141,26 @@ function getPrettyContext(context, full = true) {
     return "-";
   }
 
+  if (context.startsWith("Track.Progress")) {
+    const trackCode = context.substring(15);
+    return full
+      ? `Track Progress: ${getReadableTrack(trackCode)}`
+      : "Track Progress";
+  }
+
   if (context.startsWith("Event.Prize")) {
-    var eventCode = context.substring(12);
+    const eventCode = context.substring(12);
     return full ? `Event Prize: ${getReadableEvent(eventCode)}` : "Event Prize";
   }
 
   if (context.startsWith("Quest.Completed")) {
-    var questCode = context.substring(16);
+    const questCode = context.substring(16);
     return full
       ? `Quest Completed: ${getReadableQuest(questCode)}`
       : "Quest Completed";
   }
 
-  var pretty = economyTransactionContextsMap[context];
+  const pretty = economyTransactionContextsMap[context];
 
   // If there's no valid pretty context keep the code as is.
   return pretty || context;
@@ -162,7 +185,7 @@ function renderData(container, index) {
   const revIndex = sortedChanges.length - index - 1;
   const change = sortedChanges[revIndex];
 
-  if (change === undefined) return 0;
+  if (!change) return 0;
   if (change.archived && !showArchived) return 0;
 
   // print out daily summaries but no sub-events
@@ -184,6 +207,16 @@ function renderData(container, index) {
   if (daysago != differenceInCalendarDays(new Date(), new Date(change.date))) {
     container.appendChild(createDayHeader(change));
     rowsAdded++;
+  }
+
+  // Track Progress txns are mostly redundant with inventory change txns
+  // Non-duplicate data (should be) only on txns with level changes
+  if (selectVal === "Track Progress") {
+    if (!change.trackDiff) return rowsAdded;
+    const lvlDelta = Math.abs(
+      (change.trackDiff.currentLevel || 0) - (change.trackDiff.oldLevel || 0)
+    );
+    if (!lvlDelta) return rowsAdded;
   }
 
   const div = createChangeRow(change, change.id);
@@ -243,12 +276,8 @@ function createDayHeader(change) {
   gridVault.style.gridArea = "1 / 3 / auto / 4";
   gridVault.appendChild(createDiv(["economy_vault"], "", { title: "Vault" }));
   const vatx = tx.cloneNode(true);
-  const rawDelta = dayList[daysago].vaultProgress;
-  // Assume vault can only be redeemed once per day
-  // Rely on modulo arithmetic to derive pure vault gain
-  const delta = rawDelta < 0 ? rawDelta + 100 : rawDelta;
-  const deltaPercent = delta / 100.0;
-  vatx.innerHTML = formatPercent(deltaPercent);
+  const deltaPercent = dayList[daysago].vaultProgress / 100.0;
+  vatx.innerHTML = formatPercent(deltaPercent, vaultPercentFormat);
   const upcontva = createDiv(["economy_delta"]);
   upcontva.style.width = "auto";
   upcontva.appendChild(vatx);
@@ -504,20 +533,6 @@ function createChangeRow(change, economyId) {
       iclvl.style.lineHeight = "64px";
       flexRight.appendChild(iclvl);
     }
-
-    let expDelta =
-      (change.trackDiff.currentExp || 0) - (change.trackDiff.oldExp || 0);
-    if (expDelta) {
-      // Rely on modulo arithmetic to derive pure exp gain
-      if (expDelta < 0) expDelta += 1000;
-
-      flexRight.appendChild(
-        createDiv(["economy_exp"], "", { title: "Experience" })
-      );
-      bon = createDiv(["economy_sub"], formatNumber(expDelta));
-      bon.style.lineHeight = "64px";
-      flexRight.appendChild(bon);
-    }
   }
 
   if (change.orbCountDiff) {
@@ -531,6 +546,15 @@ function createChangeRow(change, economyId) {
       bon.style.lineHeight = "64px";
       flexRight.appendChild(bon);
     }
+  }
+
+  if (change.xpGained) {
+    flexRight.appendChild(
+      createDiv(["economy_exp"], "", { title: "Experience" })
+    );
+    bon = createDiv(["economy_sub"], formatNumber(change.xpGained));
+    bon.style.lineHeight = "64px";
+    flexRight.appendChild(bon);
   }
 
   if (checkBoosterAdded && change.delta.boosterDelta) {
@@ -664,7 +688,8 @@ function createChangeRow(change, economyId) {
           // only uncommons and commons go to vault
           let vaultProgressDelta =
             card.rarity === "uncommon" ? 1 / 300 : 1 / 900;
-          img.title = "Vault:+" + formatPercent(vaultProgressDelta);
+          img.title =
+            "Vault:+" + formatPercent(vaultProgressDelta, vaultPercentFormat);
         }
 
         d.appendChild(img);
@@ -798,16 +823,12 @@ function createEconomyUI(mainDiv) {
     if (change.delta.cardsAdded) {
       dayList[daysago].cardsEarned += change.delta.cardsAdded.length;
     }
-    if (change.delta.vaultProgressDelta) {
+    if (change.delta.vaultProgressDelta > 0) {
       dayList[daysago].vaultProgress += change.delta.vaultProgressDelta;
     }
 
-    if (change.trackDiff) {
-      let expDelta =
-        (change.trackDiff.currentExp || 0) - (change.trackDiff.oldExp || 0);
-      // Rely on modulo arithmetic to derive pure exp gain
-      if (expDelta < 0) expDelta += 1000;
-      dayList[daysago].expEarned += expDelta;
+    if (change.xpGained > 0) {
+      dayList[daysago].expEarned += change.xpGained;
     }
   }
   const selectItems = Object.keys(contextCounts);
@@ -876,7 +897,7 @@ function createEconomyUI(mainDiv) {
   icva.style.marginLeft = "24px";
   div.appendChild(icva);
   ntx = tx.cloneNode(true);
-  ntx.innerHTML = pd.economy.vault + "%";
+  ntx.innerHTML = formatPercent(pd.economy.vault / 100, vaultPercentFormat);
   div.appendChild(ntx);
 
   const icwcc = createDiv(["economy_wc_med", "wc_common"]);
