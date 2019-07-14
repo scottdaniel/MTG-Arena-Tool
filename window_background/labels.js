@@ -77,8 +77,8 @@ function onLabelOutLogInfo(entry, json) {
   if (json.params.messageName == "Client.UserDeviceSpecs") {
     let payload = {
       isWindowed: json.params.payloadObject.isWindowed,
-      monitorResolution: json.params.payloadObject.monitorResolution,
-      gameResolution: json.params.payloadObject.gameResolution
+      monitor: json.params.payloadObject.monitorResolution,
+      game: json.params.payloadObject.gameResolution
     };
     ipc_send("set_device_specs", payload);
   }

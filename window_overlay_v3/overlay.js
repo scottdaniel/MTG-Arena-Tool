@@ -272,23 +272,27 @@ function settingsUpdated() {
 function checkActiveWindow() {
   let win = currentActiveWindow;
   if (!win || !deviceSpecs) return;
+  let controllerDom = queryElements(".overlay_controller")[0];
   if (win.title == "MTGA") {
-    let controllerDom = queryElements(".overlay_controller")[0];
-
-    let offsetY = win.bounds.height - deviceSpecs.gameResolution.height;
-    let offsetX = win.bounds.width - deviceSpecs.gameResolution.width;
+    let offsetY = win.bounds.height - deviceSpecs.game.height;
+    let offsetX = win.bounds.width - deviceSpecs.game.width;
     if (!deviceSpecs.isWindowed) {
-      offsetX /= 2;
-      offsetY /= 2;
-      offsetX += 4;
-      offsetY += 4;
+      let gameScale = Math.max(
+        deviceSpecs.game.height / win.bounds.height,
+        deviceSpecs.game.width / win.bounds.width
+      );
+      deviceSpecs.game.width /= gameScale;
+      deviceSpecs.game.height /= gameScale;
+      offsetX = (win.bounds.width - deviceSpecs.game.width) / 2 + 4;
+      offsetY = (win.bounds.height - deviceSpecs.game.height) / 2 + 4;
     }
 
-    controllerDom.style.left = win.bounds.x + offsetX + "px";
-    controllerDom.style.top = win.bounds.y + offsetY + "px";
-    //controllerDom.style.width = win.bounds.width + "px";
-    //controllerDom.style.width = win.bounds.height + "px";
+    controllerDom.style.left = Math.round(win.bounds.x + offsetX) + "px";
+    controllerDom.style.top = Math.round(win.bounds.y + offsetY) + "px";
+    controllerDom.style.display = "";
+    return;
   }
+  controllerDom.style.display = "none";
 }
 
 function getVisible(settings, getBool = false) {
