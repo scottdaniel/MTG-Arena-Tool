@@ -1,25 +1,34 @@
 const electron = require("electron");
 const { globalShortcut, screen } = require("electron");
+const activeWin = require("active-win");
 
 class OverlayProcess {
   constructor() {
     setTimeout(() => {
       this.createWindow();
     }, 1000);
+
+    this.activeWindow = null;
+    setInterval(() => {
+      (async () => {
+        this.activeWindow = await activeWin();
+        this.checkActiveWindow();
+      })();
+    }, 2000);
+
+    this.show = false;
     return this;
   }
 
   createWindow() {
     console.log(`OVERLAY:  Create process`);
-    const display = screen.getPrimaryDisplay();
-    let area = display.workArea;
 
     const overlay = new electron.BrowserWindow({
       transparent: true,
-      x: area.x,
-      y: area.y,
-      width: area.width,
-      height: area.height,
+      x: -10,
+      y: -10,
+      width: 5,
+      height: 5,
       frame: false,
       show: true,
       skipTaskbar: true,
@@ -46,14 +55,26 @@ class OverlayProcess {
     });
   }
 
+  checkActiveWindow() {
+    let win = this.activeWindow;
+    if ((win.title  == "MTGA" || win.title == "MTG Arena Tool") && !this.show) {
+      this.showWindow();
+    }
+    if (win.title !== "MTGA" && win.title !== "MTG Arena Tool" && this.show) {
+      this.hideWindow();
+    }
+  }
+
   showWindow() {
     const display = screen.getPrimaryDisplay();
     let area = display.workArea;
+    this.show = true;
     this.window.setSize(area.width, area.height);
     this.window.setPosition(area.x, area.y);
   }
 
   hideWindow() {
+    this.show = false;
     this.window.setSize(5, 5);
     this.window.setPosition(-10, -10);
   }
