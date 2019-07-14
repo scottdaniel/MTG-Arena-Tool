@@ -135,8 +135,10 @@ ipc.on("set_priority_timer", function(event, arg) {
 
 ipc.on("edit", () => {
   editMode = !editMode;
+  let controlDom = queryElements(".overlay_controller")[0];
 
   if (editMode) {
+    controlDom.style.display = "none";
     pd.settings.overlays.forEach((_overlay, index) => {
       let overlayDom = document.getElementById("overlay_" + (index + 1));
       $(overlayDom)
@@ -147,6 +149,7 @@ ipc.on("edit", () => {
       setIgnoreFalse(true);
     });
   } else {
+    controlDom.style.display = "";
     pd.settings.overlays.forEach((_overlay, index) => {
       let overlayDom = document.getElementById("overlay_" + (index + 1));
       $(overlayDom)
@@ -272,7 +275,7 @@ function settingsUpdated() {
 
 function checkActiveWindow() {
   let win = currentActiveWindow;
-  if (!win || !deviceSpecs) return;
+  if (!win || !deviceSpecs || editMode) return;
   let controllerDom = queryElements(".overlay_controller")[0];
   if (win.title == "MTGA") {
     let offsetY = win.bounds.height - deviceSpecs.game.height;
@@ -289,8 +292,10 @@ function checkActiveWindow() {
     }
 
     let elementsScale = 100 / pd.settings.overlays[0].scale;
-    controllerDom.style.left = Math.round((win.bounds.x + offsetX) * elementsScale) + "px";
-    controllerDom.style.top = Math.round((win.bounds.y + offsetY) * elementsScale) + "px";
+    controllerDom.style.left =
+      Math.round((win.bounds.x + offsetX) * elementsScale) + "px";
+    controllerDom.style.top =
+      Math.round((win.bounds.y + offsetY) * elementsScale) + "px";
     controllerDom.style.display = "";
     return;
   }
@@ -1131,6 +1136,17 @@ ready(function() {
   queryElements(".overlay_container")[0].style.display = "";
 
   setTimeout(() => {
+    let controlDom = queryElements(".overlay_controller")[0];
+    controlDom.addEventListener("mouseenter", () => {
+      setIgnoreFalse();
+    });
+    controlDom.addEventListener("mouseleave", () => {
+      setIgnoreTrue();
+    });
+    controlDom.addEventListener("click", () => {
+      ipcSend("renderer_show", IPC_MAIN);
+    });
+
     pd.settings.overlays.forEach((_overlay, index) => {
       let iconDom = `#overlay_${index + 1} .overlay_icon`;
       let settingsDom = `#overlay_${index + 1} .settings`;

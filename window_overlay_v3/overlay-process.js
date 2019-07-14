@@ -14,9 +14,10 @@ class OverlayProcess {
         this.activeWindow = await activeWin();
         this.checkActiveWindow();
       })();
-    }, 2000);
+    }, 1000);
 
     this.show = false;
+    this.editMode = false;
     return this;
   }
 
@@ -50,6 +51,7 @@ class OverlayProcess {
       // Toggle edit mode
       // This should have its own setting to turn on / off or change the key maybe
       globalShortcut.register("Alt+E", () => {
+        this.editMode = !this.editMode;
         overlay.webContents.send("edit", true);
       });
     });
@@ -62,10 +64,10 @@ class OverlayProcess {
       win.title == "MTG Arena Tool" ||
       win.owner.name.indexOf("electron") !== -1;
 
-    if (nameMatch && !this.show) {
+    if ((nameMatch && !this.show) || this.editMode) {
       this.showWindow();
     }
-    if (!nameMatch && this.show) {
+    if (!nameMatch && this.show && !this.editMode) {
       this.hideWindow();
     }
   }
