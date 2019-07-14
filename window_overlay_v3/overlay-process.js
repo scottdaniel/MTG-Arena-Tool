@@ -57,10 +57,15 @@ class OverlayProcess {
 
   checkActiveWindow() {
     let win = this.activeWindow;
-    if ((win.title  == "MTGA" || win.title == "MTG Arena Tool") && !this.show) {
+    let nameMatch =
+      win.title == "MTGA" ||
+      win.title == "MTG Arena Tool" ||
+      win.owner.name.indexOf("electron") !== -1;
+
+    if (nameMatch && !this.show) {
       this.showWindow();
     }
-    if (win.title !== "MTGA" && win.title !== "MTG Arena Tool" && this.show) {
+    if (!nameMatch && this.show) {
       this.hideWindow();
     }
   }

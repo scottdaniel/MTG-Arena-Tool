@@ -39,10 +39,16 @@ const {
 } = require("../shared/card-hover");
 const { queryElements, createDiv } = require("../shared/dom-fns");
 
-//const activeWin = require("active-win");
-//(async () => {
-//  console.log(await activeWin());
-//})();
+const activeWin = require("active-win");
+let deviceSpecs = null;
+
+let currentActiveWindow = null;
+window.setInterval(() => {
+  (async () => {
+    currentActiveWindow = await activeWin();
+    checkActiveWindow();
+  })();
+}, 100);
 
 const {
   ARENA_MODE_IDLE,
@@ -263,6 +269,28 @@ function settingsUpdated() {
   });
 }
 
+function checkActiveWindow() {
+  let win = currentActiveWindow;
+  if (!win || !deviceSpecs) return;
+  if (win.title == "MTGA") {
+    let controllerDom = queryElements(".overlay_controller")[0];
+
+    let offsetY = win.bounds.height - deviceSpecs.gameResolution.height;
+    let offsetX = win.bounds.width - deviceSpecs.gameResolution.width;
+    if (!deviceSpecs.isWindowed) {
+      offsetX /= 2;
+      offsetY /= 2;
+      offsetX += 4;
+      offsetY += 4;
+    }
+
+    controllerDom.style.left = win.bounds.x + offsetX + "px";
+    controllerDom.style.top = win.bounds.y + offsetY + "px";
+    //controllerDom.style.width = win.bounds.width + "px";
+    //controllerDom.style.width = win.bounds.height + "px";
+  }
+}
+
 function getVisible(settings, getBool = false) {
   if (!settings) return;
 
@@ -290,6 +318,10 @@ function setIgnoreFalse(force = false) {
     remote.getCurrentWindow().setIgnoreMouseEvents(false);
   }
 }
+
+ipc.on("set_device_specs", (event, arg) => {
+  deviceSpecs = arg;
+});
 
 ipc.on("set_draft_cards", (event, draft) => {
   recreateClock();
