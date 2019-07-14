@@ -115,6 +115,7 @@ function ipcSend(method, arg, to = IPC_BACKGROUND) {
 
 ipc.on("set_arena_state", function(event, arg) {
   arenaState = arg;
+  settingsUpdated();
 });
 
 ipc.on("set_timer", function(event, arg) {
@@ -287,8 +288,9 @@ function checkActiveWindow() {
       offsetY = (win.bounds.height - deviceSpecs.game.height) / 2 + 4;
     }
 
-    controllerDom.style.left = Math.round(win.bounds.x + offsetX) + "px";
-    controllerDom.style.top = Math.round(win.bounds.y + offsetY) + "px";
+    let elementsScale = 100 / pd.settings.overlays[0].scale;
+    controllerDom.style.left = Math.round((win.bounds.x + offsetX) * elementsScale) + "px";
+    controllerDom.style.top = Math.round((win.bounds.y + offsetY) * elementsScale) + "px";
     controllerDom.style.display = "";
     return;
   }

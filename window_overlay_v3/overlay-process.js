@@ -73,6 +73,16 @@ class OverlayProcess {
   showWindow() {
     const display = screen.getPrimaryDisplay();
     let area = display.workArea;
+    console.log(
+      "Overlay area:" +
+        area.x +
+        ", " +
+        area.y +
+        ", " +
+        area.width +
+        ", " +
+        area.height
+    );
     this.show = true;
     this.window.setSize(area.width, area.height);
     this.window.setPosition(area.x, area.y);
