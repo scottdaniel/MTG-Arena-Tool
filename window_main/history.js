@@ -40,6 +40,7 @@ const { DEFAULT_DECK, RANKED_CONST, RANKED_DRAFT, DATE_SEASON } = Aggregator;
 let filters = Aggregator.getDefaultFilters();
 let filteredMatches;
 let sortedHistory;
+let totalAgg;
 const tagPrompt = "Set archetype";
 
 function getNextRank(currentRank) {
@@ -81,6 +82,13 @@ function openHistoryTab(_filters = {}, dataIndex = 25, scrollTop = 0) {
   sortedHistory = [...pd.history];
   sortedHistory.sort(compare_matches);
   setFilters(_filters);
+  totalAgg = new Aggregator({ date: filters.date });
+  if (
+    filters.arch !== Aggregator.DEFAULT_ARCH &&
+    !totalAgg.archs.includes(filters.arch)
+  ) {
+    filters.arch = Aggregator.DEFAULT_ARCH;
+  }
   filteredMatches = new Aggregator(filters);
 
   const wrap_r = createDiv(["wrapper_column", "sidebar_column_l"]);
@@ -139,7 +147,7 @@ function openHistoryTab(_filters = {}, dataIndex = 25, scrollTop = 0) {
     "history_top",
     selected => openHistoryTab(selected),
     filters,
-    getLocalState().totalAgg.events,
+    totalAgg.events,
     matchesInEvent.tags,
     matchesInPartialDeckFilters.decks,
     true,
@@ -298,7 +306,6 @@ function attachMatchData(listItem, match) {
   listItem.rightBottom.appendChild(tagsDiv);
 
   // Set tag
-  const totalAgg = getLocalState().totalAgg;
   const allTags = [...totalAgg.archs, ...db.archetypes.map(arch => arch.name)];
   const tags = [...new Set(allTags)].map(tag => {
     const count = totalAgg.archCounts[tag] || 0;

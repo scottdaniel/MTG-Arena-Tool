@@ -65,10 +65,6 @@ class Aggregator {
     stats.winrate = winrate;
   }
 
-  static createAllMatches() {
-    return new Aggregator({ date: DATE_ALL_TIME });
-  }
-
   static getDefaultColorFilter() {
     const colorFilters = {};
     COLORS_BRIEF.forEach(code => (colorFilters[code] = false));
