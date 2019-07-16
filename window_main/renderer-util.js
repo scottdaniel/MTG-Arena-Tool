@@ -5,6 +5,7 @@ const _ = require("lodash");
 const anime = require("animejs");
 const striptags = require("striptags");
 const Picker = require("vanilla-picker");
+const Pikaday = require("pikaday");
 
 const {
   COLORS_ALL,
@@ -789,6 +790,25 @@ function showColorpicker(
   const pickerWrapper = $$(".picker_wrapper")[0];
   pickerWrapper.style.backgroundColor = "rgb(0,0,0,0)";
   pickerWrapper.style.boxShadow = "none";
+}
+
+//
+exports.showDatepicker = showDatepicker;
+function showDatepicker(defaultDate, onChange = () => {}, pickerOptions = {}) {
+  const cont = createDiv(["dialog_content"]);
+  cont.style.width = "320px";
+  cont.style.heigh = "400px";
+  // https://github.com/Pikaday/Pikaday
+  const now = new Date();
+  const picker = new Pikaday({
+    defaultDate,
+    maxDate: now,
+    onSelect: () => onChange(picker.getDate()),
+    setDefaultDate: defaultDate !== undefined,
+    ...pickerOptions
+  });
+  cont.appendChild(picker.el);
+  openDialog(cont);
 }
 
 //
