@@ -3,6 +3,7 @@ const {
   COLORS_BRIEF,
   DATE_ALL_TIME,
   DATE_LAST_30,
+  DATE_LAST_DAY,
   DATE_SEASON
 } = require("../shared/constants");
 const db = require("../shared/database");
@@ -34,12 +35,8 @@ const SINGLE_MATCH_EVENTS = [
   "Traditional_Ladder"
 ];
 const CONSTRUCTED_EVENTS = ["Ladder", "Traditional_Ladder"];
-// Date constants
+// Archetype constants
 const NO_ARCH = "No Archetype";
-const now = new Date();
-const then = new Date();
-then.setDate(now.getDate() - 30);
-const DAYS_AGO_30 = then.toISOString();
 
 class Aggregator {
   constructor(filters) {
@@ -121,10 +118,17 @@ class Aggregator {
   filterDate(_date) {
     const { date } = this.filters;
     let dateFilter = null;
+    const now = new Date();
     if (date === DATE_SEASON) {
       dateFilter = db.season_starts;
     } else if (date === DATE_LAST_30) {
-      dateFilter = DAYS_AGO_30;
+      const then = new Date();
+      then.setDate(now.getDate() - 30);
+      dateFilter = then.toISOString();
+    } else if (date === DATE_LAST_DAY) {
+      const then = new Date();
+      then.setDate(now.getDate() - 1);
+      dateFilter = then.toISOString();
     } else {
       dateFilter = date;
     }
