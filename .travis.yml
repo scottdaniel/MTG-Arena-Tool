@@ -24,7 +24,6 @@ jobs:
       os: windows
       env: YARN_GPG=no
       script:
-        - npm test
         - npm run dist
       deploy:
         provider: releases
