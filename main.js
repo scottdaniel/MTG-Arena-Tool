@@ -27,9 +27,9 @@ console.log(process.platform);
 const debugBack = false;
 const debugIPC = false;
 
-var mainWindow;
-var updaterWindow;
-var background;
+var mainWindow = null;
+var updaterWindow = null;
+var background = null;
 var overlays = [];
 var mainTimeout = null;
 
@@ -405,11 +405,11 @@ function toggleWindow() {
 function showWindow() {
   if (mainWindow) {
     if (!mainWindow.isVisible()) mainWindow.show();
-    mainWindow.moveTop();
+    else mainWindow.moveTop();
   }
   if (updaterWindow) {
     if (!updaterWindow.isVisible()) updaterWindow.show();
-    updaterWindow.moveTop();
+    else updaterWindow.moveTop();
   }
 }
 
