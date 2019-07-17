@@ -50,7 +50,7 @@ function openEventsTab(_filters, dataIndex = 25, scrollTop = 0) {
     "events_top",
     selected => openEventsTab(selected),
     filters,
-    getLocalState().totalAgg.trackEvents,
+    new Aggregator({ date: filters.date }).trackEvents,
     [],
     [],
     false,

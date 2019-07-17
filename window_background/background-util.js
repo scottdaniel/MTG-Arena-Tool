@@ -21,7 +21,7 @@ const pd = require("../shared/player-data.js");
 // https://date-fns.org/v2.0.0-alpha.7/docs/parse
 let dateLangs = [
   "dd.MM.yyyy HH:mm:ss",
-  "dd/MM/yyyy HH:mm:ss"
+  "dd/MM/yyyy HH:mm:ss",
   "M/dd/yyyy hh:mm:ss aa",
   "dd/MM/yyyy hh:mm:ss aa",
   "yyyy-MM-dd A HH:mm:ss",
