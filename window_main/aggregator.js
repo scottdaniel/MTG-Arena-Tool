@@ -1,4 +1,10 @@
-const { COLORS_ALL, COLORS_BRIEF } = require("../shared/constants");
+const {
+  COLORS_ALL,
+  COLORS_BRIEF,
+  DATE_ALL_TIME,
+  DATE_LAST_30,
+  DATE_SEASON
+} = require("../shared/constants");
 const db = require("../shared/database");
 const pd = require("../shared/player-data");
 const {
@@ -27,18 +33,13 @@ const SINGLE_MATCH_EVENTS = [
   "Ladder",
   "Traditional_Ladder"
 ];
+const CONSTRUCTED_EVENTS = ["Ladder", "Traditional_Ladder"];
 // Date constants
-const DATE_LAST_30 = "Last 30 Days";
-const DATE_SEASON = "Current Season";
-const DATE_ALL_TIME = "All Time";
 const NO_ARCH = "No Archetype";
-
 const now = new Date();
 const then = new Date();
 then.setDate(now.getDate() - 30);
 const DAYS_AGO_30 = then.toISOString();
-
-const CONSTRUCTED_EVENTS = ["Ladder", "Traditional_Ladder"];
 
 class Aggregator {
   constructor(filters) {
@@ -81,7 +82,7 @@ class Aggregator {
       onlyCurrentDecks: false,
       arch: DEFAULT_ARCH,
       oppColors: Aggregator.getDefaultColorFilter(),
-      date: DATE_LAST_30,
+      date: pd.settings.last_date_filter,
       showArchived: false
     };
   }
@@ -489,9 +490,6 @@ Aggregator.RANKED_DRAFT = RANKED_DRAFT;
 Aggregator.ALL_DRAFTS = ALL_DRAFTS;
 Aggregator.DRAFT_REPLAYS = DRAFT_REPLAYS;
 Aggregator.ALL_EVENT_TRACKS = ALL_EVENT_TRACKS;
-Aggregator.DATE_LAST_30 = DATE_LAST_30;
-Aggregator.DATE_SEASON = DATE_SEASON;
-Aggregator.DATE_ALL_TIME = DATE_ALL_TIME;
 Aggregator.NO_ARCH = NO_ARCH;
 
 module.exports = Aggregator;

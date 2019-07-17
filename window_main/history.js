@@ -78,7 +78,7 @@ function setFilters(selected = {}) {
     };
   } else {
     // default case
-    filters = { ...filters, ...selected };
+    filters = { ...filters, date: pd.settings.last_date_filter, ...selected };
   }
 }
 
