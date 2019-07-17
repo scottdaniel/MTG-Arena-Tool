@@ -485,10 +485,14 @@ function createMainWindow() {
   win.loadURL(`file://${__dirname}/window_main/index.html`);
   win.on("closed", onClosed);
 
-  let iconPath = path.join(__dirname, "icon-tray.png");
+  let iconPath = path.join(__dirname, "icon-tray@8x.png");
   if (process.platform == "win32") {
     iconPath = path.join(__dirname, "icon.ico");
   }
+  if (process.platform == "darwin") {
+    let iconPath = path.join(__dirname, "icon-tray.png");
+  }
+
   tray = new Tray(iconPath);
 
   const contextMenu = Menu.buildFromTemplate([
