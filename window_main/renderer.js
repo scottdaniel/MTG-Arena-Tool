@@ -477,7 +477,9 @@ ipc.on("no_log", function(event, arg) {
     but.addEventListener("click", function() {
       ipcSend("set_log", byId("log_input").value);
       closeDialog();
-      logDialogOpen = false;
+      setTimeout(() => {
+        logDialogOpen = false;
+      }, 300);
     });
     cont.appendChild(but);
 
