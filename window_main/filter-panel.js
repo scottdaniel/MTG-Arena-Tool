@@ -19,6 +19,7 @@ const {
   DEFAULT_ARCH,
   DEFAULT_DECK,
   DEFAULT_TAG,
+  NO_ARCH,
   getDefaultFilters
 } = require("./aggregator");
 
@@ -65,6 +66,7 @@ class FilterPanel {
     if (showCount && tag in this.archCounts) {
       tagString += ` (${this.archCounts[tag]})`;
     }
+    if (tag === NO_ARCH) return tagString;
     return `<div class="deck_tag" style="${style}">${tagString}</div>`;
   }
 
