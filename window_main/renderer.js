@@ -60,7 +60,6 @@ const {
   showLoadingBars
 } = require("./renderer-util");
 const {
-  createAllMatches,
   getDefaultFilters,
   RANKED_CONST,
   RANKED_DRAFT
@@ -423,8 +422,6 @@ ipc.on("initialize", function() {
   updateTopBar();
 
   sidebarActive = pd.settings.last_open_tab;
-  const totalAgg = createAllMatches();
-  setLocalState({ totalAgg });
   openTab(sidebarActive);
 
   if (isNew) {

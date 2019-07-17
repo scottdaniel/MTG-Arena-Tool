@@ -96,7 +96,7 @@ function openDecksTab(_filters = {}, scrollTop = 0) {
     "decks_top",
     selected => openDecksTab(selected),
     filters,
-    ls.totalAgg.events,
+    new Aggregator({ date: filters.date }).events,
     tags,
     [],
     true,
