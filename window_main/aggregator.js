@@ -70,7 +70,7 @@ class Aggregator {
   static getDefaultColorFilter() {
     const colorFilters = {};
     COLORS_BRIEF.forEach(code => (colorFilters[code] = false));
-    return { ...colorFilters };
+    return { ...colorFilters, multi: true };
   }
 
   static getDefaultFilters() {
@@ -138,23 +138,21 @@ class Aggregator {
   _filterDeckByColors(deck, _colors) {
     if (!deck) return true;
 
-    // All decks pass when no colors are selected
-    if (Object.values(_colors).every(val => val === false)) return true;
-
     // Normalize deck colors into matching data format
-    let deckColorCodes = Aggregator.getDefaultColorFilter();
+    const deckColorCodes = Aggregator.getDefaultColorFilter();
     if (deck.colors instanceof Array) {
       deck.colors.forEach(i => (deckColorCodes[COLORS_ALL[i - 1]] = true));
     } else if (deck.colors instanceof Object) {
-      deckColorCodes = deck.colors;
+      Object.assign(deckColorCodes, deck.colors);
     }
 
-    // If at least one color is selected, deck must match exactly
-    for (const code in _colors) {
-      if (_colors[code] !== deckColorCodes[code]) return false;
-    }
-
-    return true;
+    return Object.entries(_colors).every(([color, value]) => {
+      if (color === "multi") return true;
+      if (!_colors.multi || value) {
+        return deckColorCodes[color] === value;
+      }
+      return true;
+    });
   }
 
   filterDeck(deck) {
@@ -222,7 +220,8 @@ class Aggregator {
 
     if (
       match.type === "draft" &&
-      (arch !== DEFAULT_ARCH || Object.values(oppColors).some(color => color))
+      (arch !== DEFAULT_ARCH ||
+        (Object.values(oppColors).some(color => color) && !oppColors.multi))
     )
       return false;
 
