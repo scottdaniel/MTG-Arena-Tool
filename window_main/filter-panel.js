@@ -213,7 +213,7 @@ class FilterPanel {
         manas.appendChild(manabutton);
       });
       const code = "multi";
-      const filterClasses = ["mana_filter", "icon_search_multi"];
+      const filterClasses = ["mana_filter", "icon_search_inclusive"];
       if (!colors[code]) {
         filterClasses.push("mana_filter_on");
       }
