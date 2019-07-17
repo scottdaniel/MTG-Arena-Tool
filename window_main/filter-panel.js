@@ -16,6 +16,7 @@ const {
   DATE_LAST_30,
   DATE_ALL_TIME,
   DATE_SEASON,
+  NO_ARCH,
   getDefaultFilters
 } = require("./aggregator");
 
@@ -62,6 +63,7 @@ class FilterPanel {
     if (showCount && tag in this.archCounts) {
       tagString += ` (${this.archCounts[tag]})`;
     }
+    if (tag === NO_ARCH) return tagString;
     return `<div class="deck_tag" style="${style}">${tagString}</div>`;
   }
 
