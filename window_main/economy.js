@@ -107,8 +107,40 @@ function getReadableTrack(trackCode) {
 }
 
 function getReadableQuest(questCode) {
-  // FIXME: Can we get a human readable quest name?
-  // For now lets just use a small portion of the ID.
+  const questMap = {
+    "a4a06519-fd8a-422a-b20f-8fc7a175feef": "Quests/Quest_Azorius_Justiciar",
+    "7658b13d-861b-4c0c-bc7b-e01efcfa64ae": "Quests/Quest_Azorius_Judge",
+    "59fd1ddb-6445-4016-aeef-d401e7ac98df": "Quests/Quest_Boros_Vigor",
+    "7d257bad-9007-4e1f-b00e-697737130fdb": "Quests/Quest_Boros_Reckoner",
+    "2bc8f0c7-60d8-40fc-aceb-41b8b66e7118": "Quests/Quest_Horrible_Horde",
+    "84bb640d-58fd-40b3-84c6-b3cb989e493a": "Quests/Quest_Creature_Comforts",
+    "d901ed54-99f1-4872-a134-78a25e794ed2": "Quests/Quest_Dimir_Cutpurse",
+    "14480b30-416b-4283-83cb-e8ef509bfe37": "Quests/Quest_Dimir_Guile",
+    "93a9ee9c-9196-4301-8ce8-737f06b01f62": "Quests/Quest_Tragic_Slip",
+    "3ddedbc9-fe86-4adc-8b85-74d9f5e6302c": "Quests/Quest_Fatal_Push",
+    "332718c9-33c1-4446-97aa-e3c9c95b8a3f": "Quests/Quest_Gruul_Bloodthirst",
+    "b36bbc38-11df-402e-b94c-b74c37a27e37": "Quests/Quest_Gruul_Scrapper",
+    "258d1f41-0481-4a5f-9f2c-e307aae75817": "Quests/Quest_Golgari_Guildmage",
+    "20e3c215-ba16-41b7-8d90-255f4a15453c": "Quests/Quest_Golgari_Necromancy",
+    "79c12017-2e82-45b4-bc90-77d8897265bd": "Quests/Quest_Izzet_Comprehension",
+    "b50625d4-028c-42b0-86cd-573e96b53c7f": "Quests/Quest_Izzet_Chronarch",
+    "77b5aa57-3531-4d3f-969b-3f4b5ad019fb": "Quests/Quest_Nissas_Campaign",
+    "39892322-3ea8-4131-911d-fa6386c7b2d4": "Quests/Quest_Nissas_Journey",
+    "27ca3d82-d417-4d47-99ae-1d64840db46c": "Quests/Quest_Orzhov_Domination",
+    "80c38efd-a07d-452f-b701-921471bdcf2f": "Quests/Quest_Orzhov_Advokist",
+    "592d1212-b2a2-4d26-8c3a-aa173828acdf": "Quests/Quest_Almighty_Army",
+    "7af15f62-732e-4f2e-8bcc-1b9379517aaa": "Quests/Quest_Raiding_Party",
+    "8063315c-e17e-46c8-a408-b6281603c260": "Quests/Quest_Rakdos_Destruction",
+    "90c7f0d6-e165-44fc-88c8-fdf557bd178d": "Quests/Quest_Rakdos_Cackler",
+    "fa28d3a3-63f6-4d00-b74f-4292e71a1c72": "Quests/Quest_Selesnya_Silence",
+    "6a4ef8b1-cf56-4c61-b3c8-f886bd804e92": "Quests/Quest_Selesnya_Sentry",
+    "a28b4eb1-345e-41a8-b3f6-033773cb6682": "Quests/Quest_Simic_Supremacy",
+    "85e3c2f5-94d2-4574-b8d6-084ba371dcca": "Quests/Quest_Simic_Manipulator"
+  };
+  if (questCode in questMap) {
+    return questMap[questCode].slice(13).replace(/_/g, " ");
+  }
+  // If no readable quest name, just use a small portion of the ID.
   return `#${questCode.substring(0, 6)}`;
 }
 
