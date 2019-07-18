@@ -526,12 +526,16 @@ function createChangeRow(change, economyId) {
       (change.trackDiff.currentLevel || 0) - (change.trackDiff.oldLevel || 0)
     );
     if (lvlDelta) {
-      const iclvl = createDiv(["economy_sub"], `+${lvlDelta} ML`, {
-        title: `+${lvlDelta} Mastery Level (${pd.economy.trackName})`
-      });
-      iclvl.style.marginLeft = "24px";
-      iclvl.style.lineHeight = "64px";
-      flexRight.appendChild(iclvl);
+      bos = createDiv(["economy_mastery_med"]);
+      bos.title = `Mastery Level (${pd.economy.trackName})`;
+
+      bon = createDiv();
+      bon.style.lineHeight = "64px";
+      bon.classList.add("economy_sub");
+      bon.innerHTML = "+" + formatNumber(lvlDelta);
+
+      flexRight.appendChild(bos);
+      flexRight.appendChild(bon);
     }
   }
 
@@ -944,12 +948,12 @@ function createEconomyUI(mainDiv) {
   div.appendChild(ntx);
 
   const masteryLevel = pd.economy.currentLevel + 1;
-  const iclvl = createDiv(["economy_sub"], "ML" + masteryLevel, {
-    title: `Mastery Level ${masteryLevel} (${pd.economy.trackName})`
-  });
-  iclvl.style.marginLeft = "24px";
-  iclvl.style.lineHeight = "64px";
+  const iclvl = createDiv(["economy_mastery_med"]);
+  iclvl.title = `Mastery Level (${pd.economy.trackName})`;
   div.appendChild(iclvl);
+  ntx = tx.cloneNode(true);
+  ntx.innerHTML = formatNumber(masteryLevel);
+  div.appendChild(ntx);
 
   const icxp = createDiv(["economy_exp"], "", { title: "Experience" });
   icxp.style.marginLeft = "24px";
