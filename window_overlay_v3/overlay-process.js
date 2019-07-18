@@ -1,19 +1,11 @@
 const electron = require("electron");
 const { globalShortcut, screen } = require("electron");
-const activeWin = require("active-win");
 
 class OverlayProcess {
   constructor() {
     setTimeout(() => {
       this.createWindow();
-    }, 1000);
-
-    this.activeWindow = null;
-    setInterval(() => {
-      (async () => {
-        this.activeWindow = await activeWin();
-        this.checkActiveWindow();
-      })();
+      this.showWindow();
     }, 1000);
 
     this.show = false;
@@ -50,26 +42,11 @@ class OverlayProcess {
 
       // Toggle edit mode
       // This should have its own setting to turn on / off or change the key maybe
-      globalShortcut.register("Alt+E", () => {
+      globalShortcut.register("Alt+Shift+E", () => {
         this.editMode = !this.editMode;
         overlay.webContents.send("edit", true);
       });
     });
-  }
-
-  checkActiveWindow() {
-    let win = this.activeWindow;
-    let nameMatch =
-      win.title == "MTGA" ||
-      win.title == "MTG Arena Tool" ||
-      win.owner.name.indexOf("electron") !== -1;
-
-    if ((nameMatch && !this.show) || this.editMode) {
-      this.showWindow();
-    }
-    if (!nameMatch && this.show && !this.editMode) {
-      this.hideWindow();
-    }
   }
 
   showWindow() {

@@ -39,17 +39,6 @@ const {
 } = require("../shared/card-hover");
 const { queryElements, createDiv } = require("../shared/dom-fns");
 
-const activeWin = require("active-win");
-let deviceSpecs = null;
-
-let currentActiveWindow = null;
-window.setInterval(() => {
-  (async () => {
-    currentActiveWindow = await activeWin();
-    checkActiveWindow();
-  })();
-}, 100);
-
 const {
   ARENA_MODE_IDLE,
   ARENA_MODE_MATCH,
@@ -135,10 +124,8 @@ ipc.on("set_priority_timer", function(event, arg) {
 
 ipc.on("edit", () => {
   editMode = !editMode;
-  let controlDom = queryElements(".overlay_controller")[0];
 
   if (editMode) {
-    controlDom.style.display = "none";
     pd.settings.overlays.forEach((_overlay, index) => {
       let overlayDom = document.getElementById("overlay_" + (index + 1));
       $(overlayDom)
@@ -149,7 +136,6 @@ ipc.on("edit", () => {
       setIgnoreFalse(true);
     });
   } else {
-    controlDom.style.display = "";
     pd.settings.overlays.forEach((_overlay, index) => {
       let overlayDom = document.getElementById("overlay_" + (index + 1));
       $(overlayDom)
@@ -273,35 +259,6 @@ function settingsUpdated() {
   });
 }
 
-function checkActiveWindow() {
-  let win = currentActiveWindow;
-  if (!win || !deviceSpecs || editMode) return;
-  let controllerDom = queryElements(".overlay_controller")[0];
-  if (win.title == "MTGA") {
-    let offsetY = win.bounds.height - deviceSpecs.game.height;
-    let offsetX = win.bounds.width - deviceSpecs.game.width;
-    if (!deviceSpecs.isWindowed) {
-      let gameScale = Math.max(
-        deviceSpecs.game.height / win.bounds.height,
-        deviceSpecs.game.width / win.bounds.width
-      );
-      deviceSpecs.game.width /= gameScale;
-      deviceSpecs.game.height /= gameScale;
-      offsetX = (win.bounds.width - deviceSpecs.game.width) / 2 + 4;
-      offsetY = (win.bounds.height - deviceSpecs.game.height) / 2 + 4;
-    }
-
-    let elementsScale = 100 / pd.settings.overlays[0].scale;
-    controllerDom.style.left =
-      Math.round((win.bounds.x + offsetX) * elementsScale) + "px";
-    controllerDom.style.top =
-      Math.round((win.bounds.y + offsetY) * elementsScale) + "px";
-    controllerDom.style.display = "";
-    return;
-  }
-  controllerDom.style.display = "none";
-}
-
 function getVisible(settings, getBool = false) {
   if (!settings) return;
 
@@ -329,10 +286,6 @@ function setIgnoreFalse(force = false) {
     remote.getCurrentWindow().setIgnoreMouseEvents(false);
   }
 }
-
-ipc.on("set_device_specs", (event, arg) => {
-  deviceSpecs = arg;
-});
 
 ipc.on("set_draft_cards", (event, draft) => {
   recreateClock();
@@ -1136,17 +1089,6 @@ ready(function() {
   queryElements(".overlay_container")[0].style.display = "";
 
   setTimeout(() => {
-    let controlDom = queryElements(".overlay_controller")[0];
-    controlDom.addEventListener("mouseenter", () => {
-      setIgnoreFalse();
-    });
-    controlDom.addEventListener("mouseleave", () => {
-      setIgnoreTrue();
-    });
-    controlDom.addEventListener("click", () => {
-      ipcSend("renderer_show", IPC_MAIN);
-    });
-
     pd.settings.overlays.forEach((_overlay, index) => {
       let iconDom = `#overlay_${index + 1} .overlay_icon`;
       let settingsDom = `#overlay_${index + 1} .settings`;

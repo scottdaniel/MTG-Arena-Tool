@@ -66,7 +66,6 @@
     "version": "node -p \"require('./package.json').version\""
   },
   "dependencies": {
-    "active-win": "^5.1.2",
     "animejs": "^3.0.1",
     "async": "^2.6.1",
     "chart.js": "^2.8.0",
@@ -80,7 +79,6 @@
     "electron-unhandled": "^2.2.0",
     "electron-updater": "^4.0.6",
     "electron-util": "^0.11.0",
-    "ffi-napi": "^2.4.5",
     "google-protobuf": "^3.7.1",
     "gunzip-file": "^0.1.1",
     "howler": "^2.1.2",
@@ -92,7 +90,6 @@
     "npm": "^6.10.1",
     "qs": "^6.7.0",
     "queue": "^4.5.1",
-    "ref-wchar": "^1.0.2",
     "striptags": "^3.1.1",
     "time-elements": "^2.0.0",
     "vanilla-picker": "^2.8.1"

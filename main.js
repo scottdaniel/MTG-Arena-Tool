@@ -221,11 +221,6 @@ function startApp() {
         mainWindow.minimize();
         break;
 
-      // to main js / window handling
-      case "set_device_specs":
-        overlayMux();
-        break;
-
       case "set_arena_state":
         overlayMux();
         //setArenaState(arg);
