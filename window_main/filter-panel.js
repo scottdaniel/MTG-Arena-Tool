@@ -2,6 +2,7 @@ const {
   COLORS_ALL,
   COLORS_BRIEF,
   DATE_LAST_30,
+  DATE_LAST_DAY,
   DATE_ALL_TIME,
   DATE_SEASON
 } = require("../shared/constants");
@@ -125,7 +126,7 @@ class FilterPanel {
     dataCont.style.display = "flex";
     const dateSelect = createSelect(
       dataCont,
-      [DATE_ALL_TIME, DATE_SEASON, DATE_LAST_30],
+      [DATE_ALL_TIME, DATE_SEASON, DATE_LAST_30, DATE_LAST_DAY],
       this.filters.date,
       filter => {
         this.filters.date = filter;
