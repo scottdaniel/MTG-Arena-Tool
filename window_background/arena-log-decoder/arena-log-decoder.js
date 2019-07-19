@@ -120,7 +120,7 @@ function parseLogEntry(text, matchText, position) {
         ..._.mapValues(rematches.groups, unleakString),
         json: () => {
           try {
-            JSON.parse(text.substr(jsonStart, jsonLen));
+            return JSON.parse(text.substr(jsonStart, jsonLen));
           } catch (e) {
             console.log(e, {
               input: rematches.input,
@@ -163,7 +163,16 @@ function parseLogEntry(text, matchText, position) {
       {
         type: "label_json",
         ..._.mapValues(rematches.groups, unleakString),
-        json: () => JSON.parse(text.substr(jsonStart, jsonLen))
+        json: () => {
+          try {
+            return JSON.parse(text.substr(jsonStart, jsonLen));
+          } catch (e) {
+            console.log(e, {
+              input: rematches.input,
+              string: text.substr(jsonStart, jsonLen)
+            });
+          }
+        }
       }
     ];
   }
