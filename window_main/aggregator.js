@@ -47,6 +47,8 @@ class Aggregator {
     this.updateFilters = this.updateFilters.bind(this);
     this._processMatch = this._processMatch.bind(this);
     this.compareDecks = this.compareDecks.bind(this);
+    this.compareDecksByWins = this.compareDecksByWins.bind(this);
+    this.compareDecksByWinrates = this.compareDecksByWinrates.bind(this);
     this.compareEvents = this.compareEvents.bind(this);
     this.updateFilters(filters);
   }
@@ -80,7 +82,8 @@ class Aggregator {
       arch: DEFAULT_ARCH,
       oppColors: Aggregator.getDefaultColorFilter(),
       date: pd.settings.last_date_filter,
-      showArchived: false
+      showArchived: false,
+      sort: "By Date"
     };
   }
 
@@ -432,6 +435,48 @@ class Aggregator {
     if (bName) return 1;
     // neither valid, leave in place
     return 0;
+  }
+
+  compareDecksByWins(a, b) {
+    const aStats = {
+      ...Aggregator.getDefaultStats(),
+      winrate: 0,
+      ...this.deckStats[a.id]
+    };
+    const bStats = {
+      ...Aggregator.getDefaultStats(),
+      winrate: 0,
+      ...this.deckStats[b.id]
+    };
+    const aName = getRecentDeckName(a.id);
+    const bName = getRecentDeckName(b.id);
+
+    return (
+      bStats.wins - aStats.wins ||
+      bStats.winrate - aStats.winrate ||
+      aName.localeCompare(bName)
+    );
+  }
+
+  compareDecksByWinrates(a, b) {
+    const aStats = {
+      ...Aggregator.getDefaultStats(),
+      winrate: 0,
+      ...this.deckStats[a.id]
+    };
+    const bStats = {
+      ...Aggregator.getDefaultStats(),
+      winrate: 0,
+      ...this.deckStats[b.id]
+    };
+    const aName = getRecentDeckName(a.id);
+    const bName = getRecentDeckName(b.id);
+
+    return (
+      bStats.winrate - aStats.winrate ||
+      bStats.wins - aStats.wins ||
+      aName.localeCompare(bName)
+    );
   }
 
   compareEvents(a, b) {
