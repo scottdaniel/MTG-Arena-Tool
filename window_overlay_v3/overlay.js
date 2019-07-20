@@ -1,8 +1,5 @@
-/*
-globals
-  $
-*/
 const { ipcRenderer: ipc, webFrame, remote } = require("electron");
+const interact = require("interactjs");
 
 if (!remote.app.isPackaged) {
   const { openNewGitHubIssue, debugInfo } = require("electron-util");
@@ -128,21 +125,74 @@ ipc.on("edit", () => {
   if (editMode) {
     pd.settings.overlays.forEach((_overlay, index) => {
       let overlayDom = document.getElementById("overlay_" + (index + 1));
-      $(overlayDom)
-        .draggable()
-        .resizable();
-
       overlayDom.classList.add("editable");
+      interact("#overlay_" + (index + 1))
+        .draggable({
+          modifiers: [
+            interact.modifiers.restrictRect({
+              restriction: "parent"
+            })
+          ]
+        })
+        .on("dragmove", function(event) {
+          const target = event.target;
+          // keep the dragged position in the data-x/data-y attributes
+          const x = (parseFloat(target.getAttribute("data-x")) || 0) + event.dx;
+          const y = (parseFloat(target.getAttribute("data-y")) || 0) + event.dy;
+
+          // translate the element
+          target.style.webkitTransform = target.style.transform =
+            "translate(" + x + "px, " + y + "px)";
+
+          // update the posiion attributes
+          target.setAttribute("data-x", x);
+          target.setAttribute("data-y", y);
+        })
+        .resizable({
+          // resize from all edges and corners
+          edges: { left: true, right: true, bottom: true, top: true },
+
+          modifiers: [
+            // keep the edges inside the parent
+            interact.modifiers.restrictEdges({
+              outer: "parent",
+              endOnly: true
+            }),
+
+            // minimum size
+            interact.modifiers.restrictSize({
+              min: { width: 100, height: 50 }
+            })
+          ],
+
+          inertia: true
+        })
+        .on("resizemove", function(event) {
+          const target = event.target;
+          let x = parseFloat(target.getAttribute("data-x")) || 0;
+          let y = parseFloat(target.getAttribute("data-y")) || 0;
+
+          // update the element's style
+          target.style.width = event.rect.width + "px";
+          target.style.height = event.rect.height + "px";
+
+          // translate when resizing from top or left edges
+          x += event.deltaRect.left;
+          y += event.deltaRect.top;
+
+          target.style.webkitTransform = target.style.transform =
+            "translate(" + x + "px," + y + "px)";
+
+          target.setAttribute("data-x", x);
+          target.setAttribute("data-y", y);
+        });
       setIgnoreFalse(true);
     });
   } else {
     pd.settings.overlays.forEach((_overlay, index) => {
       let overlayDom = document.getElementById("overlay_" + (index + 1));
-      $(overlayDom)
-        .draggable("destroy")
-        .resizable("destroy");
-
       overlayDom.classList.remove("editable");
+      interact("#overlay_" + (index + 1)).unset();
     });
     setIgnoreTrue(true);
     saveOverlaysPosition();

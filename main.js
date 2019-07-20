@@ -30,7 +30,7 @@ const debugIPC = false;
 var mainWindow = null;
 var updaterWindow = null;
 var background = null;
-var overlays = [];
+var overlay = null;
 var mainTimeout = null;
 
 var tray = null;
