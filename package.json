@@ -58,7 +58,7 @@
     "start": "electron .",
     "postinstall": "install-app-deps",
     "format": "prettier --write \"**/*.js\"",
-    "test": "npm run --silent test:eslint && npm run --silent test:prettier",
+    "test": "npm run --silent test:eslint && npm run --silent test:prettier && npm run --silent test:jest",
     "test:eslint": "eslint . --quiet",
     "test:prettier": "prettier --list-different \"**/*.js\"",
     "test:jest": "jest",
