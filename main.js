@@ -27,10 +27,10 @@ console.log(process.platform);
 const debugBack = false;
 const debugIPC = false;
 
-var mainWindow;
-var updaterWindow;
-var background;
-let overlay = null;
+var mainWindow = null;
+var updaterWindow = null;
+var background = null;
+var overlays = [];
 var mainTimeout = null;
 
 var tray = null;
@@ -403,11 +403,11 @@ function toggleWindow() {
 function showWindow() {
   if (mainWindow) {
     if (!mainWindow.isVisible()) mainWindow.show();
-    mainWindow.moveTop();
+    else mainWindow.moveTop();
   }
   if (updaterWindow) {
     if (!updaterWindow.isVisible()) updaterWindow.show();
-    updaterWindow.moveTop();
+    else updaterWindow.moveTop();
   }
 }
 
@@ -484,9 +484,13 @@ function createMainWindow() {
   win.on("closed", onClosed);
 
   let iconPath = path.join(__dirname, "icon-tray.png");
-  if (process.platform == "win32") {
-    iconPath = path.join(__dirname, "icon.ico");
+  if (process.platform == "linux") {
+    iconPath = path.join(__dirname, "icon-tray@8x.png");
   }
+  if (process.platform == "win32") {
+    iconPath = path.join(__dirname, "icon-tray@8x.png");
+  }
+
   tray = new Tray(iconPath);
 
   const contextMenu = Menu.buildFromTemplate([

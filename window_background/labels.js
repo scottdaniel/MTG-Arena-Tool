@@ -630,15 +630,15 @@ function onLabelTrackProgressUpdated(entry, json) {
   if (!json) return;
   // console.log(json);
   const economy = { ...pd.economy };
-  json.forEach(entry => {
-    if (!entry.trackDiff) return; // ignore rewardWebDiff updates for now
+  json.forEach(track => {
+    if (!track.trackDiff) return; // ignore rewardWebDiff updates for now
 
     const transaction = {
-      context: "Track Progress",
+      context: "Track.Progress." + (track.trackName || ""),
       timestamp: entry.timestamp,
       date: parseWotcTime(entry.timestamp),
       delta: {},
-      ...entry
+      ...track
     };
 
     const trackDiff = minifiedDelta(transaction.trackDiff);
@@ -648,11 +648,11 @@ function onLabelTrackProgressUpdated(entry, json) {
     }
     transaction.trackDiff = trackDiff;
 
-    if (entry.trackName) {
-      economy.trackName = entry.trackName;
+    if (track.trackName) {
+      economy.trackName = track.trackName;
     }
-    if (entry.trackTier !== undefined) {
-      economy.trackTier = entry.trackTier;
+    if (track.trackTier !== undefined) {
+      economy.trackTier = track.trackTier;
     }
     if (trackDiff.currentLevel !== undefined) {
       economy.currentLevel = trackDiff.currentLevel;
@@ -675,6 +675,47 @@ function onLabelTrackProgressUpdated(entry, json) {
     );
     saveEconomyTransaction(transaction);
   });
+  // console.log(economy);
+  setData({ economy });
+  if (debugLog || !firstPass) store.set("economy", economy);
+}
+
+//
+function onLabelTrackRewardTierUpdated(entry, json) {
+  if (!json) return;
+  // console.log(json);
+  const economy = { ...pd.economy };
+
+  const transaction = {
+    context: "Track.RewardTier.Updated",
+    timestamp: entry.timestamp,
+    date: parseWotcTime(entry.timestamp),
+    delta: {},
+    ...json
+  };
+
+  if (transaction.inventoryDelta) {
+    // this is redundant data, removing to save space
+    delete transaction.inventoryDelta;
+  }
+  if (transaction.newTier !== undefined) {
+    economy.trackTier = transaction.newTier;
+  }
+
+  if (transaction.orbCountDiff) {
+    const orbDiff = minifiedDelta(transaction.orbCountDiff);
+    transaction.orbCountDiff = orbDiff;
+    if (orbDiff.currentOrbCount !== undefined) {
+      economy.currentOrbCount = orbDiff.currentOrbCount;
+    }
+  }
+
+  // Construct a unique ID
+  transaction.id = sha1(
+    entry.timestamp + transaction.oldTier + transaction.newTier
+  );
+  saveEconomyTransaction(transaction);
+
   // console.log(economy);
   setData({ economy });
   if (debugLog || !firstPass) store.set("economy", economy);
@@ -956,5 +997,6 @@ module.exports = {
   onLabelInEventGetSeasonAndRankDetail,
   onLabelGetPlayerInventoryGetRewardSchedule,
   onLabelRankUpdated,
-  onLabelTrackProgressUpdated
+  onLabelTrackProgressUpdated,
+  onLabelTrackRewardTierUpdated
 };

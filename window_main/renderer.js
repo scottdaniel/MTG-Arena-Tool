@@ -19,8 +19,10 @@ const anime = require("animejs");
 require("time-elements");
 
 const {
-  HIDDEN_PW,
+  DATE_LAST_30,
+  DATE_SEASON,
   EASING_DEFAULT,
+  HIDDEN_PW,
   MAIN_LOGIN,
   MAIN_HOME,
   MAIN_DECKS,
@@ -58,11 +60,9 @@ const {
   showLoadingBars
 } = require("./renderer-util");
 const {
-  createAllMatches,
   getDefaultFilters,
   RANKED_CONST,
-  RANKED_DRAFT,
-  DATE_SEASON
+  RANKED_DRAFT
 } = require("./aggregator");
 const { openHomeTab, requestHome } = require("./home");
 const { tournamentOpen } = require("./tournaments");
@@ -422,8 +422,6 @@ ipc.on("initialize", function() {
   updateTopBar();
 
   sidebarActive = pd.settings.last_open_tab;
-  const totalAgg = createAllMatches();
-  setLocalState({ totalAgg });
   openTab(sidebarActive);
 
   if (isNew) {
@@ -479,7 +477,9 @@ ipc.on("no_log", function(event, arg) {
     but.addEventListener("click", function() {
       ipcSend("set_log", byId("log_input").value);
       closeDialog();
-      logDialogOpen = false;
+      setTimeout(() => {
+        logDialogOpen = false;
+      }, 300);
     });
     cont.appendChild(but);
 
@@ -582,6 +582,20 @@ function ready(fn) {
   }
 }
 
+ipc.on("toggle_login", (event, arg) => {
+  loginToggle(arg);
+});
+
+function loginToggle(toggle) {
+  if (toggle) {
+    canLogin = true;
+    $$(".login_link")[0].classList.remove("disabled");
+  } else {
+    canLogin = false;
+    $$(".login_link")[0].classList.add("disabled");
+  }
+}
+
 ready(function() {
   $$(".signup_link")[0].addEventListener("click", function() {
     shell.openExternal("https://mtgatool.com/signup/");
@@ -603,7 +617,7 @@ ready(function() {
         pass = sha1(pass);
       }
       ipcSend("login", { username: user, password: pass });
-      canLogin = false;
+      loginToggle(false);
     }
   }
 
@@ -642,7 +656,7 @@ ready(function() {
           easing: EASING_DEFAULT,
           duration: 350
         });
-        let filters = {};
+        let filters = { date: pd.settings.last_date_filter };
         if (classList.includes("ith")) {
           sidebarActive = MAIN_HOME;
         } else if (classList.includes("it0")) {
@@ -678,7 +692,10 @@ ready(function() {
         }
         setLocalState({ lastDataIndex: 0, lastScrollTop: 0 });
         openTab(sidebarActive, filters);
-        ipcSend("save_user_settings", { last_open_tab: sidebarActive });
+        ipcSend("save_user_settings", {
+          last_open_tab: sidebarActive,
+          last_date_filter: filters.date
+        });
       } else {
         anime({
           targets: ".moving_ux",

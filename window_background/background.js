@@ -77,7 +77,8 @@ const {
   onLabelInEventGetSeasonAndRankDetail,
   onLabelGetPlayerInventoryGetRewardSchedule,
   onLabelRankUpdated,
-  onLabelTrackProgressUpdated
+  onLabelTrackProgressUpdated,
+  onLabelTrackRewardTierUpdated
 } = require("./labels");
 
 const toolVersion = electron.remote.app
@@ -829,6 +830,11 @@ function onLogEntryFound(entry) {
             onLabelTrackProgressUpdated(entry, json);
             break;
 
+          case "TrackRewardTier.Updated":
+            json = entry.json();
+            onLabelTrackRewardTierUpdated(entry, json);
+            break;
+
           case "Event.DeckSubmit":
             if (entry.arrow == "<==") {
               json = entry.json();
@@ -1055,6 +1061,7 @@ async function logLoop() {
   ipc_send("show_login", true);
 
   if (auto_login) {
+    ipc_send("toggle_login", false);
     if (remember_me && username && tokenAuth) {
       ipc_send("popup", {
         text: "Logging in automatically...",
@@ -1625,7 +1632,11 @@ function saveMatch(id) {
   match.playerDeck = currentMatch.player.originalDeck.getSave();
   match.oppDeck = getOppDeck();
 
-  if (match.oppDeck.archetype && match.oppDeck.archetype !== "-") {
+  if (
+    (!match.tags || !match.tags.length) &&
+    match.oppDeck.archetype &&
+    match.oppDeck.archetype !== "-"
+  ) {
     match.tags = [match.oppDeck.archetype];
   }
 

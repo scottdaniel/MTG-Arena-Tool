@@ -26,7 +26,7 @@
   "homepage": "https://mtgatool.com/",
   "repository": "https://github.com/Manuel-777/MTG-Arena-Tool",
   "bugs": "https://github.com/Manuel-777/MTG-Arena-Tool/issues",
-  "version": "2.8.0",
+  "version": "2.8.2",
   "main": "main.js",
   "build": {
     "appId": "com.github.manuel777.mtgatool",
@@ -85,7 +85,7 @@
     "jquery": "^3.4.1",
     "jquery-ui-dist": "^1.12.1",
     "js-sha1": "^0.6.0",
-    "lodash": "^4.17.11",
+    "lodash": "^4.17.14",
     "mathjs": "^5.9.0",
     "npm": "^6.10.1",
     "qs": "^6.7.0",
