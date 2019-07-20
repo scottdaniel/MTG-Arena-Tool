@@ -625,7 +625,7 @@ function attachLandOdds(tile, odds) {
   if (odds.landR) createManaChanceDiv(odds.landR, "r");
   if (odds.landG) createManaChanceDiv(odds.landG, "g");
 
-  tile.addEventListener("mouseenter", () => {
+  tile.addEventListener("mouseover", () => {
     if (queryElements(".lands_div").length == 0) {
       queryElements(".overlay_hover_container")[0].appendChild(landsDiv);
     }
@@ -649,9 +649,9 @@ function drawDeckOdds(index) {
   let oddsPrev = createDiv(["odds_prev", "click-on"]);
   let oddsNext = createDiv(["odds_next", "click-on"]);
   // Allow clicks
-  oddsPrev.addEventListener("mouseenter", setIgnoreFalse);
+  oddsPrev.addEventListener("mouseover", setIgnoreFalse);
   oddsPrev.addEventListener("mouseleave", setIgnoreTrue);
-  oddsNext.addEventListener("mouseenter", setIgnoreFalse);
+  oddsNext.addEventListener("mouseover", setIgnoreFalse);
   oddsNext.addEventListener("mouseleave", setIgnoreTrue);
 
   navCont.appendChild(oddsPrev);
@@ -1107,7 +1107,7 @@ ready(function() {
       });
     });
     queryElements(".button").forEach(el =>
-      el.addEventListener("mouseenter", setIgnoreFalse)
+      el.addEventListener("mouseover", setIgnoreFalse)
     );
     queryElements(".button").forEach(el =>
       el.addEventListener("mouseleave", setIgnoreTrue)
