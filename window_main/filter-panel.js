@@ -7,7 +7,7 @@ const {
   DATE_SEASON
 } = require("../shared/constants");
 const pd = require("../shared/player-data");
-const { createDiv } = require("../shared/dom-fns");
+const { createDiv, createLabel } = require("../shared/dom-fns");
 const { createSelect } = require("../shared/select");
 const {
   getReadableEvent,
@@ -36,7 +36,8 @@ class FilterPanel {
     archs,
     showOppManaFilter,
     archCounts,
-    showArchivedFilter
+    showArchivedFilter,
+    showSortOption
   ) {
     this.prefixId = prefixId;
     this.onFilterChange = onFilterChange;
@@ -52,6 +53,7 @@ class FilterPanel {
     this.showOppManaFilter = showOppManaFilter || false;
     this.archCounts = archCounts || {};
     this.showArchivedFilter = showArchivedFilter || false;
+    this.showSortOption = showSortOption || false;
     this.getTagString = this.getTagString.bind(this);
     this.getDeckString = this.getDeckString.bind(this);
     return this;
@@ -313,6 +315,33 @@ class FilterPanel {
       if (this.showOppManaFilter) {
         renderManaFilter("oppColors", columnC);
       }
+      container.appendChild(columnC);
+    } else if (this.showSortOption) {
+      const columnC = createDiv([]);
+
+      const sortDiv = createDiv([]);
+      sortDiv.style.display = "flex";
+      const sortLabel = createLabel([], "Sort");
+      sortLabel.style.marginTop = "7px";
+      sortDiv.appendChild(sortLabel);
+      const sortSelect = createSelect(
+        sortDiv,
+        ["By Date", "By Wins", "By Winrate"],
+        this.filters.sort,
+        filter => {
+          this.filters.sort = filter;
+          this.onFilterChange({ sort: filter }, this.filters);
+        },
+        this.prefixId + "_query_sort"
+      );
+      sortSelect.style.width = "150px";
+      sortSelect.style.marginBottom = "8px";
+      columnC.appendChild(sortDiv);
+
+      const spacer = createDiv(["select_container"]);
+      spacer.style.marginBottom = "8px";
+      columnC.appendChild(spacer);
+
       container.appendChild(columnC);
     } else {
       // spacer
