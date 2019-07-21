@@ -1306,6 +1306,14 @@ a:hover {
     background: center no-repeat url('../images/filter_multi.png');
 }
 
+.icon_search_inclusive {
+    display: -webkit-inline-box;
+    width: 20px;
+    margin-right: 16px;
+    height: 20px;
+    background: center no-repeat url('../images/create.png');
+}
+
 .wc_search_icon {
     width: 24px;
     height: 20px;

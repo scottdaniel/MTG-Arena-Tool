@@ -176,6 +176,66 @@ class FilterPanel {
     }
     container.appendChild(columnA);
 
+    const filterLabels = {
+      w: "White",
+      u: "Blue",
+      b: "Black",
+      r: "Red",
+      g: "Green",
+      multi: "Allow unselected colors"
+    };
+    const renderManaFilter = (filterKey, cont) => {
+      const colors = this.filters[filterKey];
+      const manas = createDiv([this.prefixId + "_query_mana"]);
+      manas.style.display = "flex";
+      manas.style.margin = "8px";
+      manas.style.width = "150px";
+      manas.style.height = "32px";
+      COLORS_BRIEF.forEach(code => {
+        const filterClasses = ["mana_filter"];
+        if (!colors[code]) {
+          filterClasses.push("mana_filter_on");
+        }
+        const manabutton = createDiv(filterClasses, "", {
+          title: filterLabels[code]
+        });
+        manabutton.style.backgroundImage = `url(../images/${code}20.png)`;
+        manabutton.style.width = "30px";
+        manabutton.addEventListener("click", () => {
+          if (manabutton.classList.contains("mana_filter_on")) {
+            manabutton.classList.remove("mana_filter_on");
+            colors[code] = true;
+          } else {
+            manabutton.classList.add("mana_filter_on");
+            colors[code] = false;
+          }
+          this.onFilterChange({ [filterKey]: colors }, this.filters);
+        });
+        manas.appendChild(manabutton);
+      });
+      const code = "multi";
+      const filterClasses = ["mana_filter", "icon_search_inclusive"];
+      if (!colors[code]) {
+        filterClasses.push("mana_filter_on");
+      }
+      const manabutton = createDiv(filterClasses, "", {
+        title: filterLabels[code]
+      });
+      manabutton.style.width = "30px";
+      manabutton.addEventListener("click", () => {
+        if (manabutton.classList.contains("mana_filter_on")) {
+          manabutton.classList.remove("mana_filter_on");
+          colors[code] = true;
+        } else {
+          manabutton.classList.add("mana_filter_on");
+          colors[code] = false;
+        }
+        this.onFilterChange({ [filterKey]: colors }, this.filters);
+      });
+      manas.appendChild(manabutton);
+      cont.appendChild(manas);
+    };
+
     const showColumnB = this.tags.length || this.showManaFilter;
     if (showColumnB) {
       const columnB = createDiv([]);
@@ -225,33 +285,7 @@ class FilterPanel {
       }
 
       if (this.showManaFilter) {
-        const manas = createDiv([this.prefixId + "_query_mana"]);
-        manas.style.display = "flex";
-        manas.style.margin = "8px";
-        manas.style.width = "150px";
-        manas.style.height = "32px";
-        COLORS_BRIEF.forEach(code => {
-          const filterClasses = ["mana_filter"];
-          if (!this.filters.colors[code]) {
-            filterClasses.push("mana_filter_on");
-          }
-          var manabutton = createDiv(filterClasses);
-          manabutton.style.backgroundImage = `url(../images/${code}20.png)`;
-          manabutton.style.width = "30px";
-          manabutton.addEventListener("click", () => {
-            if (manabutton.classList.contains("mana_filter_on")) {
-              manabutton.classList.remove("mana_filter_on");
-              this.filters.colors[code] = true;
-            } else {
-              manabutton.classList.add("mana_filter_on");
-              this.filters.colors[code] = false;
-            }
-            const colors = this.filters.colors;
-            this.onFilterChange({ colors }, this.filters);
-          });
-          manas.appendChild(manabutton);
-        });
-        columnB.appendChild(manas);
+        renderManaFilter("colors", columnB);
       }
       container.appendChild(columnB);
     }
@@ -277,33 +311,7 @@ class FilterPanel {
       }
 
       if (this.showOppManaFilter) {
-        const manas = createDiv([this.prefixId + "_query_mana"]);
-        manas.style.display = "flex";
-        manas.style.margin = "8px";
-        manas.style.width = "150px";
-        manas.style.height = "32px";
-        COLORS_BRIEF.forEach(code => {
-          const filterClasses = ["mana_filter"];
-          if (!this.filters.oppColors[code]) {
-            filterClasses.push("mana_filter_on");
-          }
-          var manabutton = createDiv(filterClasses);
-          manabutton.style.backgroundImage = `url(../images/${code}20.png)`;
-          manabutton.style.width = "30px";
-          manabutton.addEventListener("click", () => {
-            if (manabutton.classList.contains("mana_filter_on")) {
-              manabutton.classList.remove("mana_filter_on");
-              this.filters.oppColors[code] = true;
-            } else {
-              manabutton.classList.add("mana_filter_on");
-              this.filters.oppColors[code] = false;
-            }
-            const oppColors = this.filters.oppColors;
-            this.onFilterChange({ oppColors }, this.filters);
-          });
-          manas.appendChild(manabutton);
-        });
-        columnC.appendChild(manas);
+        renderManaFilter("oppColors", columnC);
       }
       container.appendChild(columnC);
     } else {
