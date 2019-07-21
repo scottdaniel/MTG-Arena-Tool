@@ -270,6 +270,7 @@ ipc.on("player_data_refresh", () => {
   if (sidebarActive === MAIN_LOGIN) return;
   const ls = getLocalState();
   updateTopBar();
+  changeBackground("default");
   anime({
     targets: ".moving_ux",
     left: 0,
