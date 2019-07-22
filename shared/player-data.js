@@ -296,6 +296,8 @@ class PlayerData {
       "toolVersion",
       "auto_login",
       "launch_to_tray",
+      "logUri",
+      "log_locale_format",
       "remember_me",
       "beta_channel"
     ];
