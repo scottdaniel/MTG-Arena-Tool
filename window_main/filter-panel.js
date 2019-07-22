@@ -12,10 +12,11 @@ const { createSelect } = require("../shared/select");
 const {
   getReadableEvent,
   getReadableFormat,
-  getRecentDeckName
+  getRecentDeckName,
+  timeSince
 } = require("../shared/util");
 
-const { getTagColor, ipcSend } = require("./renderer-util");
+const { getTagColor, ipcSend, showDatepicker } = require("./renderer-util");
 const {
   DEFAULT_ARCH,
   DEFAULT_DECK,
@@ -125,15 +126,39 @@ class FilterPanel {
 
     const dataCont = createDiv([]);
 
+    const dateOptions = [
+      DATE_ALL_TIME,
+      DATE_SEASON,
+      DATE_LAST_30,
+      DATE_LAST_DAY,
+      "Custom"
+    ];
+    let dateSelected = this.filters.date;
+    if (this.filters.date && !dateOptions.includes(this.filters.date)) {
+      const prettyDate = `Since ${new Date(this.filters.date).toDateString()}`;
+      dateOptions.unshift(prettyDate);
+      dateSelected = prettyDate;
+    }
+
     dataCont.style.display = "flex";
     const dateSelect = createSelect(
       dataCont,
-      [DATE_ALL_TIME, DATE_SEASON, DATE_LAST_30, DATE_LAST_DAY],
-      this.filters.date,
+      dateOptions,
+      dateSelected,
       filter => {
-        this.filters.date = filter;
-        this.onFilterChange({ date: filter }, this.filters);
-        ipcSend("save_user_settings", { last_date_filter: filter });
+        if (filter === "Custom") {
+          const lastWeek = new Date();
+          lastWeek.setDate(new Date().getDate() - 7);
+          showDatepicker(lastWeek, date => {
+            const filter = date.toISOString();
+            this.onFilterChange({ date: filter }, this.filters);
+            ipcSend("save_user_settings", { last_date_filter: filter });
+          });
+        } else {
+          this.filters.date = filter;
+          this.onFilterChange({ date: filter }, this.filters);
+          ipcSend("save_user_settings", { last_date_filter: filter });
+        }
       },
       this.prefixId + "_query_date"
     );
