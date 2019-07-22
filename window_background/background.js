@@ -922,6 +922,7 @@ function onLogEntryFound(entry) {
           default:
             break;
         }
+        pd.settings.log_datetime = entry.timestamp;
       } catch (err) {
         console.log(entry.label, entry.position, entry.json());
         console.error(err);

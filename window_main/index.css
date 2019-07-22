@@ -76,7 +76,7 @@ relative-time, local-time {
     background-image: url(../images/logo_big.png);
 }
 
-.release_notes_link {
+.release_notes_link, .link {
     cursor: pointer;
     text-decoration: underline;
 }
