@@ -348,10 +348,10 @@ function appendArenaData(section) {
   section.appendChild(
     createDiv(
       ["settings_note"],
-      `<p><i>Date format to use when parsing the Arena log.</p>
+      `<p><i>Date format to use when parsing the Arena log. Incorrect date formats can cause issues displaying data, mtgatool tries to auto-detect formats, but sometimes manual input is required.</p>
       <p><a class="link parse_link">Date format reference</a></p>
       Leave blank to use default auto-detection.</i></p>
-      <p>Found date in current output log: ${latestDateStamp}</p>
+      <p>Found example date: <b>${latestDateStamp}</b></p>
       <p>Parsed output: ${
         isValid(latestDateParsed)
           ? '<b class="green">' +
