@@ -19,7 +19,6 @@ const anime = require("animejs");
 require("time-elements");
 
 const {
-  DATE_LAST_30,
   DATE_SEASON,
   EASING_DEFAULT,
   HIDDEN_PW,
@@ -55,6 +54,7 @@ const {
   ipcSend,
   openDialog,
   pop,
+  renderLogInput,
   resetMainContainer,
   setLocalState,
   showLoadingBars
@@ -451,39 +451,9 @@ ipc.on("no_log", function(event, arg) {
       '</div><div class="message_sub_16 white">if it does, try closing MTG Arena and deleting it.</div>';
   } else if (!logDialogOpen) {
     logDialogOpen = true;
-
     const cont = createDiv(["dialog_content"]);
-    cont.style.width = "600px";
-
-    const title = createDiv(["share_title"], "Enter output_log.txt location:");
-    title.style.margin = "12px auto";
-    cont.appendChild(title);
-    const icd = createDiv(["share_input_container"]);
-    const sin = createInput([], "", {
-      id: "log_input",
-      autofocus: true,
-      autocomplete: "off",
-      value: arg
-    });
-    sin.style.borderRadius = "3px";
-    sin.style.height = "28px";
-    sin.style.fontSize = "14px";
-    sin.style.margin = 0;
-    icd.appendChild(sin);
-    cont.appendChild(icd);
-
-    const but = createDiv(["button_simple"], "Save");
-    but.style.marginLeft = "auto";
-    but.style.marginRight = "auto";
-    but.addEventListener("click", function() {
-      ipcSend("set_log", byId("log_input").value);
-      closeDialog();
-      setTimeout(() => {
-        logDialogOpen = false;
-      }, 300);
-    });
-    cont.appendChild(but);
-
+    cont.style.width = "650px";
+    renderLogInput(cont);
     openDialog(cont, () => (logDialogOpen = false));
   }
 });
