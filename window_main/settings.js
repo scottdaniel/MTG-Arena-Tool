@@ -611,6 +611,7 @@ function appendOverlay(section) {
     );
     resetButton.addEventListener("click", function() {
       ipcSend("reset_overlay_pos", index);
+      // TODO this does nothing at the moment
     });
     overlaySection.appendChild(resetButton);
 

@@ -1698,7 +1698,7 @@ function setDraftData(data) {
 
   if (debugLog || !firstPass) store.set(id, data);
   setData({ [id]: data, cards: pd.cards, cardsNew: pd.cardsNew });
-  ipc_send("set_draft_cards", data);
+  ipc_send("set_draft_cards", data, IPC_OVERLAY);
 }
 
 //

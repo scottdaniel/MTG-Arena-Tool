@@ -250,15 +250,7 @@ function startApp() {
 
       case "set_arena_state":
         mainWindow.webContents.send("player_data_refresh");
-        overlay.webContents.send("set_arena_state");
-        break;
-
-      case "set_draft_cards":
-        overlay.webContents.send("set_draft_cards");
-        break;
-
-      case "set_turn":
-        overlay.webContents.send("set_turn");
+        overlay.webContents.send("set_arena_state", arg);
         break;
 
       case "overlay_minimize":
@@ -296,10 +288,6 @@ function startApp() {
 
       case "set_clipboard":
         clipboard.writeText(arg);
-        break;
-
-      case "reset_overlay_pos":
-        overlay.setPosition(0, 0);
         break;
 
       case "updates_check":
