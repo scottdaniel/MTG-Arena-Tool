@@ -129,65 +129,29 @@ ipc.on("edit", () => {
     pd.settings.overlays.forEach((_overlay, index) => {
       if (!getVisible(_overlay)) return;
 
-      let overlayDom = document.getElementById("overlay_" + (index + 1));
-      overlayDom.classList.add("editable");
+      const overlayDiv = byId("overlay_" + (index + 1));
+      overlayDiv.classList.add("editable");
+
       interact("#overlay_" + (index + 1))
-        .draggable({
-          modifiers: [
-            interact.modifiers.restrictRect({
-              restriction: "parent"
-            })
-          ]
-        })
+        .draggable({})
         .on("dragmove", function(event) {
           const target = event.target;
-          // keep the dragged position in the data-x/data-y attributes
-          const x = (parseFloat(target.getAttribute("data-x")) || 0) + event.dx;
-          const y = (parseFloat(target.getAttribute("data-y")) || 0) + event.dy;
-
-          // translate the element
-          target.style.webkitTransform = target.style.transform =
-            "translate(" + x + "px, " + y + "px)";
-
-          // update the posiion attributes
-          target.setAttribute("data-x", x);
-          target.setAttribute("data-y", y);
+          const x = parseFloat(target.style.left) + event.dx;
+          const y = parseFloat(target.style.top) + event.dy;
+          target.style.left = x + "px";
+          target.style.top = y + "px";
         })
         .resizable({
-          // resize from all edges and corners
-          edges: { left: true, right: true, bottom: true, top: true },
-
-          modifiers: [
-            // keep the edges inside the parent
-            interact.modifiers.restrictEdges({
-              outer: "parent",
-              endOnly: true
-            }),
-
-            // minimum size
-            interact.modifiers.restrictSize({
-              min: { width: 100, height: 50 }
-            })
-          ]
+          edges: { left: true, right: true, bottom: true, top: true }
         })
         .on("resizemove", function(event) {
           const target = event.target;
-          let x = parseFloat(target.getAttribute("data-x")) || 0;
-          let y = parseFloat(target.getAttribute("data-y")) || 0;
-
-          // update the element's style
+          const x = parseFloat(target.style.left) + event.deltaRect.left;
+          const y = parseFloat(target.style.top) + event.deltaRect.top;
           target.style.width = event.rect.width + "px";
           target.style.height = event.rect.height + "px";
-
-          // translate when resizing from top or left edges
-          x += event.deltaRect.left;
-          y += event.deltaRect.top;
-
-          target.style.webkitTransform = target.style.transform =
-            "translate(" + x + "px," + y + "px)";
-
-          target.setAttribute("data-x", x);
-          target.setAttribute("data-y", y);
+          target.style.left = x + "px";
+          target.style.top = y + "px";
         });
     });
   } else {
@@ -208,13 +172,11 @@ function saveOverlaysPosition() {
   overlays.forEach((_overlay, index) => {
     const overlayDiv = byId("overlay_" + (index + 1));
     const forceInt = num => Math.round(parseFloat(num));
-    const dx = parseFloat(overlayDiv.getAttribute("data-x")) || 0;
-    const dy = parseFloat(overlayDiv.getAttribute("data-y")) || 0;
     const bounds = {
       width: forceInt(overlayDiv.style.width),
       height: forceInt(overlayDiv.style.height),
-      x: forceInt(parseFloat(overlayDiv.style.left) + dx),
-      y: forceInt(parseFloat(overlayDiv.style.top) + dy)
+      x: forceInt(overlayDiv.style.left),
+      y: forceInt(overlayDiv.style.top)
     };
     const newOverlay = {
       ...overlays[index], // old overlay
@@ -252,7 +214,6 @@ function settingsUpdated() {
     overlayDiv.style.width = _overlay.bounds.width + "px";
     overlayDiv.style.left = _overlay.bounds.x + "px";
     overlayDiv.style.top = _overlay.bounds.y + "px";
-    overlayDiv.style.webkitTransform = overlayDiv.style.transform = "";
 
     if (getVisible(_overlay)) {
       overlayDiv.style.opacity = "1";
