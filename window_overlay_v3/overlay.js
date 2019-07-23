@@ -241,7 +241,7 @@ ipc.on("action_log", function(event, arg) {
 ipc.on("settings_updated", settingsUpdated);
 
 function settingsUpdated() {
-  webFrame.setZoomFactor(pd.settings.overlays[0].scale / 100);
+  webFrame.setZoomFactor(pd.settings.overlay_scale / 100);
   if (editMode) return;
   pd.settings.overlays.forEach((_overlay, index) => {
     const overlayDom = byId("overlay_" + (index + 1));

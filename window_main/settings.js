@@ -221,6 +221,38 @@ function appendBehaviour(section) {
     pd.settings.close_to_tray,
     updateUserSettings
   );
+
+  const label = createLabel(["but_container_label"], "Export Format:");
+  const icd = createDiv(["input_container"]);
+  const exportInput = createInput([], "", {
+    type: "text",
+    id: "settings_export_format",
+    autocomplete: "off",
+    placeholder: "$Name,$Count,$SetName,$SetCode,$Rarity,$Type",
+    value: pd.settings.export_format
+  });
+  exportInput.addEventListener("keyup", e => {
+    if (e.keyCode === 13) {
+      updateUserSettings();
+    }
+  });
+  exportInput.addEventListener("focusout", () => {
+    updateUserSettings();
+  });
+  icd.appendChild(exportInput);
+  label.appendChild(icd);
+  section.appendChild(label);
+
+  const textDiv = createDiv(
+    ["settings_note"],
+    "<i>Possible variables: $Name, $Count, $SetName, $SetCode, $Collector, $Rarity, $Type, $Cmc</i>"
+  );
+  section.appendChild(textDiv);
+}
+
+function appendOverlay(section) {
+  section.appendChild(createDiv(["settings_title"], "Overlays"));
+
   addCheckbox(
     section,
     "Sound when priority changes",
@@ -265,42 +297,37 @@ function appendBehaviour(section) {
   sliderSoundVolume.appendChild(sliderSoundVolumeInput);
   section.appendChild(sliderSoundVolume);
 
-  const label = createLabel(["but_container_label"], "Export Format:");
-  const icd = createDiv(["input_container"]);
-  const exportInput = createInput([], "", {
-    type: "text",
-    id: "settings_export_format",
-    autocomplete: "off",
-    placeholder: "$Name,$Count,$SetName,$SetCode,$Rarity,$Type",
-    value: pd.settings.export_format
-  });
-  exportInput.addEventListener("keyup", e => {
-    if (e.keyCode === 13) {
-      updateUserSettings();
-    }
-  });
-  exportInput.addEventListener("focusout", () => {
-    updateUserSettings();
-  });
-  icd.appendChild(exportInput);
-  label.appendChild(icd);
-  section.appendChild(label);
-
-  const textDiv = createDiv(
-    ["settings_note"],
-    "<i>Possible variables: $Name, $Count, $SetName, $SetCode, $Collector, $Rarity, $Type, $Cmc</i>"
+  const sliderScale = createDiv(["slidecontainer_settings"]);
+  const sliderScaleLabel = createLabel(
+    ["card_size_container"],
+    "Scale: " + pd.settings.overlay_scale + "%"
   );
-  section.appendChild(textDiv);
-}
+  sliderScaleLabel.style.width = "400px";
+  sliderScale.appendChild(sliderScaleLabel);
 
-function appendOverlay(section) {
-  section.appendChild(createDiv(["settings_title"], "Overlays"));
+  const sliderScaleInput = createInput(["slider"], "", {
+    id: "scaleRange",
+    type: "range",
+    min: "10",
+    max: "200",
+    step: "10",
+    value: pd.settings.overlay_scale
+  });
+  sliderScaleInput.addEventListener("input", function() {
+    sliderScaleLabel.innerHTML = "Scale: " + parseInt(this.value) + "%";
+  });
+  sliderScaleInput.addEventListener("change", function() {
+    updateUserSettingsBlend({ overlay_scale: parseInt(this.value) });
+  });
+  sliderScale.appendChild(sliderScaleInput);
+  section.appendChild(sliderScale);
+
   const helpDiv = createDiv(
     ["settings_note"],
     `You can enable up to 5 independent overlay windows. Customize each overlay
     using the settings below.`
   );
-  helpDiv.style.margin = "0px 64px 0px 16px";
+  helpDiv.style.margin = "24px 64px 0px 16px";
   section.appendChild(helpDiv);
 
   const topCont = createDiv(["overlay_section_selector_cont", "top_nav_icons"]);
@@ -578,32 +605,6 @@ function appendOverlay(section) {
     });
     sliderOpacityBack.appendChild(sliderOpacityBackInput);
     overlaySection.appendChild(sliderOpacityBack);
-
-    const sliderScale = createDiv(["slidecontainer_settings"]);
-    const sliderScaleLabel = createLabel(
-      ["card_size_container"],
-      "Scale: " + settings.scale + "%"
-    );
-    sliderScaleLabel.style.width = "400px";
-    sliderScale.appendChild(sliderScaleLabel);
-
-    const sliderScaleInput = createInput(["slider"], "", {
-      id: "scaleRange",
-      type: "range",
-      min: "10",
-      max: "200",
-      step: "10",
-      value: settings.scale
-    });
-    sliderScaleInput.addEventListener("input", function() {
-      sliderScaleLabel.innerHTML = "Scale: " + parseInt(this.value) + "%";
-    });
-    sliderScaleInput.addEventListener("change", function() {
-      pd.settings.overlays[index].scale = parseInt(this.value);
-      updateUserSettingsBlend();
-    });
-    sliderScale.appendChild(sliderScaleInput);
-    overlaySection.appendChild(sliderScale);
 
     const resetButton = createDiv(
       ["button_simple", "centered"],
