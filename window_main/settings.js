@@ -610,8 +610,10 @@ function appendOverlay(section) {
       "Reset Position"
     );
     resetButton.addEventListener("click", function() {
-      ipcSend("reset_overlay_pos", index);
-      // TODO this does nothing at the moment
+      pd.settings.overlays[index].bounds = {
+        ...pd.defaultCfg.settings.overlays[0].bounds
+      };
+      updateUserSettingsBlend();
     });
     overlaySection.appendChild(resetButton);
 
