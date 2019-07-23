@@ -126,7 +126,10 @@ function startApp() {
   }
   mainWindow = createMainWindow();
   background = createBackgroundWindow();
-  overlay = createOverlayWindow();
+
+  setTimeout(() => {
+    overlay = createOverlayWindow();
+  }, 1000);
 
   appStarted = true;
 
