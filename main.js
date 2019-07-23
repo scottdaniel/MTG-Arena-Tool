@@ -126,21 +126,25 @@ function startApp() {
   }
   mainWindow = createMainWindow();
   background = createBackgroundWindow();
-
-  const overlayProcess = require("./window_overlay_v3/overlay-process.js");
-  overlay = new overlayProcess();
+  overlay = createOverlayWindow();
 
   appStarted = true;
 
   globalShortcut.register("Alt+Shift+D", () => {
     if (!background.isVisible()) background.show();
     else background.hide();
-    background.toggleDevTools();
-    mainWindow.toggleDevTools();
+    const windows = [background, mainWindow, overlay];
+    windows.forEach(win => {
+      if (win.isVisible()) {
+        win.toggleDevTools();
+      }
+    });
   });
 
-  globalShortcut.register("Alt+Shift+O", () => {
-    overlay.window.toggleDevTools();
+  // Toggle edit mode
+  // TODO This should have its own setting to turn on / off or change the key maybe
+  globalShortcut.register("Alt+Shift+E", () => {
+    overlay.webContents.send("edit");
   });
 
   mainWindow.webContents.once("dom-ready", () => {
@@ -157,6 +161,25 @@ function startApp() {
     }
   });
 
+  overlay.webContents.once("dom-ready", function() {
+    //We need to wait for the overlay to be initialized before we interact with it
+    const display = electron.screen.getPrimaryDisplay();
+    const area = display.workArea;
+    console.log(
+      "Overlay area:" +
+        area.x +
+        ", " +
+        area.y +
+        ", " +
+        area.width +
+        ", " +
+        area.height
+    );
+    overlay.setSize(area.width, area.height);
+    overlay.setPosition(area.x, area.y);
+    overlay.webContents.send("settings_updated");
+  });
+
   // If we destroy updater before creating another renderer
   // Electron shuts down the whole app.
   if (updaterWindow) {
@@ -165,10 +188,6 @@ function startApp() {
   }
 
   ipc.on("ipc_switch", function(event, method, from, arg, to) {
-    const overlayMux = () => {
-      overlay.window.webContents.send(method, arg);
-    };
-
     if (debugIPC && method != "log_read") {
       if (
         debugIPC == 2 &&
@@ -200,12 +219,12 @@ function startApp() {
 
       case "player_data_refresh":
         mainWindow.webContents.send("player_data_refresh");
-        overlayMux();
+        overlay.webContents.send("player_data_refresh");
         break;
 
       case "set_db":
         mainWindow.webContents.send("set_db", arg);
-        overlayMux();
+        overlay.webContents.send("set_db", arg);
         break;
 
       case "popup":
@@ -222,22 +241,21 @@ function startApp() {
         break;
 
       case "set_arena_state":
-        overlayMux();
-        //setArenaState(arg);
-        //overlay.updateVisible();
+        mainWindow.webContents.send("player_data_refresh");
+        overlay.webContents.send("set_arena_state");
         break;
 
       case "set_draft_cards":
-        overlayMux();
+        overlay.webContents.send("set_draft_cards");
         break;
 
       case "set_turn":
-        overlayMux();
+        overlay.webContents.send("set_turn");
         break;
 
       case "overlay_minimize":
-        if (overlay.window.isMinimized()) return;
-        overlay.window.minimize();
+        if (overlay.isMinimized()) return;
+        overlay.minimize();
         break;
 
       case "renderer_set_bounds":
@@ -273,7 +291,7 @@ function startApp() {
         break;
 
       case "reset_overlay_pos":
-        overlay.window.setPosition(0, 0);
+        overlay.setPosition(0, 0);
         break;
 
       case "updates_check":
@@ -335,7 +353,7 @@ function startApp() {
       default:
         if (to == 0) background.webContents.send(method, arg);
         if (to == 1) mainWindow.webContents.send(method, arg);
-        if (to == 2) overlayMux();
+        if (to == 2) overlay.webContents.send(method, arg);
         break;
     }
   });
@@ -361,14 +379,14 @@ function setSettings(settings) {
     globalShortcut.unregister("Alt+" + (index + 1));
     if (_settings.keyboard_shortcut) {
       globalShortcut.register("Alt+" + (index + 1), () => {
-        overlay.window.webContents.send("close", { action: -1, index: index });
+        overlay.webContents.send("close", { action: -1, index: index });
       });
     }
   });
 
   // Send settings update
-  overlay.window.setAlwaysOnTop(settings.overlays[0].ontop, "floating");
-  overlay.window.webContents.send("settings_updated");
+  overlay.setAlwaysOnTop(settings.overlays[0].ontop, "floating");
+  overlay.webContents.send("settings_updated");
 }
 
 // Catch exceptions
@@ -408,6 +426,10 @@ function showWindow() {
   if (updaterWindow) {
     if (!updaterWindow.isVisible()) updaterWindow.show();
     else updaterWindow.moveTop();
+  }
+  if (overlay) {
+    if (!overlay.isVisible()) overlay.show();
+    else overlay.moveTop();
   }
 }
 
@@ -465,6 +487,28 @@ function createBackgroundWindow() {
   win.on("closed", onClosed);
 
   return win;
+}
+
+function createOverlayWindow() {
+  const overlay = new electron.BrowserWindow({
+    transparent: true,
+    x: -10,
+    y: -10,
+    width: 5,
+    height: 5,
+    frame: false,
+    show: true,
+    skipTaskbar: true,
+    focusable: false,
+    title: "MTG Arena Tool",
+    webPreferences: {
+      nodeIntegration: true
+    }
+  });
+  overlay.loadURL(`file://${__dirname}/window_overlay_v3/index.html`);
+  overlay.setIgnoreMouseEvents(true, { forward: true });
+
+  return overlay;
 }
 
 function createMainWindow() {
