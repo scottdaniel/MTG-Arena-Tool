@@ -58,6 +58,8 @@ const {
   OVERLAY_DRAFT_MODES
 } = require("../shared/constants.js");
 
+const byId = id => document.getElementById(id);
+
 let landsCard = {
   id: 100,
   name: "Lands",
@@ -242,14 +244,14 @@ function settingsUpdated() {
   webFrame.setZoomFactor(pd.settings.overlays[0].scale / 100);
   if (editMode) return;
   pd.settings.overlays.forEach((_overlay, index) => {
-    let overlayDom = document.getElementById("overlay_" + (index + 1));
-    //console.log(index, overlay);
+    const overlayDom = byId("overlay_" + (index + 1));
+    overlayDom.style.opacity = getVisible(_overlay) ? "1" : "0";
+    if (!getVisible(_overlay)) return;
 
     overlayDom.style.height = _overlay.bounds.height + "px";
     overlayDom.style.width = _overlay.bounds.width + "px";
     overlayDom.style.left = _overlay.bounds.x + "px";
     overlayDom.style.top = _overlay.bounds.y + "px";
-    overlayDom.style.opacity = getVisible(_overlay);
 
     change_background(index, pd.settings.back_url);
 
@@ -273,27 +275,16 @@ function settingsUpdated() {
       ? ""
       : "none";
 
-    //queryElements(deckListDom)[0].innerHTML = "";
     queryElements(deckListDom)[0].style.display = _overlay.deck ? "" : "none";
-
-    if (_overlay.deck) {
-      setTimeout(function() {
-        queryElements(deckListDom)[0].style.display = getVisible(_overlay, true)
-          ? ""
-          : "none";
-      }, 200);
-    }
 
     const showClock =
       _overlay.clock && !OVERLAY_DRAFT_MODES.includes(_overlay.mode);
     queryElements(clockDom)[0].style.display = showClock ? "" : "none";
 
-    if (_overlay.show || _overlay.show_always) {
-      if (OVERLAY_DRAFT_MODES.includes(_overlay.mode)) {
-        updateDraftView(index);
-      } else {
-        updateMatchView(index);
-      }
+    if (OVERLAY_DRAFT_MODES.includes(_overlay.mode)) {
+      updateDraftView(index);
+    } else {
+      updateMatchView(index);
     }
 
     // Only issue with this is when two overlays are on top of eachother
@@ -309,8 +300,8 @@ function settingsUpdated() {
   });
 }
 
-function getVisible(settings, getBool = false) {
-  if (!settings) return;
+function getVisible(settings) {
+  if (!settings) return false;
 
   const currentModeApplies =
     (OVERLAY_DRAFT_MODES.includes(settings.mode) &&
@@ -318,11 +309,7 @@ function getVisible(settings, getBool = false) {
     (!OVERLAY_DRAFT_MODES.includes(settings.mode) &&
       arenaState === ARENA_MODE_MATCH);
 
-  const shouldShow =
-    settings.show && (currentModeApplies || settings.show_always);
-
-  if (getBool) return shouldShow;
-  return shouldShow ? "1" : "0";
+  return settings.show && (currentModeApplies || settings.show_always);
 }
 
 function setIgnoreTrue(force = false) {
