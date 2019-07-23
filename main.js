@@ -139,16 +139,19 @@ function startApp() {
     } else {
       background.openDevTools({ mode: "detach" });
     }
-    if (overlay.isDevToolsOpened()) {
-      overlay.closeDevTools();
-    } else {
-      overlay.openDevTools({ mode: "detach" });
-    }
     if (mainWindow.isDevToolsOpened()) {
       mainWindow.closeDevTools();
     } else {
       showWindow();
       mainWindow.openDevTools();
+    }
+  });
+
+  globalShortcut.register("Alt+Shift+O", () => {
+    if (overlay.isDevToolsOpened()) {
+      overlay.closeDevTools();
+    } else {
+      overlay.openDevTools({ mode: "detach" });
     }
   });
 
