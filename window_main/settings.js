@@ -69,13 +69,13 @@ function openSettingsTab(openSection = lastSettingsSection, scrollTop = 0) {
 
   wrap_l.appendChild(createDiv(["list_fill"]));
   wrap_l.appendChild(createDiv(["settings_nav", "sn1"], "Behaviour"));
-  wrap_l.appendChild(createDiv(["settings_nav", "sn7"], "Arena Data"));
-  wrap_l.appendChild(createDiv(["settings_nav", "sn2"], "Overlay"));
-  wrap_l.appendChild(createDiv(["settings_nav", "sn3"], "Visual"));
-  wrap_l.appendChild(createDiv(["settings_nav", "sn4"], "Privacy"));
-  wrap_l.appendChild(createDiv(["settings_nav", "sn5"], "About"));
+  wrap_l.appendChild(createDiv(["settings_nav", "sn2"], "Arena Data"));
+  wrap_l.appendChild(createDiv(["settings_nav", "sn3"], "Overlay"));
+  wrap_l.appendChild(createDiv(["settings_nav", "sn4"], "Visual"));
+  wrap_l.appendChild(createDiv(["settings_nav", "sn5"], "Privacy"));
+  wrap_l.appendChild(createDiv(["settings_nav", "sn6"], "About"));
   wrap_l.appendChild(
-    createDiv(["settings_nav", "sn6"], pd.offline ? "Login" : "Logout")
+    createDiv(["settings_nav", "sn7"], pd.offline ? "Login" : "Logout")
   );
   mainDiv.appendChild(wrap_l);
   $$(".sn" + openSection)[0].classList.add("nav_selected");
@@ -128,33 +128,33 @@ function openSettingsTab(openSection = lastSettingsSection, scrollTop = 0) {
   div.appendChild(section);
 
   // DATA
-  section = createDiv(["settings_section", "ss7"]);
+  section = createDiv(["settings_section", "ss2"]);
   appendArenaData(section);
   div.appendChild(section);
 
   // OVERLAY
-  section = createDiv(["settings_section", "ss2"]);
+  section = createDiv(["settings_section", "ss3"]);
   appendOverlay(section);
   div.appendChild(section);
 
   // VISUAL
-  section = createDiv(["settings_section", "ss3"]);
+  section = createDiv(["settings_section", "ss4"]);
   appendVisual(section);
   div.appendChild(section);
 
   // PRIVACY
-  section = createDiv(["settings_section", "ss4"]);
+  section = createDiv(["settings_section", "ss5"]);
   appendPrivacy(section);
   div.appendChild(section);
 
   // ABOUT
-  section = createDiv(["settings_section", "ss5"]);
+  section = createDiv(["settings_section", "ss6"]);
   section.style.height = "100%";
   appendAbout(section);
   div.appendChild(section);
 
   // LOGIN
-  section = createDiv(["settings_section", "ss6"]);
+  section = createDiv(["settings_section", "ss7"]);
   section.style.height = "100%";
   appendLogin(section);
   div.appendChild(section);

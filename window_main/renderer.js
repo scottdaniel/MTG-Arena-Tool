@@ -283,7 +283,7 @@ ipc.on("player_data_refresh", () => {
 //
 ipc.on("set_update_state", function(event, arg) {
   if (sidebarActive === MAIN_UPDATE) {
-    openSettingsTab(5);
+    openSettingsTab(6);
   }
 });
 
@@ -529,7 +529,7 @@ function force_open_about() {
     duration: 350
   });
   $$(".top_nav_item").forEach(el => el.classList.remove("item_selected"));
-  openSettingsTab(5, 0);
+  openSettingsTab(6, 0);
 }
 
 //
