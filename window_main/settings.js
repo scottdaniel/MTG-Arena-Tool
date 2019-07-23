@@ -3,6 +3,7 @@ const { ipcRenderer: ipc, remote, shell } = require("electron");
 const {
   CARD_TILE_ARENA,
   CARD_TILE_FLAT,
+  COLORS_ALL,
   OVERLAY_FULL,
   OVERLAY_LEFT,
   OVERLAY_ODDS,
@@ -12,7 +13,13 @@ const {
   OVERLAY_DRAFT_BREW,
   OVERLAY_LOG,
   OVERLAY_DRAFT_MODES,
-  COLORS_ALL
+  SETTINGS_BEHAVIOUR,
+  SETTINGS_ARENA_DATA,
+  SETTINGS_OVERLAY,
+  SETTINGS_VISUAL,
+  SETTINGS_PRIVACY,
+  SETTINGS_ABOUT,
+  SETTINGS_LOGIN
 } = require("../shared/constants");
 const db = require("../shared/database");
 const pd = require("../shared/player-data");
@@ -68,14 +75,29 @@ function openSettingsTab(openSection = lastSettingsSection, scrollTop = 0) {
   const wrap_l = createDiv(["wrapper_column", "sidebar_column_r"]);
 
   wrap_l.appendChild(createDiv(["list_fill"]));
-  wrap_l.appendChild(createDiv(["settings_nav", "sn1"], "Behaviour"));
-  wrap_l.appendChild(createDiv(["settings_nav", "sn2"], "Arena Data"));
-  wrap_l.appendChild(createDiv(["settings_nav", "sn3"], "Overlay"));
-  wrap_l.appendChild(createDiv(["settings_nav", "sn4"], "Visual"));
-  wrap_l.appendChild(createDiv(["settings_nav", "sn5"], "Privacy"));
-  wrap_l.appendChild(createDiv(["settings_nav", "sn6"], "About"));
   wrap_l.appendChild(
-    createDiv(["settings_nav", "sn7"], pd.offline ? "Login" : "Logout")
+    createDiv(["settings_nav", "sn" + SETTINGS_BEHAVIOUR], "Behaviour")
+  );
+  wrap_l.appendChild(
+    createDiv(["settings_nav", "sn" + SETTINGS_ARENA_DATA], "Arena Data")
+  );
+  wrap_l.appendChild(
+    createDiv(["settings_nav", "sn" + SETTINGS_OVERLAY], "Overlay")
+  );
+  wrap_l.appendChild(
+    createDiv(["settings_nav", "sn" + SETTINGS_VISUAL], "Visual")
+  );
+  wrap_l.appendChild(
+    createDiv(["settings_nav", "sn" + SETTINGS_PRIVACY], "Privacy")
+  );
+  wrap_l.appendChild(
+    createDiv(["settings_nav", "sn" + SETTINGS_ABOUT], "About")
+  );
+  wrap_l.appendChild(
+    createDiv(
+      ["settings_nav", "sn" + SETTINGS_LOGIN],
+      pd.offline ? "Login" : "Logout"
+    )
   );
   mainDiv.appendChild(wrap_l);
   $$(".sn" + openSection)[0].classList.add("nav_selected");
@@ -123,38 +145,38 @@ function openSettingsTab(openSection = lastSettingsSection, scrollTop = 0) {
   let section;
 
   // BEHAVIOR
-  section = createDiv(["settings_section", "ss1"]);
+  section = createDiv(["settings_section", "ss" + SETTINGS_BEHAVIOUR]);
   appendBehaviour(section);
   div.appendChild(section);
 
   // DATA
-  section = createDiv(["settings_section", "ss2"]);
+  section = createDiv(["settings_section", "ss" + SETTINGS_ARENA_DATA]);
   appendArenaData(section);
   div.appendChild(section);
 
   // OVERLAY
-  section = createDiv(["settings_section", "ss3"]);
+  section = createDiv(["settings_section", "ss" + SETTINGS_OVERLAY]);
   appendOverlay(section);
   div.appendChild(section);
 
   // VISUAL
-  section = createDiv(["settings_section", "ss4"]);
+  section = createDiv(["settings_section", "ss" + SETTINGS_VISUAL]);
   appendVisual(section);
   div.appendChild(section);
 
   // PRIVACY
-  section = createDiv(["settings_section", "ss5"]);
+  section = createDiv(["settings_section", "ss" + SETTINGS_PRIVACY]);
   appendPrivacy(section);
   div.appendChild(section);
 
   // ABOUT
-  section = createDiv(["settings_section", "ss6"]);
+  section = createDiv(["settings_section", "ss" + SETTINGS_ABOUT]);
   section.style.height = "100%";
   appendAbout(section);
   div.appendChild(section);
 
   // LOGIN
-  section = createDiv(["settings_section", "ss7"]);
+  section = createDiv(["settings_section", "ss" + SETTINGS_LOGIN]);
   section.style.height = "100%";
   appendLogin(section);
   div.appendChild(section);

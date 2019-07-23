@@ -31,14 +31,11 @@ const {
   MAIN_ECONOMY,
   MAIN_COLLECTION,
   MAIN_SETTINGS,
-  MAIN_UPDATE
+  MAIN_UPDATE,
+  SETTINGS_ABOUT
 } = require("../shared/constants");
 const pd = require("../shared/player-data");
-const {
-  createDiv,
-  createInput,
-  queryElements: $$
-} = require("../shared/dom-fns");
+const { createDiv, queryElements: $$ } = require("../shared/dom-fns");
 const {
   compare_cards,
   get_deck_colors,
@@ -48,7 +45,6 @@ const {
 
 const {
   changeBackground,
-  closeDialog,
   getLocalState,
   hideLoadingBars,
   ipcSend,
@@ -283,7 +279,7 @@ ipc.on("player_data_refresh", () => {
 //
 ipc.on("set_update_state", function(event, arg) {
   if (sidebarActive === MAIN_UPDATE) {
-    openSettingsTab(6);
+    openSettingsTab(SETTINGS_ABOUT);
   }
 });
 
@@ -529,7 +525,7 @@ function force_open_about() {
     duration: 350
   });
   $$(".top_nav_item").forEach(el => el.classList.remove("item_selected"));
-  openSettingsTab(6, 0);
+  openSettingsTab(SETTINGS_ABOUT, 0);
 }
 
 //
