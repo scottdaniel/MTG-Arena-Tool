@@ -168,9 +168,7 @@ ipc.on("edit", () => {
             interact.modifiers.restrictSize({
               min: { width: 100, height: 50 }
             })
-          ],
-
-          inertia: true
+          ]
         })
         .on("resizemove", function(event) {
           const target = event.target;
@@ -194,8 +192,8 @@ ipc.on("edit", () => {
     });
   } else {
     pd.settings.overlays.forEach((_overlay, index) => {
-      let overlayDom = document.getElementById("overlay_" + (index + 1));
-      overlayDom.classList.remove("editable");
+      const overlayDiv = byId("overlay_" + (index + 1));
+      overlayDiv.classList.remove("editable");
       interact("#overlay_" + (index + 1)).unset();
     });
     setIgnoreTrue(true);
@@ -208,16 +206,19 @@ function saveOverlaysPosition() {
   const overlays = [...pd.settings.overlays];
 
   overlays.forEach((_overlay, index) => {
-    let overlayDom = document.getElementById("overlay_" + (index + 1));
-    let _new = _overlay.bounds;
-    _new.height = parseInt(overlayDom.style.height);
-    _new.width = parseInt(overlayDom.style.width);
-    _new.x = parseInt(overlayDom.style.left);
-    _new.y = parseInt(overlayDom.style.top);
-
+    const overlayDiv = byId("overlay_" + (index + 1));
+    const forceInt = num => Math.round(parseFloat(num));
+    const dx = parseFloat(overlayDiv.getAttribute("data-x")) || 0;
+    const dy = parseFloat(overlayDiv.getAttribute("data-y")) || 0;
+    const bounds = {
+      width: forceInt(overlayDiv.style.width),
+      height: forceInt(overlayDiv.style.height),
+      x: forceInt(parseFloat(overlayDiv.style.left) + dx),
+      y: forceInt(parseFloat(overlayDiv.style.top) + dy)
+    };
     const newOverlay = {
       ...overlays[index], // old overlay
-      bounds: _new // new setting
+      bounds // new setting
     };
     overlays[index] = newOverlay;
   });
@@ -251,6 +252,7 @@ function settingsUpdated() {
     overlayDiv.style.width = _overlay.bounds.width + "px";
     overlayDiv.style.left = _overlay.bounds.x + "px";
     overlayDiv.style.top = _overlay.bounds.y + "px";
+    overlayDiv.style.webkitTransform = overlayDiv.style.transform = "";
 
     if (getVisible(_overlay)) {
       overlayDiv.style.opacity = "1";
