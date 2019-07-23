@@ -125,7 +125,10 @@ ipc.on("edit", () => {
   editMode = !editMode;
 
   if (editMode) {
+    setIgnoreFalse(true);
     pd.settings.overlays.forEach((_overlay, index) => {
+      if (!getVisible(_overlay)) return;
+
       let overlayDom = document.getElementById("overlay_" + (index + 1));
       overlayDom.classList.add("editable");
       interact("#overlay_" + (index + 1))
@@ -188,7 +191,6 @@ ipc.on("edit", () => {
           target.setAttribute("data-x", x);
           target.setAttribute("data-y", y);
         });
-      setIgnoreFalse(true);
     });
   } else {
     pd.settings.overlays.forEach((_overlay, index) => {
@@ -244,14 +246,22 @@ function settingsUpdated() {
   webFrame.setZoomFactor(pd.settings.overlay_scale / 100);
   if (editMode) return;
   pd.settings.overlays.forEach((_overlay, index) => {
-    const overlayDom = byId("overlay_" + (index + 1));
-    overlayDom.style.opacity = getVisible(_overlay) ? "1" : "0";
-    if (!getVisible(_overlay)) return;
+    const overlayDiv = byId("overlay_" + (index + 1));
+    overlayDiv.style.height = _overlay.bounds.height + "px";
+    overlayDiv.style.width = _overlay.bounds.width + "px";
+    overlayDiv.style.left = _overlay.bounds.x + "px";
+    overlayDiv.style.top = _overlay.bounds.y + "px";
 
-    overlayDom.style.height = _overlay.bounds.height + "px";
-    overlayDom.style.width = _overlay.bounds.width + "px";
-    overlayDom.style.left = _overlay.bounds.x + "px";
-    overlayDom.style.top = _overlay.bounds.y + "px";
+    if (getVisible(_overlay)) {
+      overlayDiv.style.opacity = "1";
+      overlayDiv.classList.add("click-on");
+      overlayDiv.classList.remove("click-through");
+    } else {
+      overlayDiv.style.opacity = "0";
+      overlayDiv.classList.add("click-through");
+      overlayDiv.classList.remove("click-on");
+      return;
+    }
 
     change_background(index, pd.settings.back_url);
 
@@ -290,11 +300,11 @@ function settingsUpdated() {
     // Only issue with this is when two overlays are on top of eachother
     // But when we allow editing the layour we should not allow that
     /*
-    overlayDom.removeEventListener("mouseenter", setIgnoreFalse);
-    overlayDom.removeEventListener("mouseleave", setIgnoreTrue);
+    overlayDiv.removeEventListener("mouseenter", setIgnoreFalse);
+    overlayDiv.removeEventListener("mouseleave", setIgnoreTrue);
     if (_overlay.show) {
-      overlayDom.addEventListener("mouseenter", setIgnoreFalse);
-      overlayDom.addEventListener("mouseleave", setIgnoreTrue);
+      overlayDiv.addEventListener("mouseenter", setIgnoreFalse);
+      overlayDiv.addEventListener("mouseleave", setIgnoreTrue);
     }
     */
   });
