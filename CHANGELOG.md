@@ -1,3 +1,22 @@
+## <small>2.8.3 (2019-07-21)</small>
+
+* [BUGFIX] Fixes action log share icon location reference ([1d47626](https://github.com/Manuel-777/MTG-Arena-Tool/commit/1d47626))
+* add custom sort options to decks page ([5ff7fb5](https://github.com/Manuel-777/MTG-Arena-Tool/commit/5ff7fb5))
+* add margin for deck crafting costs ([460aa0d](https://github.com/Manuel-777/MTG-Arena-Tool/commit/460aa0d))
+* bugfix booster estimate accounts for owned wildcards ([231ce36](https://github.com/Manuel-777/MTG-Arena-Tool/commit/231ce36))
+* bugfix db singleton handles filtering out bad sets ([47bab9b](https://github.com/Manuel-777/MTG-Arena-Tool/commit/47bab9b))
+* bugfix player_data_refresh background ([4060c6e](https://github.com/Manuel-777/MTG-Arena-Tool/commit/4060c6e))
+* bugfix ranked estimates on history page ([6231310](https://github.com/Manuel-777/MTG-Arena-Tool/commit/6231310))
+* filter-panel and aggregator support inclusive color matches ([413cebb](https://github.com/Manuel-777/MTG-Arena-Tool/commit/413cebb))
+* fix tray icon for osx ([73a5b62](https://github.com/Manuel-777/MTG-Arena-Tool/commit/73a5b62))
+* More detailed parse errors ([50685ce](https://github.com/Manuel-777/MTG-Arena-Tool/commit/50685ce))
+* typo fix ([2b0a80f](https://github.com/Manuel-777/MTG-Arena-Tool/commit/2b0a80f))
+* Update arena-log-decoder.js ([d0b4893](https://github.com/Manuel-777/MTG-Arena-Tool/commit/d0b4893))
+* Update database.json ([6a51ed5](https://github.com/Manuel-777/MTG-Arena-Tool/commit/6a51ed5))
+* use plus symbol instead of multicolored ([cb4a8c9](https://github.com/Manuel-777/MTG-Arena-Tool/commit/cb4a8c9))
+
+
+
 ## <small>2.8.2 (2019-07-18)</small>
 
 * add filter for no archetype set ([f7729c3](https://github.com/Manuel-777/MTG-Arena-Tool/commit/f7729c3))

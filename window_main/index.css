@@ -1,3 +1,5 @@
+@import '../node_modules/pikaday/css/pikaday.css';
+
 span i {
     margin-left: 4px;
 }
@@ -1134,6 +1136,7 @@ a:hover {
     line-height: 80px;
     height: 64px;
     text-align: center;
+    margin: auto 4px;
     background-position: center 4px;
     background-repeat: no-repeat;
 }
@@ -1304,6 +1307,14 @@ a:hover {
     margin-right: 16px;
     height: 20px;
     background: center no-repeat url('../images/filter_multi.png');
+}
+
+.icon_search_inclusive {
+    display: -webkit-inline-box;
+    width: 20px;
+    margin-right: 16px;
+    height: 20px;
+    background: center no-repeat url('../images/create.png');
 }
 
 .wc_search_icon {
