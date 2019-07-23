@@ -37,7 +37,7 @@ function parseWotcTime(dateStr) {
     const test = parse(dateStr, lang, new Date());
     if (isValid(test) && !isNaN(test.getTime())) {
       //console.log(`Log datetime language detected: ${lang}`, dateStr, test);
-      pd.settings.log_used_format = lang;
+      setData({ last_log_format: lang });
       return test;
     }
   }
@@ -47,7 +47,7 @@ function parseWotcTime(dateStr) {
     const test = parse(dateStr, lang, new Date());
     if (isValid(test) && !isNaN(test.getTime())) {
       //console.log(`Log datetime language detected: ${lang}`, dateStr, test);
-      pd.settings.log_used_format = lang;
+      setData({ last_log_format: lang });
       return test;
     }
   });

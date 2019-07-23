@@ -26,7 +26,9 @@ const playerDataDefault = {
   arenaVersion: "",
   offline: false,
   patreon: false,
-  patreon_tier: 0
+  patreon_tier: 0,
+  last_log_timestamp: null,
+  last_log_format: ""
 };
 
 const overlayCfg = {
