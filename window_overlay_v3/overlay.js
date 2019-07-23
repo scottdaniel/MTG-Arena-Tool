@@ -325,10 +325,12 @@ function setIgnoreFalse(force = false) {
 }
 
 ipc.on("set_draft_cards", (event, draft) => {
-  recreateClock();
   matchBeginTime = Date.now();
   currentDraft = draft;
-  updateDraftView(currentDraft.packNumber, currentDraft.pickNumber);
+  pd.settings.overlays.forEach((_overlay, index) => {
+    recreateClock(index);
+    updateDraftView(index, currentDraft.packNumber, currentDraft.pickNumber);
+  });
 });
 
 ipc.on("set_turn", (event, arg) => {
@@ -1042,7 +1044,7 @@ function recreateClock(index) {
     clockTurn.innerHTML = "";
   }
 
-  updateClock();
+  updateClock(index);
 }
 
 function change_background(index, arg = "default") {
