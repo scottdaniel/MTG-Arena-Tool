@@ -323,7 +323,7 @@ function appendArenaData(section) {
     id: "settings_log_locale_format",
     autocomplete: "off",
     placeholder: "default (auto)",
-    value: pd.settings.log_used_format
+    value: pd.settings.log_locale_format
   });
   logFormatInput.addEventListener("keyup", e => {
     if (e.keyCode === 13) logFormatInput.blur();
@@ -340,25 +340,27 @@ function appendArenaData(section) {
   logFormatLabel.appendChild(logFormatCont);
   section.appendChild(logFormatLabel);
 
-  let latestDateStamp = pd.settings.log_datetime;
-  let latestDateParsed = parse(
-    latestDateStamp,
-    pd.settings.log_locale_format,
+  const latestDateParsed = parse(
+    pd.last_log_timestamp,
+    pd.last_log_format,
     new Date()
   );
   section.appendChild(
     createDiv(
       ["settings_note"],
-      `<p><i>Date format to use when parsing the Arena log. Incorrect date formats can cause issues displaying data, mtgatool tries to auto-detect formats, but sometimes manual input is required.</p>
-      <p><a class="link parse_link">Date format reference</a></p>
-      Leave blank to use default auto-detection.</i></p>
-      <p>Found example date: <b>${latestDateStamp}</b></p>
+      `<p><i>Date and time format to use when parsing the Arena log. Incorrect
+      formats can cause issues importing or displaying data. mtgatool tries to
+      auto-detect formats, but sometimes manual input is required.</p>
+      <p>Leave blank to use default auto-detection, or
+      <a class="link parse_link">use ISO_8601 to specify a custom format</a>.</p></i>
+      <p>Last log timestamp: <b>${pd.last_log_timestamp}</b></p>
+      <p>Last format used: <b>${pd.last_log_format}</b></p>
       <p>Parsed output: ${
-        isValid(latestDateParsed)
+        isValid(latestDateParsed) && !isNaN(latestDateParsed.getTime())
           ? '<b class="green">' +
             latestDateParsed.toISOString() +
-            "</b><i> (ISO_8601 format)</i>"
-          : '<b class="red">Invalid format or date</b>'
+            "</b><i> (simplified extended ISO_8601 format)</i>"
+          : '<b class="red">Invalid format or timestamp</b>'
       }</p>`
     )
   );
