@@ -131,14 +131,22 @@ function startApp() {
   appStarted = true;
 
   globalShortcut.register("Alt+Shift+D", () => {
-    if (!background.isVisible()) background.show();
-    else background.hide();
-    const windows = [background, mainWindow, overlay];
-    windows.forEach(win => {
-      if (win.isVisible()) {
-        win.toggleDevTools();
-      }
-    });
+    if (background.isDevToolsOpened()) {
+      background.closeDevTools();
+    } else {
+      background.openDevTools({ mode: "detach" });
+    }
+    if (overlay.isDevToolsOpened()) {
+      overlay.closeDevTools();
+    } else {
+      overlay.openDevTools({ mode: "detach" });
+    }
+    if (mainWindow.isDevToolsOpened()) {
+      mainWindow.closeDevTools();
+    } else {
+      showWindow();
+      mainWindow.openDevTools();
+    }
   });
 
   // Toggle edit mode
