@@ -129,6 +129,24 @@ function startApp() {
 
   setTimeout(() => {
     overlay = createOverlayWindow();
+    overlay.webContents.once("dom-ready", function() {
+      //We need to wait for the overlay to be initialized before we interact with it
+      const display = electron.screen.getPrimaryDisplay();
+      const area = display.workArea;
+      console.log(
+        "Overlay area:" +
+          area.x +
+          ", " +
+          area.y +
+          ", " +
+          area.width +
+          ", " +
+          area.height
+      );
+      overlay.setSize(area.width, area.height);
+      overlay.setPosition(area.x, area.y);
+      overlay.webContents.send("settings_updated");
+    });
   }, 1000);
 
   appStarted = true;
@@ -173,25 +191,6 @@ function startApp() {
     if (mainLoaded == true) {
       background.webContents.send("start_background");
     }
-  });
-
-  overlay.webContents.once("dom-ready", function() {
-    //We need to wait for the overlay to be initialized before we interact with it
-    const display = electron.screen.getPrimaryDisplay();
-    const area = display.workArea;
-    console.log(
-      "Overlay area:" +
-        area.x +
-        ", " +
-        area.y +
-        ", " +
-        area.width +
-        ", " +
-        area.height
-    );
-    overlay.setSize(area.width, area.height);
-    overlay.setPosition(area.x, area.y);
-    overlay.webContents.send("settings_updated");
   });
 
   // If we destroy updater before creating another renderer
