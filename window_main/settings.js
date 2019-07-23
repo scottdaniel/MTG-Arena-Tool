@@ -317,6 +317,7 @@ function appendArenaData(section) {
     { for: "settings_log_locale_format" }
   );
   const logFormatCont = createDiv(["input_container"]);
+  logFormatCont.style.margin = "3px";
   const logFormatInput = createInput([], "", {
     type: "text",
     id: "settings_log_locale_format",

@@ -819,8 +819,9 @@ function renderLogInput(section) {
     for: "settings_log_uri"
   });
   logUriLabel.style.width = "100%";
-  logUriLabel.appendChild(createDiv(["copy_button"]));
+  logUriLabel.appendChild(createDiv(["open_button"]));
   const logUriCont = createDiv(["input_container"]);
+  logUriCont.style.margin = "3px";
   logUriCont.style.width = "70%";
   const logUriInput = createInput([], "", {
     type: "text",
