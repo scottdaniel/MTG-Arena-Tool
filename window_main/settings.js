@@ -389,7 +389,7 @@ function appendArenaData(section) {
 
   setTimeout(() => {
     $$(".parse_link")[0].addEventListener("click", () => {
-      shell.openExternal("https://date-fns.org/v2.0.0-alpha.7/docs/parse");
+      shell.openExternal("https://date-fns.org/v2.0.0-alpha.27/docs/parse");
     });
   }, 100);
 }
