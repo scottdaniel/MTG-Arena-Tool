@@ -126,6 +126,8 @@ ipc.on("edit", () => {
 
   if (editMode) {
     setIgnoreFalse(true);
+    document.body.style.backgroundColor = "rgba(0, 0, 0, 0.3)";
+
     pd.settings.overlays.forEach((_overlay, index) => {
       if (!getVisible(_overlay)) return;
 
@@ -161,6 +163,7 @@ ipc.on("edit", () => {
       interact("#overlay_" + (index + 1)).unset();
     });
     setIgnoreTrue(true);
+    document.body.style.backgroundColor = "rgba(0, 0, 0, 0.01)";
     saveOverlaysPosition();
   }
 });
@@ -206,8 +209,12 @@ ipc.on("action_log", function(event, arg) {
 ipc.on("settings_updated", settingsUpdated);
 
 function settingsUpdated() {
-  webFrame.setZoomFactor(pd.settings.overlay_scale / 100);
+  // mid-match Arena updates can make edit-mode difficult
+  // temporarily allow the overlays to go stale during editing
+  // (should be okay since ending edit-mode causes a refresh)
   if (editMode) return;
+
+  webFrame.setZoomFactor(pd.settings.overlay_scale / 100);
   pd.settings.overlays.forEach((_overlay, index) => {
     const overlayDiv = byId("overlay_" + (index + 1));
     overlayDiv.style.height = _overlay.bounds.height + "px";
@@ -1072,6 +1079,8 @@ function ready(fn) {
 }
 
 ready(function() {
+  document.body.style.backgroundColor = "rgba(0, 0, 0, 0.1)";
+
   queryElements(".overlay_container").forEach(node => {
     node.innerHTML = `
       <div class="outer_wrapper">
