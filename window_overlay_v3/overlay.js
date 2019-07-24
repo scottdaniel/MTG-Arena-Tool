@@ -84,7 +84,7 @@ let landsCard = {
 
 let matchBeginTime = Date.now();
 let priorityTimers = [];
-let clockMode = [0, 0, 0, 0, 0];
+const clockMode = pd.settings.overlays.map(() => 0);
 setRenderer(1);
 
 let playerSeat = 0;
@@ -338,10 +338,10 @@ ipc.on("set_turn", (event, arg) => {
 
   pd.settings.overlays.forEach((_overlay, index) => {
     let clockTurnDom = `#overlay_${index + 1} .clock_turn`;
-    if (clockMode[index] == 0) {
+    if (clockMode[index] === 0) {
       recreateClock(index);
     }
-    if (clockMode > 0) {
+    if (clockMode[index] > 0) {
       if (turnPriority === playerSeat) {
         queryElements(clockTurnDom)[0].innerHTML = "You have priority.";
       } else {
@@ -937,14 +937,14 @@ window.setInterval(() => {
 function updateClock(index) {
   let hh, mm, ss;
   let clockPriority1Dom = `#overlay_${index + 1} .clock_priority_1`;
-  let clockPriority2Dom = `#overlay_${index + 1} .clock_priority_1`;
+  let clockPriority2Dom = `#overlay_${index + 1} .clock_priority_2`;
   let clockElapsedDom = `#overlay_${index + 1} .clock_elapsed`;
 
   if (matchBeginTime === 0) {
     hh = 0;
     mm = 0;
     ss = 0;
-  } else if (clockMode === 0) {
+  } else if (clockMode[index] === 0) {
     let time = priorityTimers[1] / 1000;
     const now = new Date();
     if (turnPriority === 1 && time > 0) {
@@ -967,7 +967,7 @@ function updateClock(index) {
     ss = Math.floor(time % 60);
     ss = ("0" + ss).slice(-2);
     queryElements(clockPriority2Dom)[0].innerHTML = mm + ":" + ss;
-  } else if (clockMode === 1) {
+  } else if (clockMode[index] === 1) {
     const diff = Math.floor((Date.now() - matchBeginTime) / 1000);
     hh = Math.floor(diff / 3600);
     mm = Math.floor((diff % 3600) / 60);
@@ -976,7 +976,7 @@ function updateClock(index) {
     mm = ("0" + mm).slice(-2);
     ss = ("0" + ss).slice(-2);
     queryElements(clockElapsedDom)[0].innerHTML = hh + ":" + mm + ":" + ss;
-  } else if (clockMode === 2) {
+  } else if (clockMode[index] === 2) {
     queryElements(
       clockElapsedDom
     )[0].innerHTML = new Date().toLocaleTimeString();
@@ -990,7 +990,7 @@ function recreateClock(index) {
   const clockTurn = queryElements(clockTurnDom)[0];
   const clockElapsed = queryElements(clockElapsedDom)[0];
 
-  if (clockMode === 0) {
+  if (clockMode[index] === 0) {
     const p1 = createDiv(["clock_priority_1"]);
     const p2 = createDiv(["clock_priority_2"]);
     let p1name = oppName;
@@ -1104,15 +1104,50 @@ ready(function() {
         <div class="button close" style="margin-right: 4px;"></div>
       </div>`;
   });
+  pd.settings.overlays.forEach((_overlay, index) => recreateClock(index));
   // Force a dom refresh
   queryElements(".overlay_container")[0].style.display = "none";
   queryElements(".overlay_container")[0].style.display = "";
 
   setTimeout(() => {
     pd.settings.overlays.forEach((_overlay, index) => {
-      let iconDom = `#overlay_${index + 1} .overlay_icon`;
-      let settingsDom = `#overlay_${index + 1} .settings`;
-      let closeDom = `#overlay_${index + 1} .close`;
+      const iconDom = `#overlay_${index + 1} .overlay_icon`;
+      const settingsDom = `#overlay_${index + 1} .settings`;
+      const closeDom = `#overlay_${index + 1} .close`;
+      const clockPrevDom = `#overlay_${index + 1} .clock_prev`;
+      const clockNextDom = `#overlay_${index + 1} .clock_next`;
+
+      queryElements(clockPrevDom)[0].addEventListener("click", function() {
+        clockMode[index] -= 1;
+        if (clockMode[index] < 0) {
+          clockMode[index] = 2;
+        }
+        recreateClock(index);
+      });
+      queryElements(clockPrevDom)[0].addEventListener(
+        "mouseover",
+        setIgnoreFalse
+      );
+      queryElements(clockPrevDom)[0].addEventListener(
+        "mouseleave",
+        setIgnoreTrue
+      );
+
+      queryElements(clockNextDom)[0].addEventListener("click", function() {
+        clockMode[index] += 1;
+        if (clockMode[index] > 2) {
+          clockMode[index] = 0;
+        }
+        recreateClock(index);
+      });
+      queryElements(clockNextDom)[0].addEventListener(
+        "mouseover",
+        setIgnoreFalse
+      );
+      queryElements(clockNextDom)[0].addEventListener(
+        "mouseleave",
+        setIgnoreTrue
+      );
 
       queryElements(iconDom)[0].style.backgroundColor = `var(--color-${
         COLORS_ALL[index]
