@@ -173,12 +173,6 @@ function startApp() {
     }
   });
 
-  // Toggle edit mode
-  // TODO This should have its own setting to turn on / off or change the key maybe
-  globalShortcut.register("Alt+Shift+E", () => {
-    overlay.webContents.send("edit");
-  });
-
   mainWindow.webContents.once("dom-ready", () => {
     mainLoaded = true;
     if (backLoaded == true) {

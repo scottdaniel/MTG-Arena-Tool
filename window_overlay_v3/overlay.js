@@ -122,11 +122,11 @@ ipc.on("set_priority_timer", function(event, arg) {
   }
 });
 
-ipc.on("edit", () => {
+function toggleEditMode() {
   editMode = !editMode;
 
   if (editMode) {
-    setIgnoreFalse(true);
+    setIgnoreFalse();
     document.body.style.backgroundColor = "rgba(0, 0, 0, 0.3)";
 
     pd.settings.overlays.forEach((_overlay, index) => {
@@ -135,7 +135,7 @@ ipc.on("edit", () => {
       const overlayDiv = byId("overlay_" + (index + 1));
       overlayDiv.classList.add("editable");
 
-      interact("#overlay_" + (index + 1))
+      interact(overlayDiv)
         .draggable({})
         .on("dragmove", function(event) {
           const target = event.target;
@@ -161,13 +161,13 @@ ipc.on("edit", () => {
     pd.settings.overlays.forEach((_overlay, index) => {
       const overlayDiv = byId("overlay_" + (index + 1));
       overlayDiv.classList.remove("editable");
-      interact("#overlay_" + (index + 1)).unset();
+      interact(overlayDiv).unset();
     });
-    setIgnoreTrue(true);
+    setIgnoreTrue();
     document.body.style.backgroundColor = "rgba(0, 0, 0, 0)";
     saveOverlaysPosition();
   }
-});
+}
 
 function saveOverlaysPosition() {
   // Update each overlay with the new dimensions
@@ -294,16 +294,13 @@ function getVisible(settings) {
   return settings.show && (currentModeApplies || settings.show_always);
 }
 
-function setIgnoreTrue(force = false) {
-  if (!editMode || force) {
-    remote.getCurrentWindow().setIgnoreMouseEvents(true, { forward: true });
-  }
+function setIgnoreTrue() {
+  if (editMode) return;
+  remote.getCurrentWindow().setIgnoreMouseEvents(true, { forward: true });
 }
 
-function setIgnoreFalse(force = false) {
-  if (!editMode || force) {
-    remote.getCurrentWindow().setIgnoreMouseEvents(false);
-  }
+function setIgnoreFalse() {
+  remote.getCurrentWindow().setIgnoreMouseEvents(false);
 }
 
 ipc.on("set_draft_cards", (event, draft) => {
@@ -1117,41 +1114,33 @@ ready(function() {
       const clockPrevDom = `#overlay_${index + 1} .clock_prev`;
       const clockNextDom = `#overlay_${index + 1} .clock_next`;
 
-      queryElements(clockPrevDom)[0].addEventListener("click", function() {
+      const clockPrevDiv = queryElements(clockPrevDom)[0];
+      clockPrevDiv.addEventListener("click", function() {
         clockMode[index] -= 1;
         if (clockMode[index] < 0) {
           clockMode[index] = 2;
         }
         recreateClock(index);
       });
-      queryElements(clockPrevDom)[0].addEventListener(
-        "mouseover",
-        setIgnoreFalse
-      );
-      queryElements(clockPrevDom)[0].addEventListener(
-        "mouseleave",
-        setIgnoreTrue
-      );
+      clockPrevDiv.addEventListener("mouseover", setIgnoreFalse);
+      clockPrevDiv.addEventListener("mouseleave", setIgnoreTrue);
 
-      queryElements(clockNextDom)[0].addEventListener("click", function() {
+      const clockNextDiv = queryElements(clockNextDom)[0];
+      clockNextDiv.addEventListener("click", function() {
         clockMode[index] += 1;
         if (clockMode[index] > 2) {
           clockMode[index] = 0;
         }
         recreateClock(index);
       });
-      queryElements(clockNextDom)[0].addEventListener(
-        "mouseover",
-        setIgnoreFalse
-      );
-      queryElements(clockNextDom)[0].addEventListener(
-        "mouseleave",
-        setIgnoreTrue
-      );
+      clockNextDiv.addEventListener("mouseover", setIgnoreFalse);
+      clockNextDiv.addEventListener("mouseleave", setIgnoreTrue);
 
-      queryElements(iconDom)[0].style.backgroundColor = `var(--color-${
-        COLORS_ALL[index]
-      })`;
+      const iconDiv = queryElements(iconDom)[0];
+      iconDiv.style.backgroundColor = `var(--color-${COLORS_ALL[index]})`;
+      iconDiv.addEventListener("click", toggleEditMode);
+      iconDiv.addEventListener("mouseover", setIgnoreFalse);
+      iconDiv.addEventListener("mouseleave", setIgnoreTrue);
 
       queryElements(settingsDom)[0].addEventListener("click", function() {
         ipcSend("renderer_show");

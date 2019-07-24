@@ -501,6 +501,7 @@ body {
     height: 12px;
     margin: auto auto auto 8px;
     border-radius: 50%;
+    cursor: pointer;
 }
 
 .top_nav_wrapper {
