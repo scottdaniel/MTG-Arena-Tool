@@ -126,28 +126,7 @@ function startApp() {
   }
   mainWindow = createMainWindow();
   background = createBackgroundWindow();
-
-  setTimeout(() => {
-    overlay = createOverlayWindow();
-    overlay.webContents.once("dom-ready", function() {
-      //We need to wait for the overlay to be initialized before we interact with it
-      const display = electron.screen.getPrimaryDisplay();
-      const area = display.workArea;
-      console.log(
-        "Overlay area:" +
-          area.x +
-          ", " +
-          area.y +
-          ", " +
-          area.width +
-          ", " +
-          area.height
-      );
-      overlay.setSize(area.width, area.height);
-      overlay.setPosition(area.x, area.y);
-      overlay.webContents.send("settings_updated");
-    });
-  }, 1000);
+  overlay = createOverlayWindow();
 
   appStarted = true;
 
@@ -185,6 +164,18 @@ function startApp() {
     if (mainLoaded == true) {
       background.webContents.send("start_background");
     }
+  });
+
+  overlay.webContents.once("dom-ready", function() {
+    //We need to wait for the overlay to be initialized before we interact with it
+    const display = electron.screen.getPrimaryDisplay();
+    // display.workArea does not include the taskbar
+    overlay.setSize(display.size.width, display.size.height);
+    overlay.setPosition(0, 0);
+    overlay.webContents.send("settings_updated");
+    // only show overlay after its ready
+    // TODO does this work with Linux transparency???
+    setTimeout(() => overlay.show(), 1000);
   });
 
   // If we destroy updater before creating another renderer
@@ -492,7 +483,6 @@ function createOverlayWindow() {
     width: 5,
     height: 5,
     frame: false,
-    show: true,
     skipTaskbar: true,
     focusable: false,
     title: "MTG Arena Tool",
