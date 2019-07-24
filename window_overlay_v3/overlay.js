@@ -122,6 +122,10 @@ ipc.on("set_priority_timer", function(event, arg) {
   }
 });
 
+ipc.on("edit", () => {
+  toggleEditMode();
+});
+
 function toggleEditMode() {
   editMode = !editMode;
 
