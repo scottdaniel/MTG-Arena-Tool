@@ -253,6 +253,31 @@ function appendBehaviour(section) {
 function appendOverlay(section) {
   section.appendChild(createDiv(["settings_title"], "Overlays"));
 
+  const sliderScale = createDiv(["slidecontainer_settings"]);
+  const sliderScaleLabel = createLabel(
+    ["card_size_container"],
+    "UI Scale: " + pd.settings.overlay_scale + "%"
+  );
+  sliderScaleLabel.style.width = "400px";
+  sliderScale.appendChild(sliderScaleLabel);
+
+  const sliderScaleInput = createInput(["slider"], "", {
+    id: "scaleRange",
+    type: "range",
+    min: "10",
+    max: "200",
+    step: "10",
+    value: pd.settings.overlay_scale
+  });
+  sliderScaleInput.addEventListener("input", function() {
+    sliderScaleLabel.innerHTML = "UI Scale: " + parseInt(this.value) + "%";
+  });
+  sliderScaleInput.addEventListener("change", function() {
+    updateUserSettingsBlend({ overlay_scale: parseInt(this.value) });
+  });
+  sliderScale.appendChild(sliderScaleInput);
+  section.appendChild(sliderScale);
+
   addCheckbox(
     section,
     "Sound when priority changes",
@@ -296,31 +321,6 @@ function appendOverlay(section) {
   });
   sliderSoundVolume.appendChild(sliderSoundVolumeInput);
   section.appendChild(sliderSoundVolume);
-
-  const sliderScale = createDiv(["slidecontainer_settings"]);
-  const sliderScaleLabel = createLabel(
-    ["card_size_container"],
-    "Scale: " + pd.settings.overlay_scale + "%"
-  );
-  sliderScaleLabel.style.width = "400px";
-  sliderScale.appendChild(sliderScaleLabel);
-
-  const sliderScaleInput = createInput(["slider"], "", {
-    id: "scaleRange",
-    type: "range",
-    min: "10",
-    max: "200",
-    step: "10",
-    value: pd.settings.overlay_scale
-  });
-  sliderScaleInput.addEventListener("input", function() {
-    sliderScaleLabel.innerHTML = "Scale: " + parseInt(this.value) + "%";
-  });
-  sliderScaleInput.addEventListener("change", function() {
-    updateUserSettingsBlend({ overlay_scale: parseInt(this.value) });
-  });
-  sliderScale.appendChild(sliderScaleInput);
-  section.appendChild(sliderScale);
 
   const helpDiv = createDiv(
     ["settings_note"],
