@@ -1,5 +1,6 @@
 const { ipcRenderer: ipc, webFrame, remote } = require("electron");
 const interact = require("interactjs");
+const format = require("date-fns/format");
 
 if (!remote.app.isPackaged) {
   const { openNewGitHubIssue, debugInfo } = require("electron-util");
@@ -413,14 +414,11 @@ function updateMatchView(index) {
     let initalTime = actionLog[0] ? new Date(actionLog[0].time) : new Date();
     actionLog.forEach(log => {
       const _date = new Date(log.time);
-      const hh = ("0" + _date.getHours()).slice(-2);
-      const mm = ("0" + _date.getMinutes()).slice(-2);
-      const ss = ("0" + _date.getSeconds()).slice(-2);
       const secondsPast = Math.round((_date - initalTime) / 1000);
 
       const box = createDiv(["actionlog", "log_p" + log.seat]);
       const time = createDiv(["actionlog_time"], secondsPast + "s", {
-        title: `${hh}:${mm}:${ss}`
+        title: format(_date, "HH:mm:ss")
       });
       const str = createDiv(["actionlog_text"], log.str);
 
