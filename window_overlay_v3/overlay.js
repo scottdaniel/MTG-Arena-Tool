@@ -223,7 +223,6 @@ function settingsUpdated() {
       overlayDiv.style.opacity = "0";
       overlayDiv.classList.add("click-through");
       overlayDiv.classList.remove("click-on");
-      return;
     }
 
     change_background(index, pd.settings.back_url);
