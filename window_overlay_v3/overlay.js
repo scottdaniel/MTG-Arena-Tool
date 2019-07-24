@@ -135,8 +135,15 @@ function toggleEditMode() {
       const overlayDiv = byId("overlay_" + (index + 1));
       overlayDiv.classList.add("editable");
 
+      const restrictToParent = interact.modifiers.restrictRect({
+        restriction: "parent"
+      });
+      const restrictMinSize = interact.modifiers.restrictSize({
+        min: { width: 100, height: 100 }
+      });
+
       interact(overlayDiv)
-        .draggable({})
+        .draggable({ modifiers: [restrictToParent] })
         .on("dragmove", function(event) {
           const target = event.target;
           const x = parseFloat(target.style.left) + event.dx;
@@ -145,7 +152,8 @@ function toggleEditMode() {
           target.style.top = y + "px";
         })
         .resizable({
-          edges: { left: true, right: true, bottom: true, top: true }
+          edges: { left: true, right: true, bottom: true, top: true },
+          modifiers: [restrictToParent, restrictMinSize]
         })
         .on("resizemove", function(event) {
           const target = event.target;
