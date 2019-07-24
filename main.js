@@ -483,6 +483,7 @@ function createOverlayWindow() {
     width: 5,
     height: 5,
     frame: false,
+    resizable: false,
     skipTaskbar: true,
     focusable: false,
     title: "MTG Arena Tool",
