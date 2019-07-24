@@ -868,7 +868,7 @@ function updateDraftView(index, _packN = -1, _pickN = -1) {
       );
     });
 
-    draftPack.sort(compare_draft_picks);
+    draftPack.sort(compareDraftPicks);
 
     const deckListDiv = queryElements(deckListDom)[0];
     deckListDiv.style.display = "";
@@ -1172,52 +1172,26 @@ function compare_chances(a, b) {
   return 0;
 }
 
-function compare_draft_cards(a, b) {
-  // Yeah this is lazy.. I know
-  a = db.card(a);
-  b = db.card(b);
-  var as = get_card_type_sort(a.type);
-  var bs = get_card_type_sort(b.type);
-
-  // Order by type?
-  if (as < bs) {
-    return -1;
-  }
-  if (as > bs) {
-    return 1;
-  }
-
-  // by cmc
-  if (a.cmc < b.cmc) {
-    return -1;
-  }
-  if (a.cmc > b.cmc) {
-    return 1;
-  }
-
-  // then by name
-  if (a.name < b.name) {
-    return -1;
-  }
-  if (a.name > b.name) {
-    return 1;
-  }
-
-  return 0;
-}
-
 function compare_logs(a, b) {
   if (a.time < b.time) return -1;
   if (a.time > b.time) return 1;
   return 0;
 }
 
-function compare_draft_picks(a, b) {
-  var arank = db.card(a).rank;
-  var brank = db.card(b).rank;
-
-  if (arank > brank) return -1;
-  if (arank < brank) return 1;
-
-  return 0;
+function compareDraftPicks(a, b) {
+  const aCard = db.card(a);
+  const bCard = db.card(b);
+  const aColors = new Colors();
+  aColors.addFromCost(aCard.cost);
+  const bColors = new Colors();
+  bColors.addFromCost(bCard.cost);
+  const aType = get_card_type_sort(aCard.type);
+  const bType = get_card_type_sort(bCard.type);
+  return (
+    bCard.rank - aCard.rank ||
+    aColors.length - bColors.length ||
+    aCard.cmc - bCard.cmc ||
+    aType - bType ||
+    aCard.name.localeCompare(bCard.name)
+  );
 }
