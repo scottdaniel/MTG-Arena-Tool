@@ -126,7 +126,10 @@ function startApp() {
   }
   mainWindow = createMainWindow();
   background = createBackgroundWindow();
-  overlay = createOverlayWindow();
+
+  setTimeout(() => {
+    overlay = createOverlayWindow();
+  }, 500);
 
   appStarted = true;
 
@@ -142,6 +145,10 @@ function startApp() {
       showWindow();
       mainWindow.openDevTools();
     }
+  });
+
+  globalShortcut.register("Alt+Shift+E", () => {
+    overlay.webContents.send("edit");
   });
 
   globalShortcut.register("Alt+Shift+O", () => {
@@ -164,18 +171,6 @@ function startApp() {
     if (mainLoaded == true) {
       background.webContents.send("start_background");
     }
-  });
-
-  overlay.webContents.once("dom-ready", function() {
-    //We need to wait for the overlay to be initialized before we interact with it
-    const display = electron.screen.getPrimaryDisplay();
-    // display.workArea does not include the taskbar
-    overlay.setSize(display.size.width, display.size.height);
-    overlay.setPosition(0, 0);
-    overlay.webContents.send("settings_updated");
-    // only show overlay after its ready
-    // TODO does this work with Linux transparency???
-    setTimeout(() => overlay.show(), 1000);
   });
 
   // If we destroy updater before creating another renderer
@@ -493,6 +488,18 @@ function createOverlayWindow() {
   });
   overlay.loadURL(`file://${__dirname}/window_overlay_v3/index.html`);
   overlay.setIgnoreMouseEvents(true, { forward: true });
+
+  overlay.webContents.once("dom-ready", function() {
+    //We need to wait for the overlay to be initialized before we interact with it
+    const display = electron.screen.getPrimaryDisplay();
+    // display.workArea does not include the taskbar
+    overlay.setSize(display.size.width, display.size.height);
+    overlay.setPosition(0, 0);
+    overlay.webContents.send("settings_updated");
+    // only show overlay after its ready
+    // TODO does this work with Linux transparency???
+    setTimeout(() => overlay.show(), 1000);
+  });
 
   return overlay;
 }
