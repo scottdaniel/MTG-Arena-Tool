@@ -163,7 +163,7 @@ ipc.on("edit", () => {
       interact("#overlay_" + (index + 1)).unset();
     });
     setIgnoreTrue(true);
-    document.body.style.backgroundColor = "rgba(0, 0, 0, 0.01)";
+    document.body.style.backgroundColor = "rgba(0, 0, 0, 0)";
     saveOverlaysPosition();
   }
 });
@@ -224,10 +224,12 @@ function settingsUpdated() {
 
     if (getVisible(_overlay)) {
       overlayDiv.style.opacity = "1";
+      overlayDiv.style.visibility = "visible";
       overlayDiv.classList.add("click-on");
       overlayDiv.classList.remove("click-through");
     } else {
       overlayDiv.style.opacity = "0";
+      overlayDiv.style.visibility = "hidden";
       overlayDiv.classList.add("click-through");
       overlayDiv.classList.remove("click-on");
     }
@@ -1079,7 +1081,7 @@ function ready(fn) {
 }
 
 ready(function() {
-  document.body.style.backgroundColor = "rgba(0, 0, 0, 0.1)";
+  document.body.style.backgroundColor = "rgba(0, 0, 0, 0)";
 
   queryElements(".overlay_container").forEach(node => {
     node.innerHTML = `
