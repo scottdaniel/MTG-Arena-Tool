@@ -463,6 +463,14 @@ function appendOverlay(section) {
       settings.show_always,
       updateUserSettings
     );
+    const helpDiv = createDiv(
+      ["settings_note"],
+      `<p><i>Displays the overlay regardless of Arena match or draft status
+      ("Enable Overlay" must also be checked). To adjust overlay position,
+      click on its colored icon in the top left to toggle edit mode.</i></p>`
+    );
+    helpDiv.style.paddingLeft = "35px";
+    overlaySection.appendChild(helpDiv);
     addCheckbox(
       overlaySection,
       `Enable Alt+${index + 1} keyboard shortcut`,
