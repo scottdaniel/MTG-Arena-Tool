@@ -808,10 +808,10 @@ function updateDraftView(index, _packN = -1, _pickN = -1) {
     }
     titleDiv.innerHTML = title;
 
-    const controlCont = createDiv(["overlay_draft_container", "click-on"]);
+    const controlCont = createDiv(["overlay_draft_container"]);
     if (settings.top) controlCont.style.top = "32px";
 
-    const draftPrev = createDiv(["draft_prev"]);
+    const draftPrev = createDiv(["draft_prev", "click-on"]);
     draftPrev.addEventListener("click", function() {
       pickN -= 1;
       let packSize = (currentDraft && PACK_SIZES[currentDraft.set]) || 14;
@@ -827,11 +827,13 @@ function updateDraftView(index, _packN = -1, _pickN = -1) {
 
       updateDraftView(index, packN, pickN);
     });
+    draftPrev.addEventListener("mouseenter", setIgnoreFalse);
+    draftPrev.addEventListener("mouseleave", setIgnoreTrue);
     controlCont.appendChild(draftPrev);
 
     controlCont.appendChild(createDiv(["draft_title"]));
 
-    const draftNext = createDiv(["draft_next"]);
+    const draftNext = createDiv(["draft_next", "click-on"]);
     draftNext.addEventListener("click", function() {
       pickN += 1;
       let packSize = (currentDraft && PACK_SIZES[currentDraft.set]) || 14;
@@ -855,6 +857,8 @@ function updateDraftView(index, _packN = -1, _pickN = -1) {
         updateDraftView(index, packN, pickN);
       }
     });
+    draftNext.addEventListener("mouseenter", setIgnoreFalse);
+    draftNext.addEventListener("mouseleave", setIgnoreTrue);
     controlCont.appendChild(draftNext);
 
     titleDiv.appendChild(controlCont);
