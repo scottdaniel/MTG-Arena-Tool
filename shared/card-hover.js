@@ -77,7 +77,7 @@ function attachOwnerhipStars(card, starContainer) {
 
   const owned = pd.cards.cards[card.id];
   const acquired = pd.cardsNew[card.id];
-  starContainer.title = `${owned}/4 copies in collection`;
+  starContainer.title = `${owned || 0}/4 copies in collection`;
   if (acquired) {
     starContainer.title += ` (${acquired} recent)`;
   }
