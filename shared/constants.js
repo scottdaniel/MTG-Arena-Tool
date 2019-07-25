@@ -714,6 +714,14 @@ exports.MAIN_COLLECTION = 5;
 exports.MAIN_SETTINGS = 6;
 exports.MAIN_UPDATE = 9;
 
+exports.SETTINGS_BEHAVIOUR = 1;
+exports.SETTINGS_ARENA_DATA = 2;
+exports.SETTINGS_OVERLAY = 3;
+exports.SETTINGS_VISUAL = 4;
+exports.SETTINGS_PRIVACY = 5;
+exports.SETTINGS_ABOUT = 6;
+exports.SETTINGS_LOGIN = 7;
+
 // Date constants
 exports.DATE_LAST_DAY = "Last 24 Hours";
 exports.DATE_LAST_30 = "Last 30 Days";
