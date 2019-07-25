@@ -212,12 +212,12 @@ function startApp() {
 
       case "player_data_refresh":
         mainWindow.webContents.send("player_data_refresh");
-        overlay.webContents.send("player_data_refresh");
+        if (overlay) overlay.webContents.send("player_data_refresh");
         break;
 
       case "set_db":
         mainWindow.webContents.send("set_db", arg);
-        overlay.webContents.send("set_db", arg);
+        if (overlay) overlay.webContents.send("set_db", arg);
         break;
 
       case "popup":
@@ -235,11 +235,11 @@ function startApp() {
 
       case "set_arena_state":
         mainWindow.webContents.send("player_data_refresh");
-        overlay.webContents.send("set_arena_state", arg);
+        if (overlay) overlay.webContents.send("set_arena_state", arg);
         break;
 
       case "overlay_minimize":
-        if (overlay.isMinimized()) return;
+        if (!overlay || overlay.isMinimized()) return;
         overlay.minimize();
         break;
 
@@ -334,7 +334,7 @@ function startApp() {
       default:
         if (to == 0) background.webContents.send(method, arg);
         if (to == 1) mainWindow.webContents.send(method, arg);
-        if (to == 2) overlay.webContents.send(method, arg);
+        if (to === 2 && overlay) overlay.webContents.send(method, arg);
         break;
     }
   });
