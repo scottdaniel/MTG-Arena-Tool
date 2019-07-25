@@ -694,7 +694,11 @@ exports.RANKS_SORT = {
   Mythic: 6
 };
 
-exports.PACK_SIZES = { "Ravnica Allegiance": 14, "Guilds of Ravnica": 14 };
+exports.PACK_SIZES = {
+  "Ravnica Allegiance": 14,
+  "Guilds of Ravnica": 14,
+  "Core Set 2020": 15
+};
 
 exports.DEFAULT_TILE = 67003;
 
