@@ -32,7 +32,9 @@ const {
   MAIN_COLLECTION,
   MAIN_SETTINGS,
   MAIN_UPDATE,
-  SETTINGS_ABOUT
+  SETTINGS_ABOUT,
+  SETTINGS_OVERLAY,
+  SETTINGS_PRIVACY
 } = require("../shared/constants");
 const pd = require("../shared/player-data");
 const { createDiv, queryElements: $$ } = require("../shared/dom-fns");
@@ -313,7 +315,7 @@ ipc.on("force_open_settings", function() {
 //
 ipc.on("force_open_overlay_settings", function(event, arg) {
   setCurrentOverlaySettings(arg);
-  force_open_settings(2);
+  force_open_settings(SETTINGS_OVERLAY);
 });
 
 //
@@ -472,7 +474,7 @@ function showOfflineSplash() {
     <div class="message_sub_16 white">If you need an account, you can <a class="signup_link">sign up here</a>.</div>
   </div>`;
   $$(".privacy_link")[0].addEventListener("click", function() {
-    force_open_settings(4);
+    force_open_settings(SETTINGS_PRIVACY);
   });
   $$(".launch_login_link")[0].addEventListener("click", function() {
     const clearAppSettings = {
