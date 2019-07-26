@@ -1,3 +1,12 @@
+## <small>2.8.5 (2019-07-26)</small>
+
+* bugfix add new gre message regexes ([e7144fe](https://github.com/Manuel-777/MTG-Arena-Tool/commit/e7144fe))
+* bugfix force_open_settings index nums ([07bd6c9](https://github.com/Manuel-777/MTG-Arena-Tool/commit/07bd6c9))
+* bugfix handle null notifications messages ([85269bd](https://github.com/Manuel-777/MTG-Arena-Tool/commit/85269bd))
+* update PACK_SIZES with m20 ([62d6a51](https://github.com/Manuel-777/MTG-Arena-Tool/commit/62d6a51))
+
+
+
 ## <small>2.8.4 (2019-07-25)</small>
 
 * add custom date since to filter panel ([053b101](https://github.com/Manuel-777/MTG-Arena-Tool/commit/053b101))
