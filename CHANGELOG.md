@@ -1,3 +1,10 @@
+## <small>2.8.6 (2019-07-27)</small>
+
+* delay player data refreshes ([534dec4](https://github.com/Manuel-777/MTG-Arena-Tool/commit/534dec4))
+* remove unecesary regexes ([8e52738](https://github.com/Manuel-777/MTG-Arena-Tool/commit/8e52738))
+
+
+
 ## <small>2.8.5 (2019-07-26)</small>
 
 * bugfix add new gre message regexes ([e7144fe](https://github.com/Manuel-777/MTG-Arena-Tool/commit/e7144fe))
