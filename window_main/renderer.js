@@ -263,9 +263,17 @@ ipc.on("settings_updated", function() {
   lastSettings = { ...pd.settings };
 });
 
+let playerDataRefreshTimeout = null;
+
 //
 ipc.on("player_data_refresh", () => {
   if (sidebarActive === MAIN_LOGIN) return;
+
+  clearTimeout(playerDataRefreshTimeout);
+  playerDataRefreshTimeout = setTimeout(playerDataRefresh, 1000);
+});
+
+function playerDataRefresh() {
   const ls = getLocalState();
   updateTopBar();
   changeBackground("default");
@@ -276,7 +284,7 @@ ipc.on("player_data_refresh", () => {
     duration: 350
   });
   openTab(sidebarActive, {}, ls.lastDataIndex, ls.lastScrollTop);
-});
+}
 
 //
 ipc.on("set_update_state", function(event, arg) {
