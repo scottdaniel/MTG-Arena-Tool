@@ -346,6 +346,12 @@ function onLabelInDeckGetDeckListsV3(entry, json) {
   onLabelInDeckGetDeckLists(entry, json.map(d => convert_deck_from_v3(d)));
 }
 
+function onLabelInDeckGetPreconDecks(entry, json) {
+  if (!json) return;
+  ipc_send("set_precon_decks", json);
+  // console.log(json);
+}
+
 function onLabelInEventGetPlayerCourses(entry, json) {
   if (!json) return;
 
@@ -966,6 +972,7 @@ module.exports = {
   onLabelInEventGetCombinedRankInfo,
   onLabelInDeckGetDeckLists,
   onLabelInDeckGetDeckListsV3,
+  onLabelInDeckGetPreconDecks,
   onLabelInEventGetPlayerCourses,
   onLabelInEventGetPlayerCoursesV2,
   onLabelInDeckUpdateDeck,
