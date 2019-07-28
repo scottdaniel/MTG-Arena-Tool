@@ -383,6 +383,7 @@ function createChangeRow(change, economyId) {
     });
 
     checkWildcardsAdded = true;
+    checkGemsEarnt = true;
     checkCardsAdded = true;
     checkAetherized = true;
   } else if (
