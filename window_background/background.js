@@ -95,7 +95,8 @@ const rememberCfg = {
     auto_login: false,
     launch_to_tray: false,
     remember_me: true,
-    beta_channel: false
+    beta_channel: false,
+    log_locale_format: ""
   }
 };
 
@@ -249,7 +250,7 @@ ipc.on("start_background", function() {
   // first time during bootstrapping that we load
   // app-level settings into singletons
   const appSettings = rstore.get("settings");
-  const settings = { ...pd.settings, ...appSettings };
+  const settings = { ...pd.settings, ...appSettings, logUri };
   setData({ settings }, false);
   ipc_send("initial_settings", settings);
 
@@ -922,6 +923,7 @@ function onLogEntryFound(entry) {
           default:
             break;
         }
+        setData({ last_log_timestamp: entry.timestamp });
       } catch (err) {
         console.log(entry.label, entry.position, entry.json());
         console.error(err);
