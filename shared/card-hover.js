@@ -76,17 +76,17 @@ function attachOwnerhipStars(card, starContainer) {
   starContainer.style.opacity = 1;
 
   const owned = pd.cards.cards[card.id];
-  const aquired = pd.cardsNew[card.id];
-  starContainer.title = `${owned}/4 copies in collection`;
-  if (aquired) {
-    starContainer.title += ` (${aquired} recent)`;
+  const acquired = pd.cardsNew[card.id];
+  starContainer.title = `${owned || 0}/4 copies in collection`;
+  if (acquired) {
+    starContainer.title += ` (${acquired} recent)`;
   }
 
   for (let i = 0; i < 4; i++) {
     let color = "gray";
 
     if (i < owned) color = "green";
-    if (aquired && i >= owned - aquired && i < owned) color = "orange";
+    if (acquired && i >= owned - acquired && i < owned) color = "orange";
 
     starContainer.appendChild(createDiv([`inventory_card_quantity_${color}`]));
   }
