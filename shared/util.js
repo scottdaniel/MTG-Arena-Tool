@@ -1,4 +1,5 @@
 const formatDistanceStrict = require("date-fns/formatDistanceStrict");
+const { shell } = require("electron");
 
 const {
   FORMATS,
@@ -16,19 +17,56 @@ const pd = require("../shared/player-data");
 const { createDiv, createSpan } = require("../shared/dom-fns");
 
 //
-exports.get_card_image = get_card_image;
-function get_card_image(cardObj) {
+exports.getCardArtCrop = getCardArtCrop;
+function getCardArtCrop(cardObj) {
   if (typeof cardObj !== "object") {
     cardObj = db.card(cardObj);
   }
 
-  if (!cardObj) {
+  try {
+    return "https://img.scryfall.com/cards" + cardObj.images.art_crop;
+  } catch (e) {
+    console.log("Cant find card art crop: ", cardObj);
     return "../images/notfound.png";
-  } else {
+  }
+}
+
+//
+exports.getCardImage = getCardImage;
+function getCardImage(cardObj) {
+  if (typeof cardObj !== "object") {
+    cardObj = db.card(cardObj);
+  }
+
+  try {
     return (
       "https://img.scryfall.com/cards" +
       cardObj.images[pd.settings.cards_quality]
     );
+  } catch (e) {
+    console.log("Cant find card image: ", cardObj);
+    return "../images/notfound.png";
+  }
+}
+
+//
+exports.openScryfallCard = openScryfallCard;
+function openScryfallCard(cardObj) {
+  if (typeof cardObj !== "object") {
+    cardObj = db.card(cardObj);
+  }
+
+  try {
+    shell.openExternal(
+      "https://scryfall.com/card/" +
+        db.sets[cardObj.set].scryfall +
+        "/" +
+        cardObj.cid +
+        "/" +
+        cardObj.name
+    );
+  } catch (e) {
+    console.log("Cant open scryfall card: ", cardObj);
   }
 }
 
@@ -177,15 +215,6 @@ function compare_archetypes(a, b) {
   if (a.average > b.average) return -1;
   if (a.average < b.average) return 1;
   return 0;
-}
-
-//
-exports.get_set_scryfall = get_set_scryfall;
-function get_set_scryfall(set) {
-  if (set == undefined) return "";
-  let s = db.sets[set].scryfall;
-  if (s == undefined) s = set;
-  return s;
 }
 
 //
