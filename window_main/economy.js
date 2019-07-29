@@ -114,15 +114,13 @@ function getReadableQuest(questCode) {
 }
 
 //
-function get_colation_set(collationid) {
-  var ret = "";
-  Object.keys(db.sets).forEach(function(setName) {
-    if (db.sets[setName].collation == collationid) {
-      ret = setName;
+function get_collation_set(collationid) {
+  for (let name in db.sets) {
+    if (db.sets[name].collation === collationid) {
+      return name;
     }
-  });
-
-  return ret;
+  }
+  return "";
 }
 
 //
@@ -366,7 +364,7 @@ function createChangeRow(change, economyId) {
 
   if (fullContext === "Booster Open") {
     change.delta.boosterDelta.forEach(function(booster) {
-      var set = get_colation_set(booster.collationId);
+      var set = get_collation_set(booster.collationId);
 
       var bos = createDiv(["set_logo"]);
       bos.style.backgroundImage =
@@ -564,7 +562,7 @@ function createChangeRow(change, economyId) {
 
   if (checkBoosterAdded && change.delta.boosterDelta) {
     change.delta.boosterDelta.forEach(function(booster) {
-      var set = get_colation_set(booster.collationId);
+      var set = get_collation_set(booster.collationId);
 
       var bos = createDiv(["set_logo_med"]);
       bos.style.backgroundImage =
