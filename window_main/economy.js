@@ -1,5 +1,3 @@
-const { shell } = require("electron");
-
 const differenceInCalendarDays = require("date-fns/differenceInCalendarDays");
 const startOfDay = require("date-fns/startOfDay");
 const compareAsc = require("date-fns/compareAsc");
@@ -11,9 +9,10 @@ const { createSelect } = require("../shared/select");
 const { addCardHover } = require("../shared/card-hover");
 const {
   collectionSortRarity,
-  get_card_image,
-  get_set_scryfall,
-  getReadableEvent
+  getCardArtCrop,
+  getCardImage,
+  getReadableEvent,
+  openScryfallCard
 } = require("../shared/util");
 
 const DataScroller = require("./data-scroller");
@@ -123,19 +122,6 @@ function get_colation_set(collationid) {
   });
 
   return ret;
-}
-
-//
-function get_card_art(cardObj) {
-  if (typeof cardObj !== "object") {
-    cardObj = db.card(cardObj);
-  }
-
-  if (!cardObj) {
-    return "../images/notfound.png";
-  } else {
-    return "https://img.scryfall.com/cards" + cardObj.images.art_crop;
-  }
 }
 
 function getPrettyContext(context, full = true) {
@@ -641,7 +627,7 @@ function createChangeRow(change, economyId) {
       var img = document.createElement("img");
       img.classList.add("inventory_card_img");
       img.style.width = "39px";
-      img.src = get_card_image(card);
+      img.src = getCardImage(card);
 
       d.appendChild(img);
 
@@ -653,14 +639,7 @@ function createChangeRow(change, economyId) {
           card = db.card(card.dfcId);
         }
         //let newname = card.name.split(' ').join('-');
-        shell.openExternal(
-          "https://scryfall.com/card/" +
-            get_set_scryfall(card.set) +
-            "/" +
-            card.cid +
-            "/" +
-            card.name
-        );
+        openScryfallCard(card);
       });
     });
   }
@@ -687,7 +666,7 @@ function createChangeRow(change, economyId) {
         img.classList.add("inventory_card_img");
         img.classList.add("inventory_card_aetherized");
         img.style.width = "39px";
-        img.src = get_card_image(card);
+        img.src = getCardImage(card);
 
         if (card.rarity) {
           // only uncommons and commons go to vault
@@ -707,14 +686,7 @@ function createChangeRow(change, economyId) {
             card = db.card(card.dfcId);
           }
           //let newname = card.name.split(' ').join('-');
-          shell.openExternal(
-            "https://scryfall.com/card/" +
-              get_set_scryfall(card.set) +
-              "/" +
-              card.cid +
-              "/" +
-              card.name
-          );
+          openScryfallCard(card);
         });
       }
     });
@@ -726,7 +698,7 @@ function createChangeRow(change, economyId) {
 
       bos = createDiv(["economy_skin_art"]);
       bos.title = card.name + " Skin";
-      bos.style.backgroundImage = `url("${get_card_art(card)}")`;
+      bos.style.backgroundImage = `url("${getCardArtCrop(card)}")`;
 
       flexRight.appendChild(bos);
     });

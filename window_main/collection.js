@@ -1,5 +1,5 @@
 const anime = require("animejs");
-const { remote, shell } = require("electron");
+const { remote } = require("electron");
 const Menu = remote.Menu;
 const MenuItem = remote.MenuItem;
 
@@ -15,9 +15,9 @@ const { createSelect } = require("../shared/select");
 const { addCardHover, attachOwnerhipStars } = require("../shared/card-hover");
 const {
   collectionSortRarity,
-  get_card_image,
-  get_set_scryfall,
+  getCardImage,
   getCardsMissingCount,
+  openScryfallCard,
   replaceAll
 } = require("../shared/util");
 
@@ -1019,7 +1019,7 @@ function printCards() {
     const img = document.createElement("img");
     img.style.width = pd.cardsSize + "px";
     img.classList.add("inventory_card_img");
-    img.src = get_card_image(card);
+    img.src = getCardImage(card);
 
     cardDiv.appendChild(img);
 
@@ -1030,11 +1030,7 @@ function printCards() {
         card = db.card(card.dfcId);
       }
       //let newname = card.name.split(' ').join('-');
-      shell.openExternal(
-        `https://scryfall.com/card/${get_set_scryfall(card.set)}/${card.cid}/${
-          card.name
-        }`
-      );
+      openScryfallCard(card);
     });
 
     addCardMenu(img, card);

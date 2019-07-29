@@ -1,7 +1,7 @@
 const db = require("../shared/database");
 const pd = require("../shared/player-data");
 const { createDiv, queryElements: $$ } = require("../shared/dom-fns");
-const { get_card_image } = require("../shared/util");
+const { getCardImage } = require("../shared/util");
 
 let renderer = 0;
 
@@ -27,7 +27,7 @@ function addCardHover(element, card) {
       });
 
       var dfcCard = db.card(card.dfcId);
-      var dfcCardImage = get_card_image(dfcCard);
+      var dfcCardImage = getCardImage(dfcCard);
 
       var dfcImageElement = $$(".main_hover_dfc")[0];
       dfcImageElement.src = dfcCardImage;
@@ -39,7 +39,7 @@ function addCardHover(element, card) {
     }
 
     var mainImageElement = $$(".main_hover")[0];
-    mainImageElement.src = get_card_image(card);
+    mainImageElement.src = getCardImage(card);
     mainImageElement.addEventListener("load", () => {
       $$(".loader").forEach(el => (el.style.opacity = 0));
     });
