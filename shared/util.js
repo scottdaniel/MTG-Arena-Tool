@@ -22,13 +22,14 @@ function get_card_image(cardObj) {
     cardObj = db.card(cardObj);
   }
 
-  if (!cardObj) {
-    return "../images/notfound.png";
-  } else {
-    return (
+  try {
+    let ret =
       "https://img.scryfall.com/cards" +
-      cardObj.images[pd.settings.cards_quality]
-    );
+      cardObj.images[pd.settings.cards_quality];
+    return ret;
+  } catch (e) {
+    console.log("Cant find card art: ", cardObj);
+    return "../images/notfound.png";
   }
 }
 
