@@ -219,9 +219,13 @@ function openCollectionTab() {
   filteredSets = [];
   filteredMana = [];
   orderedSets = Object.keys(db.sets);
-  orderedSets.sort(
-    (a, b) => new Date(db.sets[a].release) - new Date(db.sets[b].release)
-  );
+  orderedSets = orderedSets
+    .filter(set => db.sets[set].collation !== -1)
+    .sort(
+      (a, b) => new Date(db.sets[a].release) - new Date(db.sets[b].release)
+    );
+
+  console.log(orderedSets);
 
   hideLoadingBars();
   let mainDiv;
