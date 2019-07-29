@@ -316,10 +316,9 @@ function setIgnoreFalse() {
 }
 
 ipc.on("set_draft_cards", (event, draft) => {
-  matchBeginTime = Date.now();
   currentDraft = draft;
   pd.settings.overlays.forEach((_overlay, index) => {
-    recreateClock(index);
+    if (!OVERLAY_DRAFT_MODES.includes(_overlay.mode)) return;
     updateDraftView(index, currentDraft.packNumber, currentDraft.pickNumber);
   });
 });
@@ -354,7 +353,7 @@ ipc.on("set_turn", (event, arg) => {
       if (turnPriority === playerSeat) {
         queryElements(clockTurnDom)[0].innerHTML = "You have priority.";
       } else {
-        queryElements(clockTurnDom)[0].innerHTML = "Opponent has priority.";
+        queryElements(clockTurnDom)[0].innerHTML = `${oppName} has priority.`;
       }
     }
   });
@@ -364,7 +363,7 @@ ipc.on("set_match", (event, arg) => {
   currentMatch = JSON.parse(arg);
   currentMatch.oppCards = new Deck(currentMatch.oppCards);
 
-  let tempMain = currentMatch.playerCardsLeft.mainDeck;
+  const tempMain = currentMatch.playerCardsLeft.mainDeck;
   currentMatch.playerCardsLeft = new Deck(currentMatch.playerCardsLeft);
   currentMatch.playerCardsLeft.mainboard._list = tempMain;
 
@@ -372,13 +371,9 @@ ipc.on("set_match", (event, arg) => {
   currentMatch.player.originalDeck = new Deck(currentMatch.player.originalDeck);
 
   pd.settings.overlays.forEach((_overlay, index) => {
-    if (_overlay.show || _overlay.show_always) {
-      if (OVERLAY_DRAFT_MODES.includes(_overlay.mode)) {
-        updateDraftView(index);
-      } else {
-        updateMatchView(index);
-      }
-    }
+    if (OVERLAY_DRAFT_MODES.includes(_overlay.mode)) return;
+    recreateClock(index);
+    updateMatchView(index);
   });
 });
 
@@ -1028,7 +1023,7 @@ function recreateClock(index) {
     if (turnPriority == playerSeat) {
       clockTurn.innerHTML = "You have priority.";
     } else {
-      clockTurn.innerHTML = "Opponent has priority.";
+      clockTurn.innerHTML = `${oppName} has priority.`;
     }
   }
 
