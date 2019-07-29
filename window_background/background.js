@@ -1262,13 +1262,6 @@ function createMatch(arg) {
 
   ipc_send("ipc_log", "vs " + currentMatch.opponent.name);
   ipc_send("set_timer", currentMatch.beginTime, IPC_OVERLAY);
-  ipc_send("set_opponent", currentMatch.opponent.name, IPC_OVERLAY);
-  ipc_send(
-    "set_opponent_rank",
-    get_rank_index(currentMatch.opponent.rank, currentMatch.opponent.tier),
-    currentMatch.opponent.rank + " " + currentMatch.opponent.tier,
-    IPC_OVERLAY
-  );
 
   if (currentMatch.eventId == "DirectGame" && currentDeck) {
     let str = currentDeck.getSave();
