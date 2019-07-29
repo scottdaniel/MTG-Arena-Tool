@@ -56,6 +56,7 @@ const {
   onLabelInEventGetCombinedRankInfo,
   onLabelInDeckGetDeckLists,
   onLabelInDeckGetDeckListsV3,
+  onLabelInDeckGetPreconDecks,
   onLabelInEventGetPlayerCourses,
   onLabelInEventGetPlayerCoursesV2,
   onLabelInDeckUpdateDeck,
@@ -784,6 +785,13 @@ function onLogEntryFound(entry) {
             if (entry.arrow == "<==") {
               json = entry.json();
               onLabelInDeckGetDeckListsV3(entry, json);
+            }
+            break;
+
+          case "Deck.GetPreconDecks":
+            if (entry.arrow == "<==") {
+              json = entry.json();
+              onLabelInDeckGetPreconDecks(entry, json);
             }
             break;
 
