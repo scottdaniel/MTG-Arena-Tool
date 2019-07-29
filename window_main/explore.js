@@ -495,7 +495,7 @@ function queryExplore() {
 }
 
 function setExploreDecks(data) {
-  if (!queryInFlight) return;
+  if (!queryInFlight || !data || !data.result) return;
 
   const exploreList = document.getElementById("explore_list");
   const loadMessage = document.getElementById("explore_load_message");
