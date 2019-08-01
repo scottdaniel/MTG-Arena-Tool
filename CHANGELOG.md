@@ -1,3 +1,25 @@
+## <small>2.8.7 (2019-08-01)</small>
+
+*  background.actionLog uses date-fns.format ([f833baa](https://github.com/Manuel-777/MTG-Arena-Tool/commit/f833baa))
+*  util.timeSince uses date-fns.formatDistanceStrict ([70b9007](https://github.com/Manuel-777/MTG-Arena-Tool/commit/70b9007))
+* aggregator uses date-fns ([c44f8a1](https://github.com/Manuel-777/MTG-Arena-Tool/commit/c44f8a1))
+* background and labels.onLabelInDeckGetPreconDecks ([e848e17](https://github.com/Manuel-777/MTG-Arena-Tool/commit/e848e17))
+* bugfix economy page shows gems from booster duplicates ([1d3766f](https://github.com/Manuel-777/MTG-Arena-Tool/commit/1d3766f))
+* economy page uses date-fns.startOfDay and compareAsc ([b8ee0a7](https://github.com/Manuel-777/MTG-Arena-Tool/commit/b8ee0a7))
+* explore page gracefully handles null result for decks ([4394fb7](https://github.com/Manuel-777/MTG-Arena-Tool/commit/4394fb7))
+* Fix "undefined/4 copies..." in tooltip ([37bc807](https://github.com/Manuel-777/MTG-Arena-Tool/commit/37bc807))
+* handle new database changes ([292c077](https://github.com/Manuel-777/MTG-Arena-Tool/commit/292c077))
+* labels.onLabelInPlayerInventoryGetPlayerCardsV3 uses date-fns.differenceInDays ([b9211b5](https://github.com/Manuel-777/MTG-Arena-Tool/commit/b9211b5))
+* metadata database.handleSetPreconDecks ([7ca482f](https://github.com/Manuel-777/MTG-Arena-Tool/commit/7ca482f))
+* overlay.updateMatchView uses date-fns.format ([553f27b](https://github.com/Manuel-777/MTG-Arena-Tool/commit/553f27b))
+* player-data.prettierDeckData uses db.preconDecks ([6a6711a](https://github.com/Manuel-777/MTG-Arena-Tool/commit/6a6711a))
+* refactor scryfall util fns ([3fee540](https://github.com/Manuel-777/MTG-Arena-Tool/commit/3fee540))
+* Replace logic of get_collation_set with for loop ([58fdf6d](https://github.com/Manuel-777/MTG-Arena-Tool/commit/58fdf6d))
+* Update card-hover.js ([325d844](https://github.com/Manuel-777/MTG-Arena-Tool/commit/325d844))
+* util.get_card_image handles missing metadata ([9bc6287](https://github.com/Manuel-777/MTG-Arena-Tool/commit/9bc6287))
+
+
+
 ## <small>2.8.6 (2019-07-27)</small>
 
 * delay player data refreshes ([534dec4](https://github.com/Manuel-777/MTG-Arena-Tool/commit/534dec4))
