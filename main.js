@@ -357,9 +357,9 @@ function setSettings(settings) {
   mainWindow.webContents.send("settings_updated");
 
   settings.overlays.forEach((_settings, index) => {
-    globalShortcut.unregister("Alt+" + (index + 1));
+    globalShortcut.unregister("Alt+Shift+" + (index + 1));
     if (_settings.keyboard_shortcut) {
-      globalShortcut.register("Alt+" + (index + 1), () => {
+      globalShortcut.register("Alt+Shift+" + (index + 1), () => {
         overlay.webContents.send("close", { action: -1, index: index });
       });
     }
