@@ -1,5 +1,6 @@
 const db = require("../shared/database");
 const pd = require("../shared/player-data");
+const { cardHasType } = require("../shared/card-types.js");
 const { createDiv, queryElements: $$ } = require("../shared/dom-fns");
 const { getCardImage } = require("../shared/util");
 
@@ -72,22 +73,41 @@ function hide(element) {
 
 exports.attachOwnerhipStars = attachOwnerhipStars;
 function attachOwnerhipStars(card, starContainer) {
+  let isbasic = cardHasType(card, "Basic Land");
   starContainer.innerHTML = "";
   starContainer.style.opacity = 1;
 
   const owned = pd.cards.cards[card.id];
   const acquired = pd.cardsNew[card.id];
-  starContainer.title = `${owned || 0}/4 copies in collection`;
-  if (acquired) {
-    starContainer.title += ` (${acquired} recent)`;
-  }
 
-  for (let i = 0; i < 4; i++) {
+  if (isbasic) {
+    // Show infinity for basics (should work for rats and petitioners?)
+    if (owned > 0) starContainer.title = `∞ copies in collection`;
+    else starContainer.title = `0 copies in collection`;
+    if (acquired) {
+      starContainer.title += ` (∞ recent)`;
+    }
+
     let color = "gray";
+    if (owned > 0) color = "green";
+    if (acquired > 0) color = "orange";
 
-    if (i < owned) color = "green";
-    if (acquired && i >= owned - acquired && i < owned) color = "orange";
+    starContainer.appendChild(createDiv([`inventory_card_infinity_${color}`]));
+  } else {
+    starContainer.title = `${owned || 0}/4 copies in collection`;
+    if (acquired) {
+      starContainer.title += ` (${acquired} recent)`;
+    }
 
-    starContainer.appendChild(createDiv([`inventory_card_quantity_${color}`]));
+    for (let i = 0; i < 4; i++) {
+      let color = "gray";
+
+      if (i < owned) color = "green";
+      if (acquired && i >= owned - acquired && i < owned) color = "orange";
+
+      starContainer.appendChild(
+        createDiv([`inventory_card_quantity_${color}`])
+      );
+    }
   }
 }

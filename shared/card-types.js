@@ -18,6 +18,7 @@ exports.cardType = card => {
   return result;
 };
 
+exports.cardHasType = cardHasType;
 function cardHasType(card, type) {
   if (!_.has(card, "type"))
     throw new Error("The specified card object does not have a type property");

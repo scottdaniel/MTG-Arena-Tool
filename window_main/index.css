@@ -1277,6 +1277,34 @@ a:hover {
     background: center no-repeat url('../images/quantity_orange.png');
 }
 
+.inventory_card_infinity_blue {
+    width: 100%;
+    height: 24px;
+    display: inline-block;
+    background: center no-repeat url('../images/quantity_inf_blue.png');
+}
+
+.inventory_card_infinity_green {
+    width: 100%;
+    height: 24px;
+    display: inline-block;
+    background: center no-repeat url('../images/quantity_inf_green.png');
+}
+
+.inventory_card_infinity_gray {
+    width: 100%;
+    height: 24px;
+    display: inline-block;
+    background: center no-repeat url('../images/quantity_inf_gray.png');
+}
+
+.inventory_card_infinity_orange {
+    width: 100%;
+    height: 24px;
+    display: inline-block;
+    background: center no-repeat url('../images/quantity_inf_orange.png');
+}
+
 .icon_search_unowned {
     display: -webkit-inline-box;
     width: 20px;
