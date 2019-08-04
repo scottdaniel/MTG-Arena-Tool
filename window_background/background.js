@@ -123,7 +123,7 @@ var settingsStore = new Store({
 let logLoopInterval = null;
 const debugArenaID = undefined;
 const debugLog = false;
-const debugNet = false;
+const debugNet = true;
 var debugLogSpeed = 0.001;
 
 const actionLogDir = path.join(
