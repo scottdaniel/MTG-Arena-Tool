@@ -574,6 +574,12 @@ function loginToggle(toggle) {
 }
 
 ready(function() {
+  $$(".version_number")[0].innerHTML = `v${remote.app.getVersion()}`;
+
+  $$(".version_number")[0].addEventListener("click", function() {
+    force_open_settings(SETTINGS_ABOUT);
+  });
+
   $$(".signup_link")[0].addEventListener("click", function() {
     shell.openExternal("https://mtgatool.com/signup/");
   });

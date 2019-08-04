@@ -14,6 +14,27 @@ relative-time, local-time {
   color: var(--color-light-50);
 }
 
+.version_number {
+    width: 80px;
+    text-align: center;
+    font-family: var(--main-font-name);
+    color: var(--color-light-75);
+    line-height: 24px;
+    font-size: 14px;
+    height: 24px;
+    position: absolute;
+    left: calc(100% - 82px);
+    top: calc(100% - 26px);
+    background-color: var(--color-back);
+    z-index: 100;
+    border-radius: 4px 0 0 0;
+    cursor: pointer;
+}
+
+.version_number {
+    text-decoration: underline;
+}
+
 .top_status, .top_status_span {
     width: 24px;
     height: 24px;
