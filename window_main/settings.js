@@ -426,7 +426,8 @@ function appendOverlay(section) {
   const helpDiv = createDiv(
     ["settings_note"],
     `You can enable up to 5 independent overlay windows. Customize each overlay
-    using the settings below.`
+    using the settings below.</br>
+    To edit the overlay's position and size press Alt + Shift + E`
   );
   helpDiv.style.margin = "24px 64px 0px 16px";
   section.appendChild(helpDiv);
@@ -574,7 +575,7 @@ function appendOverlay(section) {
     overlaySection.appendChild(helpDiv);
     addCheckbox(
       overlaySection,
-      `Enable Alt+${index + 1} keyboard shortcut`,
+      `Enable Alt+Shift+${index + 1} keyboard shortcut`,
       `overlay_${index}_keyboard_shortcut`,
       settings.keyboard_shortcut,
       updateUserSettings
