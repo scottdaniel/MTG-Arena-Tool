@@ -164,7 +164,7 @@ function getCourseStats(course) {
     .map(pd.match)
     .filter(
       match =>
-        match !== undefined &&
+        match &&
         match.type === "match" &&
         (!match.archived || filters.showArchived)
     )
@@ -173,11 +173,9 @@ function getCourseStats(course) {
       if (match.duration && match.duration < 3600) {
         stats.duration += match.duration;
       }
-      stats.duration += match.duration || 0;
       if (match.player.win > match.opponent.win) {
         stats.wins++;
-      }
-      if (match.player.win < match.opponent.win) {
+      } else if (match.player.win < match.opponent.win) {
         stats.losses++;
       }
     });
