@@ -1,7 +1,12 @@
 const anime = require("animejs");
 
 const autocomplete = require("../shared/autocomplete");
-const { DATE_SEASON, EASING_DEFAULT, RANKS } = require("../shared/constants");
+const {
+  DATE_SEASON,
+  DEFAULT_TILE,
+  EASING_DEFAULT,
+  RANKS
+} = require("../shared/constants");
 const db = require("../shared/database");
 const pd = require("../shared/player-data");
 const { createDiv, createInput } = require("../shared/dom-fns");
@@ -203,7 +208,11 @@ function renderData(container, index) {
     tileGrpid = match.playerDeck.deckTileId;
     clickCallback = handleOpenMatch;
   } else {
-    tileGrpid = db.sets[match.set].tile;
+    if (match.set in db.sets && db.sets[match.set].tile) {
+      tileGrpid = db.sets[match.set].tile;
+    } else {
+      tileGrpid = DEFAULT_TILE;
+    }
     clickCallback = handleOpenDraft;
   }
   const deleteCallback = id => {
