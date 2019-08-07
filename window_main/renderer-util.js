@@ -29,6 +29,7 @@ const {
   createSpan,
   queryElements: $$
 } = require("../shared/dom-fns");
+const { createSelect } = require("../shared/select");
 const deckDrawer = require("../shared/deck-drawer");
 const cardTypes = require("../shared/card-types");
 const { addCardHover } = require("../shared/card-hover");
@@ -36,7 +37,6 @@ const {
   deckTypesStats,
   getCardArtCrop,
   get_deck_colors,
-  get_card_image,
   get_rank_index_16,
   getCardImage,
   getReadableEvent,
@@ -1037,4 +1037,81 @@ function attachMatchData(listItem, match) {
     div.title = onThePlay ? "On the play" : "On the draw";
     listItem.right.after(div);
   }
+}
+
+//
+exports.attachDraftData = attachDraftData;
+function attachDraftData(listItem, draft) {
+  // console.log("Draft: ", match);
+
+  const draftSetDiv = createDiv(["list_deck_name"], draft.set + " draft");
+  listItem.leftTop.appendChild(draftSetDiv);
+
+  const draftTimeDiv = createDiv(
+    ["list_match_time"],
+    timeSince(new Date(draft.date)) + " ago."
+  );
+  listItem.rightBottom.appendChild(draftTimeDiv);
+
+  const replayDiv = createDiv(["list_match_replay"], "See replay");
+  listItem.rightTop.appendChild(replayDiv);
+
+  const replayShareButton = createDiv(["list_draft_share", draft.id + "dr"]);
+  replayShareButton.addEventListener("click", e => {
+    e.stopPropagation();
+    const cont = createDiv(["dialog_content"]);
+    cont.style.width = "500px";
+
+    cont.append(createDiv(["share_title"], "Link for sharing:"));
+    const icd = createDiv(["share_input_container"]);
+    const linkInput = createInput([], "", {
+      id: "share_input",
+      autocomplete: "off"
+    });
+    linkInput.addEventListener("click", () => linkInput.select());
+    icd.appendChild(linkInput);
+    const but = createDiv(["button_simple"], "Copy");
+    but.addEventListener("click", function() {
+      ipcSend("set_clipboard", byId("share_input").value);
+    });
+    icd.appendChild(but);
+    cont.appendChild(icd);
+
+    cont.appendChild(createDiv(["share_subtitle"], "<i>Expires in: </i>"));
+    createSelect(
+      cont,
+      ["One day", "One week", "One month", "Never"],
+      "",
+      () => draftShareLink(draft.id),
+      "expire_select"
+    );
+
+    openDialog(cont);
+    draftShareLink(draft.id);
+  });
+  listItem.right.after(replayShareButton);
+}
+
+function draftShareLink(id) {
+  const shareExpire = byId("expire_select").value;
+  let expire = 0;
+  switch (shareExpire) {
+    case "One day":
+      expire = 0;
+      break;
+    case "One week":
+      expire = 1;
+      break;
+    case "One month":
+      expire = 2;
+      break;
+    case "Never":
+      expire = -1;
+      break;
+    default:
+      expire = 0;
+      break;
+  }
+  showLoadingBars();
+  ipcSend("request_draft_link", { expire, id });
 }
