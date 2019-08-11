@@ -362,8 +362,8 @@ function setSettings(settings) {
   let display = electron.screen
     .getAllDisplays()
     .filter(d => d.id == displayId)[0];
-  overlay.setSize(display.size.width, display.size.height);
-  overlay.setPosition(display.size.x, display.size.y);
+  overlay.setSize(display.bounds.width, display.bounds.height);
+  overlay.setPosition(display.bounds.x, display.bounds.y);
 
   settings.overlays.forEach((_settings, index) => {
     globalShortcut.unregister("Alt+Shift+" + (index + 1));
@@ -502,8 +502,8 @@ function createOverlayWindow() {
     //We need to wait for the overlay to be initialized before we interact with it
     const display = electron.screen.getPrimaryDisplay();
     // display.workArea does not include the taskbar
-    overlay.setSize(display.size.width, display.size.height);
-    overlay.setPosition(display.size.x, display.size.y);
+    overlay.setSize(display.bounds.width, display.bounds.height);
+    overlay.setPosition(display.bounds.x, display.bounds.height);
     overlay.webContents.send("settings_updated");
     // only show overlay after its ready
     // TODO does this work with Linux transparency???
