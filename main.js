@@ -356,6 +356,15 @@ function setSettings(settings) {
   launchToTray = settings.launch_to_tray;
   mainWindow.webContents.send("settings_updated");
 
+  let displayId = settings.overlay_display
+    ? settings.overlay_display
+    : electron.screen.getPrimaryDisplay().id;
+  let display = electron.screen
+    .getAllDisplays()
+    .filter(d => d.id == displayId)[0];
+  overlay.setSize(display.size.width, display.size.height);
+  overlay.setPosition(display.size.x, display.size.y);
+
   settings.overlays.forEach((_settings, index) => {
     globalShortcut.unregister("Alt+Shift+" + (index + 1));
     if (_settings.keyboard_shortcut) {
@@ -494,7 +503,7 @@ function createOverlayWindow() {
     const display = electron.screen.getPrimaryDisplay();
     // display.workArea does not include the taskbar
     overlay.setSize(display.size.width, display.size.height);
-    overlay.setPosition(0, 0);
+    overlay.setPosition(display.size.x, display.size.y);
     overlay.webContents.send("settings_updated");
     // only show overlay after its ready
     // TODO does this work with Linux transparency???

@@ -434,6 +434,35 @@ function appendOverlay(section) {
 
   const topCont = createDiv(["overlay_section_selector_cont", "top_nav_icons"]);
 
+  let overlayDisplay = pd.settings.overlay_display
+    ? pd.settings.overlay_display
+    : remote.screen.getPrimaryDisplay().id;
+
+  const label = createLabel(["but_container_label"], "Overlay Display:");
+  const displaySelect = createSelect(
+    label,
+    remote.screen.getAllDisplays().map((v, i) => {
+      return v.id;
+    }),
+    overlayDisplay,
+    filter => {
+      pd.settings.overlay_display = filter;
+      updateUserSettingsBlend();
+    },
+    `overlay_display`,
+    filter => {
+      let displayNumber = remote.screen
+        .getAllDisplays()
+        .findIndex(d => d.id == filter);
+      let primary = filter == remote.screen.getPrimaryDisplay().id;
+
+      return primary ? `${displayNumber} (primary)` : displayNumber;
+    }
+  );
+  displaySelect.style.width = "180px";
+  displaySelect.style.marginLeft = "32px";
+  section.appendChild(label);
+
   pd.settings.overlays.forEach((settings, index) => {
     const overlaySettingsNav = createDiv([
       "overlay_settings_nav",
