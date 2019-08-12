@@ -279,7 +279,7 @@ class PlayerData {
   }
 
   get cardsSize() {
-    return 100 + this.settings.cards_size * 10;
+    return 100 + this.settings.cards_size * 15;
   }
 
   get cardsSizeOverlayCard() {

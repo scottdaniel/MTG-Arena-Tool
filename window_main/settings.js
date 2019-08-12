@@ -863,7 +863,7 @@ function appendVisual(section) {
     id: "myRange"
   });
   sliderInput.addEventListener("input", function() {
-    const cardSize = 100 + Math.round(parseInt(this.value)) * 10;
+    const cardSize = 100 + Math.round(parseInt(this.value)) * 15;
     $$(".card_size_label")[0].innerHTML =
       "Collection card size: " + cardSize + "px";
     $$(".inventory_card_settings")[0].style.width = cardSize + "px";
