@@ -619,7 +619,10 @@ function updateMatchView() {
     });
   }
 
-  if (overlayMode === OVERLAY_ODDS || overlayMode === OVERLAY_MIXED) {
+  if (
+    overlayMode === OVERLAY_ODDS ||
+    (overlayMode === OVERLAY_MIXED && settings.draw_odds)
+  ) {
     drawDeckOdds();
     return;
   }

@@ -597,6 +597,14 @@ function appendOverlay(section) {
     );
     addCheckbox(
       overlaySection,
+      "Show draw crads odds",
+      `overlay_${index}_draw_odds`,
+      settings.draw_odds,
+      updateUserSettings,
+      OVERLAY_DRAFT_MODES.includes(settings.mode)
+    );
+    addCheckbox(
+      overlaySection,
       "Show type counts",
       `overlay_${index}_type_counts`,
       settings.type_counts,
@@ -1013,6 +1021,7 @@ function updateUserSettingsBlend(_settings = {}) {
       title: byId(`overlay_${index}_title`).checked,
       deck: byId(`overlay_${index}_deck`).checked,
       clock: byId(`overlay_${index}_clock`).checked,
+      draw_odds: byId(`overlay_${index}_draw_odds`).checked,
       sideboard: byId(`overlay_${index}_sideboard`).checked,
       ontop: byId(`overlay_${index}_ontop`).checked,
       lands: byId(`overlay_${index}_lands`).checked,
