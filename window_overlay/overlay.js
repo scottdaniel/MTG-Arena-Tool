@@ -336,6 +336,12 @@ ipc.on("settings_updated", (_event, index) => {
     settings.clock && !OVERLAY_DRAFT_MODES.includes(overlayMode);
   $$(".overlay_clock_container")[0].style.display = showClock ? "" : "none";
 
+  const showCardOverlay =
+    settings.cards_overlay && !OVERLAY_DRAFT_MODES.includes(overlayMode);
+  $$(".overlay_hover_container")[0].style.display = showCardOverlay
+    ? ""
+    : "none";
+
   if (OVERLAY_DRAFT_MODES.includes(overlayMode)) {
     updateDraftView();
   } else {
