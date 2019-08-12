@@ -809,13 +809,47 @@ function appendVisual(section) {
   tagSelect.style.marginLeft = "32px";
   section.appendChild(label);
 
+  const sliderOverlayCard = createDiv(["slidecontainer_settings"]);
+  sliderOverlayCard.style.marginTop = "20px";
+
+  const sliderlabelOverlayCard = createLabel(
+    ["card_size_container", "card_size_label_overlay_card"],
+    "Overlay card size: " + pd.cardsSizeOverlayCard + "px"
+  );
+  sliderlabelOverlayCard.style.width = "300px";
+  sliderlabelOverlayCard.style.margin = "0";
+  sliderlabelOverlayCard.style.whiteSpace = "nowrap";
+
+  sliderOverlayCard.appendChild(sliderlabelOverlayCard);
+
+  const sliderInputOverlayCard = createInput(["slider", "sliderA"], "", {
+    type: "range",
+    min: "0",
+    max: "10",
+    value: pd.settings.cards_size_overlay_card,
+    id: "myRangeOverlayCard"
+  });
+
+  sliderInputOverlayCard.addEventListener("input", function() {
+    const cardSizeOverlayCard = 240 + Math.round(parseInt(this.value) * 6);
+    $$(".card_size_label_overlay_card")[0].innerHTML =
+      "Overlay card size: " + cardSizeOverlayCard + "px";
+  });
+  sliderInputOverlayCard.addEventListener("change", function() {
+    updateUserSettingsBlend({
+      cards_size_overlay_card: Math.round(parseInt(this.value))
+    });
+  });
+  sliderOverlayCard.appendChild(sliderInputOverlayCard);
+  section.appendChild(sliderOverlayCard);
+
   const slider = createDiv(["slidecontainer_settings"]);
   slider.style.marginTop = "20px";
   const sliderlabel = createLabel(
     ["card_size_container", "card_size_label"],
-    "Card size: " + pd.cardsSize + "px"
+    "Collection card size: " + pd.cardsSize + "px"
   );
-  sliderlabel.style.width = "180px";
+  sliderlabel.style.width = "300px";
   sliderlabel.style.margin = "0";
   sliderlabel.style.whiteSpace = "nowrap";
 
@@ -830,7 +864,8 @@ function appendVisual(section) {
   });
   sliderInput.addEventListener("input", function() {
     const cardSize = 100 + Math.round(parseInt(this.value)) * 10;
-    $$(".card_size_label")[0].innerHTML = "Card size: " + cardSize + "px";
+    $$(".card_size_label")[0].innerHTML =
+      "Collection card size: " + cardSize + "px";
     $$(".inventory_card_settings")[0].style.width = cardSize + "px";
     $$(".inventory_card_settings_img")[0].style.width = cardSize + "px";
   });

@@ -332,6 +332,10 @@ ipc.on("settings_updated", (_event, index) => {
   $$(".overlay_decklist")[0].innerHTML = "";
   $$(".overlay_decklist")[0].style.display = settings.deck ? "" : "none";
 
+  $$(".main_hover")[0].style.width = pd.cardsSizeOverlayCard + "px";
+  $$(".main_hover")[0].style.height =
+    pd.cardsSizeOverlayCard / 0.71808510638 + "px";
+
   const showClock =
     settings.clock && !OVERLAY_DRAFT_MODES.includes(overlayMode);
   $$(".overlay_clock_container")[0].style.display = showClock ? "" : "none";

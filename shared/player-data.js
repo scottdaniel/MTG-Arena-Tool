@@ -65,6 +65,7 @@ const defaultCfg = {
     anon_explore: false,
     close_on_match: true,
     cards_size: 2,
+    cards_size_overlay_card: 2,
     export_format: "$Name,$Count,$Rarity,$SetName,$Collector",
     back_color: "rgba(0,0,0,0.3)",
     back_url: "",
@@ -279,6 +280,10 @@ class PlayerData {
 
   get cardsSize() {
     return 100 + this.settings.cards_size * 10;
+  }
+
+  get cardsSizeOverlayCard() {
+    return 240 + this.settings.cards_size_overlay_card * 6;
   }
 
   get transactionList() {
