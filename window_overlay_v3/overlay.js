@@ -256,6 +256,7 @@ function settingsUpdated() {
     let bgImageDom = `#overlay_${index + 1} .overlay_bg_image`;
     let elementsDom = `#overlay_${index + 1} .elements_wrapper`;
     let topDom = `#overlay_${index + 1} .top_nav_wrapper`;
+    let mainHoverDom = `#hover_${index + 1}`;
 
     queryElements(bgImageDom)[0].style.opacity = _overlay.alpha_back.toString();
     queryElements(elementsDom)[0].style.opacity = _overlay.alpha.toString();
@@ -270,10 +271,19 @@ function settingsUpdated() {
       : "none";
 
     queryElements(deckListDom)[0].style.display = _overlay.deck ? "" : "none";
+    queryElements(mainHoverDom)[0].style.width = pd.cardsSizeOverlayCard + "px";
+    queryElements(mainHoverDom)[0].style.height =
+      pd.cardsSizeOverlayCard / 0.71808510638 + "px";
 
     const showClock =
       _overlay.clock && !OVERLAY_DRAFT_MODES.includes(_overlay.mode);
     queryElements(clockDom)[0].style.display = showClock ? "" : "none";
+
+    const showCardOverlay =
+      _overlay.cards_overlay && !OVERLAY_DRAFT_MODES.includes(_overlay.mode);
+    queryElements(mainHoverDom)[0].style.display = showCardOverlay
+      ? ""
+      : "none";
 
     if (OVERLAY_DRAFT_MODES.includes(_overlay.mode)) {
       updateDraftView(index);
