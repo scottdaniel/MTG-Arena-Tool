@@ -3511,3 +3511,16 @@ a:hover {
     height: 12px;
     margin: 2px 4px;
 }
+
+.shortcuts_grid {
+    display: grid;
+    font-size: 16px;
+    color: var(--color-light);
+    line-height: 32px;
+    max-width: calc(100% - 64px);
+}
+
+.shortcuts_line {
+    height: 32px;
+    padding-left: 12px;
+}

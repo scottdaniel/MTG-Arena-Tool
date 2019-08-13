@@ -722,9 +722,10 @@ exports.SETTINGS_BEHAVIOUR = 1;
 exports.SETTINGS_ARENA_DATA = 2;
 exports.SETTINGS_OVERLAY = 3;
 exports.SETTINGS_VISUAL = 4;
-exports.SETTINGS_PRIVACY = 5;
-exports.SETTINGS_ABOUT = 6;
-exports.SETTINGS_LOGIN = 7;
+exports.SETTINGS_SHORTCUTS = 5;
+exports.SETTINGS_PRIVACY = 6;
+exports.SETTINGS_ABOUT = 7;
+exports.SETTINGS_LOGIN = 8;
 
 // Date constants
 exports.DATE_LAST_DAY = "Last 24 Hours";

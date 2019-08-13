@@ -17,6 +17,7 @@ const {
   SETTINGS_ARENA_DATA,
   SETTINGS_OVERLAY,
   SETTINGS_VISUAL,
+  SETTINGS_SHORTCUTS,
   SETTINGS_PRIVACY,
   SETTINGS_ABOUT,
   SETTINGS_LOGIN
@@ -88,6 +89,9 @@ function openSettingsTab(openSection = lastSettingsSection, scrollTop = 0) {
     createDiv(["settings_nav", "sn" + SETTINGS_VISUAL], "Visual")
   );
   wrap_l.appendChild(
+    createDiv(["settings_nav", "sn" + SETTINGS_SHORTCUTS], "Shortcuts")
+  );
+  wrap_l.appendChild(
     createDiv(["settings_nav", "sn" + SETTINGS_PRIVACY], "Privacy")
   );
   wrap_l.appendChild(
@@ -134,6 +138,9 @@ function openSettingsTab(openSection = lastSettingsSection, scrollTop = 0) {
       } else if (classList.includes("sn7")) {
         lastSettingsSection = 7;
         $$(".ss7")[0].style.display = "block";
+      } else if (classList.includes("sn8")) {
+        lastSettingsSection = 8;
+        $$(".ss8")[0].style.display = "block";
       }
       this.classList.add("nav_selected");
     })
@@ -162,6 +169,11 @@ function openSettingsTab(openSection = lastSettingsSection, scrollTop = 0) {
   // VISUAL
   section = createDiv(["settings_section", "ss" + SETTINGS_VISUAL]);
   appendVisual(section);
+  div.appendChild(section);
+
+  // SHORTCUTS
+  section = createDiv(["settings_section", "ss" + SETTINGS_SHORTCUTS]);
+  appendShortcuts(section);
   div.appendChild(section);
 
   // PRIVACY
@@ -877,6 +889,74 @@ function appendVisual(section) {
   d.appendChild(img);
   label.appendChild(d);
   section.appendChild(label);
+}
+
+function appendShortcuts(section) {
+  section.appendChild(createDiv(["settings_title"], "Shortcuts"));
+
+  const gridDiv = createDiv(["shortcuts_grid"]);
+  let cell;
+  cell = createDiv(
+    ["line_dark", "line_bottom_border", "shortcuts_line"],
+    "Action"
+  );
+  cell.style.gridArea = `1 / 1 / auto / 3`;
+  gridDiv.appendChild(cell);
+
+  cell = createDiv(
+    ["line_dark", "line_bottom_border", "shortcuts_line"],
+    "Shortcut"
+  );
+  cell.style.gridArea = `1 / 2 / auto / 4`;
+  gridDiv.appendChild(cell);
+
+  // Hardcoded this for the time being, it should live inside
+  // player data / settings and each key should have an ID so
+  // we can assign names and values easily in the future.
+  let shortcuts = [
+    {
+      name: "Toggle Overlay 1",
+      key: "Alt + Shift + 1"
+    },
+    {
+      name: "Toggle Overlay 2",
+      key: "Alt + Shift + 2"
+    },
+    {
+      name: "Toggle Overlay 3",
+      key: "Alt + Shift + 3"
+    },
+    {
+      name: "Toggle Overlay 4",
+      key: "Alt + Shift + 4"
+    },
+    {
+      name: "Toggle Overlay 5",
+      key: "Alt + Shift + 5"
+    },
+    {
+      name: "Toggle Edit Mode",
+      key: "Alt + Shift + E"
+    }
+  ];
+
+  shortcuts.forEach((short, index) => {
+    let ld = index % 2 ? "line_dark" : "line_light";
+
+    cell = createDiv([ld, "shortcuts_line"], short.name);
+    cell.style.gridArea = `${index + 2} / 1 / auto / 2`;
+    gridDiv.appendChild(cell);
+
+    cell = createDiv([ld, "shortcuts_line"], short.key);
+    cell.style.gridArea = `${index + 2} / 2 / auto / 3`;
+    gridDiv.appendChild(cell);
+
+    cell = createDiv([ld, "shortcuts_line"]);
+    cell.style.gridArea = `${index + 2} / 3 / auto / 4`;
+    gridDiv.appendChild(cell);
+  });
+
+  section.appendChild(gridDiv);
 }
 
 function appendPrivacy(section) {
