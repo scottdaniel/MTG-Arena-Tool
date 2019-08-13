@@ -758,8 +758,8 @@ function drawDeckOdds(index) {
     )
   );
 
-  let oddNextDom = `#overlay_${index + 1} .odds_prev`;
-  let oddPrevDom = `#overlay_${index + 1} .odds_next`;
+  let oddNextDom = `#overlay_${index + 1} .odds_next`;
+  let oddPrevDom = `#overlay_${index + 1} .odds_prev`;
   //
   queryElements(oddPrevDom)[0].addEventListener("click", function() {
     let cardsLeft = currentMatch.playerCardsLeft.mainboard.count();

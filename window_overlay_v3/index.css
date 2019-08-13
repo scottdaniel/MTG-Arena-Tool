@@ -119,6 +119,7 @@ body {
 .main_hover {
     margin-left: auto !important;
     margin-right: auto !important;
+    margin-bottom: 70px !important;
 }
 
 .overlay_hover {
