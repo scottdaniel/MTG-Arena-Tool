@@ -142,6 +142,10 @@ function toggleEditMode() {
       const restrictToParent = interact.modifiers.restrictRect({
         restriction: "parent"
       });
+      const restrictToEdges = interact.modifiers.restrictEdges({
+        outer: "parent",
+        endOnly: true
+      });
       const restrictMinSize = interact.modifiers.restrictSize({
         min: { width: 100, height: 100 }
       });
@@ -157,14 +161,16 @@ function toggleEditMode() {
         })
         .resizable({
           edges: { left: true, right: true, bottom: true, top: true },
-          modifiers: [restrictToParent, restrictMinSize]
+          modifiers: [restrictToEdges, restrictMinSize],
+          inertia: true
         })
         .on("resizemove", function(event) {
           const target = event.target;
           const x = parseFloat(target.style.left) + event.deltaRect.left;
           const y = parseFloat(target.style.top) + event.deltaRect.top;
-          target.style.width = event.rect.width + "px";
-          target.style.height = event.rect.height + "px";
+          //fix for interact.js adding 4px to height/width on resize
+          target.style.width = event.rect.width - 4 + "px";
+          target.style.height = event.rect.height - 4 + "px";
           target.style.left = x + "px";
           target.style.top = y + "px";
         });
