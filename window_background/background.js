@@ -1262,7 +1262,7 @@ function createMatch(arg) {
 
   currentMatch.opponent.percentile = arg.opponentMythicPercentile;
   currentMatch.opponent.leaderboardPlace = arg.opponentMythicLeaderboardPlace;
-  
+
   currentMatch.opponent.cards = [];
   currentMatch.eventId = arg.eventId;
   currentMatch.matchId = arg.matchId + "-" + pd.arenaId;

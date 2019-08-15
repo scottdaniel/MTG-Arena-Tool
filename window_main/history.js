@@ -17,7 +17,8 @@ const {
   getReadableEvent,
   makeId,
   timeSince,
-  toMMSS
+  toMMSS,
+  formatRank
 } = require("../shared/util");
 
 const Aggregator = require("./aggregator");

@@ -311,14 +311,14 @@ function onLabelInEventGetCombinedRankInfo(entry, json) {
   rank.constructed.percentile = json.constructedPercentile;
   rank.constructed.leaderboardPlace = json.constructedLeaderboardPlace;
   rank.constructed.seasonOrdinal = json.constructedSeasonOrdinal;
-  
+
   rank.limited.percentile = json.limitedPercentile;
   rank.limited.leaderboardPlace = json.limitedLeaderboardPlace;
   rank.limited.seasonOrdinal = json.limitedSeasonOrdinal;
 
   var infoLength = Object.keys(json).length - 1;
   if (infoLength != Object.keys(rank).length) {
-    console.warn('rankInfo is not processing all data.', Object.keys(json));
+    console.warn("rankInfo is not processing all data.", Object.keys(json));
   }
 
   setData({ rank });
@@ -349,13 +349,13 @@ function onLabelRankUpdated(entry, json) {
 
   setData({ rank });
   if (debugLog || !firstPass) {
-    store.set("rank", rank); 
+    store.set("rank", rank);
   }
 }
 
 function onLabelMythicRatingUpdated(entry, json) {
   // This is exclusive to constructed?
-  // Not sure what the limited event is called. 
+  // Not sure what the limited event is called.
 
   // Example data:
   // (-1) Incoming MythicRating.Updated {
