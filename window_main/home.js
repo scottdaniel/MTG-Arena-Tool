@@ -302,7 +302,7 @@ function openHomeTab(arg, opentab = true) {
     cell.style.gridArea = `1 / 4 / auto / 5`;
     cont.appendChild(cell);
 
-    cell = createDiv(["line_dark", "line_bottom_border"], "Ammount");
+    cell = createDiv(["line_dark", "line_bottom_border"], "Amount");
     cell.style.gridArea = `1 / 5 / auto / 6`;
     cont.appendChild(cell);
 

@@ -1,5 +1,14 @@
 body {
     pointer-events: none;
+    background-color: rgba(0, 0, 0, 0.01);
+    overflow: hidden;
+    -webkit-app-region: no-drag;
+}
+
+.main_wrapper, .overlay_wrapper, .outer_wrapper {
+    padding: 0 !important;
+    height: 100% !important;
+    width: 100% !important;
 }
 
 .click-on {
@@ -9,14 +18,65 @@ body {
     pointer-events: none;
 }
 
+.overlay_master_wrapper {
+    width: 100%;
+    height: 100%;
+}
+
+.overlay_controller {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    background-size: contain;
+    background-image: url("../icon.png");
+    opacity: 0.8;
+    -webkit-transition: all 0.25s ease-in-out;
+}
+
+.overlay_controller:hover {
+    opacity: 1;
+    cursor: pointer;
+    -webkit-transform: rotate(360deg);
+}
+
 .overlay_container {
+    background-position: center;
+    border-radius: 4px;
+    background-size: cover;
+    overflow: hidden;
+    position: absolute !important;
+    background-color: rgba(0, 0, 0, 0);
     -webkit-transition: all 0.2s ease-in;
+}
+
+/*
+.overlay_container:after {
+    background: url(../images/background_overlay.png);
+    content: ' ';
+    top: 0;
+    left: 0;
+    width: calc(100% - 0px);
+    height: calc(100% - 0px);
+    position: absolute;
+    background-size: 100% 100%;
+    z-index: 1;
+}
+*/
+
+.editable {
+    border: 2px var(--color-g) dashed;
+    -webkit-transition: none !important;
 }
 
 .overlay_decklist {
     overflow-x: hidden;
     overflow-y: auto;
     flex-grow: 2;
+}
+
+.outer_wrapper {
+    position: absolute !important;
+    z-index: 1 !important;
 }
 
 .overlay_decklist a {
@@ -26,8 +86,7 @@ body {
 
 .overlay_deckname {
     background-color: rgba(0,0,0,0.75);
-    -webkit-app-region: drag;
-    padding: 12px 0 0 0;
+    padding: 4px 0 0 0;
     text-align: center;
     color: #fae5d2;
 }
@@ -36,7 +95,6 @@ body {
     font-size: 14px;
     background-color: rgba(0,0,0,0.75);
     opacity: 1;
-    -webkit-app-region: drag;
     padding: 4px 0 0 0;
     text-align: center;
     color: #fae5d2;
@@ -44,12 +102,12 @@ body {
 
 .overlay_deckcolors {
     background-color: rgba(0,0,0,0.75);
-    -webkit-app-region: drag;
     height: 24px;
     display: flex;
     justify-content: center;
     padding-top: 4px;
-    margin: 0 0 auto 0;
+    padding-bottom: 4px;
+    margin: 0 0 1px 0;
 }
 
 .overlay_separator {
@@ -90,7 +148,6 @@ body {
 }
 
 .overlay_clock_container {
-    -webkit-app-region: drag;
     position: relative;
     display: flex;
     flex-direction: column;
@@ -194,7 +251,6 @@ body {
 .draft_prev,
 .deck_prev,
 .odds_prev {
-    -webkit-app-region: no-drag;
     position: absolute;
     cursor: pointer;
     background: url(../images/prev.png) no-repeat center;
@@ -211,7 +267,6 @@ body {
 .draft_next,
 .deck_next,
 .odds_next {
-    -webkit-app-region: no-drag;
     cursor: pointer;
     position: absolute;
     background: url(../images/next.png) no-repeat center;
@@ -442,9 +497,15 @@ body {
 }
 
 .overlay_icon {
-    width: 16px;
-    height: 16px;
-    margin: auto 0 auto 12px;
+    width: 12px;
+    height: 12px;
+    margin: auto auto auto 8px;
     border-radius: 50%;
-    flex-shrink: 0;
+    cursor: pointer;
+}
+
+.top_nav_wrapper {
+    flex-direction: row !important;
+    height: 32px !important;
+    justify-content: flex-end !important;
 }

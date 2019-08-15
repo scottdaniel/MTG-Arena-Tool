@@ -76,6 +76,15 @@ function convert_deck_from_v3(deck) {
 function onLabelOutLogInfo(entry, json) {
   if (!json) return;
   logTime = parseWotcTime(entry.timestamp);
+
+  if (json.params.messageName == "Client.UserDeviceSpecs") {
+    let payload = {
+      isWindowed: json.params.payloadObject.isWindowed,
+      monitor: json.params.payloadObject.monitorResolution,
+      game: json.params.payloadObject.gameResolution
+    };
+    ipc_send("set_device_specs", payload);
+  }
   if (json.params.messageName == "DuelScene.GameStart") {
     let gameNumber = json.params.payloadObject.gameNumber;
     actionLog(-2, logTime, `Game ${gameNumber} Start`);
