@@ -1143,6 +1143,11 @@ ready(function() {
       const closeDom = `#overlay_${index + 1} .close`;
       const clockPrevDom = `#overlay_${index + 1} .clock_prev`;
       const clockNextDom = `#overlay_${index + 1} .clock_next`;
+      const deckListDom = `#overlay_${index + 1} .overlay_decklist`;
+
+      const deckListDiv = queryElements(deckListDom)[0];
+      deckListDiv.addEventListener("mouseover", setIgnoreFalse);
+      deckListDiv.addEventListener("mouseleave", setIgnoreTrue);
 
       const clockPrevDiv = queryElements(clockPrevDom)[0];
       clockPrevDiv.addEventListener("click", function() {
