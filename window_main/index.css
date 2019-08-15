@@ -249,6 +249,18 @@ relative-time, local-time {
     box-shadow: 0px 3px 8px 0px rgba(0, 0, 0, 0.6);
 }
 
+.button_edit {
+    height: 20px;
+    line-height: 20px;
+    margin: 6px auto;
+}
+
+.button_edit:active {
+    background-color: var(--color-mid);
+    line-height: 22px;
+    box-shadow: 0px 3px 8px 0px rgba(0, 0, 0, 0.6);
+}
+
 .top_username {
     color: var(--color-light);
     font-size: 20px;
@@ -3523,4 +3535,12 @@ a:hover {
 .shortcuts_line {
     height: 32px;
     padding-left: 12px;
+}
+
+.keycomb_desc {
+    font-family:  var(--main-font-name-it);
+    font-size: 20px;
+    border-bottom: solid var(--color-light-20) 2px;
+    color: var(--color-light);
+    margin: auto auto 0 auto;
 }

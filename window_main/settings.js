@@ -45,6 +45,8 @@ const {
   changeBackground,
   hideLoadingBars,
   ipcSend,
+  openDialog,
+  closeDialog,
   renderLogInput,
   resetMainContainer,
   setLocalState,
@@ -60,6 +62,36 @@ function getCardStyleName(style) {
 }
 
 let currentOverlay = 0;
+
+// Hardcoded this for the time being, it should live inside
+// player data / settings and each key should have an ID so
+// we can assign names and values easily in the future.
+let shortcuts = [
+  {
+    name: "Toggle Overlay 1",
+    key: "Alt + Shift + 1"
+  },
+  {
+    name: "Toggle Overlay 2",
+    key: "Alt + Shift + 2"
+  },
+  {
+    name: "Toggle Overlay 3",
+    key: "Alt + Shift + 3"
+  },
+  {
+    name: "Toggle Overlay 4",
+    key: "Alt + Shift + 4"
+  },
+  {
+    name: "Toggle Overlay 5",
+    key: "Alt + Shift + 5"
+  },
+  {
+    name: "Toggle Edit Mode",
+    key: "Alt + Shift + E"
+  }
+];
 
 //
 function openSettingsTab(openSection = lastSettingsSection, scrollTop = 0) {
@@ -894,6 +926,13 @@ function appendVisual(section) {
 function appendShortcuts(section) {
   section.appendChild(createDiv(["settings_title"], "Shortcuts"));
 
+  const helpDiv = createDiv(
+    ["settings_note"],
+    `Click Edit to change a shortcut`
+  );
+  helpDiv.style.margin = "24px 64px 0px 16px";
+  section.appendChild(helpDiv);
+
   const gridDiv = createDiv(["shortcuts_grid"]);
   let cell;
   cell = createDiv(
@@ -910,36 +949,6 @@ function appendShortcuts(section) {
   cell.style.gridArea = `1 / 2 / auto / 4`;
   gridDiv.appendChild(cell);
 
-  // Hardcoded this for the time being, it should live inside
-  // player data / settings and each key should have an ID so
-  // we can assign names and values easily in the future.
-  let shortcuts = [
-    {
-      name: "Toggle Overlay 1",
-      key: "Alt + Shift + 1"
-    },
-    {
-      name: "Toggle Overlay 2",
-      key: "Alt + Shift + 2"
-    },
-    {
-      name: "Toggle Overlay 3",
-      key: "Alt + Shift + 3"
-    },
-    {
-      name: "Toggle Overlay 4",
-      key: "Alt + Shift + 4"
-    },
-    {
-      name: "Toggle Overlay 5",
-      key: "Alt + Shift + 5"
-    },
-    {
-      name: "Toggle Edit Mode",
-      key: "Alt + Shift + E"
-    }
-  ];
-
   shortcuts.forEach((short, index) => {
     let ld = index % 2 ? "line_dark" : "line_light";
 
@@ -953,10 +962,61 @@ function appendShortcuts(section) {
 
     cell = createDiv([ld, "shortcuts_line"]);
     cell.style.gridArea = `${index + 2} / 3 / auto / 4`;
+
+    let editBut = createDiv([ld, "button_simple", "button_edit"], "Edit");
+
+    editBut.addEventListener("click", function() {
+      openKeyCombinationDialog(short.name);
+    });
+
+    cell.appendChild(editBut);
+
     gridDiv.appendChild(cell);
   });
 
   section.appendChild(gridDiv);
+}
+
+function openKeyCombinationDialog(name) {
+  const cont = createDiv(["dialog_content"]);
+  cont.style.width = "380px";
+  cont.style.height = "240px";
+
+  let desc = createDiv(["keycomb_desc"], "Press any key");
+  let okButton = createDiv(["button_simple"], "Ok");
+
+  function reportKeyEvent(zEvent) {
+    let keyDesc = $$(".keycomb_desc")[0];
+    var keyStr = ["Control", "Shift", "Alt", "Meta"].includes(zEvent.key)
+      ? ""
+      : zEvent.key + " ";
+    var reportStr =
+      (zEvent.ctrlKey ? "Control " : "") +
+      (zEvent.shiftKey ? "Shift " : "") +
+      (zEvent.altKey ? "Alt " : "") +
+      (zEvent.metaKey ? "Meta " : "") +
+      keyStr;
+    keyDesc.innerHTML = reportStr;
+
+    //--- Was a Ctrl-Alt-E combo pressed?
+    if (zEvent.ctrlKey && zEvent.altKey && zEvent.key === "e") {
+      // case sensitive
+      this.hitCnt = (this.hitCnt || 0) + 1;
+      keyDesc.innerHTML = "<p>Bingo! cnt: " + this.hitCnt + "</p>";
+    }
+    zEvent.stopPropagation();
+    zEvent.preventDefault();
+  }
+
+  okButton.addEventListener("click", () => {
+    // Assign key here?
+    closeDialog();
+  });
+
+  document.addEventListener("keydown", reportKeyEvent);
+  cont.appendChild(desc);
+  cont.appendChild(okButton);
+  openDialog(cont);
 }
 
 function appendPrivacy(section) {
