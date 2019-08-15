@@ -42,7 +42,8 @@ const {
   compare_cards,
   get_deck_colors,
   get_rank_index,
-  removeDuplicates
+  removeDuplicates,
+  formatRank
 } = require("../shared/util");
 
 const {
@@ -163,7 +164,7 @@ function updateNavIcons() {
   }
 }
 
-//
+
 function updateTopBar() {
   updateNavIcons();
 
@@ -184,14 +185,24 @@ function updateTopBar() {
     constructedRankIcon.style.backgroundPosition = rankOffset * -48 + "px 0px";
     constructedRankIcon.setAttribute(
       "title",
-      constructed.rank + " " + constructed.tier
+      formatRank(constructed)
+    );
+
+    constructedRankIcon.innerHTML = (
+      constructed.leaderboardPlace ?
+        formatRank(constructed).split(' ')[1] : ''
     );
 
     const limited = pd.rank.limited;
     rankOffset = get_rank_index(limited.rank, limited.tier);
     const limitedRankIcon = $$(".top_limited_rank")[0];
     limitedRankIcon.style.backgroundPosition = rankOffset * -48 + "px 0px";
-    limitedRankIcon.setAttribute("title", limited.rank + " " + limited.tier);
+    limitedRankIcon.setAttribute("title", formatRank(limited));
+
+    limitedRankIcon.innerHTML = (
+      limited.leaderboardPlace ?
+        formatRank(limited).split(' ')[1] : ''
+    );
   }
 
   const patreonIcon = $$(".top_patreon")[0];
