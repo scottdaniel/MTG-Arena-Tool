@@ -662,19 +662,25 @@ function appendOverlay(section) {
     );
     addCheckbox(
       overlaySection,
-      "Show draw crads odds",
+      "Show odds",
       `overlay_${index}_draw_odds`,
       settings.draw_odds,
       updateUserSettings,
-      OVERLAY_DRAFT_MODES.includes(settings.mode)
+      [
+        OVERLAY_FULL,
+        OVERLAY_LEFT,
+        OVERLAY_SEEN,
+        OVERLAY_DRAFT,
+        OVERLAY_LOG,
+        OVERLAY_DRAFT_BREW
+      ].includes(settings.mode)
     );
     addCheckbox(
       overlaySection,
-      "Show cards on hoover",
+      "Show hover cards",
       `overlay_${index}_cards_overlay`,
       settings.cards_overlay,
-      updateUserSettings,
-      OVERLAY_DRAFT_MODES.includes(settings.mode)
+      updateUserSettings
     );
     addCheckbox(
       overlaySection,

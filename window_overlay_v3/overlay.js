@@ -262,7 +262,7 @@ function settingsUpdated() {
     let bgImageDom = `#overlay_${index + 1} .overlay_bg_image`;
     let elementsDom = `#overlay_${index + 1} .elements_wrapper`;
     let topDom = `#overlay_${index + 1} .top_nav_wrapper`;
-    let mainHoverDom = `#hover_${index + 1}`;
+    let mainHoverDom = ".main_hover";
 
     queryElements(bgImageDom)[0].style.opacity = _overlay.alpha_back.toString();
     queryElements(elementsDom)[0].style.opacity = _overlay.alpha.toString();
@@ -284,12 +284,6 @@ function settingsUpdated() {
     const showClock =
       _overlay.clock && !OVERLAY_DRAFT_MODES.includes(_overlay.mode);
     queryElements(clockDom)[0].style.display = showClock ? "" : "none";
-
-    const showCardOverlay =
-      _overlay.cards_overlay && !OVERLAY_DRAFT_MODES.includes(_overlay.mode);
-    queryElements(mainHoverDom)[0].style.display = showCardOverlay
-      ? ""
-      : "none";
 
     if (OVERLAY_DRAFT_MODES.includes(_overlay.mode)) {
       updateDraftView(index);
@@ -634,8 +628,8 @@ function updateMatchView(index) {
   }
 
   if (
-    overlayMode === OVERLAY_ODDS ||
-    (overlayMode === OVERLAY_MIXED && settings.draw_odds)
+    (overlayMode === OVERLAY_ODDS || overlayMode === OVERLAY_MIXED) &&
+    settings.draw_odds
   ) {
     drawDeckOdds(index);
     return;
@@ -1148,6 +1142,21 @@ ready(function() {
       const deckListDiv = queryElements(deckListDom)[0];
       deckListDiv.addEventListener("mouseover", setIgnoreFalse);
       deckListDiv.addEventListener("mouseleave", setIgnoreTrue);
+      deckListDiv.addEventListener("mouseover", function() {
+        let index = this.offsetParent.offsetParent.attributes["0"].value.slice(
+          -1
+        );
+        let mainHoverDom = ".main_hover";
+        let settings = pd.settings.overlays[index - 1];
+
+        if (settings.cards_overlay) {
+          console.log(index + " aktiviert");
+          queryElements(mainHoverDom)[0].style.display = "";
+        } else {
+          queryElements(mainHoverDom)[0].style.display = "none";
+          console.log(index + " deaktiviert");
+        }
+      });
 
       const clockPrevDiv = queryElements(clockPrevDom)[0];
       clockPrevDiv.addEventListener("click", function() {
