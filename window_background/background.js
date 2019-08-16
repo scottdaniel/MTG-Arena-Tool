@@ -79,6 +79,7 @@ const {
   onLabelInEventGetSeasonAndRankDetail,
   onLabelGetPlayerInventoryGetRewardSchedule,
   onLabelRankUpdated,
+  onLabelMythicRatingUpdated,
   onLabelTrackProgressUpdated,
   onLabelTrackRewardTierUpdated
 } = require("./labels");
@@ -760,6 +761,13 @@ function onLogEntryFound(entry) {
             }
             break;
 
+          case "MythicRating.Updated":
+            {
+              json = entry.json();
+              onLabelMythicRatingUpdated(entry, json);
+            }
+            break;
+
           case "Event.GetPlayerCourses":
             if (entry.arrow == "<==") {
               json = entry.json();
@@ -1251,6 +1259,10 @@ function createMatch(arg) {
   currentMatch.opponent.name = arg.opponentScreenName;
   currentMatch.opponent.rank = arg.opponentRankingClass;
   currentMatch.opponent.tier = arg.opponentRankingTier;
+
+  currentMatch.opponent.percentile = arg.opponentMythicPercentile;
+  currentMatch.opponent.leaderboardPlace = arg.opponentMythicLeaderboardPlace;
+
   currentMatch.opponent.cards = [];
   currentMatch.eventId = arg.eventId;
   currentMatch.matchId = arg.matchId + "-" + pd.arenaId;
