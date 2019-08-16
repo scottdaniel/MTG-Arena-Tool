@@ -63,35 +63,14 @@ function getCardStyleName(style) {
 
 let currentOverlay = 0;
 
-// Hardcoded this for the time being, it should live inside
-// player data / settings and each key should have an ID so
-// we can assign names and values easily in the future.
-let shortcuts = [
-  {
-    name: "Toggle Overlay 1",
-    key: "Alt + Shift + 1"
-  },
-  {
-    name: "Toggle Overlay 2",
-    key: "Alt + Shift + 2"
-  },
-  {
-    name: "Toggle Overlay 3",
-    key: "Alt + Shift + 3"
-  },
-  {
-    name: "Toggle Overlay 4",
-    key: "Alt + Shift + 4"
-  },
-  {
-    name: "Toggle Overlay 5",
-    key: "Alt + Shift + 5"
-  },
-  {
-    name: "Toggle Edit Mode",
-    key: "Alt + Shift + E"
-  }
-];
+const shortcutNames = {
+  shortcut_overlay_1: "Toggle Overlay 1",
+  shortcut_overlay_2: "Toggle Overlay 2",
+  shortcut_overlay_3: "Toggle Overlay 3",
+  shortcut_overlay_4: "Toggle Overlay 4",
+  shortcut_overlay_5: "Toggle Overlay 5",
+  shortcut_editmode: "Toggle Edit Mode"
+};
 
 //
 function openSettingsTab(openSection = lastSettingsSection, scrollTop = 0) {
@@ -928,7 +907,7 @@ function appendShortcuts(section) {
 
   const helpDiv = createDiv(
     ["settings_note"],
-    `Click Edit to change a shortcut`
+    `Click Edit to change a shortcut</br>`
   );
   helpDiv.style.margin = "24px 64px 0px 16px";
   section.appendChild(helpDiv);
@@ -949,14 +928,14 @@ function appendShortcuts(section) {
   cell.style.gridArea = `1 / 2 / auto / 4`;
   gridDiv.appendChild(cell);
 
-  shortcuts.forEach((short, index) => {
+  Object.keys(shortcutNames).forEach(function(key, index) {
     let ld = index % 2 ? "line_dark" : "line_light";
 
-    cell = createDiv([ld, "shortcuts_line"], short.name);
+    cell = createDiv([ld, "shortcuts_line"], shortcutNames[key]);
     cell.style.gridArea = `${index + 2} / 1 / auto / 2`;
     gridDiv.appendChild(cell);
 
-    cell = createDiv([ld, "shortcuts_line"], short.key);
+    cell = createDiv([ld, "shortcuts_line"], pd.settings[key]);
     cell.style.gridArea = `${index + 2} / 2 / auto / 3`;
     gridDiv.appendChild(cell);
 
@@ -966,7 +945,7 @@ function appendShortcuts(section) {
     let editBut = createDiv([ld, "button_simple", "button_edit"], "Edit");
 
     editBut.addEventListener("click", function() {
-      openKeyCombinationDialog(short.name);
+      openKeyCombinationDialog(key);
     });
 
     cell.appendChild(editBut);
@@ -998,25 +977,22 @@ function openKeyCombinationDialog(name) {
       keyStr;
     keyDesc.innerHTML = reportStr;
 
-    //--- Was a Ctrl-Alt-E combo pressed?
-    if (zEvent.ctrlKey && zEvent.altKey && zEvent.key === "e") {
-      // case sensitive
-      this.hitCnt = (this.hitCnt || 0) + 1;
-      keyDesc.innerHTML = "<p>Bingo! cnt: " + this.hitCnt + "</p>";
-    }
     zEvent.stopPropagation();
     zEvent.preventDefault();
   }
 
-  okButton.addEventListener("click", () => {
-    // Assign key here?
+  okButton.addEventListener("click", function() {
+    pd.settings[name] = $$(".keycomb_desc")[0].innerHTML;
+    //updateUserSettingsBlend();
     closeDialog();
   });
 
   document.addEventListener("keydown", reportKeyEvent);
   cont.appendChild(desc);
   cont.appendChild(okButton);
-  openDialog(cont);
+  openDialog(cont, () => {
+    document.removeEventListener("keydown", reportKeyEvent);
+  });
 }
 
 function appendPrivacy(section) {
