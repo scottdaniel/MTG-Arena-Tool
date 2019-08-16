@@ -35,6 +35,7 @@ const cardTypes = require("../shared/card-types");
 const { addCardHover } = require("../shared/card-hover");
 const {
   deckTypesStats,
+  formatRank,
   getCardArtCrop,
   get_deck_colors,
   get_rank_index_16,
@@ -146,7 +147,10 @@ function makeResizable(div, resizeCallback, finalCallback) {
   };
 
   let saveWidth = function(width) {
-    ipcSend("save_user_settings", { right_panel_width: width });
+    ipcSend("save_user_settings", {
+      right_panel_width: width,
+      skip_refresh: true
+    });
   };
 
   div.addEventListener(
@@ -996,7 +1000,7 @@ function attachMatchData(listItem, match) {
   oppRank.style.marginRight = "0px";
   oppRank.style.backgroundPosition =
     get_rank_index_16(match.opponent.rank) * -16 + "px 0px";
-  oppRank.title = match.opponent.rank + " " + match.opponent.tier;
+  oppRank.title = formatRank(match.opponent);
   listItem.rightTop.appendChild(oppRank);
 
   // Match time
