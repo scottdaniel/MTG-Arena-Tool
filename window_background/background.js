@@ -79,6 +79,7 @@ const {
   onLabelInEventGetSeasonAndRankDetail,
   onLabelGetPlayerInventoryGetRewardSchedule,
   onLabelRankUpdated,
+  onLabelMythicRatingUpdated,
   onLabelTrackProgressUpdated,
   onLabelTrackRewardTierUpdated
 } = require("./labels");
@@ -329,9 +330,14 @@ ipc.on("overlayBounds", (event, index, bounds) => {
 ipc.on("save_user_settings", function(event, settings) {
   // console.log("save_user_settings");
   ipc_send("show_loading");
+  let refresh = true;
+  if (settings.skip_refresh) {
+    delete settings.skip_refresh;
+    refresh = false;
+  }
   const updated = { ...pd.settings, ...settings };
   store.set("settings", updated);
-  syncSettings(updated);
+  syncSettings(updated, refresh);
   ipc_send("hide_loading");
 });
 
@@ -757,6 +763,13 @@ function onLogEntryFound(entry) {
             {
               json = entry.json();
               onLabelRankUpdated(entry, json);
+            }
+            break;
+
+          case "MythicRating.Updated":
+            {
+              json = entry.json();
+              onLabelMythicRatingUpdated(entry, json);
             }
             break;
 
@@ -1251,6 +1264,10 @@ function createMatch(arg) {
   currentMatch.opponent.name = arg.opponentScreenName;
   currentMatch.opponent.rank = arg.opponentRankingClass;
   currentMatch.opponent.tier = arg.opponentRankingTier;
+
+  currentMatch.opponent.percentile = arg.opponentMythicPercentile;
+  currentMatch.opponent.leaderboardPlace = arg.opponentMythicLeaderboardPlace;
+
   currentMatch.opponent.cards = [];
   currentMatch.eventId = arg.eventId;
   currentMatch.matchId = arg.matchId + "-" + pd.arenaId;
