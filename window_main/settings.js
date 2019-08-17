@@ -13,6 +13,7 @@ const {
   OVERLAY_DRAFT_BREW,
   OVERLAY_LOG,
   OVERLAY_DRAFT_MODES,
+  SHORTCUT_NAMES,
   SETTINGS_BEHAVIOUR,
   SETTINGS_ARENA_DATA,
   SETTINGS_OVERLAY,
@@ -62,15 +63,6 @@ function getCardStyleName(style) {
 }
 
 let currentOverlay = 0;
-
-const shortcutNames = {
-  shortcut_overlay_1: "Toggle Overlay 1",
-  shortcut_overlay_2: "Toggle Overlay 2",
-  shortcut_overlay_3: "Toggle Overlay 3",
-  shortcut_overlay_4: "Toggle Overlay 4",
-  shortcut_overlay_5: "Toggle Overlay 5",
-  shortcut_editmode: "Toggle Edit Mode"
-};
 
 //
 function openSettingsTab(openSection = lastSettingsSection, scrollTop = 0) {
@@ -909,7 +901,7 @@ function appendShortcuts(section) {
     ["settings_note"],
     `Click Edit to change a shortcut</br>`
   );
-  helpDiv.style.margin = "24px 64px 0px 16px";
+  helpDiv.style.margin = "24px 16px 16px";
   section.appendChild(helpDiv);
 
   const gridDiv = createDiv(["shortcuts_grid"]);
@@ -928,10 +920,10 @@ function appendShortcuts(section) {
   cell.style.gridArea = `1 / 2 / auto / 4`;
   gridDiv.appendChild(cell);
 
-  Object.keys(shortcutNames).forEach(function(key, index) {
+  Object.keys(SHORTCUT_NAMES).forEach(function(key, index) {
     let ld = index % 2 ? "line_dark" : "line_light";
 
-    cell = createDiv([ld, "shortcuts_line"], shortcutNames[key]);
+    cell = createDiv([ld, "shortcuts_line"], SHORTCUT_NAMES[key]);
     cell.style.gridArea = `${index + 2} / 1 / auto / 2`;
     gridDiv.appendChild(cell);
 
@@ -958,8 +950,10 @@ function appendShortcuts(section) {
 
 function openKeyCombinationDialog(name) {
   const cont = createDiv(["dialog_content"]);
-  cont.style.width = "380px";
-  cont.style.height = "240px";
+  cont.style.width = "320px";
+  cont.style.height = "120px";
+
+  remote.globalShortcut.unregisterAll();
 
   let desc = createDiv(["keycomb_desc"], "Press any key");
   let okButton = createDiv(["button_simple"], "Ok");

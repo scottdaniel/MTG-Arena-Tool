@@ -3542,5 +3542,5 @@ a:hover {
     font-size: 20px;
     border-bottom: solid var(--color-light-20) 2px;
     color: var(--color-light);
-    margin: auto auto 0 auto;
+    margin: auto;
 }

@@ -345,7 +345,6 @@ function openOverlayDevTools() {
 
 function setSettings(settings) {
   globalShortcut.unregisterAll();
-
   globalShortcut.register("Alt+Shift+D", openDevTools);
   globalShortcut.register("Alt+Shift+O", openOverlayDevTools);
 

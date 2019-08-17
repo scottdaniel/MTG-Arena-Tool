@@ -718,6 +718,15 @@ exports.MAIN_COLLECTION = 5;
 exports.MAIN_SETTINGS = 6;
 exports.MAIN_UPDATE = 9;
 
+exports.SHORTCUT_NAMES = {
+  shortcut_overlay_1: "Toggle Overlay 1",
+  shortcut_overlay_2: "Toggle Overlay 2",
+  shortcut_overlay_3: "Toggle Overlay 3",
+  shortcut_overlay_4: "Toggle Overlay 4",
+  shortcut_overlay_5: "Toggle Overlay 5",
+  shortcut_editmode: "Toggle Edit Mode"
+};
+
 exports.SETTINGS_BEHAVIOUR = 1;
 exports.SETTINGS_ARENA_DATA = 2;
 exports.SETTINGS_OVERLAY = 3;
