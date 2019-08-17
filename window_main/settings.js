@@ -619,13 +619,6 @@ function appendOverlay(section) {
     overlaySection.appendChild(helpDiv);
     addCheckbox(
       overlaySection,
-      `Enable Alt+Shift+${index + 1} keyboard shortcut`,
-      `overlay_${index}_keyboard_shortcut`,
-      settings.keyboard_shortcut,
-      updateUserSettings
-    );
-    addCheckbox(
-      overlaySection,
       "Show top bar",
       `overlay_${index}_top`,
       settings.top,
@@ -1167,7 +1160,6 @@ function updateUserSettingsBlend(_settings = {}) {
       ...settings,
       show: byId(`overlay_${index}_show`).checked,
       show_always: byId(`overlay_${index}_show_always`).checked,
-      keyboard_shortcut: byId(`overlay_${index}_keyboard_shortcut`).checked,
       top: byId(`overlay_${index}_top`).checked,
       title: byId(`overlay_${index}_title`).checked,
       deck: byId(`overlay_${index}_deck`).checked,

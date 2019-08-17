@@ -370,12 +370,10 @@ function setSettings(settings) {
   });
 
   settings.overlays.forEach((_settings, index) => {
-    if (_settings.keyboard_shortcut) {
-      let short = "shortcut_overlay_" + (index + 1);
-      globalShortcut.register(settings[short], () => {
-        overlay.webContents.send("close", { action: -1, index: index });
-      });
-    }
+    let short = "shortcut_overlay_" + (index + 1);
+    globalShortcut.register(settings[short], () => {
+      overlay.webContents.send("close", { action: -1, index: index });
+    });
   });
 
   // Send settings update
