@@ -348,20 +348,22 @@ function setSettings(settings) {
 
   // update keyboard shortcuts
   globalShortcut.unregisterAll();
-  globalShortcut.register(settings.shortcut_devtools_main, openDevTools);
-  globalShortcut.register(
-    settings.shortcut_devtools_overlay,
-    openOverlayDevTools
-  );
-  globalShortcut.register(settings.shortcut_editmode, () => {
-    overlay.webContents.send("edit");
-  });
-  settings.overlays.forEach((_settings, index) => {
-    let short = "shortcut_overlay_" + (index + 1);
-    globalShortcut.register(settings[short], () => {
-      overlay.webContents.send("close", { action: -1, index: index });
+  if (settings.enable_keyboard_shortcuts) {
+    globalShortcut.register(settings.shortcut_devtools_main, openDevTools);
+    globalShortcut.register(
+      settings.shortcut_devtools_overlay,
+      openOverlayDevTools
+    );
+    globalShortcut.register(settings.shortcut_editmode, () => {
+      overlay.webContents.send("edit");
     });
-  });
+    settings.overlays.forEach((_settings, index) => {
+      let short = "shortcut_overlay_" + (index + 1);
+      globalShortcut.register(settings[short], () => {
+        overlay.webContents.send("close", { action: -1, index: index });
+      });
+    });
+  }
 
   app.setLoginItemSettings({
     openAtLogin: settings.startup

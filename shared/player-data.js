@@ -73,6 +73,7 @@ const defaultCfg = {
     card_tile_style: CARD_TILE_FLAT,
     skip_firstpass: false,
     overlay_scale: 100,
+    enable_keyboard_shortcuts: true,
     shortcut_overlay_1: "Alt+Shift+1",
     shortcut_overlay_2: "Alt+Shift+2",
     shortcut_overlay_3: "Alt+Shift+3",

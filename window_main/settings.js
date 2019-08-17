@@ -887,6 +887,14 @@ function appendVisual(section) {
 function appendShortcuts(section) {
   section.appendChild(createDiv(["settings_title"], "Shortcuts"));
 
+  addCheckbox(
+    section,
+    "Enable keyboard shortcuts",
+    "settings_enablekeyboardshortcuts",
+    pd.settings.enable_keyboard_shortcuts,
+    updateUserSettings
+  );
+
   const helpDiv = createDiv(
     ["settings_note"],
     `Click Edit to change a shortcut</br>`
@@ -1175,6 +1183,7 @@ function updateUserSettingsBlend(_settings = {}) {
     close_on_match: byId("settings_closeonmatch").checked,
     close_to_tray: byId("settings_closetotray").checked,
     export_format: byId("settings_export_format").value,
+    enable_keyboard_shortcuts: byId("settings_enablekeyboardshortcuts").checked,
     send_data: byId("settings_senddata").checked,
     skip_firstpass: !byId("settings_readlogonlogin").checked,
     sound_priority: byId("settings_soundpriority").checked,
