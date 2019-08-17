@@ -6,7 +6,7 @@ const { DEFAULT_TILE, MANA, EASING_DEFAULT } = require("../shared/constants");
 const db = require("../shared/database");
 const pd = require("../shared/player-data");
 const { createDiv, queryElementsByClass } = require("../shared/dom-fns");
-const { getReadableEvent, timeSince, toMMSS } = require("../shared/util");
+const { getReadableEvent, toMMSS } = require("../shared/util");
 
 const Aggregator = require("./aggregator");
 const DataScroller = require("./data-scroller");
@@ -17,6 +17,7 @@ const {
   attachDraftData,
   attachMatchData,
   getEventWinLossClass,
+  localTimeSince,
   openDraft,
   resetMainContainer,
   toggleArchived
@@ -206,7 +207,10 @@ function attachEventData(listItem, course) {
   listItem.rightBottom.appendChild(
     createDiv(
       ["list_match_time"],
-      timeSince(new Date(course.date)) + " ago - " + toMMSS(stats.duration)
+      localTimeSince(new Date(course.date)) +
+        " " +
+        toMMSS(stats.duration) +
+        " long"
     )
   );
 

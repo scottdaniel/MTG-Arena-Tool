@@ -967,7 +967,8 @@ function compareColorWinrates(a, b) {
   return 0;
 }
 
-function localDateFormat(date) {
+exports.localTimeSince = localTimeSince;
+function localTimeSince(date) {
   return `<relative-time datetime="${date.toISOString()}">
     ${date.toString()}
   </relative-time>`;
@@ -1011,7 +1012,10 @@ function attachMatchData(listItem, match) {
   // Match time
   const matchTime = createDiv(
     ["list_match_time"],
-    localDateFormat(new Date(match.date)) + " - " + toMMSS(match.duration)
+    localTimeSince(new Date(match.date)) +
+      " " +
+      toMMSS(match.duration) +
+      " long"
   );
   listItem.rightBottom.appendChild(matchTime);
 
@@ -1058,7 +1062,7 @@ function attachDraftData(listItem, draft) {
 
   const draftTimeDiv = createDiv(
     ["list_match_time"],
-    localDateFormat(new Date(draft.date))
+    localTimeSince(new Date(draft.date))
   );
   listItem.rightBottom.appendChild(draftTimeDiv);
 
