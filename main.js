@@ -344,11 +344,25 @@ function openOverlayDevTools() {
 }
 
 function setSettings(settings) {
-  globalShortcut.unregisterAll();
-  globalShortcut.register("Alt+Shift+D", openDevTools);
-  globalShortcut.register("Alt+Shift+O", openOverlayDevTools);
-
   console.log("MAIN:  Updating settings");
+
+  // update keyboard shortcuts
+  globalShortcut.unregisterAll();
+  globalShortcut.register(settings.shortcut_devtools_main, openDevTools);
+  globalShortcut.register(
+    settings.shortcut_devtools_overlay,
+    openOverlayDevTools
+  );
+  globalShortcut.register(settings.shortcut_editmode, () => {
+    overlay.webContents.send("edit");
+  });
+  settings.overlays.forEach((_settings, index) => {
+    let short = "shortcut_overlay_" + (index + 1);
+    globalShortcut.register(settings[short], () => {
+      overlay.webContents.send("close", { action: -1, index: index });
+    });
+  });
+
   app.setLoginItemSettings({
     openAtLogin: settings.startup
   });
@@ -356,6 +370,7 @@ function setSettings(settings) {
   launchToTray = settings.launch_to_tray;
   mainWindow.webContents.send("settings_updated");
 
+  // update overlay positions
   let displayId = settings.overlay_display
     ? settings.overlay_display
     : electron.screen.getPrimaryDisplay().id;
@@ -364,17 +379,6 @@ function setSettings(settings) {
     .filter(d => d.id == displayId)[0];
   overlay.setSize(display.bounds.width, display.bounds.height);
   overlay.setPosition(display.bounds.x, display.bounds.y);
-
-  globalShortcut.register(settings.shortcut_editmode, () => {
-    overlay.webContents.send("edit");
-  });
-
-  settings.overlays.forEach((_settings, index) => {
-    let short = "shortcut_overlay_" + (index + 1);
-    globalShortcut.register(settings[short], () => {
-      overlay.webContents.send("close", { action: -1, index: index });
-    });
-  });
 
   // Send settings update
   overlay.setAlwaysOnTop(settings.overlays[0].ontop, "floating");

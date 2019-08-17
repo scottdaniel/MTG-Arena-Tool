@@ -79,6 +79,8 @@ const defaultCfg = {
     shortcut_overlay_4: "Alt+Shift+4",
     shortcut_overlay_5: "Alt+Shift+5",
     shortcut_editmode: "Alt+Shift+E",
+    shortcut_devtools_main: "Alt+Shift+D",
+    shortcut_devtools_overlay: "Alt+Shift+O",
     overlays: [
       {
         ...overlayCfg,
