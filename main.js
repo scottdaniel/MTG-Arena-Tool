@@ -133,32 +133,6 @@ function startApp() {
 
   appStarted = true;
 
-  globalShortcut.register("Alt+Shift+D", () => {
-    if (background.isDevToolsOpened()) {
-      background.closeDevTools();
-    } else {
-      background.openDevTools({ mode: "detach" });
-    }
-    if (mainWindow.isDevToolsOpened()) {
-      mainWindow.closeDevTools();
-    } else {
-      showWindow();
-      mainWindow.openDevTools();
-    }
-  });
-
-  globalShortcut.register("Alt+Shift+E", () => {
-    overlay.webContents.send("edit");
-  });
-
-  globalShortcut.register("Alt+Shift+O", () => {
-    if (overlay.isDevToolsOpened()) {
-      overlay.closeDevTools();
-    } else {
-      overlay.openDevTools({ mode: "detach" });
-    }
-  });
-
   mainWindow.webContents.once("dom-ready", () => {
     mainLoaded = true;
     if (backLoaded == true) {
@@ -347,7 +321,34 @@ function initialize(settings) {
   if (!launchToTray) showWindow();
 }
 
+function openDevTools() {
+  if (background.isDevToolsOpened()) {
+    background.closeDevTools();
+  } else {
+    background.openDevTools({ mode: "detach" });
+  }
+  if (mainWindow.isDevToolsOpened()) {
+    mainWindow.closeDevTools();
+  } else {
+    showWindow();
+    mainWindow.openDevTools();
+  }
+}
+
+function openOverlayDevTools() {
+  if (overlay.isDevToolsOpened()) {
+    overlay.closeDevTools();
+  } else {
+    overlay.openDevTools({ mode: "detach" });
+  }
+}
+
 function setSettings(settings) {
+  globalShortcut.unregisterAll();
+
+  globalShortcut.register("Alt+Shift+D", openDevTools);
+  globalShortcut.register("Alt+Shift+O", openOverlayDevTools);
+
   console.log("MAIN:  Updating settings");
   app.setLoginItemSettings({
     openAtLogin: settings.startup
@@ -365,10 +366,14 @@ function setSettings(settings) {
   overlay.setSize(display.bounds.width, display.bounds.height);
   overlay.setPosition(display.bounds.x, display.bounds.y);
 
+  globalShortcut.register(settings.shortcut_editmode, () => {
+    overlay.webContents.send("edit");
+  });
+
   settings.overlays.forEach((_settings, index) => {
-    globalShortcut.unregister("Alt+Shift+" + (index + 1));
     if (_settings.keyboard_shortcut) {
-      globalShortcut.register("Alt+Shift+" + (index + 1), () => {
+      let short = "shortcut_overlay_" + (index + 1);
+      globalShortcut.register(settings[short], () => {
         overlay.webContents.send("close", { action: -1, index: index });
       });
     }

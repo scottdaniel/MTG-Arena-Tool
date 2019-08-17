@@ -966,15 +966,17 @@ function openKeyCombinationDialog(name) {
 
   function reportKeyEvent(zEvent) {
     let keyDesc = $$(".keycomb_desc")[0];
-    var keyStr = ["Control", "Shift", "Alt", "Meta"].includes(zEvent.key)
-      ? ""
-      : zEvent.key + " ";
-    var reportStr =
-      (zEvent.ctrlKey ? "Control " : "") +
-      (zEvent.shiftKey ? "Shift " : "") +
-      (zEvent.altKey ? "Alt " : "") +
-      (zEvent.metaKey ? "Meta " : "") +
-      keyStr;
+    let keys = [];
+
+    if (zEvent.ctrlKey) keys.push("Control");
+    if (zEvent.shiftKey) keys.push("Shift");
+    if (zEvent.altKey) keys.push("Alt");
+    if (zEvent.metaKey) keys.push("Meta");
+
+    if (!["Control", "Shift", "Alt", "Meta"].includes(zEvent.key))
+      keys.push(zEvent.key);
+
+    let reportStr = keys.join("+");
     keyDesc.innerHTML = reportStr;
 
     zEvent.stopPropagation();
@@ -983,7 +985,12 @@ function openKeyCombinationDialog(name) {
 
   okButton.addEventListener("click", function() {
     pd.settings[name] = $$(".keycomb_desc")[0].innerHTML;
-    //updateUserSettingsBlend();
+
+    ipcSend("save_user_settings", {
+      ...pd.settings
+    });
+
+    document.removeEventListener("keydown", reportKeyEvent);
     closeDialog();
   });
 
