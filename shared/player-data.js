@@ -35,7 +35,9 @@ const overlayCfg = {
   alpha: 1,
   alpha_back: 1,
   bounds: { width: 300, height: 600, x: 0, y: 0 },
+  cards_overlay: true,
   clock: false,
+  draw_odds: true,
   deck: true,
   lands: true,
   keyboard_shortcut: true,
@@ -64,7 +66,7 @@ const defaultCfg = {
     anon_explore: false,
     close_on_match: true,
     cards_size: 2,
-    cards_size_overlay_card: 2,
+    cards_size_hover_card: 2,
     export_format: "$Name,$Count,$Rarity,$SetName,$Collector",
     back_color: "rgba(0,0,0,0.3)",
     back_url: "",
@@ -291,8 +293,8 @@ class PlayerData {
     return 100 + this.settings.cards_size * 15;
   }
 
-  get cardsSizeOverlayCard() {
-    return 240 + this.settings.cards_size_overlay_card * 6;
+  get cardsSizeHoverCard() {
+    return 100 + this.settings.cards_size_hover_card * 15;
   }
 
   get transactionList() {

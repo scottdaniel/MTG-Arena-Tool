@@ -693,9 +693,7 @@ function appendOverlay(section) {
       `overlay_${index}_type_counts`,
       settings.type_counts,
       updateUserSettings,
-      [OVERLAY_LOG, OVERLAY_ODDS, OVERLAY_MIXED, OVERLAY_DRAFT].includes(
-        settings.mode
-      )
+      [OVERLAY_LOG, OVERLAY_DRAFT].includes(settings.mode)
     );
     addCheckbox(
       overlaySection,
@@ -703,9 +701,7 @@ function appendOverlay(section) {
       `overlay_${index}_mana_curve`,
       settings.mana_curve,
       updateUserSettings,
-      [OVERLAY_LOG, OVERLAY_ODDS, OVERLAY_MIXED, OVERLAY_DRAFT].includes(
-        settings.mode
-      )
+      [OVERLAY_LOG, OVERLAY_DRAFT].includes(settings.mode)
     );
 
     const sliderOpacity = createDiv(["slidecontainer_settings"]);
@@ -862,40 +858,42 @@ function appendVisual(section) {
   tagSelect.style.marginLeft = "32px";
   section.appendChild(label);
 
-  const sliderOverlayCard = createDiv(["slidecontainer_settings"]);
-  sliderOverlayCard.style.marginTop = "20px";
+  //
+  const sliderHoverCard = createDiv(["slidecontainer_settings"]);
+  sliderHoverCard.style.marginTop = "20px";
 
-  const sliderlabelOverlayCard = createLabel(
-    ["card_size_container", "card_size_label_overlay_card"],
-    "Overlay card size: " + pd.cardsSizeOverlayCard + "px"
+  const sliderlabelHoverCard = createLabel(
+    ["card_size_container", "card_size_label_hover_card"],
+    "Hover card size: " + pd.cardsSizeHoverCard + "px"
   );
-  sliderlabelOverlayCard.style.width = "300px";
-  sliderlabelOverlayCard.style.margin = "0";
-  sliderlabelOverlayCard.style.whiteSpace = "nowrap";
+  sliderlabelHoverCard.style.width = "300px";
+  sliderlabelHoverCard.style.margin = "0";
+  sliderlabelHoverCard.style.whiteSpace = "nowrap";
 
-  sliderOverlayCard.appendChild(sliderlabelOverlayCard);
+  sliderHoverCard.appendChild(sliderlabelHoverCard);
 
-  const sliderInputOverlayCard = createInput(["slider", "sliderA"], "", {
+  const sliderInputHoverCard = createInput(["slider"], "", {
     type: "range",
     min: "0",
-    max: "10",
-    value: pd.settings.cards_size_overlay_card,
-    id: "myRangeOverlayCard"
+    max: "20",
+    value: pd.settings.cards_size_hover_card,
+    id: "myRangeHoverCard"
   });
 
-  sliderInputOverlayCard.addEventListener("input", function() {
-    const cardSizeOverlayCard = 240 + Math.round(parseInt(this.value) * 6);
-    $$(".card_size_label_overlay_card")[0].innerHTML =
-      "Overlay card size: " + cardSizeOverlayCard + "px";
+  sliderInputHoverCard.addEventListener("input", function() {
+    const cardSizeHoverCard = 100 + Math.round(parseInt(this.value)) * 15;
+    $$(".card_size_label_hover_card")[0].innerHTML =
+      "Hover card size: " + cardSizeHoverCard + "px";
   });
-  sliderInputOverlayCard.addEventListener("change", function() {
+  sliderInputHoverCard.addEventListener("change", function() {
     updateUserSettingsBlend({
-      cards_size_overlay_card: Math.round(parseInt(this.value))
+      cards_size_hover_card: Math.round(parseInt(this.value))
     });
   });
-  sliderOverlayCard.appendChild(sliderInputOverlayCard);
-  section.appendChild(sliderOverlayCard);
+  sliderHoverCard.appendChild(sliderInputHoverCard);
+  section.appendChild(sliderHoverCard);
 
+  //
   const slider = createDiv(["slidecontainer_settings"]);
   slider.style.marginTop = "20px";
   const sliderlabel = createLabel(
@@ -908,7 +906,7 @@ function appendVisual(section) {
 
   slider.appendChild(sliderlabel);
 
-  const sliderInput = createInput(["slider", "sliderA"], "", {
+  const sliderInput = createInput(["slider"], "", {
     type: "range",
     min: "0",
     max: "20",
