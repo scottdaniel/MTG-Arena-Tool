@@ -529,7 +529,7 @@ label {
     display: flex;
     position: relative;
     opacity: 1;
-    left: 210px;
+    left: 260px;
     top: -32px;
     width: 180px;
     height: 32px;
@@ -568,8 +568,8 @@ label {
 .main_hover, .main_hover_dfc {
     pointer-events: none;
     align-self: right;
-    width: 240px;
-    height: 340px;
+    width: 340px;
+    height: 473px;
     opacity: 1;
     display: block;
     margin-right: 24px;
@@ -594,7 +594,7 @@ label {
     box-shadow: -1px 1px black;
     width: 20px;
     height: 20px;
-    margin: 0 2px auto 2px;s
+    margin: 0 2px auto 2px;
 }
 
 .mana_s16 {
