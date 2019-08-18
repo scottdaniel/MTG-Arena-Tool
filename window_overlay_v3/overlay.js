@@ -632,7 +632,6 @@ function updateMatchView(index) {
     settings.draw_odds
   ) {
     drawDeckOdds(index);
-    return;
   }
 
   const deck = deckToDraw.getSave();
@@ -1150,11 +1149,9 @@ ready(function() {
         let settings = pd.settings.overlays[index - 1];
 
         if (settings.cards_overlay) {
-          console.log(index + " aktiviert");
           queryElements(mainHoverDom)[0].style.display = "";
         } else {
           queryElements(mainHoverDom)[0].style.display = "none";
-          console.log(index + " deaktiviert");
         }
       });
 

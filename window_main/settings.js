@@ -685,9 +685,7 @@ function appendOverlay(section) {
       `overlay_${index}_type_counts`,
       settings.type_counts,
       updateUserSettings,
-      [OVERLAY_LOG, OVERLAY_ODDS, OVERLAY_MIXED, OVERLAY_DRAFT].includes(
-        settings.mode
-      )
+      [OVERLAY_LOG, OVERLAY_DRAFT].includes(settings.mode)
     );
     addCheckbox(
       overlaySection,
@@ -695,9 +693,7 @@ function appendOverlay(section) {
       `overlay_${index}_mana_curve`,
       settings.mana_curve,
       updateUserSettings,
-      [OVERLAY_LOG, OVERLAY_ODDS, OVERLAY_MIXED, OVERLAY_DRAFT].includes(
-        settings.mode
-      )
+      [OVERLAY_LOG, OVERLAY_DRAFT].includes(settings.mode)
     );
 
     const sliderOpacity = createDiv(["slidecontainer_settings"]);
