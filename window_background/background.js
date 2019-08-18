@@ -90,7 +90,12 @@ const {
   onLabelTrackRewardTierUpdated
 } = require("./labels");
 
-const { createDeck, createDraft, createMatch } = require("./data");
+const {
+  createDeck,
+  createDraft,
+  createMatch,
+  completeMatch
+} = require("./data");
 
 const toolVersion = electron.remote.app
   .getVersion()
@@ -1543,76 +1548,8 @@ function saveMatch(id, matchEndTime) {
   if (!currentMatch || !currentMatch.matchTime || currentMatch.matchId !== id) {
     return;
   }
-
-  let pw = 0;
-  let ow = 0;
-  let dr = 0;
-  currentMatch.results.forEach(function(res) {
-    if (res.scope == "MatchScope_Game") {
-      if (res.result == "ResultType_Draw") {
-        dr += 1;
-      } else if (res.winningTeamId == currentMatch.player.seat) {
-        pw += 1;
-      }
-      if (res.winningTeamId == currentMatch.opponent.seat) {
-        ow += 1;
-      }
-    }
-  });
-
-  if (currentMatch.eventId === "AIBotMatch") return;
-
-  const match = playerData.match(id) || {};
-  match.onThePlay = currentMatch.onThePlay;
-  match.id = currentMatch.matchId;
-  match.duration = currentMatch.matchTime;
-  match.opponent = {
-    name: currentMatch.opponent.name,
-    rank: currentMatch.opponent.rank,
-    tier: currentMatch.opponent.tier,
-    userid: currentMatch.opponent.id,
-    seat: currentMatch.opponent.seat,
-    win: ow
-  };
-  let rank, tier;
-  if (db.ranked_events.includes(currentMatch.eventId)) {
-    rank = playerData.rank.limited.rank;
-    tier = playerData.rank.limited.tier;
-  } else {
-    rank = playerData.rank.constructed.rank;
-    tier = playerData.rank.constructed.tier;
-  }
-  match.player = {
-    name: playerData.name,
-    rank,
-    tier,
-    userid: playerData.arenaId,
-    seat: currentMatch.player.seat,
-    win: pw
-  };
-  match.draws = dr;
-
-  match.eventId = currentMatch.eventId;
-  match.playerDeck = currentMatch.player.originalDeck.getSave();
-  match.oppDeck = getOpponentDeck();
-
-  if (
-    (!match.tags || !match.tags.length) &&
-    match.oppDeck.archetype &&
-    match.oppDeck.archetype !== "-"
-  ) {
-    match.tags = [match.oppDeck.archetype];
-  }
-  if (matchEndTime) {
-    match.date = matchEndTime;
-  }
-  match.bestOf = currentMatch.bestOf;
-
-  match.gameStats = matchGameStats;
-
-  // Convert string "2.2.19" into number for easy comparison, 1 byte per part, allowing for versions up to 255.255.255
-  match.toolVersion = toolVersion;
-  match.toolRunFromSource = !electron.remote.app.isPackaged;
+  const existingMatch = playerData.match(id) || {};
+  const match = completeMatch(existingMatch, currentMatch, matchEndTime);
 
   // console.log("Save match:", match);
   if (!playerData.matches_index.includes(id)) {
