@@ -850,40 +850,42 @@ function appendVisual(section) {
   tagSelect.style.marginLeft = "32px";
   section.appendChild(label);
 
-  const sliderOverlayCard = createDiv(["slidecontainer_settings"]);
-  sliderOverlayCard.style.marginTop = "20px";
+  //
+  const sliderHoverCard = createDiv(["slidecontainer_settings"]);
+  sliderHoverCard.style.marginTop = "20px";
 
-  const sliderlabelOverlayCard = createLabel(
-    ["card_size_container", "card_size_label_overlay_card"],
-    "Overlay card size: " + pd.cardsSizeOverlayCard + "px"
+  const sliderlabelHoverCard = createLabel(
+    ["card_size_container", "card_size_label_hover_card"],
+    "Hover card size: " + pd.cardsSizeHoverCard + "px"
   );
-  sliderlabelOverlayCard.style.width = "300px";
-  sliderlabelOverlayCard.style.margin = "0";
-  sliderlabelOverlayCard.style.whiteSpace = "nowrap";
+  sliderlabelHoverCard.style.width = "300px";
+  sliderlabelHoverCard.style.margin = "0";
+  sliderlabelHoverCard.style.whiteSpace = "nowrap";
 
-  sliderOverlayCard.appendChild(sliderlabelOverlayCard);
+  sliderHoverCard.appendChild(sliderlabelHoverCard);
 
-  const sliderInputOverlayCard = createInput(["slider"], "", {
+  const sliderInputHoverCard = createInput(["slider"], "", {
     type: "range",
     min: "0",
     max: "20",
-    value: pd.settings.cards_size_overlay_card,
-    id: "myRangeOverlayCard"
+    value: pd.settings.cards_size_hover_card,
+    id: "myRangeHoverCard"
   });
 
-  sliderInputOverlayCard.addEventListener("input", function() {
-    const cardSizeOverlayCard = 100 + Math.round(parseInt(this.value)) * 15;
-    $$(".card_size_label_overlay_card")[0].innerHTML =
-      "Overlay card size: " + cardSizeOverlayCard + "px";
+  sliderInputHoverCard.addEventListener("input", function() {
+    const cardSizeHoverCard = 100 + Math.round(parseInt(this.value)) * 15;
+    $$(".card_size_label_hover_card")[0].innerHTML =
+      "Hover card size: " + cardSizeHoverCard + "px";
   });
-  sliderInputOverlayCard.addEventListener("change", function() {
+  sliderInputHoverCard.addEventListener("change", function() {
     updateUserSettingsBlend({
-      cards_size_overlay_card: Math.round(parseInt(this.value))
+      cards_size_hover_card: Math.round(parseInt(this.value))
     });
   });
-  sliderOverlayCard.appendChild(sliderInputOverlayCard);
-  section.appendChild(sliderOverlayCard);
+  sliderHoverCard.appendChild(sliderInputHoverCard);
+  section.appendChild(sliderHoverCard);
 
+  //
   const slider = createDiv(["slidecontainer_settings"]);
   slider.style.marginTop = "20px";
   const sliderlabel = createLabel(
