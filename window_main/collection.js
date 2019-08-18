@@ -1023,7 +1023,10 @@ function printCards() {
 
     cardDiv.appendChild(img);
 
-    addCardHover(img, card);
+    //Don't show card hover, if collection card size is over 340px
+    if (!(pd.cardsSize >= 340)) {
+      addCardHover(img, card);
+    }
 
     img.addEventListener("click", () => {
       if (db.card(grpId).dfc == "SplitHalf") {

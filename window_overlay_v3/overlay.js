@@ -142,6 +142,10 @@ function toggleEditMode() {
       const restrictToParent = interact.modifiers.restrictRect({
         restriction: "parent"
       });
+      const restrictToEdges = interact.modifiers.restrictEdges({
+        outer: "parent",
+        endOnly: true
+      });
       const restrictMinSize = interact.modifiers.restrictSize({
         min: { width: 100, height: 100 }
       });
@@ -157,14 +161,16 @@ function toggleEditMode() {
         })
         .resizable({
           edges: { left: true, right: true, bottom: true, top: true },
-          modifiers: [restrictToParent, restrictMinSize]
+          modifiers: [restrictToEdges, restrictMinSize],
+          inertia: true
         })
         .on("resizemove", function(event) {
           const target = event.target;
           const x = parseFloat(target.style.left) + event.deltaRect.left;
           const y = parseFloat(target.style.top) + event.deltaRect.top;
-          target.style.width = event.rect.width + "px";
-          target.style.height = event.rect.height + "px";
+          //fix for interact.js adding 4px to height/width on resize
+          target.style.width = event.rect.width - 4 + "px";
+          target.style.height = event.rect.height - 4 + "px";
           target.style.left = x + "px";
           target.style.top = y + "px";
         });
@@ -256,6 +262,7 @@ function settingsUpdated() {
     let bgImageDom = `#overlay_${index + 1} .overlay_bg_image`;
     let elementsDom = `#overlay_${index + 1} .elements_wrapper`;
     let topDom = `#overlay_${index + 1} .top_nav_wrapper`;
+    let mainHoverDom = ".main_hover";
 
     queryElements(bgImageDom)[0].style.opacity = _overlay.alpha_back.toString();
     queryElements(elementsDom)[0].style.opacity = _overlay.alpha.toString();
@@ -270,6 +277,9 @@ function settingsUpdated() {
       : "none";
 
     queryElements(deckListDom)[0].style.display = _overlay.deck ? "" : "none";
+    queryElements(mainHoverDom)[0].style.width = pd.cardsSizeOverlayCard + "px";
+    queryElements(mainHoverDom)[0].style.height =
+      pd.cardsSizeOverlayCard / 0.71808510638 + "px";
 
     const showClock =
       _overlay.clock && !OVERLAY_DRAFT_MODES.includes(_overlay.mode);
@@ -617,7 +627,10 @@ function updateMatchView(index) {
     });
   }
 
-  if (overlayMode === OVERLAY_ODDS || overlayMode === OVERLAY_MIXED) {
+  if (
+    (overlayMode === OVERLAY_ODDS || overlayMode === OVERLAY_MIXED) &&
+    settings.draw_odds
+  ) {
     drawDeckOdds(index);
     return;
   }
@@ -745,8 +758,8 @@ function drawDeckOdds(index) {
     )
   );
 
-  let oddNextDom = `#overlay_${index + 1} .odds_prev`;
-  let oddPrevDom = `#overlay_${index + 1} .odds_next`;
+  let oddNextDom = `#overlay_${index + 1} .odds_next`;
+  let oddPrevDom = `#overlay_${index + 1} .odds_prev`;
   //
   queryElements(oddPrevDom)[0].addEventListener("click", function() {
     let cardsLeft = currentMatch.playerCardsLeft.mainboard.count();
@@ -1124,6 +1137,26 @@ ready(function() {
       const closeDom = `#overlay_${index + 1} .close`;
       const clockPrevDom = `#overlay_${index + 1} .clock_prev`;
       const clockNextDom = `#overlay_${index + 1} .clock_next`;
+      const deckListDom = `#overlay_${index + 1} .overlay_decklist`;
+
+      const deckListDiv = queryElements(deckListDom)[0];
+      deckListDiv.addEventListener("mouseover", setIgnoreFalse);
+      deckListDiv.addEventListener("mouseleave", setIgnoreTrue);
+      deckListDiv.addEventListener("mouseover", function() {
+        let index = this.offsetParent.offsetParent.attributes["0"].value.slice(
+          -1
+        );
+        let mainHoverDom = ".main_hover";
+        let settings = pd.settings.overlays[index - 1];
+
+        if (settings.cards_overlay) {
+          console.log(index + " aktiviert");
+          queryElements(mainHoverDom)[0].style.display = "";
+        } else {
+          queryElements(mainHoverDom)[0].style.display = "none";
+          console.log(index + " deaktiviert");
+        }
+      });
 
       const clockPrevDiv = queryElements(clockPrevDom)[0];
       clockPrevDiv.addEventListener("click", function() {
