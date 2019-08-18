@@ -133,32 +133,6 @@ function startApp() {
 
   appStarted = true;
 
-  globalShortcut.register("Alt+Shift+D", () => {
-    if (background.isDevToolsOpened()) {
-      background.closeDevTools();
-    } else {
-      background.openDevTools({ mode: "detach" });
-    }
-    if (mainWindow.isDevToolsOpened()) {
-      mainWindow.closeDevTools();
-    } else {
-      showWindow();
-      mainWindow.openDevTools();
-    }
-  });
-
-  globalShortcut.register("Alt+Shift+E", () => {
-    overlay.webContents.send("edit");
-  });
-
-  globalShortcut.register("Alt+Shift+O", () => {
-    if (overlay.isDevToolsOpened()) {
-      overlay.closeDevTools();
-    } else {
-      overlay.openDevTools({ mode: "detach" });
-    }
-  });
-
   mainWindow.webContents.once("dom-ready", () => {
     mainLoaded = true;
     if (backLoaded == true) {
@@ -347,8 +321,50 @@ function initialize(settings) {
   if (!launchToTray) showWindow();
 }
 
+function openDevTools() {
+  if (background.isDevToolsOpened()) {
+    background.closeDevTools();
+  } else {
+    background.openDevTools({ mode: "detach" });
+  }
+  if (mainWindow.isDevToolsOpened()) {
+    mainWindow.closeDevTools();
+  } else {
+    showWindow();
+    mainWindow.openDevTools();
+  }
+}
+
+function openOverlayDevTools() {
+  if (overlay.isDevToolsOpened()) {
+    overlay.closeDevTools();
+  } else {
+    overlay.openDevTools({ mode: "detach" });
+  }
+}
+
 function setSettings(settings) {
   console.log("MAIN:  Updating settings");
+
+  // update keyboard shortcuts
+  globalShortcut.unregisterAll();
+  if (settings.enable_keyboard_shortcuts) {
+    globalShortcut.register(settings.shortcut_devtools_main, openDevTools);
+    globalShortcut.register(
+      settings.shortcut_devtools_overlay,
+      openOverlayDevTools
+    );
+    globalShortcut.register(settings.shortcut_editmode, () => {
+      overlay.webContents.send("edit");
+    });
+    settings.overlays.forEach((_settings, index) => {
+      let short = "shortcut_overlay_" + (index + 1);
+      globalShortcut.register(settings[short], () => {
+        overlay.webContents.send("close", { action: -1, index: index });
+      });
+    });
+  }
+
   app.setLoginItemSettings({
     openAtLogin: settings.startup
   });
@@ -356,6 +372,7 @@ function setSettings(settings) {
   launchToTray = settings.launch_to_tray;
   mainWindow.webContents.send("settings_updated");
 
+  // update overlay positions
   let displayId = settings.overlay_display
     ? settings.overlay_display
     : electron.screen.getPrimaryDisplay().id;
@@ -364,15 +381,6 @@ function setSettings(settings) {
     .filter(d => d.id == displayId)[0];
   overlay.setSize(display.bounds.width, display.bounds.height);
   overlay.setPosition(display.bounds.x, display.bounds.y);
-
-  settings.overlays.forEach((_settings, index) => {
-    globalShortcut.unregister("Alt+Shift+" + (index + 1));
-    if (_settings.keyboard_shortcut) {
-      globalShortcut.register("Alt+Shift+" + (index + 1), () => {
-        overlay.webContents.send("close", { action: -1, index: index });
-      });
-    }
-  });
 
   // Send settings update
   overlay.setAlwaysOnTop(settings.overlays[0].ontop, "floating");
