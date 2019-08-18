@@ -867,16 +867,16 @@ function appendVisual(section) {
 
   sliderOverlayCard.appendChild(sliderlabelOverlayCard);
 
-  const sliderInputOverlayCard = createInput(["slider", "sliderA"], "", {
+  const sliderInputOverlayCard = createInput(["slider"], "", {
     type: "range",
     min: "0",
-    max: "10",
+    max: "20",
     value: pd.settings.cards_size_overlay_card,
     id: "myRangeOverlayCard"
   });
 
   sliderInputOverlayCard.addEventListener("input", function() {
-    const cardSizeOverlayCard = 240 + Math.round(parseInt(this.value) * 6);
+    const cardSizeOverlayCard = 100 + Math.round(parseInt(this.value)) * 15;
     $$(".card_size_label_overlay_card")[0].innerHTML =
       "Overlay card size: " + cardSizeOverlayCard + "px";
   });
@@ -900,7 +900,7 @@ function appendVisual(section) {
 
   slider.appendChild(sliderlabel);
 
-  const sliderInput = createInput(["slider", "sliderA"], "", {
+  const sliderInput = createInput(["slider"], "", {
     type: "range",
     min: "0",
     max: "20",

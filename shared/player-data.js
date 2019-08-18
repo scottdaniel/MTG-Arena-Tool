@@ -283,7 +283,7 @@ class PlayerData {
   }
 
   get cardsSizeOverlayCard() {
-    return 240 + this.settings.cards_size_overlay_card * 6;
+    return 100 + this.settings.cards_size_overlay_card * 15;
   }
 
   get transactionList() {
