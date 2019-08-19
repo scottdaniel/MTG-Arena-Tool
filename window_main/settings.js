@@ -1,4 +1,6 @@
 const { ipcRenderer: ipc, remote, shell } = require("electron");
+const format = require("date-fns/format");
+const fromUnixTime = require("date-fns/fromUnixTime");
 
 const {
   CARD_TILE_ARENA,
@@ -1096,6 +1098,14 @@ function appendAbout(section) {
     shell.openExternal("https://mtgatool.com/release-notes/");
   });
   about.appendChild(versionLink);
+  const metadataVersion = createDiv(
+    ["message_sub_15", "white"],
+    `Metadata: version ${db.data.version || "???"}, updated ${format(
+      db.data.updated ? fromUnixTime(db.data.updated) : "???",
+      "Pp"
+    )}`
+  );
+  about.appendChild(metadataVersion);
   about.appendChild(createDiv(["message_updates", "green"], updateState + "."));
   const updateButton = createDiv(
     ["button_simple", "centered"],
