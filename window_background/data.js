@@ -170,7 +170,7 @@ function matchIsLimited(match) {
 function completeMatch(match, matchData, matchEndTime) {
   if (matchData.eventId === "AIBotMatch") return;
 
-  let mode = matchIsLimited(match) ? "limited" : "constructed";
+  let mode = matchIsLimited(matchData) ? "limited" : "constructed";
 
   let [playerWins, opponentWins, draws] = matchResults(matchData);
 
