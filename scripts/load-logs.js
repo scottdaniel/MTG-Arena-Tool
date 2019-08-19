@@ -108,7 +108,6 @@ function nextLog(log_files, callback) {
   }
 }
 
-
 // Set app name so we load the correct config file.
 const appName = "MTG-Arena-Tool";
 app.setName(appName);
