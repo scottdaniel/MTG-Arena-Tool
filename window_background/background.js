@@ -200,6 +200,13 @@ function fixBadSettingsData() {
   // and conservitive as possible.
 }
 
+function downloadMetadata() {
+  httpApi.httpGetDatabase();
+  ipc_send("popup", { text: "Downloading metadata", time: 0 });
+}
+
+ipc.on("download_metadata", downloadMetadata);
+
 //
 ipc.on("start_background", function() {
   fixBadSettingsData();
@@ -217,8 +224,7 @@ ipc.on("start_background", function() {
 
   // start http
   httpApi.httpBasic();
-  httpApi.httpGetDatabase();
-  ipc_send("popup", { text: "Downloading metadata", time: 0 });
+  downloadMetadata();
 
   // Check if it is the first time we open this version
   if (
