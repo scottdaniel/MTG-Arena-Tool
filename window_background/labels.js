@@ -1006,8 +1006,6 @@ function onLabelGetPlayerInventoryGetRewardSchedule(entry, json) {
     data.daily = json.dailyReset;
   }
 
-  // deprecated, leaving around for backwards compatibility for now
-  // TODO handle week-based reward track system
   if (json.weeklyReset) {
     if (!json.weeklyReset.endsWith("Z"))
       json.weeklyReset = json.weeklyReset + "Z";
