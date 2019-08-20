@@ -1,6 +1,9 @@
-const { ipcRenderer: ipc } = require("electron");
+const path = require("path");
+const { remote, ipcRenderer: ipc } = require("electron");
 const fs = require("fs");
 const _ = require("lodash");
+
+const cachePath = path.join(remote.app.getPath("userData"), "database.json");
 
 // Some other things should go here later, like updating from MTGA Servers themselves.
 class Database {
@@ -23,7 +26,10 @@ class Database {
     this.activeEvents = [];
     this.preconDecks = [];
 
-    const dbUri = `${__dirname}/../resources/database.json`;
+    let dbUri = `${__dirname}/../resources/database.json`;
+    if (fs.existsSync(cachePath)) {
+      dbUri = cachePath;
+    }
     const defaultDb = fs.readFileSync(dbUri, "utf8");
     this.handleSetDb(null, defaultDb);
 
@@ -43,6 +49,7 @@ class Database {
   handleSetDb(_event, arg) {
     try {
       this.data = JSON.parse(arg);
+      fs.writeFileSync(cachePath, arg);
     } catch (e) {
       console.log("Error parsing metadata", e);
     }
