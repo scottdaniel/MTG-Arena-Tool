@@ -258,6 +258,7 @@ function httpBasic() {
                   progress: -1
                 });
                 db.handleSetDb(null, results);
+                db.updateCache(results);
                 ipc_send("set_db", results);
                 // autologin users may beat the metadata request
                 // manually trigger a UI refresh just in case

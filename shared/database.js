@@ -52,11 +52,18 @@ class Database {
   handleSetDb(_event, arg) {
     try {
       this.data = JSON.parse(arg);
-      if (cachePath) {
-        fs.writeFileSync(cachePath, arg);
-      }
     } catch (e) {
       console.log("Error parsing metadata", e);
+    }
+  }
+
+  updateCache(data) {
+    try {
+      if (cachePath) {
+        fs.writeFileSync(cachePath, data);
+      }
+    } catch (e) {
+      console.log("Error saving metadata", e);
     }
   }
 
