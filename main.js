@@ -250,6 +250,7 @@ function startApp() {
         break;
 
       case "updates_check":
+        background.webContents.send("download_metadata");
         startUpdater();
         break;
 
