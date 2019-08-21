@@ -174,6 +174,21 @@ function httpBasic() {
               });
               ipc_send("set_discord_tag", "");
             }
+            if (_headers.method == "get_database_version") {
+              // Compare parsedResult.version with stored version
+              if (parsedResult.latest > db.version) {
+                console.log(
+                  `Downloading latest database (had v${db.version}, found v${
+                    parsedResult.latest
+                  })`
+                );
+                httpGetDatabase();
+              } else {
+                console.log(
+                  `Database up to date (${db.version}), skipping download.`
+                );
+              }
+            }
             if (_headers.method == "notifications") {
               notificationProcess(parsedResult);
             }
@@ -258,6 +273,7 @@ function httpBasic() {
                   progress: -1
                 });
                 db.handleSetDb(null, results);
+                db.updateCache(results);
                 ipc_send("set_db", results);
                 // autologin users may beat the metadata request
                 // manually trigger a UI refresh just in case
@@ -544,6 +560,15 @@ function httpGetDatabase() {
   httpAsync.push({ reqId: _id, method: "get_database" });
 }
 
+function httpGetDatabaseVersion() {
+  var _id = makeId(6);
+  httpAsync.push({
+    reqId: _id,
+    method: "get_database_version",
+    method_path: "/database/latest/"
+  });
+}
+
 function httpDraftShareLink(did, exp) {
   var _id = makeId(6);
   httpAsync.push({
@@ -687,6 +712,7 @@ module.exports = {
   httpSetEconomy,
   httpDeleteData,
   httpGetDatabase,
+  httpGetDatabaseVersion,
   httpHomeGet,
   httpDraftShareLink,
   httpLogShareLink,

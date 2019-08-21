@@ -224,7 +224,8 @@ ipc.on("start_background", function() {
 
   // start http
   httpApi.httpBasic();
-  downloadMetadata();
+  httpApi.httpGetDatabaseVersion();
+  ipc_send("popup", { text: "Downloading metadata", time: 0 });
 
   // Check if it is the first time we open this version
   if (
