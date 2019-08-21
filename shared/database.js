@@ -149,6 +149,10 @@ class Database {
     );
   }
 
+  get version() {
+    return Number(this.data.version);
+  }
+
   card(id) {
     return this.data.cards[id] || false;
   }
