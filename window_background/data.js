@@ -144,10 +144,33 @@ function matchResults(matchData) {
   return [playerWins, opponentWins, draws];
 }
 
+// Guess if an event is a limited or constructed event.
+function matchIsLimited(match) {
+  // old data uses InternalEventName
+  var eventId = match.eventId || match.InternalEventName;
+
+  // The order of can matter.
+  if (database.ranked_events.includes(eventId)) {
+    return true;
+  }
+  if (eventId.startsWith("QuickDraft")) {
+    return true;
+  }
+  if (eventId.includes("Draft") || eventId.includes("Sealed")) {
+    return true;
+  }
+  if (eventId.includes("Constructed")) {
+    return false;
+  }
+  return false;
+}
+
 // Given match data calculates derived data for storage.
 // This is called when a match is complete.
 function completeMatch(match, matchData, matchEndTime) {
   if (matchData.eventId === "AIBotMatch") return;
+
+  let mode = matchIsLimited(matchData) ? "limited" : "constructed";
 
   let [playerWins, opponentWins, draws] = matchResults(matchData);
 
@@ -164,13 +187,6 @@ function completeMatch(match, matchData, matchEndTime) {
     seat: matchData.opponent.seat,
     win: opponentWins
   };
-
-  let mode;
-  if (database.ranked_events.includes(matchData.eventId)) {
-    mode = "limited";
-  } else {
-    mode = "constructed";
-  }
 
   match.player = {
     name: playerData.name,
