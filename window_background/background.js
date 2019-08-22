@@ -26,7 +26,6 @@ const sha1 = require("js-sha1");
 
 const httpApi = require("./http-api");
 
-const manifestParser = require("./manifest-parser");
 const greToClientInterpreter = require("./gre-to-client-interpreter");
 const Deck = require("../shared/deck");
 const db = require("../shared/database");
@@ -1006,8 +1005,6 @@ async function logLoop() {
     strCheck = '"clientVersion": "';
     if (value.includes(strCheck)) {
       parsedData.arenaVersion = unleakString(dataChop(value, strCheck, '"'));
-      // We request manifest data here
-      //manifestParser.requestManifestData(playerData.arenaVersion);
     }
     /*
     if (firstPass) {
