@@ -1,17 +1,11 @@
-const electron = require("electron");
+var http = require("https");
+
 const path = require("path");
 const fs = require("fs");
 var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
-var http = require("https");
 const gunzip = require("gunzip-file");
 
-/**
- * This is meant to replace our current implementation of card data
- * to alleviate the dependency of manual updates from the server.
- * It downloads all cards data, including abilities and oracle.
- **/
-
-const appData = (electron.app || electron.remote.app).getPath("userData");
+const { APPDATA } = require("./metadata-constants");
 
 function requestManifestData(version) {
   return new Promise(resolve => {
@@ -34,7 +28,7 @@ function requestManifestData(version) {
 function downloadManifest(manifestData) {
   return new Promise(resolve => {
     httpGetFile(manifestData.url, manifestData.file).then(file => {
-      let outFile = path.join(appData, "external", "manifest.json");
+      let outFile = path.join(APPDATA, "external", "manifest.json");
       gunzip(file, outFile, () => {
         fs.unlink(file, () => {});
         let manifestData = JSON.parse(fs.readFileSync(outFile));
@@ -60,19 +54,22 @@ function processManifest(data) {
     let assetName = regex.exec(asset.Name)[1];
 
     return new Promise(resolve => {
-      let assetUri = path.join(appData, "external", assetName + ".json");
+      let assetUri = path.join(APPDATA, "external", assetName + ".json");
 
-      let dir = path.join(appData, "external");
+      let dir = path.join(APPDATA, "external");
       if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir);
       }
 
       let stream = fs.createWriteStream(assetUri);
       http.get(assetUrl, response => {
-        console.log("Downloaded " + assetUri);
         response.pipe(stream);
 
-        resolve(assetName);
+        response.on("end", function() {
+          console.log("Downloaded " + assetUri);
+          resolve(assetName);
+        });
+        //resolve(assetName);
         /*
         // These used to be gzipped.. ¯\_(ツ)_/¯
         let outFile = assetUri + ".json";
@@ -96,9 +93,9 @@ function httpGetText(url) {
 
 function httpGetFile(url, file) {
   return new Promise(resolve => {
-    file = path.join(appData, "external", file);
+    file = path.join(APPDATA, "external", file);
 
-    let dir = path.join(appData, "external");
+    let dir = path.join(APPDATA, "external");
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir);
     }
@@ -106,7 +103,9 @@ function httpGetFile(url, file) {
     let stream = fs.createWriteStream(file);
     http.get(url, response => {
       response.pipe(stream);
-      resolve(file);
+      response.on("end", function() {
+        resolve(file);
+      });
     });
   });
 }
