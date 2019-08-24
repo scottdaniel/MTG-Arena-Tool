@@ -461,7 +461,9 @@ function appendOverlay(section) {
     overlayDisplay,
     filter => {
       pd.settings.overlay_display = filter;
-      updateUserSettingsBlend();
+      ipcSend("save_user_settings", {
+        ...pd.settings
+      });
     },
     `overlay_display`,
     filter => {
