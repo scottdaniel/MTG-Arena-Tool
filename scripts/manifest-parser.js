@@ -9,6 +9,23 @@ const { APPDATA } = require("./metadata-constants");
 
 function requestManifestData(version) {
   return new Promise(resolve => {
+    let requiredFiles = [
+      "abilities.json",
+      "cards.json",
+      "prompts.json",
+      "loc.json",
+      "enums.json"
+    ];
+    requiredFiles = requiredFiles.filter(file => {
+      let assetUri = path.join(APPDATA, "external", file);
+      return !fs.existsSync(assetUri);
+    });
+
+    if (requiredFiles.length == 0) {
+      console.log("All manifest files available, skipping manifest.");
+      resolve(false);
+    }
+
     version = version.replace(".", "_");
     let externalURL = `https://assets.mtgarena.wizards.com/External_${version}.mtga`;
     console.log("Manifest external URL:", externalURL);
@@ -27,14 +44,18 @@ function requestManifestData(version) {
 
 function downloadManifest(manifestData) {
   return new Promise(resolve => {
-    httpGetFile(manifestData.url, manifestData.file).then(file => {
-      let outFile = path.join(APPDATA, "external", "manifest.json");
-      gunzip(file, outFile, () => {
-        fs.unlink(file, () => {});
-        let manifestData = JSON.parse(fs.readFileSync(outFile));
-        resolve(manifestData);
+    if (!manifestData) {
+      resolve(false);
+    } else {
+      httpGetFile(manifestData.url, manifestData.file).then(file => {
+        let outFile = path.join(APPDATA, "external", "manifest.json");
+        gunzip(file, outFile, () => {
+          fs.unlink(file, () => {});
+          let manifestData = JSON.parse(fs.readFileSync(outFile));
+          resolve(manifestData);
+        });
       });
-    });
+    }
   });
 }
 
@@ -45,6 +66,7 @@ function getManifestFiles(version) {
 }
 
 function processManifest(data) {
+  if (!data) return false;
   let requests = data.Assets.filter(asset => {
     return asset.AssetType == "Data";
   }).map(asset => {
