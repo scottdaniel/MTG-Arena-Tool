@@ -441,7 +441,9 @@ function appendOverlay(section) {
     ["settings_note"],
     `You can enable up to 5 independent overlay windows. Customize each overlay
     using the settings below.</br>
-    To edit the overlay's position and size press Alt + Shift + E`
+    To edit the overlay's position and size press ${
+      pd.settings.shortcut_editmode
+    }`
   );
   helpDiv.style.margin = "24px 64px 0px 16px";
   section.appendChild(helpDiv);
