@@ -24,6 +24,7 @@ function requestManifestData(version) {
     if (requiredFiles.length == 0) {
       console.log("All manifest files available, skipping manifest.");
       resolve(false);
+      return;
     }
 
     version = version.replace(".", "_");

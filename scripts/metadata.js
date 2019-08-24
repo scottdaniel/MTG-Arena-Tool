@@ -38,35 +38,36 @@ function quit() {
 }
 
 function getRanksData() {
-  return new Promise(resolve => {
-    let requests = RANKS_SHEETS.map(rank => {
-      return new Promise(resolve => {
-        console.log(`Get ${rank.setCode.toUpperCase()} ranks data.`);
-        httpGetFile(
-          `https://docs.google.com/spreadsheets/d/${
-            rank.sheet
-          }/gviz/tq?headers=2&range=B1:B,F1:F,G1:G&sheet=${rank.page}`,
-          rank.setCode + "_ranks"
-        ).then(file => {
-          let str = fs.readFileSync(file).toString();
+  let requests = RANKS_SHEETS.map(rank => {
+    return new Promise(resolve => {
+      console.log(`Get ${rank.setCode.toUpperCase()} ranks data.`);
+      httpGetFile(
+        `https://docs.google.com/spreadsheets/d/${
+          rank.sheet
+        }/gviz/tq?headers=2&range=B1:B,F1:F,G1:G&sheet=${rank.page}`,
+        rank.setCode + "_ranks"
+      ).then(file => {
+        fs.readFile(file, function read(err, data) {
+          let str = data.toString();
           str = str
-            .replace(
-              `/*O_o*/
-`,
-              ""
-            )
+            .replace("/*O_o*/", "")
             .replace(`google.visualization.Query.setResponse(`, "")
-            .replace(`);`, "");
+            .replace(`);`, " ");
 
           console.log(`${rank.setCode.toUpperCase()} ok.`);
-          ranksData[rank.setCode] = JSON.parse(str);
-          resolve();
+          try {
+            ranksData[rank.setCode] = JSON.parse(str);
+          } catch (e) {
+            console.log(e);
+          }
         });
+
+        resolve();
       });
     });
-
-    return Promise.all(requests);
   });
+
+  return Promise.all(requests);
 }
 
 function getMetagameData() {
