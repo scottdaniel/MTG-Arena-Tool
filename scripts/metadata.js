@@ -18,6 +18,9 @@ const {
 let metagameData = {};
 let ranksData = {};
 
+const VERSION = 12;
+const LANGUAGES = ["EN"];
+
 app.on("ready", () => {
   console.log("Begin Metadata fetch.");
   // It would be nice if we could suppy the version manually or
@@ -27,11 +30,13 @@ app.on("ready", () => {
 
   manifestParser
     .getManifestFiles("1622.721726")
-    //.then(getRanksData)
+    .then(getRanksData)
     //.then(getScryfallCards)
-    .then(generateScryfallDatabase)
-    .then(data => generateMetadata(data))
     //.then(getMetagameData)
+    .then(generateScryfallDatabase)
+    .then(data =>
+      generateMetadata(data, ranksData, metagameData, VERSION, LANGUAGES)
+    )
     .then(quit);
 });
 
@@ -63,7 +68,7 @@ function getRanksData() {
 
           console.log(`${rank.setCode.toUpperCase()} ok.`);
           try {
-            ranksData[rank.setCode] = JSON.parse(str);
+            ranksData[rank.setCode.toUpperCase()] = processRanksData(str);
           } catch (e) {
             console.log(e);
           }
@@ -75,6 +80,19 @@ function getRanksData() {
   });
 
   return Promise.all(requests);
+}
+
+function processRanksData(str) {
+  let data = JSON.parse(str);
+  let ret = {};
+  data.table.rows.forEach(row => {
+    let name = row.c[0].v;
+    let rank = row.c[1].v;
+    let cont = row.c[2].v;
+    ret[name] = { rank: rank, cont: cont };
+  });
+
+  return ret;
 }
 
 function getMetagameData() {
@@ -194,7 +212,7 @@ function generateScryfallDatabase() {
               }
             }
           } catch (e) {
-            console.log(e);
+            //console.log(e);
           }
         }
       };
@@ -233,6 +251,11 @@ function httpGetText(url) {
 function httpGetFile(url, file) {
   return new Promise(resolve => {
     file = path.join(APPDATA, "external", file);
+    /*
+    if (fs.existsSync(file)) {
+      resolve(file);
+      return;
+    }*/
 
     let dir = path.join(APPDATA, "external");
     if (!fs.existsSync(dir)) {

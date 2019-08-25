@@ -3,23 +3,31 @@ const path = require("path");
 const fs = require("fs");
 const {
   APPDATA,
-  LANGUAGES,
   SETS_DATA,
   SET_NAMES,
   COLORS,
   RARITY,
-  NO_DUPES_ART_SETS
+  NO_DUPES_ART_SETS,
+  EVENT_TO_NAME,
+  EVENT_TO_FORMAT,
+  RANKED_EVENTS
 } = require("./metadata-constants");
 
-exports.generateMetadata = function(ScryfallCards) {
+exports.generateMetadata = function(
+  ScryfallCards,
+  ranksData,
+  metagameData,
+  version,
+  languages
+) {
   return new Promise(resolve => {
     console.log("Reading JSON files");
     let cards = readExternalJson("cards.json");
-    let abilities = readExternalJson("abilities.json");
+    let abilitiesRead = readExternalJson("abilities.json");
     let locRead = readExternalJson("loc.json");
     let enumsRead = readExternalJson("enums.json");
 
-    clipboard.writeText(JSON.stringify(ScryfallCards));
+    //clipboard.writeText(JSON.stringify(ScryfallCards));
 
     const regex = new RegExp("/o(?=[^{]*})/");
     let loc = {};
@@ -35,16 +43,23 @@ exports.generateMetadata = function(ScryfallCards) {
       return loc[language][id];
     };
 
+    // Altrough enums must be in other languages ill write them in english
+    // This is because Tool currently relies and expects data to be in english
+    // for things like creature types. And it would break.
     let enums = {};
     enumsRead.forEach(_enum => {
       enums[_enum.name] = {};
       _enum.values.forEach(value => {
-        // Enums must be in English, sorry!
         enums[_enum.name][value.id] = getText(value.text, "EN");
       });
     });
 
-    LANGUAGES.forEach(lang => {
+    languages.forEach(lang => {
+      let abilities = {};
+      abilitiesRead.forEach(ab => {
+        let abid = ab.id;
+        abilities[abid] = getText(ab.text, lang);
+      });
       // main loop
       console.log("Generating " + lang);
       let cardsFinal = {};
@@ -126,24 +141,83 @@ exports.generateMetadata = function(ScryfallCards) {
           // Promo Duress
           if (cardId == 70141) scryfallSet = "f05";
 
-          console.log(cardName + " - " + scryfallSet + " - " + colllector);
-          if (NO_DUPES_ART_SETS.includes(scryfallSet)) {
-            scryfallObject = ScryfallCards[lang][scryfallSet][cardName];
-          } else {
-            scryfallObject =
-              ScryfallCards[lang][scryfallSet][cardName][colllector];
+          //console.log(cardName + " - " + scryfallSet + " - " + colllector);
+          try {
+            if (NO_DUPES_ART_SETS.includes(scryfallSet)) {
+              scryfallObject = ScryfallCards[lang][scryfallSet][cardName];
+            } else {
+              scryfallObject =
+                ScryfallCards[lang][scryfallSet][cardName][colllector];
+            }
+          } catch (e) {
+            //
           }
         } else {
-          scryfallObject =
-            ScryfallCards[lang]["t" + scryfallSet][cardName][colllector];
+          try {
+            scryfallObject =
+              ScryfallCards[lang]["t" + scryfallSet][cardName][colllector];
+          } catch (e) {
+            //
+          }
         }
 
-        clipboard.writeText(JSON.stringify(scryfallObject));
-        cardObj.images = scryfallObject.image_uris;
+        if (card.linkedFaces.length > 0) {
+          cardObj.dfcId = card.linkedFaces[0];
+        } else {
+          cardObj.dfcId = 0;
+        }
+
+        if (ranksData[set]) {
+          cardObj.rank = ranksData[set].rank;
+          cardObj.cont = ranksData[set].cont;
+        } else {
+          cardObj.rank = 0;
+          cardObj.cont = 0;
+        }
+
+        if (scryfallObject == undefined) {
+          console.log(
+            `No images found for ${cardObj.name} - ${cardObj.set} (${
+              cardObj.cid
+            })`
+          );
+        } else {
+          delete scryfallObject.image_uris.png;
+          delete scryfallObject.image_uris.border_crop;
+          cardObj.images = scryfallObject.image_uris;
+        }
 
         cardsFinal[cardObj.id] = cardObj;
         //console.log(JSON.stringify(cardObj));
       });
+
+      let date = new Date();
+      let jsonOutput = {
+        cards: cardsFinal,
+        ok: true,
+        version: version,
+        updated: date.getTime(),
+        events: EVENT_TO_NAME,
+        events_format: EVENT_TO_FORMAT,
+        sets: SETS_DATA,
+        abilities: abilities,
+        ranked_events: RANKED_EVENTS,
+        archetypes: metagameData
+      };
+
+      let str = JSON.stringify(jsonOutput);
+      let jsonOut = path.join(
+        APPDATA,
+        "external",
+        `database-${version}-${lang}.json`
+      );
+      fs.writeFile(jsonOut, str, function(err) {
+        if (err) {
+          return console.log(err);
+        }
+        console.log(`${jsonOut} generated.`);
+      });
+      //
     });
 
     resolve();

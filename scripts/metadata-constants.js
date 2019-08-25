@@ -1,6 +1,100 @@
 const electron = require("electron");
 
-exports.LANGUAGES = ["EN"];
+exports.EVENT_TO_NAME = {
+  NPE: "New Player Experience",
+  DirectGame: "Direct Game",
+  Constructed_Event: "Constructed",
+  Ladder: "Ranked",
+  Traditional_Cons_Event: "Traditional Constructed",
+  Constructed_BestOf3: "Traditional Play",
+  Traditional_Ladder: "Traditional Ranked",
+
+  CompDraft_RNA_20190117: "Traditional Draft RNA",
+  CompDraft_WAR_20190425: "Traditional Draft WAR",
+  CompDraft_M20_20190708: "Traditional Draft M20",
+
+  Sealed_M20_20190630: "Sealed M20",
+  Sealed_Ravnica_20190816: "Sealed Ravnica",
+
+  QuickDraft_RNA_20190621: "Ranked Draft RNA 06/19",
+  QuickDraft_WAR_20190510: "Ranked Draft WAR 05/19",
+  QuickDraft_DOM_20190524: "Ranked Draft DOM",
+  QuickDraft_WAR_20190607: "Ranked Draft WAR 06/19",
+  QuickDraft_WAR_20190705: "Ranked Draft WAR 07/19",
+  QuickDraft_M20_20190719: "Ranked Draft M20",
+  QuickDraft_RNA_20190802: "Ranked Draft RNA",
+  QuickDraft_WAR_20190816: "Ranked Draft WAR",
+  Cascade_Constructed_20190516: "Cascade Constructed",
+  Omniscience_Draft_20190628: "Omniscience Draft",
+
+  Esports_Qualifier_20190525: "Mythic Qualifier Weekend 05/19",
+  Esports_Qualifier_20190817: "Mythic Qualifier Weekend 08/19",
+  CompCons_Metagame_Challenge_20190712: "Metagame Challenge",
+
+  Lore_WAR1_Momir: "Ravnica at War I - Momir",
+  Lore_WAR2_Pauper: "Ravnica at War II - Pauper",
+  Lore_WAR3_Singleton: "Ravnica at War III - Singleton",
+  Lore_WAR4_OverflowingCounters: "Ravnica at War IV - Counters",
+  Lore_WAR5_Ravnica: "Ravnica at war V - Ravnica",
+  Planecation1_GuildBattle: "Planecation - Guild Battle",
+  Planecation2_Treasure: "Planecation - Treasure",
+  Planecation3_Singleton: "Planecation - Singleton",
+  Planecation4_Shakeup: "Planecation - Shakeup",
+  Planecation5_Landfall: "Planecation - Landfall",
+  Giant_Monsters_20190719: "Giant Monsters"
+};
+
+exports.EVENT_TO_FORMAT = {
+  Play: "Standard",
+  DirectGame: "Direct Game",
+  Constructed_Event: "Standard",
+  Ladder: "Standard",
+  Traditional_Cons_Event: "Traditional Standard",
+  Constructed_BestOf3: "Traditional Standard",
+  Traditional_Ladder: "Traditional Standard",
+
+  CompDraft_RNA_20190117: "Draft RNA",
+  CompDraft_WAR_20190425: "Draft WAR",
+  CompDraft_M20_20190708: "Draft M20",
+
+  Sealed_M20_20190630: "Sealed M20",
+  Sealed_Ravnica_20190816: "Sealed Ravnica",
+
+  QuickDraft_RNA_20190426: "Draft RNA",
+  QuickDraft_RNA_20190621: "Draft RNA",
+  QuickDraft_WAR_20190510: "Draft WAR",
+  QuickDraft_DOM_20190524: "Draft DOM",
+  QuickDraft_WAR_20190607: "Draft WAR",
+  QuickDraft_WAR_20190705: "Draft WAR",
+  QuickDraft_M20_20190719: "Draft M20",
+  QuickDraft_RNA_20190802: "Draft RNA",
+  QuickDraft_WAR_20190816: "Draft WAR",
+
+  Cascade_Constructed_20190516: "Cascade Constructed",
+  Omniscience_Draft_20190628: "Omniscience Draft",
+
+  Esports_Qualifier_20190525: "Traditional Standard",
+  Esports_Qualifier_20190817: "Traditional Standard",
+  CompCons_Metagame_Challenge_20190712: "Traditional Standard",
+
+  Lore_WAR1_Momir: "Momir",
+  Lore_WAR2_Pauper: "Pauper",
+  Lore_WAR3_Singleton: "Singleton",
+  Lore_WAR4_OverflowingCounters: "Counters",
+  Lore_WAR5_Ravnica: "Ravnica Constructed",
+  Planecation1_GuildBattle: "Precon",
+  Planecation2_Treasure: "Treasure",
+  Planecation3_Singleton: "Singleton",
+  Planecation4_Shakeup: "Shakeup",
+  Planecation5_Landfall: "Landfall",
+  Giant_Monsters_20190719: "Giant Monsters"
+};
+
+exports.RANKED_EVENTS = [
+  "QuickDraft_M20_20190719",
+  "QuickDraft_WAR_20190816",
+  "QuickDraft_RNA_20190802"
+];
 
 /*
   "Kaladesh": {
