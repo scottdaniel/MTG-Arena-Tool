@@ -26,13 +26,11 @@ app.on("ready", () => {
   // It would be nice if we could suppy the version manually or
   // obtain it from somewhere automatically, like a settings
   // file or the output log itself.
-  //getScryfallCards().then(quit);
-
   manifestParser
     .getManifestFiles("1622.721726")
     .then(getRanksData)
-    //.then(getScryfallCards)
-    //.then(getMetagameData)
+    .then(getScryfallCards)
+    .then(getMetagameData)
     .then(generateScryfallDatabase)
     .then(data =>
       generateMetadata(data, ranksData, metagameData, VERSION, LANGUAGES)
@@ -67,14 +65,13 @@ function getRanksData() {
             .replace(`);`, " ");
 
           console.log(`${rank.setCode.toUpperCase()} ok.`);
+          resolve();
           try {
             ranksData[rank.setCode.toUpperCase()] = processRanksData(str);
           } catch (e) {
             console.log(e);
           }
         });
-
-        resolve();
       });
     });
   });

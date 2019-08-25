@@ -54,6 +54,7 @@ exports.generateMetadata = function(
       });
     });
 
+    let finalized = 0;
     languages.forEach(lang => {
       let abilities = {};
       abilitiesRead.forEach(ab => {
@@ -191,6 +192,34 @@ exports.generateMetadata = function(
         //console.log(JSON.stringify(cardObj));
       });
 
+      Object.keys(cardsFinal).forEach(key => {
+        let card = cardsFinal[key];
+
+        if (card.frame) {
+          if (card.dfc == "SplitHalf" && card.frame.length == 0) {
+            let did = card.dfcId;
+            card.frame = cardsFinal[did].frame;
+            card.dfcId = did;
+          }
+        }
+
+        card.reprints = false;
+        if (card.rarity !== "token" && card.rarity !== "land") {
+          let arr = [];
+
+          Object.keys(cardsFinal).forEach(key => {
+            let cardLoop = cardsFinal[key];
+            if (cardLoop.name == card.name && cardLoop.id !== card.id) {
+              arr.push(cardLoop.id);
+            }
+          });
+
+          if (arr.length > 0) {
+            card.reprints = arr;
+          }
+        }
+      });
+
       let date = new Date();
       let jsonOutput = {
         cards: cardsFinal,
@@ -209,18 +238,21 @@ exports.generateMetadata = function(
       let jsonOut = path.join(
         APPDATA,
         "external",
-        `database-${version}-${lang}.json`
+        `v${version}-${lang}-database.json`
       );
       fs.writeFile(jsonOut, str, function(err) {
         if (err) {
           return console.log(err);
         }
+
         console.log(`${jsonOut} generated.`);
+        finalized++;
+        if (finalized == languages.length) {
+          resolve();
+        }
       });
       //
     });
-
-    resolve();
   });
 };
 
