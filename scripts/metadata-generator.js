@@ -126,6 +126,7 @@ exports.generateMetadata = function(ScryfallCards) {
           // Promo Duress
           if (cardId == 70141) scryfallSet = "f05";
 
+          console.log(cardName + " - " + scryfallSet + " - " + colllector);
           if (NO_DUPES_ART_SETS.includes(scryfallSet)) {
             scryfallObject = ScryfallCards[lang][scryfallSet][cardName];
           } else {
@@ -137,13 +138,12 @@ exports.generateMetadata = function(ScryfallCards) {
             ScryfallCards[lang]["t" + scryfallSet][cardName][colllector];
         }
 
+        clipboard.writeText(JSON.stringify(scryfallObject));
         cardObj.images = scryfallObject.image_uris;
 
         cardsFinal[cardObj.id] = cardObj;
         //console.log(JSON.stringify(cardObj));
       });
-
-      clipboard.writeText(JSON.stringify(cardsFinal));
     });
 
     resolve();

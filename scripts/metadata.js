@@ -122,6 +122,19 @@ function generateScryfallDatabase() {
 
       let scryfallData = {};
 
+      let scryfallDataAdd = function(obj, lang, set, name, cid = false) {
+        if (scryfallData[lang] == undefined) scryfallData[lang] = {};
+        if (scryfallData[lang][set] == undefined) scryfallData[lang][set] = {};
+        if (scryfallData[lang][set][name] == undefined)
+          scryfallData[lang][set][name] = {};
+
+        if (NO_DUPES_ART_SETS.includes(set)) {
+          scryfallData[lang][set][name] = obj;
+        } else {
+          scryfallData[lang][set][name][cid] = obj;
+        }
+      };
+
       let pump = function() {
         var pos;
 
@@ -149,24 +162,39 @@ function generateScryfallDatabase() {
           try {
             var obj = JSON.parse(line);
             if (ALLOWED_SCRYFALL.includes(obj.set)) {
-              let lang = obj.lang.toUpperCase();
-
-              if (scryfallData[lang] == undefined) scryfallData[lang] = {};
-              if (scryfallData[lang][obj.set] == undefined)
-                scryfallData[lang][obj.set] = {};
-              if (scryfallData[lang][obj.set][obj.name] == undefined)
-                scryfallData[lang][obj.set][obj.name] = {};
-
-              if (NO_DUPES_ART_SETS.includes(obj.set)) {
-                scryfallData[lang][obj.set][obj.name] = obj;
-              } else {
-                scryfallData[lang][obj.set][obj.name][
-                  obj.collector_number
-                ] = obj;
+              obj.lang = obj.lang.toUpperCase();
+              scryfallDataAdd(
+                obj,
+                obj.lang,
+                obj.set,
+                obj.name,
+                obj.collector_number
+              );
+              if (obj.layout == "transform") {
+                obj.card_faces.forEach(face => {
+                  scryfallDataAdd(
+                    face,
+                    obj.lang,
+                    obj.set,
+                    face.name,
+                    obj.collector_number
+                  );
+                });
+              }
+              if (obj.layout == "split") {
+                obj.card_faces.forEach(face => {
+                  scryfallDataAdd(
+                    obj,
+                    obj.lang,
+                    obj.set,
+                    face.name,
+                    obj.collector_number
+                  );
+                });
               }
             }
           } catch (e) {
-            //console.log(e);
+            console.log(e);
           }
         }
       };
