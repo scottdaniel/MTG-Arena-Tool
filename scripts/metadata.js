@@ -19,7 +19,22 @@ let metagameData = {};
 let ranksData = {};
 
 const VERSION = 12;
-const LANGUAGES = ["EN"];
+/*
+  Languages available in loc.json;
+  "BR"
+  "DE"
+  "EN"
+  "ES"
+  "FR"
+  "IT"
+  "JP"
+  "RU"
+  "ko-KR"
+  "zh-CN"
+*/
+const LANGUAGES = ["EN", "ES", "DE"];
+// "scryfall-all-cards.json" contains cards in all languages but is 800+mb
+const SCRYFALL_FILE = "scryfall-all-cards.json";
 
 app.on("ready", () => {
   console.log("Begin Metadata fetch.");
@@ -103,8 +118,6 @@ function getMetagameData() {
     });
   });
 }
-
-const SCRYFALL_FILE = "scryfall-default-cards.json";
 
 function getScryfallCards() {
   return new Promise(resolve => {
