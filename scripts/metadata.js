@@ -148,6 +148,11 @@ function generateScryfallDatabase() {
       var stream = fs.createReadStream(file, { flags: "r", encoding: "utf-8" });
       var buf = "";
 
+      // We read the file as a stream, decoding line by line because decoding
+      // such a huge file in JS causes the GC to go craz yand crash for me.
+      // The only problem may be if Scryfall changes its files and stops
+      // using the newline characters..
+
       let scryfallData = {};
 
       let scryfallDataAdd = function(obj, lang, set, name, cid = false) {

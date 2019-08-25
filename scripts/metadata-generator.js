@@ -143,22 +143,42 @@ exports.generateMetadata = function(
           if (cardId == 70141) scryfallSet = "f05";
 
           //console.log(cardName + " - " + scryfallSet + " - " + colllector);
-          try {
-            if (NO_DUPES_ART_SETS.includes(scryfallSet)) {
-              scryfallObject = ScryfallCards[lang][scryfallSet][cardName];
-            } else {
-              scryfallObject =
-                ScryfallCards[lang][scryfallSet][cardName][colllector];
+          scryfallObject = getScryfallCard(
+            ScryfallCards,
+            lang,
+            scryfallSet,
+            cardName,
+            colllector
+          );
+          if (scryfallObject == undefined) {
+            if (lang !== "EN") {
+              scryfallObject = getScryfallCard(
+                ScryfallCards,
+                "EN",
+                scryfallSet,
+                getText(card.titleId, "EN"),
+                colllector
+              );
             }
-          } catch (e) {
-            //
           }
         } else {
-          try {
-            scryfallObject =
-              ScryfallCards[lang]["t" + scryfallSet][cardName][colllector];
-          } catch (e) {
-            //
+          scryfallObject = getScryfallCard(
+            ScryfallCards,
+            lang,
+            "t" + scryfallSet,
+            cardName,
+            colllector
+          );
+          if (scryfallObject == undefined) {
+            if (lang !== "EN") {
+              scryfallObject = getScryfallCard(
+                ScryfallCards,
+                "EN",
+                "t" + scryfallSet,
+                getText(card.titleId, "EN"),
+                colllector
+              );
+            }
           }
         }
 
@@ -176,11 +196,13 @@ exports.generateMetadata = function(
           cardObj.cont = 0;
         }
 
+        // We did not find any image data on scryfall for this card!
+        // Something may be wrong.
         if (scryfallObject == undefined) {
           console.log(
             `No images found for ${cardObj.name} - ${cardObj.set} (${
               cardObj.cid
-            })`
+            }) grpId: ${cardObj.id}`
           );
         } else {
           delete scryfallObject.image_uris.png;
@@ -189,7 +211,6 @@ exports.generateMetadata = function(
         }
 
         cardsFinal[cardObj.id] = cardObj;
-        //console.log(JSON.stringify(cardObj));
       });
 
       Object.keys(cardsFinal).forEach(key => {
@@ -255,6 +276,27 @@ exports.generateMetadata = function(
     });
   });
 };
+
+function getScryfallCard(
+  ScryfallCards,
+  lang,
+  scryfallSet,
+  cardName,
+  colllector
+) {
+  let ret = undefined;
+  try {
+    if (NO_DUPES_ART_SETS.includes(scryfallSet)) {
+      ret = ScryfallCards[lang][scryfallSet][cardName];
+    } else {
+      ret = ScryfallCards[lang][scryfallSet][cardName][colllector];
+    }
+  } catch (e) {
+    return undefined;
+  }
+
+  return ret;
+}
 
 function readExternalJson(filename) {
   let file = path.join(APPDATA, "external", filename);
