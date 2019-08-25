@@ -245,9 +245,9 @@ function httpGetText(url) {
   return xmlHttp;
 }
 
-function httpGetFile(url, file) {
+function httpGetFile(url, filename) {
   return new Promise(resolve => {
-    file = path.join(APPDATA, "external", file);
+    let file = path.join(APPDATA, "external", filename);
     /*
     if (fs.existsSync(file)) {
       resolve(file);
@@ -262,7 +262,20 @@ function httpGetFile(url, file) {
     let stream = fs.createWriteStream(file);
     http.get(url, response => {
       response.pipe(stream);
+      let data = "";
+
+      response.on("data", function(chunk) {
+        data += chunk;
+        process.stdout.clearLine();
+        process.stdout.cursorTo(0);
+        process.stdout.write(
+          `Downloading ${filename}:\t ${(data.length / 1024 / 1024).toFixed(
+            2
+          )} mb`
+        );
+      });
       response.on("end", function() {
+        console.log("");
         resolve(file);
       });
     });
