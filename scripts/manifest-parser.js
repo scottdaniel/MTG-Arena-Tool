@@ -77,6 +77,7 @@ function processManifest(data) {
     let assetName = regex.exec(asset.Name)[1];
 
     return new Promise(resolve => {
+      let assetUriGz = path.join(APPDATA, "external", assetName + ".gz");
       let assetUri = path.join(APPDATA, "external", assetName + ".json");
 
       let dir = path.join(APPDATA, "external");
@@ -84,13 +85,17 @@ function processManifest(data) {
         fs.mkdirSync(dir);
       }
 
-      let stream = fs.createWriteStream(assetUri);
+      let stream = fs.createWriteStream(assetUriGz);
       http.get(assetUrl, response => {
         response.pipe(stream);
 
         response.on("end", function() {
-          console.log("Downloaded " + assetUri);
+          console.log("Downloaded " + assetUriGz);
           resolve(assetName);
+
+          gunzip(assetUriGz, assetUri, () => {
+            //fs.unlink(assetUri, () => {});
+          });
         });
         //resolve(assetName);
         /*

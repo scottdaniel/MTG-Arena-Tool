@@ -1,5 +1,7 @@
 const electron = require("electron");
 
+exports.LANGUAGES = ["EN"];
+
 /*
   "Kaladesh": {
     collation: 62242,
@@ -182,6 +184,82 @@ exports.SETS_DATA = {
     release: "2000-00-00"
   }
 };
+
+exports.COLORS = ["{?}", "{W}", "{U}", "{B}", "{R}", "{G}", "{C}", "", "{X}"];
+
+exports.RARITY = ["token", "land", "common", "uncommon", "rare", "mythic"];
+
+exports.SET_NAMES = {
+  W17: "Welcome Deck 2017",
+  KLD: "Kaladesh",
+  AER: "Aether Revolt",
+  AKH: "Amonkhet",
+  HOU: "Hour of Devastation",
+  XLN: "Ixalan",
+  RIX: "Rivals of Ixalan",
+  DAR: "Dominaria",
+  OGW: "Oath of the Gatewatch",
+  M19: "Core Set 2019",
+  ANA: "Arena",
+  GRN: "Guilds of Ravnica",
+  G18: "M19 Gift Pack",
+  RNA: "Ravnica Allegiance",
+  WAR: "War of the Spark",
+  M20: "Core Set 2020",
+  MI: "Mirage",
+  ROE: "Rise of Eldrazi",
+  RTR: "Return to Ravnica",
+  BFZ: "Battle for Zendikar"
+};
+
+exports.NO_DUPES_ART_SETS = [
+  "pm20",
+  "g18",
+  "pgrn",
+  "pdom",
+  "prix",
+  "f05",
+  "roe",
+  "rtr",
+  "bfz",
+  "unh",
+  "c16",
+  "mir"
+];
+
+exports.ALLOWED_SCRYFALL = [
+  "m20",
+  "war",
+  "rna",
+  "grn",
+  "med",
+  "m19",
+  "ana",
+  "dom",
+  "rix",
+  "xln",
+  "tm20",
+  "twar",
+  "trna",
+  "tgrn",
+  "tm19",
+  "tdom",
+  "trix",
+  "txln",
+  "pm20",
+  "g18",
+  "pgrn",
+  "pdom",
+  "prix",
+  "f05",
+  "roe",
+  "rtr",
+  "bfz",
+  "mir",
+  "akh",
+  "unh",
+  "c16"
+];
 
 exports.RANKS_SHEETS = [
   {
