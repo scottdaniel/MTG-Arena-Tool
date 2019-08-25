@@ -238,7 +238,7 @@ exports.generateMetadata = function(
       let jsonOut = path.join(
         APPDATA,
         "external",
-        `v${version}-${lang}-database.json`
+        `v${version}-${lang.toLowerCase()}-database.json`
       );
       fs.writeFile(jsonOut, str, function(err) {
         if (err) {
