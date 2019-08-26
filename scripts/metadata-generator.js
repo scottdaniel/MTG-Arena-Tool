@@ -1,11 +1,9 @@
-const { clipboard } = require("electron");
 const path = require("path");
 const fs = require("fs");
 const {
   APPDATA,
   SETS_DATA,
   SET_NAMES,
-  COLORS,
   RARITY,
   NO_DUPES_ART_SETS,
   EVENT_TO_NAME,
@@ -27,8 +25,7 @@ exports.generateMetadata = function(
     let locRead = readExternalJson("loc.json");
     let enumsRead = readExternalJson("enums.json");
 
-    //clipboard.writeText(JSON.stringify(ScryfallCards));
-
+    // Read locales for all languages and clean up mana costs in the texts
     const regex = new RegExp("/o(?=[^{]*})/");
     let loc = {};
     locRead.forEach(lang => {
@@ -53,20 +50,24 @@ exports.generateMetadata = function(
         enums[_enum.name][value.id] = getText(value.text, "EN");
       });
     });
+    enumsRead = null;
 
     let finalized = 0;
     languages.forEach(lang => {
+      // Read abilities for this language
       let abilities = {};
       abilitiesRead.forEach(ab => {
         let abid = ab.id;
         abilities[abid] = getText(ab.text, lang);
       });
+
       // main loop
       console.log("Generating " + lang);
       let cardsFinal = {};
       cards.forEach(card => {
         if (card.set == "ArenaSUP") return;
 
+        // Get types line based on enums
         let typeLine = "";
         card.supertypes.forEach(type => {
           typeLine += enums["SuperType"][type] + " ";
@@ -77,7 +78,9 @@ exports.generateMetadata = function(
         card.subtypes.forEach(type => {
           typeLine += enums["SubType"][type] + " ";
         });
+        typeLine = typeLine.slice(0, -1);
 
+        // Clean up mana cost
         let manaCost = [];
         card.castingcost.split("o").forEach(mana => {
           if (mana !== "" && mana !== "0") {
@@ -93,6 +96,7 @@ exports.generateMetadata = function(
         let set = SET_NAMES[card.set];
 
         let colllector = card.CollectorNumber;
+        // Special collectors numbers that define Mythic edition and Gift pack cards
         if (colllector.includes("GR")) {
           set = "Mythic Edition";
         }
@@ -162,6 +166,7 @@ exports.generateMetadata = function(
             }
           }
         } else {
+          // If the card is a token the scryfall set name begins with "t"
           scryfallObject = getScryfallCard(
             ScryfallCards,
             lang,
@@ -188,6 +193,7 @@ exports.generateMetadata = function(
           cardObj.dfcId = 0;
         }
 
+        // Add ranks data
         if (ranksData[set]) {
           cardObj.rank = ranksData[set].rank;
           cardObj.cont = ranksData[set].cont;
@@ -205,14 +211,26 @@ exports.generateMetadata = function(
             }) grpId: ${cardObj.id}`
           );
         } else {
+          // Remove the first part of the URLs and some
+          // links that are not used by tool.
+          // This reduces the file size subtantially
           delete scryfallObject.image_uris.png;
           delete scryfallObject.image_uris.border_crop;
+          if (scryfallObject.image_uris) {
+            let rep = "https://img.scryfall.com/cards";
+            Object.keys(scryfallObject.image_uris).forEach(key => {
+              scryfallObject.image_uris[key] = scryfallObject.image_uris[
+                key
+              ].replace(rep, "");
+            });
+          }
           cardObj.images = scryfallObject.image_uris;
         }
 
         cardsFinal[cardObj.id] = cardObj;
       });
 
+      // Add reprints and split cards references
       Object.keys(cardsFinal).forEach(key => {
         let card = cardsFinal[key];
 
@@ -241,6 +259,7 @@ exports.generateMetadata = function(
         }
       });
 
+      // Make the final JSON structure
       let date = new Date();
       let jsonOutput = {
         cards: cardsFinal,
@@ -255,6 +274,7 @@ exports.generateMetadata = function(
         archetypes: metagameData
       };
 
+      // Write to a file
       let str = JSON.stringify(jsonOutput);
       let jsonOut = path.join(
         APPDATA,
