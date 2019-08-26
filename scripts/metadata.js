@@ -196,31 +196,34 @@ function generateScryfallDatabase() {
             var obj = JSON.parse(line);
             if (ALLOWED_SCRYFALL.includes(obj.set)) {
               obj.lang = obj.lang.toUpperCase();
+              let name = obj.printed_name || obj.name;
               scryfallDataAdd(
                 obj,
                 obj.lang,
                 obj.set,
-                obj.name,
+                name,
                 obj.collector_number
               );
               if (obj.layout == "transform") {
                 obj.card_faces.forEach(face => {
+                  let name = face.printed_name || face.name;
                   scryfallDataAdd(
                     face,
                     obj.lang,
                     obj.set,
-                    face.name,
+                    name,
                     obj.collector_number
                   );
                 });
               }
               if (obj.layout == "split") {
                 obj.card_faces.forEach(face => {
+                  let name = face.printed_name || face.name;
                   scryfallDataAdd(
                     obj,
                     obj.lang,
                     obj.set,
-                    face.name,
+                    name,
                     obj.collector_number
                   );
                 });

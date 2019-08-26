@@ -25,6 +25,11 @@ exports.generateMetadata = function(
     let locRead = readExternalJson("loc.json");
     let enumsRead = readExternalJson("enums.json");
 
+    // Write scryfall cards to a file. Its good for debugging.
+    let str = JSON.stringify(ScryfallCards);
+    let jsonOut = path.join(APPDATA, "external", `scryfall-cards.json`);
+    fs.writeFile(jsonOut, str, () => {});
+
     // Read locales for all languages and clean up mana costs in the texts
     const regex = new RegExp("/o(?=[^{]*})/");
     let loc = {};
@@ -78,7 +83,8 @@ exports.generateMetadata = function(
         card.subtypes.forEach(type => {
           typeLine += enums["SubType"][type] + " ";
         });
-        typeLine = typeLine.slice(0, -1);
+        // Doing this throws an error in tool :(
+        //typeLine = typeLine.slice(0, -1);
 
         // Clean up mana cost
         let manaCost = [];
