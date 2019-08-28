@@ -64,6 +64,14 @@ function getCardStyleName(style) {
   return "Arena";
 }
 
+function blurIfEnterKey(element) {
+  return e => {
+    if (e.keyCode === 13) {
+      element.blur();
+    }
+  };
+}
+
 let currentOverlay = 0;
 
 //
@@ -217,42 +225,60 @@ function appendBehaviour(section) {
     "Beta updates channel",
     "settings_betachannel",
     pd.settings.beta_channel,
-    updateAppSettings
+    () =>
+      ipcSend("save_app_settings", {
+        beta_channel: byId("settings_betachannel").checked
+      })
   );
   addCheckbox(
     section,
     "Login/offline mode automatically",
     "settings_autologin",
     pd.settings.auto_login,
-    updateAppSettings
+    () =>
+      ipcSend("save_app_settings", {
+        auto_login: byId("settings_autologin").checked
+      })
   );
   addCheckbox(
     section,
     "Launch to tray",
     "settings_launchtotray",
     pd.settings.launch_to_tray,
-    updateAppSettings
+    () =>
+      ipcSend("save_app_settings", {
+        launch_to_tray: byId("settings_launchtotray").checked
+      })
   );
   addCheckbox(
     section,
     "Launch on startup",
     "settings_startup",
     pd.settings.startup,
-    updateUserSettings
+    () =>
+      ipcSend("save_user_settings", {
+        startup: byId("settings_startup").checked
+      })
   );
   addCheckbox(
     section,
     "Close main window on match found",
     "settings_closeonmatch",
     pd.settings.close_on_match,
-    updateUserSettings
+    () =>
+      ipcSend("save_user_settings", {
+        close_on_match: byId("settings_closeonmatch").checked
+      })
   );
   addCheckbox(
     section,
     "Close to tray",
     "settings_closetotray",
     pd.settings.close_to_tray,
-    updateUserSettings
+    () =>
+      ipcSend("save_user_settings", {
+        close_to_tray: byId("settings_closetotray").checked
+      })
   );
 
   const label = createLabel(["but_container_label"], "Export Format:");
@@ -264,13 +290,11 @@ function appendBehaviour(section) {
     placeholder: "$Name,$Count,$SetName,$SetCode,$Rarity,$Type",
     value: pd.settings.export_format
   });
-  exportInput.addEventListener("keyup", e => {
-    if (e.keyCode === 13) {
-      updateUserSettings();
-    }
-  });
+  exportInput.addEventListener("keyup", blurIfEnterKey(exportInput));
   exportInput.addEventListener("focusout", () => {
-    updateUserSettings();
+    ipcSend("save_user_settings", {
+      export_format: byId("settings_export_format").value
+    });
   });
   icd.appendChild(exportInput);
   label.appendChild(icd);
@@ -293,7 +317,10 @@ function appendArenaData(section) {
     "Read entire Arena log during launch",
     "settings_readlogonlogin",
     !pd.settings.skip_firstpass,
-    updateUserSettings
+    () =>
+      ipcSend("save_user_settings", {
+        skip_firstpass: !byId("settings_readlogonlogin").checked
+      })
   );
   const helpDiv = createDiv(
     ["settings_note"],
@@ -321,12 +348,12 @@ function appendArenaData(section) {
     placeholder: "default (auto)",
     value: pd.settings.log_locale_format
   });
-  logFormatInput.addEventListener("keyup", e => {
-    if (e.keyCode === 13) logFormatInput.blur();
-  });
+  logFormatInput.addEventListener("keyup", blurIfEnterKey(logFormatInput));
   logFormatInput.addEventListener("focusout", () => {
     if (logFormatInput.value !== pd.settings.log_locale_format) {
-      updateAppSettings();
+      ipcSend("save_app_settings", {
+        log_locale_format: byId("settings_log_locale_format").value
+      });
     }
   });
   logFormatCont.appendChild(logFormatInput);
@@ -388,7 +415,7 @@ function appendOverlay(section) {
     sliderScaleLabel.innerHTML = "UI Scale: " + parseInt(this.value) + "%";
   });
   sliderScaleInput.addEventListener("change", function() {
-    updateUserSettingsBlend({ overlay_scale: parseInt(this.value) });
+    ipcSend("save_user_settings", { overlay_scale: parseInt(this.value) });
   });
   sliderScale.appendChild(sliderScaleInput);
   section.appendChild(sliderScale);
@@ -398,7 +425,10 @@ function appendOverlay(section) {
     "Sound when priority changes",
     "settings_soundpriority",
     pd.settings.sound_priority,
-    updateUserSettings
+    () =>
+      ipcSend("save_user_settings", {
+        sound_priority: byId("settings_soundpriority").checked
+      })
   );
 
   const sliderSoundVolume = createDiv(["slidecontainer_settings"]);
@@ -430,7 +460,7 @@ function appendOverlay(section) {
     let sound = new Howl({ src: ["../sounds/blip.mp3"] });
     Howler.volume(this.value);
     sound.play();
-    updateUserSettingsBlend({
+    ipcSend("save_user_settings", {
       sound_priority_volume: this.value
     });
   });
@@ -457,24 +487,17 @@ function appendOverlay(section) {
   const label = createLabel(["but_container_label"], "Overlay Display:");
   const displaySelect = createSelect(
     label,
-    remote.screen.getAllDisplays().map((v, i) => {
-      return v.id;
-    }),
+    remote.screen.getAllDisplays().map(display => display.id),
     overlayDisplay,
-    filter => {
-      pd.settings.overlay_display = filter;
-      ipcSend("save_user_settings", {
-        ...pd.settings
-      });
-    },
-    `overlay_display`,
+    filter => ipcSend("save_user_settings", { overlay_display: filter }),
+    "overlay_display",
     filter => {
       let displayNumber = remote.screen
         .getAllDisplays()
         .findIndex(d => d.id == filter);
       let primary = filter == remote.screen.getPrimaryDisplay().id;
 
-      return primary ? `${displayNumber} (primary)` : displayNumber;
+      return `Display ${displayNumber} ${primary ? "(primary)" : ""}`;
     }
   );
   displaySelect.style.width = "180px";
@@ -557,17 +580,22 @@ function appendOverlay(section) {
       "Enable overlay " + (index + 1),
       `overlay_${index}_show`,
       settings.show,
-      updateUserSettings
+      () =>
+        ipcSend("save_overlay_settings", {
+          index,
+          show: byId(`overlay_${index}_show`).checked
+        })
     );
 
     const modeSelect = createSelect(
       label,
       modeOptions,
       modeOptions[settings.mode],
-      filter => {
-        pd.settings.overlays[index].mode = modeOptions.indexOf(filter);
-        updateUserSettingsBlend();
-      },
+      filter =>
+        ipcSend("save_overlay_settings", {
+          index,
+          mode: modeOptions.indexOf(filter)
+        }),
       `overlay_${index}_mode`
     );
     modeSelect.style.width = "180px";
@@ -603,14 +631,22 @@ function appendOverlay(section) {
       "Always on top when shown",
       `overlay_${index}_ontop`,
       settings.ontop,
-      updateUserSettings
+      () =>
+        ipcSend("save_overlay_settings", {
+          index,
+          ontop: byId(`overlay_${index}_ontop`).checked
+        })
     );
     addCheckbox(
       overlaySection,
       "Always show overlay&nbsp;<i>(useful for OBS setup)</i>",
       `overlay_${index}_show_always`,
       settings.show_always,
-      updateUserSettings
+      () =>
+        ipcSend("save_overlay_settings", {
+          index,
+          show_always: byId(`overlay_${index}_show_always`).checked
+        })
     );
     const helpDiv = createDiv(
       ["settings_note"],
@@ -625,14 +661,22 @@ function appendOverlay(section) {
       "Show top bar",
       `overlay_${index}_top`,
       settings.top,
-      updateUserSettings
+      () =>
+        ipcSend("save_overlay_settings", {
+          index,
+          top: byId(`overlay_${index}_top`).checked
+        })
     );
     addCheckbox(
       overlaySection,
       "Show title",
       `overlay_${index}_title`,
       settings.title,
-      updateUserSettings,
+      () =>
+        ipcSend("save_overlay_settings", {
+          index,
+          title: byId(`overlay_${index}_title`).checked
+        }),
       settings.mode === OVERLAY_DRAFT
     );
     addCheckbox(
@@ -640,7 +684,11 @@ function appendOverlay(section) {
       "Show deck/lists",
       `overlay_${index}_deck`,
       settings.deck,
-      updateUserSettings,
+      () =>
+        ipcSend("save_overlay_settings", {
+          index,
+          deck: byId(`overlay_${index}_deck`).checked
+        }),
       settings.mode === OVERLAY_DRAFT
     );
     addCheckbox(
@@ -648,7 +696,11 @@ function appendOverlay(section) {
       "Show sideboard",
       `overlay_${index}_sideboard`,
       settings.sideboard,
-      updateUserSettings,
+      () =>
+        ipcSend("save_overlay_settings", {
+          index,
+          sideboard: byId(`overlay_${index}_sideboard`).checked
+        }),
       ![OVERLAY_FULL, OVERLAY_LEFT, OVERLAY_ODDS, OVERLAY_MIXED].includes(
         settings.mode
       )
@@ -658,7 +710,11 @@ function appendOverlay(section) {
       "Compact lands",
       `overlay_${index}_lands`,
       settings.lands,
-      updateUserSettings,
+      () =>
+        ipcSend("save_overlay_settings", {
+          index,
+          lands: byId(`overlay_${index}_lands`).checked
+        }),
       ![OVERLAY_FULL, OVERLAY_LEFT, OVERLAY_ODDS, OVERLAY_MIXED].includes(
         settings.mode
       )
@@ -668,7 +724,11 @@ function appendOverlay(section) {
       "Show clock",
       `overlay_${index}_clock`,
       settings.clock,
-      updateUserSettings,
+      () =>
+        ipcSend("save_overlay_settings", {
+          index,
+          clock: byId(`overlay_${index}_clock`).checked
+        }),
       OVERLAY_DRAFT_MODES.includes(settings.mode)
     );
     addCheckbox(
@@ -676,7 +736,11 @@ function appendOverlay(section) {
       "Show odds",
       `overlay_${index}_draw_odds`,
       settings.draw_odds,
-      updateUserSettings,
+      () =>
+        ipcSend("save_overlay_settings", {
+          index,
+          draw_odds: byId(`overlay_${index}_draw_odds`).checked
+        }),
       [
         OVERLAY_FULL,
         OVERLAY_LEFT,
@@ -691,14 +755,22 @@ function appendOverlay(section) {
       "Show hover cards",
       `overlay_${index}_cards_overlay`,
       settings.cards_overlay,
-      updateUserSettings
+      () =>
+        ipcSend("save_overlay_settings", {
+          index,
+          cards_overlay: byId(`overlay_${index}_cards_overlay`).checked
+        })
     );
     addCheckbox(
       overlaySection,
       "Show type counts",
       `overlay_${index}_type_counts`,
       settings.type_counts,
-      updateUserSettings,
+      () =>
+        ipcSend("save_overlay_settings", {
+          index,
+          type_counts: byId(`overlay_${index}_type_counts`).checked
+        }),
       [OVERLAY_LOG, OVERLAY_DRAFT].includes(settings.mode)
     );
     addCheckbox(
@@ -706,7 +778,11 @@ function appendOverlay(section) {
       "Show mana curve",
       `overlay_${index}_mana_curve`,
       settings.mana_curve,
-      updateUserSettings,
+      () =>
+        ipcSend("save_overlay_settings", {
+          index,
+          mana_curve: byId(`overlay_${index}_mana_curve`).checked
+        }),
       [OVERLAY_LOG, OVERLAY_DRAFT].includes(settings.mode)
     );
 
@@ -727,15 +803,14 @@ function appendOverlay(section) {
       value: transparencyFromAlpha(settings.alpha)
     });
     sliderOpacityInput.addEventListener("input", function() {
-      const overlayAlpha = alphaFromTransparency(parseInt(this.value));
       sliderOpacityLabel.innerHTML =
-        "Elements transparency: " + transparencyFromAlpha(overlayAlpha) + "%";
+        "Elements transparency: " + parseInt(this.value) + "%";
     });
     sliderOpacityInput.addEventListener("change", function() {
-      pd.settings.overlays[index].alpha = alphaFromTransparency(
-        parseInt(this.value)
-      );
-      updateUserSettingsBlend();
+      ipcSend("save_overlay_settings", {
+        index,
+        alpha: alphaFromTransparency(parseInt(this.value))
+      });
     });
     sliderOpacity.appendChild(sliderOpacityInput);
     overlaySection.appendChild(sliderOpacity);
@@ -759,17 +834,14 @@ function appendOverlay(section) {
       value: transparencyFromAlpha(settings.alpha_back)
     });
     sliderOpacityBackInput.addEventListener("input", function() {
-      const overlayAlphaBack = alphaFromTransparency(parseInt(this.value));
       sliderOpacityBackLabel.innerHTML =
-        "Background transparency: " +
-        transparencyFromAlpha(overlayAlphaBack) +
-        "%";
+        "Background transparency: " + parseInt(this.value) + "%";
     });
     sliderOpacityBackInput.addEventListener("change", function() {
-      pd.settings.overlays[index].alpha_back = alphaFromTransparency(
-        parseInt(this.value)
-      );
-      updateUserSettingsBlend();
+      ipcSend("save_overlay_settings", {
+        index,
+        alpha_back: alphaFromTransparency(parseInt(this.value))
+      });
     });
     sliderOpacityBack.appendChild(sliderOpacityBackInput);
     overlaySection.appendChild(sliderOpacityBack);
@@ -779,10 +851,12 @@ function appendOverlay(section) {
       "Reset Position"
     );
     resetButton.addEventListener("click", function() {
-      pd.settings.overlays[index].bounds = {
-        ...pd.defaultCfg.settings.overlays[0].bounds
-      };
-      updateUserSettingsBlend();
+      ipcSend("save_overlay_settings", {
+        index,
+        bounds: {
+          ...pd.defaultCfg.settings.overlays[0].bounds
+        }
+      });
     });
     overlaySection.appendChild(resetButton);
 
@@ -803,12 +877,12 @@ function appendVisual(section) {
     placeholder: "https://example.com/photo.png",
     value: pd.settings.back_url !== "default" ? pd.settings.back_url : ""
   });
-  urlInput.addEventListener("keyup", e => {
-    if (e.keyCode === 13) {
-      updateUserSettings();
-    }
+  urlInput.addEventListener("keyup", blurIfEnterKey(urlInput));
+  urlInput.addEventListener("focusout", () => {
+    ipcSend("save_user_settings", {
+      back_url: byId("query_image").value || "default"
+    });
   });
-  urlInput.addEventListener("focusout", () => updateUserSettings());
   icd.appendChild(urlInput);
   label.appendChild(icd);
   section.appendChild(label);
@@ -828,7 +902,7 @@ function appendVisual(section) {
     showColorpicker(
       pd.settings.back_color,
       color => (colorPick.style.backgroundColor = color.rgbaString),
-      color => updateUserSettingsBlend({ back_color: color.rgbaString }),
+      color => ipcSend("save_user_settings", { back_color: color.rgbaString }),
       () => (colorPick.style.backgroundColor = pd.settings.back_color),
       { alpha: true }
     );
@@ -841,7 +915,7 @@ function appendVisual(section) {
     label,
     [CARD_TILE_ARENA, CARD_TILE_FLAT],
     pd.settings.card_tile_style,
-    filter => updateUserSettingsBlend({ card_tile_style: filter }),
+    filter => ipcSend("save_user_settings", { card_tile_style: filter }),
     "settings_cards_style",
     getCardStyleName
   );
@@ -857,7 +931,7 @@ function appendVisual(section) {
     label,
     ["small", "normal", "large"],
     pd.settings.cards_quality,
-    filter => updateUserSettingsBlend({ cards_quality: filter }),
+    filter => ipcSend("save_user_settings", { cards_quality: filter }),
     "settings_cards_quality"
   );
   tagSelect.style.width = "180px";
@@ -892,7 +966,7 @@ function appendVisual(section) {
       "Hover card size: " + cardSizeHoverCard + "px";
   });
   sliderInputHoverCard.addEventListener("change", function() {
-    updateUserSettingsBlend({
+    ipcSend("save_user_settings", {
       cards_size_hover_card: Math.round(parseInt(this.value))
     });
   });
@@ -927,7 +1001,9 @@ function appendVisual(section) {
     $$(".inventory_card_settings_img")[0].style.width = cardSize + "px";
   });
   sliderInput.addEventListener("change", function() {
-    updateUserSettingsBlend({ cards_size: Math.round(parseInt(this.value)) });
+    ipcSend("save_user_settings", {
+      cards_size: Math.round(parseInt(this.value))
+    });
   });
   slider.appendChild(sliderInput);
   section.appendChild(slider);
@@ -951,9 +1027,12 @@ function appendShortcuts(section) {
   addCheckbox(
     section,
     "Enable keyboard shortcuts",
-    "settings_enablekeyboardshortcuts",
+    "settings_keyboardshortcuts",
     pd.settings.enable_keyboard_shortcuts,
-    updateUserSettings
+    () =>
+      ipcSend("save_user_settings", {
+        enable_keyboard_shortcuts: byId("settings_keyboardshortcuts").checked
+      })
   );
 
   const helpDiv = createDiv(
@@ -1062,14 +1141,20 @@ function appendPrivacy(section) {
     "Anonymous sharing&nbsp;<i>(makes your username anonymous on Explore)</i>",
     "settings_anon_explore",
     pd.settings.anon_explore,
-    updateUserSettings
+    () =>
+      ipcSend("save_user_settings", {
+        anon_explore: byId("settings_anon_explore").checked
+      })
   );
   addCheckbox(
     section,
     "Online sharing&nbsp;<i>(when disabled, uses offline mode and only contacts our servers to fetch Arena metadata)</i>",
     "settings_senddata",
     pd.settings.send_data,
-    updateUserSettings
+    () =>
+      ipcSend("save_user_settings", {
+        send_data: byId("settings_senddata").checked
+      })
   );
 
   const label = createLabel(["check_container_but"]);
@@ -1198,21 +1283,6 @@ function appendLogin(section) {
 }
 
 //
-function updateAppSettings() {
-  const auto_login = byId("settings_autologin").checked;
-  const launch_to_tray = byId("settings_launchtotray").checked;
-  const beta_channel = byId("settings_betachannel").checked;
-  const log_locale_format = byId("settings_log_locale_format").value;
-  const rSettings = {
-    auto_login,
-    launch_to_tray,
-    log_locale_format,
-    beta_channel
-  };
-  ipcSend("save_app_settings", rSettings);
-}
-
-//
 function alphaFromTransparency(transparency) {
   return 1 - transparency / 100;
 }
@@ -1220,48 +1290,6 @@ function alphaFromTransparency(transparency) {
 //
 function transparencyFromAlpha(alpha) {
   return Math.round((1 - alpha) * 100);
-}
-
-// only purpose is to strip paramaters for use with addCheckbox
-function updateUserSettings() {
-  updateUserSettingsBlend();
-}
-
-//
-function updateUserSettingsBlend(_settings = {}) {
-  const overlays = pd.settings.overlays.map((settings, index) => {
-    return {
-      ...settings,
-      show: byId(`overlay_${index}_show`).checked,
-      show_always: byId(`overlay_${index}_show_always`).checked,
-      top: byId(`overlay_${index}_top`).checked,
-      title: byId(`overlay_${index}_title`).checked,
-      deck: byId(`overlay_${index}_deck`).checked,
-      clock: byId(`overlay_${index}_clock`).checked,
-      cards_overlay: byId(`overlay_${index}_cards_overlay`).checked,
-      draw_odds: byId(`overlay_${index}_draw_odds`).checked,
-      sideboard: byId(`overlay_${index}_sideboard`).checked,
-      ontop: byId(`overlay_${index}_ontop`).checked,
-      lands: byId(`overlay_${index}_lands`).checked,
-      type_counts: byId(`overlay_${index}_type_counts`).checked,
-      mana_curve: byId(`overlay_${index}_mana_curve`).checked
-    };
-  });
-
-  ipcSend("save_user_settings", {
-    anon_explore: byId("settings_anon_explore").checked,
-    back_url: byId("query_image").value || "default",
-    close_on_match: byId("settings_closeonmatch").checked,
-    close_to_tray: byId("settings_closetotray").checked,
-    export_format: byId("settings_export_format").value,
-    enable_keyboard_shortcuts: byId("settings_enablekeyboardshortcuts").checked,
-    send_data: byId("settings_senddata").checked,
-    skip_firstpass: !byId("settings_readlogonlogin").checked,
-    sound_priority: byId("settings_soundpriority").checked,
-    startup: byId("settings_startup").checked,
-    overlays,
-    ..._settings
-  });
 }
 
 //
