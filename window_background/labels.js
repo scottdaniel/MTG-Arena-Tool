@@ -117,11 +117,11 @@ function onLabelOutLogInfo(entry, json) {
       gameNumberCompleted = payload.gameNumber;
       currentMatch.matchTime += time;
 
+      let game = {};
       game.winner = payload.winningTeamId;
-      // Just a shortcut for future aggregations 
+      // Just a shortcut for future aggregations
       game.win = payload.winningTeamId == currentMatch.player.seat;
 
-      let game = {};
       game.shuffledOrder = [];
       for (let i = 0; i < initialLibraryInstanceIds.length; i++) {
         let instance = initialLibraryInstanceIds[i];
