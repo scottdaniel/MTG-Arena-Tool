@@ -161,16 +161,15 @@ function courseDataIsCorrupt(course) {
     return true;
   }
   // Try getting the match indices, if any are false return true.
-  if(wlGate.ProcessedMatchIds.map(getMatchesHistoryIndex).some(x => !x)) {
+  if (wlGate.ProcessedMatchIds.map(getMatchesHistoryIndex).some(x => !x)) {
     return true;
   }
-  
+
   return false;
 }
 
 // Given a courses object returns all of the matches' stats
 function getCourseStats(course) {
-
   const stats = { wins: 0, losses: 0, gameWins: 0, gameLosses: 0, duration: 0 };
   const wlGate = getWlGate(course);
 
