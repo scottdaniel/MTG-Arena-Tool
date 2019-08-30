@@ -289,6 +289,28 @@ ipc.on("overlayBounds", (event, index, bounds) => {
 });
 
 //
+ipc.on("save_overlay_settings", function(event, settings) {
+  // console.log("save_overlay_settings");
+  if (settings.index === undefined) return;
+  ipc_send("show_loading");
+
+  const { index } = settings;
+  const overlays = playerData.settings.overlays.map((overlay, _index) => {
+    if (_index === index) {
+      const updatedOverlay = { ...overlay, ...settings };
+      delete updatedOverlay.index;
+      return updatedOverlay;
+    }
+    return overlay;
+  });
+
+  const updated = { ...playerData.settings, overlays };
+  store.set("settings", updated);
+  syncSettings(updated);
+  ipc_send("hide_loading");
+});
+
+//
 ipc.on("save_user_settings", function(event, settings) {
   // console.log("save_user_settings");
   ipc_send("show_loading");
