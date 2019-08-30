@@ -64,7 +64,8 @@
     "test:jest": "jest",
     "dist": "build --x64",
     "version": "node -p \"require('./package.json').version\"",
-    "load-logs": "electron \"./scripts/load-logs.js\""
+    "load-logs": "electron \"./scripts/load-logs.js\"",
+    "metadata": "electron \"./scripts/metadata.js\""
   },
   "dependencies": {
     "animejs": "^3.0.1",
@@ -92,7 +93,8 @@
     "queue": "^4.5.1",
     "striptags": "^3.1.1",
     "time-elements": "^2.0.0",
-    "vanilla-picker": "^2.8.1"
+    "vanilla-picker": "^2.8.1",
+    "xmlhttprequest": "^1.8.0"
   },
   "devDependencies": {
     "acorn": "^6.1.1",
