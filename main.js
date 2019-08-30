@@ -41,6 +41,8 @@ const ipc = electron.ipcMain;
 
 var mainLoaded = false;
 var backLoaded = false;
+const ARENA_MODE_IDLE = 0; // copied from constants.js
+let arenaState = ARENA_MODE_IDLE;
 
 const singleLock = app.requestSingleInstanceLock();
 
@@ -185,7 +187,13 @@ function startApp() {
         break;
 
       case "player_data_refresh":
-        mainWindow.webContents.send("player_data_refresh");
+        // HACK WARNING!
+        // during Arena matches and drafts we deliberately let the main window state
+        // "go stale" instead of auto-refreshing. This allows players to use deck
+        // details or collections pages without being constantly "reset" to main tab
+        if (arenaState === ARENA_MODE_IDLE) {
+          mainWindow.webContents.send("player_data_refresh");
+        }
         if (overlay) overlay.webContents.send("player_data_refresh");
         break;
 
@@ -209,6 +217,7 @@ function startApp() {
 
       case "set_arena_state":
         mainWindow.webContents.send("player_data_refresh");
+        arenaState = arg;
         if (overlay) overlay.webContents.send("set_arena_state", arg);
         break;
 
