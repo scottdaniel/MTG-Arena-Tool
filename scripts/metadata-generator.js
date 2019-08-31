@@ -271,6 +271,7 @@ exports.generateMetadata = function(
         cards: cardsFinal,
         ok: true,
         version: version,
+        language: lang,
         updated: date.getTime(),
         events: EVENT_TO_NAME,
         events_format: EVENT_TO_FORMAT,
