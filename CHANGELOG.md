@@ -1,3 +1,33 @@
+## <small>2.9.2 (2019-08-31)</small>
+
+* Added data corruption function and code to use it ([66da544](https://github.com/Manuel-777/MTG-Arena-Tool/commit/66da544))
+* background save_overlay_settings handler ([674f8f8](https://github.com/Manuel-777/MTG-Arena-Tool/commit/674f8f8))
+* bugfix player_data_refresh logic ([9ae47d3](https://github.com/Manuel-777/MTG-Arena-Tool/commit/9ae47d3))
+* bugfix player_data_refresh only updates main window while idle ([95a335d](https://github.com/Manuel-777/MTG-Arena-Tool/commit/95a335d))
+* comments ([78c6049](https://github.com/Manuel-777/MTG-Arena-Tool/commit/78c6049))
+* constants and flow ([6246ccd](https://github.com/Manuel-777/MTG-Arena-Tool/commit/6246ccd))
+* correct lang write to scryfall data ([649e54a](https://github.com/Manuel-777/MTG-Arena-Tool/commit/649e54a))
+* Fallback to english when no locale is found ([c55511c](https://github.com/Manuel-777/MTG-Arena-Tool/commit/c55511c))
+* fix ranks parsing ([f11fe78](https://github.com/Manuel-777/MTG-Arena-Tool/commit/f11fe78))
+* generate files ([3ff9664](https://github.com/Manuel-777/MTG-Arena-Tool/commit/3ff9664))
+* init ([70b00e4](https://github.com/Manuel-777/MTG-Arena-Tool/commit/70b00e4))
+* metadata constants ([684d17f](https://github.com/Manuel-777/MTG-Arena-Tool/commit/684d17f))
+* move const up ([f0d221a](https://github.com/Manuel-777/MTG-Arena-Tool/commit/f0d221a))
+* order of assignment (derp) ([bbf26f6](https://github.com/Manuel-777/MTG-Arena-Tool/commit/bbf26f6))
+* prettier ([59c6b31](https://github.com/Manuel-777/MTG-Arena-Tool/commit/59c6b31))
+* read scryfall data ([05e81b5](https://github.com/Manuel-777/MTG-Arena-Tool/commit/05e81b5))
+* reprints ([23c92d1](https://github.com/Manuel-777/MTG-Arena-Tool/commit/23c92d1))
+* save games wins ([e193ace](https://github.com/Manuel-777/MTG-Arena-Tool/commit/e193ace))
+* scryfall images ([728d9a9](https://github.com/Manuel-777/MTG-Arena-Tool/commit/728d9a9))
+* set overlay bounds correctly ([c208902](https://github.com/Manuel-777/MTG-Arena-Tool/commit/c208902))
+* settings page uses explicit independent updates ([a1e2df2](https://github.com/Manuel-777/MTG-Arena-Tool/commit/a1e2df2))
+* show downloads progress ([8ea9453](https://github.com/Manuel-777/MTG-Arena-Tool/commit/8ea9453))
+* show edit mode shortcut ([d33e7f2](https://github.com/Manuel-777/MTG-Arena-Tool/commit/d33e7f2))
+* skip manifest files if present ([24f92f7](https://github.com/Manuel-777/MTG-Arena-Tool/commit/24f92f7))
+* use lowercase langs ([3c04582](https://github.com/Manuel-777/MTG-Arena-Tool/commit/3c04582))
+
+
+
 ## <small>2.9.1 (2019-08-24)</small>
 
 * add default settings for cards_overlay and draw_odds ([4ed8142](https://github.com/Manuel-777/MTG-Arena-Tool/commit/4ed8142))
