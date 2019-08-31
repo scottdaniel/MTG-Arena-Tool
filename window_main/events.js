@@ -153,12 +153,39 @@ function getWlGate(course) {
   return wlGate;
 }
 
-// Given a courses object returns all of the matches
-function getCourseStats(course) {
+function courseDataIsCorrupt(course) {
+  // Returns true if we are missing some match data
+  // This happens when we get the end of an event but miss match data.
   const wlGate = getWlGate(course);
-  let matchesList = wlGate ? wlGate.ProcessedMatchIds : undefined;
-  const stats = { wins: 0, losses: 0, duration: 0 };
-  if (!matchesList) return stats;
+  if (!wlGate || !wlGate.ProcessedMatchIds) {
+    return true;
+  }
+  // Try getting the match indices, if any are false return true.
+  if (wlGate.ProcessedMatchIds.map(getMatchesHistoryIndex).some(x => !x)) {
+    return true;
+  }
+
+  return false;
+}
+
+// Given a courses object returns all of the matches' stats
+function getCourseStats(course) {
+  const stats = { wins: 0, losses: 0, gameWins: 0, gameLosses: 0, duration: 0 };
+  const wlGate = getWlGate(course);
+
+  if (!wlGate) return stats;
+
+  let matchesList = wlGate.ProcessedMatchIds;
+
+  if (courseDataIsCorrupt(course)) {
+    // If there's no matches list we can't count duration.
+    // If the data is corrupt fallback on wlgate data.
+    stats.wins = wlGate.CurrentWins || 0;
+    stats.losses = wlGate.CurrentLosses || 0;
+    stats.gameWins = undefined; // we cannot say 0
+    stats.gameLosses = undefined;
+    return stats;
+  }
 
   matchesList
     .map(getMatchesHistoryIndex)
@@ -179,7 +206,10 @@ function getCourseStats(course) {
       } else if (match.player.win < match.opponent.win) {
         stats.losses++;
       }
+      stats.gameWins += match.player.win;
+      stats.gameLosses += match.opponent.win;
     });
+
   return stats;
 }
 
@@ -215,11 +245,6 @@ function attachEventData(listItem, course) {
   );
 
   let { wins, losses } = stats;
-  const wlGate = getWlGate(course);
-  if (filters.showArchived && wlGate) {
-    wins = wlGate.CurrentWins;
-    losses = wlGate.CurrentLosses;
-  }
   wins = wins || 0;
   losses = losses || 0;
   const wl = `${wins}:${losses}`;
