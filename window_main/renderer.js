@@ -289,28 +289,23 @@ ipc.on("settings_updated", function() {
   lastSettings = { ...pd.settings };
 });
 
-let playerDataRefreshTimeout = null;
+let lastDataRefresh = null;
 
 //
 ipc.on("player_data_refresh", () => {
+  // ignore signal before user login
   if (sidebarActive === MAIN_LOGIN) return;
 
-  clearTimeout(playerDataRefreshTimeout);
-  playerDataRefreshTimeout = setTimeout(playerDataRefresh, 1000);
-});
+  // limit refresh to one per second
+  const ts = Date.now();
+  const lastRefreshTooRecent = lastDataRefresh && ts - lastDataRefresh < 1000;
+  if (lastRefreshTooRecent) return;
 
-function playerDataRefresh() {
   const ls = getLocalState();
   updateTopBar();
-  changeBackground("default");
-  anime({
-    targets: ".moving_ux",
-    left: 0,
-    easing: EASING_DEFAULT,
-    duration: 350
-  });
   openTab(sidebarActive, {}, ls.lastDataIndex, ls.lastScrollTop);
-}
+  lastDataRefresh = ts;
+});
 
 //
 ipc.on("set_update_state", function(event, arg) {
