@@ -367,43 +367,44 @@ exports.RANKS_SHEETS = [
   {
     setCode: "war",
     sheet: "1pk3a1YKGas-NI4ze_8hbwOtVRdYAbzCDIBS9MKjcQ7M",
-    page: "Table%20Source"
+    page: "Staging%20Sheet"
   },
   {
     setCode: "rna",
     sheet: "1DfcITmtWaBHtiDYLYWHzizw-AOrB3GUQaapc_BqfeH4",
-    page: "Table%20Source"
+    page: "Staging%20Sheet"
   },
   {
     setCode: "grn",
     sheet: "1FPN3hgl6x_ePq-8On7Ebr8L6WHSU2IznoWSBoGaC_RQ",
-    page: "Table%20Source"
+    page: "Staging%20Sheet"
   },
   {
     setCode: "m19",
     sheet: "1aZlqE-8mGdfQ50NXUaP-9dRk3w_hp9XmcBqZ_4x3_jk",
-    page: "TableSource"
+    page: "Staging%20Sheet"
   },
   {
     setCode: "dom",
     sheet: "1cc-AOmpQZ7vKqxDTSSvhmRBVOCy_569kT0S-j-Rpbj8",
-    page: "Table%20Source"
+    page: "Staging%20Sheet"
   },
   {
     setCode: "rix",
     sheet: "1CNg-FDp-pOtQ14Qj-rIBO-yfyr5YcPA6n6ztrEe4ATg",
-    page: "TableSource"
+    page: "Staging%20Sheet"
   },
   {
     setCode: "xln",
     sheet: "1KDtLJd6Nkrv_DDpFs84soBZcWPG1tg79TnVEh-enPz8",
-    page: "TableSource"
+    page: "Staging%20Sheet"
   },
   {
     setCode: "m20",
     sheet: "1BAPtQv4U9KUAtVzkccJlPS8cb0s_uOcGEDORip5uaQg",
-    page: "Table%20Source"
+    page: "Staging%20Sheet"
   }
 ];
 
 exports.APPDATA = (electron.app || electron.remote.app).getPath("userData");
+

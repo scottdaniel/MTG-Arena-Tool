@@ -78,9 +78,9 @@ function getRanksData() {
     return new Promise(resolve => {
       console.log(`Get ${rank.setCode.toUpperCase()} ranks data.`);
       httpGetFile(
-        `https://docs.google.com/spreadsheets/d/${
-          rank.sheet
-        }/gviz/tq?headers=2&range=B1:B,F1:F,G1:G&sheet=${rank.page}`,
+        `https://docs.google.com/spreadsheets/d/${rank.sheet}/gviz/tq?sheet=${
+          rank.page
+        }`,
         rank.setCode + "_ranks"
       ).then(file => {
         fs.readFile(file, function read(err, data) {
@@ -110,9 +110,24 @@ function processRanksData(str) {
   let ret = {};
   data.table.rows.forEach(row => {
     let name = row.c[0].v;
-    let rank = row.c[1].v;
-    let cont = row.c[2].v;
-    ret[name] = { rank: rank, cont: cont };
+    let rank = row.c[4].v;
+    let cont = row.c[5].v;
+    let values = [
+      row.c[9].v,
+      row.c[10].v,
+      row.c[11].v,
+      row.c[12].v,
+      row.c[13].v,
+      row.c[14].v,
+      row.c[15].v,
+      row.c[16].v,
+      row.c[17].v,
+      row.c[18].v,
+      row.c[19].v,
+      row.c[20].v,
+      row.c[21].v
+    ];
+    ret[name] = { rank: rank, cont: cont, values: values };
   });
 
   return ret;

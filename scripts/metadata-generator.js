@@ -185,8 +185,12 @@ exports.generateMetadata = function(
         let setCode = SETS_DATA[set].code;
         if (ranksData[setCode] && ranksData[setCode][englishName]) {
           cardObj.rank = Math.round(ranksData[setCode][englishName].rank);
+          cardObj.rank_values = ranksData[setCode][englishName].values;
+          cardObj.rank_controversy = ranksData[setCode][englishName].cont;
         } else {
           cardObj.rank = 0;
+          cardObj.rank_values = 0;
+          cardObj.rank_controversy = 0;
         }
 
         // We did not find any image data on scryfall for this card!
