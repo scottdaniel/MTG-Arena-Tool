@@ -1,5 +1,18 @@
 const electron = require("electron");
 
+exports.SCRYFALL_LANGUAGE = {
+  DE: "DE",
+  EN: "EN",
+  ES: "ES",
+  FR: "FR",
+  IT: "IT",
+  RU: "RU",
+  BR: "PT",
+  JP: "JA",
+  "zh-CN": "ZHS",
+  "ko-KR": "KO"
+};
+
 exports.EVENT_TO_NAME = {
   NPE: "New Player Experience",
   DirectGame: "Direct Game",
@@ -311,9 +324,6 @@ exports.NO_DUPES_ART_SETS = [
   "pdom",
   "prix",
   "f05",
-  "roe",
-  "rtr",
-  "bfz",
   "unh",
   "c16",
   "mir"

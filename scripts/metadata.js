@@ -18,7 +18,7 @@ const {
 let metagameData = {};
 let ranksData = {};
 
-const VERSION = 12;
+const VERSION = 13;
 /*
   Languages available in loc.json;
   "BR"
@@ -32,7 +32,18 @@ const VERSION = 12;
   "ko-KR"
   "zh-CN"
 */
-const LANGUAGES = ["EN", "ES", "DE", "IT", "BR", "FR", "JP", "RU"];
+const LANGUAGES = [
+  "EN",
+  "ES",
+  "BR",
+  "DE",
+  "FR",
+  "IT",
+  "JP",
+  "RU",
+  "ko-KR",
+  "zh-CN"
+];
 // "scryfall-all-cards.json" contains cards in all languages but is 800+mb
 const SCRYFALL_FILE = "scryfall-all-cards.json";
 
@@ -158,13 +169,11 @@ function generateScryfallDatabase() {
       let scryfallDataAdd = function(obj, lang, set, name, cid = false) {
         if (scryfallData[lang] == undefined) scryfallData[lang] = {};
         if (scryfallData[lang][set] == undefined) scryfallData[lang][set] = {};
-        if (scryfallData[lang][set][name] == undefined)
-          scryfallData[lang][set][name] = {};
 
         if (NO_DUPES_ART_SETS.includes(set)) {
           scryfallData[lang][set][name] = obj;
         } else {
-          scryfallData[lang][set][name][cid] = obj;
+          scryfallData[lang][set][cid] = obj;
         }
       };
 
@@ -196,7 +205,7 @@ function generateScryfallDatabase() {
             var obj = JSON.parse(line);
             if (ALLOWED_SCRYFALL.includes(obj.set)) {
               obj.lang = obj.lang.toUpperCase();
-              let name = obj.printed_name || obj.name;
+              let name = obj.name;
               scryfallDataAdd(
                 obj,
                 obj.lang,
@@ -206,7 +215,7 @@ function generateScryfallDatabase() {
               );
               if (obj.layout == "transform") {
                 obj.card_faces.forEach(face => {
-                  let name = face.printed_name || face.name;
+                  let name = face.name;
                   scryfallDataAdd(
                     face,
                     obj.lang,
@@ -218,7 +227,7 @@ function generateScryfallDatabase() {
               }
               if (obj.layout == "split") {
                 obj.card_faces.forEach(face => {
-                  let name = face.printed_name || face.name;
+                  let name = face.name;
                   scryfallDataAdd(
                     obj,
                     obj.lang,

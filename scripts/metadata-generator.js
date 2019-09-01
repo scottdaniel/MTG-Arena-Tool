@@ -8,7 +8,8 @@ const {
   NO_DUPES_ART_SETS,
   EVENT_TO_NAME,
   EVENT_TO_FORMAT,
-  RANKED_EVENTS
+  RANKED_EVENTS,
+  SCRYFALL_LANGUAGE
 } = require("./metadata-constants");
 
 exports.generateMetadata = function(
@@ -29,14 +30,22 @@ exports.generateMetadata = function(
     let str = JSON.stringify(ScryfallCards);
     let jsonOut = path.join(APPDATA, "external", `scryfall-cards.json`);
     fs.writeFile(jsonOut, str, () => {});
+    // Same for ranks
+    str = JSON.stringify(ranksData);
+    jsonOut = path.join(APPDATA, "external", `ranks-data.json`);
+    fs.writeFile(jsonOut, str, () => {});
 
     // Read locales for all languages and clean up mana costs in the texts
     const regex = new RegExp("/o(?=[^{]*})/");
+    // Clean up kanji descriptions for JP
+    const JpRegex = new RegExp(/ *（[^）]*） */g);
     let loc = {};
     locRead.forEach(lang => {
       loc[lang.langkey] = {};
       lang.keys.forEach(item => {
-        loc[lang.langkey][item.id] = item.text.replace(regex, "");
+        loc[lang.langkey][item.id] = item.text
+          .replace(regex, "")
+          .replace(JpRegex, "");
       });
     });
     locRead = null;
@@ -113,6 +122,7 @@ exports.generateMetadata = function(
         let cardObj = {};
         let cardId = card.grpid;
         let cardName = getText(card.titleId, lang);
+        let englishName = getText(card.titleId, "EN");
         cardObj.id = cardId;
         cardObj.name = cardName;
         cardObj.set = set;
@@ -151,47 +161,19 @@ exports.generateMetadata = function(
           if (cardId == 70140) scryfallSet = "prix";
           // Promo Duress
           if (cardId == 70141) scryfallSet = "f05";
-
-          //console.log(cardName + " - " + scryfallSet + " - " + colllector);
-          scryfallObject = getScryfallCard(
-            ScryfallCards,
-            lang,
-            scryfallSet,
-            cardName,
-            colllector
-          );
-          if (scryfallObject == undefined) {
-            if (lang !== "EN") {
-              scryfallObject = getScryfallCard(
-                ScryfallCards,
-                "EN",
-                scryfallSet,
-                getText(card.titleId, "EN"),
-                colllector
-              );
-            }
-          }
         } else {
           // If the card is a token the scryfall set name begins with "t"
-          scryfallObject = getScryfallCard(
-            ScryfallCards,
-            lang,
-            "t" + scryfallSet,
-            cardName,
-            colllector
-          );
-          if (scryfallObject == undefined) {
-            if (lang !== "EN") {
-              scryfallObject = getScryfallCard(
-                ScryfallCards,
-                "EN",
-                "t" + scryfallSet,
-                getText(card.titleId, "EN"),
-                colllector
-              );
-            }
-          }
+          scryfallSet = "t" + scryfallSet;
         }
+
+        // Get scryfall object
+        scryfallObject = getScryfallCard(
+          ScryfallCards,
+          lang,
+          scryfallSet,
+          englishName,
+          colllector
+        );
 
         if (card.linkedFaces.length > 0) {
           cardObj.dfcId = card.linkedFaces[0];
@@ -200,21 +182,22 @@ exports.generateMetadata = function(
         }
 
         // Add ranks data
-        if (ranksData[set]) {
-          cardObj.rank = ranksData[set].rank;
-          cardObj.cont = ranksData[set].cont;
+        let setCode = SETS_DATA[set].code;
+        if (ranksData[setCode] && ranksData[setCode][englishName]) {
+          cardObj.rank = Math.round(ranksData[setCode][englishName].rank);
         } else {
           cardObj.rank = 0;
-          cardObj.cont = 0;
         }
 
         // We did not find any image data on scryfall for this card!
         // Something may be wrong.
         if (scryfallObject == undefined) {
           console.log(
-            `No images found for ${cardObj.name} - ${cardObj.set} (${
-              cardObj.cid
-            }) grpId: ${cardObj.id}`
+            `No images found for [${lang}] ${
+              cardObj.name
+            } (${englishName}) - ${scryfallSet} (${cardObj.cid}) grpId: ${
+              cardObj.id
+            }`
           );
         } else {
           // Remove the first part of the URLs and some
@@ -229,6 +212,9 @@ exports.generateMetadata = function(
                 key
               ].replace(rep, "");
             });
+          }
+          if (scryfallObject.printed_name) {
+            cardObj.name = scryfallObject.printed_name;
           }
           cardObj.images = scryfallObject.image_uris;
         }
@@ -312,14 +298,33 @@ function getScryfallCard(
   colllector
 ) {
   let ret = undefined;
+
+  try {
+    lang = SCRYFALL_LANGUAGE[lang];
+  } catch (e) {
+    // no need to catch
+  }
+
   try {
     if (NO_DUPES_ART_SETS.includes(scryfallSet)) {
       ret = ScryfallCards[lang][scryfallSet][cardName];
     } else {
-      ret = ScryfallCards[lang][scryfallSet][cardName][colllector];
+      ret = ScryfallCards[lang][scryfallSet][colllector];
     }
   } catch (e) {
-    return undefined;
+    ret = undefined;
+  }
+
+  if (ret == undefined && lang !== "EN") {
+    try {
+      if (NO_DUPES_ART_SETS.includes(scryfallSet)) {
+        ret = ScryfallCards["EN"][scryfallSet][cardName];
+      } else {
+        ret = ScryfallCards["EN"][scryfallSet][colllector];
+      }
+    } catch (e) {
+      ret = undefined;
+    }
   }
 
   return ret;
