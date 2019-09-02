@@ -184,11 +184,13 @@ function generateScryfallDatabase() {
       let scryfallDataAdd = function(obj, lang, set, name, cid = false) {
         if (scryfallData[lang] == undefined) scryfallData[lang] = {};
         if (scryfallData[lang][set] == undefined) scryfallData[lang][set] = {};
+        if (scryfallData[lang][set][name] == undefined)
+          scryfallData[lang][set][name] = {};
 
         if (NO_DUPES_ART_SETS.includes(set)) {
           scryfallData[lang][set][name] = obj;
         } else {
-          scryfallData[lang][set][cid] = obj;
+          scryfallData[lang][set][name][cid] = obj;
         }
       };
 

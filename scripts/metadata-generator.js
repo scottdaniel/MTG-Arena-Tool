@@ -313,7 +313,7 @@ function getScryfallCard(
     if (NO_DUPES_ART_SETS.includes(scryfallSet)) {
       ret = ScryfallCards[lang][scryfallSet][cardName];
     } else {
-      ret = ScryfallCards[lang][scryfallSet][colllector];
+      ret = ScryfallCards[lang][scryfallSet][cardName][colllector];
     }
   } catch (e) {
     ret = undefined;
@@ -324,7 +324,7 @@ function getScryfallCard(
       if (NO_DUPES_ART_SETS.includes(scryfallSet)) {
         ret = ScryfallCards["EN"][scryfallSet][cardName];
       } else {
-        ret = ScryfallCards["EN"][scryfallSet][colllector];
+        ret = ScryfallCards["EN"][scryfallSet][cardName][colllector];
       }
     } catch (e) {
       ret = undefined;
