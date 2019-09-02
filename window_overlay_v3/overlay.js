@@ -104,6 +104,12 @@ function ipcSend(method, arg, to = IPC_BACKGROUND) {
 
 ipc.on("set_arena_state", function(event, arg) {
   arenaState = arg;
+
+  // Change how cards hover are drawn if we are in a draft
+  setRenderer(1);
+  if (arenaState == ARENA_MODE_DRAFT) {
+    setRenderer(2);
+  }
   settingsUpdated();
 });
 

@@ -117,9 +117,8 @@ body {
 }
 
 .main_hover {
-    margin-left: auto !important;
-    margin-right: auto !important;
     margin-bottom: 70px !important;
+    margin-right: 0px !important;
 }
 
 .overlay_hover {
@@ -136,12 +135,49 @@ body {
 }
 
 .overlay_hover_container {
+    justify-content: center;
     pointer-events: none;
     position: absolute;
+    display: flex;
     bottom: 0;
     float: right;
     width: 100%;
     z-index: 50;
+}
+
+.main_hover_ratings {
+    display: flex;
+    width: 260px;
+    -webkit-transition: opacity 0.2s ease-in;
+}
+
+.rank_values_main_container {
+    width: 100%;
+    margin: 0 8px 0 8px;
+}
+
+.rank_value_container {
+    display: flex;
+    background-color: var(--color-back);
+    color: var(--color-light);
+    font-family: var(--main-font-name-it);
+    font-size: 14px;
+    line-height: 22px;
+    text-indent: 4px;
+    height: 22px;
+    margin-bottom: 2px;
+    border-radius: 3px;
+}
+
+.rank_value_title {
+    width: 24px;
+    height: 22px;
+    line-height: 22px;
+    font-family: var(--main-font-name-bold);
+}
+
+.rank_value_bar {
+    background-color: var(--color-light-75);
 }
 
 .overlay_clock_spacer {
@@ -349,12 +385,13 @@ body {
 
 .lands_div {
     max-width: 120px;
-    margin: 0 auto 16px auto;
+    margin: 64px 0 32px 0;
     padding: 16px;
     border-radius: 6px;
     background-color: rgba(0,0,0,0.75);
     opacity: 1;
     font-family: var(--main-font-name);
+    position: fixed;
 }
 
 .mana_cont {

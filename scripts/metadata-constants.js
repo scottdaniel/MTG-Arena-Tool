@@ -407,4 +407,3 @@ exports.RANKS_SHEETS = [
 ];
 
 exports.APPDATA = (electron.app || electron.remote.app).getPath("userData");
-

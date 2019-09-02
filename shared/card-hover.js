@@ -4,6 +4,8 @@ const { cardHasType } = require("../shared/card-types.js");
 const { createDiv, queryElements: $$ } = require("../shared/dom-fns");
 const { getCardImage } = require("../shared/util");
 
+const { DRAFT_RANKS } = require("../shared/constants.js");
+
 let renderer = 0;
 
 exports.setRenderer = value => {
@@ -49,11 +51,19 @@ function addCardHover(element, card) {
     if (renderer == 0) {
       attachOwnerhipStars(card, $$(".hover_card_quantity")[0]);
     }
+
+    if (renderer == 2) {
+      attachDraftRatings(card, $$(".main_hover_ratings")[0]);
+    } else {
+      $$(".main_hover_ratings").forEach(
+        element => (element.style.display = "none")
+      );
+    }
   });
 
   element.addEventListener("mouseleave", () => {
     $$(
-      ".hover_card_quantity, .main_hover, .main_hover_dfc, .loader, .loader_dfc"
+      ".hover_card_quantity, .main_hover, .main_hover_ratings, .main_hover_dfc, .loader, .loader_dfc"
     ).forEach(element => (element.style.opacity = 0));
   });
 }
@@ -110,4 +120,52 @@ function attachOwnerhipStars(card, starContainer) {
       );
     }
   }
+}
+
+exports.attachDraftRatings = attachDraftRatings;
+function attachDraftRatings(card, ratingsContainer) {
+  ratingsContainer.innerHTML = "";
+  ratingsContainer.style.opacity = 1;
+  ratingsContainer.style.display = "flex";
+
+  let rank = card.rank;
+  let rankValues = card.rank_values;
+  let rankControversy = card.rank_controversy;
+
+  let maxValue = Math.max.apply(Math, card.rank_values);
+
+  let valuesContainer = createDiv([`rank_values_main_container`]);
+
+  let rankCont = createDiv(
+    [`rank_value_container`],
+    `Rank: ${DRAFT_RANKS[Math.round(rank)]}`
+  );
+  valuesContainer.appendChild(rankCont);
+  let controversyCont = createDiv(
+    [`rank_value_container`],
+    `Controversy: ${rankControversy}`
+  );
+  valuesContainer.appendChild(controversyCont);
+
+  rankValues.forEach((v, index) => {
+    let rv = 12 - index;
+    let rank = DRAFT_RANKS[rv];
+
+    let colorClass = "white";
+    if (rank == "A+" || rank == "A") colorClass = "blue";
+    if (rank == "A-" || rank == "B+" || rank == "B") colorClass = "green";
+    if (rank == "C-" || rank == "D+" || rank == "D") colorClass = "orange";
+    if (rank == "D-" || rank == "F") colorClass = "red";
+
+    let divCont = createDiv([`rank_value_container`]);
+    let divTitle = createDiv([`rank_value_title`, colorClass], rank);
+    let divBar = createDiv([`rank_value_bar`]);
+    divBar.style.width = (240 / maxValue) * v + "px";
+
+    divCont.appendChild(divTitle);
+    divCont.appendChild(divBar);
+    valuesContainer.appendChild(divCont);
+  });
+
+  ratingsContainer.appendChild(valuesContainer);
 }
