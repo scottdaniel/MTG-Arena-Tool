@@ -818,7 +818,7 @@ span {
     margin-left: 8px;
     margin-right: 8px;
     color: white;
-    text-align: center;
+    text-align: left;
     line-height: 31px;
     overflow: hidden;
     text-overflow: ellipsis;
