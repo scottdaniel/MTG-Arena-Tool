@@ -4,18 +4,7 @@ const { createDiv, queryElements } = require("../shared/dom-fns");
 const { openDialog } = require("./renderer-util");
 
 // We should clear this on releases and fill as we add new features
-const screens = [
-  {
-    title: "Mixed overlay",
-    desciption: "Now you can see cards left and odds in the same overlay!",
-    image: "01.png"
-  },
-  {
-    title: "Mastery track rewards",
-    desciption: "Track your experience and mastery track rewards in Economy",
-    image: "02.png"
-  }
-];
+const screens = [];
 
 let selectedScreen = 0;
 let screenoffset = (screens.length - 1) * 50;
