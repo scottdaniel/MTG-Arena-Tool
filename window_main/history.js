@@ -187,7 +187,7 @@ function renderData(container, index) {
   }
 
   if (match.type == "match") {
-    if (match.opponent == undefined) {
+    if (!match.opponent || !match.opponent.userid) {
       return 0;
     }
     if (match.opponent.userid.indexOf("Familiar") !== -1) {
