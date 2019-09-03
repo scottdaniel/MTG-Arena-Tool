@@ -507,6 +507,8 @@ function get_deck_export(deck) {
       cardObj = db.card(grpid);
     }
 
+    if (cardObj.dfc == "DFC_Front") return;
+
     let card_name = cardObj.name;
     let card_set = cardObj.set;
     let card_cn = cardObj.cid;
