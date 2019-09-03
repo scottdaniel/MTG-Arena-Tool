@@ -531,7 +531,7 @@ function updateMatchView(index) {
 
   let sortFunc = compare_cards;
   if (overlayMode === OVERLAY_ODDS || overlayMode == OVERLAY_MIXED) {
-    sortFunc = compare_chances;
+    sortFunc = compare_quantity;
   }
 
   let mainCards = deckToDraw.mainboard;
@@ -1226,19 +1226,8 @@ function get_ids_colors(list) {
   return colors;
 }
 
-function compare_chances(a, b) {
-  // Yeah this is lazy.. I know
-  a = a.chance;
-  b = b.chance;
-
-  if (a > b) {
-    return -1;
-  }
-  if (a < b) {
-    return 1;
-  }
-
-  return 0;
+function compare_quantity(a, b) {
+  return b.quantity - a.quantity;
 }
 
 function compare_logs(a, b) {
