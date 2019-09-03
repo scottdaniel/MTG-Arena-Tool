@@ -360,11 +360,13 @@ function drawDeckVisual(container, deck, openCallback) {
         for (let i = 0; i < c.quantity; i++) {
           if (_n % 4 === 0) {
             tileNow = createDiv(["deck_visual_tile"]);
+            tileNow.style.marginBottom = sz * 0.5 + "px";
             mainDiv.appendChild(tileNow);
           }
 
           const d = createDiv(["deck_visual_card"]);
           d.style.width = sz + "px";
+          d.style.height = sz * 0.166 + "px";
           const img = createImg(["deck_visual_card_img"], "", {
             src: getCardImage(card)
           });
@@ -403,6 +405,7 @@ function drawDeckVisual(container, deck, openCallback) {
           for (let i = 0; i < c.quantity; i++) {
             const d = createDiv(["deck_visual_card_side"]);
             d.style.width = sz + "px";
+            d.style.height = sz * 0.166 + "px";
             if (_n % 2 === 0) {
               d.style.marginLeft = "60px";
             }
