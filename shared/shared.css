@@ -591,6 +591,7 @@ label {
     pointer-events: none;
     background-size: contain;
     box-shadow: -1px 1px black;
+    border-radius: 100%;
     width: 20px;
     height: 20px;
     margin: 0 2px auto 2px;
@@ -601,6 +602,7 @@ label {
     pointer-events: none;
     background-size: contain;
     box-shadow: -1px 1px black;
+    border-radius: 100%;
     width: 16px;
     height: 16px;
     margin: auto 2px auto 2px;
