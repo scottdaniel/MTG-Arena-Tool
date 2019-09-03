@@ -203,6 +203,10 @@ class Deck {
   }
 
   getSave() {
+    return objectClone(this.getSaveRaw());
+  }
+
+  getSaveRaw() {
     let ret = {};
     ret.mainDeck = this.mainboard.get();
     ret.sideboard = this.sideboard.get();
@@ -214,8 +218,7 @@ class Deck {
     ret.tags = this.tags;
     ret.custom = this.custom;
 
-    let cloned = objectClone(ret);
-    return cloned;
+    return ret;
   }
 
   getUniqueString(checkSide = true) {
