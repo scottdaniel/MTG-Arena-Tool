@@ -86,7 +86,7 @@ exports.EVENT_TO_FORMAT = {
   QuickDraft_GRN_20190829: "Draft GRN",
 
   Cascade_Constructed_20190516: "Cascade Constructed",
-  Omniscience_Draft_20190830: "Omniscience Draft",
+  Omniscience_Draft_20190830: "Draft M20",
 
   Esports_Qualifier_20190525: "Traditional Standard",
   Esports_Qualifier_20190817: "Traditional Standard",
