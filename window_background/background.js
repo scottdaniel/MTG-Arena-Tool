@@ -1006,11 +1006,23 @@ async function logLoop() {
   var splitString = rawString.split("[UnityCrossThread");
   const parsedData = {};
 
+  let detailedLogs = true;
   splitString.forEach(value => {
     //ipc_send("ipc_log", "Async: ("+index+")");
 
+    // Check if logs are disabled
+    let strCheck = "DETAILED LOGS: DISABLED";
+    if (value.includes(strCheck)) {
+      ipc_send("popup", {
+        text:
+          "Detailed logs (plugin support) is disabled in Arena. Enable in Options > View Account. You will need to restart MTG Arena afterwards.",
+        time: 0
+      });
+      detailedLogs = false;
+    }
+
     // Get player Id
-    let strCheck = '"playerId": "';
+    strCheck = '"playerId": "';
     if (value.includes(strCheck)) {
       parsedData.arenaId = debugArenaID
         ? debugArenaID
@@ -1034,6 +1046,8 @@ async function logLoop() {
     }
     */
   });
+
+  if (!detailedLogs) return;
 
   for (let key in parsedData) {
     ipc_send("ipc_log", `Initial log parse: ${key}=${parsedData[key]}`);
