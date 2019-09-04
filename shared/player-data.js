@@ -368,11 +368,11 @@ class PlayerData {
   }
 
   transactionExists(id) {
-    return this.economy_index.includes(id) && id in this;
+    return id in this;
   }
 
   deckChangeExists(id) {
-    return this.deck_changes_index.includes(id) && id in this.deck_changes;
+    return id in this.deck_changes;
   }
 
   deck(id) {
@@ -405,7 +405,7 @@ class PlayerData {
   }
 
   draftExists(id) {
-    return this.draft_index.includes(id) && id in this;
+    return id in this;
   }
 
   event(id) {
@@ -418,7 +418,7 @@ class PlayerData {
   }
 
   eventExists(id) {
-    return this.courses_index.includes(id) && id in this;
+    return id in this;
   }
 
   match(id) {
@@ -448,7 +448,7 @@ class PlayerData {
   }
 
   matchExists(id) {
-    return this.matches_index.includes(id) && id in this;
+    return id in this;
   }
 }
 
