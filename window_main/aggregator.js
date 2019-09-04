@@ -15,11 +15,7 @@ const {
 } = require("../shared/constants");
 const db = require("../shared/database");
 const pd = require("../shared/player-data");
-const {
-  get_deck_colors,
-  getReadableEvent,
-  getRecentDeckName
-} = require("../shared/util");
+const { getReadableEvent, getRecentDeckName } = require("../shared/util");
 const { normalApproximationInterval } = require("../shared/stats-fns");
 
 // Default filter values
@@ -152,11 +148,7 @@ class Aggregator {
 
     // Normalize deck colors into matching data format
     const deckColorCodes = Aggregator.getDefaultColorFilter();
-    if (deck.colors instanceof Array) {
-      deck.colors.forEach(i => (deckColorCodes[COLORS_ALL[i - 1]] = true));
-    } else if (deck.colors instanceof Object) {
-      Object.assign(deckColorCodes, deck.colors);
-    }
+    deck.colors.forEach(i => (deckColorCodes[COLORS_ALL[i - 1]] = true));
 
     return Object.entries(_colors).every(([color, value]) => {
       if (color === "multi") return true;
@@ -373,7 +365,7 @@ class Aggregator {
     }
     // process opponent data
     if (match.oppDeck) {
-      const colors = get_deck_colors(match.oppDeck);
+      const colors = match.oppDeck.colors;
       if (colors && colors.length) {
         colors.sort();
         if (!(colors in this.colorStats)) {

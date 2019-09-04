@@ -37,7 +37,6 @@ const {
   deckTypesStats,
   formatRank,
   getCardArtCrop,
-  get_deck_colors,
   get_rank_index_16,
   getCardImage,
   getReadableEvent,
@@ -1023,7 +1022,7 @@ function attachMatchData(listItem, match) {
   listItem.rightBottom.appendChild(matchTime);
 
   // Opp colors
-  get_deck_colors(match.oppDeck).forEach(color => {
+  match.oppDeck.colors.forEach(color => {
     const m = createDiv(["mana_s20", "mana_" + MANA[color]]);
     listItem.rightBottom.appendChild(m);
   });
