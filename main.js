@@ -389,7 +389,12 @@ function setSettings(settings) {
   let display = electron.screen
     .getAllDisplays()
     .filter(d => d.id == displayId)[0];
-  overlay.setBounds(display.bounds);
+
+  if (display) {
+    overlay.setBounds(display.bounds);
+  } else {
+    overlay.setBounds(electron.screen.getPrimaryDisplay().bounds);
+  }
 
   // Send settings update
   overlay.setAlwaysOnTop(settings.overlays[0].ontop, "floating");
