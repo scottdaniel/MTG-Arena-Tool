@@ -397,7 +397,7 @@ function setSettings(settings) {
   }
 
   // Send settings update
-  overlay.setAlwaysOnTop(settings.overlays[0].ontop, "floating");
+  overlay.setAlwaysOnTop(settings.overlay_ontop, "floating");
   overlay.webContents.send("settings_updated");
 }
 
@@ -438,10 +438,6 @@ function showWindow() {
   if (updaterWindow) {
     if (!updaterWindow.isVisible()) updaterWindow.show();
     else updaterWindow.moveTop();
-  }
-  if (overlay) {
-    if (!overlay.isVisible()) overlay.show();
-    else overlay.moveTop();
   }
 }
 

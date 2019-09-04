@@ -484,6 +484,17 @@ function appendOverlay(section) {
     ? pd.settings.overlay_display
     : remote.screen.getPrimaryDisplay().id;
 
+  addCheckbox(
+    section,
+    "Always on top when shown",
+    `overlay_ontop`,
+    pd.settings.overlay_ontop,
+    () =>
+      ipcSend("save_user_settings", {
+        overlay_ontop: byId(`overlay_ontop`).checked
+      })
+  );
+
   const label = createLabel(["but_container_label"], "Overlay Display:");
   const displaySelect = createSelect(
     label,
@@ -626,17 +637,6 @@ function appendOverlay(section) {
     modeHelpDiv.style.paddingLeft = "76px";
     overlaySection.appendChild(modeHelpDiv);
 
-    addCheckbox(
-      overlaySection,
-      "Always on top when shown",
-      `overlay_${index}_ontop`,
-      settings.ontop,
-      () =>
-        ipcSend("save_overlay_settings", {
-          index,
-          ontop: byId(`overlay_${index}_ontop`).checked
-        })
-    );
     addCheckbox(
       overlaySection,
       "Always show overlay&nbsp;<i>(useful for OBS setup)</i>",
