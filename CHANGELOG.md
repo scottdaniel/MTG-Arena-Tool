@@ -1,3 +1,39 @@
+## <small>2.9.3 (2019-09-05)</small>
+
+* add new sets data ([1e415cd](https://github.com/Manuel-777/MTG-Arena-Tool/commit/1e415cd))
+* always on top as global ([50ad436](https://github.com/Manuel-777/MTG-Arena-Tool/commit/50ad436))
+* card name in collection ([818e77d](https://github.com/Manuel-777/MTG-Arena-Tool/commit/818e77d))
+* catch undef images ([5f4673f](https://github.com/Manuel-777/MTG-Arena-Tool/commit/5f4673f))
+* default no image ([efa64eb](https://github.com/Manuel-777/MTG-Arena-Tool/commit/efa64eb))
+* default to primary monitor ([73cf498](https://github.com/Manuel-777/MTG-Arena-Tool/commit/73cf498))
+* detailed ranks data ([7fd83fe](https://github.com/Manuel-777/MTG-Arena-Tool/commit/7fd83fe))
+* dfc cards fix ([aaf0c4d](https://github.com/Manuel-777/MTG-Arena-Tool/commit/aaf0c4d))
+* do not export dfc backs ([50a6844](https://github.com/Manuel-777/MTG-Arena-Tool/commit/50a6844)), closes [#508](https://github.com/Manuel-777/MTG-Arena-Tool/issues/508)
+* draft ratings details ([26b25b0](https://github.com/Manuel-777/MTG-Arena-Tool/commit/26b25b0))
+* draw adventure tile cost ([ac833e7](https://github.com/Manuel-777/MTG-Arena-Tool/commit/ac833e7))
+* ELD icon ([c68afbc](https://github.com/Manuel-777/MTG-Arena-Tool/commit/c68afbc))
+* fix hover types ([e56b7e5](https://github.com/Manuel-777/MTG-Arena-Tool/commit/e56b7e5))
+* fix multilang and ranks ([6bc2c79](https://github.com/Manuel-777/MTG-Arena-Tool/commit/6bc2c79))
+* fix overlay sort ([f823b18](https://github.com/Manuel-777/MTG-Arena-Tool/commit/f823b18))
+* more languages output ([934e90c](https://github.com/Manuel-777/MTG-Arena-Tool/commit/934e90c))
+* overlay names alignment ([9e67a9b](https://github.com/Manuel-777/MTG-Arena-Tool/commit/9e67a9b))
+* precon brawl ([c5a98da](https://github.com/Manuel-777/MTG-Arena-Tool/commit/c5a98da))
+* precons name ([ab5c7c7](https://github.com/Manuel-777/MTG-Arena-Tool/commit/ab5c7c7))
+* remove slow check ([84da82c](https://github.com/Manuel-777/MTG-Arena-Tool/commit/84da82c))
+* set images as undefined ([656afa3](https://github.com/Manuel-777/MTG-Arena-Tool/commit/656afa3))
+* show detailed logs warning ([c4cd6dd](https://github.com/Manuel-777/MTG-Arena-Tool/commit/c4cd6dd))
+* undef and null check ([88585e5](https://github.com/Manuel-777/MTG-Arena-Tool/commit/88585e5))
+* Update constants.js ([7abc7b6](https://github.com/Manuel-777/MTG-Arena-Tool/commit/7abc7b6))
+* Update deck.js ([e9ae46d](https://github.com/Manuel-777/MTG-Arena-Tool/commit/e9ae46d))
+* Update metadata-constants.js ([edd53a5](https://github.com/Manuel-777/MTG-Arena-Tool/commit/edd53a5))
+* Update metadata-constants.js ([d0a756b](https://github.com/Manuel-777/MTG-Arena-Tool/commit/d0a756b))
+* Update metadata.js ([612a183](https://github.com/Manuel-777/MTG-Arena-Tool/commit/612a183))
+* Update shared.css ([943e30c](https://github.com/Manuel-777/MTG-Arena-Tool/commit/943e30c))
+* Update whats-new.js ([d1f7610](https://github.com/Manuel-777/MTG-Arena-Tool/commit/d1f7610))
+* visual view sizing fix ([c8271a2](https://github.com/Manuel-777/MTG-Arena-Tool/commit/c8271a2))
+
+
+
 ## <small>2.9.2 (2019-08-31)</small>
 
 * Added data corruption function and code to use it ([66da544](https://github.com/Manuel-777/MTG-Arena-Tool/commit/66da544))
