@@ -244,7 +244,11 @@ function prettierDeckData(deckData) {
     "Decks/Precon/Precon_July_U": "Mono Blue",
     "Decks/Precon/Precon_July_G": "Mono Green",
     "Decks/Precon/Precon_July_R": "Mono Red",
-    "Decks/Precon/Precon_July_W": "Mono White"
+    "Decks/Precon/Precon_July_W": "Mono White",
+    "Decks/Precon/Precon_Brawl_Alela": "Alela, Artful Provocateur",
+    "Decks/Precon/Precon_Brawl_Chulane": "Chulane, Teller of Tales",
+    "Decks/Precon/Precon_Brawl_Korvold": "Korvold, Fae-Cursed King",
+    "Decks/Precon/Precon_Brawl_SyrGwyn": "Syr Gwyn, Hero of Ashvale"
   };
   if (deckData.description in prettyDescriptions) {
     deckData.description = prettyDescriptions[deckData.description];
