@@ -45,6 +45,7 @@ exports.EVENT_TO_NAME = {
   Esports_Qualifier_20190817: "Mythic Qualifier Weekend 08/19",
   CompCons_Metagame_Challenge_20190712: "Metagame Challenge",
 
+  Precon_Brawl_ELD: "Precon Brawl",
   Lore_WAR1_Momir: "Ravnica at War I - Momir",
   Lore_WAR2_Pauper: "Ravnica at War II - Pauper",
   Lore_WAR3_Singleton: "Ravnica at War III - Singleton",
@@ -92,6 +93,7 @@ exports.EVENT_TO_FORMAT = {
   Esports_Qualifier_20190817: "Traditional Standard",
   CompCons_Metagame_Challenge_20190712: "Traditional Standard",
 
+  Precon_Brawl_ELD: "Brawl",
   Lore_WAR1_Momir: "Momir",
   Lore_WAR2_Pauper: "Pauper",
   Lore_WAR3_Singleton: "Singleton",
