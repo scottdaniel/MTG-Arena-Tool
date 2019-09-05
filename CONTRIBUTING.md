@@ -114,7 +114,7 @@ npm install
 npm start
 ```
 
-### Electron Developter Tools
+### Electron Developer Tools
 
 You can toggle developer tools for debugging using `Shift+Alt+D`, or using `F12` if you run from source for specific windows (like a single overlay or just for main window).
 Use `Shift+Alt+O` to toggle all overlays developer tools at once.
