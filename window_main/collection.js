@@ -1015,6 +1015,7 @@ function printCards() {
     const cardDiv = createDiv(["inventory_card"]);
     cardDiv.style.width = pd.cardsSize + "px";
     attachOwnerhipStars(card, cardDiv);
+    cardDiv.title = card.name;
 
     const img = document.createElement("img");
     img.style.width = pd.cardsSize + "px";
