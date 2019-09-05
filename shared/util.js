@@ -39,6 +39,8 @@ function getCardImage(cardObj) {
   }
 
   try {
+    let url = cardObj.images[pd.settings.cards_quality];
+    if (url == undefined || url == "") throw "Undefined url";
     return (
       "https://img.scryfall.com/cards" +
       cardObj.images[pd.settings.cards_quality]
