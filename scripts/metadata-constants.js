@@ -200,14 +200,6 @@ exports.SETS_DATA = {
     tile: 68674,
     release: "2018-10-05"
   },
-  "Mythic Edition": {
-    collation: -1,
-    scryfall: "med",
-    code: "MED",
-    arenacode: "MED",
-    tile: 68674,
-    release: "2018-10-06"
-  },
   "M19 Gift Pack": {
     collation: false,
     scryfall: "g18",
@@ -239,6 +231,23 @@ exports.SETS_DATA = {
     arenacode: "M20",
     tile: 69912,
     release: "2019-07-12"
+  },
+  "Throne of Eldraine": {
+    collation: 100015,
+    scryfall: "eld",
+    code: "ELD",
+    arenacode: "ELD",
+    tile: 70338,
+    release: "2017-04-28"
+  },
+  // Other sets below
+  "Mythic Edition": {
+    collation: -1,
+    scryfall: "med",
+    code: "MED",
+    arenacode: "MED",
+    tile: 68674,
+    release: "2018-10-06"
   },
   Mirage: {
     collation: -1,
@@ -280,6 +289,158 @@ exports.SETS_DATA = {
     tile: 64827,
     release: "2017-04-28"
   },
+  Planeshift: {
+    collation: -1,
+    scryfall: "pls",
+    code: "PS",
+    arenacode: "PS",
+    tile: 64827,
+    release: "2001-02-05"
+  },
+  Scourge: {
+    collation: -1,
+    scryfall: "scg",
+    code: "SCG",
+    arenacode: "SCG",
+    tile: 64827,
+    release: "2003-05-26"
+  },
+  Darksteel: {
+    collation: -1,
+    scryfall: "dst",
+    code: "DST",
+    arenacode: "DST",
+    tile: 64827,
+    release: "2004-02-06"
+  },
+  "Fifth Dawn": {
+    collation: -1,
+    scryfall: "5dn",
+    code: "5DN",
+    arenacode: "5DN",
+    tile: 64827,
+    release: "2004-06-04"
+  },
+  "Ninth Edition": {
+    collation: -1,
+    scryfall: "9ed",
+    code: "9ED",
+    arenacode: "9ED",
+    tile: 64827,
+    release: "2005-07-29"
+  },
+  "Ravnica: City of Guilds": {
+    collation: -1,
+    scryfall: "rav",
+    code: "RAV",
+    arenacode: "RAV",
+    tile: 64827,
+    release: "2005-10-07 "
+  },
+  Dissension: {
+    collation: -1,
+    scryfall: "dis",
+    code: "DIS",
+    arenacode: "DIS",
+    tile: 64827,
+    release: "2006-05-05 "
+  },
+  "Tenth Edition": {
+    collation: -1,
+    scryfall: "10e",
+    code: "10E",
+    arenacode: "10E",
+    tile: 64827,
+    release: "2007-07-13"
+  },
+  "Masters Edition II": {
+    collation: -1,
+    scryfall: "me2",
+    code: "ME2",
+    arenacode: "ME2",
+    tile: 64827,
+    release: "2008-09-22"
+  },
+  "Magic 2011": {
+    collation: -1,
+    scryfall: "m11",
+    code: "M11",
+    arenacode: "M11",
+    tile: 64827,
+    release: "2010-07-16"
+  },
+  "Masters Edition IV": {
+    collation: -1,
+    scryfall: "me4",
+    code: "ME4",
+    arenacode: "ME4",
+    tile: 64827,
+    release: "2011-01-10"
+  },
+  "Commander 2011": {
+    collation: -1,
+    scryfall: "cmd",
+    code: "CMD",
+    arenacode: "CMD",
+    tile: 64827,
+    release: "Released 2011-06-17"
+  },
+  "Avacyn Restored": {
+    collation: -1,
+    scryfall: "avr",
+    code: "AVR",
+    arenacode: "AVR",
+    tile: 64827,
+    release: "2012-05-04"
+  },
+  "Champions of Kamigawa": {
+    collation: -1,
+    scryfall: "chk",
+    code: "CHK",
+    arenacode: "CHK",
+    tile: 64827,
+    release: "2004-10-01"
+  },
+  "New Phyrexia": {
+    collation: -1,
+    scryfall: "nph",
+    code: "NPH",
+    arenacode: "NPH",
+    tile: 64827,
+    release: "2011-05-13"
+  },
+  Zendikar: {
+    collation: -1,
+    scryfall: "zen",
+    code: "ZEN",
+    arenacode: "ZEN",
+    tile: 64827,
+    release: "2009-10-02"
+  },
+  Gatecrash: {
+    collation: -1,
+    scryfall: "gtc",
+    code: "GTC",
+    arenacode: "GTC",
+    tile: 64827,
+    release: "2013-02-01"
+  },
+  "Commander 2013": {
+    collation: -1,
+    scryfall: "c13",
+    code: "C13",
+    arenacode: "C13",
+    tile: 64827,
+    release: "2013-11-01"
+  },
+  "Eldritch Moon": {
+    collation: -1,
+    scryfall: "emn",
+    code: "EMN",
+    arenacode: "EMN",
+    tile: 64827,
+    release: "2016-07-22"
+  },
   "": {
     collation: -1,
     scryfall: "",
@@ -314,7 +475,27 @@ exports.SET_NAMES = {
   MI: "Mirage",
   ROE: "Rise of Eldrazi",
   RTR: "Return to Ravnica",
-  BFZ: "Battle for Zendikar"
+  BFZ: "Battle for Zendikar",
+  ELD: "Throne of Eldraine",
+  PS: "Planeshift",
+  SCG: "Scourge",
+  DST: "Darksteel",
+  "5DN": "Fifth Dawn",
+  "9ED": "Ninth Edition",
+  RAV: "Ravnica: City of Guilds",
+  DIS: "Dissension",
+  "10E": "Tenth Edition",
+  ME2: "Masters Edition II",
+  M11: "Magic 2011",
+  ME4: "Masters Edition IV",
+  CMD: "Commander 2011",
+  AVR: "Avacyn Restored",
+  CHK: "Champions of Kamigawa",
+  NPH: "New Phyrexia",
+  ZEN: "Zendikar",
+  GTC: "Gatecrash",
+  C13: "Commander 2013",
+  EMN: "Eldritch Moon"
 };
 
 exports.NO_DUPES_ART_SETS = [
@@ -330,6 +511,7 @@ exports.NO_DUPES_ART_SETS = [
 ];
 
 exports.ALLOWED_SCRYFALL = [
+  "eld",
   "m20",
   "war",
   "rna",
@@ -340,6 +522,7 @@ exports.ALLOWED_SCRYFALL = [
   "dom",
   "rix",
   "xln",
+  "teld",
   "tm20",
   "twar",
   "trna",
@@ -360,7 +543,26 @@ exports.ALLOWED_SCRYFALL = [
   "mir",
   "akh",
   "unh",
-  "c16"
+  "c16",
+  "pls",
+  "scg",
+  "dst",
+  "5dn",
+  "9ed",
+  "rav",
+  "dis",
+  "10e",
+  "me2",
+  "m11",
+  "me4",
+  "cmd",
+  "avr",
+  "chk",
+  "nph",
+  "zen",
+  "gtc",
+  "c13",
+  "emn"
 ];
 
 exports.RANKS_SHEETS = [

@@ -178,7 +178,7 @@ exports.generateMetadata = function(
         if (card.linkedFaces.length > 0) {
           cardObj.dfcId = card.linkedFaces[0];
         } else {
-          cardObj.dfcId = 0;
+          cardObj.dfcId = false;
         }
 
         // Add ranks data

@@ -10,6 +10,7 @@ var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 const {
   APPDATA,
   RANKS_SHEETS,
+  SET_NAMES,
   SETS_DATA,
   NO_DUPES_ART_SETS,
   ALLOWED_SCRYFALL
@@ -18,7 +19,7 @@ const {
 let metagameData = {};
 let ranksData = {};
 
-const VERSION = 14;
+const VERSION = 15;
 /*
   Languages available in loc.json;
   "BR"
@@ -33,7 +34,7 @@ const VERSION = 14;
   "zh-CN"
 */
 const LANGUAGES = [
-  "EN",
+  "EN" /*,
   "ES",
   "BR",
   "DE",
@@ -42,10 +43,10 @@ const LANGUAGES = [
   "JP",
   "RU",
   "ko-KR",
-  "zh-CN"
+  "zh-CN"*/
 ];
 // "scryfall-all-cards.json" contains cards in all languages but is 800+mb
-const SCRYFALL_FILE = "scryfall-all-cards.json";
+const SCRYFALL_FILE = "scryfall-default-cards.json";
 
 app.on("ready", () => {
   console.log("Begin Metadata fetch.");
@@ -53,7 +54,8 @@ app.on("ready", () => {
   // obtain it from somewhere automatically, like a settings
   // file or the output log itself.
   manifestParser
-    .getManifestFiles("1622.721726")
+    .getManifestFiles("1678.727490")
+    //.then(checkSetsAvailable)
     .then(getRanksData)
     .then(getScryfallCards)
     .then(getMetagameData)
@@ -71,6 +73,34 @@ app.on("closed", function() {
 function quit() {
   console.log("Goodbye!");
   app.quit();
+}
+
+function checkSetsAvailable() {
+  // We use this to check for new sets
+  return new Promise(resolve => {
+    let file = path.join(APPDATA, "external", "cards.json");
+    let cards = JSON.parse(`{"value": ${fs.readFileSync(file)}}`);
+
+    let sets = [];
+    let setCards = {};
+    cards.value.forEach(card => {
+      if (!setCards[card.set]) setCards[card.set] = 1;
+      else setCards[card.set] += 1;
+      if (!sets.includes(card.set)) {
+        sets.push(card.set);
+      }
+    });
+
+    sets.forEach(setCode => {
+      if (!SET_NAMES[setCode]) {
+        console.log(`${setCode} - Not added. (${setCards[setCode]} cards)`);
+      } else {
+        console.log(`${setCode} - Ok! (${setCards[setCode]} cards)`);
+      }
+    });
+
+    resolve();
+  });
 }
 
 function getRanksData() {
