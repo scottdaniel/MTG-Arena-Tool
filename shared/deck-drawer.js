@@ -8,7 +8,12 @@ const {
   openScryfallCard
 } = require("../shared/util");
 
-const { CARD_TILE_FLAT, COLORS_ALL } = require("./constants.js");
+const {
+  CARD_TILE_FLAT,
+  COLORS_ALL,
+  FACE_SPLIT_FULL,
+  FACE_ADVENTURE_MAIN
+} = require("./constants.js");
 
 //
 function isNumber(n) {
@@ -179,7 +184,7 @@ function drawCardTileArena(
 
   if (card) {
     let prevc = true;
-    const hasSplitCost = card.dfc === "SplitHalf";
+    const hasSplitCost = card.dfc === FACE_SPLIT_FULL;
 
     card.cost.forEach(cost => {
       if (hasSplitCost) {
@@ -188,8 +193,17 @@ function drawCardTileArena(
         }
         prevc = /^\d+$/.test(cost);
       }
+
       fl2.appendChild(createDiv(["mana_s16", "flex_end", `mana_${cost}`]));
     });
+
+    if (card.dfc == FACE_ADVENTURE_MAIN) {
+      let adventure = db.card(card.dfcId);
+      fl2.innerHTML += "//";
+      adventure.cost.forEach(cost => {
+        fl2.appendChild(createDiv(["mana_s16", "flex_end", `mana_${cost}`]));
+      });
+    }
   }
   cardTile.appendChild(fl2);
 
@@ -210,7 +224,7 @@ function drawCardTileArena(
     });
 
     glow.addEventListener("click", () => {
-      if (card.dfc == "SplitHalf") {
+      if (card.dfc == FACE_SPLIT_FULL) {
         card = db.card(card.dfcId);
       }
       openScryfallCard(card);
@@ -313,7 +327,7 @@ function drawCardTileFlat(
   const cardCost = createDiv(["cart_tile_mana_flat"]);
   if (card) {
     let prevc = true;
-    const hasSplitCost = card.dfc === "SplitHalf";
+    const hasSplitCost = card.dfc === FACE_SPLIT_FULL;
 
     card.cost.forEach(cost => {
       if (hasSplitCost) {
@@ -324,6 +338,16 @@ function drawCardTileFlat(
       }
       cardCost.appendChild(createDiv(["mana_s16", "flex_end", `mana_${cost}`]));
     });
+
+    if (card.dfc == FACE_ADVENTURE_MAIN) {
+      let adventure = db.card(card.dfcId);
+      cardCost.innerHTML += "//";
+      adventure.cost.forEach(cost => {
+        cardCost.appendChild(
+          createDiv(["mana_s16", "flex_end", `mana_${cost}`])
+        );
+      });
+    }
   }
   cont.appendChild(cardCost);
 
@@ -337,7 +361,7 @@ function drawCardTileFlat(
     });
 
     cont.addEventListener("click", () => {
-      if (card.dfc == "SplitHalf") {
+      if (card.dfc == FACE_SPLIT_FULL) {
         card = db.card(card.dfcId);
       }
       openScryfallCard(card);
