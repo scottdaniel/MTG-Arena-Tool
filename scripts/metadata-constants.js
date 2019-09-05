@@ -238,7 +238,7 @@ exports.SETS_DATA = {
     code: "ELD",
     arenacode: "ELD",
     tile: 70338,
-    release: "2017-04-28"
+    release: "2016-10-04"
   },
   // Other sets below
   "Mythic Edition": {
