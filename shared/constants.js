@@ -598,11 +598,10 @@ exports.ENUMS = {
 };
 
 exports.FACE_NONE = 0;
-exports.FACE_NORMAL = 1;
-exports.FACE_DFC_BACK = 2;
-exports.FACE_DFC_FRONT = 1;
-exports.FACE_SPLIT = 6;
+exports.FACE_DFC_BACK = 1;
+exports.FACE_DFC_FRONT = 2;
 exports.FACE_SPLIT_FULL = 5;
+exports.FACE_SPLIT = 6;
 exports.FACE_ADVENTURE_MAIN = 7;
 exports.FACE_ADVENTURE = 8;
 
