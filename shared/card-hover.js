@@ -4,7 +4,11 @@ const { cardHasType } = require("../shared/card-types.js");
 const { createDiv, queryElements: $$ } = require("../shared/dom-fns");
 const { getCardImage } = require("../shared/util");
 
-const { DRAFT_RANKS } = require("../shared/constants.js");
+const {
+  DRAFT_RANKS,
+  FACE_DFC_BACK,
+  FACE_DFC_FRONT
+} = require("../shared/constants.js");
 
 let renderer = 0;
 
@@ -23,7 +27,10 @@ function addCardHover(element, card) {
     $$(".loader, .main_hover").forEach(element => (element.style.opacity = 1));
 
     // Split cards are readable both halves, no problem
-    if (card.dfc != "None" && card.dfc != "SplitHalf" && renderer == 0) {
+    if (
+      (card.dfc == FACE_DFC_BACK || card.dfc == FACE_DFC_FRONT) &&
+      renderer == 0
+    ) {
       $$(".loader_dfc, .main_hover_dfc").forEach(el => {
         show(el);
         el.style.opacity = 1;
