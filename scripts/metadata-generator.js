@@ -203,6 +203,12 @@ exports.generateMetadata = function(
               cardObj.id
             }`
           );
+          cardObj.images = {
+            art_crop: "",
+            large: "",
+            normal: "",
+            small: ""
+          };
         } else {
           // Remove the first part of the URLs and some
           // links that are not used by tool.
