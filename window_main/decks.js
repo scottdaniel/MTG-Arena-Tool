@@ -220,7 +220,7 @@ function openDecksTab(_filters = {}, scrollTop = 0) {
       } else {
         // sample size is too small (garbage results)
         interval = "???";
-        tooltip = "play at least 20 games to estimated actual winrate";
+        tooltip = "play at least 20 games to estimate actual winrate";
       }
       let colClass = getWinrateClass(dwr.winrate);
       deckWinrateDiv.innerHTML = `${dwr.wins}:${
