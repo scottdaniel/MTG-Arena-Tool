@@ -1190,7 +1190,7 @@ function appendAbout(section) {
   const metadataVersion = createDiv(
     ["message_sub_15", "white"],
     `Metadata: version ${db.data.version || "???"}, updated ${format(
-      db.data.updated ? fromUnixTime(db.data.updated) : "???",
+      db.data.updated ? fromUnixTime(db.data.updated / 1000) : "???",
       "Pp"
     )}`
   );
