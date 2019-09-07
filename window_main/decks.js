@@ -1,5 +1,6 @@
 const _ = require("lodash");
 const anime = require("animejs");
+const format = require("date-fns/format");
 
 const { MANA, CARD_RARITIES, EASING_DEFAULT } = require("../shared/constants");
 const pd = require("../shared/player-data");
@@ -208,18 +209,26 @@ function openDecksTab(_filters = {}, scrollTop = 0) {
     const dwr = aggregator.deckStats[deck.id];
     if (dwr && dwr.total > 0) {
       const deckWinrateDiv = createDiv(["list_deck_winrate"]);
+      let interval, tooltip;
+      if (dwr.total >= 20) {
+        // sample Size is large enough to use Wald Interval
+        interval = formatPercent(dwr.interval);
+        tooltip = `${formatPercent(dwr.winrateLow)} to ${formatPercent(
+          dwr.winrateHigh
+        )} with 95% confidence
+(estimated actual winrate bounds, assuming a normal distribution)`;
+      } else {
+        // sample size is too small (garbage results)
+        interval = "???";
+        tooltip = "play at least 20 games to estimated actual winrate";
+      }
       let colClass = getWinrateClass(dwr.winrate);
       deckWinrateDiv.innerHTML = `${dwr.wins}:${
         dwr.losses
       } (<span class="${colClass}_bright">${formatPercent(
         dwr.winrate
-      )}</span> <i style="opacity:0.6;">&plusmn; ${formatPercent(
-        dwr.interval
-      )}</i>)`;
-      deckWinrateDiv.title = `${formatPercent(
-        dwr.winrateLow
-      )} to ${formatPercent(dwr.winrateHigh)} with 95% confidence
-(estimated actual winrate bounds, assuming a normal distribution)`;
+      )}</span> <i style="opacity:0.6;">&plusmn; ${interval}</i>)`;
+      deckWinrateDiv.title = tooltip;
       listItem.rightTop.appendChild(deckWinrateDiv);
 
       const deckWinrateLastDiv = createDiv(
@@ -234,9 +243,8 @@ function openDecksTab(_filters = {}, scrollTop = 0) {
           drwr.winrate
         )}</span>`;
         deckWinrateLastDiv.title = `${formatPercent(
-          drwr.winrateLow
-        )} to ${formatPercent(drwr.winrateHigh)} with 95% confidence
-(estimated actual winrate bounds, assuming a normal distribution)`;
+          drwr.winrate
+        )} winrate since ${format(new Date(deck.lastUpdated), "Pp")}`;
       } else {
         deckWinrateLastDiv.innerHTML += "<span>--</span>";
         deckWinrateLastDiv.title = "no data yet";
