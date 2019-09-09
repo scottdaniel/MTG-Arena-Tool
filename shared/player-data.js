@@ -409,7 +409,7 @@ class PlayerData {
   }
 
   draftExists(id) {
-    return id in this;
+    return this.draft_index.includes(id) && id in this;
   }
 
   event(id) {
