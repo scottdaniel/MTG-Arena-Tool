@@ -381,11 +381,15 @@ class PlayerData {
 
   deck(id) {
     if (!this.deckExists(id)) return false;
+
+    let colors = this.decks[id].colors
+      ? this.decks[id].colors
+      : get_deck_colors(this.decks[id]);
     const preconData = db.preconDecks[id] || {};
     const deckData = {
       ...preconData,
       ...this.decks[id],
-      colors: get_deck_colors(this.decks[id]),
+      colors: colors,
       custom: !this.static_decks.includes(id),
       tags: this.decks_tags[id] || []
     };
@@ -437,10 +441,12 @@ class PlayerData {
       ...preconData,
       ...matchData.playerDeck
     });
-    playerDeck.colors = get_deck_colors(playerDeck);
+    playerDeck.colors = playerDeck.colors
+      ? playerDeck.colors
+      : get_deck_colors(playerDeck);
 
     const oppDeck = { ...defaultDeck, ...matchData.oppDeck };
-    oppDeck.colors = get_deck_colors(oppDeck);
+    oppDeck.colors = oppDeck.colors ? oppDeck.colors : get_deck_colors(oppDeck);
 
     return {
       ...matchData,
