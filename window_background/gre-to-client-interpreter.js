@@ -283,7 +283,10 @@ annotationFunctions.AnnotationType_ZoneTransfer = function(ann, details) {
   }
 };
 
-annotationFunctions.AnnotationType_AbilityInstanceCreated = function(ann, details) {
+annotationFunctions.AnnotationType_AbilityInstanceCreated = function(
+  ann,
+  details
+) {
   let affected = ann.affectedIds[0];
   let affector = instanceIdToObject(ann.affectorId);
 
