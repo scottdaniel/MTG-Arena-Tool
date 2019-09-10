@@ -174,6 +174,16 @@ function renderData(container, index) {
   if (!change) return 0;
   if (change.archived && !showArchived) return 0;
 
+  if (
+    change.context.startsWith("Event.Prize") &&
+    change.context.includes("Future") &&
+    !change.xpGained
+  ) {
+    // skip transactions that are just empty future play/ranked rewards
+    // originally for renewal season special events 2019-09
+    return 0;
+  }
+
   // print out daily summaries but no sub-events
   if (
     filterEconomy === "Day Summaries" &&
