@@ -195,6 +195,23 @@ function drawDeck(div, deck, showWildcards = false) {
   div.innerHTML = "";
   const unique = makeId(4);
 
+  if (deck.commandZoneGRPId) {
+    let commander = deck.commandZoneGRPId;
+    let separator = deckDrawer.cardSeparator(`Commander`);
+    div.appendChild(separator);
+
+    const tile = deckDrawer.cardTile(
+      pd.settings.card_tile_style,
+      commander,
+      unique + "a",
+      1,
+      showWildcards,
+      deck,
+      false
+    );
+    div.appendChild(tile);
+  }
+
   // draw maindeck grouped by cardType
   const cardsByGroup = _(deck.mainDeck)
     .map(card => ({ data: db.card(card.id), ...card }))
