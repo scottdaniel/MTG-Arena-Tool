@@ -21,6 +21,8 @@ exports.EVENT_TO_NAME = {
   Traditional_Cons_Event: "Traditional Constructed",
   Constructed_BestOf3: "Traditional Play",
   Traditional_Ladder: "Traditional Ranked",
+  Future_Play_20190909: "Future Play",
+  Future_Ranked_20190909: "Future Ranked",
 
   CompDraft_RNA_20190117: "Traditional Draft RNA",
   CompDraft_WAR_20190425: "Traditional Draft WAR",
@@ -28,6 +30,7 @@ exports.EVENT_TO_NAME = {
 
   Sealed_M20_20190630: "Sealed M20",
   Sealed_Ravnica_20190816: "Sealed Ravnica",
+  Sealed_WAR_20190909: "Sealed WAR",
 
   QuickDraft_RNA_20190621: "Ranked Draft RNA 06/19",
   QuickDraft_WAR_20190510: "Ranked Draft WAR 05/19",
@@ -67,6 +70,8 @@ exports.EVENT_TO_FORMAT = {
   Traditional_Cons_Event: "Traditional Standard",
   Constructed_BestOf3: "Traditional Standard",
   Traditional_Ladder: "Traditional Standard",
+  Future_Play_20190909: "Future",
+  Future_Ranked_20190909: "Traditional Future",
 
   CompDraft_RNA_20190117: "Draft RNA",
   CompDraft_WAR_20190425: "Draft WAR",
@@ -74,6 +79,7 @@ exports.EVENT_TO_FORMAT = {
 
   Sealed_M20_20190630: "Sealed M20",
   Sealed_Ravnica_20190816: "Sealed Ravnica",
+  Sealed_WAR_20190909: "Sealed WAR",
 
   QuickDraft_RNA_20190426: "Draft RNA",
   QuickDraft_RNA_20190621: "Draft RNA",
