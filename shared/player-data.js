@@ -178,6 +178,11 @@ const defaultDeck = JSON.parse(
 // Cannot use Deck/ColorList classes because it would cause circular dependency
 // tweaked for heavy use in player-data/aggregator
 function getDeckColors(deck) {
+  if (deck.colors && deck.colors instanceof Array) {
+    // if field exists, assume it was correctly pre-computed by latest code
+    return deck.colors;
+  }
+
   const colorSet = new Set();
 
   deck.mainDeck.forEach(card => {

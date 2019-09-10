@@ -1,3 +1,15 @@
+## <small>2.9.4 (2019-09-10)</small>
+
+* add future play events ([b141c39](https://github.com/Manuel-777/MTG-Arena-Tool/commit/b141c39))
+* bugfix player-data.draftExists still requires draft_index check ([7c8e035](https://github.com/Manuel-777/MTG-Arena-Tool/commit/7c8e035))
+* database date ([3991264](https://github.com/Manuel-777/MTG-Arena-Tool/commit/3991264))
+* Fixed simple typo ([6214160](https://github.com/Manuel-777/MTG-Arena-Tool/commit/6214160))
+* Update database.json ([54e1bd1](https://github.com/Manuel-777/MTG-Arena-Tool/commit/54e1bd1))
+* Update package-lock.json ([48ed9eb](https://github.com/Manuel-777/MTG-Arena-Tool/commit/48ed9eb))
+* Update TROUBLESHOOTING.md ([4d978a7](https://github.com/Manuel-777/MTG-Arena-Tool/commit/4d978a7))
+
+
+
 ## <small>2.9.3 (2019-09-05)</small>
 
 * add new sets data ([1e415cd](https://github.com/Manuel-777/MTG-Arena-Tool/commit/1e415cd))
