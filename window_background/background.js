@@ -1014,8 +1014,12 @@ async function logLoop() {
     let strCheck = "DETAILED LOGS: DISABLED";
     if (value.includes(strCheck)) {
       ipc_send("popup", {
-        text:
-          "Detailed logs (plugin support) is disabled in Arena. Enable in Options > View Account. You will need to restart MTG Arena afterwards.",
+        text: `Detailed logs disabled.
+1) Open Arena (the game by WotC)
+2) Go to the settings screen in Arena
+3) Open the View Account screen
+4) Enable Detailed logs.
+5) Restart Arena.`,
         time: 0
       });
       detailedLogs = false;
