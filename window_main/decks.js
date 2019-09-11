@@ -18,7 +18,6 @@ const StatsPanel = require("./stats-panel");
 const { openDeck } = require("./deck-details");
 const {
   formatPercent,
-  getLocalState,
   getTagColor,
   getWinrateClass,
   hideLoadingBars,
@@ -220,7 +219,7 @@ function openDecksTab(_filters = {}, scrollTop = 0) {
       } else {
         // sample size is too small (garbage results)
         interval = "???";
-        tooltip = "play at least 20 games to estimate actual winrate";
+        tooltip = "play at least 20 matches to estimate actual winrate";
       }
       let colClass = getWinrateClass(dwr.winrate);
       deckWinrateDiv.innerHTML = `${dwr.wins}:${
