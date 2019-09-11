@@ -88,40 +88,46 @@ function openMatch(id) {
     });
     flc.appendChild(actionLogButton);
 
-    const actionLogShareButton = createDiv(["list_log_share", match.id + "al"]);
-    actionLogShareButton.addEventListener("click", e => {
-      e.stopPropagation();
-      const cont = createDiv(["dialog_content"]);
-      cont.style.width = "500px";
+    if (!pd.offline) {
+      const actionLogShareButton = createDiv(["list_log_share", match.id + "al"]);
+      actionLogShareButton.addEventListener("click", e => {
+        e.stopPropagation();
+        const cont = createDiv(["dialog_content"]);
+        cont.style.width = "500px";
 
-      cont.append(createDiv(["share_title"], "Link for sharing:"));
-      const icd = createDiv(["share_input_container"]);
-      const linkInput = createInput([], "", {
-        id: "share_input",
-        autocomplete: "off"
+        cont.append(createDiv(["share_title"], "Link for sharing:"));
+        const icd = createDiv(["share_input_container"]);
+        const linkInput = createInput([], "", {
+          id: "share_input",
+          autocomplete: "off"
+        });
+        linkInput.addEventListener("click", () => linkInput.select());
+        icd.appendChild(linkInput);
+        const but = createDiv(["button_simple"], "Copy");
+        but.addEventListener("click", function() {
+          ipcSend("set_clipboard", byId("share_input").value);
+        });
+        icd.appendChild(but);
+        cont.appendChild(icd);
+
+        cont.appendChild(createDiv(["share_subtitle"], "<i>Expires in: </i>"));
+        createSelect(
+          cont,
+          ["One day", "One week", "One month", "Never"],
+          "",
+          () => logShareLink(match.id),
+          "expire_select"
+        );
+
+        openDialog(cont);
+        logShareLink(match.id);
       });
-      linkInput.addEventListener("click", () => linkInput.select());
-      icd.appendChild(linkInput);
-      const but = createDiv(["button_simple"], "Copy");
-      but.addEventListener("click", function() {
-        ipcSend("set_clipboard", byId("share_input").value);
-      });
-      icd.appendChild(but);
-      cont.appendChild(icd);
-
-      cont.appendChild(createDiv(["share_subtitle"], "<i>Expires in: </i>"));
-      createSelect(
-        cont,
-        ["One day", "One week", "One month", "Never"],
-        "",
-        () => logShareLink(match.id),
-        "expire_select"
-      );
-
-      openDialog(cont);
-      logShareLink(match.id);
-    });
-    flc.appendChild(actionLogShareButton);
+      flc.appendChild(actionLogShareButton);
+    } else {
+      const actionLogCantShare = createDiv(["list_log_cant_share"]);
+      actionLogCantShare.title = "You need to be logged in to share!";
+      flc.appendChild(actionLogCantShare);
+    }
   }
   mainDiv.appendChild(flc);
 
