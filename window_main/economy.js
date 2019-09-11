@@ -637,6 +637,7 @@ function createChangeRow(change, economyId) {
       img.classList.add("inventory_card_img");
       img.style.width = "39px";
       img.src = getCardImage(card);
+      img.title = card.name;
 
       d.appendChild(img);
 
