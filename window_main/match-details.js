@@ -89,7 +89,10 @@ function openMatch(id) {
     flc.appendChild(actionLogButton);
 
     if (!pd.offline) {
-      const actionLogShareButton = createDiv(["list_log_share", match.id + "al"]);
+      const actionLogShareButton = createDiv([
+        "list_log_share",
+        match.id + "al"
+      ]);
       actionLogShareButton.addEventListener("click", e => {
         e.stopPropagation();
         const cont = createDiv(["dialog_content"]);
