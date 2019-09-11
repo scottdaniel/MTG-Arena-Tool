@@ -637,6 +637,7 @@ function createChangeRow(change, economyId) {
       img.classList.add("inventory_card_img");
       img.style.width = "39px";
       img.src = getCardImage(card);
+      img.title = card.name;
 
       d.appendChild(img);
 
@@ -677,13 +678,24 @@ function createChangeRow(change, economyId) {
         img.style.width = "39px";
         img.src = getCardImage(card);
 
-        if (card.rarity) {
-          // only uncommons and commons go to vault
-          let vaultProgressDelta =
-            card.rarity === "uncommon" ? 1 / 300 : 1 / 900;
-          img.title =
-            "Vault:+" + formatPercent(vaultProgressDelta, vaultPercentFormat);
+        let tooltip = card.name;
+        switch (card.rarity) {
+          case "mythic":
+            tooltip += " (Gems:+40)";
+            break;
+          case "rare":
+            tooltip += " (Gems:+20)";
+            break;
+          case "uncommon":
+            tooltip +=
+              " (Vault:+" + formatPercent(1 / 300, vaultPercentFormat) + ")";
+            break;
+          case "common":
+            tooltip +=
+              " (Vault:+" + formatPercent(1 / 900, vaultPercentFormat) + ")";
+            break;
         }
+        img.title = tooltip;
 
         d.appendChild(img);
         flexRight.appendChild(d);
