@@ -19,6 +19,7 @@ class Deck {
 
     this.mainboard = new CardsList(mtgaDeck.mainDeck);
     this.sideboard = new CardsList(mtgaDeck.sideboard);
+    this.commandZoneGRPId = mtgaDeck.commandZoneGRPId || 0;
     this.name = mtgaDeck.name || "";
     this.id = mtgaDeck.id || "";
     this.lastUpdated = mtgaDeck.lastUpdated || "";
@@ -62,7 +63,8 @@ class Deck {
       lastUpdated: this.lastUpdated,
       deckTileId: this.tile,
       tags: this.tags,
-      custom: this.custom
+      custom: this.custom,
+      commandZoneGRPId: this.commandZoneGRPId
     };
 
     let ret = new Deck(objectClone(obj), main, side);
@@ -217,6 +219,7 @@ class Deck {
     ret.colors = this.colors.get();
     ret.tags = this.tags;
     ret.custom = this.custom;
+    ret.commandZoneGRPId = this.commandZoneGRPId;
 
     return ret;
   }

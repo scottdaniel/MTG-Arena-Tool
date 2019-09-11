@@ -175,54 +175,50 @@ const defaultDeck = JSON.parse(
     ',"description":null,"format":"Standard","colors":[],"id":"00000000-0000-0000-0000-000000000000","isValid":false,"lastUpdated":"2018-05-31T00:06:29.7456958","lockedForEdit":false,"lockedForUse":false,"mainDeck":[],"name":"Undefined","resourceId":"00000000-0000-0000-0000-000000000000","sideboard":[]}'
 );
 
-// cloned from util to avoid circular dependency
-// TODO refactor to recombine
-function get_deck_colors(deck) {
-  var colorIndices = [];
-  try {
-    deck.mainDeck.forEach(card => {
-      if (card.quantity < 1) {
-        return;
-      }
-
-      let cardData = db.card(card.id);
-
-      if (!cardData) {
-        return;
-      }
-
-      let isLand = cardData.type.indexOf("Land") !== -1;
-      let frame = cardData.frame;
-      if (isLand && frame.length < 3) {
-        colorIndices = colorIndices.concat(frame);
-      }
-
-      cardData.cost.forEach(cost => {
-        if (cost === "w") {
-          colorIndices.push(WHITE);
-        } else if (cost === "u") {
-          colorIndices.push(BLUE);
-        } else if (cost === "b") {
-          colorIndices.push(BLACK);
-        } else if (cost === "r") {
-          colorIndices.push(RED);
-        } else if (cost === "g") {
-          colorIndices.push(GREEN);
-        }
-      });
-    });
-
-    colorIndices = Array.from(new Set(colorIndices));
-    colorIndices.sort((a, b) => {
-      return a - b;
-    });
-  } catch (e) {
-    // FIXME: Errors shouldn't be caught silently. If this is an
-    //        expected error then there should be a test to catch only that error.
-    colorIndices = [];
+// Cannot use Deck/ColorList classes because it would cause circular dependency
+// tweaked for heavy use in player-data/aggregator
+function getDeckColors(deck) {
+  if (deck.colors && deck.colors instanceof Array) {
+    // if field exists, assume it was correctly pre-computed by latest code
+    return deck.colors;
   }
 
-  deck.colors = colorIndices;
+  const colorSet = new Set();
+
+  deck.mainDeck.forEach(card => {
+    if (card.quantity < 1) {
+      return;
+    }
+
+    let cardData = db.card(card.id);
+
+    if (!cardData) {
+      return;
+    }
+
+    let isLand = cardData.type.indexOf("Land") !== -1;
+    let frame = cardData.frame;
+    if (isLand && frame.length < 3) {
+      frame.forEach(colorIndex => colorSet.add(colorIndex));
+    }
+
+    cardData.cost.forEach(cost => {
+      if (cost === "w") {
+        colorSet.add(WHITE);
+      } else if (cost === "u") {
+        colorSet.add(BLUE);
+      } else if (cost === "b") {
+        colorSet.add(BLACK);
+      } else if (cost === "r") {
+        colorSet.add(RED);
+      } else if (cost === "g") {
+        colorSet.add(GREEN);
+      }
+    });
+  });
+
+  const colorIndices = [...colorSet];
+  colorIndices.sort();
   return colorIndices;
 }
 
@@ -385,7 +381,7 @@ class PlayerData {
     const deckData = {
       ...preconData,
       ...this.decks[id],
-      colors: get_deck_colors(this.decks[id]),
+      colors: getDeckColors(this.decks[id]),
       custom: !this.static_decks.includes(id),
       tags: this.decks_tags[id] || []
     };
@@ -409,7 +405,7 @@ class PlayerData {
   }
 
   draftExists(id) {
-    return id in this;
+    return this.draft_index.includes(id) && id in this;
   }
 
   event(id) {
@@ -437,10 +433,10 @@ class PlayerData {
       ...preconData,
       ...matchData.playerDeck
     });
-    playerDeck.colors = get_deck_colors(playerDeck);
+    playerDeck.colors = getDeckColors(playerDeck);
 
     const oppDeck = { ...defaultDeck, ...matchData.oppDeck };
-    oppDeck.colors = get_deck_colors(oppDeck);
+    oppDeck.colors = getDeckColors(oppDeck);
 
     return {
       ...matchData,

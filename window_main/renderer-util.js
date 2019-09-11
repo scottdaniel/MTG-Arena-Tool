@@ -37,7 +37,6 @@ const {
   deckTypesStats,
   formatRank,
   getCardArtCrop,
-  get_deck_colors,
   get_rank_index_16,
   getCardImage,
   getReadableEvent,
@@ -194,6 +193,23 @@ exports.drawDeck = drawDeck;
 function drawDeck(div, deck, showWildcards = false) {
   div.innerHTML = "";
   const unique = makeId(4);
+
+  if (deck.commandZoneGRPId) {
+    let commander = deck.commandZoneGRPId;
+    let separator = deckDrawer.cardSeparator(`Commander`);
+    div.appendChild(separator);
+
+    const tile = deckDrawer.cardTile(
+      pd.settings.card_tile_style,
+      commander,
+      unique + "a",
+      1,
+      showWildcards,
+      deck,
+      false
+    );
+    div.appendChild(tile);
+  }
 
   // draw maindeck grouped by cardType
   const cardsByGroup = _(deck.mainDeck)
@@ -1023,7 +1039,7 @@ function attachMatchData(listItem, match) {
   listItem.rightBottom.appendChild(matchTime);
 
   // Opp colors
-  get_deck_colors(match.oppDeck).forEach(color => {
+  match.oppDeck.colors.forEach(color => {
     const m = createDiv(["mana_s20", "mana_" + MANA[color]]);
     listItem.rightBottom.appendChild(m);
   });

@@ -283,11 +283,34 @@ annotationFunctions.AnnotationType_ZoneTransfer = function(ann, details) {
   }
 };
 
+annotationFunctions.AnnotationType_AbilityInstanceCreated = function(
+  ann,
+  details
+) {
+  let affected = ann.affectedIds[0];
+  let affector = instanceIdToObject(ann.affectorId);
+
+  if (affector) {
+    currentMatch.gameObjs[affected] = {
+      instanceId: affected,
+      grpId: 0,
+      type: "GameObjectType_Ability",
+      zoneId: affector.zoneId,
+      visibility: "Visibility_Public",
+      ownerSeatId: affector.ownerSeatId,
+      controllerSeatId: affector.controllerSeatId,
+      objectSourceGrpId: affector.grpId,
+      parentId: affector.instanceId
+    };
+  }
+};
+
 annotationFunctions.AnnotationType_ResolutionStart = function(ann, details) {
   let affected = instanceIdToObject(ann.affectedIds[0]);
   let grpId = details.grpid;
 
   if (affected.type == "GameObjectType_Ability") {
+    affected.grpId = grpId;
     actionLog(
       affected.controllerSeatId,
       logTime,

@@ -186,7 +186,9 @@ exports.generateMetadata = function(
         if (ranksData[setCode] && ranksData[setCode][englishName]) {
           cardObj.rank = Math.round(ranksData[setCode][englishName].rank);
           cardObj.rank_values = ranksData[setCode][englishName].values;
-          cardObj.rank_controversy = ranksData[setCode][englishName].cont;
+          cardObj.rank_controversy = ranksData[setCode][
+            englishName
+          ].cont.toFixed(3);
         } else {
           cardObj.rank = 0;
           cardObj.rank_values = 0;
