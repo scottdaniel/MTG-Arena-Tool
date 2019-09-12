@@ -188,7 +188,7 @@ function toggleEditMode() {
       interact(overlayDiv).unset();
     });
     setIgnoreTrue();
-    document.body.style.backgroundColor = "rgba(0, 0, 0, 0)";
+    document.body.style.backgroundColor = "rgba(0, 0, 0, 0.05)";
     saveOverlaysPosition();
   }
 }
