@@ -18,6 +18,13 @@ var rememberStore = new Store({
   defaults: {}
 });
 
+const {
+  ARENA_MODE_IDLE,
+  ARENA_MODE_MATCH,
+  ARENA_MODE_DRAFT,
+  OVERLAY_DRAFT_MODES
+} = require("./shared/constants.js");
+
 app.setAppUserModelId("com.github.manuel777.mtgatool");
 
 // Adds debug features like hotkeys for triggering dev tools and reload
@@ -41,8 +48,8 @@ const ipc = electron.ipcMain;
 
 var mainLoaded = false;
 var backLoaded = false;
-const ARENA_MODE_IDLE = 0; // copied from constants.js
 let arenaState = ARENA_MODE_IDLE;
+let overlayShow = false;
 
 const singleLock = app.requestSingleInstanceLock();
 
@@ -375,6 +382,19 @@ function setSettings(settings) {
     });
   }
 
+  let doShow = false;
+  settings.overlays.forEach(_settings => {
+    if (getOverlayVisible(_settings)) doShow = true;
+  });
+
+  if (doShow !== overlayShow) {
+    overlayShow = doShow;
+    if (!overlayShow)
+      setTimeout(function() {
+        overlay.setBounds({ x: -10, y: -10, width: 5, height: 5 });
+      }, 1000);
+  }
+
   app.setLoginItemSettings({
     openAtLogin: settings.startup
   });
@@ -382,23 +402,37 @@ function setSettings(settings) {
   launchToTray = settings.launch_to_tray;
   mainWindow.webContents.send("settings_updated");
 
-  // update overlay positions
-  let displayId = settings.overlay_display
-    ? settings.overlay_display
-    : electron.screen.getPrimaryDisplay().id;
-  let display = electron.screen
-    .getAllDisplays()
-    .filter(d => d.id == displayId)[0];
+  if (overlayShow) {
+    // update overlay positions
+    let displayId = settings.overlay_display
+      ? settings.overlay_display
+      : electron.screen.getPrimaryDisplay().id;
+    let display = electron.screen
+      .getAllDisplays()
+      .filter(d => d.id == displayId)[0];
 
-  if (display) {
-    overlay.setBounds(display.bounds);
-  } else {
-    overlay.setBounds(electron.screen.getPrimaryDisplay().bounds);
+    if (display) {
+      overlay.setBounds(display.bounds);
+    } else {
+      overlay.setBounds(electron.screen.getPrimaryDisplay().bounds);
+    }
   }
 
   // Send settings update
   overlay.setAlwaysOnTop(settings.overlay_ontop, "floating");
   overlay.webContents.send("settings_updated");
+}
+
+function getOverlayVisible(settings) {
+  if (!settings) return false;
+
+  const currentModeApplies =
+    (OVERLAY_DRAFT_MODES.includes(settings.mode) &&
+      arenaState === ARENA_MODE_DRAFT) ||
+    (!OVERLAY_DRAFT_MODES.includes(settings.mode) &&
+      arenaState === ARENA_MODE_MATCH);
+
+  return settings.show && (currentModeApplies || settings.show_always);
 }
 
 // Catch exceptions
