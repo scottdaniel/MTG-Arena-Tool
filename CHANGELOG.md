@@ -1,3 +1,24 @@
+## <small>2.9.5 (2019-09-12)</small>
+
+* a little color to the transparency ([3aa40a3](https://github.com/Manuel-777/MTG-Arena-Tool/commit/3aa40a3))
+* add card name to all tooltips ([0157028](https://github.com/Manuel-777/MTG-Arena-Tool/commit/0157028))
+* better economy page card tooltips ([31418b9](https://github.com/Manuel-777/MTG-Arena-Tool/commit/31418b9))
+* colors check ([058135e](https://github.com/Manuel-777/MTG-Arena-Tool/commit/058135e))
+* detailed step by step ([f9af24b](https://github.com/Manuel-777/MTG-Arena-Tool/commit/f9af24b))
+* draw commander in deck ([169c39c](https://github.com/Manuel-777/MTG-Arena-Tool/commit/169c39c))
+* fade share if offline ([db1cedb](https://github.com/Manuel-777/MTG-Arena-Tool/commit/db1cedb))
+* fixed controversy value ([d74a6c0](https://github.com/Manuel-777/MTG-Arena-Tool/commit/d74a6c0))
+* hide empty renewal event rewards ([38040c6](https://github.com/Manuel-777/MTG-Arena-Tool/commit/38040c6))
+* hide overlays if not used ([6ace54c](https://github.com/Manuel-777/MTG-Arena-Tool/commit/6ace54c))
+* leylines abilities ([462cbba](https://github.com/Manuel-777/MTG-Arena-Tool/commit/462cbba))
+* optimize player-data.getDeckColors ([ee781e6](https://github.com/Manuel-777/MTG-Arena-Tool/commit/ee781e6))
+* prettier ([9bd11e8](https://github.com/Manuel-777/MTG-Arena-Tool/commit/9bd11e8))
+* prettier ([403c765](https://github.com/Manuel-777/MTG-Arena-Tool/commit/403c765))
+* remove redundant calls to get_deck_colors ([8a5d324](https://github.com/Manuel-777/MTG-Arena-Tool/commit/8a5d324))
+* update decks to handle commanders ([af8d879](https://github.com/Manuel-777/MTG-Arena-Tool/commit/af8d879))
+
+
+
 ## <small>2.9.4 (2019-09-10)</small>
 
 * add future play events ([b141c39](https://github.com/Manuel-777/MTG-Arena-Tool/commit/b141c39))
