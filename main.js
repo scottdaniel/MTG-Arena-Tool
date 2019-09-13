@@ -394,17 +394,22 @@ function setSettings(_settings) {
   updateOverlayVisibility();
 }
 
+let overlayHideTimeout = undefined;
+
 function updateOverlayVisibility() {
   const shouldDisplayOverlay = settings.overlays.some(getOverlayVisible);
   const isOverlayVisible = isEntireOverlayVisible();
 
   if (!shouldDisplayOverlay && isOverlayVisible) {
     // hide entire overlay window
-    setTimeout(function() {
+    // Add a 1 second timeout for animations
+    overlayHideTimeout = setTimeout(function() {
       overlay.setBounds({ x: -10, y: -10, width: 5, height: 5 });
     }, 1000);
   } else if (shouldDisplayOverlay && !isOverlayVisible) {
     // display entire overlay window
+    clearTimeout(overlayHideTimeout);
+    overlayHideTimeout = undefined;
     let displayId = settings.overlay_display
       ? settings.overlay_display
       : electron.screen.getPrimaryDisplay().id;
