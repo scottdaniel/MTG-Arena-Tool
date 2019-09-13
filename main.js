@@ -23,7 +23,7 @@ const {
   ARENA_MODE_MATCH,
   ARENA_MODE_DRAFT,
   OVERLAY_DRAFT_MODES
-} = require("./shared/constants.js");
+} = require("./shared/constants");
 
 app.setAppUserModelId("com.github.manuel777.mtgatool");
 
@@ -39,10 +39,11 @@ var updaterWindow = null;
 var background = null;
 var overlay = null;
 var mainTimeout = null;
-
+let settings = {
+  close_to_tray: false,
+  launch_to_tray: false
+};
 var tray = null;
-var closeToTray = true;
-let launchToTray = false;
 
 const ipc = electron.ipcMain;
 
@@ -223,14 +224,7 @@ function startApp() {
         break;
 
       case "set_arena_state":
-        mainWindow.webContents.send("player_data_refresh");
-        arenaState = arg;
-        if (overlay) overlay.webContents.send("set_arena_state", arg);
-        break;
-
-      case "overlay_minimize":
-        if (!overlay || overlay.isMinimized()) return;
-        overlay.minimize();
+        setArenaState(arg);
         break;
 
       case "renderer_set_bounds":
@@ -250,15 +244,11 @@ function startApp() {
         break;
 
       case "renderer_window_close":
-        if (closeToTray) {
+        if (settings.close_to_tray) {
           hideWindow();
         } else {
           quit();
         }
-        break;
-
-      case "set_close_to_tray":
-        closeToTray = arg;
         break;
 
       case "set_clipboard":
@@ -331,11 +321,10 @@ function startApp() {
   });
 }
 
-function initialize(settings) {
+function initialize(_settings) {
   console.log("MAIN:  Initializing");
-  closeToTray = settings.close_to_tray;
-  launchToTray = settings.launch_to_tray;
-  if (!launchToTray) showWindow();
+  settings = _settings;
+  if (!settings.launch_to_tray) showWindow();
 }
 
 function openDevTools() {
@@ -360,8 +349,19 @@ function openOverlayDevTools() {
   }
 }
 
-function setSettings(settings) {
+function setArenaState(state) {
+  arenaState = state;
+  if (state === ARENA_MODE_MATCH && settings.close_on_match) {
+    mainWindow.hide();
+  }
+  mainWindow.webContents.send("player_data_refresh");
+  overlay.webContents.send("set_arena_state", state);
+  updateOverlayVisibility();
+}
+
+function setSettings(_settings) {
   console.log("MAIN:  Updating settings");
+  settings = _settings;
 
   // update keyboard shortcuts
   globalShortcut.unregisterAll();
@@ -382,28 +382,29 @@ function setSettings(settings) {
     });
   }
 
-  let doShow = false;
-  settings.overlays.forEach(_settings => {
-    if (getOverlayVisible(_settings)) doShow = true;
-  });
-
-  if (doShow !== overlayShow) {
-    overlayShow = doShow;
-    if (!overlayShow)
-      setTimeout(function() {
-        overlay.setBounds({ x: -10, y: -10, width: 5, height: 5 });
-      }, 1000);
-  }
-
   app.setLoginItemSettings({
     openAtLogin: settings.startup
   });
-  closeToTray = settings.close_to_tray;
-  launchToTray = settings.launch_to_tray;
   mainWindow.webContents.send("settings_updated");
 
-  if (overlayShow) {
-    // update overlay positions
+  // Send settings update
+  overlay.setAlwaysOnTop(settings.overlay_ontop, "floating");
+  overlay.webContents.send("settings_updated");
+
+  updateOverlayVisibility();
+}
+
+function updateOverlayVisibility() {
+  const shouldDisplayOverlay = settings.overlays.some(getOverlayVisible);
+  const isOverlayVisible = isEntireOverlayVisible();
+
+  if (!shouldDisplayOverlay && isOverlayVisible) {
+    // hide entire overlay window
+    setTimeout(function() {
+      overlay.setBounds({ x: -10, y: -10, width: 5, height: 5 });
+    }, 1000);
+  } else if (shouldDisplayOverlay && !isOverlayVisible) {
+    // display entire overlay window
     let displayId = settings.overlay_display
       ? settings.overlay_display
       : electron.screen.getPrimaryDisplay().id;
@@ -417,10 +418,16 @@ function setSettings(settings) {
       overlay.setBounds(electron.screen.getPrimaryDisplay().bounds);
     }
   }
+}
 
-  // Send settings update
-  overlay.setAlwaysOnTop(settings.overlay_ontop, "floating");
-  overlay.webContents.send("settings_updated");
+function isEntireOverlayVisible() {
+  if (!overlay) return false;
+  const bounds = overlay.getBounds();
+  // use a size-based test for visibility because GPU edge cases
+  // require us to avoid the standard isVisible() API
+  // we cannot rely on x/y position values to derive visiblity because
+  // multi-display setups may have negative values for x or y
+  return bounds.width > 10 && bounds.height > 10;
 }
 
 function getOverlayVisible(settings) {
@@ -539,6 +546,7 @@ function createOverlayWindow() {
     width: 5,
     height: 5,
     frame: false,
+    show: false,
     resizable: false,
     skipTaskbar: true,
     focusable: false,
@@ -554,8 +562,7 @@ function createOverlayWindow() {
     //We need to wait for the overlay to be initialized before we interact with it
     const display = electron.screen.getPrimaryDisplay();
     // display.workArea does not include the taskbar
-    overlay.setSize(display.bounds.width, display.bounds.height);
-    overlay.setPosition(display.bounds.x, display.bounds.height);
+    overlay.setBounds(display.bounds);
     overlay.webContents.send("settings_updated");
     // only show overlay after its ready
     // TODO does this work with Linux transparency???
