@@ -1257,10 +1257,6 @@ function processMatch(json, matchBeginTime) {
   actionLog(-99, new Date(), "");
 
   if (debugLog || !firstPass) {
-    if (playerData.settings.close_on_match) {
-      ipc_send("renderer_hide", 1);
-    }
-
     ipc_send("set_arena_state", ARENA_MODE_MATCH);
   }
 
@@ -1715,9 +1711,6 @@ function finishLoading() {
     });
 
     if (duringMatch) {
-      if (playerData.settings.close_on_match) {
-        ipc_send("renderer_hide", 1);
-      }
       ipc_send("set_arena_state", ARENA_MODE_MATCH);
       update_deck(false);
     } else if (duringDraft) {
