@@ -1,3 +1,18 @@
+## 2.10.0 (2019-09-14)
+
+* add change language setting ([f106ed2](https://github.com/Manuel-777/MTG-Arena-Tool/commit/f106ed2))
+* add timeout / clear ([3311652](https://github.com/Manuel-777/MTG-Arena-Tool/commit/3311652))
+* added RNA ranked ([e139922](https://github.com/Manuel-777/MTG-Arena-Tool/commit/e139922))
+* check for metadata language ([610d636](https://github.com/Manuel-777/MTG-Arena-Tool/commit/610d636))
+* decks page only estimates actual winrate for good sample sizes ([1d939d4](https://github.com/Manuel-777/MTG-Arena-Tool/commit/1d939d4))
+* derive overlay visibility directly from state ([432b9cf](https://github.com/Manuel-777/MTG-Arena-Tool/commit/432b9cf))
+* fix tooltip wording ([3158370](https://github.com/Manuel-777/MTG-Arena-Tool/commit/3158370))
+* hard code readable quest names ([b2443c7](https://github.com/Manuel-777/MTG-Arena-Tool/commit/b2443c7))
+* properly add adventures ([f117d60](https://github.com/Manuel-777/MTG-Arena-Tool/commit/f117d60))
+* typo ([da29dae](https://github.com/Manuel-777/MTG-Arena-Tool/commit/da29dae))
+
+
+
 ## <small>2.9.5 (2019-09-12)</small>
 
 * a little color to the transparency ([3aa40a3](https://github.com/Manuel-777/MTG-Arena-Tool/commit/3aa40a3))
