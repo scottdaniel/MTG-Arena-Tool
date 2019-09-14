@@ -260,6 +260,18 @@ function generateScryfallDatabase() {
                 name,
                 obj.collector_number
               );
+              if (obj.layout == "adventure") {
+                obj.card_faces.forEach(face => {
+                  let name = face.name;
+                  scryfallDataAdd(
+                    obj,
+                    obj.lang,
+                    obj.set,
+                    name,
+                    obj.collector_number
+                  );
+                });
+              }
               if (obj.layout == "transform") {
                 obj.card_faces.forEach(face => {
                   let name = face.name;

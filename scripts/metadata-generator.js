@@ -234,7 +234,7 @@ exports.generateMetadata = function(
         let card = cardsFinal[key];
 
         if (card.frame) {
-          if (card.dfc == "SplitHalf" && card.frame.length == 0) {
+          if (card.dfc == 5 && card.frame.length == 0) {
             let did = card.dfcId;
             card.frame = cardsFinal[did].frame;
             card.dfcId = did;
