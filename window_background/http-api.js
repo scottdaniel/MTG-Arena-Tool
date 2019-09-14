@@ -56,7 +56,7 @@ function httpBasic() {
           protocol: "https:",
           port: 443,
           hostname: serverAddress,
-          path: "/database/",
+          path: "/database/" + _headers.lang,
           method: "GET"
         };
         ipc_send("popup", {
@@ -175,14 +175,27 @@ function httpBasic() {
               ipc_send("set_discord_tag", "");
             }
             if (_headers.method == "get_database_version") {
-              // Compare parsedResult.version with stored version
-              if (parsedResult.latest > db.version) {
+              let lang = playerData.settings.metadata_lang;
+              if (
+                db.data.language &&
+                parsedResult.lang.toLowerCase() !==
+                  db.data.language.toLowerCase()
+              ) {
+                // compare language
+                console.log(
+                  `Downloading database (had lang ${db.data.language}, needed ${
+                    parsedResult.lang
+                  })`
+                );
+                httpGetDatabase(lang);
+              } else if (parsedResult.latest > db.version) {
+                // Compare parsedResult.version with stored version
                 console.log(
                   `Downloading latest database (had v${db.version}, found v${
                     parsedResult.latest
                   })`
                 );
-                httpGetDatabase();
+                httpGetDatabase(lang);
               } else {
                 console.log(
                   `Database up to date (${db.version}), skipping download.`
@@ -555,17 +568,17 @@ function httpDeleteData() {
   });
 }
 
-function httpGetDatabase() {
+function httpGetDatabase(lang) {
   var _id = makeId(6);
-  httpAsync.push({ reqId: _id, method: "get_database" });
+  httpAsync.push({ reqId: _id, method: "get_database", lang: lang });
 }
 
-function httpGetDatabaseVersion() {
+function httpGetDatabaseVersion(lang) {
   var _id = makeId(6);
   httpAsync.push({
     reqId: _id,
     method: "get_database_version",
-    method_path: "/database/latest/"
+    method_path: "/database/latest/" + lang
   });
 }
 

@@ -110,6 +110,7 @@ const rememberCfg = {
     launch_to_tray: false,
     remember_me: true,
     beta_channel: false,
+    metadata_lang: "en",
     log_locale_format: ""
   }
 };
@@ -195,13 +196,23 @@ function fixBadSettingsData() {
     appSettings.log_locale_format = "";
     rstore.set("settings", appSettings);
   }
+
+  // Define new metadata language setting.
+  if (appSettings.metadata_lang === undefined) {
+    appSettings.metadata_lang = "en";
+    rstore.set("settings", appSettings);
+  }
   // include more fixes below. Be as specific
   // and conservitive as possible.
 }
 
 function downloadMetadata() {
-  httpApi.httpGetDatabase();
-  ipc_send("popup", { text: "Downloading metadata", time: 0 });
+  const appSettings = rstore.get("settings");
+  httpApi.httpGetDatabase(appSettings.metadata_lang);
+  ipc_send("popup", {
+    text: `Downloading metadata ${appSettings.metadata_lang}`,
+    time: 0
+  });
 }
 
 ipc.on("download_metadata", downloadMetadata);
@@ -223,8 +234,11 @@ ipc.on("start_background", function() {
 
   // start http
   httpApi.httpBasic();
-  httpApi.httpGetDatabaseVersion();
-  ipc_send("popup", { text: "Downloading metadata", time: 0 });
+  httpApi.httpGetDatabaseVersion(appSettings.metadata_lang);
+  ipc_send("popup", {
+    text: `Downloading metadata ${appSettings.metadata_lang}`,
+    time: 0
+  });
 
   // Check if it is the first time we open this version
   if (
