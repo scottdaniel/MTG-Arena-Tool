@@ -59,6 +59,46 @@ const {
 let lastSettingsSection = 1;
 let updateState = "";
 
+const LANGUAGES = [
+  "en",
+  "es",
+  "br",
+  "de",
+  "fr",
+  "it",
+  "js",
+  "ru",
+  "ko-kr",
+  "zh-cn"
+];
+
+function getLanguageName(lang) {
+  switch (lang) {
+    case "en":
+      return "English";
+    case "es":
+      return "Spanish";
+    case "br":
+      return "Portuguese";
+    case "de":
+      return "Deutsche";
+    case "fr":
+      return "French";
+    case "it":
+      return "Italian";
+    case "js":
+      return "Japanese";
+    case "ru":
+      return "Russian";
+    case "ko-kr":
+      return "Korean";
+    case "zh-cn":
+      return "Chinese (simplified)";
+    default:
+      return "-";
+  }
+}
+
 function getCardStyleName(style) {
   if (style == CARD_TILE_FLAT) return "Flat";
   return "Arena";
@@ -309,6 +349,27 @@ function appendBehaviour(section) {
 
 function appendArenaData(section) {
   section.appendChild(createDiv(["settings_title"], "Arena Data"));
+
+  let label = createLabel(["but_container_label"], "Cards language:");
+  const langSelect = createSelect(
+    label,
+    LANGUAGES,
+    pd.settings.metadata_lang,
+    filter =>
+      ipcSend("save_app_settings", { metadata_lang: filter.toLowerCase() }),
+    "settings_cards_language",
+    getLanguageName
+  );
+  langSelect.style.width = "180px";
+  langSelect.style.marginLeft = "32px";
+  section.appendChild(label);
+
+  const langHelpDiv = createDiv(
+    ["settings_note"],
+    `<p><i>Changes the cards data language, <b>not the interface</b>. Requires restarting tool to take effect.</p>
+<p>Card names when exporting will also be changed.</i></p>`
+  );
+  section.appendChild(langHelpDiv);
 
   renderLogInput(section);
 
