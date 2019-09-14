@@ -38,9 +38,10 @@ exports.EVENT_TO_NAME = {
   QuickDraft_WAR_20190607: "Ranked Draft WAR 06/19",
   QuickDraft_WAR_20190705: "Ranked Draft WAR 07/19",
   QuickDraft_M20_20190719: "Ranked Draft M20",
-  QuickDraft_RNA_20190802: "Ranked Draft RNA",
+  QuickDraft_RNA_20190802: "Ranked Draft RNA 08/19",
   QuickDraft_WAR_20190816: "Ranked Draft WAR",
   QuickDraft_GRN_20190829: "Ranked Draft GRN",
+  QuickDraft_RNA_20190913: "Ranked Draft RNA",
   Cascade_Constructed_20190516: "Cascade Constructed",
   Omniscience_Draft_20190830: "Omniscience Draft",
 
@@ -91,6 +92,7 @@ exports.EVENT_TO_FORMAT = {
   QuickDraft_RNA_20190802: "Draft RNA",
   QuickDraft_WAR_20190816: "Draft WAR",
   QuickDraft_GRN_20190829: "Draft GRN",
+  QuickDraft_RNA_20190913: "Draft RNA",
 
   Cascade_Constructed_20190516: "Cascade Constructed",
   Omniscience_Draft_20190830: "Draft M20",
@@ -113,7 +115,11 @@ exports.EVENT_TO_FORMAT = {
   Giant_Monsters_20190719: "Giant Monsters"
 };
 
-exports.RANKED_EVENTS = ["QuickDraft_M20_20190719", "QuickDraft_GRN_20190829"];
+exports.RANKED_EVENTS = [
+  "QuickDraft_M20_20190719",
+  "QuickDraft_GRN_20190829",
+  "QuickDraft_RNA_20190913"
+];
 
 /*
   "Kaladesh": {

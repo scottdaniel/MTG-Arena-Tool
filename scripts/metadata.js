@@ -19,7 +19,7 @@ const {
 let metagameData = {};
 let ranksData = {};
 
-const VERSION = 16;
+const VERSION = 17;
 /*
   Languages available in loc.json;
   "BR"
@@ -34,7 +34,7 @@ const VERSION = 16;
   "zh-CN"
 */
 const LANGUAGES = [
-  "EN" /*,
+  "EN",
   "ES",
   "BR",
   "DE",
@@ -43,10 +43,10 @@ const LANGUAGES = [
   "JP",
   "RU",
   "ko-KR",
-  "zh-CN"*/
+  "zh-CN"
 ];
 // "scryfall-all-cards.json" contains cards in all languages but is 800+mb
-const SCRYFALL_FILE = "scryfall-default-cards.json";
+const SCRYFALL_FILE = "scryfall-all-cards.json";
 
 app.on("ready", () => {
   console.log("Begin Metadata fetch.");
