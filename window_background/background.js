@@ -1320,7 +1320,7 @@ function clear_deck() {
 //
 function update_deck(force) {
   var nd = new Date();
-  if (nd - lastDeckUpdate > 1000 || debugLog || !firstPass || force) {
+  if ((debugLog || force || !firstPass) && nd - lastDeckUpdate > 1000) {
     forceDeckUpdate();
 
     let currentMatchCopy = objectClone(currentMatch);
