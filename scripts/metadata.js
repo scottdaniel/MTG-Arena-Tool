@@ -54,7 +54,7 @@ app.on("ready", () => {
   // obtain it from somewhere automatically, like a settings
   // file or the output log itself.
   manifestParser
-    .getManifestFiles("1678.727490")
+    .getManifestFiles("1699.730588")
     //.then(checkSetsAvailable)
     .then(getRanksData)
     .then(getScryfallCards)
