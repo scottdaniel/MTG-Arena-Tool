@@ -153,7 +153,7 @@ var tokenAuth = undefined;
 
 var currentMatch = null;
 
-var originalDeck = new Deck();
+var originalDeck = null;
 
 var currentDeck = new Deck();
 var duringMatch = false;

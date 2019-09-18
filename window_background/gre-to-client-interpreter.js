@@ -16,8 +16,9 @@ global
 */
 const { IPC_OVERLAY } = require("../shared/constants.js");
 const { objectClone } = require("../shared/util");
-
 const { ipc_send } = require("./background-util");
+
+const Deck = require("../shared/deck");
 
 let actionType = [];
 actionType[0] = "ActionType_None";
@@ -550,6 +551,18 @@ let GREMessages = {};
 // Some game state messages are sent as queued
 GREMessages.GREMessageType_QueuedGameStateMessage = function(msg) {
   GREMessages.GREMessageType_GameStateMessage(msg);
+};
+
+GREMessages.GREMessageType_ConnectResp = function(msg) {
+  if (
+    msg.connectResp.deckMessage.deckCards &&
+    currentMatch.player.originalDeck == null
+  ) {
+    let deck = new Deck({}, msg.connectResp.deckMessage.deckCards);
+    currentMatch.player.originalDeck = deck;
+    currentMatch.player.deck = deck.clone();
+    currentMatch.playerCardsLeft = deck.clone();
+  }
 };
 
 GREMessages.GREMessageType_GameStateMessage = function(msg) {
