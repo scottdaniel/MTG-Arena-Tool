@@ -121,6 +121,7 @@ const defaultCfg = {
       }
     ]
   },
+  seasonal_rank: {},
   economy_index: [],
   economy: {
     gold: 0,
@@ -276,6 +277,7 @@ class PlayerData {
     this.eventExists = this.eventExists.bind(this);
     this.matchExists = this.matchExists.bind(this);
     this.deckChanges = this.deckChanges.bind(this);
+    this.seasonalRank = this.seasonalRank.bind(this);
 
     Object.assign(this, {
       ...playerDataDefault,
@@ -419,6 +421,18 @@ class PlayerData {
 
   eventExists(id) {
     return id in this;
+  }
+
+  seasonalRank(season, type = "constructed") {
+    let seasonTag = season + "_" + type;
+
+    // Default if no data is found
+    if (this.seasonal_rank[seasonTag]) {
+      return this.seasonal_rank[seasonTag];
+    } else {
+      this.seasonal_rank[seasonTag] = [];
+      return this.seasonal_rank[seasonTag];
+    }
   }
 
   match(id) {
