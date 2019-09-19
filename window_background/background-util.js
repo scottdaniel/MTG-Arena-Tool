@@ -159,6 +159,7 @@ function setData(data, refresh = debugLog || !firstPass) {
 }
 
 module.exports = {
+  getDateFormat,
   ipc_send,
   normaliseFields,
   parseWotcTime,
