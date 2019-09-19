@@ -421,28 +421,33 @@ function appendArenaData(section) {
   logFormatLabel.appendChild(logFormatCont);
   section.appendChild(logFormatLabel);
 
-  const latestDateParsed = parse(
-    pd.last_log_timestamp,
-    pd.last_log_format,
-    new Date()
-  );
+  let parsedOutput = "auto-detection";
+  if (pd.settings.log_locale_format) {
+    const testDate = parse(
+      pd.last_log_timestamp,
+      pd.settings.log_locale_format,
+      new Date()
+    );
+    if (isValid(testDate) && !isNaN(testDate.getTime())) {
+      parsedOutput =
+        '<b class="green">' +
+        testDate.toISOString() +
+        "</b><i> (simplified extended ISO_8601 format)</i>";
+    } else {
+      parsedOutput = '<b class="red">Invalid format or timestamp</b>';
+    }
+  }
   section.appendChild(
     createDiv(
       ["settings_note"],
-      `<p><i>Date and time format to use when parsing the Arena log. Incorrect
+      `<p>Parsed output: ${parsedOutput}</p>
+      <p><i>Date and time format to use when parsing the Arena log. Incorrect
       formats can cause issues importing or displaying data. mtgatool tries to
       auto-detect formats, but sometimes manual input is required.</p>
       <p>Leave blank to use default auto-detection, or
       <a class="link parse_link">use ISO_8601 to specify a custom format</a>.</p></i>
       <p>Last log timestamp: <b>${pd.last_log_timestamp}</b></p>
-      <p>Last format used: <b>${pd.last_log_format}</b></p>
-      <p>Parsed output: ${
-        isValid(latestDateParsed) && !isNaN(latestDateParsed.getTime())
-          ? '<b class="green">' +
-            latestDateParsed.toISOString() +
-            "</b><i> (simplified extended ISO_8601 format)</i>"
-          : '<b class="red">Invalid format or timestamp</b>'
-      }</p>`
+      <p>Last format used: <b>${pd.last_log_format}</b></p>`
     )
   );
 

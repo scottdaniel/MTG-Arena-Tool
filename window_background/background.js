@@ -46,6 +46,7 @@ const {
   MAIN_DECKS
 } = require("../shared/constants");
 const {
+  getDateFormat,
   ipc_send,
   setData,
   unleakString,
@@ -948,7 +949,12 @@ function onLogEntryFound(entry) {
           default:
             break;
         }
-        setData({ last_log_timestamp: entry.timestamp });
+        if (entry.timestamp) {
+          setData({
+            last_log_timestamp: entry.timestamp,
+            last_log_format: getDateFormat(entry.timestamp)
+          });
+        }
       } catch (err) {
         console.log(entry.label, entry.position, entry.json());
         console.error(err);
