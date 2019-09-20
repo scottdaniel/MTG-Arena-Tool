@@ -454,8 +454,13 @@ process.on("uncaughtException", function(err) {
   //console.log('Current chunk:',  currentChunk);
 });
 
-function onClosed() {
+function onMainClosed() {
   mainWindow = null;
+}
+
+function onBackClosed() {
+  background = null;
+  quit();
 }
 
 function hideWindow() {
@@ -538,7 +543,7 @@ function createBackgroundWindow() {
     }
   });
   win.loadURL(`file://${__dirname}/window_background/index.html`);
-  win.on("closed", onClosed);
+  win.on("closed", onBackClosed);
 
   return win;
 }
@@ -591,7 +596,12 @@ function createMainWindow() {
     }
   });
   win.loadURL(`file://${__dirname}/window_main/index.html`);
-  win.on("closed", onClosed);
+
+  win.onbeforeunload = e => {
+    hideWindow();
+    console.log("No close!");
+    e.returnValue = false;
+  };
 
   let iconPath = path.join(__dirname, "icon-tray.png");
   if (process.platform == "linux") {
