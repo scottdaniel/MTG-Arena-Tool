@@ -454,12 +454,9 @@ process.on("uncaughtException", function(err) {
   //console.log('Current chunk:',  currentChunk);
 });
 
-function onMainClosed() {
-  mainWindow = null;
-}
-
 function onBackClosed() {
   background = null;
+  console.log("Background process ended unexpectedly, quitting the app.")
   quit();
 }
 
