@@ -344,6 +344,9 @@ function onLabelInEventGetActiveEvents(entry, json) {
 
 function onLabelRankUpdated(entry, json) {
   if (!json) return;
+  json.date = entry.timestamp;
+  json.timestamp = parseWotcTimeFallback(entry.timestamp);
+
   const rank = { ...playerData.rank };
 
   // json.wasLossProtected
@@ -355,7 +358,13 @@ function onLabelRankUpdated(entry, json) {
   rank[updateType].step = json.newStep;
   rank[updateType].seasonOrdinal = json.seasonOrdinal;
 
-  setData({ rank });
+  let seasonal_rank = playerData.addSeasonalRank(
+    json,
+    json.seasonOrdinal,
+    json.updateType
+  );
+
+  setData({ rank, seasonal_rank });
   if (debugLog || !firstPass) {
     store.set("rank", rank);
   }

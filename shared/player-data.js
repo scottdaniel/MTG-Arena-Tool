@@ -423,8 +423,8 @@ class PlayerData {
     return id in this;
   }
 
-  seasonalRank(season, type = "constructed") {
-    let seasonTag = season + "_" + type;
+  seasonalRank(seasonOrdinal, type = "constructed") {
+    let seasonTag = seasonOrdinal + "_" + type.toLowerCase();
 
     // Default if no data is found
     if (this.seasonal_rank[seasonTag]) {
@@ -433,6 +433,20 @@ class PlayerData {
       this.seasonal_rank[seasonTag] = [];
       return this.seasonal_rank[seasonTag];
     }
+  }
+
+  addSeasonalRank(rank, seasonOrdinal, type = "constructed") {
+    let seasonData = this.seasonalRank(seasonOrdinal, type.toLowerCase());
+
+    if (
+      _.findIndex(seasonData, obj => {
+        return _.isMatch(obj, rank);
+      }) == -1
+    ) {
+      seasonData.push(rank);
+    }
+
+    return this.seasonal_rank;
   }
 
   match(id) {
