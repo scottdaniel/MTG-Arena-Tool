@@ -362,12 +362,13 @@ function onLabelRankUpdated(entry, json) {
   let seasonal_rank = playerData.addSeasonalRank(
     json,
     json.seasonOrdinal,
-    json.updateType
+    updateType
   );
 
   setData({ rank, seasonal_rank });
   if (debugLog || !firstPass) {
     store.set("rank", rank);
+    store.set("seasonal_rank", seasonal_rank);
   }
 }
 
@@ -411,6 +412,7 @@ function onLabelMythicRatingUpdated(entry, json) {
   setData({ rank, seasonal_rank });
   if (debugLog || !firstPass) {
     store.set("rank", rank);
+    store.set("seasonal_rank", seasonal_rank);
   }
 }
 
