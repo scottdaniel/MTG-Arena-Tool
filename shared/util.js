@@ -606,7 +606,7 @@ function get_deck_export_txt(deck) {
 //
 exports.timeSince = timeSince;
 function timeSince(_date, options = { includeSeconds: true }) {
-  // https://date-fns.org/v2.0.0-alpha.27/docs/formatDistanceStrict
+  // https://date-fns.org/v2.2.1/docs/formatDistanceStrict
   return formatDistanceStrict(_date, new Date(), options);
 }
 

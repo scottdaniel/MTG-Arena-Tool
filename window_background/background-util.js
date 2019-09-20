@@ -20,7 +20,7 @@ const playerData = require("../shared/player-data.js");
 // These were tested briefly
 // They are all taken from logs
 // Some format from date-fns could be wrong;
-// https://date-fns.org/v2.0.0-alpha.27/docs/parse
+// https://date-fns.org/v2.2.1/docs/parse
 let dateFormats = [
   "dd.MM.yyyy HH:mm:ss",
   "dd/MM/yyyy HH:mm:ss",
