@@ -8,6 +8,7 @@ const subDays = require("date-fns/subDays");
 const {
   COLORS_ALL,
   COLORS_BRIEF,
+  CONSTRUCTED_EVENTS,
   DATE_ALL_TIME,
   DATE_LAST_30,
   DATE_LAST_DAY,
@@ -38,7 +39,7 @@ const SINGLE_MATCH_EVENTS = [
   "Ladder",
   "Traditional_Ladder"
 ];
-const CONSTRUCTED_EVENTS = ["Ladder", "Traditional_Ladder"];
+
 // Archetype constants
 const NO_ARCH = "No Archetype";
 

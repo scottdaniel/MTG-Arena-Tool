@@ -623,6 +623,8 @@ exports.FORMATS = {
   XLN: "Ixalan Constructed"
 };
 
+exports.CONSTRUCTED_EVENTS = ["Ladder", "Traditional_Ladder"];
+
 exports.COLORS_ALL = ["w", "u", "b", "r", "g", "c"];
 exports.COLORS_BRIEF = ["w", "u", "b", "r", "g"];
 exports.RANKS = ["Bronze", "Silver", "Gold", "Platinum", "Diamond", "Mythic"];

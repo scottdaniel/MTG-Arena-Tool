@@ -41,7 +41,7 @@
 const _ = require("lodash");
 const differenceInDays = require("date-fns/differenceInDays");
 
-const { ARENA_MODE_IDLE } = require("../shared/constants");
+const { ARENA_MODE_IDLE, CONSTRUCTED_EVENTS } = require("../shared/constants");
 const db = require("../shared/database");
 const CardsList = require("../shared/cards-list");
 const { get_deck_colors, objectClone, replaceAll } = require("../shared/util");
@@ -370,8 +370,6 @@ function onLabelRankUpdated(entry, json) {
     store.set("rank", rank);
   }
 }
-
-const CONSTRUCTED_EVENTS = ["Ladder", "Traditional_Ladder"];
 
 function onLabelMythicRatingUpdated(entry, json) {
   // This is exclusive to constructed?
