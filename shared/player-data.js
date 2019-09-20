@@ -435,9 +435,12 @@ class PlayerData {
     }
   }
 
+  // I was not sure weter it was correct to include this here or in the
+  // utilities file. here its easier to handle the data.
   addSeasonalRank(rank, seasonOrdinal, type = "constructed") {
     let seasonData = this.seasonalRank(seasonOrdinal, type.toLowerCase());
 
+    // Check if this entry exists in the season data.
     if (
       _.findIndex(seasonData, obj => {
         return _.isMatch(obj, rank);

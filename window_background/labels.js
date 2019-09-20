@@ -345,8 +345,9 @@ function onLabelInEventGetActiveEvents(entry, json) {
 function onLabelRankUpdated(entry, json) {
   if (!json) return;
   json.date = entry.timestamp;
-  json.timestamp = parseWotcTimeFallback(entry.timestamp);
-
+  json.timestamp = parseWotcTimeFallback(entry.timestamp).getTime();
+  json.lastMatchId = currentMatch.matchId;
+  json.eventId = currentMatch.eventId;
   const rank = { ...playerData.rank };
 
   // json.wasLossProtected
@@ -370,6 +371,8 @@ function onLabelRankUpdated(entry, json) {
   }
 }
 
+const CONSTRUCTED_EVENTS = ["Ladder", "Traditional_Ladder"];
+
 function onLabelMythicRatingUpdated(entry, json) {
   // This is exclusive to constructed?
   // Not sure what the limited event is called.
@@ -383,12 +386,31 @@ function onLabelMythicRatingUpdated(entry, json) {
   // }
 
   if (!json) return;
+  json.date = entry.timestamp;
+  json.timestamp = parseWotcTimeFallback(entry.timestamp).getTime();
+  json.lastMatchId = currentMatch.matchId;
+  json.eventId = currentMatch.eventId;
+
+  // Default constructed?
+  let type = "constructed";
+  if (CONSTRUCTED_EVENTS.includes(json.eventId)) {
+    type = "constructed";
+  } else if (db.ranked_events.includes(json.eventId)) {
+    type = "limited";
+  }
+
   const rank = { ...playerData.rank };
 
   rank.constructed.percentile = json.newMythicPercentile;
   rank.constructed.leaderboardPlace = json.newMythicLeaderboardPlacement;
 
-  setData({ rank });
+  let seasonal_rank = playerData.addSeasonalRank(
+    json,
+    rank.constructed.seasonOrdinal,
+    type
+  );
+
+  setData({ rank, seasonal_rank });
   if (debugLog || !firstPass) {
     store.set("rank", rank);
   }
