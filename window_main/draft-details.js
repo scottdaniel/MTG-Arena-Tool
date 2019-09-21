@@ -42,6 +42,7 @@ function getPickedCards(draft, draftPosition) {
   return cards;
 }
 
+let arrowsChange = null;
 //
 exports.openDraft = openDraft;
 function openDraft(id, draftPosition = 1) {
@@ -87,6 +88,19 @@ function openDraft(id, draftPosition = 1) {
   });
   navCont.appendChild(nextNav);
   cont.appendChild(navCont);
+
+  window.addEventListener("keydown", function(event) {
+    const key = event.key;
+    console.log(key);
+    if (key == "ArrowLeft") {
+      draftPosition -= 1;
+      openDraft(id, draftPosition);
+    } else if (key == "ArrowRight") {
+      draftPosition += 1;
+      openDraft(id, draftPosition);
+    }
+    window.removeEventListener("keydown", arguments.callee);
+  });
 
   const title = createDiv(
     ["draft_title"],
