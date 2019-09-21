@@ -2043,12 +2043,10 @@ a:hover {
 .draft_pack_container {
     padding-top: 16px;
     padding-left: 48px;
-    padding-right: 48px;
     width: calc(100% - 96px);
-    overflow: auto;
     display: flex;
     flex-wrap: wrap;
-    justify-content: space-evenly;
+    justify-content: space-around;
 }
 
 .draft_card {
