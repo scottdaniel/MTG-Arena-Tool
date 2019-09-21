@@ -456,7 +456,7 @@ process.on("uncaughtException", function(err) {
 
 function onBackClosed() {
   background = null;
-  console.log("Background process ended unexpectedly, quitting the app.")
+  console.log("Background process ended unexpectedly, quitting the app.");
   quit();
 }
 
