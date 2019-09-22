@@ -572,9 +572,9 @@ function createOverlayWindow() {
 
   overlay.webContents.once("dom-ready", function() {
     //We need to wait for the overlay to be initialized before we interact with it
-    const display = electron.screen.getPrimaryDisplay();
+    //const display = electron.screen.getPrimaryDisplay();
     // display.workArea does not include the taskbar
-    overlay.setBounds(display.bounds);
+    //overlay.setBounds(display.bounds);
     overlay.webContents.send("settings_updated");
     // only show overlay after its ready
     // TODO does this work with Linux transparency???
