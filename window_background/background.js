@@ -1610,6 +1610,9 @@ function saveMatch(id, matchEndTime) {
   }
   const existingMatch = playerData.match(id) || {};
   const match = completeMatch(existingMatch, currentMatch, matchEndTime);
+  if (!match) {
+    return;
+  }
 
   // console.log("Save match:", match);
   if (!playerData.matches_index.includes(id)) {
