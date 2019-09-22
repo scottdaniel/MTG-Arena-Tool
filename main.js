@@ -141,6 +141,8 @@ function startApp() {
     overlay = createOverlayWindow();
   }, 500);
 
+  globalShortcut.register("Alt+Shift+D", openDevTools);
+
   appStarted = true;
 
   mainWindow.webContents.once("dom-ready", () => {
