@@ -456,13 +456,13 @@ process.on("uncaughtException", function(err) {
 
 function onBackClosed() {
   background = null;
-  console.log("Background process ended unexpectedly, quitting the app.");
   quit();
 }
 
-function onMainClose(e) {
-  hideWindow();
-  e.preventDefault();
+function onMainClosed(e) {
+  quit();
+  //hideWindow();
+  //e.preventDefault();
 }
 
 function hideWindow() {
@@ -598,7 +598,7 @@ function createMainWindow() {
     }
   });
   win.loadURL(`file://${__dirname}/window_main/index.html`);
-  win.on("close", onMainClose);
+  win.on("closed", onMainClosed);
 
   let iconPath = path.join(__dirname, "icon-tray.png");
   if (process.platform == "linux") {
