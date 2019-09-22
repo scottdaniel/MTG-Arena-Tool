@@ -999,18 +999,19 @@ function attachDraftData(listItem, draft) {
       cont,
       ["One day", "One week", "One month", "Never"],
       "",
-      () => draftShareLink(draft.id),
+      () => draftShareLink(draft.id, draft),
       "expire_select"
     );
 
     openDialog(cont);
-    draftShareLink(draft.id);
+    draftShareLink(draft.id, draft);
   });
   listItem.right.after(replayShareButton);
 }
 
-function draftShareLink(id) {
+function draftShareLink(id, draft) {
   const shareExpire = byId("expire_select").value;
+  let draftData = JSON.stringify(draft);
   let expire = 0;
   switch (shareExpire) {
     case "One day":
@@ -1030,5 +1031,5 @@ function draftShareLink(id) {
       break;
   }
   showLoadingBars();
-  ipcSend("request_draft_link", { expire, id });
+  ipcSend("request_draft_link", { expire, id, draftData });
 }

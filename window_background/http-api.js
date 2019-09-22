@@ -582,13 +582,14 @@ function httpGetDatabaseVersion(lang) {
   });
 }
 
-function httpDraftShareLink(did, exp) {
+function httpDraftShareLink(did, exp, draftData) {
   var _id = makeId(6);
   httpAsync.push({
     reqId: _id,
     method: "share_draft",
     method_path: "/api/get_share_draft.php",
     id: did,
+    draft: draftData,
     expire: exp
   });
 }

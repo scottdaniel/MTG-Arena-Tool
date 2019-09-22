@@ -276,7 +276,7 @@ ipc.on("unlink_discord", function(event, obj) {
 
 //
 ipc.on("request_draft_link", function(event, obj) {
-  httpApi.httpDraftShareLink(obj.id, obj.expire);
+  httpApi.httpDraftShareLink(obj.id, obj.expire, obj.draftData);
 });
 
 //
