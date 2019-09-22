@@ -1,5 +1,10 @@
 This is meant as a guide to help you locate and resolve the most common issues running MTG Arena Tool. **Please** only follow these steps if you encounter one of the issues mentioned.
 
+Common paths:
+- Output log: `%APPDATA%\..\LocalLow\Wizards Of The Coast\MTGA\`
+- Mtgatool data: `%APPDATA%\mtg-arena-tool`
+- Mtgatool data (linux): `~/.config/MTG-Arena-Tool/`
+
 ### Stuck on 'please wait a minute' (without loading %)
 
 Refer to this issue, the solution is on the comments;
@@ -8,6 +13,7 @@ Refer to this issue, the solution is on the comments;
 ### "No log file found" error or "Output log contains no user data"
 
 Close MTG Arena and MTG Arena tool, then start MTG Arena. Once MTG Arena is loaded run MTG Arena Tool again.
+If that does not work, go to `%APPDATA%/mtg-arena-tool/` and delete `settings.json`.
 
 ### Screen does not respond to mouse events (overlay covers)
 
@@ -19,7 +25,7 @@ This is probably caused by an error reading the user configuration, probably due
 Locate your log and config files;
 - Close MTG Arena and MTG Arena Tool.
 - Go to `%APPDATA%\..\LocalLow\Wizards Of The Coast\MTGA\`
-- Rename `output.log`, do not delete it!
+- Rename `output_log.txt`, do not delete it!
 - Run MTG Arena, once open, run MTG Arena Tool again.
 
 If this works, send the the old log file file to [mtgatool@gmail.com](mailto:mtgatool@gmail.com) to analyze the error.
