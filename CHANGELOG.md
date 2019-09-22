@@ -1,3 +1,22 @@
+## <small>2.10.1 (2019-09-22)</small>
+
+* bugfix settings page log locale format ux ([55559d9](https://github.com/Manuel-777/MTG-Arena-Tool/commit/55559d9))
+* draft arrows navigation ([0e3f247](https://github.com/Manuel-777/MTG-Arena-Tool/commit/0e3f247))
+* events and history page use draft-details ([2fb60e7](https://github.com/Manuel-777/MTG-Arena-Tool/commit/2fb60e7))
+* initial draft-details file cloned from render-util ([9eeefcc](https://github.com/Manuel-777/MTG-Arena-Tool/commit/9eeefcc))
+* latest version ([4cf26b8](https://github.com/Manuel-777/MTG-Arena-Tool/commit/4cf26b8))
+* not update on first pass ([603ece0](https://github.com/Manuel-777/MTG-Arena-Tool/commit/603ece0))
+* onClose main window ([bec80a2](https://github.com/Manuel-777/MTG-Arena-Tool/commit/bec80a2)), closes [#584](https://github.com/Manuel-777/MTG-Arena-Tool/issues/584)
+* override close ([defeccb](https://github.com/Manuel-777/MTG-Arena-Tool/commit/defeccb))
+* read deck from GRE ([349fd3c](https://github.com/Manuel-777/MTG-Arena-Tool/commit/349fd3c))
+* remove deprecated code ([38f2bca](https://github.com/Manuel-777/MTG-Arena-Tool/commit/38f2bca))
+* update documentation links ([41b437f](https://github.com/Manuel-777/MTG-Arena-Tool/commit/41b437f))
+* Update main.js ([d7f2dcf](https://github.com/Manuel-777/MTG-Arena-Tool/commit/d7f2dcf))
+* Update main.js ([fab9427](https://github.com/Manuel-777/MTG-Arena-Tool/commit/fab9427))
+* upgrade date-fns to 2.2.1 ([0c21ab0](https://github.com/Manuel-777/MTG-Arena-Tool/commit/0c21ab0))
+
+
+
 ## 2.10.0 (2019-09-14)
 
 * add change language setting ([f106ed2](https://github.com/Manuel-777/MTG-Arena-Tool/commit/f106ed2))
