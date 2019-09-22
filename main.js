@@ -460,6 +460,11 @@ function onBackClosed() {
   quit();
 }
 
+function onMainClose(e) {
+  hideWindow();
+  e.preventDefault();
+}
+
 function hideWindow() {
   if (mainWindow.isVisible()) {
     mainWindow.hide();
@@ -593,12 +598,7 @@ function createMainWindow() {
     }
   });
   win.loadURL(`file://${__dirname}/window_main/index.html`);
-
-  win.onbeforeunload = e => {
-    hideWindow();
-    console.log("No close!");
-    e.returnValue = false;
-  };
+  win.on("close", onMainClose);
 
   let iconPath = path.join(__dirname, "icon-tray.png");
   if (process.platform == "linux") {
