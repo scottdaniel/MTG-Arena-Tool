@@ -13,7 +13,9 @@ Refer to this issue, the solution is on the comments;
 ### "No log file found" error or "Output log contains no user data"
 
 Close MTG Arena and MTG Arena tool, then start MTG Arena. Once MTG Arena is loaded run MTG Arena Tool again.
-If that does not work, go to `%APPDATA%/mtg-arena-tool/` and delete `settings.json`.
+
+If that does not work, go to `%APPDATA%/mtg-arena-tool/` and delete `settings.json`, then load MTG Arena Tool again.
+You might be asked to point at the path of the output log again.
 
 ### Screen does not respond to mouse events (overlay covers)
 
