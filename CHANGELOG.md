@@ -1,3 +1,10 @@
+## <small>2.10.2 (2019-09-22)</small>
+
+* hide overlay until player data is loaded ([62a249b](https://github.com/Manuel-777/MTG-Arena-Tool/commit/62a249b))
+* prevent default issues ([57f9d51](https://github.com/Manuel-777/MTG-Arena-Tool/commit/57f9d51))
+
+
+
 ## <small>2.10.1 (2019-09-22)</small>
 
 * bugfix settings page log locale format ux ([55559d9](https://github.com/Manuel-777/MTG-Arena-Tool/commit/55559d9))
