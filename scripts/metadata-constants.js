@@ -619,6 +619,11 @@ exports.RANKS_SHEETS = [
     setCode: "m20",
     sheet: "1BAPtQv4U9KUAtVzkccJlPS8cb0s_uOcGEDORip5uaQg",
     page: "Staging%20Sheet"
+  },
+  {
+    setCode: "eld",
+    sheet: "1B-bEUGANnGFPB4zW-vAV8zHjUZINwLU8Qq1sVlgIdpU",
+    page: "Staging%20Sheet"
   }
 ];
 
