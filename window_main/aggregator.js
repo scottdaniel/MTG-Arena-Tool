@@ -36,7 +36,8 @@ const SINGLE_MATCH_EVENTS = [
   "DirectGame",
   "Play",
   "Ladder",
-  "Traditional_Ladder"
+  "Traditional_Ladder",
+  "Historic_Play"
 ];
 const CONSTRUCTED_EVENTS = ["Ladder", "Traditional_Ladder"];
 // Archetype constants
