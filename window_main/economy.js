@@ -135,7 +135,7 @@ function getReadableQuest(questCode) {
     "90c7f0d6-e165-44fc-88c8-fdf557bd178d": "Quests/Quest_Rakdos_Cackler",
     "fa28d3a3-63f6-4d00-b74f-4292e71a1c72": "Quests/Quest_Selesnya_Silence",
     "6a4ef8b1-cf56-4c61-b3c8-f886bd804e92": "Quests/Quest_Selesnya_Sentry",
-    "a28b4eb1-345e-41a8-b3f6-033773cb6682": "Quests/Quest_Simic_Supremacy",
+    "a28b4eb1-345e-41a8-b3f6-033773cb6682": "Quests/Quest_Simic_Evolution",
     "85e3c2f5-94d2-4574-b8d6-084ba371dcca": "Quests/Quest_Simic_Manipulator"
   };
   if (questCode in questMap) {
