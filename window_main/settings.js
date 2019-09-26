@@ -68,7 +68,7 @@ const LANGUAGES = [
   "it",
   "js",
   "ru",
-  "ko-kr"/*,
+  "ko-kr" /*,
   "zh-cn"*/
 ];
 
