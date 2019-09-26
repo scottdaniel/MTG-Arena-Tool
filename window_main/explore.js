@@ -182,25 +182,14 @@ function drawFilters() {
   if (inputFilterType === "Events") {
     eventFilters = db.eventIds
       .concat(db.activeEvents)
-      .map(getEventPrettyName)
-      .filter(
-        item =>
-          item != undefined &&
-          item != "New Player Experience" &&
-          item != "Direct Game" &&
-          item != "Ranked" &&
-          item != "Play" &&
-          item != "Traditional Play" &&
-          item != "Traditional Ranked" &&
-          !db.ranked_events.map(getEventPrettyName).includes(item)
-      );
+      .filter(item => item && !db.single_match_events.includes(item))
+      .map(getEventPrettyName);
 
     eventFilters = [...new Set(eventFilters)];
   } else if (inputFilterType === "Ranked Draft") {
-    eventFilters = db.ranked_events.map(getEventPrettyName);
+    eventFilters = db.limited_ranked_events.map(getEventPrettyName);
   } else if (inputFilterType === "Ranked Constructed") {
-    eventFilters.push("Ladder");
-    eventFilters.push("Traditional Ladder");
+    eventFilters = db.standard_ranked_events.map(getEventPrettyName);
   }
   eventFilters.sort(function(a, b) {
     if (a < b) return -1;

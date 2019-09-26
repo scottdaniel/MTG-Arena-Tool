@@ -31,15 +31,6 @@ const ALL_DRAFTS = "All Drafts";
 const DRAFT_REPLAYS = "Draft Replays";
 // Event-related constant
 const ALL_EVENT_TRACKS = "All Event Tracks";
-const SINGLE_MATCH_EVENTS = [
-  "AIBotMatch",
-  "DirectGame",
-  "Play",
-  "Ladder",
-  "Traditional_Ladder",
-  "Historic_Play"
-];
-const CONSTRUCTED_EVENTS = ["Ladder", "Traditional_Ladder"];
 // Archetype constants
 const NO_ARCH = "No Archetype";
 
@@ -202,9 +193,11 @@ class Aggregator {
     return (
       (eventId === DEFAULT_EVENT && _eventId !== "AIBotMatch") ||
       (eventId === ALL_EVENT_TRACKS &&
-        !SINGLE_MATCH_EVENTS.includes(_eventId)) ||
-      (eventId === RANKED_CONST && CONSTRUCTED_EVENTS.includes(_eventId)) ||
-      (eventId === RANKED_DRAFT && db.ranked_events.includes(_eventId)) ||
+        !db.single_match_events.includes(_eventId)) ||
+      (eventId === RANKED_CONST &&
+        db.standard_ranked_events.includes(_eventId)) ||
+      (eventId === RANKED_DRAFT &&
+        db.limited_ranked_events.includes(_eventId)) ||
       eventId === _eventId
     );
   }
@@ -332,9 +325,9 @@ class Aggregator {
             rank
           };
         }
-        if (CONSTRUCTED_EVENTS.includes(match.eventId)) {
+        if (db.standard_ranked_events.includes(match.eventId)) {
           statsToUpdate.push(this.constructedStats[rank]);
-        } else if (db.ranked_events.includes(match.eventId)) {
+        } else if (db.limited_ranked_events.includes(match.eventId)) {
           statsToUpdate.push(this.limitedStats[rank]);
         }
       }
@@ -498,7 +491,7 @@ class Aggregator {
       ALL_EVENT_TRACKS,
       RANKED_DRAFT,
       ...this._eventIds.filter(
-        eventId => !SINGLE_MATCH_EVENTS.includes(eventId)
+        eventId => !db.single_match_events.includes(eventId)
       )
     ];
   }
