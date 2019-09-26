@@ -153,15 +153,9 @@ exports.SINGLE_MATCH_EVENTS = [
   "Play",
   "NPE",
   "DirectGame",
-  "Constructed_Event",
-  "Constructed_Event_2020",
   "Ladder",
-  "Traditional_Cons_Event",
-  "Traditional_Cons_Event_2020",
   "Constructed_BestOf3",
   "Traditional_Ladder",
-  "Future_Play_20190909",
-  "Future_Ranked_20190909",
   "Historic_Play"
 ];
 
