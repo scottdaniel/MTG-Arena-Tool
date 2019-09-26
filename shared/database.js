@@ -128,8 +128,16 @@ class Database {
     return this.data.events_format;
   }
 
-  get ranked_events() {
-    return this.data.ranked_events;
+  get limited_ranked_events() {
+    return this.data.limited_ranked_events;
+  }
+
+  get standard_ranked_events() {
+    return this.data.standard_ranked_events;
+  }
+
+  get single_match_events() {
+    return this.data.single_match_events;
   }
 
   get season_starts() {

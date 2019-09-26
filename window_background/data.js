@@ -150,7 +150,7 @@ function matchIsLimited(match) {
   var eventId = match.eventId || match.InternalEventName;
 
   // The order of can matter.
-  if (database.ranked_events.includes(eventId)) {
+  if (database.limited_ranked_events.includes(eventId)) {
     return true;
   }
   if (eventId.startsWith("QuickDraft")) {

@@ -716,6 +716,7 @@ function onLogEntryFound(entry) {
     if ((firstPass && !playerData.settings.skip_firstpass) || !firstPass) {
       try {
         switch (entry.label) {
+          case "Log.BI":
           case "Log.Info":
             if (entry.arrow == "==>") {
               json = entry.json();
@@ -1604,7 +1605,7 @@ function saveCourse(json) {
 
 //
 function saveMatch(id, matchEndTime) {
-  //console.log(currentMatch.matchId, matchId);
+  //console.log(currentMatch.matchId, id);
   if (!currentMatch || !currentMatch.matchTime || currentMatch.matchId !== id) {
     return;
   }

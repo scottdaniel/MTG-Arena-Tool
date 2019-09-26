@@ -2,6 +2,7 @@ const { app } = require("electron");
 const path = require("path");
 const fs = require("fs");
 var http = require("https");
+const readline = require("readline");
 
 const manifestParser = require("./manifest-parser");
 const { generateMetadata } = require("./metadata-generator");
@@ -11,7 +12,6 @@ const {
   APPDATA,
   RANKS_SHEETS,
   SET_NAMES,
-  SETS_DATA,
   NO_DUPES_ART_SETS,
   ALLOWED_SCRYFALL
 } = require("./metadata-constants");
@@ -19,7 +19,7 @@ const {
 let metagameData = {};
 let ranksData = {};
 
-const VERSION = 18;
+const VERSION = 19;
 /*
   Languages available in loc.json;
   "BR"
@@ -42,8 +42,8 @@ const LANGUAGES = [
   "IT",
   "JP",
   "RU",
-  "ko-KR",
-  "zh-CN"
+  "ko-KR"
+  // "zh-CN"
 ];
 // "scryfall-all-cards.json" contains cards in all languages but is 800+mb
 const SCRYFALL_FILE = "scryfall-all-cards.json";
@@ -306,8 +306,7 @@ function generateScryfallDatabase() {
       stream.on("data", function(d) {
         var dataLength = d.length;
         readSize += dataLength;
-        process.stdout.clearLine();
-        process.stdout.cursorTo(0);
+        readline.cursorTo(process.stdout, 0);
         process.stdout.write(
           `Progress:\t ${((readSize / fileSize) * 100).toFixed(2)}%`
         );
@@ -317,8 +316,7 @@ function generateScryfallDatabase() {
       });
 
       stream.on("end", function() {
-        process.stdout.clearLine();
-        process.stdout.cursorTo(0);
+        readline.cursorTo(process.stdout, 0);
         process.stdout.write(`Progress:\t ${(100).toFixed(2)}%`);
         console.log("");
         resolve(scryfallData);
@@ -355,8 +353,7 @@ function httpGetFile(url, filename) {
 
       response.on("data", function(chunk) {
         data += chunk;
-        process.stdout.clearLine();
-        process.stdout.cursorTo(0);
+        readline.cursorTo(process.stdout, 0);
         process.stdout.write(
           `Downloading ${filename}:\t ${(data.length / 1024 / 1024).toFixed(
             2

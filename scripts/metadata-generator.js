@@ -8,7 +8,9 @@ const {
   NO_DUPES_ART_SETS,
   EVENT_TO_NAME,
   EVENT_TO_FORMAT,
-  RANKED_EVENTS,
+  LIMITED_RANKED_EVENTS,
+  STANDARD_RANKED_EVENTS,
+  SINGLE_MATCH_EVENTS,
   SCRYFALL_LANGUAGE
 } = require("./metadata-constants");
 
@@ -270,7 +272,9 @@ exports.generateMetadata = function(
         events_format: EVENT_TO_FORMAT,
         sets: SETS_DATA,
         abilities: abilities,
-        ranked_events: RANKED_EVENTS,
+        limited_ranked_events: LIMITED_RANKED_EVENTS,
+        standard_ranked_events: STANDARD_RANKED_EVENTS,
+        single_match_events: SINGLE_MATCH_EVENTS,
         archetypes: metagameData
       };
 
