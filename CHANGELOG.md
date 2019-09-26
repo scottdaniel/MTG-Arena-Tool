@@ -1,3 +1,28 @@
+## <small>2.10.3 (2019-09-26)</small>
+
+* add new historic play constant ([23e2f0c](https://github.com/Manuel-777/MTG-Arena-Tool/commit/23e2f0c))
+* allow debug pre-login ([007f9e1](https://github.com/Manuel-777/MTG-Arena-Tool/commit/007f9e1))
+* background handles Log.BI like Log.Info ([259bcd0](https://github.com/Manuel-777/MTG-Arena-Tool/commit/259bcd0))
+* bugfix metadata script, disable chinese ([c490d55](https://github.com/Manuel-777/MTG-Arena-Tool/commit/c490d55))
+* bugfix practice matches ([b8e917f](https://github.com/Manuel-777/MTG-Arena-Tool/commit/b8e917f))
+* bugfix single_match_events ([d41d3e5](https://github.com/Manuel-777/MTG-Arena-Tool/commit/d41d3e5))
+* Eldraine set review ([356ca24](https://github.com/Manuel-777/MTG-Arena-Tool/commit/356ca24))
+* fix game time tracking ([774f437](https://github.com/Manuel-777/MTG-Arena-Tool/commit/774f437))
+* metadata event constants ([cc7dd24](https://github.com/Manuel-777/MTG-Arena-Tool/commit/cc7dd24))
+* more constant updates ([200e41f](https://github.com/Manuel-777/MTG-Arena-Tool/commit/200e41f))
+* more format constants ([056614b](https://github.com/Manuel-777/MTG-Arena-Tool/commit/056614b))
+* new battle pass name ([6cdd3cc](https://github.com/Manuel-777/MTG-Arena-Tool/commit/6cdd3cc))
+* refactor event metadata constants ([a463ef9](https://github.com/Manuel-777/MTG-Arena-Tool/commit/a463ef9))
+* share drafts not in server ([01b02f8](https://github.com/Manuel-777/MTG-Arena-Tool/commit/01b02f8))
+* update default database ([2eef449](https://github.com/Manuel-777/MTG-Arena-Tool/commit/2eef449))
+* update filter text ([fa53cef](https://github.com/Manuel-777/MTG-Arena-Tool/commit/fa53cef))
+* Update metadata.js ([4b84764](https://github.com/Manuel-777/MTG-Arena-Tool/commit/4b84764))
+* Update metadata.js ([a93cb53](https://github.com/Manuel-777/MTG-Arena-Tool/commit/a93cb53))
+* Update TROUBLESHOOTING.md ([2472ecd](https://github.com/Manuel-777/MTG-Arena-Tool/commit/2472ecd))
+* Update TROUBLESHOOTING.md ([960f6ea](https://github.com/Manuel-777/MTG-Arena-Tool/commit/960f6ea))
+
+
+
 ## <small>2.10.2 (2019-09-22)</small>
 
 * hide overlay until player data is loaded ([62a249b](https://github.com/Manuel-777/MTG-Arena-Tool/commit/62a249b))
