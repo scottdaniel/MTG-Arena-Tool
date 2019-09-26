@@ -25,7 +25,7 @@ const DEFAULT_TAG = "All Tags";
 const DEFAULT_ARCH = "All Archetypes";
 // Ranked constants
 const RANKED_CONST = "Ranked Constructed";
-const RANKED_DRAFT = "Ranked Limited (Current)";
+const RANKED_DRAFT = "Ranked Limited";
 // Draft-related constants
 const ALL_DRAFTS = "All Drafts";
 const DRAFT_REPLAYS = "Draft Replays";
