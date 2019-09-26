@@ -79,6 +79,7 @@ const economyTransactionContextsMap = {
 };
 
 const trackCodeMap = {
+  BattlePass_ELD: "Throne of Eldraine",
   BattlePass_M20: "Core Set 2020",
   EarlyPlayerProgression: "New Player Experience"
 };
