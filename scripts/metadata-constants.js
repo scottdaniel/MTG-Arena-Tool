@@ -139,13 +139,11 @@ exports.STANDARD_RANKED_EVENTS = ["Ladder", "Traditional_Ladder"];
 
 exports.SINGLE_MATCH_EVENTS = [
   "AIBotMatch",
-  "Play",
   "NPE",
   "DirectGame",
   "Ladder",
   "Constructed_BestOf3",
-  "Traditional_Ladder",
-  "Historic_Play"
+  "Traditional_Ladder"
 ];
 
 /*
