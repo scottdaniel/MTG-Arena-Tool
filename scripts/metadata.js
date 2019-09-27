@@ -19,7 +19,7 @@ const {
 let metagameData = {};
 let ranksData = {};
 
-const VERSION = 19;
+const VERSION = 20;
 /*
   Languages available in loc.json;
   "BR"
