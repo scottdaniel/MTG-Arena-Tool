@@ -128,25 +128,14 @@ exports.EVENT_TO_FORMAT = {
   Giant_Monsters_20190719: "Giant Monsters"
 };
 
+// These are the current events in the ranked ladder
 exports.LIMITED_RANKED_EVENTS = [
-  "QuickDraft_RNA_20190426",
-  "QuickDraft_RNA_20190621",
-  "QuickDraft_WAR_20190510",
-  "QuickDraft_DOM_20190524",
-  "QuickDraft_WAR_20190607",
-  "QuickDraft_WAR_20190705",
   "QuickDraft_M20_20190719",
-  "QuickDraft_RNA_20190802",
-  "QuickDraft_WAR_20190816",
   "QuickDraft_GRN_20190829",
   "QuickDraft_RNA_20190913"
 ];
 
-exports.STANDARD_RANKED_EVENTS = [
-  "Ladder",
-  "Traditional_Ladder",
-  "Future_Ranked_20190909"
-];
+exports.STANDARD_RANKED_EVENTS = ["Ladder", "Traditional_Ladder"];
 
 exports.SINGLE_MATCH_EVENTS = [
   "AIBotMatch",
