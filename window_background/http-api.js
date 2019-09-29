@@ -126,250 +126,257 @@ function httpBasic() {
 
       var results = "";
       var req = http.request(options, function(res) {
-        res.on("data", function(chunk) {
-          results = results + chunk;
-        });
-        res.on("end", function() {
-          if (debugNet) {
-            if (_headers.method !== "notifications") {
-              ipc_send(
-                "ipc_log",
-                "RECV << " +
-                  index +
-                  ", " +
-                  _headers.method +
-                  ", " +
-                  results.slice(0, 100)
-              );
-              console.log(
-                "RECV << " + index,
-                _headers.method,
-                _headers.method == "auth" ? results : results.slice(0, 500)
-              );
-            }
-          }
-          if (_headers.method == "notifications") {
-            notificationSetTimeout();
-          }
-          try {
-            var parsedResult = null;
-            try {
-              parsedResult = JSON.parse(results);
-            } catch (e) {
-              if (debugNet) {
-                console.log(results);
-              }
-              ipc_send("popup", {
-                text: `Error parsing response. (${_headers.method})`,
-                time: 2000,
-                progress: -1
-              });
-            }
-
-            if (_headers.method == "discord_unlink") {
-              ipc_send("popup", {
-                text: "Unlink Ok",
-                time: 1000,
-                progress: -1
-              });
-              ipc_send("set_discord_tag", "");
-            }
-            if (_headers.method == "get_database_version") {
-              let lang = playerData.settings.metadata_lang;
-              if (
-                db.data.language &&
-                parsedResult.lang.toLowerCase() !==
-                  db.data.language.toLowerCase()
-              ) {
-                // compare language
-                console.log(
-                  `Downloading database (had lang ${db.data.language}, needed ${
-                    parsedResult.lang
-                  })`
+        if (res.statusCode < 200 || res.statusCode > 299) {
+          ipc_send("popup", {
+            text: `Error with request. (${_headers.method}: ${res.statusCode})`,
+            time: 2000,
+            progress: -1
+          });
+        } else {
+          res.on("data", function(chunk) {
+            results = results + chunk;
+          });
+          res.on("end", function() {
+            if (debugNet) {
+              if (_headers.method !== "notifications") {
+                ipc_send(
+                  "ipc_log",
+                  "RECV << " +
+                    index +
+                    ", " +
+                    _headers.method +
+                    ", " +
+                    results.slice(0, 100)
                 );
-                httpGetDatabase(lang);
-              } else if (parsedResult.latest > db.version) {
-                // Compare parsedResult.version with stored version
                 console.log(
-                  `Downloading latest database (had v${db.version}, found v${
-                    parsedResult.latest
-                  })`
-                );
-                httpGetDatabase(lang);
-              } else {
-                console.log(
-                  `Database up to date (${db.version}), skipping download.`
+                  "RECV << " + index,
+                  _headers.method,
+                  _headers.method == "auth" ? results : results.slice(0, 500)
                 );
               }
             }
             if (_headers.method == "notifications") {
-              notificationProcess(parsedResult);
+              notificationSetTimeout();
             }
-            if (_headers.method == "get_explore") {
-              ipc_send("set_explore_decks", parsedResult);
-            }
-            if (_headers.method == "get_ladder_decks") {
-              ipc_send("set_ladder_decks", parsedResult);
-            }
-            if (_headers.method == "get_ladder_traditional_decks") {
-              ipc_send("set_ladder_traditional_decks", parsedResult);
-            }
-            if (parsedResult && parsedResult.ok) {
-              if (_headers.method == "auth") {
-                tokenAuth = parsedResult.token;
-
-                ipc_send("auth", parsedResult);
-                //ipc_send("auth", parsedResult.arenaids);
-                if (playerData.settings.remember_me) {
-                  rstore.set("token", tokenAuth);
-                  rstore.set("email", playerData.userName);
+            try {
+              var parsedResult = null;
+              try {
+                parsedResult = JSON.parse(results);
+              } catch (e) {
+                if (debugNet) {
+                  console.log(results);
                 }
-                const data = {};
-                data.patreon = parsedResult.patreon;
-                data.patreon_tier = parsedResult.patreon_tier;
-
-                let serverData = {
-                  matches: [],
-                  courses: [],
-                  drafts: [],
-                  economy: []
-                };
-                if (data.patreon) {
-                  serverData.matches = parsedResult.matches;
-                  serverData.courses = parsedResult.courses;
-                  serverData.drafts = parsedResult.drafts;
-                  serverData.economy = parsedResult.economy;
-                }
-                setData(data, false);
-                loadPlayerConfig(playerData.arenaId, serverData);
-                ipc_send("set_discord_tag", parsedResult.discord_tag);
-                httpNotificationsPull();
-              }
-              if (
-                _headers.method == "tou_join" ||
-                _headers.method == "tou_drop"
-              ) {
-                httpTournamentGet(parsedResult.id);
-              }
-              if (_headers.method == "get_top_decks") {
-                ipc_send("set_explore", parsedResult.result);
-              }
-              if (_headers.method == "get_course") {
-                ipc_send("open_course_deck", parsedResult.result);
-              }
-              if (_headers.method == "share_draft") {
-                ipc_send("set_draft_link", parsedResult.url);
-              }
-              if (_headers.method == "share_log") {
-                ipc_send("set_log_link", parsedResult.url);
-              }
-              if (_headers.method == "share_deck") {
-                ipc_send("set_deck_link", parsedResult.url);
-              }
-              if (_headers.method == "home_get") {
-                ipc_send("set_home", parsedResult);
-              }
-              if (_headers.method == "tou_get") {
-                ipc_send("tou_set", parsedResult.result);
-              }
-              if (_headers.method == "tou_check") {
-                //ipc_send("tou_set_game", parsedResult.result);
-              }
-              if (_headers.method == "get_sync") {
-                syncUserData(parsedResult.data);
-              }
-
-              if (_headers.method == "get_database") {
-                //resetLogLoop(100);
-                metadataState = true;
-                delete parsedResult.ok;
                 ipc_send("popup", {
-                  text: "Metadata: Ok",
+                  text: `Error parsing response. (${_headers.method})`,
+                  time: 2000,
+                  progress: -1
+                });
+              }
+
+              if (_headers.method == "discord_unlink") {
+                ipc_send("popup", {
+                  text: "Unlink Ok",
                   time: 1000,
                   progress: -1
                 });
-                db.handleSetDb(null, results);
-                db.updateCache(results);
-                ipc_send("set_db", results);
-                // autologin users may beat the metadata request
-                // manually trigger a UI refresh just in case
-                ipc_send("player_data_refresh");
+                ipc_send("set_discord_tag", "");
               }
-            } else if (_headers.method == "tou_join") {
-              ipc_send("popup", {
-                text: parsedResult.error,
-                time: 10000
-              });
-            } else if (_headers.method == "tou_check") {
-              let notif = new Notification("MTG Arena Tool", {
-                body: parsedResult.state
-              });
-              //ipc_send("popup", {"text": parsedResult.state, "time": 10000});
-            } else if (
-              parsedResult &&
-              parsedResult.ok == false &&
-              parsedResult.error != undefined
-            ) {
-              if (
-                _headers.method == "share_draft" ||
-                _headers.method == "share_log" ||
-                _headers.method == "share_deck"
-              ) {
+              if (_headers.method == "get_database_version") {
+                let lang = playerData.settings.metadata_lang;
+                if (
+                  db.data.language &&
+                  parsedResult.lang.toLowerCase() !==
+                    db.data.language.toLowerCase()
+                ) {
+                  // compare language
+                  console.log(
+                    `Downloading database (had lang ${
+                      db.data.language
+                    }, needed ${parsedResult.lang})`
+                  );
+                  httpGetDatabase(lang);
+                } else if (parsedResult.latest > db.version) {
+                  // Compare parsedResult.version with stored version
+                  console.log(
+                    `Downloading latest database (had v${db.version}, found v${
+                      parsedResult.latest
+                    })`
+                  );
+                  httpGetDatabase(lang);
+                } else {
+                  console.log(
+                    `Database up to date (${db.version}), skipping download.`
+                  );
+                }
+              }
+              if (_headers.method == "notifications") {
+                notificationProcess(parsedResult);
+              }
+              if (_headers.method == "get_explore") {
+                ipc_send("set_explore_decks", parsedResult);
+              }
+              if (_headers.method == "get_ladder_decks") {
+                ipc_send("set_ladder_decks", parsedResult);
+              }
+              if (_headers.method == "get_ladder_traditional_decks") {
+                ipc_send("set_ladder_traditional_decks", parsedResult);
+              }
+              if (parsedResult && parsedResult.ok) {
+                if (_headers.method == "auth") {
+                  tokenAuth = parsedResult.token;
+
+                  ipc_send("auth", parsedResult);
+                  //ipc_send("auth", parsedResult.arenaids);
+                  if (playerData.settings.remember_me) {
+                    rstore.set("token", tokenAuth);
+                    rstore.set("email", playerData.userName);
+                  }
+                  const data = {};
+                  data.patreon = parsedResult.patreon;
+                  data.patreon_tier = parsedResult.patreon_tier;
+
+                  let serverData = {
+                    matches: [],
+                    courses: [],
+                    drafts: [],
+                    economy: []
+                  };
+                  if (data.patreon) {
+                    serverData.matches = parsedResult.matches;
+                    serverData.courses = parsedResult.courses;
+                    serverData.drafts = parsedResult.drafts;
+                    serverData.economy = parsedResult.economy;
+                  }
+                  setData(data, false);
+                  loadPlayerConfig(playerData.arenaId, serverData);
+                  ipc_send("set_discord_tag", parsedResult.discord_tag);
+                  httpNotificationsPull();
+                }
+                if (
+                  _headers.method == "tou_join" ||
+                  _headers.method == "tou_drop"
+                ) {
+                  httpTournamentGet(parsedResult.id);
+                }
+                if (_headers.method == "get_top_decks") {
+                  ipc_send("set_explore", parsedResult.result);
+                }
+                if (_headers.method == "get_course") {
+                  ipc_send("open_course_deck", parsedResult.result);
+                }
+                if (_headers.method == "share_draft") {
+                  ipc_send("set_draft_link", parsedResult.url);
+                }
+                if (_headers.method == "share_log") {
+                  ipc_send("set_log_link", parsedResult.url);
+                }
+                if (_headers.method == "share_deck") {
+                  ipc_send("set_deck_link", parsedResult.url);
+                }
+                if (_headers.method == "home_get") {
+                  ipc_send("set_home", parsedResult);
+                }
+                if (_headers.method == "tou_get") {
+                  ipc_send("tou_set", parsedResult.result);
+                }
+                if (_headers.method == "tou_check") {
+                  //ipc_send("tou_set_game", parsedResult.result);
+                }
+                if (_headers.method == "get_sync") {
+                  syncUserData(parsedResult.data);
+                }
+
+                if (_headers.method == "get_database") {
+                  //resetLogLoop(100);
+                  metadataState = true;
+                  delete parsedResult.ok;
+                  ipc_send("popup", {
+                    text: "Metadata: Ok",
+                    time: 1000,
+                    progress: -1
+                  });
+                  db.handleSetDb(null, results);
+                  db.updateCache(results);
+                  ipc_send("set_db", results);
+                  // autologin users may beat the metadata request
+                  // manually trigger a UI refresh just in case
+                  ipc_send("player_data_refresh");
+                }
+              } else if (_headers.method == "tou_join") {
                 ipc_send("popup", {
                   text: parsedResult.error,
-                  time: 3000
+                  time: 10000
                 });
-              }
-              if (_headers.method == "auth") {
-                tokenAuth = undefined;
-                rstore.set("email", "");
-                rstore.set("token", "");
+              } else if (_headers.method == "tou_check") {
+                let notif = new Notification("MTG Arena Tool", {
+                  body: parsedResult.state
+                });
+                //ipc_send("popup", {"text": parsedResult.state, "time": 10000});
+              } else if (
+                parsedResult &&
+                parsedResult.ok == false &&
+                parsedResult.error != undefined
+              ) {
+                if (
+                  _headers.method == "share_draft" ||
+                  _headers.method == "share_log" ||
+                  _headers.method == "share_deck"
+                ) {
+                  ipc_send("popup", {
+                    text: parsedResult.error,
+                    time: 3000
+                  });
+                }
+                if (_headers.method == "auth") {
+                  tokenAuth = undefined;
+                  rstore.set("email", "");
+                  rstore.set("token", "");
+                  ipc_send("auth", {});
+                  ipc_send("toggle_login", true);
+                  ipc_send("clear_pwd", 1);
+                  ipc_send("popup", {
+                    text: `Error: ${parsedResult.error}`,
+                    time: 3000,
+                    progress: -1
+                  });
+                }
+                // errors here
+              } else if (!parsedResult && _headers.method == "auth") {
                 ipc_send("auth", {});
-                ipc_send("toggle_login", true);
-                ipc_send("clear_pwd", 1);
                 ipc_send("popup", {
-                  text: `Error: ${parsedResult.error}`,
-                  time: 3000,
+                  text: "Something went wrong, please try again",
+                  time: 5000,
                   progress: -1
                 });
               }
-              // errors here
-            } else if (!parsedResult && _headers.method == "auth") {
-              ipc_send("auth", {});
-              ipc_send("popup", {
-                text: "Something went wrong, please try again",
-                time: 5000,
-                progress: -1
-              });
+            } catch (e) {
+              console.error(e);
             }
-          } catch (e) {
-            console.error(e);
-          }
-          try {
-            callback();
-          } catch (e) {
-            //
-          }
+            try {
+              callback();
+            } catch (e) {
+              //
+            }
 
-          removeFromHttp(_headers.reqId);
-          if (debugNet && _headers.method !== "notifications") {
-            var str = "";
-            httpAsync.forEach(function(h) {
-              str += h.reqId + ", ";
-            });
-            ipc_send("ipc_log", "httpAsync: " + str);
-          }
-        });
-      });
-      req.on("error", function(e) {
-        console.error(`problem with request: ${e.message}`);
-        if (!metadataState) {
-          ipc_send("popup", {
-            text: "Server unreachable, try offline mode.",
-            time: 0,
-            progress: -1
+            removeFromHttp(_headers.reqId);
+            if (debugNet && _headers.method !== "notifications") {
+              var str = "";
+              httpAsync.forEach(function(h) {
+                str += h.reqId + ", ";
+              });
+              ipc_send("ipc_log", "httpAsync: " + str);
+            }
           });
         }
+      });
+      req.on("error", function(e) {
+        console.error(`problem with request ${_headers.method}: ${e.message}`);
+        console.log(req);
+        ipc_send("popup", {
+          text: `Request error. (${e.message})`,
+          time: 0,
+          progress: -1
+        });
 
         callback(e);
         removeFromHttp(_headers.reqId);
