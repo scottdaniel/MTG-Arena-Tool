@@ -1062,8 +1062,7 @@ function change_background(index, arg = "default") {
     if (pd.settings.back_url && pd.settings.back_url !== "default") {
       mainWrapper.style.backgroundImage = "url(" + pd.settings.back_url + ")";
     } else {
-      mainWrapper.style.backgroundImage =
-        "url(../images/Ghitu-Lavarunner-Dominaria-MtG-Art.jpg)";
+      mainWrapper.style.backgroundImage = "url(../images/Bedevil-Art.jpg)";
     }
   } else {
     const xhr = new XMLHttpRequest();
