@@ -592,8 +592,7 @@ function changeBackground(arg = "default", grpId = 0) {
       mainWrapper.style.backgroundImage = "url(" + pd.settings.back_url + ")";
     } else {
       topArtist.innerHTML = "Bedevil by Seb Seb McKinnon";
-      mainWrapper.style.backgroundImage =
-        "url(../images/Bedevil-Art.jpg)";
+      mainWrapper.style.backgroundImage = "url(../images/Bedevil-Art.jpg)";
     }
   } else if (_card) {
     mainWrapper.style.backgroundImage = `url(${getCardArtCrop(_card)})`;
