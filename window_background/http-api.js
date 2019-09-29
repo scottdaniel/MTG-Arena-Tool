@@ -563,6 +563,17 @@ function httpSetEconomy(change) {
   });
 }
 
+function httpSetSettings(settings) {
+  var _id = makeId(6);
+  settings = JSON.stringify(settings);
+  httpAsync.push({
+    reqId: _id,
+    method: "set_settings",
+    method_path: "/api/send_settings.php",
+    settings: settings
+  });
+}
+
 function httpDeleteData() {
   var _id = makeId(6);
   httpAsync.push({
@@ -739,6 +750,7 @@ module.exports = {
   httpSetMatch,
   httpSetDraft,
   httpSetEconomy,
+  httpSetSettings,
   httpDeleteData,
   httpGetDatabase,
   httpGetDatabaseVersion,

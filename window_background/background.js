@@ -429,6 +429,7 @@ ipc.on("edit_tag", (event, arg) => {
   const { tag, color } = arg;
   setData({ tags_colors: { ...playerData.tags_colors, [tag]: color } });
   store.set("tags_colors." + tag, color);
+  sendSettings();
 });
 
 ipc.on("delete_tag", (event, arg) => {
@@ -638,6 +639,12 @@ function syncUserData(data) {
     });
   if (debugLog || !firstPass) store.set("draft_index", draft_index);
 
+  if (data.settings.tags_colors) {
+    let newTags = data.settings.tags_colors;
+    setData({ tags_colors: { ...newTags } });
+    store.set("tags_colors", newTags);
+  }
+
   setData({ courses_index, draft_index, economy_index, matches_index });
 }
 
@@ -692,6 +699,12 @@ function startWatchingLog() {
     onError: err => console.error(err),
     onFinish: finishLoading
   });
+}
+
+function sendSettings() {
+  let tags_colors = playerData.tags_colors;
+  let settingsData = { tags_colors };
+  httpApi.httpSetSettings(settingsData);
 }
 
 let skipMatch = false;
