@@ -285,6 +285,11 @@ ipc.on("request_log_link", function(event, obj) {
 });
 
 //
+ipc.on("request_deck_link", function(event, obj) {
+  httpApi.httpDeckShareLink(obj.deckString, obj.expire);
+});
+
+//
 ipc.on("windowBounds", (event, windowBounds) => {
   if (firstPass) return;
   setData({ windowBounds }, false);

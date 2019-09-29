@@ -735,6 +735,12 @@ ipc.on("set_log_link", function(event, arg) {
 });
 
 //
+ipc.on("set_deck_link", function(event, arg) {
+  hideLoadingBars();
+  byId("share_input").value = arg;
+});
+
+//
 ipc.on("tou_set", function(event, arg) {
   document.body.style.cursor = "auto";
   tournamentOpen(arg);

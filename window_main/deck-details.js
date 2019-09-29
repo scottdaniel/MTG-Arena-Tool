@@ -4,9 +4,11 @@ const _ = require("lodash");
 const { MANA, CARD_RARITIES, EASING_DEFAULT } = require("../shared/constants");
 const db = require("../shared/database");
 const pd = require("../shared/player-data");
+const { createSelect } = require("../shared/select");
 const {
   createDiv,
   createSpan,
+  createInput,
   queryElements: $$
 } = require("../shared/dom-fns");
 const deckDrawer = require("../shared/deck-drawer");
@@ -27,8 +29,10 @@ const {
   colorPieChart,
   drawDeck,
   drawDeckVisual,
+  openDialog,
   ipcSend,
   makeResizable,
+  showLoadingBars,
   pop
 } = require("./renderer-util");
 
@@ -288,6 +292,47 @@ function openDeck(deck = currentOpenDeck, filters = currentFilters) {
   top.appendChild(createDiv(["button", "back"]));
   top.appendChild(createDiv(["deck_name"], deck.name));
 
+  if (!pd.offline) {
+    const deckShareButton = createDiv(["list_log_share", deck.id + "al"]);
+    deckShareButton.addEventListener("click", e => {
+      e.stopPropagation();
+      const cont = createDiv(["dialog_content"]);
+      cont.style.width = "500px";
+
+      cont.append(createDiv(["share_title"], "Link for sharing:"));
+      const icd = createDiv(["share_input_container"]);
+      const linkInput = createInput([], "", {
+        id: "share_input",
+        autocomplete: "off"
+      });
+      linkInput.addEventListener("click", () => linkInput.select());
+      icd.appendChild(linkInput);
+      const but = createDiv(["button_simple"], "Copy");
+      but.addEventListener("click", function() {
+        ipcSend("set_clipboard", byId("share_input").value);
+      });
+      icd.appendChild(but);
+      cont.appendChild(icd);
+
+      cont.appendChild(createDiv(["share_subtitle"], "<i>Expires in: </i>"));
+      createSelect(
+        cont,
+        ["One day", "One week", "One month", "Never"],
+        "",
+        () => deckShareLink(deck),
+        "expire_select"
+      );
+
+      openDialog(cont);
+      deckShareLink(deck);
+    });
+    top.appendChild(deckShareButton);
+  } else {
+    const deckCantShare = createDiv(["list_log_cant_share"]);
+    deckCantShare.title = "You need to be logged in to share!";
+    top.appendChild(deckCantShare);
+  }
+
   const deckColors = createDiv(["deck_top_colors"]);
   deckColors.style.alignSelf = "center";
   deck.colors.forEach(color => {
@@ -329,6 +374,33 @@ function openDeck(deck = currentOpenDeck, filters = currentFilters) {
       duration: 350
     });
   });
+}
+
+//
+function deckShareLink(deck) {
+  let deckString = JSON.stringify(deck);
+
+  const shareExpire = byId("expire_select").value;
+  let expire = 0;
+  switch (shareExpire) {
+    case "One day":
+      expire = 0;
+      break;
+    case "One week":
+      expire = 1;
+      break;
+    case "One month":
+      expire = 2;
+      break;
+    case "Never":
+      expire = -1;
+      break;
+    default:
+      expire = 0;
+      break;
+  }
+  showLoadingBars();
+  ipcSend("request_deck_link", { expire, deckString });
 }
 
 //

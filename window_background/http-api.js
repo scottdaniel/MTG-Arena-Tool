@@ -263,6 +263,9 @@ function httpBasic() {
               if (_headers.method == "share_log") {
                 ipc_send("set_log_link", parsedResult.url);
               }
+              if (_headers.method == "share_deck") {
+                ipc_send("set_deck_link", parsedResult.url);
+              }
               if (_headers.method == "home_get") {
                 ipc_send("set_home", parsedResult);
               }
@@ -309,7 +312,8 @@ function httpBasic() {
             ) {
               if (
                 _headers.method == "share_draft" ||
-                _headers.method == "share_log"
+                _headers.method == "share_log" ||
+                _headers.method == "share_deck"
               ) {
                 ipc_send("popup", {
                   text: parsedResult.error,
@@ -606,6 +610,17 @@ function httpLogShareLink(lid, log, exp) {
   });
 }
 
+function httpDeckShareLink(deck, exp) {
+  var _id = makeId(6);
+  httpAsync.push({
+    reqId: _id,
+    method: "share_deck",
+    method_path: "/api/get_share_deck.php",
+    deck: deck,
+    expire: exp
+  });
+}
+
 function httpHomeGet(set) {
   var _id = makeId(6);
   httpAsync.unshift({
@@ -730,6 +745,7 @@ module.exports = {
   httpHomeGet,
   httpDraftShareLink,
   httpLogShareLink,
+  httpDeckShareLink,
   httpTournamentGet,
   httpTournamentJoin,
   httpTournamentDrop,
