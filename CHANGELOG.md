@@ -1,3 +1,21 @@
+## 2.11.0 (2019-09-30)
+
+* Bedevil key art ([3fa8fd8](https://github.com/Manuel-777/MTG-Arena-Tool/commit/3fa8fd8))
+* bump version ([0e0d060](https://github.com/Manuel-777/MTG-Arena-Tool/commit/0e0d060))
+* fix current ranked events ([1f8ca65](https://github.com/Manuel-777/MTG-Arena-Tool/commit/1f8ca65))
+* remove chinese ([7dd2e8c](https://github.com/Manuel-777/MTG-Arena-Tool/commit/7dd2e8c))
+* share decks ([128a27d](https://github.com/Manuel-777/MTG-Arena-Tool/commit/128a27d))
+* Show http error codes ([b75f3f2](https://github.com/Manuel-777/MTG-Arena-Tool/commit/b75f3f2)), closes [#598](https://github.com/Manuel-777/MTG-Arena-Tool/issues/598)
+* Show play events in explore ([ca6dac0](https://github.com/Manuel-777/MTG-Arena-Tool/commit/ca6dac0))
+* sync deck tags ([534dc12](https://github.com/Manuel-777/MTG-Arena-Tool/commit/534dc12))
+* update mono colored precon deck names ([59a1877](https://github.com/Manuel-777/MTG-Arena-Tool/commit/59a1877))
+* Update renderer-util.js ([5f96927](https://github.com/Manuel-777/MTG-Arena-Tool/commit/5f96927))
+* Update settings.js ([fad1c5a](https://github.com/Manuel-777/MTG-Arena-Tool/commit/fad1c5a))
+* fix(set): correct ELD date in constants file ([b432615](https://github.com/Manuel-777/MTG-Arena-Tool/commit/b432615))
+* fix(sets): Correct ELD release date ([7a9ea5c](https://github.com/Manuel-777/MTG-Arena-Tool/commit/7a9ea5c))
+
+
+
 ## <small>2.10.3 (2019-09-26)</small>
 
 * add new historic play constant ([23e2f0c](https://github.com/Manuel-777/MTG-Arena-Tool/commit/23e2f0c))
