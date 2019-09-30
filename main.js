@@ -434,7 +434,7 @@ function isEntireOverlayVisible() {
   // require us to avoid the standard isVisible() API
   // we cannot rely on x/y position values to derive visiblity because
   // multi-display setups may have negative values for x or y
-  return bounds.width > 10 && bounds.height > 10;
+  return bounds.width > 100 && bounds.height > 100;
 }
 
 function getOverlayVisible(settings) {
