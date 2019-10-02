@@ -68,8 +68,8 @@ const LANGUAGES = [
   "it",
   "js",
   "ru",
-  "ko-kr" /*,
-  "zh-cn"*/
+  "ko-kr",
+  "zh-cn"
 ];
 
 function getLanguageName(lang) {
