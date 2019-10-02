@@ -9,7 +9,7 @@ exports.SCRYFALL_LANGUAGE = {
   RU: "RU",
   BR: "PT",
   JP: "JA",
-  // "zh-CN": "ZHS",
+  "zh-CN": "ZHS",
   "ko-KR": "KO"
 };
 

@@ -197,15 +197,15 @@ exports.generateMetadata = function(
           cardObj.rank_controversy = 0;
         }
 
+        // Use the name if available
+        if (scryfallObject && scryfallObject.printed_name) {
+          cardObj.name = scryfallObject.printed_name;
+        }
         // We did not find any image data on scryfall for this card!
         if (
           scryfallObject == undefined ||
           scryfallObject.image_uris == undefined
         ) {
-          // Use the name if available
-          if (scryfallObject && scryfallObject.printed_name) {
-            cardObj.name = scryfallObject.printed_name;
-          }
           // Try default to english
           scryfallObject = getScryfallCard(
             ScryfallCards,
