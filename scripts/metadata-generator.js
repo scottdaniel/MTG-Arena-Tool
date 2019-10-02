@@ -53,7 +53,7 @@ exports.generateMetadata = function(
     locRead = null;
 
     var getText = function(id, language) {
-      return loc[language][id];
+      return loc[language] == undefined ? loc["EN"][id] : loc[language][id];
     };
 
     // Altrough enums must be in other languages ill write them in english
@@ -198,10 +198,31 @@ exports.generateMetadata = function(
         }
 
         // We did not find any image data on scryfall for this card!
-        // Something may be wrong.
-        if (scryfallObject == undefined) {
+        if (
+          scryfallObject == undefined ||
+          scryfallObject.image_uris == undefined
+        ) {
+          // Use the name if available
+          if (scryfallObject && scryfallObject.printed_name) {
+            cardObj.name = scryfallObject.printed_name;
+          }
+          // Try default to english
+          scryfallObject = getScryfallCard(
+            ScryfallCards,
+            "en",
+            scryfallSet,
+            englishName,
+            colllector
+          );
+        }
+
+        if (
+          scryfallObject == undefined ||
+          scryfallObject.image_uris == undefined
+        ) {
+          // English failed..
           console.log(
-            `No images found for [${lang}] ${
+            `No scryfall data for [${lang}] ${
               cardObj.name
             } (${englishName}) - ${scryfallSet} (${cardObj.cid}) grpId: ${
               cardObj.id
@@ -221,9 +242,6 @@ exports.generateMetadata = function(
                 key
               ].replace(rep, "");
             });
-          }
-          if (scryfallObject.printed_name) {
-            cardObj.name = scryfallObject.printed_name;
           }
           cardObj.images = scryfallObject.image_uris;
         }

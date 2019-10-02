@@ -42,8 +42,8 @@ const LANGUAGES = [
   "IT",
   "JP",
   "RU",
-  "ko-KR"
-  // "zh-CN"
+  "ko-KR",
+  "zh-CN"
 ];
 // "scryfall-all-cards.json" contains cards in all languages but is 800+mb
 const SCRYFALL_FILE = "scryfall-all-cards.json";
