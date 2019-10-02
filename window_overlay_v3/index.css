@@ -543,6 +543,7 @@ body {
     margin: auto auto auto 8px;
     border-radius: 50%;
     cursor: pointer;
+    background-image: url(../images/edit_icon.png);
 }
 
 .top_nav_wrapper {
