@@ -151,10 +151,10 @@ const overlayWhitelist = [
 // (update is destructive, be sure to use spread syntax if necessary)
 function setData(data, refresh = debugLog || !firstPass) {
   const cleanData = _.omit(data, dataBlacklist);
-  playerData.handleSetData(null, cleanData);
-  ipc_send("set_player_data", cleanData, IPC_MAIN);
+  playerData.handleSetData(null, JSON.stringify(cleanData));
+  ipc_send("set_player_data", JSON.stringify(cleanData), IPC_MAIN);
   const overlayData = _.pick(cleanData, overlayWhitelist);
-  ipc_send("set_player_data", overlayData, IPC_OVERLAY);
+  ipc_send("set_player_data", JSON.stringify(overlayData), IPC_OVERLAY);
   if (refresh) ipc_send("player_data_refresh");
 }
 
