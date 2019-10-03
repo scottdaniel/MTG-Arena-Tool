@@ -17,6 +17,12 @@ if (!remote.app.isPackaged) {
   });
 }
 
+const TransparencyMouseFix = require("electron-transparency-mouse-fix");
+const fix = new TransparencyMouseFix({
+  log: true,
+  fixPointerEvents: "auto"
+});
+
 const striptags = require("striptags");
 
 const db = require("../shared/database");
@@ -136,13 +142,18 @@ function toggleEditMode() {
   editMode = !editMode;
 
   if (editMode) {
-    setIgnoreFalse();
     document.body.style.backgroundColor = "rgba(0, 0, 0, 0.3)";
 
     pd.settings.overlays.forEach((_overlay, index) => {
-      if (!getVisible(_overlay)) return;
-
       const overlayDiv = byId("overlay_" + (index + 1));
+
+      if (!getVisible(_overlay)) {
+        return;
+      } else {
+        overlayDiv.classList.add("click-on");
+        overlayDiv.classList.remove("click-through");
+      }
+
       overlayDiv.classList.add("editable");
 
       const restrictToParent = interact.modifiers.restrictRect({
@@ -184,13 +195,17 @@ function toggleEditMode() {
   } else {
     pd.settings.overlays.forEach((_overlay, index) => {
       const overlayDiv = byId("overlay_" + (index + 1));
+      overlayDiv.classList.add("click-through");
+      overlayDiv.classList.remove("click-on");
       overlayDiv.classList.remove("editable");
       interact(overlayDiv).unset();
     });
-    setIgnoreTrue();
     document.body.style.backgroundColor = "rgba(0, 0, 0, 0.05)";
     saveOverlaysPosition();
   }
+
+  fix.unregisterWindow();
+  fix.registerWindow();
 }
 
 function saveOverlaysPosition() {
@@ -250,13 +265,9 @@ function settingsUpdated() {
     if (getVisible(_overlay)) {
       overlayDiv.style.opacity = "1";
       overlayDiv.style.visibility = "visible";
-      overlayDiv.classList.add("click-on");
-      overlayDiv.classList.remove("click-through");
     } else {
       overlayDiv.style.opacity = "0";
       overlayDiv.style.visibility = "hidden";
-      overlayDiv.classList.add("click-through");
-      overlayDiv.classList.remove("click-on");
     }
 
     change_background(index, pd.settings.back_url);
@@ -296,17 +307,6 @@ function settingsUpdated() {
     } else {
       updateMatchView(index);
     }
-
-    // Only issue with this is when two overlays are on top of eachother
-    // But when we allow editing the layour we should not allow that
-    /*
-    overlayDiv.removeEventListener("mouseenter", setIgnoreFalse);
-    overlayDiv.removeEventListener("mouseleave", setIgnoreTrue);
-    if (_overlay.show) {
-      overlayDiv.addEventListener("mouseenter", setIgnoreFalse);
-      overlayDiv.addEventListener("mouseleave", setIgnoreTrue);
-    }
-    */
   });
 }
 
@@ -320,15 +320,6 @@ function getVisible(settings) {
       arenaState === ARENA_MODE_MATCH);
 
   return settings.show && (currentModeApplies || settings.show_always);
-}
-
-function setIgnoreTrue() {
-  if (editMode) return;
-  remote.getCurrentWindow().setIgnoreMouseEvents(true, { forward: true });
-}
-
-function setIgnoreFalse() {
-  remote.getCurrentWindow().setIgnoreMouseEvents(false);
 }
 
 ipc.on("set_draft_cards", (event, draft) => {
@@ -433,6 +424,16 @@ function updateMatchView(index) {
 
     let initalTime = actionLog[0] ? new Date(actionLog[0].time) : new Date();
     actionLog.forEach(log => {
+      log.str = log.str.replace(
+        "<log-card",
+        '<log-card class="click-on"',
+        "gi"
+      );
+      log.str = log.str.replace(
+        "<log-ability",
+        '<log-ability class="click-on"',
+        "gi"
+      );
       const _date = new Date(log.time);
       const secondsPast = Math.round((_date - initalTime) / 1000);
 
@@ -688,11 +689,6 @@ function drawDeckOdds(index) {
 
   let oddsPrev = createDiv(["odds_prev", "click-on"]);
   let oddsNext = createDiv(["odds_next", "click-on"]);
-  // Allow clicks
-  oddsPrev.addEventListener("mouseover", setIgnoreFalse);
-  oddsPrev.addEventListener("mouseleave", setIgnoreTrue);
-  oddsNext.addEventListener("mouseover", setIgnoreFalse);
-  oddsNext.addEventListener("mouseleave", setIgnoreTrue);
 
   navCont.appendChild(oddsPrev);
   navCont.appendChild(
@@ -840,8 +836,6 @@ function updateDraftView(index, _packN = -1, _pickN = -1) {
 
       updateDraftView(index, packN, pickN);
     });
-    draftPrev.addEventListener("mouseenter", setIgnoreFalse);
-    draftPrev.addEventListener("mouseleave", setIgnoreTrue);
     controlCont.appendChild(draftPrev);
 
     controlCont.appendChild(createDiv(["draft_title"]));
@@ -870,8 +864,6 @@ function updateDraftView(index, _packN = -1, _pickN = -1) {
         updateDraftView(index, packN, pickN);
       }
     });
-    draftNext.addEventListener("mouseenter", setIgnoreFalse);
-    draftNext.addEventListener("mouseleave", setIgnoreTrue);
     controlCont.appendChild(draftNext);
 
     titleDiv.appendChild(controlCont);
@@ -1117,16 +1109,16 @@ ready(function() {
         <div class="overlay_deckcolors"></div>
         <div class="overlay_decklist"></div>
         <div class="overlay_clock_container">
-            <div class="clock_prev"></div>
+            <div class="clock_prev click-on"></div>
             <div class="clock_turn"></div>
             <div class="clock_elapsed"></div>
-            <div class="clock_next"></div>
+            <div class="clock_next click-on"></div>
         </div>
       </div>
       <div class="outer_wrapper top_nav_wrapper">
-        <div class="flex_item overlay_icon"></div>
-        <div class="button settings" style="margin: 0;"></div>
-        <div class="button close" style="margin-right: 4px;"></div>
+        <div class="flex_item overlay_icon click-on"></div>
+        <div class="button settings click-on" style="margin: 0;"></div>
+        <div class="button close click-on" style="margin-right: 4px;"></div>
       </div>`;
   });
   pd.settings.overlays.forEach((_overlay, index) => recreateClock(index));
@@ -1144,8 +1136,6 @@ ready(function() {
       const deckListDom = `#overlay_${index + 1} .overlay_decklist`;
 
       const deckListDiv = queryElements(deckListDom)[0];
-      deckListDiv.addEventListener("mouseover", setIgnoreFalse);
-      deckListDiv.addEventListener("mouseleave", setIgnoreTrue);
       deckListDiv.addEventListener("mouseover", function() {
         let index = this.offsetParent.offsetParent.attributes["0"].value.slice(
           -1
@@ -1168,8 +1158,6 @@ ready(function() {
         }
         recreateClock(index);
       });
-      clockPrevDiv.addEventListener("mouseover", setIgnoreFalse);
-      clockPrevDiv.addEventListener("mouseleave", setIgnoreTrue);
 
       const clockNextDiv = queryElements(clockNextDom)[0];
       clockNextDiv.addEventListener("click", function() {
@@ -1179,14 +1167,10 @@ ready(function() {
         }
         recreateClock(index);
       });
-      clockNextDiv.addEventListener("mouseover", setIgnoreFalse);
-      clockNextDiv.addEventListener("mouseleave", setIgnoreTrue);
 
       const iconDiv = queryElements(iconDom)[0];
       iconDiv.style.backgroundColor = `var(--color-${COLORS_ALL[index]})`;
       iconDiv.addEventListener("click", toggleEditMode);
-      iconDiv.addEventListener("mouseover", setIgnoreFalse);
-      iconDiv.addEventListener("mouseleave", setIgnoreTrue);
 
       queryElements(settingsDom)[0].addEventListener("click", function() {
         ipcSend("renderer_show");
@@ -1196,12 +1180,6 @@ ready(function() {
         close(-1, index);
       });
     });
-    queryElements(".button").forEach(el =>
-      el.addEventListener("mouseover", setIgnoreFalse)
-    );
-    queryElements(".button").forEach(el =>
-      el.addEventListener("mouseleave", setIgnoreTrue)
-    );
   }, 500);
 });
 
