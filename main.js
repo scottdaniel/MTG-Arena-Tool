@@ -620,6 +620,12 @@ function createMainWindow() {
       }
     },
     {
+      label: "Edit Mode",
+      click: () => {
+        overlay.webContents.send("edit");
+      }
+    },
+    {
       label: "Quit",
       click: () => {
         quit();
