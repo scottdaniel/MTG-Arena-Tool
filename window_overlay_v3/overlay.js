@@ -203,9 +203,6 @@ function toggleEditMode() {
     document.body.style.backgroundColor = "rgba(0, 0, 0, 0.05)";
     saveOverlaysPosition();
   }
-
-  fix.unregisterWindow();
-  fix.registerWindow();
 }
 
 function saveOverlaysPosition() {
@@ -950,6 +947,8 @@ window.setInterval(() => {
   pd.settings.overlays.forEach((_overlay, index) => {
     updateClock(index);
   });
+  fix.registerWindow();
+  //fix.unregisterWindow();
 }, 250);
 
 function updateClock(index) {
