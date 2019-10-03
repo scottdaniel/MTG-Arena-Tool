@@ -147,14 +147,13 @@ function toggleEditMode() {
     pd.settings.overlays.forEach((_overlay, index) => {
       const overlayDiv = byId("overlay_" + (index + 1));
 
-      if (!getVisible(_overlay)) {
-        return;
-      } else {
-        overlayDiv.classList.add("click-on");
-        overlayDiv.classList.remove("click-through");
-      }
+      if (!getVisible(_overlay)) return;
 
-      overlayDiv.classList.add("editable");
+      if (!overlayDiv.classList.contains("click-on"))
+        overlayDiv.classList.add("click-on");
+      overlayDiv.classList.remove("click-through");
+      if (!overlayDiv.classList.contains("editable"))
+        overlayDiv.classList.add("editable");
 
       const restrictToParent = interact.modifiers.restrictRect({
         restriction: "parent"
@@ -195,7 +194,8 @@ function toggleEditMode() {
   } else {
     pd.settings.overlays.forEach((_overlay, index) => {
       const overlayDiv = byId("overlay_" + (index + 1));
-      overlayDiv.classList.add("click-through");
+      if (!overlayDiv.classList.contains("click-through"))
+        overlayDiv.classList.add("click-through");
       overlayDiv.classList.remove("click-on");
       overlayDiv.classList.remove("editable");
       interact(overlayDiv).unset();
