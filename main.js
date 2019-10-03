@@ -577,7 +577,7 @@ function createOverlayWindow() {
     }
   });
   overlay.loadURL(`file://${__dirname}/window_overlay_v3/index.html`);
-  overlay.setIgnoreMouseEvents(true, { forward: true });
+  //overlay.setIgnoreMouseEvents(true, { forward: true });
 
   overlay.webContents.once("dom-ready", function() {
     //We need to wait for the overlay to be initialized before we interact with it

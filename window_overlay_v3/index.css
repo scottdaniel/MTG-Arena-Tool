@@ -11,12 +11,8 @@ body {
     width: 100% !important;
 }
 
-.click-on {
-    pointer-events: all;
-}
-.click-through {
-    pointer-events: none;
-}
+.click-on      {pointer-events: all}
+.click-through {pointer-events: none}
 
 .overlay_master_wrapper {
     /* Debug;

@@ -77,6 +77,7 @@
     "electron-asar-hot-updater": "0.0.5",
     "electron-debug": "^1.5.0",
     "electron-store": "^3.2.0",
+    "electron-transparency-mouse-fix": "^1.0.0-beta",
     "electron-unhandled": "^2.2.0",
     "electron-updater": "^4.0.6",
     "electron-util": "^0.11.0",
