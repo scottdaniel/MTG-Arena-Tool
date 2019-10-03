@@ -370,7 +370,6 @@ function setSettings(_settings) {
     return;
   }
   console.log("MAIN:  Updating settings");
-  settings = _settings;
 
   // update keyboard shortcuts
   globalShortcut.unregisterAll();
