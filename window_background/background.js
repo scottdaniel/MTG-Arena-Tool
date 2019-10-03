@@ -654,7 +654,7 @@ function syncUserData(data) {
 function syncSettings(dirtySettings = {}, refresh = debugLog || !firstPass) {
   const settings = { ...playerData.settings, ...dirtySettings };
   setData({ settings }, refresh);
-  if (refresh) ipc_send("set_settings", settings);
+  if (refresh) ipc_send("set_settings", JSON.stringify(settings));
 }
 
 // Set a new log URI
@@ -1759,7 +1759,7 @@ function finishLoading() {
       ipc_send("set_arena_state", ARENA_MODE_DRAFT);
     }
 
-    ipc_send("set_settings", playerData.settings);
+    ipc_send("set_settings", JSON.stringify(playerData.settings));
     ipc_send("initialize");
     ipc_send("player_data_refresh");
 

@@ -362,6 +362,13 @@ function setArenaState(state) {
 }
 
 function setSettings(_settings) {
+  try {
+    settings = JSON.parse(_settings);
+  } catch (e) {
+    console.log("MAIN: Error parsing settings");
+    console.log(e);
+    return;
+  }
   console.log("MAIN:  Updating settings");
   settings = _settings;
 
