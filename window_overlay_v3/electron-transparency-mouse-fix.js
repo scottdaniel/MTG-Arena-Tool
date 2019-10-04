@@ -268,6 +268,7 @@ class TransparencyMouseFix {
       let tgt = document.elementFromPoint(x - left, y - top);
       // HINT: update classList checks when expanding code
       if (
+        tgt &&
         !tgt.classList.contains("etmf-void") &&
         tgt !== this.htmlWindow.document.documentElement
       ) {
