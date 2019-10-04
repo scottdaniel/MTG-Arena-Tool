@@ -17,11 +17,8 @@ if (!remote.app.isPackaged) {
   });
 }
 
-const TransparencyMouseFix = require("electron-transparency-mouse-fix");
-const fix = new TransparencyMouseFix({
-  log: true,
-  fixPointerEvents: "auto"
-});
+const TransparencyMouseFix = require("./electron-transparency-mouse-fix.js");
+let fix = null;
 
 const striptags = require("striptags");
 
@@ -947,8 +944,7 @@ window.setInterval(() => {
   pd.settings.overlays.forEach((_overlay, index) => {
     updateClock(index);
   });
-  fix.registerWindow();
-  //fix.unregisterWindow();
+  //if (fix) fix.registerWindow();
 }, 250);
 
 function updateClock(index) {
@@ -1180,6 +1176,12 @@ ready(function() {
       });
     });
   }, 500);
+  setTimeout(() => {
+    fix = new TransparencyMouseFix({
+      log: true,
+      fixPointerEvents: "auto"
+    });
+  }, 1000);
 });
 
 function get_ids_colors(list) {
