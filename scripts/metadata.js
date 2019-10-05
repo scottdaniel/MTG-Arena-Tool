@@ -19,7 +19,7 @@ const {
 let metagameData = {};
 let ranksData = {};
 
-const VERSION = 20;
+const VERSION = 21;
 /*
   Languages available in loc.json;
   "BR"
@@ -250,6 +250,9 @@ function generateScryfallDatabase() {
         if (line.length > 0) {
           try {
             var obj = JSON.parse(line);
+            /*if (obj.set == "eld" && obj.collector_number == 149) {
+              console.log(line);
+            }*/
             if (ALLOWED_SCRYFALL.includes(obj.set)) {
               obj.lang = obj.lang.toUpperCase();
               let name = obj.name;
@@ -264,7 +267,7 @@ function generateScryfallDatabase() {
                 obj.card_faces.forEach(face => {
                   let name = face.name;
                   scryfallDataAdd(
-                    obj,
+                    Object.assign(obj, face),
                     obj.lang,
                     obj.set,
                     name,
@@ -276,7 +279,7 @@ function generateScryfallDatabase() {
                 obj.card_faces.forEach(face => {
                   let name = face.name;
                   scryfallDataAdd(
-                    face,
+                    Object.assign(obj, face),
                     obj.lang,
                     obj.set,
                     name,
@@ -288,7 +291,7 @@ function generateScryfallDatabase() {
                 obj.card_faces.forEach(face => {
                   let name = face.name;
                   scryfallDataAdd(
-                    obj,
+                    Object.assign(obj, face),
                     obj.lang,
                     obj.set,
                     name,
