@@ -19,20 +19,8 @@ const {
 let metagameData = {};
 let ranksData = {};
 
-const VERSION = 21;
-/*
-  Languages available in loc.json;
-  "BR"
-  "DE"
-  "EN"
-  "ES"
-  "FR"
-  "IT"
-  "JP"
-  "RU"
-  "ko-KR"
-  "zh-CN"
-*/
+const VERSION = 22;
+
 const LANGUAGES = [
   "EN",
   "ES",
@@ -54,7 +42,7 @@ app.on("ready", () => {
   // obtain it from somewhere automatically, like a settings
   // file or the output log itself.
   manifestParser
-    .getManifestFiles("1776.732715")
+    .getManifestFiles("1805.734606")
     .then(checkSetsAvailable)
     .then(getRanksData)
     .then(getScryfallCards)
