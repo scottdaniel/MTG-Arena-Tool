@@ -3,6 +3,7 @@ const path = require("path");
 const fs = require("fs");
 var http = require("https");
 const readline = require("readline");
+const _ = require("lodash");
 
 const manifestParser = require("./manifest-parser");
 const { generateMetadata } = require("./metadata-generator");
@@ -254,8 +255,9 @@ function generateScryfallDatabase() {
               if (obj.layout == "adventure") {
                 obj.card_faces.forEach(face => {
                   let name = face.name;
+                  let newObj = Object.assign(_.cloneDeep(obj), face);
                   scryfallDataAdd(
-                    Object.assign(obj, face),
+                    newObj,
                     obj.lang,
                     obj.set,
                     name,
@@ -266,8 +268,9 @@ function generateScryfallDatabase() {
               if (obj.layout == "transform") {
                 obj.card_faces.forEach(face => {
                   let name = face.name;
+                  let newObj = Object.assign(_.cloneDeep(obj), face);
                   scryfallDataAdd(
-                    Object.assign(obj, face),
+                    newObj,
                     obj.lang,
                     obj.set,
                     name,
@@ -278,8 +281,9 @@ function generateScryfallDatabase() {
               if (obj.layout == "split") {
                 obj.card_faces.forEach(face => {
                   let name = face.name;
+                  let newObj = Object.assign(_.cloneDeep(obj), face);
                   scryfallDataAdd(
-                    Object.assign(obj, face),
+                    newObj,
                     obj.lang,
                     obj.set,
                     name,
