@@ -176,23 +176,30 @@ function get_collection_stats() {
   db.cardList.forEach(card => {
     if (!card.collectible || card.rarity === "land") return;
     if (!(card.set in stats)) return;
+    let collation = db.sets[card.set].collation;
     // add to totals
-    stats[card.set][card.rarity].total += 4;
+    if (card.booster || !collation) {
+      stats[card.set][card.rarity].total += 4;
+      stats[card.set][card.rarity].unique += 1;
+    }
     stats.complete[card.rarity].total += 4;
-    stats[card.set][card.rarity].unique += 1;
     stats.complete[card.rarity].unique += 1;
 
     // add cards we own
     if (pd.cards.cards[card.id] !== undefined) {
       const owned = pd.cards.cards[card.id];
-      stats[card.set][card.rarity].owned += owned;
+      if (card.booster || !collation) {
+        stats[card.set][card.rarity].owned += owned;
+        stats[card.set][card.rarity].uniqueOwned += 1;
+      }
       stats.complete[card.rarity].owned += owned;
-      stats[card.set][card.rarity].uniqueOwned += 1;
       stats.complete[card.rarity].uniqueOwned += 1;
 
       // count complete sets we own
       if (owned == 4) {
-        stats[card.set][card.rarity].complete += 1;
+        if (card.booster || !collation) {
+          stats[card.set][card.rarity].complete += 1;
+        }
         stats.complete[card.rarity].complete += 1;
       }
     }
