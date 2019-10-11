@@ -19,7 +19,7 @@ const {
   getReadableEvent,
   getRecentDeckName,
   get_deck_missing,
-  getBoosterCountEstimate,
+  getBoosterCountEstimate
 } = require("../shared/util");
 const { normalApproximationInterval } = require("../shared/stats-fns");
 
@@ -467,7 +467,6 @@ class Aggregator {
       aName.localeCompare(bName)
     );
   }
-
 
   compareDecksByIncompleteness(a, b) {
     const aMissing = get_deck_missing(a);
