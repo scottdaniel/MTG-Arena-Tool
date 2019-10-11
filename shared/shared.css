@@ -331,6 +331,10 @@ label {
     background-color: rgba(221, 130, 99, 1) !important;
 }
 
+.back_blue {
+    background-color: rgba(170, 190, 223, 1) !important;
+}
+
 .back-white {
     background-color: var(--color-light) !important;
 }
