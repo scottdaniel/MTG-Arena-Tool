@@ -18,7 +18,8 @@ const pd = require("../shared/player-data");
 const {
   getReadableEvent,
   getRecentDeckName,
-  get_deck_missing
+  get_deck_missing,
+  getBoosterCountEstimate,
 } = require("../shared/util");
 const { normalApproximationInterval } = require("../shared/stats-fns");
 
@@ -51,7 +52,7 @@ class Aggregator {
     this.compareDecks = this.compareDecks.bind(this);
     this.compareDecksByWins = this.compareDecksByWins.bind(this);
     this.compareDecksByWinrates = this.compareDecksByWinrates.bind(this);
-    this.compareDecksByWildcardsNeeded = this.compareDecksByWildcardsNeeded.bind(
+    this.compareDecksByIncompleteness = this.compareDecksByIncompleteness.bind(
       this
     );
     this.compareEvents = this.compareEvents.bind(this);
@@ -467,25 +468,18 @@ class Aggregator {
     );
   }
 
-  _sumNumberWildcardsMissing(missingCards) {
-    return Object.values(missingCards).reduce((accum, num) => {
-      if (num) {
-        return accum + num;
-      }
-    });
-  }
 
-  compareDecksByWildcardsNeeded(a, b) {
+  compareDecksByIncompleteness(a, b) {
     const aMissing = get_deck_missing(a);
     const bMissing = get_deck_missing(b);
-    const aMissingTotal = this._sumNumberWildcardsMissing(aMissing);
-    const bMissingtotal = this._sumNumberWildcardsMissing(bMissing);
+    const aMissingBoosters = getBoosterCountEstimate(aMissing);
+    const bMissingBoosters = getBoosterCountEstimate(bMissing);
 
     const aName = getRecentDeckName(a.id);
     const bName = getRecentDeckName(b.id);
 
     return (
-      bMissingtotal - aMissingTotal ||
+      bMissingBoosters - aMissingBoosters ||
       bMissing.mythic - aMissing.mythic ||
       bMissing.rare - aMissing.rare ||
       bMissing.uncommon - aMissing.uncommon ||
