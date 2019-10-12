@@ -1,4 +1,4 @@
-function autocomplete(inp, arr, _onClick = () => {}, _onBlur = () => {}) {
+export default function autocomplete(inp, arr, _onClick = () => {}, _onBlur = () => {}) {
   /*
   the autocomplete function takes two arguments,
   the text field element and an array of possible autocompleted values:*/
@@ -146,5 +146,3 @@ function autocomplete(inp, arr, _onClick = () => {}, _onBlur = () => {}) {
     }
   });
 }
-
-export default autocomplete;
