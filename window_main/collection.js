@@ -432,18 +432,6 @@ function openCollectionTab() {
 
   addCheckboxSearch(
     cont,
-    '<div class="icon_search_unowned"></div>Show unowned',
-    "query_unown",
-    false
-  );
-  addCheckboxSearch(
-    cont,
-    '<div class="icon_search_incomplete"></div>Incomplete only',
-    "query_incomplete",
-    false
-  );
-  addCheckboxSearch(
-    cont,
     '<div class="icon_search_new"></div>Newly acquired only',
     "query_new",
     false
@@ -500,7 +488,6 @@ function openCollectionTab() {
 
   icd.appendChild(inputCmc);
   cont.appendChild(icd);
-
   let checkboxCmcHigher = addCheckboxSearch(
     cont,
     "Higher than",
@@ -513,6 +500,43 @@ function openCollectionTab() {
     cont,
     "Lower than",
     "query_cmclower",
+    false,
+    true
+  );
+
+  main_but_cont.appendChild(cont);
+  filters.appendChild(main_but_cont);
+  
+  cont = createDiv(["buttons_container"]);
+  icd = createDiv(["input_container_inventory", "auto_width"]);
+
+  label = document.createElement("label");
+  label.style.display = "table";
+  label.innerHTML = "Owned Qty:";
+  icd.appendChild(label);
+
+  let inputQty = document.createElement("input");
+  inputQty.style.maxWidth = "80px";
+  inputQty.id = "query_qty";
+  inputQty.autocomplete = "off";
+  inputQty.type = "number";
+  inputQty.min="0";
+  inputQty.max="4";
+
+  icd.appendChild(inputQty);
+  cont.appendChild(icd);
+   let checkboxQtyHigher = addCheckboxSearch(
+    cont,
+    "Higher than",
+    "query_qtyhigher",
+    false,
+    true
+  );
+  addCheckboxSearch(cont, "Equal to", "query_qtyequal", true);
+  let checkboxQtyLower = addCheckboxSearch(
+    cont,
+    "Lower than",
+    "query_qtylower",
     false,
     true
   );
@@ -607,8 +631,6 @@ function resetFilters() {
 
   document.getElementById("query_name").value = "";
   document.getElementById("query_type").value = "";
-  document.getElementById("query_unown").checked = false;
-  document.getElementById("query_incomplete").checked = false;
   document.getElementById("query_new").checked = false;
   document.getElementById("query_multicolor").checked = false;
   document.getElementById("query_exclude").checked = false;
@@ -932,8 +954,6 @@ function printCards() {
 
   let filterName = document.getElementById("query_name").value.toLowerCase();
   let filterType = document.getElementById("query_type").value.toLowerCase();
-  let filterUnown = document.getElementById("query_unown").checked;
-  let filterIncomplete = document.getElementById("query_incomplete").checked;
   let filterNew = document.getElementById("query_new");
   let filterMulti = document.getElementById("query_multicolor");
   let filterExclude = document.getElementById("query_exclude");
@@ -949,10 +969,15 @@ function printCards() {
   let filterCmcLower = document.getElementById("query_cmclower").checked;
   let filterCmcEqual = document.getElementById("query_cmcequal").checked;
   let filterCmcHigher = document.getElementById("query_cmchigher").checked;
+  
+  let filterQty = document.getElementById("query_qty").value;
+  let filterQtyLower = document.getElementById("query_qtylower").checked;
+  let filterQtyEqual = document.getElementById("query_qtyequal").checked;
+  let filterQtyHigher = document.getElementById("query_qtyhigher").checked;
 
   let totalCards = 0;
   let list;
-  if (filterUnown) {
+  if (filterQty == 0 || filterQtyLower) {
     list = db.cardIds;
   } else {
     list = Object.keys(pd.cards.cards);
@@ -997,13 +1022,6 @@ function printCards() {
       }
     }
 
-    if (filterIncomplete) {
-      const owned = pd.cards.cards[card.id];
-      if (owned >= 4) {
-        continue;
-      }
-    }
-
     if (filterNew.checked && pd.cardsNew[key] === undefined) {
       continue;
     }
@@ -1037,6 +1055,32 @@ function printCards() {
         }
       }
     }
+	
+	if (filterQty > 0) {
+		const owned = pd.cards.cards[card.id];
+      if (filterQtyLower && filterQtyEqual) {
+        if (owned > filterQty) {
+          continue;
+        }
+      } else if (filterQtyHigher && filterQtyEqual) {
+        if (owned < filterQty) {
+          continue;
+        }
+      } else if (filterQtyLower && !filterQtyEqual) {
+        if (owned >= filterQty) {
+          continue;
+        }
+      } else if (filterQtyHigher && !filterQtyEqual) {
+        if (owned <= filterQty) {
+          continue;
+        }
+      } else if (!filterQtyHigher && !filterQtyLower && filterQtyEqual) {
+        if (owned != filterQty) {
+          continue;
+        }
+      }
+    }
+	
 
     if (rarity == "land" && filterAnyRarityChecked && !filterCommon) continue;
     if (rarity == "common" && filterAnyRarityChecked && !filterCommon) continue;
