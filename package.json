@@ -55,7 +55,7 @@
     "clean:modules": "rm -fr node_modules",
     "clean:lock": "rm -f package-lock.json",
     "postclean": "npm install",
-    "start": "electron ./src/main.js",
+    "start": "npm run babel && electron ./lib/main.js",
     "postinstall": "install-app-deps",
     "format": "prettier --write \"**/*.js\"",
     "test": "npm run --silent test:eslint && npm run --silent test:prettier && npm run --silent test:jest",
@@ -65,7 +65,8 @@
     "dist": "build --x64",
     "version": "node -p \"require('./package.json').version\"",
     "load-logs": "electron \"./scripts/load-logs.js\"",
-    "metadata": "electron \"./scripts/metadata.js\""
+    "metadata": "electron \"./scripts/metadata.js\"",
+    "babel": "babel src --out-dir lib --copy-files"
   },
   "dependencies": {
     "animejs": "^3.0.1",
@@ -97,6 +98,9 @@
     "xmlhttprequest": "^1.8.0"
   },
   "devDependencies": {
+    "@babel/cli": "^7.6.4",
+    "@babel/core": "^7.6.4",
+    "@babel/preset-env": "^7.6.3",
     "acorn": "^6.1.1",
     "devtron": "^1.4.0",
     "electron": "^5.0.1",
