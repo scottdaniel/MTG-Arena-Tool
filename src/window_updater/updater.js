@@ -1,4 +1,4 @@
-import { ipcRenderer as ipc, remote } from 'electron';
+import { ipcRenderer as ipc, remote } from "electron";
 
 if (!remote.app.isPackaged) {
   const { openNewGitHubIssue, debugInfo } = require("electron-util");

@@ -1,8 +1,22 @@
-import electron from 'electron';
+import electron from "electron";
 const ipc = electron.ipcRenderer;
-import _ from 'lodash';
-import { CARD_TILE_FLAT, DATE_LAST_30, DEFAULT_TILE, BLACK, BLUE, GREEN, RED, WHITE, OVERLAY_LEFT, OVERLAY_FULL, OVERLAY_SEEN, OVERLAY_DRAFT, OVERLAY_LOG } from './constants';
-import db from './database';
+import _ from "lodash";
+import {
+  CARD_TILE_FLAT,
+  DATE_LAST_30,
+  DEFAULT_TILE,
+  BLACK,
+  BLUE,
+  GREEN,
+  RED,
+  WHITE,
+  OVERLAY_LEFT,
+  OVERLAY_FULL,
+  OVERLAY_SEEN,
+  OVERLAY_DRAFT,
+  OVERLAY_LOG
+} from "./constants";
+import db from "./database";
 
 const playerDataDefault = {
   name: "",

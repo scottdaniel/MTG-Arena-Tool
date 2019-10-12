@@ -14,11 +14,11 @@ global
   instanceToCardIdMap
   update_deck
 */
-import { IPC_OVERLAY } from '../shared/constants.js';
+import { IPC_OVERLAY } from "../shared/constants.js";
 
-import { objectClone } from '../shared/util';
-import { ipc_send } from './background-util';
-import Deck from '../shared/deck';
+import { objectClone } from "../shared/util";
+import { ipc_send } from "./background-util";
+import Deck from "../shared/deck";
 
 let actionType = [];
 actionType[0] = "ActionType_None";

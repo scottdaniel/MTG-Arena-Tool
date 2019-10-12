@@ -1,6 +1,6 @@
-import { remote } from 'electron';
-import { createDiv, queryElements } from '../shared/dom-fns';
-import { openDialog } from './renderer-util';
+import { remote } from "electron";
+import { createDiv, queryElements } from "../shared/dom-fns";
+import { openDialog } from "./renderer-util";
 
 // We should clear this on releases and fill as we add new features
 const screens = [];

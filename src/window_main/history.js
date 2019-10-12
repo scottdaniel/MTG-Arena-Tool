@@ -1,18 +1,33 @@
-import anime from 'animejs';
-import autocomplete from '../shared/autocomplete';
-import { DATE_SEASON, DEFAULT_TILE, EASING_DEFAULT, RANKS } from '../shared/constants';
-import db from '../shared/database';
-import pd from '../shared/player-data';
-import { createDiv, createInput } from '../shared/dom-fns';
-import { makeId } from '../shared/util';
-import Aggregator from './aggregator';
-import DataScroller from './data-scroller';
-import FilterPanel from './filter-panel';
-import ListItem from './list-item';
-import StatsPanel from './stats-panel';
-import { attachDraftData, attachMatchData, formatPercent, getTagColor, ipcSend, makeResizable, resetMainContainer, showColorpicker, toggleArchived } from './renderer-util';
-import { openDraft } from './draft-details';
-import { openMatch } from './match-details';
+import anime from "animejs";
+import autocomplete from "../shared/autocomplete";
+import {
+  DATE_SEASON,
+  DEFAULT_TILE,
+  EASING_DEFAULT,
+  RANKS
+} from "../shared/constants";
+import db from "../shared/database";
+import pd from "../shared/player-data";
+import { createDiv, createInput } from "../shared/dom-fns";
+import { makeId } from "../shared/util";
+import Aggregator from "./aggregator";
+import DataScroller from "./data-scroller";
+import FilterPanel from "./filter-panel";
+import ListItem from "./list-item";
+import StatsPanel from "./stats-panel";
+import {
+  attachDraftData,
+  attachMatchData,
+  formatPercent,
+  getTagColor,
+  ipcSend,
+  makeResizable,
+  resetMainContainer,
+  showColorpicker,
+  toggleArchived
+} from "./renderer-util";
+import { openDraft } from "./draft-details";
+import { openMatch } from "./match-details";
 
 const byId = id => document.getElementById(id);
 const {

@@ -8,7 +8,7 @@
 // TODO: Windows: can't drag files over voids
 
 // No external dependencies!
-import electron from 'electron';
+import electron from "electron";
 
 // Style for the default console logging tag
 const consoleTag = [

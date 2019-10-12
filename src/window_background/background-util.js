@@ -4,13 +4,13 @@ global
   firstPass
 */
 // Utility functions that belong only to background
-import { ipcRenderer as ipc } from 'electron';
+import { ipcRenderer as ipc } from "electron";
 
-import _ from 'lodash';
-import parse from 'date-fns/parse';
-import isValid from 'date-fns/isValid';
-import { IPC_BACKGROUND, IPC_MAIN, IPC_OVERLAY } from '../shared/constants.js';
-import playerData from '../shared/player-data.js';
+import _ from "lodash";
+import parse from "date-fns/parse";
+import isValid from "date-fns/isValid";
+import { IPC_BACKGROUND, IPC_MAIN, IPC_OVERLAY } from "../shared/constants.js";
+import playerData from "../shared/player-data.js";
 
 // These were tested briefly
 // They are all taken from logs

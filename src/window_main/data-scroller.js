@@ -1,5 +1,9 @@
-import { createDiv } from '../shared/dom-fns';
-import { setLocalState, showLoadingBars, hideLoadingBars } from './renderer-util';
+import { createDiv } from "../shared/dom-fns";
+import {
+  setLocalState,
+  showLoadingBars,
+  hideLoadingBars
+} from "./renderer-util";
 
 class DataScroller {
   constructor(container, renderData, loadAmount, maxDataIndex) {

@@ -35,18 +35,28 @@
     firstPass
     debugLog
 */
-import _ from 'lodash';
+import _ from "lodash";
 
-import differenceInDays from 'date-fns/differenceInDays';
-import { ARENA_MODE_IDLE } from '../shared/constants';
-import db from '../shared/database';
-import CardsList from '../shared/cards-list';
-import { get_deck_colors, objectClone, replaceAll } from '../shared/util';
-import { httpSetMythicRank, httpSubmitCourse, httpTournamentCheck } from './http-api';
-import { ipc_send, normaliseFields, parseWotcTime, parseWotcTimeFallback, setData } from './background-util';
-import * as greToClientInterpreter from './gre-to-client-interpreter';
-import playerData from '../shared/player-data';
-import sha1 from 'js-sha1';
+import differenceInDays from "date-fns/differenceInDays";
+import { ARENA_MODE_IDLE } from "../shared/constants";
+import db from "../shared/database";
+import CardsList from "../shared/cards-list";
+import { get_deck_colors, objectClone, replaceAll } from "../shared/util";
+import {
+  httpSetMythicRank,
+  httpSubmitCourse,
+  httpTournamentCheck
+} from "./http-api";
+import {
+  ipc_send,
+  normaliseFields,
+  parseWotcTime,
+  parseWotcTimeFallback,
+  setData
+} from "./background-util";
+import * as greToClientInterpreter from "./gre-to-client-interpreter";
+import playerData from "../shared/player-data";
+import sha1 from "js-sha1";
 
 //
 function convert_deck_from_v3(deck) {
@@ -257,7 +267,10 @@ export function onLabelGreToClient(entry, json) {
   });
 }
 
-export function onLabelClientToMatchServiceMessageTypeClientToGREMessage(entry, json) {
+export function onLabelClientToMatchServiceMessageTypeClientToGREMessage(
+  entry,
+  json
+) {
   //
   if (!json) return;
   if (skipMatch) return;

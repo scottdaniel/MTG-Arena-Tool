@@ -1,4 +1,4 @@
-import { createDiv, queryElements as $$ } from './dom-fns';
+import { createDiv, queryElements as $$ } from "./dom-fns";
 
 function createSelect(
   parent,

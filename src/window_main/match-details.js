@@ -1,17 +1,36 @@
-import fs from 'fs';
-import path from 'path';
-import sha1 from 'js-sha1';
-import anime from 'animejs';
-import _ from 'lodash';
-import { MANA, EASING_DEFAULT } from '../shared/constants';
-import db from '../shared/database';
-import pd from '../shared/player-data';
-import { createSelect } from '../shared/select';
-import { createDiv, createInput, queryElements as $$ } from '../shared/dom-fns';
-import * as deckDrawer from '../shared/deck-drawer';
-import { get_deck_export, get_deck_export_txt, get_rank_index, makeId, formatRank } from '../shared/util';
-import { hypergeometricSignificance, hypergeometricRange } from '../shared/stats-fns';
-import { actionLogDir, changeBackground, drawCardList, drawDeck, ipcSend, openDialog, openActionLog, showLoadingBars, toggleVisibility } from './renderer-util';
+import fs from "fs";
+import path from "path";
+import sha1 from "js-sha1";
+import anime from "animejs";
+import _ from "lodash";
+import { MANA, EASING_DEFAULT } from "../shared/constants";
+import db from "../shared/database";
+import pd from "../shared/player-data";
+import { createSelect } from "../shared/select";
+import { createDiv, createInput, queryElements as $$ } from "../shared/dom-fns";
+import * as deckDrawer from "../shared/deck-drawer";
+import {
+  get_deck_export,
+  get_deck_export_txt,
+  get_rank_index,
+  makeId,
+  formatRank
+} from "../shared/util";
+import {
+  hypergeometricSignificance,
+  hypergeometricRange
+} from "../shared/stats-fns";
+import {
+  actionLogDir,
+  changeBackground,
+  drawCardList,
+  drawDeck,
+  ipcSend,
+  openDialog,
+  openActionLog,
+  showLoadingBars,
+  toggleVisibility
+} from "./renderer-util";
 
 const byId = id => document.getElementById(id);
 

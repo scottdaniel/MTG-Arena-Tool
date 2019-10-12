@@ -1,7 +1,7 @@
-import path from 'path';
-import { app, remote, ipcRenderer as ipc } from 'electron';
-import fs from 'fs';
-import _ from 'lodash';
+import path from "path";
+import { app, remote, ipcRenderer as ipc } from "electron";
+import fs from "fs";
+import _ from "lodash";
 
 const cachePath =
   app || (remote && remote.app)

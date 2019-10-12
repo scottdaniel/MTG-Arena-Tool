@@ -38,7 +38,16 @@ function createLabel(classNames, innerHTML, attrs = {}) {
   return createElement("label", classNames, innerHTML, attrs);
 }
 
-export { queryElements, queryElementsByClass, createElement, createDiv, createImg, createInput, createLabel, createSpan };
+export {
+  queryElements,
+  queryElementsByClass,
+  createElement,
+  createDiv,
+  createImg,
+  createInput,
+  createLabel,
+  createSpan
+};
 function createSpan(classNames, innerHTML, attrs = {}) {
   return createElement("span", classNames, innerHTML, attrs);
 }

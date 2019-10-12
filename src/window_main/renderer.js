@@ -1,5 +1,5 @@
-import { ipcRenderer as ipc, remote, shell } from 'electron';
-import sha1 from 'js-sha1';
+import { ipcRenderer as ipc, remote, shell } from "electron";
+import sha1 from "js-sha1";
 if (!remote.app.isPackaged) {
   const { openNewGitHubIssue, debugInfo } = require("electron-util");
   const unhandled = require("electron-unhandled");
@@ -15,25 +15,59 @@ if (!remote.app.isPackaged) {
   });
   require("devtron").install();
 }
-import anime from 'animejs';
-import 'time-elements';
-import { DATE_SEASON, EASING_DEFAULT, HIDDEN_PW, MAIN_LOGIN, MAIN_HOME, MAIN_DECKS, MAIN_HISTORY, MAIN_EVENTS, MAIN_EXPLORE, MAIN_ECONOMY, MAIN_COLLECTION, MAIN_SETTINGS, MAIN_UPDATE, SETTINGS_ABOUT, SETTINGS_OVERLAY, SETTINGS_PRIVACY } from '../shared/constants';
-import pd from '../shared/player-data';
-import { createDiv, queryElements as $$ } from '../shared/dom-fns';
-import { compare_cards, get_deck_colors, get_rank_index, removeDuplicates, formatRank } from '../shared/util';
-import { changeBackground, getLocalState, hideLoadingBars, ipcSend, openDialog, pop, renderLogInput, resetMainContainer, setLocalState, showLoadingBars } from './renderer-util';
-import Aggregator from './aggregator';
-import { openHomeTab, requestHome } from './home';
-import { tournamentOpen } from './tournaments';
-import { openDecksTab } from './decks';
-import { openDeck } from './deck-details';
-import { openHistoryTab } from './history';
-import { openEventsTab } from './events';
-import { openEconomyTab } from './economy';
-import { openExploreTab, setExploreDecks } from './explore';
-import { openCollectionTab } from './collection';
-import { openSettingsTab, setCurrentOverlaySettings } from './settings';
-import { showWhatsNew } from './whats-new';
+import anime from "animejs";
+import "time-elements";
+import {
+  DATE_SEASON,
+  EASING_DEFAULT,
+  HIDDEN_PW,
+  MAIN_LOGIN,
+  MAIN_HOME,
+  MAIN_DECKS,
+  MAIN_HISTORY,
+  MAIN_EVENTS,
+  MAIN_EXPLORE,
+  MAIN_ECONOMY,
+  MAIN_COLLECTION,
+  MAIN_SETTINGS,
+  MAIN_UPDATE,
+  SETTINGS_ABOUT,
+  SETTINGS_OVERLAY,
+  SETTINGS_PRIVACY
+} from "../shared/constants";
+import pd from "../shared/player-data";
+import { createDiv, queryElements as $$ } from "../shared/dom-fns";
+import {
+  compare_cards,
+  get_deck_colors,
+  get_rank_index,
+  removeDuplicates,
+  formatRank
+} from "../shared/util";
+import {
+  changeBackground,
+  getLocalState,
+  hideLoadingBars,
+  ipcSend,
+  openDialog,
+  pop,
+  renderLogInput,
+  resetMainContainer,
+  setLocalState,
+  showLoadingBars
+} from "./renderer-util";
+import Aggregator from "./aggregator";
+import { openHomeTab, requestHome } from "./home";
+import { tournamentOpen } from "./tournaments";
+import { openDecksTab } from "./decks";
+import { openDeck } from "./deck-details";
+import { openHistoryTab } from "./history";
+import { openEventsTab } from "./events";
+import { openEconomyTab } from "./economy";
+import { openExploreTab, setExploreDecks } from "./explore";
+import { openCollectionTab } from "./collection";
+import { openSettingsTab, setCurrentOverlaySettings } from "./settings";
+import { showWhatsNew } from "./whats-new";
 
 const byId = id => document.getElementById(id);
 let sidebarActive = MAIN_LOGIN;

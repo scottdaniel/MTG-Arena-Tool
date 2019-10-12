@@ -9,14 +9,14 @@
 // Generate objects using default templates.
 // Nothing in here should call IPC functions
 
-import _ from 'lodash';
+import _ from "lodash";
 
-import electron from 'electron';
-import { DEFAULT_TILE } from '../shared/constants';
-import { objectClone } from '../shared/util';
-import playerData from '../shared/player-data.js';
-import database from '../shared/database';
-import { parseWotcTime, parseWotcTimeFallback } from './background-util';
+import electron from "electron";
+import { DEFAULT_TILE } from "../shared/constants";
+import { objectClone } from "../shared/util";
+import playerData from "../shared/player-data.js";
+import database from "../shared/database";
+import { parseWotcTime, parseWotcTimeFallback } from "./background-util";
 
 // Draft Creation
 

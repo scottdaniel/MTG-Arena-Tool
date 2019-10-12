@@ -1,24 +1,47 @@
-import fs from 'fs';
-import path from 'path';
-import { app, ipcRenderer as ipc, remote } from 'electron';
+import fs from "fs";
+import path from "path";
+import { app, ipcRenderer as ipc, remote } from "electron";
 const { dialog } = remote;
-import _ from 'lodash';
-import anime from 'animejs';
-import striptags from 'striptags';
-import Picker from 'vanilla-picker';
-import Pikaday from 'pikaday';
-import { COLORS_ALL, MANA, MANA_COLORS, IPC_MAIN, IPC_BACKGROUND, EASING_DEFAULT } from '../shared/constants';
-import db from '../shared/database';
-import pd from '../shared/player-data';
-import ConicGradient from '../shared/conic-gradient';
-import { createDiv, createImg, createInput, createLabel, createSpan, queryElements as $$ } from '../shared/dom-fns';
-import { createSelect } from '../shared/select';
-import * as deckDrawer from '../shared/deck-drawer';
-import cardTypes from '../shared/card-types';
-import { addCardHover } from '../shared/card-hover';
-import { deckTypesStats, formatRank, getCardArtCrop, get_rank_index_16, getCardImage, getReadableEvent, makeId, toMMSS } from '../shared/util';
+import _ from "lodash";
+import anime from "animejs";
+import striptags from "striptags";
+import Picker from "vanilla-picker";
+import Pikaday from "pikaday";
+import {
+  COLORS_ALL,
+  MANA,
+  MANA_COLORS,
+  IPC_MAIN,
+  IPC_BACKGROUND,
+  EASING_DEFAULT
+} from "../shared/constants";
+import db from "../shared/database";
+import pd from "../shared/player-data";
+import ConicGradient from "../shared/conic-gradient";
+import {
+  createDiv,
+  createImg,
+  createInput,
+  createLabel,
+  createSpan,
+  queryElements as $$
+} from "../shared/dom-fns";
+import { createSelect } from "../shared/select";
+import * as deckDrawer from "../shared/deck-drawer";
+import cardTypes from "../shared/card-types";
+import { addCardHover } from "../shared/card-hover";
+import {
+  deckTypesStats,
+  formatRank,
+  getCardArtCrop,
+  get_rank_index_16,
+  getCardImage,
+  getReadableEvent,
+  makeId,
+  toMMSS
+} from "../shared/util";
 
-const DEFAULT_BACKGROUND = '../images/Bedevil-Art.jpg';
+const DEFAULT_BACKGROUND = "../images/Bedevil-Art.jpg";
 
 const byId = id => document.getElementById(id);
 let popTimeout = null;
@@ -870,7 +893,41 @@ function attachMatchData(listItem, match) {
   }
 }
 
-export { actionLogDir, ipcSend, pop, showLoadingBars, hideLoadingBars, setLocalState, getLocalState, toggleArchived, getTagColor, makeResizable, resetMainContainer, drawDeck, drawCardList, drawDeckVisual, colorPieChart, openActionLog, toggleVisibility, addCheckbox, changeBackground, openDialog, closeDialog, showColorpicker, showDatepicker, renderLogInput, formatPercent, formatNumber, getWinrateClass, getEventWinLossClass, compareWinrates, compareColorWinrates, localTimeSince, attachMatchData, attachDraftData };
+export {
+  actionLogDir,
+  ipcSend,
+  pop,
+  showLoadingBars,
+  hideLoadingBars,
+  setLocalState,
+  getLocalState,
+  toggleArchived,
+  getTagColor,
+  makeResizable,
+  resetMainContainer,
+  drawDeck,
+  drawCardList,
+  drawDeckVisual,
+  colorPieChart,
+  openActionLog,
+  toggleVisibility,
+  addCheckbox,
+  changeBackground,
+  openDialog,
+  closeDialog,
+  showColorpicker,
+  showDatepicker,
+  renderLogInput,
+  formatPercent,
+  formatNumber,
+  getWinrateClass,
+  getEventWinLossClass,
+  compareWinrates,
+  compareColorWinrates,
+  localTimeSince,
+  attachMatchData,
+  attachDraftData
+};
 function attachDraftData(listItem, draft) {
   // console.log("Draft: ", match);
 

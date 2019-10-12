@@ -1,17 +1,22 @@
-import electron from 'electron';
-import { dialog, app, globalShortcut, Menu, Tray, clipboard } from 'electron';
-import path from 'path';
-import fs from 'fs';
-import { autoUpdater } from 'electron-updater';
-import Store from 'electron-store';
-import { format as formatUrl } from 'url';
+import electron from "electron";
+import { dialog, app, globalShortcut, Menu, Tray, clipboard } from "electron";
+import path from "path";
+import fs from "fs";
+import { autoUpdater } from "electron-updater";
+import Store from "electron-store";
+import { format as formatUrl } from "url";
 
 var rememberStore = new Store({
   name: "remember",
   defaults: {}
 });
 
-import { ARENA_MODE_IDLE, ARENA_MODE_MATCH, ARENA_MODE_DRAFT, OVERLAY_DRAFT_MODES } from './shared/constants';
+import {
+  ARENA_MODE_IDLE,
+  ARENA_MODE_MATCH,
+  ARENA_MODE_DRAFT,
+  OVERLAY_DRAFT_MODES
+} from "./shared/constants";
 
 // required for webpack
 // require('./window_updater/index.html');

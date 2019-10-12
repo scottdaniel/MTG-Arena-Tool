@@ -1,19 +1,58 @@
-import { ipcRenderer as ipc, remote, shell } from 'electron';
-import format from 'date-fns/format';
-import fromUnixTime from 'date-fns/fromUnixTime';
-import { CARD_TILE_ARENA, CARD_TILE_FLAT, COLORS_ALL, OVERLAY_FULL, OVERLAY_LEFT, OVERLAY_ODDS, OVERLAY_MIXED, OVERLAY_SEEN, OVERLAY_DRAFT, OVERLAY_DRAFT_BREW, OVERLAY_LOG, OVERLAY_DRAFT_MODES, SHORTCUT_NAMES, SETTINGS_BEHAVIOUR, SETTINGS_ARENA_DATA, SETTINGS_OVERLAY, SETTINGS_VISUAL, SETTINGS_SHORTCUTS, SETTINGS_PRIVACY, SETTINGS_ABOUT, SETTINGS_LOGIN } from '../shared/constants';
-import db from '../shared/database';
-import pd from '../shared/player-data';
-import { createDiv, createImg, createInput, createLabel, queryElements as $$ } from '../shared/dom-fns';
-import * as deckDrawer from '../shared/deck-drawer';
-import { showWhatsNew } from './whats-new';
-import { createSelect } from '../shared/select';
-import { getCardImage } from '../shared/util';
+import { ipcRenderer as ipc, remote, shell } from "electron";
+import format from "date-fns/format";
+import fromUnixTime from "date-fns/fromUnixTime";
+import {
+  CARD_TILE_ARENA,
+  CARD_TILE_FLAT,
+  COLORS_ALL,
+  OVERLAY_FULL,
+  OVERLAY_LEFT,
+  OVERLAY_ODDS,
+  OVERLAY_MIXED,
+  OVERLAY_SEEN,
+  OVERLAY_DRAFT,
+  OVERLAY_DRAFT_BREW,
+  OVERLAY_LOG,
+  OVERLAY_DRAFT_MODES,
+  SHORTCUT_NAMES,
+  SETTINGS_BEHAVIOUR,
+  SETTINGS_ARENA_DATA,
+  SETTINGS_OVERLAY,
+  SETTINGS_VISUAL,
+  SETTINGS_SHORTCUTS,
+  SETTINGS_PRIVACY,
+  SETTINGS_ABOUT,
+  SETTINGS_LOGIN
+} from "../shared/constants";
+import db from "../shared/database";
+import pd from "../shared/player-data";
+import {
+  createDiv,
+  createImg,
+  createInput,
+  createLabel,
+  queryElements as $$
+} from "../shared/dom-fns";
+import * as deckDrawer from "../shared/deck-drawer";
+import { showWhatsNew } from "./whats-new";
+import { createSelect } from "../shared/select";
+import { getCardImage } from "../shared/util";
 const byId = id => document.getElementById(id);
 
-import parse from 'date-fns/parse';
-import isValid from 'date-fns/isValid';
-import { addCheckbox, changeBackground, hideLoadingBars, ipcSend, openDialog, closeDialog, renderLogInput, resetMainContainer, setLocalState, showColorpicker } from './renderer-util';
+import parse from "date-fns/parse";
+import isValid from "date-fns/isValid";
+import {
+  addCheckbox,
+  changeBackground,
+  hideLoadingBars,
+  ipcSend,
+  openDialog,
+  closeDialog,
+  renderLogInput,
+  resetMainContainer,
+  setLocalState,
+  showColorpicker
+} from "./renderer-util";
 
 let lastSettingsSection = 1;
 let updateState = "";
@@ -74,7 +113,10 @@ function blurIfEnterKey(element) {
 let currentOverlay = 0;
 
 //
-export function openSettingsTab(openSection = lastSettingsSection, scrollTop = 0) {
+export function openSettingsTab(
+  openSection = lastSettingsSection,
+  scrollTop = 0
+) {
   if (openSection !== -1) {
     lastSettingsSection = openSection;
   } else {

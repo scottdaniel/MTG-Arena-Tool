@@ -1,4 +1,12 @@
-import { WHITE, BLUE, BLACK, RED, GREEN, MULTI, COLORLESS } from './constants.js';
+import {
+  WHITE,
+  BLUE,
+  BLACK,
+  RED,
+  GREEN,
+  MULTI,
+  COLORLESS
+} from "./constants.js";
 
 class Colors {
   /**

@@ -1,15 +1,38 @@
-import anime from 'animejs';
-import _ from 'lodash';
-import { MANA, CARD_RARITIES, EASING_DEFAULT } from '../shared/constants';
-import db from '../shared/database';
-import pd from '../shared/player-data';
-import { createSelect } from '../shared/select';
-import { createDiv, createSpan, createInput, queryElements as $$ } from '../shared/dom-fns';
-import * as deckDrawer from '../shared/deck-drawer';
-import { deckManaCurve, deckTypesStats, get_deck_export, get_deck_export_txt, get_deck_missing, getBoosterCountEstimate, timeSince } from '../shared/util';
-import Aggregator from './aggregator';
-import StatsPanel from './stats-panel';
-import { changeBackground, colorPieChart, drawDeck, drawDeckVisual, openDialog, ipcSend, makeResizable, showLoadingBars, pop } from './renderer-util';
+import anime from "animejs";
+import _ from "lodash";
+import { MANA, CARD_RARITIES, EASING_DEFAULT } from "../shared/constants";
+import db from "../shared/database";
+import pd from "../shared/player-data";
+import { createSelect } from "../shared/select";
+import {
+  createDiv,
+  createSpan,
+  createInput,
+  queryElements as $$
+} from "../shared/dom-fns";
+import * as deckDrawer from "../shared/deck-drawer";
+import {
+  deckManaCurve,
+  deckTypesStats,
+  get_deck_export,
+  get_deck_export_txt,
+  get_deck_missing,
+  getBoosterCountEstimate,
+  timeSince
+} from "../shared/util";
+import Aggregator from "./aggregator";
+import StatsPanel from "./stats-panel";
+import {
+  changeBackground,
+  colorPieChart,
+  drawDeck,
+  drawDeckVisual,
+  openDialog,
+  ipcSend,
+  makeResizable,
+  showLoadingBars,
+  pop
+} from "./renderer-util";
 
 const byId = id => document.getElementById(id);
 // We need to store a sorted list of card types so we create the card counts in the same order.

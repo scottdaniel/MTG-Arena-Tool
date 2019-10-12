@@ -1,5 +1,5 @@
-import fs from 'fs';
-import { promisify } from 'util';
+import fs from "fs";
+import { promisify } from "util";
 
 const fsPromises = {
   access: promisify(fs.access),

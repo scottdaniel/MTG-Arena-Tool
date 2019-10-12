@@ -1,18 +1,41 @@
-import anime from 'animejs';
-import { remote } from 'electron';
+import anime from "animejs";
+import { remote } from "electron";
 const Menu = remote.Menu;
 const MenuItem = remote.MenuItem;
 
-import { COLORS_BRIEF, CARD_RARITIES, EASING_DEFAULT } from '../shared/constants';
-import db from '../shared/database';
-import pd from '../shared/player-data';
-import { queryElements as $$, createDiv } from '../shared/dom-fns';
-import { createSelect } from '../shared/select';
-import { addCardHover, attachOwnerhipStars } from '../shared/card-hover';
-import { collectionSortRarity, getCardImage, getCardsMissingCount, openScryfallCard, replaceAll } from '../shared/util';
-import Colors from '../shared/colors';
-import { MULTI, COLORLESS, WHITE, BLUE, BLACK, GREEN, RED } from '../shared/constants.js';
-import { hideLoadingBars, changeBackground, ipcSend, resetMainContainer } from './renderer-util';
+import {
+  COLORS_BRIEF,
+  CARD_RARITIES,
+  EASING_DEFAULT
+} from "../shared/constants";
+import db from "../shared/database";
+import pd from "../shared/player-data";
+import { queryElements as $$, createDiv } from "../shared/dom-fns";
+import { createSelect } from "../shared/select";
+import { addCardHover, attachOwnerhipStars } from "../shared/card-hover";
+import {
+  collectionSortRarity,
+  getCardImage,
+  getCardsMissingCount,
+  openScryfallCard,
+  replaceAll
+} from "../shared/util";
+import Colors from "../shared/colors";
+import {
+  MULTI,
+  COLORLESS,
+  WHITE,
+  BLUE,
+  BLACK,
+  GREEN,
+  RED
+} from "../shared/constants.js";
+import {
+  hideLoadingBars,
+  changeBackground,
+  ipcSend,
+  resetMainContainer
+} from "./renderer-util";
 
 let collectionPage = 0;
 let sortingAlgorithm = "Sort by Set";
@@ -306,7 +329,6 @@ export function openCollectionTab() {
     },
     "query_select"
   );
-
 
   let exp = createDiv(["button_simple", "button_thin"], "Export Collection");
   fllb.appendChild(exp);

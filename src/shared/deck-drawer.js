@@ -1,9 +1,14 @@
-import _ from 'lodash';
-import db from './database.js';
-import { createDiv } from './dom-fns';
-import { addCardHover } from './card-hover';
-import { get_wc_missing, getCardArtCrop, openScryfallCard } from './util';
-import { CARD_TILE_FLAT, COLORS_ALL, FACE_SPLIT_FULL, FACE_ADVENTURE_MAIN } from './constants.js';
+import _ from "lodash";
+import db from "./database.js";
+import { createDiv } from "./dom-fns";
+import { addCardHover } from "./card-hover";
+import { get_wc_missing, getCardArtCrop, openScryfallCard } from "./util";
+import {
+  CARD_TILE_FLAT,
+  COLORS_ALL,
+  FACE_SPLIT_FULL,
+  FACE_ADVENTURE_MAIN
+} from "./constants.js";
 
 //
 function isNumber(n) {

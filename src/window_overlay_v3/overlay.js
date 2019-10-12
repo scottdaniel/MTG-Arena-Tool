@@ -1,6 +1,6 @@
-import { ipcRenderer as ipc, webFrame, remote } from 'electron';
-import interact from 'interactjs';
-import format from 'date-fns/format';
+import { ipcRenderer as ipc, webFrame, remote } from "electron";
+import interact from "interactjs";
+import format from "date-fns/format";
 
 if (!remote.app.isPackaged) {
   const { openNewGitHubIssue, debugInfo } = require("electron-util");
@@ -17,21 +17,50 @@ if (!remote.app.isPackaged) {
   });
 }
 
-import TransparencyMouseFix from './electron-transparency-mouse-fix.js';
+import TransparencyMouseFix from "./electron-transparency-mouse-fix.js";
 let fix = null;
 
-import striptags from 'striptags';
-import db from '../shared/database';
-import pd from '../shared/player-data';
-import Deck from '../shared/deck.js';
-import Colors from '../shared/colors';
-import * as deckDrawer from '../shared/deck-drawer';
-import { compare_cards, deckManaCurve, deckTypesStats, get_card_type_sort } from '../shared/util';
-import { addCardHover, attachOwnerhipStars, setRenderer } from '../shared/card-hover';
-import { queryElements, createDiv } from '../shared/dom-fns';
-import { ARENA_MODE_IDLE, ARENA_MODE_MATCH, ARENA_MODE_DRAFT, COLORS_ALL, DRAFT_RANKS, MANA, PACK_SIZES, IPC_BACKGROUND, IPC_OVERLAY, IPC_MAIN, OVERLAY_FULL, OVERLAY_LEFT, OVERLAY_ODDS, OVERLAY_MIXED, OVERLAY_SEEN, OVERLAY_DRAFT, OVERLAY_LOG, OVERLAY_DRAFT_BREW, OVERLAY_DRAFT_MODES } from '../shared/constants.js';
+import striptags from "striptags";
+import db from "../shared/database";
+import pd from "../shared/player-data";
+import Deck from "../shared/deck.js";
+import Colors from "../shared/colors";
+import * as deckDrawer from "../shared/deck-drawer";
+import {
+  compare_cards,
+  deckManaCurve,
+  deckTypesStats,
+  get_card_type_sort
+} from "../shared/util";
+import {
+  addCardHover,
+  attachOwnerhipStars,
+  setRenderer
+} from "../shared/card-hover";
+import { queryElements, createDiv } from "../shared/dom-fns";
+import {
+  ARENA_MODE_IDLE,
+  ARENA_MODE_MATCH,
+  ARENA_MODE_DRAFT,
+  COLORS_ALL,
+  DRAFT_RANKS,
+  MANA,
+  PACK_SIZES,
+  IPC_BACKGROUND,
+  IPC_OVERLAY,
+  IPC_MAIN,
+  OVERLAY_FULL,
+  OVERLAY_LEFT,
+  OVERLAY_ODDS,
+  OVERLAY_MIXED,
+  OVERLAY_SEEN,
+  OVERLAY_DRAFT,
+  OVERLAY_LOG,
+  OVERLAY_DRAFT_BREW,
+  OVERLAY_DRAFT_MODES
+} from "../shared/constants.js";
 
-const DEFAULT_BACKGROUND = '../images/Bedevil-Art.jpg';
+const DEFAULT_BACKGROUND = "../images/Bedevil-Art.jpg";
 
 const byId = id => document.getElementById(id);
 

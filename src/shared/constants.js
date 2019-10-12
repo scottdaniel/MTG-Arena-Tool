@@ -632,7 +632,14 @@ export const FORMATS = {
 
 export const COLORS_ALL = ["w", "u", "b", "r", "g", "c"];
 export const COLORS_BRIEF = ["w", "u", "b", "r", "g"];
-export const RANKS = ["Bronze", "Silver", "Gold", "Platinum", "Diamond", "Mythic"];
+export const RANKS = [
+  "Bronze",
+  "Silver",
+  "Gold",
+  "Platinum",
+  "Diamond",
+  "Mythic"
+];
 export const OVERLAY_FULL = 0;
 export const OVERLAY_LEFT = 1;
 export const OVERLAY_ODDS = 2;
@@ -642,10 +649,7 @@ export const OVERLAY_DRAFT = 5;
 export const OVERLAY_DRAFT_BREW = 6;
 export const OVERLAY_MIXED = 7;
 
-export const OVERLAY_DRAFT_MODES = [
-  OVERLAY_DRAFT,
-  OVERLAY_DRAFT_BREW
-];
+export const OVERLAY_DRAFT_MODES = [OVERLAY_DRAFT, OVERLAY_DRAFT_BREW];
 
 export const ARENA_MODE_IDLE = 0;
 export const ARENA_MODE_MATCH = 1;
@@ -666,7 +670,15 @@ DRAFT_RANKS[2] = "D";
 DRAFT_RANKS[1] = "D-";
 DRAFT_RANKS[0] = "F";
 export { DRAFT_RANKS };
-export const CARD_TYPE_CODES = ["cre", "lan", "ins", "sor", "enc", "art", "pla"];
+export const CARD_TYPE_CODES = [
+  "cre",
+  "lan",
+  "ins",
+  "sor",
+  "enc",
+  "art",
+  "pla"
+];
 
 export const CARD_TYPES = [
   "Creatures",

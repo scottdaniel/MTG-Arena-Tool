@@ -1,4 +1,4 @@
-import math from 'mathjs';
+import math from "mathjs";
 
 math.config({ precision: 2000 });
 
@@ -121,7 +121,11 @@ function hypergeometricSignificance(
   return returnBig ? retVal : math.number(retVal);
 }
 
-export { hypergeometricRange, hypergeometricSignificance, normalApproximationInterval };
+export {
+  hypergeometricRange,
+  hypergeometricSignificance,
+  normalApproximationInterval
+};
 function normalApproximationInterval(matches, wins) {
   if (!matches) return { winrate: 0, interval: 0 };
   const winrate = wins / matches;

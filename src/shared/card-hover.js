@@ -1,9 +1,9 @@
-import db from './database';
-import pd from './player-data';
-import { cardHasType } from './card-types.js';
-import { createDiv, queryElements as $$ } from './dom-fns';
-import { getCardImage } from './util';
-import { DRAFT_RANKS, FACE_DFC_BACK, FACE_DFC_FRONT } from './constants.js';
+import db from "./database";
+import pd from "./player-data";
+import { cardHasType } from "./card-types.js";
+import { createDiv, queryElements as $$ } from "./dom-fns";
+import { getCardImage } from "./util";
+import { DRAFT_RANKS, FACE_DFC_BACK, FACE_DFC_FRONT } from "./constants.js";
 
 let renderer = 0;
 

@@ -1,14 +1,25 @@
-import differenceInCalendarDays from 'date-fns/differenceInCalendarDays';
-import startOfDay from 'date-fns/startOfDay';
-import compareAsc from 'date-fns/compareAsc';
-import db from '../shared/database';
-import pd from '../shared/player-data';
-import { createDiv } from '../shared/dom-fns';
-import { createSelect } from '../shared/select';
-import { addCardHover } from '../shared/card-hover';
-import { collectionSortRarity, getCardArtCrop, getCardImage, getReadableEvent, openScryfallCard } from '../shared/util';
-import DataScroller from './data-scroller';
-import { formatNumber, formatPercent, resetMainContainer, toggleArchived } from './renderer-util';
+import differenceInCalendarDays from "date-fns/differenceInCalendarDays";
+import startOfDay from "date-fns/startOfDay";
+import compareAsc from "date-fns/compareAsc";
+import db from "../shared/database";
+import pd from "../shared/player-data";
+import { createDiv } from "../shared/dom-fns";
+import { createSelect } from "../shared/select";
+import { addCardHover } from "../shared/card-hover";
+import {
+  collectionSortRarity,
+  getCardArtCrop,
+  getCardImage,
+  getReadableEvent,
+  openScryfallCard
+} from "../shared/util";
+import DataScroller from "./data-scroller";
+import {
+  formatNumber,
+  formatPercent,
+  resetMainContainer,
+  toggleArchived
+} from "./renderer-util";
 
 const byId = id => document.getElementById(id);
 const vaultPercentFormat = {

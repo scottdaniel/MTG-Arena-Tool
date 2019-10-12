@@ -1,9 +1,9 @@
 /* eslint-env jest */
 
-import { cardType } from '../card-types';
+import { cardType } from "../card-types";
 
-import _ from 'lodash';
-import db from '../database.js';
+import _ from "lodash";
+import db from "../database.js";
 const cardsByName = _.keyBy(db.cards, "name");
 
 describe("card-types", () => {

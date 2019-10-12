@@ -1,19 +1,26 @@
-import anime from 'animejs';
-import compareAsc from 'date-fns/compareAsc';
-import compareDesc from 'date-fns/compareDesc';
-import { DEFAULT_TILE, MANA, EASING_DEFAULT } from '../shared/constants';
-import db from '../shared/database';
-import pd from '../shared/player-data';
-import { createDiv, queryElementsByClass } from '../shared/dom-fns';
-import { getReadableEvent, toMMSS } from '../shared/util';
-import Aggregator from './aggregator';
-import DataScroller from './data-scroller';
-import FilterPanel from './filter-panel';
-import ListItem from './list-item';
-import StatsPanel from './stats-panel';
-import { attachDraftData, attachMatchData, getEventWinLossClass, localTimeSince, resetMainContainer, toggleArchived } from './renderer-util';
-import { openMatch } from './match-details';
-import { openDraft } from './draft-details';
+import anime from "animejs";
+import compareAsc from "date-fns/compareAsc";
+import compareDesc from "date-fns/compareDesc";
+import { DEFAULT_TILE, MANA, EASING_DEFAULT } from "../shared/constants";
+import db from "../shared/database";
+import pd from "../shared/player-data";
+import { createDiv, queryElementsByClass } from "../shared/dom-fns";
+import { getReadableEvent, toMMSS } from "../shared/util";
+import Aggregator from "./aggregator";
+import DataScroller from "./data-scroller";
+import FilterPanel from "./filter-panel";
+import ListItem from "./list-item";
+import StatsPanel from "./stats-panel";
+import {
+  attachDraftData,
+  attachMatchData,
+  getEventWinLossClass,
+  localTimeSince,
+  resetMainContainer,
+  toggleArchived
+} from "./renderer-util";
+import { openMatch } from "./match-details";
+import { openDraft } from "./draft-details";
 
 let filters = Aggregator.getDefaultFilters();
 filters.eventId = Aggregator.ALL_EVENT_TRACKS;

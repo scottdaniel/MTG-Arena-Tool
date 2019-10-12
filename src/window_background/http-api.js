@@ -10,14 +10,14 @@ global
   syncUserData
 */
 
-import electron from 'electron';
+import electron from "electron";
 
-import async from 'async';
-import qs from 'qs';
-import { makeId } from '../shared/util';
-import { ipc_send, setData } from './background-util';
-import playerData from '../shared/player-data';
-import db from '../shared/database';
+import async from "async";
+import qs from "qs";
+import { makeId } from "../shared/util";
+import { ipc_send, setData } from "./background-util";
+import playerData from "../shared/player-data";
+import db from "../shared/database";
 
 let metadataState = false;
 
@@ -684,7 +684,13 @@ export function httpTournamentDrop(tid) {
   });
 }
 
-export function httpTournamentCheck(deck, opp, setCheck, bo3 = "", playFirst = "") {
+export function httpTournamentCheck(
+  deck,
+  opp,
+  setCheck,
+  bo3 = "",
+  playFirst = ""
+) {
   var _id = makeId(6);
   deck = JSON.stringify(deck);
   httpAsync.unshift({
