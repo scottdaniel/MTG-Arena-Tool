@@ -9,6 +9,32 @@ import db from 'common/database';
 import pd from 'common/player-data';
 import { getReadableEvent, getRecentDeckName, get_deck_missing, getBoosterCountEstimate } from 'common/util';
 import { normalApproximationInterval } from 'common/stats-fns';
+// Default filter values
+const DEFAULT_DECK = "All Decks";
+const DEFAULT_EVENT = "All Events";
+const DEFAULT_TAG = "All Tags";
+const DEFAULT_ARCH = "All Archetypes";
+// Ranked constants
+const RANKED_CONST = "Ranked Constructed";
+const RANKED_DRAFT = "Ranked Limited";
+// Draft-related constants
+const ALL_DRAFTS = "All Drafts";
+const DRAFT_REPLAYS = "Draft Replays";
+// Event-related constant
+const ALL_EVENT_TRACKS = "All Event Tracks";
+// Archetype constants
+const NO_ARCH = "No Archetype";
+
+const dateMax = (a, b) => (a && b ? max([a, b]) : a || b);
+
+class Aggregator {
+  constructor(filters) {
+    this.filterDate = this.filterDate.bind(this);
+    this.filterDeck = this.filterDeck.bind(this);
+    this.filterEvent = this.filterEvent.bind(this);
+    this.filterMatch = this.filterMatch.bind(this);
+    this.updateFilters = this.updateFilters.bind(this);
+    this._processMatch = this._processMatch.bind(this);
     this.compareDecks = this.compareDecks.bind(this);
     this.compareDecksByWins = this.compareDecksByWins.bind(this);
     this.compareDecksByWinrates = this.compareDecksByWinrates.bind(this);
