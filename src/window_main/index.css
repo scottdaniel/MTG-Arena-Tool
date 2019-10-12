@@ -1,4 +1,4 @@
-@import '~pikaday/css/pikaday.css';
+@import '../../node_modules/pikaday/css/pikaday.css';
 
 span i {
     margin-left: 4px;

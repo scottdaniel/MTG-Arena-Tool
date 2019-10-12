@@ -34,6 +34,7 @@ import { ARENA_MODE_MATCH, ARENA_MODE_DRAFT, ARENA_MODE_IDLE, DEFAULT_TILE, HIDD
 import { getDateFormat, ipc_send, setData, unleakString, parseWotcTimeFallback } from './background-util';
 import { onLabelOutLogInfo, onLabelGreToClient, onLabelClientToMatchServiceMessageTypeClientToGREMessage, onLabelInEventGetPlayerCourse, onLabelInEventGetPlayerCourseV2, onLabelInEventJoin, onLabelInEventGetCombinedRankInfo, onLabelInDeckGetDeckLists, onLabelInDeckGetDeckListsV3, onLabelInDeckGetPreconDecks, onLabelInEventGetPlayerCourses, onLabelInEventGetPlayerCoursesV2, onLabelInDeckUpdateDeck, onLabelInDeckUpdateDeckV3, onLabelInventoryUpdated, onLabelInPlayerInventoryGetPlayerInventory, onLabelInPlayerInventoryGetPlayerCardsV3, onLabelInProgressionGetPlayerProgress, onLabelInEventDeckSubmit, onLabelInEventDeckSubmitV3, onLabelInEventGetActiveEvents, onLabelEventMatchCreated, onLabelOutDirectGameChallenge, onLabelOutEventAIPractice, onLabelInDraftDraftStatus, onLabelInDraftMakePick, onLabelOutDraftMakePick, onLabelInEventCompleteDraft, onLabelMatchGameRoomStateChangedEvent, onLabelInEventGetSeasonAndRankDetail, onLabelGetPlayerInventoryGetRewardSchedule, onLabelRankUpdated, onLabelMythicRatingUpdated, onLabelTrackProgressUpdated, onLabelTrackRewardTierUpdated } from './labels';
 import { createDeck, createDraft, createMatch, completeMatch } from './data';
+import ArenaLogWatcher from './arena-log-watcher';
 
 const toolVersion = electron.remote.app
   .getVersion()
@@ -624,7 +625,6 @@ if (typeof process.env.LOGFILE !== "undefined") {
 }
 
 console.log(logUri);
-import ArenaLogWatcher from './arena-log-watcher/arena-log-watcher';
 
 let logReadStart = null;
 let logReadEnd = null;
