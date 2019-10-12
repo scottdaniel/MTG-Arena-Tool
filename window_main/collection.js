@@ -488,6 +488,7 @@ function openCollectionTab() {
 
   icd.appendChild(inputCmc);
   cont.appendChild(icd);
+
   let checkboxCmcHigher = addCheckboxSearch(
     cont,
     "Higher than",
@@ -506,7 +507,7 @@ function openCollectionTab() {
 
   main_but_cont.appendChild(cont);
   filters.appendChild(main_but_cont);
-  
+
   cont = createDiv(["buttons_container"]);
   icd = createDiv(["input_container_inventory", "auto_width"]);
 
@@ -520,12 +521,12 @@ function openCollectionTab() {
   inputQty.id = "query_qty";
   inputQty.autocomplete = "off";
   inputQty.type = "number";
-  inputQty.min="0";
-  inputQty.max="4";
+  inputQty.min = "0";
+  inputQty.max = "4";
 
   icd.appendChild(inputQty);
   cont.appendChild(icd);
-   let checkboxQtyHigher = addCheckboxSearch(
+  let checkboxQtyHigher = addCheckboxSearch(
     cont,
     "Higher than",
     "query_qtyhigher",
@@ -969,7 +970,7 @@ function printCards() {
   let filterCmcLower = document.getElementById("query_cmclower").checked;
   let filterCmcEqual = document.getElementById("query_cmcequal").checked;
   let filterCmcHigher = document.getElementById("query_cmchigher").checked;
-  
+
   let filterQty = document.getElementById("query_qty").value;
   let filterQtyLower = document.getElementById("query_qtylower").checked;
   let filterQtyEqual = document.getElementById("query_qtyequal").checked;
@@ -1055,9 +1056,9 @@ function printCards() {
         }
       }
     }
-	
-	if (filterQty > 0) {
-		const owned = pd.cards.cards[card.id];
+
+    if (filterQty > 0) {
+      const owned = pd.cards.cards[card.id];
       if (filterQtyLower && filterQtyEqual) {
         if (owned > filterQty) {
           continue;
@@ -1080,7 +1081,6 @@ function printCards() {
         }
       }
     }
-	
 
     if (rarity == "land" && filterAnyRarityChecked && !filterCommon) continue;
     if (rarity == "common" && filterAnyRarityChecked && !filterCommon) continue;
