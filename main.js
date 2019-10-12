@@ -1,29 +1,23 @@
-const electron = require("electron");
-
-const {
-  dialog,
-  app,
-  globalShortcut,
-  Menu,
-  Tray,
-  clipboard
-} = require("electron");
-const path = require("path");
-const fs = require("fs");
-const { autoUpdater } = require("electron-updater");
-const Store = require("electron-store");
+import electron from 'electron';
+import { dialog, app, globalShortcut, Menu, Tray, clipboard } from 'electron';
+import path from 'path';
+import fs from 'fs';
+import { autoUpdater } from 'electron-updater';
+import Store from 'electron-store';
+import { format as formatUrl } from 'url';
 
 var rememberStore = new Store({
   name: "remember",
   defaults: {}
 });
 
-const {
-  ARENA_MODE_IDLE,
-  ARENA_MODE_MATCH,
-  ARENA_MODE_DRAFT,
-  OVERLAY_DRAFT_MODES
-} = require("./shared/constants");
+import { ARENA_MODE_IDLE, ARENA_MODE_MATCH, ARENA_MODE_DRAFT, OVERLAY_DRAFT_MODES } from 'common/constants';
+
+// required for webpack
+// require('./window_updater/index.html');
+// require('./window_background/index.html');
+// require('./window_overlay_v3/index.html');
+// require('./window_main/index.html');
 
 app.setAppUserModelId("com.github.manuel777.mtgatool");
 

@@ -1,47 +1,21 @@
-const fs = require("fs");
-const path = require("path");
-const sha1 = require("js-sha1");
-const anime = require("animejs");
-const _ = require("lodash");
-
-const { MANA, EASING_DEFAULT } = require("../shared/constants");
-const db = require("../shared/database");
-const pd = require("../shared/player-data");
-const { createSelect } = require("../shared/select");
-const {
-  createDiv,
-  createInput,
-  queryElements: $$
-} = require("../shared/dom-fns");
-const deckDrawer = require("../shared/deck-drawer");
-const {
-  get_deck_export,
-  get_deck_export_txt,
-  get_rank_index,
-  makeId,
-  formatRank
-} = require("../shared/util");
-const {
-  hypergeometricSignificance,
-  hypergeometricRange
-} = require("../shared/stats-fns");
-
-const {
-  actionLogDir,
-  changeBackground,
-  drawCardList,
-  drawDeck,
-  ipcSend,
-  openDialog,
-  openActionLog,
-  showLoadingBars,
-  toggleVisibility
-} = require("./renderer-util");
+import fs from 'fs';
+import path from 'path';
+import sha1 from 'js-sha1';
+import anime from 'animejs';
+import _ from 'lodash';
+import { MANA, EASING_DEFAULT } from 'common/constants';
+import db from 'common/database';
+import pd from 'common/player-data';
+import { createSelect } from 'common/select';
+import { createDiv, createInput, queryElements as $$ } from 'common/dom-fns';
+import * as deckDrawer from 'common/deck-drawer';
+import { get_deck_export, get_deck_export_txt, get_rank_index, makeId, formatRank } from 'common/util';
+import { hypergeometricSignificance, hypergeometricRange } from 'common/stats-fns';
+import { actionLogDir, changeBackground, drawCardList, drawDeck, ipcSend, openDialog, openActionLog, showLoadingBars, toggleVisibility } from './renderer-util';
 
 const byId = id => document.getElementById(id);
 
-//
-exports.openMatch = openMatch;
+export { openMatch };
 function openMatch(id) {
   const match = pd.match(id);
   if (!match) return;

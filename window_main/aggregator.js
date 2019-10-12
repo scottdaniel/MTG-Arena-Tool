@@ -1,54 +1,14 @@
-const compareDesc = require("date-fns/compareDesc");
-const isAfter = require("date-fns/isAfter");
-const isEqual = require("date-fns/isEqual");
-const max = require("date-fns/max");
-const startOfDay = require("date-fns/startOfDay");
-const subDays = require("date-fns/subDays");
-
-const {
-  COLORS_ALL,
-  COLORS_BRIEF,
-  DATE_ALL_TIME,
-  DATE_LAST_30,
-  DATE_LAST_DAY,
-  DATE_SEASON
-} = require("../shared/constants");
-const db = require("../shared/database");
-const pd = require("../shared/player-data");
-const {
-  getReadableEvent,
-  getRecentDeckName,
-  get_deck_missing,
-  getBoosterCountEstimate
-} = require("../shared/util");
-const { normalApproximationInterval } = require("../shared/stats-fns");
-
-// Default filter values
-const DEFAULT_DECK = "All Decks";
-const DEFAULT_EVENT = "All Events";
-const DEFAULT_TAG = "All Tags";
-const DEFAULT_ARCH = "All Archetypes";
-// Ranked constants
-const RANKED_CONST = "Ranked Constructed";
-const RANKED_DRAFT = "Ranked Limited";
-// Draft-related constants
-const ALL_DRAFTS = "All Drafts";
-const DRAFT_REPLAYS = "Draft Replays";
-// Event-related constant
-const ALL_EVENT_TRACKS = "All Event Tracks";
-// Archetype constants
-const NO_ARCH = "No Archetype";
-
-const dateMax = (a, b) => (a && b ? max([a, b]) : a || b);
-
-class Aggregator {
-  constructor(filters) {
-    this.filterDate = this.filterDate.bind(this);
-    this.filterDeck = this.filterDeck.bind(this);
-    this.filterEvent = this.filterEvent.bind(this);
-    this.filterMatch = this.filterMatch.bind(this);
-    this.updateFilters = this.updateFilters.bind(this);
-    this._processMatch = this._processMatch.bind(this);
+import compareDesc from 'date-fns/compareDesc';
+import isAfter from 'date-fns/isAfter';
+import isEqual from 'date-fns/isEqual';
+import max from 'date-fns/max';
+import startOfDay from 'date-fns/startOfDay';
+import subDays from 'date-fns/subDays';
+import { COLORS_ALL, COLORS_BRIEF, DATE_ALL_TIME, DATE_LAST_30, DATE_LAST_DAY, DATE_SEASON } from 'common/constants';
+import db from 'common/database';
+import pd from 'common/player-data';
+import { getReadableEvent, getRecentDeckName, get_deck_missing, getBoosterCountEstimate } from 'common/util';
+import { normalApproximationInterval } from 'common/stats-fns';
     this.compareDecks = this.compareDecks.bind(this);
     this.compareDecksByWins = this.compareDecksByWins.bind(this);
     this.compareDecksByWinrates = this.compareDecksByWinrates.bind(this);
@@ -543,4 +503,4 @@ Aggregator.DRAFT_REPLAYS = DRAFT_REPLAYS;
 Aggregator.ALL_EVENT_TRACKS = ALL_EVENT_TRACKS;
 Aggregator.NO_ARCH = NO_ARCH;
 
-module.exports = Aggregator;
+export default Aggregator;
