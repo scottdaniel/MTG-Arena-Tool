@@ -1,7 +1,3 @@
-/*
-  global
-    clear_dec
-*/
 const _ = require("lodash");
 const differenceInDays = require("date-fns/differenceInDays");
 
