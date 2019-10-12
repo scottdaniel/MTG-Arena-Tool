@@ -1,5 +1,6 @@
 const { ipc_send } = require("./background-util");
 const fs = require("fs");
+const path = require("path");
 const { IPC_OVERLAY } = require("../shared/constants.js");
 const globals = require("./globals");
 const format = require("date-fns/format");
