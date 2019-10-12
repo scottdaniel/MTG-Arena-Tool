@@ -8,13 +8,11 @@ import db from '../shared/database';
 import pd from '../shared/player-data';
 import { queryElements as $$, createDiv } from '../shared/dom-fns';
 import { createSelect } from '../shared/select';
-import { reactSelect } from '../shared/selectreact.jsx';
 import { addCardHover, attachOwnerhipStars } from '../shared/card-hover';
 import { collectionSortRarity, getCardImage, getCardsMissingCount, openScryfallCard, replaceAll } from '../shared/util';
 import Colors from '../shared/colors';
 import { MULTI, COLORLESS, WHITE, BLUE, BLACK, GREEN, RED } from '../shared/constants.js';
 import { hideLoadingBars, changeBackground, ipcSend, resetMainContainer } from './renderer-util';
-import ReactDOM from 'react-dom';
 
 let collectionPage = 0;
 let sortingAlgorithm = "Sort by Set";
@@ -298,19 +296,6 @@ export function openCollectionTab() {
   });
 
   let sortby = ["Sort by Set", "Sort by Name", "Sort by Rarity", "Sort by CMC"];
-  // ReactDOM.render(
-  //   reactSelect({
-  //     options: sortby,
-  //     current: sortingAlgorithm,
-  //     callback: res => {
-  //       sortingAlgorithm = res;
-  //       printCollectionPage();
-  //     },
-  //     divClass: "query_select",
-  //     optionFormatter: (val) => val,
-  //   }),
-  //   filb
-  // );
   createSelect(
     fllb,
     sortby,

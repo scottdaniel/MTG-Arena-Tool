@@ -31,7 +31,7 @@ import { addCardHover, attachOwnerhipStars, setRenderer } from '../shared/card-h
 import { queryElements, createDiv } from '../shared/dom-fns';
 import { ARENA_MODE_IDLE, ARENA_MODE_MATCH, ARENA_MODE_DRAFT, COLORS_ALL, DRAFT_RANKS, MANA, PACK_SIZES, IPC_BACKGROUND, IPC_OVERLAY, IPC_MAIN, OVERLAY_FULL, OVERLAY_LEFT, OVERLAY_ODDS, OVERLAY_MIXED, OVERLAY_SEEN, OVERLAY_DRAFT, OVERLAY_LOG, OVERLAY_DRAFT_BREW, OVERLAY_DRAFT_MODES } from '../shared/constants.js';
 
-import DEFAULT_BACKGROUND from '../images/Bedevil-Art.jpg';
+const DEFAULT_BACKGROUND = '../images/Bedevil-Art.jpg';
 
 const byId = id => document.getElementById(id);
 

@@ -23,8 +23,7 @@ import path from 'path';
 import Store from 'electron-store';
 import fs from 'fs';
 import sha1 from 'js-sha1';
-import httpApi from './http-api';
-import greToClientInterpreter from './gre-to-client-interpreter';
+import * as httpApi from './http-api';
 import Deck from '../shared/deck';
 import db from '../shared/database';
 import playerData from '../shared/player-data';
@@ -34,7 +33,8 @@ import { ARENA_MODE_MATCH, ARENA_MODE_DRAFT, ARENA_MODE_IDLE, DEFAULT_TILE, HIDD
 import { getDateFormat, ipc_send, setData, unleakString, parseWotcTimeFallback } from './background-util';
 import { onLabelOutLogInfo, onLabelGreToClient, onLabelClientToMatchServiceMessageTypeClientToGREMessage, onLabelInEventGetPlayerCourse, onLabelInEventGetPlayerCourseV2, onLabelInEventJoin, onLabelInEventGetCombinedRankInfo, onLabelInDeckGetDeckLists, onLabelInDeckGetDeckListsV3, onLabelInDeckGetPreconDecks, onLabelInEventGetPlayerCourses, onLabelInEventGetPlayerCoursesV2, onLabelInDeckUpdateDeck, onLabelInDeckUpdateDeckV3, onLabelInventoryUpdated, onLabelInPlayerInventoryGetPlayerInventory, onLabelInPlayerInventoryGetPlayerCardsV3, onLabelInProgressionGetPlayerProgress, onLabelInEventDeckSubmit, onLabelInEventDeckSubmitV3, onLabelInEventGetActiveEvents, onLabelEventMatchCreated, onLabelOutDirectGameChallenge, onLabelOutEventAIPractice, onLabelInDraftDraftStatus, onLabelInDraftMakePick, onLabelOutDraftMakePick, onLabelInEventCompleteDraft, onLabelMatchGameRoomStateChangedEvent, onLabelInEventGetSeasonAndRankDetail, onLabelGetPlayerInventoryGetRewardSchedule, onLabelRankUpdated, onLabelMythicRatingUpdated, onLabelTrackProgressUpdated, onLabelTrackRewardTierUpdated } from './labels';
 import { createDeck, createDraft, createMatch, completeMatch } from './data';
-import ArenaLogWatcher from './arena-log-watcher';
+import * as ArenaLogWatcher from './arena-log-watcher';
+import * as mtgaLog from './mtga-log';
 
 const toolVersion = electron.remote.app
   .getVersion()
@@ -108,6 +108,28 @@ let instanceToCardIdMap = {};
 
 var logLanguage = "English";
 var lastDeckUpdate = new Date();
+let logTime = false;
+
+// Read the log
+// Set variables to default first
+let prevLogSize = 0;
+let watchingLog = false;
+let stopWatchingLog;
+
+let logUri = mtgaLog.defaultLogUri();
+let settingsLogUri = settingsStore.get("logUri");
+if (settingsLogUri) {
+  logUri = settingsLogUri;
+}
+
+if (typeof process.env.LOGFILE !== "undefined") {
+  logUri = process.env.LOGFILE;
+}
+
+console.log(logUri);
+
+let logReadStart = null;
+let logReadEnd = null;
 
 //
 ipc.on("save_app_settings", function(event, arg) {
@@ -605,29 +627,6 @@ ipc.on("set_log", function(event, arg) {
   logUri = arg;
   settingsStore.set("logUri", arg);
 });
-
-// Read the log
-// Set variables to default first
-import mtgaLog from './mtga-log';
-
-let prevLogSize = 0;
-let watchingLog = false;
-let stopWatchingLog;
-
-let logUri = mtgaLog.defaultLogUri();
-let settingsLogUri = settingsStore.get("logUri");
-if (settingsLogUri) {
-  logUri = settingsLogUri;
-}
-
-if (typeof process.env.LOGFILE !== "undefined") {
-  logUri = process.env.LOGFILE;
-}
-
-console.log(logUri);
-
-let logReadStart = null;
-let logReadEnd = null;
 
 function startWatchingLog() {
   logReadStart = new Date();

@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import nthLastIndexOf from './nth-last-index-of';
-import jsonText from './json-text';
+import * as jsonText from './json-text';
 import { unleakString } from '../background-util';
 
 const CONNECTION_JSON_PATTERN = /\[(?:UnityCrossThreadLogger|Client GRE)\]WebSocketClient (?<client>.*) WebSocketSharp\.WebSocket connecting to .*: (?<socket>.*)(?:\r\n|\n)/;

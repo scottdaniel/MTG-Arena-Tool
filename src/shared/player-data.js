@@ -442,4 +442,6 @@ class PlayerData {
   }
 }
 
-export default new PlayerData();
+const playerData = new PlayerData();
+
+export default playerData;

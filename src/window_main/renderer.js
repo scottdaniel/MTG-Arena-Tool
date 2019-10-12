@@ -35,11 +35,6 @@ import { openCollectionTab } from './collection';
 import { openSettingsTab, setCurrentOverlaySettings } from './settings';
 import { showWhatsNew } from './whats-new';
 
-// import css files to be included in the webpack output.
-import './index.css';
-import './flags.min.css';
-import '../shared/shared.css';
-
 const byId = id => document.getElementById(id);
 let sidebarActive = MAIN_LOGIN;
 let loggedIn = false;

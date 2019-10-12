@@ -18,7 +18,7 @@ import cardTypes from '../shared/card-types';
 import { addCardHover } from '../shared/card-hover';
 import { deckTypesStats, formatRank, getCardArtCrop, get_rank_index_16, getCardImage, getReadableEvent, makeId, toMMSS } from '../shared/util';
 
-import DEFAULT_BACKGROUND from '../images/Bedevil-Art.jpg';
+const DEFAULT_BACKGROUND = '../images/Bedevil-Art.jpg';
 
 const byId = id => document.getElementById(id);
 let popTimeout = null;

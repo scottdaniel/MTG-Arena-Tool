@@ -12,7 +12,6 @@
     idChanges
     matchGameStats
     saveMatch
-    greToClientInterpreter
     decodePayload
     addCustomDeck
     saveCourse
@@ -33,8 +32,6 @@
     draws
     oppWin
     matchCompletedOnGameNumber
-    oppId
-    playerData
     firstPass
     debugLog
 */
@@ -47,6 +44,10 @@ import CardsList from '../shared/cards-list';
 import { get_deck_colors, objectClone, replaceAll } from '../shared/util';
 import { httpSetMythicRank, httpSubmitCourse, httpTournamentCheck } from './http-api';
 import { ipc_send, normaliseFields, parseWotcTime, parseWotcTimeFallback, setData } from './background-util';
+import * as greToClientInterpreter from './gre-to-client-interpreter';
+import playerData from '../shared/player-data';
+import sha1 from 'js-sha1';
+
 //
 function convert_deck_from_v3(deck) {
   return JSON.parse(JSON.stringify(deck), (key, value) => {
@@ -977,7 +978,6 @@ export function onLabelMatchGameRoomStateChangedEvent(entry, json) {
       if (player.userId == playerData.arenaId) {
         currentMatch.player.seat = player.systemSeatId;
       } else {
-        oppId = player.userId;
         currentMatch.opponent.seat = player.systemSeatId;
       }
     });

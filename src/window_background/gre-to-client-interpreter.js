@@ -457,7 +457,6 @@ export function processAll() {
   currentMatch.oppCardsUsed = getOppUsedCards();
 }
 
-let logTime = false;
 export function GREMessageByID(msgId, time) {
   let message = currentMatch.GREtoClient[msgId];
   logTime = time;
