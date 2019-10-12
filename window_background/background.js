@@ -25,11 +25,7 @@ const httpApi = require("./http-api");
 const playerData = require("../shared/player-data");
 const { getReadableFormat } = require("../shared/util");
 const { HIDDEN_PW, MAIN_DECKS } = require("../shared/constants");
-const {
-  ipc_send,
-  setData,
-  unleakString,
-} = require("./background-util");
+const { ipc_send, setData, unleakString } = require("./background-util");
 
 const { createDeck } = require("./data");
 
