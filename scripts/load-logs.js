@@ -25,7 +25,7 @@ function createBackgroundWindow() {
     width: 640,
     height: 480,
     title: "Background",
-    icon: "icon.png",
+    icon: "icons/icon.png",
     webPreferences: {
       nodeIntegration: true
     }
