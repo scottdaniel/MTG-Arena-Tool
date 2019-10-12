@@ -30,7 +30,7 @@ const { ipc_send, setData, unleakString } = require("./background-util");
 const { createDeck } = require("./data");
 
 const globals = require("./globals");
-const mtgaLob = require("./mtga-log");
+const mtgaLog = require("./mtga-log");
 
 const settingsCfg = {
   gUri: ""
