@@ -107,6 +107,7 @@ function loadPlayerConfig(playerId, serverData = undefined) {
     progress: -1
   });
 
+  let ret = false;
   if (serverData) {
     const requestSync = {};
     requestSync.courses = serverData.courses.filter(
@@ -127,11 +128,7 @@ function loadPlayerConfig(playerId, serverData = undefined) {
       requestSync.economy.length;
 
     if (itemCount) {
-      ipc_send("ipc_log", "Fetch remote player items: " + itemCount);
-      httpApi.httpSyncRequest(requestSync);
-      // console.log("requestSync", requestSync);
-    } else {
-      ipc_send("ipc_log", "No need to fetch remote player items.");
+      ret = requestSync;
     }
   }
 
@@ -148,6 +145,9 @@ function loadPlayerConfig(playerId, serverData = undefined) {
     time: 3000,
     progress: -1
   });
+
+  // Return weter or not to fetch remote items
+  return ret;
 }
 
 function startWatchingLog() {
@@ -468,6 +468,7 @@ function finishLoading() {
     ipc_send("player_data_refresh");
 
     if (playerData.name) {
+      // This needs to be triggered somewhere else
       httpApi.httpSetPlayer(
         playerData.name,
         playerData.rank.constructed.rank,

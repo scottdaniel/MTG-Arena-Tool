@@ -311,7 +311,19 @@ function httpBasic() {
                     serverData.economy = parsedResult.economy;
                   }
                   setData(data, false);
-                  loadPlayerConfig(playerData.arenaId, serverData);
+                  let requestSync = loadPlayerConfig(
+                    playerData.arenaId,
+                    serverData
+                  );
+                  if (requestSync) {
+                    ipc_send("ipc_log", "Fetch remote player items");
+                    httpSyncRequest(requestSync);
+                  } else {
+                    ipc_send(
+                      "ipc_log",
+                      "No need to fetch remote player items."
+                    );
+                  }
                   ipc_send("set_discord_tag", parsedResult.discord_tag);
                   httpNotificationsPull();
                 }
