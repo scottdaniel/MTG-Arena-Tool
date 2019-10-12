@@ -4,6 +4,7 @@ const Store = require("electron-store");
 const Deck = require("../shared/deck");
 const path = require("path");
 const fs = require("fs");
+const mtgaLog = require("./mtga-log");
 
 // Hey! If you're here, you might be thinking of adding stuff to this file.
 // Don't. This is a shadowy place. You must never go here.
@@ -18,7 +19,6 @@ if (!fs.existsSync(actionLogDir)) {
   fs.mkdirSync(actionLogDir);
 }
 
-const mtgaLog = require("./mtga-log");
 let logUri = mtgaLog.defaultLogUri();
 
 var currentDeck = new Deck();
@@ -108,7 +108,6 @@ module.exports = {
   logUri,
   matchCompletedOnGameNumber,
   matchGameStats,
-  mtgaLog,
   odds_sample_size,
   originalDeck,
   rStore,

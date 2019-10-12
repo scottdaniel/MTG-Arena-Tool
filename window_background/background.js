@@ -30,6 +30,7 @@ const { ipc_send, setData, unleakString } = require("./background-util");
 const { createDeck } = require("./data");
 
 const globals = require("./globals");
+const mtgaLob = require("./mtga-log");
 
 const settingsCfg = {
   gUri: ""
@@ -448,7 +449,7 @@ async function logLoop() {
   }
 */
 
-  const { size } = await global.mtgaLog.stat(globals.logUri);
+  const { size } = await mtgaLog.stat(globals.logUri);
 
   if (size == undefined) {
     // Something went wrong obtaining the file size, try again later
@@ -464,8 +465,8 @@ async function logLoop() {
 
   const logSegment =
     delta > 0
-      ? await global.mtgaLog.readSegment(globals.logUri, prevLogSize, delta)
-      : await global.mtgaLog.readSegment(globals.logUri, 0, size);
+      ? await mtgaLog.readSegment(globals.logUri, prevLogSize, delta)
+      : await mtgaLog.readSegment(globals.logUri, 0, size);
 
   // We are looping only to get user data (processLogUser)
   // Process only the user data for initial loading (prior to log in)

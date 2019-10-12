@@ -1,7 +1,6 @@
 const _ = require("lodash");
 const nthLastIndexOf = require("./nth-last-index-of");
 const jsonText = require("./json-text");
-const { unleakString } = require("../background-util");
 
 const CONNECTION_JSON_PATTERN = /\[(?:UnityCrossThreadLogger|Client GRE)\]WebSocketClient (?<client>.*) WebSocketSharp\.WebSocket connecting to .*: (?<socket>.*)(?:\r\n|\n)/;
 
@@ -27,6 +26,10 @@ const logEntryPattern = new RegExp(
   `(${ALL_PATTERNS.map(re => re.source.replace(/\(\?<\w*>/g, "(")).join("|")})`,
   "g"
 );
+
+function unleakString(s) {
+  return (" " + s).substr(1);
+}
 
 function ArenaLogDecoder() {
   let buffer = "";
