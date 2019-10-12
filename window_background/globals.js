@@ -18,8 +18,8 @@ if (!fs.existsSync(actionLogDir)) {
   fs.mkdirSync(actionLogDir);
 }
 
-const mtgaLog = require("./mtga-log");
-let logUri = mtgaLog.defaultLogUri();
+global.mtgaLog = require("./mtga-log");
+let logUri = global.mtgaLog.defaultLogUri();
 
 var currentDeck = new Deck();
 
@@ -108,7 +108,6 @@ module.exports = {
   logUri,
   matchCompletedOnGameNumber,
   matchGameStats,
-  mtgaLog,
   odds_sample_size,
   originalDeck,
   rStore,
