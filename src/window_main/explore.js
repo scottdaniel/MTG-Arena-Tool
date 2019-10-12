@@ -1,10 +1,10 @@
 import _ from 'lodash';
 import anime from 'animejs';
-import { CARD_RARITIES, MANA, COLORS_BRIEF, DEFAULT_TILE, RANKS, RANKS_SORT, EASING_DEFAULT } from 'common/constants';
-import db from 'common/database';
-import { queryElements as $$, createDiv } from 'common/dom-fns';
-import { createSelect } from 'common/select';
-import { getCardArtCrop, get_rank_index_16, removeDuplicates, compare_cards, getBoosterCountEstimate } from 'common/util';
+import { CARD_RARITIES, MANA, COLORS_BRIEF, DEFAULT_TILE, RANKS, RANKS_SORT, EASING_DEFAULT } from '../shared/constants';
+import db from '../shared/database';
+import { queryElements as $$, createDiv } from '../shared/dom-fns';
+import { createSelect } from '../shared/select';
+import { getCardArtCrop, get_rank_index_16, removeDuplicates, compare_cards, getBoosterCountEstimate } from '../shared/util';
 import { addCheckbox, getLocalState, getWinrateClass, hideLoadingBars, ipcSend, resetMainContainer, setLocalState, showLoadingBars } from './renderer-util';
 import { openDeck } from './deck-details';
 

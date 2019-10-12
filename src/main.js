@@ -11,7 +11,7 @@ var rememberStore = new Store({
   defaults: {}
 });
 
-import { ARENA_MODE_IDLE, ARENA_MODE_MATCH, ARENA_MODE_DRAFT, OVERLAY_DRAFT_MODES } from 'common/constants';
+import { ARENA_MODE_IDLE, ARENA_MODE_MATCH, ARENA_MODE_DRAFT, OVERLAY_DRAFT_MODES } from './shared/constants';
 
 // required for webpack
 // require('./window_updater/index.html');

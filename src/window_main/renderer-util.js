@@ -7,16 +7,16 @@ import anime from 'animejs';
 import striptags from 'striptags';
 import Picker from 'vanilla-picker';
 import Pikaday from 'pikaday';
-import { COLORS_ALL, MANA, MANA_COLORS, IPC_MAIN, IPC_BACKGROUND, EASING_DEFAULT } from 'common/constants';
-import db from 'common/database';
-import pd from 'common/player-data';
-import ConicGradient from 'common/conic-gradient';
-import { createDiv, createImg, createInput, createLabel, createSpan, queryElements as $$ } from 'common/dom-fns';
-import { createSelect } from 'common/select';
-import * as deckDrawer from 'common/deck-drawer';
-import cardTypes from 'common/card-types';
-import { addCardHover } from 'common/card-hover';
-import { deckTypesStats, formatRank, getCardArtCrop, get_rank_index_16, getCardImage, getReadableEvent, makeId, toMMSS } from 'common/util';
+import { COLORS_ALL, MANA, MANA_COLORS, IPC_MAIN, IPC_BACKGROUND, EASING_DEFAULT } from '../shared/constants';
+import db from '../shared/database';
+import pd from '../shared/player-data';
+import ConicGradient from '../shared/conic-gradient';
+import { createDiv, createImg, createInput, createLabel, createSpan, queryElements as $$ } from '../shared/dom-fns';
+import { createSelect } from '../shared/select';
+import * as deckDrawer from '../shared/deck-drawer';
+import cardTypes from '../shared/card-types';
+import { addCardHover } from '../shared/card-hover';
+import { deckTypesStats, formatRank, getCardArtCrop, get_rank_index_16, getCardImage, getReadableEvent, makeId, toMMSS } from '../shared/util';
 
 import DEFAULT_BACKGROUND from '../images/Bedevil-Art.jpg';
 

@@ -1,5 +1,5 @@
-import { getCardArtCrop } from 'common/util';
-import { createDiv } from 'common/dom-fns';
+import { getCardArtCrop } from '../shared/util';
+import { createDiv } from '../shared/dom-fns';
 
 class ListItem {
   constructor(_grpId, _id, _onClick, _onDelete = false, isArchived = false) {

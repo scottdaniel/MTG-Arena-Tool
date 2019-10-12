@@ -1,10 +1,10 @@
 import anime from 'animejs';
-import autocomplete from 'common/autocomplete';
-import { DATE_SEASON, DEFAULT_TILE, EASING_DEFAULT, RANKS } from 'common/constants';
-import db from 'common/database';
-import pd from 'common/player-data';
-import { createDiv, createInput } from 'common/dom-fns';
-import { makeId } from 'common/util';
+import autocomplete from '../shared/autocomplete';
+import { DATE_SEASON, DEFAULT_TILE, EASING_DEFAULT, RANKS } from '../shared/constants';
+import db from '../shared/database';
+import pd from '../shared/player-data';
+import { createDiv, createInput } from '../shared/dom-fns';
+import { makeId } from '../shared/util';
 import Aggregator from './aggregator';
 import DataScroller from './data-scroller';
 import FilterPanel from './filter-panel';

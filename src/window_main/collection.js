@@ -3,16 +3,16 @@ import { remote } from 'electron';
 const Menu = remote.Menu;
 const MenuItem = remote.MenuItem;
 
-import { COLORS_BRIEF, CARD_RARITIES, EASING_DEFAULT } from 'common/constants';
-import db from 'common/database';
-import pd from 'common/player-data';
-import { queryElements as $$, createDiv } from 'common/dom-fns';
-import { createSelect } from 'common/select';
-import { reactSelect } from 'common/selectreact.jsx';
-import { addCardHover, attachOwnerhipStars } from 'common/card-hover';
-import { collectionSortRarity, getCardImage, getCardsMissingCount, openScryfallCard, replaceAll } from 'common/util';
-import Colors from 'common/colors';
-import { MULTI, COLORLESS, WHITE, BLUE, BLACK, GREEN, RED } from 'common/constants.js';
+import { COLORS_BRIEF, CARD_RARITIES, EASING_DEFAULT } from '../shared/constants';
+import db from '../shared/database';
+import pd from '../shared/player-data';
+import { queryElements as $$, createDiv } from '../shared/dom-fns';
+import { createSelect } from '../shared/select';
+import { reactSelect } from '../shared/selectreact.jsx';
+import { addCardHover, attachOwnerhipStars } from '../shared/card-hover';
+import { collectionSortRarity, getCardImage, getCardsMissingCount, openScryfallCard, replaceAll } from '../shared/util';
+import Colors from '../shared/colors';
+import { MULTI, COLORLESS, WHITE, BLUE, BLACK, GREEN, RED } from '../shared/constants.js';
 import { hideLoadingBars, changeBackground, ipcSend, resetMainContainer } from './renderer-util';
 import ReactDOM from 'react-dom';
 

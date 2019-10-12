@@ -1,10 +1,10 @@
 import anime from 'animejs';
-import { DRAFT_RANKS, EASING_DEFAULT, PACK_SIZES } from 'common/constants';
-import db from 'common/database';
-import pd from 'common/player-data';
-import { createDiv, createImg, createInput, queryElements as $$ } from 'common/dom-fns';
-import { addCardHover } from 'common/card-hover';
-import { getCardImage } from 'common/util';
+import { DRAFT_RANKS, EASING_DEFAULT, PACK_SIZES } from '../shared/constants';
+import db from '../shared/database';
+import pd from '../shared/player-data';
+import { createDiv, createImg, createInput, queryElements as $$ } from '../shared/dom-fns';
+import { addCardHover } from '../shared/card-hover';
+import { getCardImage } from '../shared/util';
 import { changeBackground } from './renderer-util';
 
 const byId = id => document.getElementById(id);

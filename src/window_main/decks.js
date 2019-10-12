@@ -1,10 +1,10 @@
 import _ from 'lodash';
 import anime from 'animejs';
 import format from 'date-fns/format';
-import { MANA, CARD_RARITIES, EASING_DEFAULT } from 'common/constants';
-import pd from 'common/player-data';
-import { createDiv, createInput } from 'common/dom-fns';
-import { get_deck_missing, getBoosterCountEstimate, getReadableFormat } from 'common/util';
+import { MANA, CARD_RARITIES, EASING_DEFAULT } from '../shared/constants';
+import pd from '../shared/player-data';
+import { createDiv, createInput } from '../shared/dom-fns';
+import { get_deck_missing, getBoosterCountEstimate, getReadableFormat } from '../shared/util';
 import Aggregator from './aggregator';
 import FilterPanel from './filter-panel';
 import ListItem from './list-item';

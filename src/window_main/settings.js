@@ -1,14 +1,14 @@
 import { ipcRenderer as ipc, remote, shell } from 'electron';
 import format from 'date-fns/format';
 import fromUnixTime from 'date-fns/fromUnixTime';
-import { CARD_TILE_ARENA, CARD_TILE_FLAT, COLORS_ALL, OVERLAY_FULL, OVERLAY_LEFT, OVERLAY_ODDS, OVERLAY_MIXED, OVERLAY_SEEN, OVERLAY_DRAFT, OVERLAY_DRAFT_BREW, OVERLAY_LOG, OVERLAY_DRAFT_MODES, SHORTCUT_NAMES, SETTINGS_BEHAVIOUR, SETTINGS_ARENA_DATA, SETTINGS_OVERLAY, SETTINGS_VISUAL, SETTINGS_SHORTCUTS, SETTINGS_PRIVACY, SETTINGS_ABOUT, SETTINGS_LOGIN } from 'common/constants';
-import db from 'common/database';
-import pd from 'common/player-data';
-import { createDiv, createImg, createInput, createLabel, queryElements as $$ } from 'common/dom-fns';
-import * as deckDrawer from 'common/deck-drawer';
+import { CARD_TILE_ARENA, CARD_TILE_FLAT, COLORS_ALL, OVERLAY_FULL, OVERLAY_LEFT, OVERLAY_ODDS, OVERLAY_MIXED, OVERLAY_SEEN, OVERLAY_DRAFT, OVERLAY_DRAFT_BREW, OVERLAY_LOG, OVERLAY_DRAFT_MODES, SHORTCUT_NAMES, SETTINGS_BEHAVIOUR, SETTINGS_ARENA_DATA, SETTINGS_OVERLAY, SETTINGS_VISUAL, SETTINGS_SHORTCUTS, SETTINGS_PRIVACY, SETTINGS_ABOUT, SETTINGS_LOGIN } from '../shared/constants';
+import db from '../shared/database';
+import pd from '../shared/player-data';
+import { createDiv, createImg, createInput, createLabel, queryElements as $$ } from '../shared/dom-fns';
+import * as deckDrawer from '../shared/deck-drawer';
 import { showWhatsNew } from './whats-new';
-import { createSelect } from 'common/select';
-import { getCardImage } from 'common/util';
+import { createSelect } from '../shared/select';
+import { getCardImage } from '../shared/util';
 const byId = id => document.getElementById(id);
 
 import parse from 'date-fns/parse';

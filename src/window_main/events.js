@@ -1,11 +1,11 @@
 import anime from 'animejs';
 import compareAsc from 'date-fns/compareAsc';
 import compareDesc from 'date-fns/compareDesc';
-import { DEFAULT_TILE, MANA, EASING_DEFAULT } from 'common/constants';
-import db from 'common/database';
-import pd from 'common/player-data';
-import { createDiv, queryElementsByClass } from 'common/dom-fns';
-import { getReadableEvent, toMMSS } from 'common/util';
+import { DEFAULT_TILE, MANA, EASING_DEFAULT } from '../shared/constants';
+import db from '../shared/database';
+import pd from '../shared/player-data';
+import { createDiv, queryElementsByClass } from '../shared/dom-fns';
+import { getReadableEvent, toMMSS } from '../shared/util';
 import Aggregator from './aggregator';
 import DataScroller from './data-scroller';
 import FilterPanel from './filter-panel';

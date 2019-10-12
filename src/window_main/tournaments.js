@@ -1,10 +1,10 @@
 import anime from 'animejs';
-import { queryElements as $$, createDiv } from 'common/dom-fns';
-import { createSelect } from 'common/select';
-import * as deckDrawer from 'common/deck-drawer';
-import { EASING_DEFAULT } from 'common/constants.js';
-import { compare_cards, get_deck_export, get_deck_missing, getBoosterCountEstimate, makeId, objectClone, timestamp, toHHMMSS, urlDecode } from 'common/util';
-import pd from 'common/player-data';
+import { queryElements as $$, createDiv } from '../shared/dom-fns';
+import { createSelect } from '../shared/select';
+import * as deckDrawer from '../shared/deck-drawer';
+import { EASING_DEFAULT } from '../shared/constants.js';
+import { compare_cards, get_deck_export, get_deck_missing, getBoosterCountEstimate, makeId, objectClone, timestamp, toHHMMSS, urlDecode } from '../shared/util';
+import pd from '../shared/player-data';
 import Aggregator from './aggregator';
 import FilterPanel from './filter-panel';
 import { pop, changeBackground, drawDeck, drawDeckVisual, ipcSend } from './renderer-util';

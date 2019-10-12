@@ -17,10 +17,10 @@ if (!remote.app.isPackaged) {
 }
 import anime from 'animejs';
 import 'time-elements';
-import { DATE_SEASON, EASING_DEFAULT, HIDDEN_PW, MAIN_LOGIN, MAIN_HOME, MAIN_DECKS, MAIN_HISTORY, MAIN_EVENTS, MAIN_EXPLORE, MAIN_ECONOMY, MAIN_COLLECTION, MAIN_SETTINGS, MAIN_UPDATE, SETTINGS_ABOUT, SETTINGS_OVERLAY, SETTINGS_PRIVACY } from 'common/constants';
-import pd from 'common/player-data';
-import { createDiv, queryElements as $$ } from 'common/dom-fns';
-import { compare_cards, get_deck_colors, get_rank_index, removeDuplicates, formatRank } from 'common/util';
+import { DATE_SEASON, EASING_DEFAULT, HIDDEN_PW, MAIN_LOGIN, MAIN_HOME, MAIN_DECKS, MAIN_HISTORY, MAIN_EVENTS, MAIN_EXPLORE, MAIN_ECONOMY, MAIN_COLLECTION, MAIN_SETTINGS, MAIN_UPDATE, SETTINGS_ABOUT, SETTINGS_OVERLAY, SETTINGS_PRIVACY } from '../shared/constants';
+import pd from '../shared/player-data';
+import { createDiv, queryElements as $$ } from '../shared/dom-fns';
+import { compare_cards, get_deck_colors, get_rank_index, removeDuplicates, formatRank } from '../shared/util';
 import { changeBackground, getLocalState, hideLoadingBars, ipcSend, openDialog, pop, renderLogInput, resetMainContainer, setLocalState, showLoadingBars } from './renderer-util';
 import Aggregator from './aggregator';
 import { openHomeTab, requestHome } from './home';
@@ -38,7 +38,7 @@ import { showWhatsNew } from './whats-new';
 // import css files to be included in the webpack output.
 import './index.css';
 import './flags.min.css';
-import 'common/shared.css';
+import '../shared/shared.css';
 
 const byId = id => document.getElementById(id);
 let sidebarActive = MAIN_LOGIN;

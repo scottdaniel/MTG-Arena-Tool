@@ -1,7 +1,7 @@
-import { MANA, RANKS } from 'common/constants';
-import { createDiv, createLabel } from 'common/dom-fns';
-import { createSelect } from 'common/select';
-import { get_rank_index, toDDHHMMSS, toMMSS } from 'common/util';
+import { MANA, RANKS } from '../shared/constants';
+import { createDiv, createLabel } from '../shared/dom-fns';
+import { createSelect } from '../shared/select';
+import { get_rank_index, toDDHHMMSS, toMMSS } from '../shared/util';
 import { compareWinrates, formatPercent, getTagColor, getWinrateClass } from './renderer-util';
 
 class StatsPanel {

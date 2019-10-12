@@ -1,9 +1,9 @@
 import formatDistanceStrict from 'date-fns/formatDistanceStrict';
 import { shell } from 'electron';
-import { FORMATS, BLACK, BLUE, GREEN, RED, WHITE, MANA_COLORS, CARD_TYPES, CARD_TYPE_CODES } from 'common/constants';
-import db from 'common/database';
-import pd from 'common/player-data';
-import { createDiv, createSpan } from 'common/dom-fns';
+import { FORMATS, BLACK, BLUE, GREEN, RED, WHITE, MANA_COLORS, CARD_TYPES, CARD_TYPE_CODES } from './constants';
+import db from './database';
+import pd from './player-data';
+import { createDiv, createSpan } from './dom-fns';
 
 export function getCardArtCrop(cardObj) {
   if (typeof cardObj !== "object") {

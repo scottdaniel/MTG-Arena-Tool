@@ -1,8 +1,8 @@
-import { COLORS_ALL, COLORS_BRIEF, DATE_LAST_30, DATE_LAST_DAY, DATE_ALL_TIME, DATE_SEASON } from 'common/constants';
-import pd from 'common/player-data';
-import { createDiv, createLabel } from 'common/dom-fns';
-import { createSelect } from 'common/select';
-import { getReadableEvent, getReadableFormat, getRecentDeckName, timeSince } from 'common/util';
+import { COLORS_ALL, COLORS_BRIEF, DATE_LAST_30, DATE_LAST_DAY, DATE_ALL_TIME, DATE_SEASON } from '../shared/constants';
+import pd from '../shared/player-data';
+import { createDiv, createLabel } from '../shared/dom-fns';
+import { createSelect } from '../shared/select';
+import { getReadableEvent, getReadableFormat, getRecentDeckName, timeSince } from '../shared/util';
 import { getTagColor, ipcSend, showDatepicker } from './renderer-util';
 import Aggregator from './aggregator';
 

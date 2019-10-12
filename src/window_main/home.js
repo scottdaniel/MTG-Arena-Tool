@@ -1,9 +1,9 @@
 import { shell } from 'electron';
-import db from 'common/database';
-import pd from 'common/player-data';
-import { queryElements as $$, createDiv } from 'common/dom-fns';
-import { addCardHover } from 'common/card-hover';
-import { toHHMMSS, toDDHHMMSS, timestamp } from 'common/util';
+import db from '../shared/database';
+import pd from '../shared/player-data';
+import { queryElements as $$, createDiv } from '../shared/dom-fns';
+import { addCardHover } from '../shared/card-hover';
+import { toHHMMSS, toDDHHMMSS, timestamp } from '../shared/util';
 import { tournamentCreate } from './tournaments';
 import { getLocalState, ipcSend, resetMainContainer, showLoadingBars } from './renderer-util';
 

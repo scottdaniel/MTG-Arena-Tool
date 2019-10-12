@@ -1,4 +1,4 @@
-import { createDiv } from 'common/dom-fns';
+import { createDiv } from '../shared/dom-fns';
 import { setLocalState, showLoadingBars, hideLoadingBars } from './renderer-util';
 
 class DataScroller {

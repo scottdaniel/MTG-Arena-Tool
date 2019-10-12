@@ -1,8 +1,8 @@
 import db from './database.js';
 import CardsList from './cards-list.js';
 import Colors from './colors.js';
-import { compare_cards, get_set_code, get_wc_missing, objectClone } from 'common/util';
-import { DEFAULT_TILE } from 'common/constants.js';
+import { compare_cards, get_set_code, get_wc_missing, objectClone } from './util';
+import { DEFAULT_TILE } from './constants.js';
 
 class Deck {
   constructor(mtgaDeck = {}, main = false, side = false) {
