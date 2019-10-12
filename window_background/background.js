@@ -98,7 +98,11 @@ var debugLogSpeed = 0.001;
 const addCustomDeck = require("./addCustomDeck");
 const forceDeckUpdate = require("./forceDeckUpdate");
 const getOpponentDeck = require("./getOpponentDeck");
-const { loadPlayerConfig, syncSettings, startWatchingLog } = require("./loadPlayerConfig");
+const {
+  loadPlayerConfig,
+  syncSettings,
+  startWatchingLog
+} = require("./loadPlayerConfig");
 const update_deck = require("./updateDeck");
 
 //
