@@ -528,7 +528,7 @@ function createUpdaterWindow() {
     width: 320,
     height: 240,
     title: "Updater",
-    icon: "icon.png",
+    icon: "../icons/icon.png",
     webPreferences: {
       nodeIntegration: true
     }
@@ -547,7 +547,7 @@ function createBackgroundWindow() {
     width: 640,
     height: 480,
     title: "Background",
-    icon: "icon.png",
+    icon: "../icons/icon.png",
     webPreferences: {
       nodeIntegration: true
     }
@@ -600,7 +600,7 @@ function createMainWindow() {
     width: 800,
     height: 600,
     title: "MTG Arena Tool",
-    icon: "icon.png",
+    icon: "../icons/icon.png",
     webPreferences: {
       nodeIntegration: true
     }
@@ -608,12 +608,12 @@ function createMainWindow() {
   win.loadURL(`file://${__dirname}/window_main/index.html`);
   win.on("closed", onMainClosed);
 
-  let iconPath = path.join(__dirname, "icon-tray.png");
+  let iconPath = path.join(__dirname, "../icons/icon-tray.png");
   if (process.platform == "linux") {
-    iconPath = path.join(__dirname, "icon-tray@8x.png");
+    iconPath = path.join(__dirname, "../icons/icon-tray@8x.png");
   }
   if (process.platform == "win32") {
-    iconPath = path.join(__dirname, "icon-tray@8x.png");
+    iconPath = path.join(__dirname, "../icons/icon-tray@8x.png");
   }
 
   tray = new Tray(iconPath);
