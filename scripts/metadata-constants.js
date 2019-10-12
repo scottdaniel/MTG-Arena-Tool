@@ -138,7 +138,8 @@ exports.EVENT_TO_FORMAT = {
 exports.LIMITED_RANKED_EVENTS = [
   "QuickDraft_M20_20190719",
   "QuickDraft_GRN_20190829",
-  "QuickDraft_RNA_20190913"
+  "QuickDraft_RNA_20190913",
+  "QuickDraft_ELD_20191011"
 ];
 
 exports.STANDARD_RANKED_EVENTS = ["Ladder", "Traditional_Ladder"];
