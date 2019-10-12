@@ -1,8 +1,8 @@
-function starts(text, position) {
+export function starts(text, position) {
   return ["{", "["].includes(text.charAt(position));
 }
 
-function length(text, position) {
+export function length(text, position) {
   switch (text.charAt(position)) {
     case "{":
     case "[": {
@@ -40,5 +40,3 @@ function length(text, position) {
       throw new Error("Not valid start of JSON: " + text.substr(position, 10));
   }
 }
-
-module.exports = { starts, length };

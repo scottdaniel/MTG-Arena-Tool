@@ -1,6 +1,6 @@
-const electron = require("electron");
-const { remote, ipcRenderer: ipc } = require("electron");
-const format = require("date-fns/format");
+import electron from 'electron';
+import { remote, ipcRenderer as ipc } from 'electron';
+import format from 'date-fns/format';
 
 if (!remote.app.isPackaged) {
   const { openNewGitHubIssue, debugInfo } = require("electron-util");
@@ -18,84 +18,22 @@ if (!remote.app.isPackaged) {
   require("devtron").install();
 }
 
-const _ = require("lodash");
-const path = require("path");
-const Store = require("electron-store");
-const fs = require("fs");
-const sha1 = require("js-sha1");
-
-const httpApi = require("./http-api");
-
-const greToClientInterpreter = require("./gre-to-client-interpreter");
-const Deck = require("../shared/deck");
-const db = require("../shared/database");
-const playerData = require("../shared/player-data");
-const { hypergeometricRange } = require("../shared/stats-fns");
-const {
-  get_rank_index,
-  getReadableFormat,
-  objectClone
-} = require("../shared/util");
-const {
-  ARENA_MODE_MATCH,
-  ARENA_MODE_DRAFT,
-  ARENA_MODE_IDLE,
-  DEFAULT_TILE,
-  HIDDEN_PW,
-  IPC_OVERLAY,
-  MAIN_DECKS
-} = require("../shared/constants");
-const {
-  getDateFormat,
-  ipc_send,
-  setData,
-  unleakString,
-  parseWotcTimeFallback
-} = require("./background-util");
-const {
-  onLabelOutLogInfo,
-  onLabelGreToClient,
-  onLabelClientToMatchServiceMessageTypeClientToGREMessage,
-  onLabelInEventGetPlayerCourse,
-  onLabelInEventGetPlayerCourseV2,
-  onLabelInEventJoin,
-  onLabelInEventGetCombinedRankInfo,
-  onLabelInDeckGetDeckLists,
-  onLabelInDeckGetDeckListsV3,
-  onLabelInDeckGetPreconDecks,
-  onLabelInEventGetPlayerCourses,
-  onLabelInEventGetPlayerCoursesV2,
-  onLabelInDeckUpdateDeck,
-  onLabelInDeckUpdateDeckV3,
-  onLabelInventoryUpdated,
-  onLabelInPlayerInventoryGetPlayerInventory,
-  onLabelInPlayerInventoryGetPlayerCardsV3,
-  onLabelInProgressionGetPlayerProgress,
-  onLabelInEventDeckSubmit,
-  onLabelInEventDeckSubmitV3,
-  onLabelInEventGetActiveEvents,
-  onLabelEventMatchCreated,
-  onLabelOutDirectGameChallenge,
-  onLabelOutEventAIPractice,
-  onLabelInDraftDraftStatus,
-  onLabelInDraftMakePick,
-  onLabelOutDraftMakePick,
-  onLabelInEventCompleteDraft,
-  onLabelMatchGameRoomStateChangedEvent,
-  onLabelInEventGetSeasonAndRankDetail,
-  onLabelGetPlayerInventoryGetRewardSchedule,
-  onLabelRankUpdated,
-  onLabelMythicRatingUpdated,
-  onLabelTrackProgressUpdated,
-  onLabelTrackRewardTierUpdated
-} = require("./labels");
-
-const {
-  createDeck,
-  createDraft,
-  createMatch,
-  completeMatch
-} = require("./data");
+import _ from 'lodash';
+import path from 'path';
+import Store from 'electron-store';
+import fs from 'fs';
+import sha1 from 'js-sha1';
+import httpApi from './http-api';
+import greToClientInterpreter from './gre-to-client-interpreter';
+import Deck from '../shared/deck';
+import db from '../shared/database';
+import playerData from '../shared/player-data';
+import { hypergeometricRange } from '../shared/stats-fns';
+import { get_rank_index, getReadableFormat, objectClone } from '../shared/util';
+import { ARENA_MODE_MATCH, ARENA_MODE_DRAFT, ARENA_MODE_IDLE, DEFAULT_TILE, HIDDEN_PW, IPC_OVERLAY, MAIN_DECKS } from '../shared/constants';
+import { getDateFormat, ipc_send, setData, unleakString, parseWotcTimeFallback } from './background-util';
+import { onLabelOutLogInfo, onLabelGreToClient, onLabelClientToMatchServiceMessageTypeClientToGREMessage, onLabelInEventGetPlayerCourse, onLabelInEventGetPlayerCourseV2, onLabelInEventJoin, onLabelInEventGetCombinedRankInfo, onLabelInDeckGetDeckLists, onLabelInDeckGetDeckListsV3, onLabelInDeckGetPreconDecks, onLabelInEventGetPlayerCourses, onLabelInEventGetPlayerCoursesV2, onLabelInDeckUpdateDeck, onLabelInDeckUpdateDeckV3, onLabelInventoryUpdated, onLabelInPlayerInventoryGetPlayerInventory, onLabelInPlayerInventoryGetPlayerCardsV3, onLabelInProgressionGetPlayerProgress, onLabelInEventDeckSubmit, onLabelInEventDeckSubmitV3, onLabelInEventGetActiveEvents, onLabelEventMatchCreated, onLabelOutDirectGameChallenge, onLabelOutEventAIPractice, onLabelInDraftDraftStatus, onLabelInDraftMakePick, onLabelOutDraftMakePick, onLabelInEventCompleteDraft, onLabelMatchGameRoomStateChangedEvent, onLabelInEventGetSeasonAndRankDetail, onLabelGetPlayerInventoryGetRewardSchedule, onLabelRankUpdated, onLabelMythicRatingUpdated, onLabelTrackProgressUpdated, onLabelTrackRewardTierUpdated } from './labels';
+import { createDeck, createDraft, createMatch, completeMatch } from './data';
 
 const toolVersion = electron.remote.app
   .getVersion()
@@ -669,7 +607,8 @@ ipc.on("set_log", function(event, arg) {
 
 // Read the log
 // Set variables to default first
-const mtgaLog = require("./mtga-log");
+import mtgaLog from './mtga-log';
+
 let prevLogSize = 0;
 let watchingLog = false;
 let stopWatchingLog;
@@ -685,7 +624,7 @@ if (typeof process.env.LOGFILE !== "undefined") {
 }
 
 console.log(logUri);
-const ArenaLogWatcher = require("./arena-log-watcher");
+import ArenaLogWatcher from './arena-log-watcher/arena-log-watcher';
 
 let logReadStart = null;
 let logReadEnd = null;

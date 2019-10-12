@@ -4,18 +4,13 @@ global
   firstPass
 */
 // Utility functions that belong only to background
-const { ipcRenderer: ipc } = require("electron");
-const _ = require("lodash");
-const parse = require("date-fns/parse");
-const isValid = require("date-fns/isValid");
+import { ipcRenderer as ipc } from 'electron';
 
-const {
-  IPC_BACKGROUND,
-  IPC_MAIN,
-  IPC_OVERLAY
-} = require("../shared/constants.js");
-
-const playerData = require("../shared/player-data.js");
+import _ from 'lodash';
+import parse from 'date-fns/parse';
+import isValid from 'date-fns/isValid';
+import { IPC_BACKGROUND, IPC_MAIN, IPC_OVERLAY } from '../shared/constants.js';
+import playerData from '../shared/player-data.js';
 
 // These were tested briefly
 // They are all taken from logs
@@ -44,7 +39,7 @@ class DateParseError extends Error {
 // The original date string should always be kept as backup.
 // Use parseWotcTimeFallback for non-important dates.
 
-function parseWotcTime(dateStr) {
+export function parseWotcTime(dateStr) {
   // This must throw an error if it fails
 
   const dateFormat = getDateFormat(dateStr);
@@ -70,7 +65,7 @@ function parseWotcTime(dateStr) {
 // Ignore date parsing errors and return `new Date()`
 // All other errors should still be passed upwards.
 // New code should preferentially use parseWotcTime and handle their own errors.
-function parseWotcTimeFallback(dateStr) {
+export function parseWotcTimeFallback(dateStr) {
   try {
     return parseWotcTime(dateStr);
   } catch (e) {
@@ -90,7 +85,7 @@ function isValidDate(date) {
   return isValid(date) && !isNaN(date.getTime());
 }
 
-function getDateFormat(dateStr) {
+export function getDateFormat(dateStr) {
   if (playerData.settings.log_locale_format) {
     // return the players setting
     return playerData.settings.log_locale_format;
@@ -103,7 +98,7 @@ function getDateFormat(dateStr) {
   }
 }
 
-function normaliseFields(iterator) {
+export function normaliseFields(iterator) {
   if (typeof iterator == "object") {
     return _.transform(iterator, function(result, value, key) {
       let nkey =
@@ -114,12 +109,12 @@ function normaliseFields(iterator) {
   return iterator;
 }
 
-function unleakString(s) {
+export function unleakString(s) {
   return (" " + s).substr(1);
 }
 
 // Begin of IPC messages recievers
-function ipc_send(method, arg, to = IPC_MAIN) {
+export function ipc_send(method, arg, to = IPC_MAIN) {
   if (method == "ipc_log") {
     //
   }
@@ -149,7 +144,7 @@ const overlayWhitelist = [
 
 // convenience fn to update player data singletons in all processes
 // (update is destructive, be sure to use spread syntax if necessary)
-function setData(data, refresh = debugLog || !firstPass) {
+export function setData(data, refresh = debugLog || !firstPass) {
   const cleanData = _.omit(data, dataBlacklist);
   playerData.handleSetData(null, JSON.stringify(cleanData));
   ipc_send("set_player_data", JSON.stringify(cleanData), IPC_MAIN);
@@ -157,13 +152,3 @@ function setData(data, refresh = debugLog || !firstPass) {
   ipc_send("set_player_data", JSON.stringify(overlayData), IPC_OVERLAY);
   if (refresh) ipc_send("player_data_refresh");
 }
-
-module.exports = {
-  getDateFormat,
-  ipc_send,
-  normaliseFields,
-  parseWotcTime,
-  parseWotcTimeFallback,
-  setData,
-  unleakString
-};

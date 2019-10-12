@@ -14,11 +14,11 @@ global
   instanceToCardIdMap
   update_deck
 */
-const { IPC_OVERLAY } = require("../shared/constants.js");
-const { objectClone } = require("../shared/util");
-const { ipc_send } = require("./background-util");
+import { IPC_OVERLAY } from '../shared/constants.js';
 
-const Deck = require("../shared/deck");
+import { objectClone } from '../shared/util';
+import { ipc_send } from './background-util';
+import Deck from '../shared/deck';
 
 let actionType = [];
 actionType[0] = "ActionType_None";
@@ -442,7 +442,7 @@ annotationFunctions.AnnotationType_CardRevealed = function(ann, details) {
 };
 
 // Used for debug only.
-function processAll() {
+export function processAll() {
   for (var i = 0; i < currentMatch.latestMessage; i++) {
     let message = currentMatch.GREtoClient[i];
     if (message) {
@@ -458,7 +458,7 @@ function processAll() {
 }
 
 let logTime = false;
-function GREMessageByID(msgId, time) {
+export function GREMessageByID(msgId, time) {
   let message = currentMatch.GREtoClient[msgId];
   logTime = time;
 
@@ -473,7 +473,7 @@ function GREMessageByID(msgId, time) {
   );
 }
 
-function GREMessage(message, time) {
+export function GREMessage(message, time) {
   //currentMatch.GREtoClient[message.msgId] = message;
   logTime = time;
 
@@ -773,10 +773,4 @@ GREMessages.GREMessageType_DieRollResultsResp = function(msg) {
     currentMatch.onThePlay = highest.systemSeatId;
   }
   return true;
-};
-
-module.exports = {
-  GREMessage,
-  GREMessageByID,
-  processAll
 };

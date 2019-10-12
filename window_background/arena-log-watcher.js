@@ -1,9 +1,9 @@
-const fs = require("fs");
-const { promisify } = require("util");
-const { StringDecoder } = require("string_decoder");
-const queue = require("queue");
-const ArenaLogDecoder = require("./arena-log-decoder");
-const pd = require("../shared/player-data");
+import fs from 'fs';
+import { promisify } from 'util';
+import { StringDecoder } from 'string_decoder';
+import queue from 'queue';
+import ArenaLogDecoder from './arena-log-decoder/arena-log-decoder';
+import pd from '../shared/player-data';
 
 const fsAsync = {
   close: promisify(fs.close),
@@ -12,7 +12,7 @@ const fsAsync = {
   stat: promisify(fs.stat)
 };
 
-function start({ path, chunkSize, onLogEntry, onError, onFinish }) {
+export function start({ path, chunkSize, onLogEntry, onError, onFinish }) {
   const q = queue({ concurrency: 1 });
   let position = 0;
   let stringDecoder = new StringDecoder();
@@ -109,5 +109,3 @@ async function readChunk(path, position, length) {
   }
   return buffer;
 }
-
-module.exports = { start };

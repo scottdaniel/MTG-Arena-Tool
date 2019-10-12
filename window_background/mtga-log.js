@@ -1,5 +1,5 @@
-const fs = require("fs");
-const { promisify } = require("util");
+import fs from 'fs';
+import { promisify } from 'util';
 
 const fsPromises = {
   access: promisify(fs.access),
@@ -8,7 +8,7 @@ const fsPromises = {
   read: promisify(fs.read)
 };
 
-function defaultLogUri() {
+export function defaultLogUri() {
   if (process.platform !== "win32") {
     return (
       process.env.HOME +
@@ -23,7 +23,7 @@ function defaultLogUri() {
   );
 }
 
-async function exists(path) {
+export async function exists(path) {
   try {
     await fsPromises.access(path, fs.constants.R_OK);
     return true;
@@ -32,11 +32,11 @@ async function exists(path) {
   }
 }
 
-async function stat(path) {
+export async function stat(path) {
   return await fsPromises.stat(path);
 }
 
-async function readSegment(path, start, length) {
+export async function readSegment(path, start, length) {
   const fd = await fsPromises.open(path, "r");
   try {
     const buffer = Buffer.alloc(length);
@@ -46,5 +46,3 @@ async function readSegment(path, start, length) {
     fs.close(fd);
   }
 }
-
-module.exports = { defaultLogUri, exists, stat, readSegment };

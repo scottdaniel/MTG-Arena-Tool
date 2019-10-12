@@ -9,16 +9,14 @@
 // Generate objects using default templates.
 // Nothing in here should call IPC functions
 
-const _ = require("lodash");
-const electron = require("electron");
+import _ from 'lodash';
 
-const { DEFAULT_TILE } = require("../shared/constants");
-
-const { objectClone } = require("../shared/util");
-const playerData = require("../shared/player-data.js");
-const database = require("../shared/database");
-
-const { parseWotcTime, parseWotcTimeFallback } = require("./background-util");
+import electron from 'electron';
+import { DEFAULT_TILE } from '../shared/constants';
+import { objectClone } from '../shared/util';
+import playerData from '../shared/player-data.js';
+import database from '../shared/database';
+import { parseWotcTime, parseWotcTimeFallback } from './background-util';
 
 // Draft Creation
 
@@ -34,7 +32,7 @@ var currentDraftDefault = {
   date: undefined
 };
 
-function createDraft(id, entry) {
+export function createDraft(id, entry) {
   const data = {
     ..._.cloneDeep(currentDraftDefault),
     id,
@@ -97,7 +95,7 @@ var matchDataDefault = {
   }
 };
 
-function createMatch(json, matchBeginTime) {
+export function createMatch(json, matchBeginTime) {
   var match = _.cloneDeep(matchDataDefault);
 
   match.player.originalDeck = originalDeck;
@@ -167,7 +165,7 @@ function matchIsLimited(match) {
 
 // Given match data calculates derived data for storage.
 // This is called when a match is complete.
-function completeMatch(match, matchData, matchEndTime) {
+export function completeMatch(match, matchData, matchEndTime) {
   if (matchData.eventId === "AIBotMatch") return;
 
   let mode = matchIsLimited(matchData) ? "limited" : "constructed";
@@ -240,13 +238,6 @@ const deckDefault = {
   sideboard: []
 };
 
-function createDeck() {
+export function createDeck() {
   return objectClone(deckDefault);
 }
-
-module.exports = {
-  createDeck,
-  createDraft,
-  createMatch,
-  completeMatch
-};
