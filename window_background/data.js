@@ -10,8 +10,7 @@ const { objectClone } = require("../shared/util");
 const playerData = require("../shared/player-data.js");
 const database = require("../shared/database");
 const getOpponentDeck = require("./getOpponentDeck");
-
-const { parseWotcTime, parseWotcTimeFallback } = require("./background-util");
+const globals = require('./globals');
 
 // Draft Creation
 

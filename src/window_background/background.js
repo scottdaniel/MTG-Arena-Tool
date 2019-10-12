@@ -22,9 +22,9 @@ const sha1 = require("js-sha1");
 
 const httpApi = require("./http-api");
 
-const db = require("../shared/database");
-const playerData = require("../shared/player-data");
-const { getReadableFormat } = require("../shared/util");
+const db = require("common/database");
+const playerData = require("common/player-data");
+const { getReadableFormat } = require("common/util");
 const {
   ARENA_MODE_MATCH,
   ARENA_MODE_DRAFT,
@@ -32,7 +32,7 @@ const {
   HIDDEN_PW,
   IPC_OVERLAY,
   MAIN_DECKS
-} = require("../shared/constants");
+} = require("common/constants");
 const {
   getDateFormat,
   ipc_send,
@@ -94,6 +94,8 @@ var settingsStore = new Store({
 let logLoopInterval = null;
 const debugArenaID = undefined;
 var debugLogSpeed = 0.001;
+
+var lastDeckUpdate = new Date();
 
 const addCustomDeck = require("./addCustomDeck");
 const forceDeckUpdate = require("./forceDeckUpdate");
@@ -419,8 +421,9 @@ ipc.on("add_history_tag", (event, arg) => {
   httpApi.httpSetDeckTag(tag, match.oppDeck.mainDeck, match.eventId);
 });
 
+let odds_sample_size = 1;
 ipc.on("set_odds_samplesize", function(event, state) {
-  globals.odds_sample_size = state;
+  odds_sample_size = state;
   forceDeckUpdate(false);
   update_deck(true);
 });
@@ -455,6 +458,17 @@ const ArenaLogWatcher = require("./arena-log-watcher");
 
 let logReadStart = null;
 let logReadEnd = null;
+
+function startWatchingLog() {
+  logReadStart = new Date();
+  return ArenaLogWatcher.start({
+    path: logUri,
+    chunkSize: 268435440,
+    onLogEntry: onLogEntryFound,
+    onError: err => console.error(err),
+    onFinish: finishLoading
+  });
+}
 
 function sendSettings() {
   let tags_colors = playerData.tags_colors;

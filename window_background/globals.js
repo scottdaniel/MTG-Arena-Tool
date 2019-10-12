@@ -42,6 +42,8 @@ var matchGameStats = [];
 
 var originalDeck = null;
 
+let odds_sample_size = 1;
+
 const toolVersion = electron.remote.app
   .getVersion()
   .split(".")
@@ -73,6 +75,10 @@ var store = new Store({
 
 var tokenAuth = undefined;
 
+let watchingLog = false;
+
+let stopWatchingLog;
+
 module.exports = {
   actionLogDir,
   currentDeck,
@@ -89,9 +95,12 @@ module.exports = {
   logTime,
   matchCompletedOnGameNumber,
   matchGameStats,
+  odds_sample_size,
   originalDeck,
   rStore,
+  stopWatchingLog,
   store,
   tokenAuth,
-  toolVersion
+  toolVersion,
+  watchingLog
 };
