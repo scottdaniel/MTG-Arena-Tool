@@ -613,7 +613,7 @@ function createMainWindow() {
     iconPath = path.join(__dirname, "icon-tray@8x.png");
   }
   if (process.platform == "win32") {
-    iconPath = path.join(__dirname, "icon-tray@8x.png");
+    iconPath = path.join(__dirname, "icon-256.png");
   }
 
   tray = new Tray(iconPath);
