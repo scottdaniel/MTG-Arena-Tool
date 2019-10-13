@@ -738,8 +738,13 @@ function printStats() {
   let rs = renderSetStats(stats.complete, "PW", "Complete collection");
   mainstats.appendChild(rs);
 
+  // Filter out non booster sets ?
+  let sets =
+    displayMode == BOOSTER_CARDS
+      ? sets.filter(set => db.sets[set].collation > 0)
+      : orderedSets;
   // each set stats
-  orderedSets
+  sets
     .slice()
     .reverse()
     .forEach(set => {
