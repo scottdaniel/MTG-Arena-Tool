@@ -569,6 +569,18 @@ function openCollectionTab() {
     }
   });
 
+  checkboxQtyLower.addEventListener("change", () => {
+    if (document.getElementById("query_qtylower").checked == true) {
+      document.getElementById("query_qtyhigher").checked = false;
+    }
+  });
+
+  checkboxQtyHigher.addEventListener("change", () => {
+    if (document.getElementById("query_qtyhigher").checked == true) {
+      document.getElementById("query_qtylower").checked = false;
+    }
+  });
+
   printCards();
 }
 
@@ -645,6 +657,10 @@ function resetFilters() {
   document.getElementById("query_cmclower").checked = false;
   document.getElementById("query_cmcequal").checked = true;
   document.getElementById("query_cmchigher").checked = false;
+
+  document.getElementById("query_qtylower").checked = false;
+  document.getElementById("query_qtyequal").checked = true;
+  document.getElementById("query_qtyhigher").checked = false;
 
   printCollectionPage();
 }
