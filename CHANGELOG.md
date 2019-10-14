@@ -1,3 +1,15 @@
+## <small>2.12.2 (2019-10-14)</small>
+
+* bugfix ([c84edd1](https://github.com/Manuel-777/MTG-Arena-Tool/commit/c84edd1))
+* disable transaprency debug ([f16e421](https://github.com/Manuel-777/MTG-Arena-Tool/commit/f16e421))
+* extend timeout ([5ffaa96](https://github.com/Manuel-777/MTG-Arena-Tool/commit/5ffaa96)), closes [#631](https://github.com/Manuel-777/MTG-Arena-Tool/issues/631)
+* move sentry dependency to dev-only ([5b79b15](https://github.com/Manuel-777/MTG-Arena-Tool/commit/5b79b15))
+* prettier ([b4a6c08](https://github.com/Manuel-777/MTG-Arena-Tool/commit/b4a6c08))
+* track card types in zones ([0cf53de](https://github.com/Manuel-777/MTG-Arena-Tool/commit/0cf53de))
+* Unknown dates ([479827a](https://github.com/Manuel-777/MTG-Arena-Tool/commit/479827a))
+
+
+
 ## <small>2.12.1 (2019-10-13)</small>
 
 * Added an Advanced Filter : Owned quantity  ([120c1ec](https://github.com/Manuel-777/MTG-Arena-Tool/commit/120c1ec))
