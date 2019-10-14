@@ -1182,7 +1182,7 @@ ready(function() {
   }, 500);
   setTimeout(() => {
     fix = new TransparencyMouseFix({
-      log: true,
+      log: false,
       fixPointerEvents: "auto"
     });
   }, 1000);
