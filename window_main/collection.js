@@ -741,7 +741,7 @@ function printStats() {
   // Filter out non booster sets ?
   let sets =
     displayMode == BOOSTER_CARDS
-      ? sets.filter(set => db.sets[set].collation > 0)
+      ? orderedSets.filter(set => db.sets[set].collation > 0)
       : orderedSets;
   // each set stats
   sets
