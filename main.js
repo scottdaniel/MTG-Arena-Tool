@@ -559,12 +559,13 @@ function createBackgroundWindow() {
 }
 
 function createOverlayWindow() {
+  let bounds = electron.screen.getPrimaryDisplay().bounds;
   const overlay = new electron.BrowserWindow({
     transparent: true,
-    x: -10,
-    y: -10,
-    width: 5,
-    height: 5,
+    x: bounds.x,
+    y: bounds.y,
+    width: bounds.width,
+    height: bounds.height,
     frame: false,
     show: false,
     resizable: false,
