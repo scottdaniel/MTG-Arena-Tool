@@ -802,7 +802,7 @@ function renderSetStats(setStats, setIconCode, setName) {
   if (defaultSetName == setName) {
     setTimeout(() => {
       openSetStats(setStats, setName);
-    }, 100);
+    }, 500);
   }
 
   return setDiv;
