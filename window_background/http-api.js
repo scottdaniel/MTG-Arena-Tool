@@ -311,10 +311,28 @@ function httpBasic() {
                     serverData.economy = parsedResult.economy;
                   }
                   setData(data, false);
-                  let requestSync = loadPlayerConfig(
-                    playerData.arenaId,
-                    serverData
+                  loadPlayerConfig(playerData.arenaId);
+
+                  const requestSync = {};
+                  requestSync.courses = serverData.courses.filter(
+                    id => !(id in playerData)
                   );
+                  requestSync.matches = serverData.matches.filter(
+                    id => !(id in playerData)
+                  );
+                  requestSync.drafts = serverData.drafts.filter(
+                    id => !(id in playerData)
+                  );
+                  requestSync.economy = serverData.economy.filter(
+                    id => !(id in playerData)
+                  );
+
+                  const itemCount =
+                    requestSync.courses.length +
+                    requestSync.matches.length +
+                    requestSync.drafts.length +
+                    requestSync.economy.length;
+
                   if (requestSync) {
                     ipc_send("ipc_log", "Fetch remote player items");
                     httpSyncRequest(requestSync);
