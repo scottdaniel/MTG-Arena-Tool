@@ -68,7 +68,6 @@
     "metadata": "electron \"./scripts/metadata.js\""
   },
   "dependencies": {
-    "@sentry/electron": "^0.17.4",
     "animejs": "^3.0.1",
     "async": "^2.6.1",
     "chart.js": "^2.8.0",
@@ -98,6 +97,7 @@
     "xmlhttprequest": "^1.8.0"
   },
   "devDependencies": {
+    "@sentry/electron": "^0.17.4",
     "acorn": "^6.1.1",
     "devtron": "^1.4.0",
     "electron": "^5.0.1",
