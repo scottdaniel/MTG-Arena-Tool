@@ -912,7 +912,9 @@ function attachMatchData(listItem, match) {
   oppRank.title = formatRank(match.opponent);
   listItem.rightTop.appendChild(oppRank);
 
-  let date = !match.date ? "Unknown date - " : localTimeSince(new Date(match.date));
+  let date = !match.date
+    ? "Unknown date - "
+    : localTimeSince(new Date(match.date));
   // Match time
   const matchTime = createDiv(
     ["list_match_time"],
