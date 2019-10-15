@@ -8,7 +8,9 @@ const {
   NO_DUPES_ART_SETS,
   EVENT_TO_NAME,
   EVENT_TO_FORMAT,
-  RANKED_EVENTS,
+  LIMITED_RANKED_EVENTS,
+  STANDARD_RANKED_EVENTS,
+  SINGLE_MATCH_EVENTS,
   SCRYFALL_LANGUAGE
 } = require("./metadata-constants");
 
@@ -51,7 +53,7 @@ exports.generateMetadata = function(
     locRead = null;
 
     var getText = function(id, language) {
-      return loc[language][id];
+      return loc[language] == undefined ? loc["EN"][id] : loc[language][id];
     };
 
     // Altrough enums must be in other languages ill write them in english
@@ -137,6 +139,7 @@ exports.generateMetadata = function(
         cardObj.dfc = card.linkedFaceType;
         cardObj.collectible = card.isCollectible;
         cardObj.craftable = card.isCraftable;
+        cardObj.booster = false;
 
         let scryfallObject = undefined;
         let scryfallSet = SETS_DATA[set].scryfall;
@@ -195,11 +198,32 @@ exports.generateMetadata = function(
           cardObj.rank_controversy = 0;
         }
 
+        // Use the name if available
+        if (scryfallObject && scryfallObject.printed_name) {
+          cardObj.name = scryfallObject.printed_name;
+        }
         // We did not find any image data on scryfall for this card!
-        // Something may be wrong.
-        if (scryfallObject == undefined) {
+        if (
+          scryfallObject == undefined ||
+          scryfallObject.image_uris == undefined
+        ) {
+          // Try default to english
+          scryfallObject = getScryfallCard(
+            ScryfallCards,
+            "en",
+            scryfallSet,
+            englishName,
+            colllector
+          );
+        }
+
+        if (
+          scryfallObject == undefined ||
+          scryfallObject.image_uris == undefined
+        ) {
+          // English failed..
           console.log(
-            `No images found for [${lang}] ${
+            `No scryfall data for [${lang}] ${
               cardObj.name
             } (${englishName}) - ${scryfallSet} (${cardObj.cid}) grpId: ${
               cardObj.id
@@ -220,9 +244,7 @@ exports.generateMetadata = function(
               ].replace(rep, "");
             });
           }
-          if (scryfallObject.printed_name) {
-            cardObj.name = scryfallObject.printed_name;
-          }
+          cardObj.booster = scryfallObject.booster;
           cardObj.images = scryfallObject.image_uris;
         }
 
@@ -270,7 +292,9 @@ exports.generateMetadata = function(
         events_format: EVENT_TO_FORMAT,
         sets: SETS_DATA,
         abilities: abilities,
-        ranked_events: RANKED_EVENTS,
+        limited_ranked_events: LIMITED_RANKED_EVENTS,
+        standard_ranked_events: STANDARD_RANKED_EVENTS,
+        single_match_events: SINGLE_MATCH_EVENTS,
         archetypes: metagameData
       };
 

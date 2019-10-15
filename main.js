@@ -75,6 +75,10 @@ app.on("ready", () => {
   if (app.isPackaged) {
     startUpdater();
   } else {
+    const Sentry = require("@sentry/electron");
+    Sentry.init({
+      dsn: "https://4ec87bda1b064120a878eada5fc0b10f@sentry.io/1778171"
+    });
     require("devtron").install();
     startApp();
   }
@@ -140,6 +144,8 @@ function startApp() {
   setTimeout(() => {
     overlay = createOverlayWindow();
   }, 500);
+
+  globalShortcut.register("Alt+Shift+D", openDevTools);
 
   appStarted = true;
 
@@ -360,8 +366,14 @@ function setArenaState(state) {
 }
 
 function setSettings(_settings) {
+  try {
+    settings = JSON.parse(_settings);
+  } catch (e) {
+    console.log("MAIN: Error parsing settings");
+    console.log(e);
+    return;
+  }
   console.log("MAIN:  Updating settings");
-  settings = _settings;
 
   // update keyboard shortcuts
   globalShortcut.unregisterAll();
@@ -404,19 +416,20 @@ function updateOverlayVisibility() {
     // hide entire overlay window
     // Add a 1 second timeout for animations
     overlayHideTimeout = setTimeout(function() {
-      overlay.setBounds({ x: -10, y: -10, width: 5, height: 5 });
+      overlay.hide();
     }, 1000);
   } else if (shouldDisplayOverlay && !isOverlayVisible) {
     // display entire overlay window
     clearTimeout(overlayHideTimeout);
     overlayHideTimeout = undefined;
+    overlay.show();
+
     let displayId = settings.overlay_display
       ? settings.overlay_display
       : electron.screen.getPrimaryDisplay().id;
     let display = electron.screen
       .getAllDisplays()
       .filter(d => d.id == displayId)[0];
-
     if (display) {
       overlay.setBounds(display.bounds);
     } else {
@@ -427,12 +440,7 @@ function updateOverlayVisibility() {
 
 function isEntireOverlayVisible() {
   if (!overlay) return false;
-  const bounds = overlay.getBounds();
-  // use a size-based test for visibility because GPU edge cases
-  // require us to avoid the standard isVisible() API
-  // we cannot rely on x/y position values to derive visiblity because
-  // multi-display setups may have negative values for x or y
-  return bounds.width > 10 && bounds.height > 10;
+  return overlay.isVisible();
 }
 
 function getOverlayVisible(settings) {
@@ -454,8 +462,15 @@ process.on("uncaughtException", function(err) {
   //console.log('Current chunk:',  currentChunk);
 });
 
-function onClosed() {
-  mainWindow = null;
+function onBackClosed() {
+  background = null;
+  quit();
+}
+
+function onMainClosed(e) {
+  quit();
+  //hideWindow();
+  //e.preventDefault();
 }
 
 function hideWindow() {
@@ -538,18 +553,19 @@ function createBackgroundWindow() {
     }
   });
   win.loadURL(`file://${__dirname}/window_background/index.html`);
-  win.on("closed", onClosed);
+  win.on("closed", onBackClosed);
 
   return win;
 }
 
 function createOverlayWindow() {
+  let bounds = electron.screen.getPrimaryDisplay().bounds;
   const overlay = new electron.BrowserWindow({
     transparent: true,
-    x: -10,
-    y: -10,
-    width: 5,
-    height: 5,
+    x: bounds.x,
+    y: bounds.y,
+    width: bounds.width,
+    height: bounds.height,
     frame: false,
     show: false,
     resizable: false,
@@ -561,13 +577,13 @@ function createOverlayWindow() {
     }
   });
   overlay.loadURL(`file://${__dirname}/window_overlay_v3/index.html`);
-  overlay.setIgnoreMouseEvents(true, { forward: true });
+  //overlay.setIgnoreMouseEvents(true, { forward: true });
 
   overlay.webContents.once("dom-ready", function() {
     //We need to wait for the overlay to be initialized before we interact with it
-    const display = electron.screen.getPrimaryDisplay();
+    //const display = electron.screen.getPrimaryDisplay();
     // display.workArea does not include the taskbar
-    overlay.setBounds(display.bounds);
+    //overlay.setBounds(display.bounds);
     overlay.webContents.send("settings_updated");
     // only show overlay after its ready
     // TODO does this work with Linux transparency???
@@ -591,14 +607,14 @@ function createMainWindow() {
     }
   });
   win.loadURL(`file://${__dirname}/window_main/index.html`);
-  win.on("closed", onClosed);
+  win.on("closed", onMainClosed);
 
   let iconPath = path.join(__dirname, "icon-tray.png");
   if (process.platform == "linux") {
     iconPath = path.join(__dirname, "icon-tray@8x.png");
   }
   if (process.platform == "win32") {
-    iconPath = path.join(__dirname, "icon-tray@8x.png");
+    iconPath = path.join(__dirname, "icon-256.png");
   }
 
   tray = new Tray(iconPath);
@@ -608,6 +624,12 @@ function createMainWindow() {
       label: "Show",
       click: () => {
         showWindow();
+      }
+    },
+    {
+      label: "Edit Mode",
+      click: () => {
+        overlay.webContents.send("edit");
       }
     },
     {

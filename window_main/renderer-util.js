@@ -10,10 +10,8 @@ const Pikaday = require("pikaday");
 
 const {
   COLORS_ALL,
-  DRAFT_RANKS,
   MANA,
   MANA_COLORS,
-  PACK_SIZES,
   IPC_MAIN,
   IPC_BACKGROUND,
   EASING_DEFAULT
@@ -484,119 +482,6 @@ function colorPieChart(colorCounts, title) {
 }
 
 //
-exports.openDraft = openDraft;
-function openDraft(id, draftPosition = 1) {
-  // console.log("OPEN DRAFT", id, draftPosition);
-  const container = byId("ux_1");
-  container.innerHTML = "";
-  container.classList.remove("flex_item");
-
-  const draft = pd.draft(id);
-  if (!draft) return;
-  const tileGrpid = db.sets[draft.set].tile;
-  if (db.card(tileGrpid)) {
-    changeBackground("", tileGrpid);
-  }
-
-  const packSize = PACK_SIZES[draft.set] || 14;
-  if (draftPosition < 1) draftPosition = packSize * 6;
-  if (draftPosition > packSize * 6) draftPosition = 1;
-  const pa = Math.floor((draftPosition - 1) / 2 / packSize);
-  const pi = Math.floor(((draftPosition - 1) / 2) % packSize);
-  const key = "pack_" + pa + "pick_" + pi;
-  const pack = (draft[key] && draft[key].pack) || [];
-  const pick = (draft[key] && draft[key].pick) || "";
-
-  const d = createDiv(["list_fill"]);
-  container.appendChild(d);
-
-  const top = createDiv(["decklist_top"]);
-  top.appendChild(createDiv(["button", "back"]));
-  top.appendChild(createDiv(["deck_name"], draft.set + " Draft"));
-  top.appendChild(createDiv(["deck_top_colors"]));
-  container.appendChild(top);
-
-  const cont = createDiv(["flex_item"]);
-  cont.style.flexDirection = "column";
-
-  const navCont = createDiv(["draft_nav_container"]);
-  const prevNav = createDiv(["draft_nav_prev"]);
-  prevNav.addEventListener("click", function() {
-    draftPosition -= 1;
-    openDraft(id, draftPosition);
-  });
-  navCont.appendChild(prevNav);
-  const nextNav = createDiv(["draft_nav_next"]);
-  nextNav.addEventListener("click", function() {
-    draftPosition += 1;
-    openDraft(id, draftPosition);
-  });
-  navCont.appendChild(nextNav);
-  cont.appendChild(navCont);
-
-  const title = createDiv(
-    ["draft_title"],
-    "Pack " + (pa + 1) + ", Pick " + (pi + 1)
-  );
-  cont.appendChild(title);
-
-  const slider = createDiv(["slidecontainer"]);
-  const sliderInput = createInput(["slider"], "", {
-    type: "range",
-    min: 1,
-    max: packSize * 6,
-    step: 1,
-    value: draftPosition
-  });
-  sliderInput.addEventListener("input", function() {
-    const pa = Math.floor((this.value - 1) / 2 / packSize);
-    const pi = Math.floor(((this.value - 1) / 2) % packSize);
-    title.innerHTML = "Pack " + (pa + 1) + ", Pick " + (pi + 1);
-  });
-  sliderInput.addEventListener("change", function() {
-    draftPosition = parseInt(this.value);
-    openDraft(id, draftPosition);
-  });
-  slider.appendChild(sliderInput);
-  cont.appendChild(slider);
-
-  const pdiv = createDiv(["draft_pack_container"]);
-  cont.appendChild(pdiv);
-
-  pack.forEach(grpId => {
-    const card = db.card(grpId);
-    const d = createDiv(["draft_card"]);
-    d.style.width = pd.cardsSize + "px";
-
-    const img = createImg(["draft_card_img"], "", {
-      src: getCardImage(card)
-    });
-    img.style.width = pd.cardsSize + "px";
-    if (grpId === pick && draftPosition % 2 === 0) {
-      img.classList.add("draft_card_picked");
-    }
-    addCardHover(img, card);
-    d.appendChild(img);
-
-    d.appendChild(createDiv(["draft_card_rating"], DRAFT_RANKS[card.rank]));
-
-    pdiv.appendChild(d);
-  });
-
-  container.appendChild(cont);
-
-  $$(".back")[0].addEventListener("click", () => {
-    changeBackground("default");
-    anime({
-      targets: ".moving_ux",
-      left: 0,
-      easing: EASING_DEFAULT,
-      duration: 350
-    });
-  });
-}
-
-//
 exports.openActionLog = openActionLog;
 function openActionLog(actionLogId) {
   const conatiner = byId("ux_2");
@@ -706,9 +591,8 @@ function changeBackground(arg = "default", grpId = 0) {
       topArtist.innerHTML = "";
       mainWrapper.style.backgroundImage = "url(" + pd.settings.back_url + ")";
     } else {
-      topArtist.innerHTML = "Ghitu Lavarunner by Jesper Ejsing";
-      mainWrapper.style.backgroundImage =
-        "url(../images/Ghitu-Lavarunner-Dominaria-MtG-Art.jpg)";
+      topArtist.innerHTML = "Bedevil by Seb Seb McKinnon";
+      mainWrapper.style.backgroundImage = "url(../images/Bedevil-Art.jpg)";
     }
   } else if (_card) {
     mainWrapper.style.backgroundImage = `url(${getCardArtCrop(_card)})`;
@@ -1028,13 +912,13 @@ function attachMatchData(listItem, match) {
   oppRank.title = formatRank(match.opponent);
   listItem.rightTop.appendChild(oppRank);
 
+  let date = !match.date
+    ? "Unknown date - "
+    : localTimeSince(new Date(match.date));
   // Match time
   const matchTime = createDiv(
     ["list_match_time"],
-    localTimeSince(new Date(match.date)) +
-      " " +
-      toMMSS(match.duration) +
-      " long"
+    date + " " + toMMSS(match.duration) + " long"
   );
   listItem.rightBottom.appendChild(matchTime);
 
@@ -1114,18 +998,19 @@ function attachDraftData(listItem, draft) {
       cont,
       ["One day", "One week", "One month", "Never"],
       "",
-      () => draftShareLink(draft.id),
+      () => draftShareLink(draft.id, draft),
       "expire_select"
     );
 
     openDialog(cont);
-    draftShareLink(draft.id);
+    draftShareLink(draft.id, draft);
   });
   listItem.right.after(replayShareButton);
 }
 
-function draftShareLink(id) {
+function draftShareLink(id, draft) {
   const shareExpire = byId("expire_select").value;
+  let draftData = JSON.stringify(draft);
   let expire = 0;
   switch (shareExpire) {
     case "One day":
@@ -1145,5 +1030,5 @@ function draftShareLink(id) {
       break;
   }
   showLoadingBars();
-  ipcSend("request_draft_link", { expire, id });
+  ipcSend("request_draft_link", { expire, id, draftData });
 }

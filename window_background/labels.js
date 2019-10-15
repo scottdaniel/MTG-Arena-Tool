@@ -115,9 +115,9 @@ function onLabelOutLogInfo(entry, json) {
     var time = payload.secondsCount;
     if (mid == currentMatch.matchId) {
       gameNumberCompleted = payload.gameNumber;
-      currentMatch.matchTime += time;
 
       let game = {};
+      game.time = time;
       game.winner = payload.winningTeamId;
       // Just a shortcut for future aggregations
       game.win = payload.winningTeamId == currentMatch.player.seat;
@@ -231,6 +231,10 @@ function onLabelOutLogInfo(entry, json) {
       game.landsInLibrary = landsInLibrary;
       game.libraryLands = libraryLands;
 
+      currentMatch.matchTime = matchGameStats.reduce(
+        (acc, cur) => acc + cur.time,
+        0
+      );
       matchGameStats[gameNumberCompleted - 1] = game;
 
       saveMatch(mid);

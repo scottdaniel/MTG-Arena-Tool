@@ -1,3 +1,135 @@
+## <small>2.12.2 (2019-10-14)</small>
+
+* bugfix ([c84edd1](https://github.com/Manuel-777/MTG-Arena-Tool/commit/c84edd1))
+* disable transaprency debug ([f16e421](https://github.com/Manuel-777/MTG-Arena-Tool/commit/f16e421))
+* extend timeout ([5ffaa96](https://github.com/Manuel-777/MTG-Arena-Tool/commit/5ffaa96)), closes [#631](https://github.com/Manuel-777/MTG-Arena-Tool/issues/631)
+* move sentry dependency to dev-only ([5b79b15](https://github.com/Manuel-777/MTG-Arena-Tool/commit/5b79b15))
+* prettier ([b4a6c08](https://github.com/Manuel-777/MTG-Arena-Tool/commit/b4a6c08))
+* track card types in zones ([0cf53de](https://github.com/Manuel-777/MTG-Arena-Tool/commit/0cf53de))
+* Unknown dates ([479827a](https://github.com/Manuel-777/MTG-Arena-Tool/commit/479827a))
+
+
+
+## <small>2.12.1 (2019-10-13)</small>
+
+* Added an Advanced Filter : Owned quantity  ([120c1ec](https://github.com/Manuel-777/MTG-Arena-Tool/commit/120c1ec))
+* bullet behaviour and reset filters ([24445f2](https://github.com/Manuel-777/MTG-Arena-Tool/commit/24445f2))
+* filter non booster sets ([8e72382](https://github.com/Manuel-777/MTG-Arena-Tool/commit/8e72382))
+* hide overlay if not visible ([6f9273f](https://github.com/Manuel-777/MTG-Arena-Tool/commit/6f9273f))
+* new events ([c37e83b](https://github.com/Manuel-777/MTG-Arena-Tool/commit/c37e83b))
+* only in boosters toggle ([cec0a2f](https://github.com/Manuel-777/MTG-Arena-Tool/commit/cec0a2f))
+* testing Sentry ([ae747ed](https://github.com/Manuel-777/MTG-Arena-Tool/commit/ae747ed))
+* Update collection.js ([d52f2da](https://github.com/Manuel-777/MTG-Arena-Tool/commit/d52f2da))
+* Update main.js ([8a41db3](https://github.com/Manuel-777/MTG-Arena-Tool/commit/8a41db3))
+* Update metadata-constants.js ([b02f8c2](https://github.com/Manuel-777/MTG-Arena-Tool/commit/b02f8c2))
+
+
+
+## 2.12.0 (2019-10-12)
+
+* add class once ([f16d0c6](https://github.com/Manuel-777/MTG-Arena-Tool/commit/f16d0c6))
+* add sort by wildcards ([cbf5e6e](https://github.com/Manuel-777/MTG-Arena-Tool/commit/cbf5e6e))
+* add stats panel frequency chart and group by toggle ([75c0529](https://github.com/Manuel-777/MTG-Arena-Tool/commit/75c0529))
+* add win every card event ([5300d4d](https://github.com/Manuel-777/MTG-Arena-Tool/commit/5300d4d))
+* Added resetting data instructions ([1f0a68b](https://github.com/Manuel-777/MTG-Arena-Tool/commit/1f0a68b))
+* Change visibility size check ([56c2f46](https://github.com/Manuel-777/MTG-Arena-Tool/commit/56c2f46)), closes [#601](https://github.com/Manuel-777/MTG-Arena-Tool/issues/601)
+* Do not count cards not in boosters ([87ae453](https://github.com/Manuel-777/MTG-Arena-Tool/commit/87ae453))
+* Edit mode in tray ([9e83dd4](https://github.com/Manuel-777/MTG-Arena-Tool/commit/9e83dd4))
+* Eldraine home ([f76c556](https://github.com/Manuel-777/MTG-Arena-Tool/commit/f76c556))
+* Fix gem icon display for drafted duplicate rares and mythics ([66a52a2](https://github.com/Manuel-777/MTG-Arena-Tool/commit/66a52a2)), closes [#593](https://github.com/Manuel-777/MTG-Arena-Tool/issues/593)
+* fix tiling issues ([0b6dc25](https://github.com/Manuel-777/MTG-Arena-Tool/commit/0b6dc25))
+* format ([850ba6a](https://github.com/Manuel-777/MTG-Arena-Tool/commit/850ba6a))
+* get missing text from scryfall ([cc03f49](https://github.com/Manuel-777/MTG-Arena-Tool/commit/cc03f49))
+* include booster data ([6eed44f](https://github.com/Manuel-777/MTG-Arena-Tool/commit/6eed44f))
+* include chinese ([e0c9cf5](https://github.com/Manuel-777/MTG-Arena-Tool/commit/e0c9cf5))
+* linux fix ([f8def1e](https://github.com/Manuel-777/MTG-Arena-Tool/commit/f8def1e))
+* metadata bad cloning ([4662782](https://github.com/Manuel-777/MTG-Arena-Tool/commit/4662782))
+* move overlay mouse fix to source ([2348504](https://github.com/Manuel-777/MTG-Arena-Tool/commit/2348504))
+* overlay resize icon ([2e41a50](https://github.com/Manuel-777/MTG-Arena-Tool/commit/2e41a50))
+* prettier ([116f765](https://github.com/Manuel-777/MTG-Arena-Tool/commit/116f765))
+* register window in interval ([0c55e55](https://github.com/Manuel-777/MTG-Arena-Tool/commit/0c55e55))
+* serialize playerData IPC ([19e5464](https://github.com/Manuel-777/MTG-Arena-Tool/commit/19e5464))
+* serialize settings IPC ([0f33274](https://github.com/Manuel-777/MTG-Arena-Tool/commit/0f33274))
+* set completion tables ([a927a41](https://github.com/Manuel-777/MTG-Arena-Tool/commit/a927a41))
+* Update electron-transparency-mouse-fix.js ([6c9a8f4](https://github.com/Manuel-777/MTG-Arena-Tool/commit/6c9a8f4))
+* Update main.js ([c1e7a56](https://github.com/Manuel-777/MTG-Arena-Tool/commit/c1e7a56))
+* Update metadata.js ([fa0a785](https://github.com/Manuel-777/MTG-Arena-Tool/commit/fa0a785))
+* Update metadata.js ([cb14d82](https://github.com/Manuel-777/MTG-Arena-Tool/commit/cb14d82))
+* Update metadata.js ([0352591](https://github.com/Manuel-777/MTG-Arena-Tool/commit/0352591))
+* Update settings.js ([b413784](https://github.com/Manuel-777/MTG-Arena-Tool/commit/b413784))
+* use booster count as better source ([7ee8c75](https://github.com/Manuel-777/MTG-Arena-Tool/commit/7ee8c75))
+
+
+
+## 2.11.0 (2019-09-30)
+
+* Bedevil key art ([3fa8fd8](https://github.com/Manuel-777/MTG-Arena-Tool/commit/3fa8fd8))
+* bump version ([0e0d060](https://github.com/Manuel-777/MTG-Arena-Tool/commit/0e0d060))
+* fix current ranked events ([1f8ca65](https://github.com/Manuel-777/MTG-Arena-Tool/commit/1f8ca65))
+* remove chinese ([7dd2e8c](https://github.com/Manuel-777/MTG-Arena-Tool/commit/7dd2e8c))
+* share decks ([128a27d](https://github.com/Manuel-777/MTG-Arena-Tool/commit/128a27d))
+* Show http error codes ([b75f3f2](https://github.com/Manuel-777/MTG-Arena-Tool/commit/b75f3f2)), closes [#598](https://github.com/Manuel-777/MTG-Arena-Tool/issues/598)
+* Show play events in explore ([ca6dac0](https://github.com/Manuel-777/MTG-Arena-Tool/commit/ca6dac0))
+* sync deck tags ([534dc12](https://github.com/Manuel-777/MTG-Arena-Tool/commit/534dc12))
+* update mono colored precon deck names ([59a1877](https://github.com/Manuel-777/MTG-Arena-Tool/commit/59a1877))
+* Update renderer-util.js ([5f96927](https://github.com/Manuel-777/MTG-Arena-Tool/commit/5f96927))
+* Update settings.js ([fad1c5a](https://github.com/Manuel-777/MTG-Arena-Tool/commit/fad1c5a))
+* fix(set): correct ELD date in constants file ([b432615](https://github.com/Manuel-777/MTG-Arena-Tool/commit/b432615))
+* fix(sets): Correct ELD release date ([7a9ea5c](https://github.com/Manuel-777/MTG-Arena-Tool/commit/7a9ea5c))
+
+
+
+## <small>2.10.3 (2019-09-26)</small>
+
+* add new historic play constant ([23e2f0c](https://github.com/Manuel-777/MTG-Arena-Tool/commit/23e2f0c))
+* allow debug pre-login ([007f9e1](https://github.com/Manuel-777/MTG-Arena-Tool/commit/007f9e1))
+* background handles Log.BI like Log.Info ([259bcd0](https://github.com/Manuel-777/MTG-Arena-Tool/commit/259bcd0))
+* bugfix metadata script, disable chinese ([c490d55](https://github.com/Manuel-777/MTG-Arena-Tool/commit/c490d55))
+* bugfix practice matches ([b8e917f](https://github.com/Manuel-777/MTG-Arena-Tool/commit/b8e917f))
+* bugfix single_match_events ([d41d3e5](https://github.com/Manuel-777/MTG-Arena-Tool/commit/d41d3e5))
+* Eldraine set review ([356ca24](https://github.com/Manuel-777/MTG-Arena-Tool/commit/356ca24))
+* fix game time tracking ([774f437](https://github.com/Manuel-777/MTG-Arena-Tool/commit/774f437))
+* metadata event constants ([cc7dd24](https://github.com/Manuel-777/MTG-Arena-Tool/commit/cc7dd24))
+* more constant updates ([200e41f](https://github.com/Manuel-777/MTG-Arena-Tool/commit/200e41f))
+* more format constants ([056614b](https://github.com/Manuel-777/MTG-Arena-Tool/commit/056614b))
+* new battle pass name ([6cdd3cc](https://github.com/Manuel-777/MTG-Arena-Tool/commit/6cdd3cc))
+* refactor event metadata constants ([a463ef9](https://github.com/Manuel-777/MTG-Arena-Tool/commit/a463ef9))
+* share drafts not in server ([01b02f8](https://github.com/Manuel-777/MTG-Arena-Tool/commit/01b02f8))
+* update default database ([2eef449](https://github.com/Manuel-777/MTG-Arena-Tool/commit/2eef449))
+* update filter text ([fa53cef](https://github.com/Manuel-777/MTG-Arena-Tool/commit/fa53cef))
+* Update metadata.js ([4b84764](https://github.com/Manuel-777/MTG-Arena-Tool/commit/4b84764))
+* Update metadata.js ([a93cb53](https://github.com/Manuel-777/MTG-Arena-Tool/commit/a93cb53))
+* Update TROUBLESHOOTING.md ([2472ecd](https://github.com/Manuel-777/MTG-Arena-Tool/commit/2472ecd))
+* Update TROUBLESHOOTING.md ([960f6ea](https://github.com/Manuel-777/MTG-Arena-Tool/commit/960f6ea))
+
+
+
+## <small>2.10.2 (2019-09-22)</small>
+
+* hide overlay until player data is loaded ([62a249b](https://github.com/Manuel-777/MTG-Arena-Tool/commit/62a249b))
+* prevent default issues ([57f9d51](https://github.com/Manuel-777/MTG-Arena-Tool/commit/57f9d51))
+
+
+
+## <small>2.10.1 (2019-09-22)</small>
+
+* bugfix settings page log locale format ux ([55559d9](https://github.com/Manuel-777/MTG-Arena-Tool/commit/55559d9))
+* draft arrows navigation ([0e3f247](https://github.com/Manuel-777/MTG-Arena-Tool/commit/0e3f247))
+* events and history page use draft-details ([2fb60e7](https://github.com/Manuel-777/MTG-Arena-Tool/commit/2fb60e7))
+* initial draft-details file cloned from render-util ([9eeefcc](https://github.com/Manuel-777/MTG-Arena-Tool/commit/9eeefcc))
+* latest version ([4cf26b8](https://github.com/Manuel-777/MTG-Arena-Tool/commit/4cf26b8))
+* not update on first pass ([603ece0](https://github.com/Manuel-777/MTG-Arena-Tool/commit/603ece0))
+* onClose main window ([bec80a2](https://github.com/Manuel-777/MTG-Arena-Tool/commit/bec80a2)), closes [#584](https://github.com/Manuel-777/MTG-Arena-Tool/issues/584)
+* override close ([defeccb](https://github.com/Manuel-777/MTG-Arena-Tool/commit/defeccb))
+* read deck from GRE ([349fd3c](https://github.com/Manuel-777/MTG-Arena-Tool/commit/349fd3c))
+* remove deprecated code ([38f2bca](https://github.com/Manuel-777/MTG-Arena-Tool/commit/38f2bca))
+* update documentation links ([41b437f](https://github.com/Manuel-777/MTG-Arena-Tool/commit/41b437f))
+* Update main.js ([d7f2dcf](https://github.com/Manuel-777/MTG-Arena-Tool/commit/d7f2dcf))
+* Update main.js ([fab9427](https://github.com/Manuel-777/MTG-Arena-Tool/commit/fab9427))
+* upgrade date-fns to 2.2.1 ([0c21ab0](https://github.com/Manuel-777/MTG-Arena-Tool/commit/0c21ab0))
+
+
+
 ## 2.10.0 (2019-09-14)
 
 * add change language setting ([f106ed2](https://github.com/Manuel-777/MTG-Arena-Tool/commit/f106ed2))

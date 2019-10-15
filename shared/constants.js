@@ -8,6 +8,8 @@ exports.BLUE = 2;
 exports.BLACK = 3;
 exports.RED = 4;
 exports.GREEN = 5;
+exports.COLORLESS = 6;
+exports.MULTI = 7;
 
 // Magic constant to represent auth token in form
 exports.HIDDEN_PW = "********";
@@ -608,11 +610,15 @@ exports.FACE_ADVENTURE_MAIN = 8;
 exports.FORMATS = {
   Standard: "Standard",
   TraditionalStandard: "Traditional Standard",
+  Historic: "Historic",
+  TraditionalHistoric: "Traditional Historic",
+  Renewal: "Standard 2020",
   Draft: "Draft",
   Sealed: "Sealed",
   Pauper: "Pauper",
   Singleton: "Singleton",
   Cascade: "Cascade",
+  MoreBans: "Standard Shakeup",
   Pandemonium: "Pandemonium",
   NoInstants: "No Instants",
   DirectGame: "Direct Game",

@@ -16,7 +16,12 @@ const {
 } = require("../shared/constants");
 const db = require("../shared/database");
 const pd = require("../shared/player-data");
-const { getReadableEvent, getRecentDeckName } = require("../shared/util");
+const {
+  getReadableEvent,
+  getRecentDeckName,
+  get_deck_missing,
+  getBoosterCountEstimate
+} = require("../shared/util");
 const { normalApproximationInterval } = require("../shared/stats-fns");
 
 // Default filter values
@@ -26,19 +31,12 @@ const DEFAULT_TAG = "All Tags";
 const DEFAULT_ARCH = "All Archetypes";
 // Ranked constants
 const RANKED_CONST = "Ranked Constructed";
-const RANKED_DRAFT = "Ranked Limited (Current)";
+const RANKED_DRAFT = "Ranked Limited";
 // Draft-related constants
 const ALL_DRAFTS = "All Drafts";
 const DRAFT_REPLAYS = "Draft Replays";
 // Event-related constant
 const ALL_EVENT_TRACKS = "All Event Tracks";
-const SINGLE_MATCH_EVENTS = [
-  "AIBotMatch",
-  "DirectGame",
-  "Play",
-  "Ladder",
-  "Traditional_Ladder"
-];
 
 // Archetype constants
 const NO_ARCH = "No Archetype";
@@ -56,6 +54,9 @@ class Aggregator {
     this.compareDecks = this.compareDecks.bind(this);
     this.compareDecksByWins = this.compareDecksByWins.bind(this);
     this.compareDecksByWinrates = this.compareDecksByWinrates.bind(this);
+    this.compareDecksByIncompleteness = this.compareDecksByIncompleteness.bind(
+      this
+    );
     this.compareEvents = this.compareEvents.bind(this);
     this.updateFilters(filters);
   }
@@ -202,9 +203,11 @@ class Aggregator {
     return (
       (eventId === DEFAULT_EVENT && _eventId !== "AIBotMatch") ||
       (eventId === ALL_EVENT_TRACKS &&
-        !SINGLE_MATCH_EVENTS.includes(_eventId)) ||
-      (eventId === RANKED_CONST && CONSTRUCTED_EVENTS.includes(_eventId)) ||
-      (eventId === RANKED_DRAFT && db.ranked_events.includes(_eventId)) ||
+        !db.single_match_events.includes(_eventId)) ||
+      (eventId === RANKED_CONST &&
+        db.standard_ranked_events.includes(_eventId)) ||
+      (eventId === RANKED_DRAFT &&
+        db.limited_ranked_events.includes(_eventId)) ||
       eventId === _eventId
     );
   }
@@ -332,9 +335,9 @@ class Aggregator {
             rank
           };
         }
-        if (CONSTRUCTED_EVENTS.includes(match.eventId)) {
+        if (db.standard_ranked_events.includes(match.eventId)) {
           statsToUpdate.push(this.constructedStats[rank]);
-        } else if (db.ranked_events.includes(match.eventId)) {
+        } else if (db.limited_ranked_events.includes(match.eventId)) {
           statsToUpdate.push(this.limitedStats[rank]);
         }
       }
@@ -467,6 +470,25 @@ class Aggregator {
     );
   }
 
+  compareDecksByIncompleteness(a, b) {
+    const aMissing = get_deck_missing(a);
+    const bMissing = get_deck_missing(b);
+    const aMissingBoosters = getBoosterCountEstimate(aMissing);
+    const bMissingBoosters = getBoosterCountEstimate(bMissing);
+
+    const aName = getRecentDeckName(a.id);
+    const bName = getRecentDeckName(b.id);
+
+    return (
+      bMissingBoosters - aMissingBoosters ||
+      bMissing.mythic - aMissing.mythic ||
+      bMissing.rare - aMissing.rare ||
+      bMissing.uncommon - aMissing.uncommon ||
+      bMissing.common - aMissing.common ||
+      aName.localeCompare(bName)
+    );
+  }
+
   compareEvents(a, b) {
     const aDate = this.eventLastPlayed[a];
     const bDate = this.eventLastPlayed[b];
@@ -498,7 +520,7 @@ class Aggregator {
       ALL_EVENT_TRACKS,
       RANKED_DRAFT,
       ...this._eventIds.filter(
-        eventId => !SINGLE_MATCH_EVENTS.includes(eventId)
+        eventId => !db.single_match_events.includes(eventId)
       )
     ];
   }

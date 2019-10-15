@@ -135,7 +135,7 @@ function openMatch(id) {
   mainDiv.appendChild(flc);
 
   const fld = createDiv(["flex_item"]);
-  const isLimited = db.ranked_events.includes(match.eventId);
+  const isLimited = db.limited_ranked_events.includes(match.eventId);
   renderSeat(
     fld,
     match.id,

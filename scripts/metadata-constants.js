@@ -17,37 +17,47 @@ exports.EVENT_TO_NAME = {
   NPE: "New Player Experience",
   DirectGame: "Direct Game",
   Constructed_Event: "Constructed",
-  Ladder: "Ranked",
+  Constructed_Event_2020: "Standard Event",
+  Ladder: "Standard Ranked",
   Traditional_Cons_Event: "Traditional Constructed",
-  Constructed_BestOf3: "Traditional Play",
-  Traditional_Ladder: "Traditional Ranked",
+  Traditional_Cons_Event_2020: "Traditional Standard Event",
+  Constructed_BestOf3: "Traditional Standard Play",
+  Traditional_Ladder: "Traditional Standard Ranked",
   Future_Play_20190909: "Future Play",
   Future_Ranked_20190909: "Future Ranked",
+  Historic_Play: "Historic Play",
 
   CompDraft_RNA_20190117: "Traditional Draft RNA",
   CompDraft_WAR_20190425: "Traditional Draft WAR",
   CompDraft_M20_20190708: "Traditional Draft M20",
+  CompDraft_ELD_20190930: "Traditional Draft ELD",
 
   Sealed_M20_20190630: "Sealed M20",
   Sealed_Ravnica_20190816: "Sealed Ravnica",
   Sealed_WAR_20190909: "Sealed WAR",
+  Sealed_ELD_20190923: "Sealed ELD",
 
+  QuickDraft_RNA_20190426: "Ranked Draft RNA 04/19",
   QuickDraft_RNA_20190621: "Ranked Draft RNA 06/19",
   QuickDraft_WAR_20190510: "Ranked Draft WAR 05/19",
-  QuickDraft_DOM_20190524: "Ranked Draft DOM",
+  QuickDraft_DOM_20190524: "Ranked Draft DOM 05/19",
   QuickDraft_WAR_20190607: "Ranked Draft WAR 06/19",
   QuickDraft_WAR_20190705: "Ranked Draft WAR 07/19",
-  QuickDraft_M20_20190719: "Ranked Draft M20",
+  QuickDraft_M20_20190719: "Ranked Draft M20 07/19",
   QuickDraft_RNA_20190802: "Ranked Draft RNA 08/19",
-  QuickDraft_WAR_20190816: "Ranked Draft WAR",
-  QuickDraft_GRN_20190829: "Ranked Draft GRN",
-  QuickDraft_RNA_20190913: "Ranked Draft RNA",
+  QuickDraft_WAR_20190816: "Ranked Draft WAR 08/19",
+  QuickDraft_GRN_20190829: "Ranked Draft GRN 08/19",
+  QuickDraft_RNA_20190913: "Ranked Draft RNA 09/19",
+  QuickDraft_ELD_20191011: "Ranked Draft ELD 10/19",
   Cascade_Constructed_20190516: "Cascade Constructed",
   Omniscience_Draft_20190830: "Omniscience Draft",
 
   Esports_Qualifier_20190525: "Mythic Qualifier Weekend 05/19",
   Esports_Qualifier_20190817: "Mythic Qualifier Weekend 08/19",
-  CompCons_Metagame_Challenge_20190712: "Metagame Challenge",
+  CompCons_Metagame_Challenge_20190712: "Metagame Challenge 07/19",
+  PlayAnyDeck_20190926: "Play Any Deck - Standard",
+  WinEveryCard_20191005: "Win Every Card - Standard",
+  CompCons_Metagame_Challenge_20191004: "Metagame Challenge 10/19",
 
   Precon_Brawl_ELD: "Precon Brawl",
   Lore_WAR1_Momir: "Ravnica at War I - Momir",
@@ -65,10 +75,13 @@ exports.EVENT_TO_NAME = {
 
 exports.EVENT_TO_FORMAT = {
   Play: "Standard",
+  Historic_Play: "Historic",
   DirectGame: "Direct Game",
   Constructed_Event: "Standard",
+  Constructed_Event_2020: "Standard",
   Ladder: "Standard",
   Traditional_Cons_Event: "Traditional Standard",
+  Traditional_Cons_Event_2020: "Traditional Standard",
   Constructed_BestOf3: "Traditional Standard",
   Traditional_Ladder: "Traditional Standard",
   Future_Play_20190909: "Future",
@@ -77,10 +90,12 @@ exports.EVENT_TO_FORMAT = {
   CompDraft_RNA_20190117: "Draft RNA",
   CompDraft_WAR_20190425: "Draft WAR",
   CompDraft_M20_20190708: "Draft M20",
+  CompDraft_ELD_20190930: "Draft ELD",
 
   Sealed_M20_20190630: "Sealed M20",
   Sealed_Ravnica_20190816: "Sealed Ravnica",
   Sealed_WAR_20190909: "Sealed WAR",
+  Sealed_ELD_20190923: "Sealed ELD",
 
   QuickDraft_RNA_20190426: "Draft RNA",
   QuickDraft_RNA_20190621: "Draft RNA",
@@ -93,6 +108,7 @@ exports.EVENT_TO_FORMAT = {
   QuickDraft_WAR_20190816: "Draft WAR",
   QuickDraft_GRN_20190829: "Draft GRN",
   QuickDraft_RNA_20190913: "Draft RNA",
+  QuickDraft_ELD_20191011: "Draft ELD",
 
   Cascade_Constructed_20190516: "Cascade Constructed",
   Omniscience_Draft_20190830: "Draft M20",
@@ -100,6 +116,9 @@ exports.EVENT_TO_FORMAT = {
   Esports_Qualifier_20190525: "Traditional Standard",
   Esports_Qualifier_20190817: "Traditional Standard",
   CompCons_Metagame_Challenge_20190712: "Traditional Standard",
+  PlayAnyDeck_20190926: "Standard",
+  WinEveryCard_20191005: "Standard",
+  CompCons_Metagame_Challenge_20191004: "Traditional Standard",
 
   Precon_Brawl_ELD: "Brawl",
   Lore_WAR1_Momir: "Momir",
@@ -115,10 +134,23 @@ exports.EVENT_TO_FORMAT = {
   Giant_Monsters_20190719: "Giant Monsters"
 };
 
-exports.RANKED_EVENTS = [
+// These are the current events in the ranked ladder
+exports.LIMITED_RANKED_EVENTS = [
   "QuickDraft_M20_20190719",
   "QuickDraft_GRN_20190829",
-  "QuickDraft_RNA_20190913"
+  "QuickDraft_RNA_20190913",
+  "QuickDraft_ELD_20191011"
+];
+
+exports.STANDARD_RANKED_EVENTS = ["Ladder", "Traditional_Ladder"];
+
+exports.SINGLE_MATCH_EVENTS = [
+  "AIBotMatch",
+  "NPE",
+  "DirectGame",
+  "Ladder",
+  "Constructed_BestOf3",
+  "Traditional_Ladder"
 ];
 
 /*
@@ -252,7 +284,7 @@ exports.SETS_DATA = {
     code: "ELD",
     arenacode: "ELD",
     tile: 70338,
-    release: "2016-10-04"
+    release: "2019-10-04"
   },
   // Other sets below
   "Mythic Edition": {
@@ -618,6 +650,11 @@ exports.RANKS_SHEETS = [
   {
     setCode: "m20",
     sheet: "1BAPtQv4U9KUAtVzkccJlPS8cb0s_uOcGEDORip5uaQg",
+    page: "Staging%20Sheet"
+  },
+  {
+    setCode: "eld",
+    sheet: "1B-bEUGANnGFPB4zW-vAV8zHjUZINwLU8Qq1sVlgIdpU",
     page: "Staging%20Sheet"
   }
 ];

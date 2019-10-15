@@ -24,11 +24,11 @@ const {
   getTagColor,
   ipcSend,
   makeResizable,
-  openDraft,
   resetMainContainer,
   showColorpicker,
   toggleArchived
 } = require("./renderer-util");
+const { openDraft } = require("./draft-details");
 const { openMatch } = require("./match-details");
 
 const byId = id => document.getElementById(id);

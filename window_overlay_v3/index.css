@@ -11,14 +11,13 @@ body {
     width: 100% !important;
 }
 
-.click-on {
-    pointer-events: all;
-}
-.click-through {
-    pointer-events: none;
-}
+.click-on      {pointer-events: all}
+.click-through {pointer-events: none}
 
 .overlay_master_wrapper {
+    /* Debug;
+    background-color: rgba(255, 0, 0, 0.11);
+    */
     width: 100%;
     height: 100%;
 }
@@ -117,7 +116,7 @@ body {
 }
 
 .main_hover {
-    margin-bottom: 70px !important;
+    margin-bottom: 0px !important;
     margin-right: 0px !important;
 }
 
@@ -127,8 +126,10 @@ body {
     max-width: 300px;
     opacity: 0;
     display: block;
+    /*
     margin-left: auto;
     margin-right: auto;
+    */
     -webkit-border-radius: 4.75% / 3.5%;
     box-shadow: 0px 15px 30px 0px rgba(0, 0, 0, 0.5);
     -webkit-transition: opacity 0.2s ease-in;
@@ -136,12 +137,10 @@ body {
 
 .overlay_hover_container {
     justify-content: center;
-    pointer-events: none;
     position: absolute;
+    border-radius: 4px;
     display: flex;
-    bottom: 0;
     float: right;
-    width: 100%;
     z-index: 50;
 }
 
@@ -540,6 +539,7 @@ body {
     margin: auto auto auto 8px;
     border-radius: 50%;
     cursor: pointer;
+    background-image: url(../images/edit_icon.png);
 }
 
 .top_nav_wrapper {

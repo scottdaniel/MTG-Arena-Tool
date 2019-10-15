@@ -16,6 +16,10 @@ if (!remote.app.isPackaged) {
     }
   });
   require("devtron").install();
+  const Sentry = require("@sentry/electron");
+  Sentry.init({
+    dsn: "https://4ec87bda1b064120a878eada5fc0b10f@sentry.io/1778171"
+  });
 }
 
 const _ = require("lodash");
@@ -46,6 +50,7 @@ const {
   MAIN_DECKS
 } = require("../shared/constants");
 const {
+  getDateFormat,
   ipc_send,
   setData,
   unleakString,
@@ -275,12 +280,17 @@ ipc.on("unlink_discord", function(event, obj) {
 
 //
 ipc.on("request_draft_link", function(event, obj) {
-  httpApi.httpDraftShareLink(obj.id, obj.expire);
+  httpApi.httpDraftShareLink(obj.id, obj.expire, obj.draftData);
 });
 
 //
 ipc.on("request_log_link", function(event, obj) {
   httpApi.httpLogShareLink(obj.id, obj.log, obj.expire);
+});
+
+//
+ipc.on("request_deck_link", function(event, obj) {
+  httpApi.httpDeckShareLink(obj.deckString, obj.expire);
 });
 
 //
@@ -423,6 +433,7 @@ ipc.on("edit_tag", (event, arg) => {
   const { tag, color } = arg;
   setData({ tags_colors: { ...playerData.tags_colors, [tag]: color } });
   store.set("tags_colors." + tag, color);
+  sendSettings();
 });
 
 ipc.on("delete_tag", (event, arg) => {
@@ -632,6 +643,12 @@ function syncUserData(data) {
     });
   if (debugLog || !firstPass) store.set("draft_index", draft_index);
 
+  if (data.settings.tags_colors) {
+    let newTags = data.settings.tags_colors;
+    setData({ tags_colors: { ...newTags } });
+    store.set("tags_colors", newTags);
+  }
+
   setData({ courses_index, draft_index, economy_index, matches_index });
 }
 
@@ -641,7 +658,7 @@ function syncUserData(data) {
 function syncSettings(dirtySettings = {}, refresh = debugLog || !firstPass) {
   const settings = { ...playerData.settings, ...dirtySettings };
   setData({ settings }, refresh);
-  if (refresh) ipc_send("set_settings", settings);
+  if (refresh) ipc_send("set_settings", JSON.stringify(settings));
 }
 
 // Set a new log URI
@@ -688,6 +705,12 @@ function startWatchingLog() {
   });
 }
 
+function sendSettings() {
+  let tags_colors = playerData.tags_colors;
+  let settingsData = { tags_colors };
+  httpApi.httpSetSettings(settingsData);
+}
+
 let skipMatch = false;
 
 function onLogEntryFound(entry) {
@@ -715,6 +738,7 @@ function onLogEntryFound(entry) {
     if ((firstPass && !playerData.settings.skip_firstpass) || !firstPass) {
       try {
         switch (entry.label) {
+          case "Log.BI":
           case "Log.Info":
             if (entry.arrow == "==>") {
               json = entry.json();
@@ -948,7 +972,12 @@ function onLogEntryFound(entry) {
           default:
             break;
         }
-        setData({ last_log_timestamp: entry.timestamp });
+        if (entry.timestamp) {
+          setData({
+            last_log_timestamp: entry.timestamp,
+            last_log_format: getDateFormat(entry.timestamp)
+          });
+        }
       } catch (err) {
         console.log(entry.label, entry.position, entry.json());
         console.error(err);
@@ -1598,12 +1627,15 @@ function saveCourse(json) {
 
 //
 function saveMatch(id, matchEndTime) {
-  //console.log(currentMatch.matchId, matchId);
+  //console.log(currentMatch.matchId, id);
   if (!currentMatch || !currentMatch.matchTime || currentMatch.matchId !== id) {
     return;
   }
   const existingMatch = playerData.match(id) || {};
   const match = completeMatch(existingMatch, currentMatch, matchEndTime);
+  if (!match) {
+    return;
+  }
 
   // console.log("Save match:", match);
   if (!playerData.matches_index.includes(id)) {
@@ -1731,7 +1763,7 @@ function finishLoading() {
       ipc_send("set_arena_state", ARENA_MODE_DRAFT);
     }
 
-    ipc_send("set_settings", playerData.settings);
+    ipc_send("set_settings", JSON.stringify(playerData.settings));
     ipc_send("initialize");
     ipc_send("player_data_refresh");
 

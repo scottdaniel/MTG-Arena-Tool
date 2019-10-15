@@ -15,7 +15,14 @@ if (!remote.app.isPackaged) {
       });
     }
   });
+  const Sentry = require("@sentry/electron");
+  Sentry.init({
+    dsn: "https://4ec87bda1b064120a878eada5fc0b10f@sentry.io/1778171"
+  });
 }
+
+const TransparencyMouseFix = require("./electron-transparency-mouse-fix.js");
+let fix = null;
 
 const striptags = require("striptags");
 
@@ -135,15 +142,24 @@ ipc.on("edit", () => {
 function toggleEditMode() {
   editMode = !editMode;
 
+  let divsList = [];
+  let mainHover = queryElements(".main_hover")[0];
+  mainHover.style.opacity = "1";
+  divsList.push(byId("overlay_hover"));
+  pd.settings.overlays.forEach((_overlay, index) => {
+    if (!getVisible(_overlay)) return;
+    divsList.push(byId("overlay_" + (index + 1)));
+  });
+
   if (editMode) {
-    setIgnoreFalse();
     document.body.style.backgroundColor = "rgba(0, 0, 0, 0.3)";
 
-    pd.settings.overlays.forEach((_overlay, index) => {
-      if (!getVisible(_overlay)) return;
-
-      const overlayDiv = byId("overlay_" + (index + 1));
-      overlayDiv.classList.add("editable");
+    divsList.forEach(overlayDiv => {
+      if (!overlayDiv.classList.contains("click-on"))
+        overlayDiv.classList.add("click-on");
+      overlayDiv.classList.remove("click-through");
+      if (!overlayDiv.classList.contains("editable"))
+        overlayDiv.classList.add("editable");
 
       const restrictToParent = interact.modifiers.restrictRect({
         restriction: "parent"
@@ -182,12 +198,15 @@ function toggleEditMode() {
         });
     });
   } else {
-    pd.settings.overlays.forEach((_overlay, index) => {
-      const overlayDiv = byId("overlay_" + (index + 1));
-      overlayDiv.classList.remove("editable");
-      interact(overlayDiv).unset();
+    mainHover.style.opacity = "0";
+    divsList.forEach(_div => {
+      if (!_div.classList.contains("click-through"))
+        _div.classList.add("click-through");
+      _div.classList.remove("click-on");
+      _div.classList.remove("editable");
+      interact(_div).unset();
     });
-    setIgnoreTrue();
+
     document.body.style.backgroundColor = "rgba(0, 0, 0, 0.05)";
     saveOverlaysPosition();
   }
@@ -196,10 +215,10 @@ function toggleEditMode() {
 function saveOverlaysPosition() {
   // Update each overlay with the new dimensions
   const overlays = [...pd.settings.overlays];
+  const forceInt = num => Math.round(parseFloat(num));
 
   overlays.forEach((_overlay, index) => {
     const overlayDiv = byId("overlay_" + (index + 1));
-    const forceInt = num => Math.round(parseFloat(num));
     const bounds = {
       width: forceInt(overlayDiv.style.width),
       height: forceInt(overlayDiv.style.height),
@@ -213,7 +232,12 @@ function saveOverlaysPosition() {
     overlays[index] = newOverlay;
   });
 
-  ipcSend("save_user_settings", { overlays, skip_refresh: true });
+  const hoverDiv = byId("overlay_hover");
+  let overlayHover = {
+    x: forceInt(hoverDiv.style.left),
+    y: forceInt(hoverDiv.style.top)
+  };
+  ipcSend("save_user_settings", { overlays, overlayHover, skip_refresh: true });
 }
 
 ipc.on("close", (event, arg) => {
@@ -239,6 +263,19 @@ function settingsUpdated() {
   // (should be okay since ending edit-mode causes a refresh)
   if (editMode) return;
 
+  console.log(window.innerWidth, window.innerHeight);
+  let hoverContainer = byId("overlay_hover");
+  if (pd.settings.overlayHover) {
+    hoverContainer.style.left = `${pd.settings.overlayHover.x}px`;
+    hoverContainer.style.top = `${pd.settings.overlayHover.y}px`;
+  } else {
+    hoverContainer.style.left = `${window.innerWidth / 2 -
+      pd.cardsSizeHoverCard / 2}px`;
+    hoverContainer.style.top = `${window.innerHeight -
+      pd.cardsSizeHoverCard / 0.71808510638 -
+      50}px`;
+  }
+
   webFrame.setZoomFactor(pd.settings.overlay_scale / 100);
   pd.settings.overlays.forEach((_overlay, index) => {
     const overlayDiv = byId("overlay_" + (index + 1));
@@ -250,13 +287,9 @@ function settingsUpdated() {
     if (getVisible(_overlay)) {
       overlayDiv.style.opacity = "1";
       overlayDiv.style.visibility = "visible";
-      overlayDiv.classList.add("click-on");
-      overlayDiv.classList.remove("click-through");
     } else {
       overlayDiv.style.opacity = "0";
       overlayDiv.style.visibility = "hidden";
-      overlayDiv.classList.add("click-through");
-      overlayDiv.classList.remove("click-on");
     }
 
     change_background(index, pd.settings.back_url);
@@ -296,17 +329,6 @@ function settingsUpdated() {
     } else {
       updateMatchView(index);
     }
-
-    // Only issue with this is when two overlays are on top of eachother
-    // But when we allow editing the layour we should not allow that
-    /*
-    overlayDiv.removeEventListener("mouseenter", setIgnoreFalse);
-    overlayDiv.removeEventListener("mouseleave", setIgnoreTrue);
-    if (_overlay.show) {
-      overlayDiv.addEventListener("mouseenter", setIgnoreFalse);
-      overlayDiv.addEventListener("mouseleave", setIgnoreTrue);
-    }
-    */
   });
 }
 
@@ -320,15 +342,6 @@ function getVisible(settings) {
       arenaState === ARENA_MODE_MATCH);
 
   return settings.show && (currentModeApplies || settings.show_always);
-}
-
-function setIgnoreTrue() {
-  if (editMode) return;
-  remote.getCurrentWindow().setIgnoreMouseEvents(true, { forward: true });
-}
-
-function setIgnoreFalse() {
-  remote.getCurrentWindow().setIgnoreMouseEvents(false);
 }
 
 ipc.on("set_draft_cards", (event, draft) => {
@@ -433,6 +446,16 @@ function updateMatchView(index) {
 
     let initalTime = actionLog[0] ? new Date(actionLog[0].time) : new Date();
     actionLog.forEach(log => {
+      log.str = log.str.replace(
+        "<log-card",
+        '<log-card class="click-on"',
+        "gi"
+      );
+      log.str = log.str.replace(
+        "<log-ability",
+        '<log-ability class="click-on"',
+        "gi"
+      );
       const _date = new Date(log.time);
       const secondsPast = Math.round((_date - initalTime) / 1000);
 
@@ -688,11 +711,6 @@ function drawDeckOdds(index) {
 
   let oddsPrev = createDiv(["odds_prev", "click-on"]);
   let oddsNext = createDiv(["odds_next", "click-on"]);
-  // Allow clicks
-  oddsPrev.addEventListener("mouseover", setIgnoreFalse);
-  oddsPrev.addEventListener("mouseleave", setIgnoreTrue);
-  oddsNext.addEventListener("mouseover", setIgnoreFalse);
-  oddsNext.addEventListener("mouseleave", setIgnoreTrue);
 
   navCont.appendChild(oddsPrev);
   navCont.appendChild(
@@ -840,8 +858,6 @@ function updateDraftView(index, _packN = -1, _pickN = -1) {
 
       updateDraftView(index, packN, pickN);
     });
-    draftPrev.addEventListener("mouseenter", setIgnoreFalse);
-    draftPrev.addEventListener("mouseleave", setIgnoreTrue);
     controlCont.appendChild(draftPrev);
 
     controlCont.appendChild(createDiv(["draft_title"]));
@@ -870,8 +886,6 @@ function updateDraftView(index, _packN = -1, _pickN = -1) {
         updateDraftView(index, packN, pickN);
       }
     });
-    draftNext.addEventListener("mouseenter", setIgnoreFalse);
-    draftNext.addEventListener("mouseleave", setIgnoreTrue);
     controlCont.appendChild(draftNext);
 
     titleDiv.appendChild(controlCont);
@@ -958,6 +972,7 @@ window.setInterval(() => {
   pd.settings.overlays.forEach((_overlay, index) => {
     updateClock(index);
   });
+  //if (fix) fix.registerWindow();
 }, 250);
 
 function updateClock(index) {
@@ -1062,8 +1077,7 @@ function change_background(index, arg = "default") {
     if (pd.settings.back_url && pd.settings.back_url !== "default") {
       mainWrapper.style.backgroundImage = "url(" + pd.settings.back_url + ")";
     } else {
-      mainWrapper.style.backgroundImage =
-        "url(../images/Ghitu-Lavarunner-Dominaria-MtG-Art.jpg)";
+      mainWrapper.style.backgroundImage = "url(../images/Bedevil-Art.jpg)";
     }
   } else {
     const xhr = new XMLHttpRequest();
@@ -1118,16 +1132,16 @@ ready(function() {
         <div class="overlay_deckcolors"></div>
         <div class="overlay_decklist"></div>
         <div class="overlay_clock_container">
-            <div class="clock_prev"></div>
+            <div class="clock_prev click-on"></div>
             <div class="clock_turn"></div>
             <div class="clock_elapsed"></div>
-            <div class="clock_next"></div>
+            <div class="clock_next click-on"></div>
         </div>
       </div>
       <div class="outer_wrapper top_nav_wrapper">
-        <div class="flex_item overlay_icon"></div>
-        <div class="button settings" style="margin: 0;"></div>
-        <div class="button close" style="margin-right: 4px;"></div>
+        <div class="flex_item overlay_icon click-on"></div>
+        <div class="button settings click-on" style="margin: 0;"></div>
+        <div class="button close click-on" style="margin-right: 4px;"></div>
       </div>`;
   });
   pd.settings.overlays.forEach((_overlay, index) => recreateClock(index));
@@ -1145,8 +1159,6 @@ ready(function() {
       const deckListDom = `#overlay_${index + 1} .overlay_decklist`;
 
       const deckListDiv = queryElements(deckListDom)[0];
-      deckListDiv.addEventListener("mouseover", setIgnoreFalse);
-      deckListDiv.addEventListener("mouseleave", setIgnoreTrue);
       deckListDiv.addEventListener("mouseover", function() {
         let index = this.offsetParent.offsetParent.attributes["0"].value.slice(
           -1
@@ -1169,8 +1181,6 @@ ready(function() {
         }
         recreateClock(index);
       });
-      clockPrevDiv.addEventListener("mouseover", setIgnoreFalse);
-      clockPrevDiv.addEventListener("mouseleave", setIgnoreTrue);
 
       const clockNextDiv = queryElements(clockNextDom)[0];
       clockNextDiv.addEventListener("click", function() {
@@ -1180,14 +1190,10 @@ ready(function() {
         }
         recreateClock(index);
       });
-      clockNextDiv.addEventListener("mouseover", setIgnoreFalse);
-      clockNextDiv.addEventListener("mouseleave", setIgnoreTrue);
 
       const iconDiv = queryElements(iconDom)[0];
       iconDiv.style.backgroundColor = `var(--color-${COLORS_ALL[index]})`;
       iconDiv.addEventListener("click", toggleEditMode);
-      iconDiv.addEventListener("mouseover", setIgnoreFalse);
-      iconDiv.addEventListener("mouseleave", setIgnoreTrue);
 
       queryElements(settingsDom)[0].addEventListener("click", function() {
         ipcSend("renderer_show");
@@ -1197,13 +1203,13 @@ ready(function() {
         close(-1, index);
       });
     });
-    queryElements(".button").forEach(el =>
-      el.addEventListener("mouseover", setIgnoreFalse)
-    );
-    queryElements(".button").forEach(el =>
-      el.addEventListener("mouseleave", setIgnoreTrue)
-    );
   }, 500);
+  setTimeout(() => {
+    fix = new TransparencyMouseFix({
+      log: false,
+      fixPointerEvents: "auto"
+    });
+  }, 1000);
 });
 
 function get_ids_colors(list) {

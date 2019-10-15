@@ -20,7 +20,7 @@ const playerData = require("../shared/player-data.js");
 // These were tested briefly
 // They are all taken from logs
 // Some format from date-fns could be wrong;
-// https://date-fns.org/v2.0.0-alpha.27/docs/parse
+// https://date-fns.org/v2.2.1/docs/parse
 let dateFormats = [
   "dd.MM.yyyy HH:mm:ss",
   "dd/MM/yyyy HH:mm:ss",
@@ -151,14 +151,15 @@ const overlayWhitelist = [
 // (update is destructive, be sure to use spread syntax if necessary)
 function setData(data, refresh = debugLog || !firstPass) {
   const cleanData = _.omit(data, dataBlacklist);
-  playerData.handleSetData(null, cleanData);
-  ipc_send("set_player_data", cleanData, IPC_MAIN);
+  playerData.handleSetData(null, JSON.stringify(cleanData));
+  ipc_send("set_player_data", JSON.stringify(cleanData), IPC_MAIN);
   const overlayData = _.pick(cleanData, overlayWhitelist);
-  ipc_send("set_player_data", overlayData, IPC_OVERLAY);
+  ipc_send("set_player_data", JSON.stringify(overlayData), IPC_OVERLAY);
   if (refresh) ipc_send("player_data_refresh");
 }
 
 module.exports = {
+  getDateFormat,
   ipc_send,
   normaliseFields,
   parseWotcTime,

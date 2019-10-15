@@ -1,5 +1,10 @@
 This is meant as a guide to help you locate and resolve the most common issues running MTG Arena Tool. **Please** only follow these steps if you encounter one of the issues mentioned.
 
+Common paths:
+- Output log: `%APPDATA%\..\LocalLow\Wizards Of The Coast\MTGA\`
+- Mtgatool data: `%APPDATA%\mtg-arena-tool`
+- Mtgatool data (linux): `~/.config/MTG-Arena-Tool/`
+
 ### Stuck on 'please wait a minute' (without loading %)
 
 Refer to this issue, the solution is on the comments;
@@ -8,6 +13,9 @@ Refer to this issue, the solution is on the comments;
 ### "No log file found" error or "Output log contains no user data"
 
 Close MTG Arena and MTG Arena tool, then start MTG Arena. Once MTG Arena is loaded run MTG Arena Tool again.
+
+If that does not work, go to `%APPDATA%/mtg-arena-tool/` and delete `settings.json`, then load MTG Arena Tool again.
+You might be asked to point at the path of the output log again.
 
 ### Screen does not respond to mouse events (overlay covers)
 
@@ -19,18 +27,26 @@ This is probably caused by an error reading the user configuration, probably due
 Locate your log and config files;
 - Close MTG Arena and MTG Arena Tool.
 - Go to `%APPDATA%\..\LocalLow\Wizards Of The Coast\MTGA\`
-- Rename `output.log`, do not delete it!
+- Rename `output_log.txt`, do not delete it!
 - Run MTG Arena, once open, run MTG Arena Tool again.
 
 If this works, send the the old log file file to [mtgatool@gmail.com](mailto:mtgatool@gmail.com) to analyze the error.
 
 If that does not work;
 - Proceed to `%APPDATA%\mtg-arena-tool`
-- Locate your user-data file (the .json file named with your User ID, something like `0A1F2E3E4D5C6B7A.json`)
+- Locate your *user-data file* (the .json file named with your User ID, something like `0A1F2E3E4D5C6B7A.json`)
 - Rename the file, adding something to the end. **Do not delete it!**
 - Run MTG Arena Tool again.
 
 If the last step worked, send your user-data file to [mtgatool@gmail.com](mailto:mtgatool@gmail.com) and I will inspect what is wrong with it.
+
+### I want to reset all my historical data
+
+If the amount of data is __small__ you can archive it all. The intended purpose of archiving is to remove from stats and hide from the UI.
+
+If you have a patreon subscription with data syncing it is best to directly email [mtgatool@gmail.com](mailto:mtgatool@gmail.com). Otherwise some deleted data will be resynced.
+
+Otherwise, with a large amount of bad data, it's best to rename the *user-data file*. (the .json file named with your User ID, something like `0A1F2E3E4D5C6B7A.json`)
 
 ### If you have any other unexpected behaviour
 

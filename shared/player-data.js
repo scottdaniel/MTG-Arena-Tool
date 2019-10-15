@@ -237,11 +237,11 @@ function prettierDeckData(deckData) {
     "Decks/Precon/Precon_EPP_UR_Desc": "Izzet League",
     "Decks/Precon/Precon_EPP_WB_Desc": "Orzhov Syndicate",
     "Decks/Precon/Precon_EPP_WU_Desc": "Azorius Senate",
-    "Decks/Precon/Precon_July_B": "Mono Black",
-    "Decks/Precon/Precon_July_U": "Mono Blue",
-    "Decks/Precon/Precon_July_G": "Mono Green",
-    "Decks/Precon/Precon_July_R": "Mono Red",
-    "Decks/Precon/Precon_July_W": "Mono White",
+    "Decks/Precon/Precon_July_B": "Out for Blood",
+    "Decks/Precon/Precon_July_U": "Azure Skies",
+    "Decks/Precon/Precon_July_G": "Forest's Might",
+    "Decks/Precon/Precon_July_R": "Dome Destruction",
+    "Decks/Precon/Precon_July_W": "Angelic Army",
     "Decks/Precon/Precon_Brawl_Alela": "Alela, Artful Provocateur",
     "Decks/Precon/Precon_Brawl_Chulane": "Chulane, Teller of Tales",
     "Decks/Precon/Precon_Brawl_Korvold": "Korvold, Fae-Cursed King",
@@ -289,7 +289,12 @@ class PlayerData {
   }
 
   handleSetData(_event, arg) {
-    Object.assign(this, arg);
+    try {
+      arg = JSON.parse(arg);
+      Object.assign(this, arg);
+    } catch (e) {
+      console.log("Unable to parse player data", e);
+    }
   }
 
   get cardsSize() {

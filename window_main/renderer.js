@@ -14,6 +14,10 @@ if (!remote.app.isPackaged) {
     }
   });
   require("devtron").install();
+  const Sentry = require("@sentry/electron");
+  Sentry.init({
+    dsn: "https://4ec87bda1b064120a878eada5fc0b10f@sentry.io/1778171"
+  });
 }
 const anime = require("animejs");
 require("time-elements");
@@ -730,6 +734,12 @@ ipc.on("set_draft_link", function(event, arg) {
 
 //
 ipc.on("set_log_link", function(event, arg) {
+  hideLoadingBars();
+  byId("share_input").value = arg;
+});
+
+//
+ipc.on("set_deck_link", function(event, arg) {
   hideLoadingBars();
   byId("share_input").value = arg;
 });
