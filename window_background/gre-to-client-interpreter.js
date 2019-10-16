@@ -519,7 +519,7 @@ function GREMessage(message, time) {
 
   globals.currentMatch.cardTypesByZone = getCardsTypeZone();
   globals.currentMatch.playerCardsUsed = getPlayerUsedCards();
-  globals.currentMatch.oppCardsUsed = currentMatch.opponent.cards.concat(
+  globals.currentMatch.oppCardsUsed = globals.currentMatch.opponent.cards.concat(
     getOppUsedCards()
   );
 }
@@ -553,13 +553,13 @@ function getOppUsedCards() {
 
 function getCardsTypeZone() {
   let data = {};
-  Object.keys(currentMatch.zones).forEach(key => {
-    let zone = currentMatch.zones[key];
+  Object.keys(globals.currentMatch.zones).forEach(key => {
+    let zone = globals.currentMatch.zones[key];
     let zoneType = zone.type;
     if (zone.objectInstanceIds) {
       zone.objectInstanceIds.forEach(id => {
         try {
-          let obj = currentMatch.gameObjs[id];
+          let obj = globals.currentMatch.gameObjs[id];
           if (obj.type == "GameObjectType_Card" && obj.grpId !== 3) {
             obj.cardTypes
               .filter(cardType => cardTypes.includes(cardType))

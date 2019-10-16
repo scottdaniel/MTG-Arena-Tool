@@ -573,8 +573,8 @@ function onLabelRankUpdated(entry, json) {
   if (!json) return;
   json.date = entry.timestamp;
   json.timestamp = parseWotcTimeFallback(entry.timestamp).getTime();
-  json.lastMatchId = currentMatch.matchId;
-  json.eventId = currentMatch.eventId;
+  json.lastMatchId = globals.currentMatch.matchId;
+  json.eventId = globals.currentMatch.eventId;
   const rank = { ...playerData.rank };
 
   // json.wasLossProtected
@@ -620,8 +620,8 @@ function onLabelMythicRatingUpdated(entry, json) {
   if (!json) return;
   json.date = entry.timestamp;
   json.timestamp = parseWotcTimeFallback(entry.timestamp).getTime();
-  json.lastMatchId = currentMatch.matchId;
-  json.eventId = currentMatch.eventId;
+  json.lastMatchId = globals.currentMatch.matchId;
+  json.eventId = globals.currentMatch.eventId;
 
   // Default constructed?
   let type = "constructed";
