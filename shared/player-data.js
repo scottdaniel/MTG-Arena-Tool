@@ -122,6 +122,7 @@ const defaultCfg = {
     ]
   },
   seasonal_rank: {},
+  seasonal: {},
   economy_index: [],
   economy: {
     gold: 0,
@@ -276,6 +277,7 @@ class PlayerData {
     this.draftExists = this.draftExists.bind(this);
     this.eventExists = this.eventExists.bind(this);
     this.matchExists = this.matchExists.bind(this);
+    this.seasonalExists = this.seasonalExists.bind(this);
     this.deckChanges = this.deckChanges.bind(this);
     this.seasonalRank = this.seasonalRank.bind(this);
 
@@ -428,6 +430,10 @@ class PlayerData {
     return id in this;
   }
 
+  seasonalExists(id) {
+    return id in this.seasonal;
+  }
+
   seasonalRank(seasonOrdinal, type = "constructed") {
     let seasonTag = seasonOrdinal + "_" + type.toLowerCase();
 
@@ -446,12 +452,9 @@ class PlayerData {
     let seasonData = this.seasonalRank(seasonOrdinal, type.toLowerCase());
 
     // Check if this entry exists in the season data.
-    if (
-      _.findIndex(seasonData, obj => {
-        return _.isMatch(obj, rank);
-      }) == -1
-    ) {
-      seasonData.push(rank);
+    if (!this.seasonalExists(rank.id)) {
+      seasonData.push(rank.id);
+      this.seasonal[rank.id] = rank;
     }
 
     return this.seasonal_rank;
