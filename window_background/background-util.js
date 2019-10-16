@@ -82,6 +82,17 @@ function parseWotcTimeFallback(dateStr) {
   }
 }
 
+function updateLoading(entry) {
+  if (globals.firstPass) {
+    const completion = entry.position / entry.size;
+    ipc_send("popup", {
+      text: `Reading log: ${Math.round(100 * completion)}%`,
+      time: 0,
+      progress: completion
+    });
+  }
+}
+
 function isValidDate(date) {
   return isValid(date) && !isNaN(date.getTime());
 }
@@ -161,5 +172,6 @@ module.exports = {
   parseWotcTime,
   parseWotcTimeFallback,
   setData,
-  unleakString
+  unleakString,
+  updateLoading
 };

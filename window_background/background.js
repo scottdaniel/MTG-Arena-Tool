@@ -1,4 +1,26 @@
-const { remote, ipcRenderer: ipc } = require("electron");
+const { app, remote, ipcRenderer: ipc } = require("electron");
+const Store = require("electron-store");
+const fs = require("fs");
+const sha1 = require("js-sha1");
+const path = require("path");
+
+const playerData = require("../shared/player-data");
+const { getReadableFormat } = require("../shared/util");
+const { HIDDEN_PW, MAIN_DECKS } = require("../shared/constants");
+
+const globals = require("./globals");
+const mtgaLog = require("./mtga-log");
+const httpApi = require("./http-api");
+const { createDeck } = require("./data");
+const { ipc_send, setData, unleakString } = require("./background-util");
+const addCustomDeck = require("./addCustomDeck");
+const forceDeckUpdate = require("./forceDeckUpdate");
+const {
+  loadPlayerConfig,
+  syncSettings,
+  startWatchingLog
+} = require("./loadPlayerConfig");
+const update_deck = require("./updateDeck");
 
 if (!remote.app.isPackaged) {
   const { openNewGitHubIssue, debugInfo } = require("electron-util");
@@ -20,25 +42,32 @@ if (!remote.app.isPackaged) {
   });
 }
 
-const Store = require("electron-store");
-const fs = require("fs");
-const sha1 = require("js-sha1");
+globals.actionLogDir = path.join(
+  (app || remote.app).getPath("userData"),
+  "actionlogs"
+);
+if (!fs.existsSync(globals.actionLogDir)) {
+  fs.mkdirSync(globals.actionLogDir);
+}
 
-const httpApi = require("./http-api");
-
-const playerData = require("../shared/player-data");
-const { getReadableFormat } = require("../shared/util");
-const { HIDDEN_PW, MAIN_DECKS } = require("../shared/constants");
-const { ipc_send, setData, unleakString } = require("./background-util");
-
-const { createDeck } = require("./data");
-
-const globals = require("./globals");
-const mtgaLog = require("./mtga-log");
+globals.toolVersion = (app || remote.app)
+  .getVersion()
+  .split(".")
+  .reduce((acc, cur) => +acc * 256 + +cur);
 
 const settingsCfg = {
   gUri: ""
 };
+
+globals.rStore = new Store({
+  name: "remember",
+  defaults: globals.rememberCfg
+});
+
+globals.store = new Store({
+  name: "default",
+  defaults: playerData.defaultCfg
+});
 
 var settingsStore = new Store({
   name: "settings",
@@ -47,15 +76,6 @@ var settingsStore = new Store({
 
 let logLoopInterval = null;
 const debugArenaID = undefined;
-
-const addCustomDeck = require("./addCustomDeck");
-const forceDeckUpdate = require("./forceDeckUpdate");
-const {
-  loadPlayerConfig,
-  syncSettings,
-  startWatchingLog
-} = require("./loadPlayerConfig");
-const update_deck = require("./updateDeck");
 
 //
 ipc.on("save_app_settings", function(event, arg) {

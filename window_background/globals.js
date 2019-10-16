@@ -1,9 +1,4 @@
-const electron = require("electron");
-const playerData = require("../shared/player-data");
-const Store = require("electron-store");
 const Deck = require("../shared/deck");
-const path = require("path");
-const fs = require("fs");
 const mtgaLog = require("./mtga-log");
 
 // Hey! If you're here, you might be thinking of adding stuff to this file.
@@ -11,13 +6,7 @@ const mtgaLog = require("./mtga-log");
 // Hopefully we'll be able to get rid of all of the ones that can change,
 // and put them into stores or better structures than a giant export list.
 
-const actionLogDir = path.join(
-  (electron.app || electron.remote.app).getPath("userData"),
-  "actionlogs"
-);
-if (!fs.existsSync(actionLogDir)) {
-  fs.mkdirSync(actionLogDir);
-}
+let actionLogDir = "";
 
 let logUri = mtgaLog.defaultLogUri();
 
@@ -55,10 +44,7 @@ var originalDeck = null;
 
 let odds_sample_size = 1;
 
-const toolVersion = electron.remote.app
-  .getVersion()
-  .split(".")
-  .reduce((acc, cur) => +acc * 256 + +cur);
+let toolVersion = null;
 
 const rememberCfg = {
   email: "",
@@ -74,15 +60,9 @@ const rememberCfg = {
   }
 };
 
-var rStore = new Store({
-  name: "remember",
-  defaults: rememberCfg
-});
+var rStore = null;
 
-var store = new Store({
-  name: "default",
-  defaults: playerData.defaultCfg
-});
+var store = null;
 
 var tokenAuth = undefined;
 
@@ -110,6 +90,7 @@ module.exports = {
   matchGameStats,
   odds_sample_size,
   originalDeck,
+  rememberCfg,
   rStore,
   stopWatchingLog,
   store,

@@ -56,6 +56,7 @@ const actionLogGenerateLink = function(grpId) {
 const actionLogGenerateAbilityLink = function(abId) {
   return `<log-ability id="${abId}">ability</log-ability>`;
 };
+
 const cardTypes = [
   //"CardType_None",
   "CardType_Artifact",
@@ -655,6 +656,7 @@ GREMessages.GREMessageType_GameStateMessage = function(msg) {
     globals.currentMatch.playerCardsUsed = [];
     globals.currentMatch.oppCardsUsed = [];
     globals.initialLibraryInstanceIds = [];
+    globals.cardTypesByZone = [];
     globals.idChanges = {};
     globals.instanceToCardIdMap = {};
   }
