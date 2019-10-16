@@ -449,6 +449,9 @@ class PlayerData {
   // I was not sure weter it was correct to include this here or in the
   // utilities file. here its easier to handle the data.
   addSeasonalRank(rank, seasonOrdinal, type = "constructed") {
+    if (!seasonOrdinal && rank.seasonOrdinal) {
+      seasonOrdinal = rank.seasonOrdinal;
+    }
     let seasonData = this.seasonalRank(seasonOrdinal, type.toLowerCase());
 
     // Check if this entry exists in the season data.
