@@ -14,6 +14,10 @@ if (!remote.app.isPackaged) {
     }
   });
   require("devtron").install();
+  const Sentry = require("@sentry/electron");
+  Sentry.init({
+    dsn: "https://4ec87bda1b064120a878eada5fc0b10f@sentry.io/1778171"
+  });
 }
 
 const Store = require("electron-store");
@@ -380,6 +384,181 @@ ipc.on("set_odds_samplesize", function(event, state) {
   forceDeckUpdate(false);
   update_deck(true);
 });
+
+// Loads this player's configuration file
+function loadPlayerConfig(playerId, serverData = undefined) {
+  ipc_send("ipc_log", "Load player ID: " + playerId);
+  ipc_send("popup", {
+    text: "Loading player history...",
+    time: 0,
+    progress: 2
+  });
+  globals.store = new Store({
+    name: playerId,
+    defaults: playerData.defaultCfg
+  });
+
+  const savedData = globals.store.get();
+  const savedOverlays = savedData.settings.overlays || [];
+  const appSettings = globals.rstore.get("settings");
+  const settings = {
+    ...playerData.settings,
+    ...savedData.settings,
+    ...appSettings,
+    overlays: playerData.settings.overlays.map((overlay, index) => {
+      if (index < savedOverlays.length) {
+        // blend in new default overlay settings
+        return { ...overlay, ...savedOverlays[index] };
+      } else {
+        return overlay;
+      }
+    })
+  };
+  const __playerData = {
+    ...playerData,
+    ...savedData,
+    settings
+  };
+  syncSettings(__playerData.settings, true);
+  setData(__playerData, false);
+  ipc_send("renderer_set_bounds", playerData.windowBounds);
+
+  ipc_send("popup", {
+    text: "Player history loaded.",
+    time: 3000,
+    progress: -1
+  });
+
+  if (serverData) {
+    const requestSync = {};
+    requestSync.courses = serverData.courses.filter(
+      id => !(id in __playerData)
+    );
+    requestSync.matches = serverData.matches.filter(
+      id => !(id in __playerData)
+    );
+    requestSync.drafts = serverData.drafts.filter(id => !(id in __playerData));
+    requestSync.economy = serverData.economy.filter(
+      id => !(id in __playerData)
+    );
+    requestSync.seasonal = serverData.seasonal.filter(
+      id => !(id in __playerData)
+    );
+
+    const itemCount =
+      requestSync.courses.length +
+      requestSync.matches.length +
+      requestSync.drafts.length +
+      requestSync.economy.length +
+      requestSync.seasonal.length;
+
+    if (itemCount) {
+      ipc_send("ipc_log", "Fetch remote player items: " + itemCount);
+      httpApi.httpSyncRequest(requestSync);
+      // console.log("requestSync", requestSync);
+    } else {
+      ipc_send("ipc_log", "No need to fetch remote player items.");
+    }
+  }
+
+  ipc_send("popup", {
+    text: "Loading settings...",
+    time: 0,
+    progress: 2
+  });
+
+  globals.watchingLog = true;
+  globals.stopWatchingLog = startWatchingLog();
+  ipc_send("popup", {
+    text: "Settings loaded.",
+    time: 3000,
+    progress: -1
+  });
+}
+
+function syncUserData(data) {
+  // Sync Events
+  const courses_index = [...playerData.courses_index];
+  data.courses
+    .filter(doc => !playerData.eventExists(doc._id))
+    .forEach(doc => {
+      const id = doc._id;
+      doc.id = id;
+      delete doc._id;
+      courses_index.push(id);
+      if (debugLog || !firstPass) store.set(id, doc);
+      setData({ [id]: doc }, false);
+    });
+  if (debugLog || !firstPass) store.set("courses_index", courses_index);
+
+  // Sync Matches
+  const matches_index = [...playerData.matches_index];
+  data.matches
+    .filter(doc => !playerData.matchExists(doc._id))
+    .forEach(doc => {
+      const id = doc._id;
+      doc.id = id;
+      delete doc._id;
+      matches_index.push(id);
+      if (debugLog || !firstPass) store.set(id, doc);
+      setData({ [id]: doc }, false);
+    });
+  if (debugLog || !firstPass) store.set("matches_index", matches_index);
+
+  // Sync Economy
+  const economy_index = [...playerData.economy_index];
+  data.economy
+    .filter(doc => !playerData.transactionExists(doc._id))
+    .forEach(doc => {
+      const id = doc._id;
+      doc.id = id;
+      delete doc._id;
+      economy_index.push(id);
+      if (debugLog || !firstPass) store.set(id, doc);
+      setData({ [id]: doc }, false);
+    });
+  if (debugLog || !firstPass) store.set("economy_index", economy_index);
+
+  // Sync Drafts
+  const draft_index = [...playerData.draft_index];
+  data.drafts
+    .filter(doc => !playerData.draftExists(doc._id))
+    .forEach(doc => {
+      const id = doc._id;
+      doc.id = id;
+      delete doc._id;
+      draft_index.push(id);
+      if (debugLog || !firstPass) store.set(id, doc);
+      setData({ [id]: doc }, false);
+    });
+  if (debugLog || !firstPass) store.set("draft_index", draft_index);
+
+  // Sync seasonal
+  data.seasonal.forEach(doc => {
+    const id = doc._id;
+    doc.id = id;
+    delete doc._id;
+    if (debugLog || !firstPass)
+      playerData.addSeasonalRank(doc, false, doc.rankUpdateType);
+  });
+
+  if (data.settings.tags_colors) {
+    let newTags = data.settings.tags_colors;
+    setData({ tags_colors: { ...newTags } });
+    store.set("tags_colors", newTags);
+  }
+
+  setData({ courses_index, draft_index, economy_index, matches_index });
+}
+
+// Merges settings and updates singletons across processes
+// (essentially fancy setData for settings field only)
+// To persist changes, see "save_user_settings" or "save_app_settings"
+function syncSettings(dirtySettings = {}, refresh = debugLog || !firstPass) {
+  const settings = { ...playerData.settings, ...dirtySettings };
+  setData({ settings }, refresh);
+  if (refresh) ipc_send("set_settings", JSON.stringify(settings));
+}
 
 // Set a new log URI
 ipc.on("set_log", function(event, arg) {

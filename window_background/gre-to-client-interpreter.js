@@ -56,6 +56,21 @@ const actionLogGenerateLink = function(grpId) {
 const actionLogGenerateAbilityLink = function(abId) {
   return `<log-ability id="${abId}">ability</log-ability>`;
 };
+const cardTypes = [
+  //"CardType_None",
+  "CardType_Artifact",
+  "CardType_Creature",
+  "CardType_Enchantment",
+  "CardType_Instant",
+  "CardType_Land",
+  //"CardType_Phenomenon",
+  //"CardType_Plane",
+  "CardType_Planeswalker",
+  //"CardType_Scheme",
+  "CardType_Sorcery"
+  //"CardType_Tribal",
+  //"CardType_Vanguard",
+];
 
 function keyValuePair(obj, addTo) {
   // I found some times we get f as the value array.. *shrug*
@@ -472,6 +487,7 @@ function processAll() {
       }
     }
   }
+  globals.currentMatch.cardTypesByZone = getCardsTypeZone();
   globals.currentMatch.playerCardsUsed = getPlayerUsedCards();
   globals.currentMatch.oppCardsUsed = getOppUsedCards();
 }
@@ -486,6 +502,7 @@ function GREMessageByID(msgId, time) {
   }
 
   globals.currentMatch.playerCardsUsed = getPlayerUsedCards();
+  globals.currentMatch.cardTypesByZone = getCardsTypeZone();
   globals.currentMatch.oppCardsUsed = globals.currentMatch.opponent.cards.concat(
     getOppUsedCards()
   );
@@ -500,8 +517,9 @@ function GREMessage(message, time) {
     fn(message);
   }
 
+  globals.currentMatch.cardTypesByZone = getCardsTypeZone();
   globals.currentMatch.playerCardsUsed = getPlayerUsedCards();
-  globals.currentMatch.oppCardsUsed = globals.currentMatch.opponent.cards.concat(
+  globals.currentMatch.oppCardsUsed = currentMatch.opponent.cards.concat(
     getOppUsedCards()
   );
 }
@@ -531,6 +549,40 @@ function getOppUsedCards() {
     }
   });
   return cardsUsed;
+}
+
+function getCardsTypeZone() {
+  let data = {};
+  Object.keys(currentMatch.zones).forEach(key => {
+    let zone = currentMatch.zones[key];
+    let zoneType = zone.type;
+    if (zone.objectInstanceIds) {
+      zone.objectInstanceIds.forEach(id => {
+        try {
+          let obj = currentMatch.gameObjs[id];
+          if (obj.type == "GameObjectType_Card" && obj.grpId !== 3) {
+            obj.cardTypes
+              .filter(cardType => cardTypes.includes(cardType))
+              .forEach(cardType => {
+                let grpId;
+                grpId = obj.grpId;
+                let owner = obj.controllerSeatId;
+                if (!data[owner]) data[owner] = {};
+                if (!data[owner][zoneType]) data[owner][zoneType] = {};
+                if (!data[owner][zoneType][cardType])
+                  data[owner][zoneType][cardType] = [];
+
+                data[owner][zoneType][cardType].push(grpId);
+              });
+          }
+        } catch (e) {
+          //
+        }
+      });
+    }
+  });
+
+  return data;
 }
 
 function getPlayerUsedCards() {

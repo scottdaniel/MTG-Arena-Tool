@@ -1,7 +1,7 @@
 const _ = require("lodash");
 const differenceInDays = require("date-fns/differenceInDays");
 
-const { ARENA_MODE_IDLE } = require("../shared/constants");
+const { ARENA_MODE_IDLE, CONSTRUCTED_EVENTS } = require("../shared/constants");
 const db = require("../shared/database");
 const CardsList = require("../shared/cards-list");
 const { get_deck_colors, objectClone, replaceAll } = require("../shared/util");
@@ -15,6 +15,7 @@ const Deck = require("../shared/deck");
 
 const {
   httpSetMythicRank,
+  httpSetSeasonal,
   httpSubmitCourse,
   httpTournamentCheck
 } = require("./http-api");
@@ -570,6 +571,10 @@ function onLabelInEventGetActiveEvents(entry, json) {
 
 function onLabelRankUpdated(entry, json) {
   if (!json) return;
+  json.date = entry.timestamp;
+  json.timestamp = parseWotcTimeFallback(entry.timestamp).getTime();
+  json.lastMatchId = currentMatch.matchId;
+  json.eventId = currentMatch.eventId;
   const rank = { ...playerData.rank };
 
   // json.wasLossProtected
@@ -581,9 +586,22 @@ function onLabelRankUpdated(entry, json) {
   rank[updateType].step = json.newStep;
   rank[updateType].seasonOrdinal = json.seasonOrdinal;
 
-  setData({ rank });
+  json.id = sha1(
+    updateType + json.seasonOrdinal + json.lastMatchId + json.date
+  );
+
+  let seasonal_rank = playerData.addSeasonalRank(
+    json,
+    json.seasonOrdinal,
+    updateType
+  );
+
+  httpSetSeasonal(json);
+
+  setData({ rank, seasonal_rank });
   if (globals.debugLog || !globals.firstPass) {
     globals.store.set("rank", rank);
+    globals.store.set("seasonal_rank", seasonal_rank);
   }
 }
 
@@ -600,14 +618,34 @@ function onLabelMythicRatingUpdated(entry, json) {
   // }
 
   if (!json) return;
+  json.date = entry.timestamp;
+  json.timestamp = parseWotcTimeFallback(entry.timestamp).getTime();
+  json.lastMatchId = currentMatch.matchId;
+  json.eventId = currentMatch.eventId;
+
+  // Default constructed?
+  let type = "constructed";
+  if (CONSTRUCTED_EVENTS.includes(json.eventId)) {
+    type = "constructed";
+  } else if (db.ranked_events.includes(json.eventId)) {
+    type = "limited";
+  }
+
   const rank = { ...playerData.rank };
 
   rank.constructed.percentile = json.newMythicPercentile;
   rank.constructed.leaderboardPlace = json.newMythicLeaderboardPlacement;
 
-  setData({ rank });
+  let seasonal_rank = playerData.addSeasonalRank(
+    json,
+    rank.constructed.seasonOrdinal,
+    type
+  );
+
+  setData({ rank, seasonal_rank });
   if (globals.debugLog || !globals.firstPass) {
     globals.store.set("rank", rank);
+    globals.store.set("seasonal_rank", seasonal_rank);
   }
 }
 

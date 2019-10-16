@@ -302,13 +302,15 @@ function httpBasic() {
                     matches: [],
                     courses: [],
                     drafts: [],
-                    economy: []
+                    economy: [],
+                    seasonal: []
                   };
                   if (data.patreon) {
                     serverData.matches = parsedResult.matches;
                     serverData.courses = parsedResult.courses;
                     serverData.drafts = parsedResult.drafts;
                     serverData.economy = parsedResult.economy;
+                    serverData.seasonal = parsedResult.seasonal;
                   }
                   setData(data, false);
                   let requestSync = loadPlayerConfig(
@@ -645,6 +647,17 @@ function httpSetEconomy(change) {
   });
 }
 
+function httpSetSeasonal(change) {
+  var _id = makeId(6);
+  change = JSON.stringify(change);
+  httpAsync.push({
+    reqId: _id,
+    method: "set_seasonal",
+    method_path: "/api/send_seasonal.php",
+    change: change
+  });
+}
+
 function httpSetSettings(settings) {
   var _id = makeId(6);
   settings = JSON.stringify(settings);
@@ -832,6 +845,7 @@ module.exports = {
   httpSetMatch,
   httpSetDraft,
   httpSetEconomy,
+  httpSetSeasonal,
   httpSetSettings,
   httpDeleteData,
   httpGetDatabase,
