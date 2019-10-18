@@ -39,7 +39,8 @@ const {
   getCardImage,
   getReadableEvent,
   makeId,
-  toMMSS
+  toMMSS,
+  openScryfallCard
 } = require("../shared/util");
 
 const byId = id => document.getElementById(id);
@@ -955,23 +956,60 @@ function attachMatchData(listItem, match) {
   }
 }
 
-//
-exports.attachDraftData = attachDraftData;
-function attachDraftData(listItem, draft) {
-  // console.log("Draft: ", match);
+function createDraftSetDiv(draft) {
+  return createDiv(["list_deck_name"], draft.set + " draft");
+}
 
-  const draftSetDiv = createDiv(["list_deck_name"], draft.set + " draft");
-  listItem.leftTop.appendChild(draftSetDiv);
+exports.createInventoryCard = createInventoryCard;
+function createInventoryCard(card, size = "39px", rarityOverlay = false) {
+  var inventoryCard = createDiv([
+    "inventory_card",
+    card.rarity,
+    `rarity-overlay${rarityOverlay ? "" : "-none"}`
+  ]);
+  inventoryCard.style.width = size;
 
-  const draftTimeDiv = createDiv(
-    ["list_match_time"],
-    localTimeSince(new Date(draft.date))
-  );
-  listItem.rightBottom.appendChild(draftTimeDiv);
+  var img = createImg();
+  img.style.width = size;
+  img.src = getCardImage(card);
+  img.title = card.name;
+  inventoryCard.appendChild(img);
 
-  const replayDiv = createDiv(["list_match_replay"], "See replay");
-  listItem.rightTop.appendChild(replayDiv);
+  addCardHover(inventoryCard, card);
 
+  inventoryCard.addEventListener("click", () => {
+    if (card.dfc == "SplitHalf") {
+      card = db.card(card.dfcId);
+    }
+    //let newname = card.name.split(' ').join('-');
+    openScryfallCard(card);
+  });
+
+  return inventoryCard;
+}
+
+function createDraftRares(draft) {
+  var draftRares = createDiv();
+  if (!draft.pickedCards) return draftRares;
+
+  draft.pickedCards
+    .map(cardId => db.card(cardId))
+    .filter(card => card.rarity == "rare" || card.rarity == "mythic")
+    .map(card => createInventoryCard(card, undefined, true))
+    .forEach(inventoryCard => draftRares.appendChild(inventoryCard));
+
+  return draftRares;
+}
+
+function createDraftTimeDiv(draft) {
+  return createDiv(["list_match_time"], localTimeSince(new Date(draft.date)));
+}
+
+function createReplayDiv(draft) {
+  return createDiv(["list_match_replay"], "See replay");
+}
+
+function createReplayShareButton(draft) {
   const replayShareButton = createDiv(["list_draft_share", draft.id + "dr"]);
   replayShareButton.addEventListener("click", e => {
     e.stopPropagation();
@@ -1005,6 +1043,23 @@ function attachDraftData(listItem, draft) {
     openDialog(cont);
     draftShareLink(draft.id, draft);
   });
+  return replayShareButton;
+}
+
+exports.attachDraftData = attachDraftData;
+function attachDraftData(listItem, draft) {
+  console.log("Draft: ", draft);
+
+  const draftSetDiv = createDraftSetDiv(draft);
+  const draftRares = createDraftRares(draft);
+  const draftTimeDiv = createDraftTimeDiv(draft);
+  const replayDiv = createReplayDiv(draft);
+  const replayShareButton = createReplayShareButton(draft);
+
+  listItem.leftTop.appendChild(draftSetDiv);
+  listItem.center.appendChild(draftRares);
+  listItem.rightBottom.appendChild(draftTimeDiv);
+  listItem.rightTop.appendChild(replayDiv);
   listItem.right.after(replayShareButton);
 }
 
