@@ -1,13 +1,9 @@
-/*
-global
-  debugLog
-  firstPass
-*/
 // Utility functions that belong only to background
 const { ipcRenderer: ipc } = require("electron");
 const _ = require("lodash");
 const parse = require("date-fns/parse");
 const isValid = require("date-fns/isValid");
+const globals = require("./globals");
 
 const {
   IPC_BACKGROUND,
@@ -86,6 +82,17 @@ function parseWotcTimeFallback(dateStr) {
   }
 }
 
+function updateLoading(entry) {
+  if (globals.firstPass) {
+    const completion = entry.position / entry.size;
+    ipc_send("popup", {
+      text: `Reading log: ${Math.round(100 * completion)}%`,
+      time: 0,
+      progress: completion
+    });
+  }
+}
+
 function isValidDate(date) {
   return isValid(date) && !isNaN(date.getTime());
 }
@@ -149,7 +156,7 @@ const overlayWhitelist = [
 
 // convenience fn to update player data singletons in all processes
 // (update is destructive, be sure to use spread syntax if necessary)
-function setData(data, refresh = debugLog || !firstPass) {
+function setData(data, refresh = globals.debugLog || !globals.firstPass) {
   const cleanData = _.omit(data, dataBlacklist);
   playerData.handleSetData(null, JSON.stringify(cleanData));
   ipc_send("set_player_data", JSON.stringify(cleanData), IPC_MAIN);
@@ -165,5 +172,6 @@ module.exports = {
   parseWotcTime,
   parseWotcTimeFallback,
   setData,
-  unleakString
+  unleakString,
+  updateLoading
 };

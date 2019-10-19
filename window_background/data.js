@@ -1,11 +1,3 @@
-/*
-  global
-    originalDeck
-    matchGameStats
-    getOpponentDeck
-    toolVersion
-*/
-
 // Generate objects using default templates.
 // Nothing in here should call IPC functions
 
@@ -17,8 +9,8 @@ const { DEFAULT_TILE } = require("../shared/constants");
 const { objectClone } = require("../shared/util");
 const playerData = require("../shared/player-data.js");
 const database = require("../shared/database");
-
-const { parseWotcTime, parseWotcTimeFallback } = require("./background-util");
+const getOpponentDeck = require("./getOpponentDeck");
+const globals = require("./globals");
 
 // Draft Creation
 
@@ -100,9 +92,9 @@ var matchDataDefault = {
 function createMatch(json, matchBeginTime) {
   var match = _.cloneDeep(matchDataDefault);
 
-  match.player.originalDeck = originalDeck;
-  match.player.deck = originalDeck.clone();
-  match.playerCardsLeft = originalDeck.clone();
+  match.player.originalDeck = globals.originalDeck;
+  match.player.deck = globals.originalDeck.clone();
+  match.playerCardsLeft = globals.originalDeck.clone();
 
   match.opponent.name = json.opponentScreenName;
   match.opponent.rank = json.opponentRankingClass;
@@ -217,10 +209,10 @@ function completeMatch(match, matchData, matchEndTime) {
   }
   match.bestOf = matchData.bestOf;
 
-  match.gameStats = matchGameStats;
+  match.gameStats = globals.matchGameStats;
 
   // Convert string "2.2.19" into number for easy comparison, 1 byte per part, allowing for versions up to 255.255.255
-  match.toolVersion = toolVersion;
+  match.toolVersion = globals.toolVersion;
   match.toolRunFromSource = !electron.remote.app.isPackaged;
 
   return match;
