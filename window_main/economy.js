@@ -20,7 +20,8 @@ const {
   formatNumber,
   formatPercent,
   resetMainContainer,
-  toggleArchived
+  toggleArchived,
+  createInventoryCard
 } = require("./renderer-util");
 
 const byId = id => document.getElementById(id);
@@ -662,28 +663,8 @@ function createChangeRow(change, economyId) {
     change.delta.cardsAdded.sort(collectionSortRarity);
     change.delta.cardsAdded.forEach(function(grpId) {
       var card = db.card(grpId);
-
-      var d = createDiv(["inventory_card"]);
-      d.style.width = "39px";
-
-      var img = document.createElement("img");
-      img.classList.add("inventory_card_img");
-      img.style.width = "39px";
-      img.src = getCardImage(card);
-      img.title = card.name;
-
-      d.appendChild(img);
-
-      flexRight.appendChild(d);
-      addCardHover(img, card);
-
-      img.addEventListener("click", () => {
-        if (db.card(grpId).dfc == "SplitHalf") {
-          card = db.card(card.dfcId);
-        }
-        //let newname = card.name.split(' ').join('-');
-        openScryfallCard(card);
-      });
+      var divWithNoName = createInventoryCard(card);
+      flexRight.appendChild(divWithNoName);
     });
   }
 
