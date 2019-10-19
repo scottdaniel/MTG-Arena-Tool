@@ -446,7 +446,7 @@ class PlayerData {
     }
 
     // Check if this entry exists in the season data.
-    console.log("id: " + rank.id, this.seasonalExists(rank.id));
+    //console.log("id: " + rank.id, this.seasonalExists(rank.id));
     if (!this.seasonalExists(rank.id)) {
       this.seasonal_rank[seasonTag].push(rank.id);
       this.seasonal[rank.id] = rank;
