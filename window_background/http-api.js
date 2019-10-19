@@ -17,6 +17,7 @@ var httpAsync = [];
 const serverAddress = "mtgatool.com";
 
 function syncUserData(data) {
+  console.log(data);
   // Sync Events
   const courses_index = [...playerData.courses_index];
   data.courses
@@ -76,7 +77,7 @@ function syncUserData(data) {
     });
   if (globals.debugLog || !globals.firstPass)
     globals.store.set("draft_index", draft_index);
-
+  
   if (data.settings.tags_colors) {
     let newTags = data.settings.tags_colors;
     setData({ tags_colors: { ...newTags } });
@@ -328,9 +329,9 @@ function httpBasic() {
                   requestSync.economy = serverData.economy.filter(
                     id => !(id in playerData)
                   );
-                  requestSync.seasonal = serverData.seasonal
-                    .filter(id => !(id in playerData.seasonal))
-                    .map(seasonal => seasonal.id);
+                  requestSync.seasonal = serverData.seasonal.filter(
+                    id => !(id in playerData.seasonal)
+                  );
 
                   const itemCount =
                     requestSync.courses.length +
@@ -341,6 +342,7 @@ function httpBasic() {
 
                   if (requestSync) {
                     ipc_send("ipc_log", "Fetch remote player items");
+                    console.log(requestSync);
                     httpSyncRequest(requestSync);
                   } else {
                     ipc_send(
