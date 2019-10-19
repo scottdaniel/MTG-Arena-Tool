@@ -77,7 +77,29 @@ function syncUserData(data) {
     });
   if (globals.debugLog || !globals.firstPass)
     globals.store.set("draft_index", draft_index);
-  
+
+  // Sync seasonal
+  data.seasonal.forEach(doc => {
+    const id = doc._id;
+    doc.id = id;
+    delete doc._id;
+
+    let seasonal_rank = playerData.addSeasonalRank(
+      doc,
+      doc.seasonOrdinal,
+      doc.rankUpdateType
+    );
+    setData({ seasonal_rank });
+
+    const seasonal = { ...playerData.seasonal, [id]: doc };
+    setData({ seasonal });
+
+    if (globals.debugLog || !globals.firstPass) {
+      globals.store.set("seasonal." + id, doc);
+      globals.store.set("seasonal_rank", seasonal_rank);
+    }
+  });
+
   if (data.settings.tags_colors) {
     let newTags = data.settings.tags_colors;
     setData({ tags_colors: { ...newTags } });
