@@ -961,16 +961,12 @@ function createDraftSetDiv(draft) {
 }
 
 exports.createInventoryCard = createInventoryCard;
-function createInventoryCard(card, size = "39px", rarityOverlay = false) {
-  var inventoryCard = createDiv([
-    "inventory_card",
-    card.rarity,
-    `rarity-overlay${rarityOverlay ? "" : "-none"}`
-  ]);
-  inventoryCard.style.width = size;
+function createInventoryCard(card) {
+  var inventoryCard = createDiv(["inventory_card"]);
+  inventoryCard.style.width = "39px";
 
   var img = createImg();
-  img.style.width = size;
+  img.style.width = "39px";
   img.src = getCardImage(card);
   img.title = card.name;
   inventoryCard.appendChild(img);
@@ -988,14 +984,38 @@ function createInventoryCard(card, size = "39px", rarityOverlay = false) {
   return inventoryCard;
 }
 
+exports.createRoundCard = createRoundCard;
+function createRoundCard(card, rarityOverlay = false) {
+  var roundCard = createDiv([
+    "round_card",
+    card.rarity,
+    `rarity-overlay${rarityOverlay ? "" : "-none"}`
+  ]);
+
+  roundCard.title = card.name;
+  roundCard.style.backgroundImage = `url("${getCardImage(card, "art_crop")}")`;
+
+  addCardHover(roundCard, card);
+
+  roundCard.addEventListener("click", () => {
+    if (card.dfc == "SplitHalf") {
+      card = db.card(card.dfcId);
+    }
+    openScryfallCard(card);
+  });
+
+  return roundCard;
+}
+
 function createDraftRares(draft) {
-  var draftRares = createDiv();
+  var draftRares = createDiv(["flex_item"]);
+  draftRares.style.margin = "auto";
   if (!draft.pickedCards) return draftRares;
 
   draft.pickedCards
     .map(cardId => db.card(cardId))
     .filter(card => card.rarity == "rare" || card.rarity == "mythic")
-    .map(card => createInventoryCard(card, undefined, true))
+    .map(card => createRoundCard(card, true))
     .forEach(inventoryCard => draftRares.appendChild(inventoryCard));
 
   return draftRares;

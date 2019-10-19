@@ -1367,9 +1367,15 @@ a:hover {
     background: center no-repeat url('../images/quantity_inf_orange.png');
 }
 
-.rarity-overlay {
-  position: relative;
+.round_card {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    position: relative;
+    margin: auto 4px;
+    background-size: contain;
 }
+
 .rarity-overlay:before {
   pointer-events: none;
   content: "";
