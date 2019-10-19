@@ -328,12 +328,16 @@ function httpBasic() {
                   requestSync.economy = serverData.economy.filter(
                     id => !(id in playerData)
                   );
+                  requestSync.seasonal = serverData.seasonal
+                    .filter(id => !(id in playerData.seasonal))
+                    .map(seasonal => seasonal.id);
 
                   const itemCount =
                     requestSync.courses.length +
                     requestSync.matches.length +
                     requestSync.drafts.length +
-                    requestSync.economy.length;
+                    requestSync.economy.length +
+                    requestSync.seasonal.length;
 
                   if (requestSync) {
                     ipc_send("ipc_log", "Fetch remote player items");
