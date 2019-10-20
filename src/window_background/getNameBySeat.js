@@ -1,5 +1,5 @@
-import playerData from '../shared/player-data';
-import globals from './globals';
+import playerData from "../shared/player-data";
+import globals from "./globals";
 
 // Get player name by seat in the game
 const getNameBySeat = function(seat) {

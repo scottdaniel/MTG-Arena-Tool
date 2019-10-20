@@ -1,6 +1,6 @@
-import { setData } from './background-util';
-import globals from './globals';
-import playerData from '../shared/player-data.js';
+import { setData } from "./background-util";
+import globals from "./globals";
+import playerData from "../shared/player-data.js";
 
 export interface Deck {
   id: string;

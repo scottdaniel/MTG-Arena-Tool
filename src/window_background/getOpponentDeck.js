@@ -1,6 +1,6 @@
-import globals from './globals';
-import db from '../shared/database';
-import Deck from '../shared/deck';
+import globals from "./globals";
+import db from "../shared/database";
+import Deck from "../shared/deck";
 
 function getOpponentDeck() {
   let _deck = new Deck({}, globals.currentMatch.oppCardsUsed, false);
