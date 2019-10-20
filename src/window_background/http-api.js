@@ -6,8 +6,6 @@ import { ipc_send, setData } from "./background-util";
 import playerData from "../shared/player-data";
 import db from "../shared/database";
 import globals from "./globals";
-import db from "../shared/database";
-import playerData from "../shared/player-data.js";
 import { loadPlayerConfig } from "./loadPlayerConfig";
 
 let metadataState = false;

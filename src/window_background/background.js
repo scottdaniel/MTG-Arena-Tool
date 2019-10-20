@@ -1,5 +1,4 @@
-import { app, remote, ipcRenderer: ipc } from "electron";
-import { remote, ipcRenderer as ipc } from "electron";
+import { app, remote, ipcRenderer as ipc } from "electron";
 import format from "date-fns/format";
 import _ from "lodash";
 import path from "path";
@@ -68,15 +67,15 @@ import {
 import { createDeck, createDraft, createMatch, completeMatch } from "./data";
 import * as ArenaLogWatcher from "./arena-log-watcher";
 import * as mtgaLog from "./mtga-log";
-import globals from './globals';
-import addCustomDeck from './addCustomDeck';
-import forceDeckUpdate from './forceDeckUpdate';
+import globals from "./globals";
+import addCustomDeck from "./addCustomDeck";
+import forceDeckUpdate from "./forceDeckUpdate";
 import {
   loadPlayerConfig,
   syncSettings,
   startWatchingLog
 } from "./loadPlayerConfig";
-import update_deck from './updateDeck';
+import update_deck from "./updateDeck";
 
 if (!remote.app.isPackaged) {
   const { openNewGitHubIssue, debugInfo } = require("electron-util");
