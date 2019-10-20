@@ -1,24 +1,30 @@
 import _ from "lodash";
 import differenceInDays from "date-fns/differenceInDays";
-import { IPC_OVERLAY, ARENA_MODE_MATCH, ARENA_MODE_DRAFT, ARENA_MODE_IDLE, CONSTRUCTED_EVENTS } from "../shared/constants";
+import {
+  IPC_OVERLAY,
+  ARENA_MODE_MATCH,
+  ARENA_MODE_DRAFT,
+  ARENA_MODE_IDLE,
+  CONSTRUCTED_EVENTS
+} from "../shared/constants";
 import db from "../shared/database";
 import CardsList from "../shared/cards-list";
 import { get_deck_colors, objectClone, replaceAll } from "../shared/util";
 import * as greToClientInterpreter from "./gre-to-client-interpreter";
 import playerData from "../shared/player-data";
 import sha1 from "js-sha1";
-import globals from './globals';
-import getNameBySeat from './getNameBySeat';
-import Deck from '../shared/deck';
+import globals from "./globals";
+import getNameBySeat from "./getNameBySeat";
+import Deck from "../shared/deck";
 import {
   ipc_send,
   normaliseFields,
   parseWotcTimeFallback,
   setData
 } from "./background-util";
-import actionLog from './actionLog';
-import addCustomDeck from './addCustomDeck'
-import { createDraft, createMatch, completeMatch } from './data';
+import actionLog from "./actionLog";
+import addCustomDeck from "./addCustomDeck";
+import { createDraft, createMatch, completeMatch } from "./data";
 
 var logLanguage = "English";
 
@@ -1253,7 +1259,6 @@ export function onLabelMatchGameRoomStateChangedEvent(entry, json) {
       if (player.userId == playerData.arenaId) {
         globals.currentMatch.player.seat = player.systemSeatId;
       } else {
-        currentMatch.opponent.seat = player.systemSeatId;
         globals.currentMatch.opponent.seat = player.systemSeatId;
       }
     });

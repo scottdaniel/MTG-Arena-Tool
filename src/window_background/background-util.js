@@ -6,7 +6,7 @@ import parse from "date-fns/parse";
 import isValid from "date-fns/isValid";
 import { IPC_BACKGROUND, IPC_MAIN, IPC_OVERLAY } from "../shared/constants.js";
 import playerData from "../shared/player-data.js";
-import globals from './globals';
+import globals from "./globals";
 
 // These were tested briefly
 // They are all taken from logs
@@ -151,7 +151,10 @@ const overlayWhitelist = [
 
 // convenience fn to update player data singletons in all processes
 // (update is destructive, be sure to use spread syntax if necessary)
-export function setData(data, refresh = debugLog || !firstPass) {
+export function setData(
+  data,
+  refresh = globals.debugLog || !globals.firstPass
+) {
   const cleanData = _.omit(data, dataBlacklist);
   playerData.handleSetData(null, JSON.stringify(cleanData));
   ipc_send("set_player_data", JSON.stringify(cleanData), IPC_MAIN);

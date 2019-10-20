@@ -31,7 +31,7 @@ function unleakString(s) {
   return (" " + s).substr(1);
 }
 
-export function ArenaLogDecoder() {
+export default function ArenaLogDecoder() {
   let buffer = "";
   let bufferDiscarded = 0;
   return { append };

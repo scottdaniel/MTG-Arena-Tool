@@ -1,4 +1,3 @@
-
 import { IPC_OVERLAY } from "../shared/constants.js";
 import { objectClone } from "../shared/util";
 import { ipc_send } from "./background-util";
@@ -12,7 +11,7 @@ import update_deck from "./updateDeck";
 
 let actionType = [];
 actionType[0] = "ActionType_None";
-actionType[1] = "ActionType_Cast"
+actionType[1] = "ActionType_Cast";
 actionType[2] = "ActionType_Activate";
 actionType[3] = "ActionType_Play";
 actionType[4] = "ActionType_Activate_Mana";

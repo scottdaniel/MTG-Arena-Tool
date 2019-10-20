@@ -13,9 +13,8 @@
 // At the time of writing there are several backward compatibility issues
 // with very old logs.
 
-import { app, BrowserWindow, ipcMain as ipc } from 'electron';
-
-import path from 'path';
+const { app, BrowserWindow, ipcMain: ipc } = require("electron");
+const path = require("path");
 
 function createBackgroundWindow() {
   const win = new BrowserWindow({
@@ -26,7 +25,7 @@ function createBackgroundWindow() {
     width: 640,
     height: 480,
     title: "Background",
-    icon: "icons/icon.png",
+    icon: "icon.png",
     webPreferences: {
       nodeIntegration: true
     }

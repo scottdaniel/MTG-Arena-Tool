@@ -40,17 +40,16 @@ import {
   onLabelMythicRatingUpdated,
   onLabelTrackProgressUpdated,
   onLabelTrackRewardTierUpdated
-} from './labels';
+} from "./labels";
 import {
   ipc_send,
   getDateFormat,
   setData,
   updateLoading
 } from "./background-util";
-import { ARENA_MODE_MATCH, ARENA_MODE_DRAFT } from '../shared/constants';
-import update_deck from './updateDeck';
-import globals from './globals';
-
+import { ARENA_MODE_MATCH, ARENA_MODE_DRAFT } from "../shared/constants";
+import update_deck from "./updateDeck";
+import globals from "./globals";
 
 var debugLogSpeed = 0.001;
 let logReadEnd = null;
@@ -66,7 +65,7 @@ export function start({ path, chunkSize, onLogEntry, onError, onFinish }) {
   const q = queue({ concurrency: 1 });
   let position = 0;
   let stringDecoder = new StringDecoder();
-  let logDecoder = new ArenaLogDecoder();
+  let logDecoder = ArenaLogDecoder();
 
   schedule();
   const stopWatching = fsWatch(path, schedule, 250);
@@ -95,7 +94,7 @@ export function start({ path, chunkSize, onLogEntry, onError, onFinish }) {
     if (position > size) {
       // the file has been recreated, we must reset our state
       stringDecoder = new StringDecoder();
-      logDecoder = new ArenaLogDecoder();
+      logDecoder = ArenaLogDecoder();
       position = 0;
     }
     while (position < size) {

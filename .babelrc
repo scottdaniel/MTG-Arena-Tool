@@ -3,5 +3,6 @@
         "targets": {
             "electron": "5.0.1"
         }
-    }]]
+    }]],
+    "exclude": "/node_modules/"
 }

@@ -1,82 +1,25 @@
-import { app, remote, ipcRenderer: ipc } from "electron";
-import { remote, ipcRenderer as ipc } from "electron";
-import format from "date-fns/format";
+import { app, remote, ipcRenderer as ipc } from "electron";
 import _ from "lodash";
 import path from "path";
 import Store from "electron-store";
 import fs from "fs";
 import sha1 from "js-sha1";
 import * as httpApi from "./http-api";
-import Deck from "../shared/deck";
-import db from "../shared/database";
 import playerData from "../shared/player-data";
-import { hypergeometricRange } from "../shared/stats-fns";
-import { get_rank_index, getReadableFormat, objectClone } from "../shared/util";
-import {
-  ARENA_MODE_MATCH,
-  ARENA_MODE_DRAFT,
-  ARENA_MODE_IDLE,
-  DEFAULT_TILE,
-  HIDDEN_PW,
-  IPC_OVERLAY,
-  MAIN_DECKS
-} from "../shared/constants";
-import {
-  getDateFormat,
-  ipc_send,
-  setData,
-  unleakString,
-  parseWotcTimeFallback
-} from "./background-util";
-import {
-  onLabelOutLogInfo,
-  onLabelGreToClient,
-  onLabelClientToMatchServiceMessageTypeClientToGREMessage,
-  onLabelInEventGetPlayerCourse,
-  onLabelInEventGetPlayerCourseV2,
-  onLabelInEventJoin,
-  onLabelInEventGetCombinedRankInfo,
-  onLabelInDeckGetDeckLists,
-  onLabelInDeckGetDeckListsV3,
-  onLabelInDeckGetPreconDecks,
-  onLabelInEventGetPlayerCourses,
-  onLabelInEventGetPlayerCoursesV2,
-  onLabelInDeckUpdateDeck,
-  onLabelInDeckUpdateDeckV3,
-  onLabelInventoryUpdated,
-  onLabelInPlayerInventoryGetPlayerInventory,
-  onLabelInPlayerInventoryGetPlayerCardsV3,
-  onLabelInProgressionGetPlayerProgress,
-  onLabelInEventDeckSubmit,
-  onLabelInEventDeckSubmitV3,
-  onLabelInEventGetActiveEvents,
-  onLabelEventMatchCreated,
-  onLabelOutDirectGameChallenge,
-  onLabelOutEventAIPractice,
-  onLabelInDraftDraftStatus,
-  onLabelInDraftMakePick,
-  onLabelOutDraftMakePick,
-  onLabelInEventCompleteDraft,
-  onLabelMatchGameRoomStateChangedEvent,
-  onLabelInEventGetSeasonAndRankDetail,
-  onLabelGetPlayerInventoryGetRewardSchedule,
-  onLabelRankUpdated,
-  onLabelMythicRatingUpdated,
-  onLabelTrackProgressUpdated,
-  onLabelTrackRewardTierUpdated
-} from "./labels";
-import { createDeck, createDraft, createMatch, completeMatch } from "./data";
-import * as ArenaLogWatcher from "./arena-log-watcher";
+import { getReadableFormat } from "../shared/util";
+import { HIDDEN_PW, MAIN_DECKS } from "../shared/constants";
+import { ipc_send, setData, unleakString } from "./background-util";
+import { createDeck } from "./data";
 import * as mtgaLog from "./mtga-log";
-import globals from './globals';
-import addCustomDeck from './addCustomDeck';
-import forceDeckUpdate from './forceDeckUpdate';
+import globals from "./globals";
+import addCustomDeck from "./addCustomDeck";
+import forceDeckUpdate from "./forceDeckUpdate";
 import {
   loadPlayerConfig,
   syncSettings,
   startWatchingLog
 } from "./loadPlayerConfig";
-import update_deck from './updateDeck';
+import update_deck from "./updateDeck";
 
 if (!remote.app.isPackaged) {
   const { openNewGitHubIssue, debugInfo } = require("electron-util");

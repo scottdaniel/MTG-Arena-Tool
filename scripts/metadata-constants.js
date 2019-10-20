@@ -1,6 +1,6 @@
-import electron from 'electron';
+const electron = require("electron");
 
-export const SCRYFALL_LANGUAGE = {
+exports.SCRYFALL_LANGUAGE = {
   DE: "DE",
   EN: "EN",
   ES: "ES",
@@ -13,7 +13,7 @@ export const SCRYFALL_LANGUAGE = {
   "ko-KR": "KO"
 };
 
-export const EVENT_TO_NAME = {
+exports.EVENT_TO_NAME = {
   NPE: "New Player Experience",
   DirectGame: "Direct Game",
   Constructed_Event: "Constructed",
@@ -73,7 +73,7 @@ export const EVENT_TO_NAME = {
   Giant_Monsters_20190719: "Giant Monsters"
 };
 
-export const EVENT_TO_FORMAT = {
+exports.EVENT_TO_FORMAT = {
   Play: "Standard",
   Historic_Play: "Historic",
   DirectGame: "Direct Game",
@@ -135,16 +135,16 @@ export const EVENT_TO_FORMAT = {
 };
 
 // These are the current events in the ranked ladder
-export const LIMITED_RANKED_EVENTS = [
+exports.LIMITED_RANKED_EVENTS = [
   "QuickDraft_M20_20190719",
   "QuickDraft_GRN_20190829",
   "QuickDraft_RNA_20190913",
   "QuickDraft_ELD_20191011"
 ];
 
-export const STANDARD_RANKED_EVENTS = ["Ladder", "Traditional_Ladder"];
+exports.STANDARD_RANKED_EVENTS = ["Ladder", "Traditional_Ladder"];
 
-export const SINGLE_MATCH_EVENTS = [
+exports.SINGLE_MATCH_EVENTS = [
   "AIBotMatch",
   "NPE",
   "DirectGame",
@@ -197,7 +197,7 @@ export const SINGLE_MATCH_EVENTS = [
     tile: 67106
   },
 */
-export const SETS_DATA = {
+exports.SETS_DATA = {
   Ixalan: {
     collation: 100005,
     scryfall: "xln",
@@ -497,10 +497,11 @@ export const SETS_DATA = {
   }
 };
 
-export const COLORS = ["{?}", "{W}", "{U}", "{B}", "{R}", "{G}", "{C}", "", "{X}"];
-export const RARITY = ["token", "land", "common", "uncommon", "rare", "mythic"];
+exports.COLORS = ["{?}", "{W}", "{U}", "{B}", "{R}", "{G}", "{C}", "", "{X}"];
 
-export const SET_NAMES = {
+exports.RARITY = ["token", "land", "common", "uncommon", "rare", "mythic"];
+
+exports.SET_NAMES = {
   W17: "Welcome Deck 2017",
   KLD: "Kaladesh",
   AER: "Aether Revolt",
@@ -543,7 +544,7 @@ export const SET_NAMES = {
   EMN: "Eldritch Moon"
 };
 
-export const NO_DUPES_ART_SETS = [
+exports.NO_DUPES_ART_SETS = [
   "pm20",
   "g18",
   "pgrn",
@@ -555,7 +556,7 @@ export const NO_DUPES_ART_SETS = [
   "mir"
 ];
 
-export const ALLOWED_SCRYFALL = [
+exports.ALLOWED_SCRYFALL = [
   "eld",
   "m20",
   "war",
@@ -610,7 +611,7 @@ export const ALLOWED_SCRYFALL = [
   "emn"
 ];
 
-export const RANKS_SHEETS = [
+exports.RANKS_SHEETS = [
   {
     setCode: "war",
     sheet: "1pk3a1YKGas-NI4ze_8hbwOtVRdYAbzCDIBS9MKjcQ7M",
@@ -658,4 +659,4 @@ export const RANKS_SHEETS = [
   }
 ];
 
-export const APPDATA = (electron.app || electron.remote.app).getPath("userData");
+exports.APPDATA = (electron.app || electron.remote.app).getPath("userData");

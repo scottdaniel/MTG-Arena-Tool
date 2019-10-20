@@ -33,6 +33,8 @@ export function getCardImage(cardObj) {
     cardObj = db.card(cardObj);
   }
 
+  let quality;
+
   if (quality == undefined) {
     quality = pd.settings.cards_quality;
   }
