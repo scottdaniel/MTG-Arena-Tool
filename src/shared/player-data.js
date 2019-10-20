@@ -268,6 +268,7 @@ class PlayerData {
     this.transaction = this.transaction.bind(this);
     this.deck = this.deck.bind(this);
     this.decks = undefined;
+    this.name = undefined;
     this.draft = this.draft.bind(this);
     this.event = this.event.bind(this);
     this.match = this.match.bind(this);

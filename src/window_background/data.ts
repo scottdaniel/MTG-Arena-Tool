@@ -25,7 +25,7 @@ var currentDraftDefault = {
   date: undefined
 };
 
-export function createDraft(id, entry) {
+export function createDraft(id: string, entry: any) {
   const data = {
     ..._.cloneDeep(currentDraftDefault),
     id,
@@ -37,7 +37,56 @@ export function createDraft(id, entry) {
 
 // Match Creation
 
-var matchDataDefault = {
+export interface DeckData {
+  mainDeck: [];
+  sideboard: [];
+}
+
+export interface PlayerMatchData {
+    seat: number,
+    deck: DeckData,
+    life: number,
+    turn: number,
+    name: string,
+    id: string,
+    rank: string,
+    tier: number
+}
+
+export interface MatchData {
+  eventId: string;
+  matchId: string;
+  beginTime: number;
+  matchTime: number;
+  currentPriority: number;
+  bestOf: number;
+  game: number;
+  priorityTimers: number[];
+  lastPriorityChangeTime: number;
+  results: any[];
+  playerChances: Object;
+  playerCardsLeft: Object;
+  oppArchetype: string;
+  oppCards: Object;
+  onThePlay: number;
+  GREtoClient: Object;
+  processedAnnotations: any[];
+  timers: Object;
+  zones: any[];
+  players: Object;
+  annotations: any[];
+  gameObjs: Object;
+  gameInfo: Object;
+  gameStage: string;
+  turnInfo: Object;
+  playerCardsUsed: any[];
+  oppCardsUsed: any[];
+  cardsCast: any[];
+  player: PlayerMatchData;
+  opponent: PlayerMatchData;
+};
+
+const matchDataDefault: MatchData = {
   eventId: "",
   matchId: "",
   beginTime: 0,

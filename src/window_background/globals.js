@@ -10,9 +10,9 @@ let actionLogDir = "";
 
 let logUri = mtgaLog.defaultLogUri();
 
-var currentDeck = new Deck();
+let currentDeck = new Deck();
 
-var currentMatch = null;
+let currentMatch = null;
 
 const debugLog = false;
 
@@ -20,11 +20,11 @@ const debugNet = true;
 
 let duringDraft = false;
 
-var duringMatch = false;
+let duringMatch = false;
 
-var firstPass = true;
+let firstPass = true;
 
-var gameNumberCompleted = 0;
+let gameNumberCompleted = 0;
 
 let idChanges = {};
 
@@ -36,11 +36,11 @@ let logReadStart = null;
 
 let logTime = false;
 
-var matchCompletedOnGameNumber = 0;
+let matchCompletedOnGameNumber = 0;
 
-var matchGameStats = [];
+let matchGameStats = [];
 
-var originalDeck = null;
+let originalDeck = null;
 
 let odds_sample_size = 1;
 
@@ -60,11 +60,11 @@ const rememberCfg = {
   }
 };
 
-var rStore = null;
+let rStore = null;
 
-var store = null;
+let store = null;
 
-var tokenAuth = undefined;
+let tokenAuth = undefined;
 
 let watchingLog = false;
 
