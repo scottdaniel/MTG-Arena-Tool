@@ -1,28 +1,27 @@
-const anime = require("animejs");
-const { remote } = require("electron");
+import anime from "animejs";
+import { remote } from "electron";
 const Menu = remote.Menu;
 const MenuItem = remote.MenuItem;
 
-const {
+import {
   COLORS_BRIEF,
   CARD_RARITIES,
   EASING_DEFAULT
-} = require("../shared/constants");
-const db = require("../shared/database");
-const pd = require("../shared/player-data");
-const { queryElements: $$, createDiv } = require("../shared/dom-fns");
-const { createSelect } = require("../shared/select");
-const { addCardHover, attachOwnerhipStars } = require("../shared/card-hover");
-const {
+} from "../shared/constants";
+import db from "../shared/database";
+import pd from "../shared/player-data";
+import { queryElements as $$, createDiv } from "../shared/dom-fns";
+import { createSelect } from "../shared/select";
+import { addCardHover, attachOwnerhipStars } from "../shared/card-hover";
+import {
   collectionSortRarity,
   getCardImage,
   getCardsMissingCount,
   openScryfallCard,
   replaceAll
-} = require("../shared/util");
-
-const Colors = require("../shared/colors");
-const {
+} from "../shared/util";
+import Colors from "../shared/colors";
+import {
   MULTI,
   COLORLESS,
   WHITE,
@@ -30,14 +29,13 @@ const {
   BLACK,
   GREEN,
   RED
-} = require("../shared/constants.js");
-
-const {
+} from "../shared/constants.js";
+import {
   hideLoadingBars,
   changeBackground,
   ipcSend,
   resetMainContainer
-} = require("./renderer-util");
+} from "./renderer-util";
 
 let collectionPage = 0;
 let sortingAlgorithm = "Sort by Set";
@@ -250,7 +248,7 @@ function get_collection_stats() {
 }
 
 //
-function openCollectionTab() {
+export function openCollectionTab() {
   filteredSets = [];
   filteredMana = [];
   orderedSets = Object.keys(db.sets);
@@ -1313,7 +1311,3 @@ function printCollectionPage(page = 0) {
   collectionPage = page;
   printCards();
 }
-
-module.exports = {
-  openCollectionTab: openCollectionTab
-};

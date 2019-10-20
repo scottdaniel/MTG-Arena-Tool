@@ -1,10 +1,9 @@
-const { createDiv } = require("../shared/dom-fns");
-
-const {
+import { createDiv } from "../shared/dom-fns";
+import {
   setLocalState,
   showLoadingBars,
   hideLoadingBars
-} = require("./renderer-util");
+} from "./renderer-util";
 
 class DataScroller {
   constructor(container, renderData, loadAmount, maxDataIndex) {
@@ -54,4 +53,4 @@ class DataScroller {
   }
 }
 
-module.exports = DataScroller;
+export default DataScroller;

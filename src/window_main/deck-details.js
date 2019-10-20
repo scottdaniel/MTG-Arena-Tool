@@ -1,18 +1,17 @@
-const anime = require("animejs");
-const _ = require("lodash");
-
-const { MANA, CARD_RARITIES, EASING_DEFAULT } = require("../shared/constants");
-const db = require("../shared/database");
-const pd = require("../shared/player-data");
-const { createSelect } = require("../shared/select");
-const {
+import anime from "animejs";
+import _ from "lodash";
+import { MANA, CARD_RARITIES, EASING_DEFAULT } from "../shared/constants";
+import db from "../shared/database";
+import pd from "../shared/player-data";
+import { createSelect } from "../shared/select";
+import {
   createDiv,
   createSpan,
   createInput,
-  queryElements: $$
-} = require("../shared/dom-fns");
-const deckDrawer = require("../shared/deck-drawer");
-const {
+  queryElements as $$
+} from "../shared/dom-fns";
+import * as deckDrawer from "../shared/deck-drawer";
+import {
   deckManaCurve,
   deckTypesStats,
   get_deck_export,
@@ -20,11 +19,10 @@ const {
   get_deck_missing,
   getBoosterCountEstimate,
   timeSince
-} = require("../shared/util");
-
-const Aggregator = require("./aggregator");
-const StatsPanel = require("./stats-panel");
-const {
+} from "../shared/util";
+import Aggregator from "./aggregator";
+import StatsPanel from "./stats-panel";
+import {
   changeBackground,
   colorPieChart,
   drawDeck,
@@ -34,7 +32,7 @@ const {
   makeResizable,
   showLoadingBars,
   pop
-} = require("./renderer-util");
+} from "./renderer-util";
 
 const byId = id => document.getElementById(id);
 // We need to store a sorted list of card types so we create the card counts in the same order.
@@ -236,7 +234,7 @@ function deckStatsSection(deck) {
   return stats;
 }
 
-function openDeck(deck = currentOpenDeck, filters = currentFilters) {
+export function openDeck(deck = currentOpenDeck, filters = currentFilters) {
   if (!deck) return;
   currentOpenDeck = deck;
   if (filters && deck.id !== filters.deckId) filters = null;
@@ -555,7 +553,3 @@ function compare_changes_inner(a, b) {
   }
   return 0;
 }
-
-module.exports = {
-  openDeck
-};

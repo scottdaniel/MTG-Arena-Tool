@@ -1,5 +1,5 @@
-const { ipcRenderer: ipc, remote, shell } = require("electron");
-const sha1 = require("js-sha1");
+import { ipcRenderer as ipc, remote, shell } from "electron";
+import sha1 from "js-sha1";
 if (!remote.app.isPackaged) {
   const { openNewGitHubIssue, debugInfo } = require("electron-util");
   const unhandled = require("electron-unhandled");
@@ -19,10 +19,9 @@ if (!remote.app.isPackaged) {
     dsn: "https://4ec87bda1b064120a878eada5fc0b10f@sentry.io/1778171"
   });
 }
-const anime = require("animejs");
-require("time-elements");
-
-const {
+import anime from "animejs";
+import "time-elements";
+import {
   DATE_SEASON,
   EASING_DEFAULT,
   HIDDEN_PW,
@@ -39,18 +38,17 @@ const {
   SETTINGS_ABOUT,
   SETTINGS_OVERLAY,
   SETTINGS_PRIVACY
-} = require("../shared/constants");
-const pd = require("../shared/player-data");
-const { createDiv, queryElements: $$ } = require("../shared/dom-fns");
-const {
+} from "../shared/constants";
+import pd from "../shared/player-data";
+import { createDiv, queryElements as $$ } from "../shared/dom-fns";
+import {
   compare_cards,
   get_deck_colors,
   get_rank_index,
   removeDuplicates,
   formatRank
-} = require("../shared/util");
-
-const {
+} from "../shared/util";
+import {
   changeBackground,
   getLocalState,
   hideLoadingBars,
@@ -61,23 +59,19 @@ const {
   resetMainContainer,
   setLocalState,
   showLoadingBars
-} = require("./renderer-util");
-const {
-  getDefaultFilters,
-  RANKED_CONST,
-  RANKED_DRAFT
-} = require("./aggregator");
-const { openHomeTab, requestHome } = require("./home");
-const { tournamentOpen } = require("./tournaments");
-const { openDecksTab } = require("./decks");
-const { openDeck } = require("./deck-details");
-const { openHistoryTab } = require("./history");
-const { openEventsTab } = require("./events");
-const { openEconomyTab } = require("./economy");
-const { openExploreTab, setExploreDecks } = require("./explore");
-const { openCollectionTab } = require("./collection");
-const { openSettingsTab, setCurrentOverlaySettings } = require("./settings");
-const { showWhatsNew } = require("./whats-new");
+} from "./renderer-util";
+import Aggregator from "./aggregator";
+import { openHomeTab, requestHome } from "./home";
+import { tournamentOpen } from "./tournaments";
+import { openDecksTab } from "./decks";
+import { openDeck } from "./deck-details";
+import { openHistoryTab } from "./history";
+import { openEventsTab } from "./events";
+import { openEconomyTab } from "./economy";
+import { openExploreTab, setExploreDecks } from "./explore";
+import { openCollectionTab } from "./collection";
+import { openSettingsTab, setCurrentOverlaySettings } from "./settings";
+import { showWhatsNew } from "./whats-new";
 
 const byId = id => document.getElementById(id);
 let sidebarActive = MAIN_LOGIN;
@@ -687,17 +681,17 @@ ready(function() {
         } else if (classList.includes("it7")) {
           sidebarActive = MAIN_HISTORY;
           filters = {
-            ...getDefaultFilters(),
+            ...Aggregator.getDefaultFilters(),
             date: DATE_SEASON,
-            eventId: RANKED_CONST,
+            eventId: Aggregator.RANKED_CONST,
             rankedMode: true
           };
         } else if (classList.includes("it8")) {
           sidebarActive = MAIN_HISTORY;
           filters = {
-            ...getDefaultFilters(),
+            ...Aggregator.getDefaultFilters(),
             date: DATE_SEASON,
-            eventId: RANKED_DRAFT,
+            eventId: Aggregator.RANKED_DRAFT,
             rankedMode: true
           };
         }

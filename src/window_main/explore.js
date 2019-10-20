@@ -1,7 +1,6 @@
-const _ = require("lodash");
-const anime = require("animejs");
-
-const {
+import _ from "lodash";
+import anime from "animejs";
+import {
   CARD_RARITIES,
   MANA,
   COLORS_BRIEF,
@@ -9,19 +8,18 @@ const {
   RANKS,
   RANKS_SORT,
   EASING_DEFAULT
-} = require("../shared/constants");
-const db = require("../shared/database");
-const { queryElements: $$, createDiv } = require("../shared/dom-fns");
-const { createSelect } = require("../shared/select");
-const {
+} from "../shared/constants";
+import db from "../shared/database";
+import { queryElements as $$, createDiv } from "../shared/dom-fns";
+import { createSelect } from "../shared/select";
+import {
   getCardArtCrop,
   get_rank_index_16,
   removeDuplicates,
   compare_cards,
   getBoosterCountEstimate
-} = require("../shared/util");
-
-const {
+} from "../shared/util";
+import {
   addCheckbox,
   getLocalState,
   getWinrateClass,
@@ -30,8 +28,8 @@ const {
   resetMainContainer,
   setLocalState,
   showLoadingBars
-} = require("./renderer-util");
-const { openDeck } = require("./deck-details");
+} from "./renderer-util";
+import { openDeck } from "./deck-details";
 
 // default values for cached local state
 const defaultData = {
@@ -61,7 +59,7 @@ let inputRanks = defaultData.filteredranks;
 let queryInFlight = false; // semaphore to limit simultaneous queries
 
 //
-function openExploreTab() {
+export function openExploreTab() {
   hideLoadingBars();
   queryInFlight = false;
   let { exploreData } = getLocalState();
@@ -482,7 +480,7 @@ function queryExplore() {
   ipcSend("request_explore", query);
 }
 
-function setExploreDecks(data) {
+export function setExploreDecks(data) {
   if (!queryInFlight || !data || !data.result) return;
 
   const exploreList = document.getElementById("explore_list");
@@ -678,8 +676,3 @@ function deckLoad(_deck, index) {
     });
   });
 }
-
-module.exports = {
-  openExploreTab,
-  setExploreDecks
-};

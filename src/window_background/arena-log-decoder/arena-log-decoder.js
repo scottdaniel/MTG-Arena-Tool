@@ -1,6 +1,6 @@
-const _ = require("lodash");
-const nthLastIndexOf = require("./nth-last-index-of");
-const jsonText = require("./json-text");
+import _ from "lodash";
+import nthLastIndexOf from "./nth-last-index-of";
+import * as jsonText from "./json-text";
 
 const CONNECTION_JSON_PATTERN = /\[(?:UnityCrossThreadLogger|Client GRE)\]WebSocketClient (?<client>.*) WebSocketSharp\.WebSocket connecting to .*: (?<socket>.*)(?:\r\n|\n)/;
 
@@ -31,7 +31,7 @@ function unleakString(s) {
   return (" " + s).substr(1);
 }
 
-function ArenaLogDecoder() {
+export default function ArenaLogDecoder() {
   let buffer = "";
   let bufferDiscarded = 0;
   return { append };
@@ -194,5 +194,3 @@ function occurrences(text, re) {
 function unleakRegExp() {
   /\s*/g.exec("");
 }
-
-module.exports = ArenaLogDecoder;

@@ -1,37 +1,36 @@
-const fs = require("fs");
-const path = require("path");
-const { app, ipcRenderer: ipc, remote } = require("electron");
+import fs from "fs";
+import path from "path";
+import { app, ipcRenderer as ipc, remote } from "electron";
 const { dialog } = remote;
-const _ = require("lodash");
-const anime = require("animejs");
-const striptags = require("striptags");
-const Picker = require("vanilla-picker");
-const Pikaday = require("pikaday");
-
-const {
+import _ from "lodash";
+import anime from "animejs";
+import striptags from "striptags";
+import Picker from "vanilla-picker";
+import Pikaday from "pikaday";
+import {
   COLORS_ALL,
   MANA,
   MANA_COLORS,
   IPC_MAIN,
   IPC_BACKGROUND,
   EASING_DEFAULT
-} = require("../shared/constants");
-const db = require("../shared/database");
-const pd = require("../shared/player-data");
-const ConicGradient = require("../shared/conic-gradient");
-const {
+} from "../shared/constants";
+import db from "../shared/database";
+import pd from "../shared/player-data";
+import ConicGradient from "../shared/conic-gradient";
+import {
   createDiv,
   createImg,
   createInput,
   createLabel,
   createSpan,
-  queryElements: $$
-} = require("../shared/dom-fns");
-const { createSelect } = require("../shared/select");
-const deckDrawer = require("../shared/deck-drawer");
-const cardTypes = require("../shared/card-types");
-const { addCardHover } = require("../shared/card-hover");
-const {
+  queryElements as $$
+} from "../shared/dom-fns";
+import { createSelect } from "../shared/select";
+import * as deckDrawer from "../shared/deck-drawer";
+import cardTypes from "../shared/card-types";
+import { addCardHover } from "../shared/card-hover";
+import {
   deckTypesStats,
   formatRank,
   getCardArtCrop,
@@ -41,7 +40,9 @@ const {
   makeId,
   toMMSS,
   openScryfallCard
-} = require("../shared/util");
+} from "../shared/util";
+
+const DEFAULT_BACKGROUND = "../images/Bedevil-Art.jpg";
 
 const byId = id => document.getElementById(id);
 let popTimeout = null;
@@ -60,16 +61,10 @@ const actionLogDir = path.join(
   (app || remote.app).getPath("userData"),
   "actionlogs"
 );
-exports.actionLogDir = actionLogDir;
-
-//
-exports.ipcSend = ipcSend;
 function ipcSend(method, arg, to = IPC_BACKGROUND) {
   ipc.send("ipc_switch", method, IPC_MAIN, arg, to);
 }
 
-//
-exports.pop = pop;
 function pop(str, timeout) {
   const popup = $$(".popup")[0];
   popup.style.opacity = 1;
@@ -88,46 +83,32 @@ function pop(str, timeout) {
   }
 }
 
-//
-exports.showLoadingBars = showLoadingBars;
 function showLoadingBars() {
   $$(".main_loading")[0].style.display = "block";
   document.body.style.cursor = "progress";
 }
 
-//
-exports.hideLoadingBars = hideLoadingBars;
 function hideLoadingBars() {
   $$(".main_loading")[0].style.display = "none";
   document.body.style.cursor = "auto";
 }
 
-//
-exports.setLocalState = setLocalState;
 function setLocalState(state = {}) {
   Object.assign(localState, state);
 }
 
-//
-exports.getLocalState = getLocalState;
 function getLocalState() {
   return localState;
 }
 
-// convenience handler for player data singleton
-exports.toggleArchived = toggleArchived;
 function toggleArchived(id) {
   ipcSend("toggle_archived", id);
 }
 
-//
-exports.getTagColor = getTagColor;
 function getTagColor(tag) {
   return pd.tags_colors[tag] || "#FAE5D2";
 }
 
-//
-exports.makeResizable = makeResizable;
 function makeResizable(div, resizeCallback, finalCallback) {
   var m_pos;
   let finalWidth;
@@ -173,8 +154,6 @@ function makeResizable(div, resizeCallback, finalCallback) {
   );
 }
 
-//
-exports.resetMainContainer = resetMainContainer;
 function resetMainContainer() {
   const container = byId("ux_0");
   container.innerHTML = "";
@@ -187,8 +166,6 @@ function resetMainContainer() {
   return container;
 }
 
-//
-exports.drawDeck = drawDeck;
 function drawDeck(div, deck, showWildcards = false) {
   div.innerHTML = "";
   const unique = makeId(4);
@@ -295,8 +272,6 @@ function drawDeck(div, deck, showWildcards = false) {
   }
 }
 
-//
-exports.drawCardList = drawCardList;
 function drawCardList(div, cards) {
   let unique = makeId(4);
   let counts = {};
@@ -312,8 +287,6 @@ function drawCardList(div, cards) {
   });
 }
 
-//
-exports.drawDeckVisual = drawDeckVisual;
 function drawDeckVisual(container, deck, openCallback) {
   container.innerHTML = "";
   container.style.flexDirection = "column";
@@ -451,8 +424,6 @@ function drawDeckVisual(container, deck, openCallback) {
   }
 }
 
-//
-exports.colorPieChart = colorPieChart;
 function colorPieChart(colorCounts, title) {
   /*
     used for land / card pie charts.
@@ -482,8 +453,6 @@ function colorPieChart(colorCounts, title) {
   return chart;
 }
 
-//
-exports.openActionLog = openActionLog;
 function openActionLog(actionLogId) {
   const conatiner = byId("ux_2");
   conatiner.innerHTML = "";
@@ -541,8 +510,6 @@ function openActionLog(actionLogId) {
   });
 }
 
-//
-exports.toggleVisibility = toggleVisibility;
 function toggleVisibility(...ids) {
   ids.forEach(id => {
     const el = byId(id);
@@ -554,8 +521,6 @@ function toggleVisibility(...ids) {
   });
 }
 
-//
-exports.addCheckbox = addCheckbox;
 function addCheckbox(div, label, id, def, func, disabled = false) {
   const labelEl = createLabel(["check_container", "hover_label"], label);
   if (disabled) {
@@ -578,8 +543,6 @@ function addCheckbox(div, label, id, def, func, disabled = false) {
   return labelEl;
 }
 
-//
-exports.changeBackground = changeBackground;
 function changeBackground(arg = "default", grpId = 0) {
   let artistLine = "";
   const _card = db.card(grpId);
@@ -593,7 +556,7 @@ function changeBackground(arg = "default", grpId = 0) {
       mainWrapper.style.backgroundImage = "url(" + pd.settings.back_url + ")";
     } else {
       topArtist.innerHTML = "Bedevil by Seb Seb McKinnon";
-      mainWrapper.style.backgroundImage = "url(../images/Bedevil-Art.jpg)";
+      mainWrapper.style.backgroundImage = "url(" + DEFAULT_BACKGROUND + ")";
     }
   } else if (_card) {
     mainWrapper.style.backgroundImage = `url(${getCardArtCrop(_card)})`;
@@ -621,8 +584,6 @@ function changeBackground(arg = "default", grpId = 0) {
   }
 }
 
-//
-exports.openDialog = openDialog;
 function openDialog(content, onClose = () => {}) {
   const wrapper = $$(".dialog_wrapper")[0];
   dialogHandler = () => {
@@ -655,8 +616,6 @@ function openDialog(content, onClose = () => {}) {
   });
 }
 
-//
-exports.closeDialog = closeDialog;
 function closeDialog() {
   const wrapper = $$(".dialog_wrapper")[0];
   anime({
@@ -680,8 +639,6 @@ function closeDialog() {
   setTimeout(() => (dialog.innerHTML = ""), 250);
 }
 
-//
-exports.showColorpicker = showColorpicker;
 function showColorpicker(
   color,
   onChange = () => {},
@@ -710,8 +667,6 @@ function showColorpicker(
   pickerWrapper.style.boxShadow = "none";
 }
 
-//
-exports.showDatepicker = showDatepicker;
 function showDatepicker(defaultDate, onChange = () => {}, pickerOptions = {}) {
   const cont = createDiv(["dialog_content"]);
   cont.style.width = "320px";
@@ -729,8 +684,6 @@ function showDatepicker(defaultDate, onChange = () => {}, pickerOptions = {}) {
   openDialog(cont);
 }
 
-//
-exports.renderLogInput = renderLogInput;
 function renderLogInput(section) {
   const logUriLabel = createLabel(["but_container_label"], "Arena Log:", {
     for: "settings_log_uri"
@@ -800,8 +753,6 @@ function renderLogInput(section) {
   );
 }
 
-//
-exports.formatPercent = formatPercent;
 function formatPercent(value, config = { maximumSignificantDigits: 2 }) {
   return value.toLocaleString([], {
     style: "percent",
@@ -809,8 +760,6 @@ function formatPercent(value, config = { maximumSignificantDigits: 2 }) {
   });
 }
 
-//
-exports.formatNumber = formatNumber;
 function formatNumber(value, config = {}) {
   return value.toLocaleString([], {
     style: "decimal",
@@ -818,8 +767,6 @@ function formatNumber(value, config = {}) {
   });
 }
 
-//
-exports.getWinrateClass = getWinrateClass;
 function getWinrateClass(wr) {
   if (wr > 0.65) return "blue";
   if (wr > 0.55) return "green";
@@ -828,8 +775,6 @@ function getWinrateClass(wr) {
   return "white";
 }
 
-//
-exports.getEventWinLossClass = getEventWinLossClass;
 function getEventWinLossClass(wlGate) {
   if (wlGate === undefined) return "white";
   if (wlGate.MaxWins === wlGate.CurrentWins) return "blue";
@@ -838,8 +783,6 @@ function getEventWinLossClass(wlGate) {
   return "red";
 }
 
-//
-exports.compareWinrates = compareWinrates;
 function compareWinrates(a, b) {
   let _a = a.wins / a.losses;
   let _b = b.wins / b.losses;
@@ -850,8 +793,6 @@ function compareWinrates(a, b) {
   return compareColorWinrates(a, b);
 }
 
-//
-exports.compareColorWinrates = compareColorWinrates;
 function compareColorWinrates(a, b) {
   a = a.colors;
   b = b.colors;
@@ -871,15 +812,12 @@ function compareColorWinrates(a, b) {
   return 0;
 }
 
-exports.localTimeSince = localTimeSince;
 function localTimeSince(date) {
   return `<relative-time datetime="${date.toISOString()}">
     ${date.toString()}
   </relative-time>`;
 }
 
-//
-exports.attachMatchData = attachMatchData;
 function attachMatchData(listItem, match) {
   // Deck name
   const deckNameDiv = createDiv(["list_deck_name"], match.playerDeck.name);
@@ -960,8 +898,7 @@ function createDraftSetDiv(draft) {
   return createDiv(["list_deck_name"], draft.set + " draft");
 }
 
-exports.createInventoryCard = createInventoryCard;
-function createInventoryCard(card) {
+export function createInventoryCard(card) {
   var inventoryCard = createDiv(["inventory_card"]);
   inventoryCard.style.width = "39px";
 
@@ -984,8 +921,7 @@ function createInventoryCard(card) {
   return inventoryCard;
 }
 
-exports.createRoundCard = createRoundCard;
-function createRoundCard(card, rarityOverlay = false) {
+export function createRoundCard(card, rarityOverlay = false) {
   var roundCard = createDiv([
     "round_card",
     card.rarity,
@@ -1066,8 +1002,7 @@ function createReplayShareButton(draft) {
   return replayShareButton;
 }
 
-exports.attachDraftData = attachDraftData;
-function attachDraftData(listItem, draft) {
+export function attachDraftData(listItem, draft) {
   console.log("Draft: ", draft);
 
   const draftSetDiv = createDraftSetDiv(draft);
@@ -1107,3 +1042,38 @@ function draftShareLink(id, draft) {
   showLoadingBars();
   ipcSend("request_draft_link", { expire, id, draftData });
 }
+
+export {
+  actionLogDir,
+  ipcSend,
+  pop,
+  showLoadingBars,
+  hideLoadingBars,
+  setLocalState,
+  getLocalState,
+  toggleArchived,
+  getTagColor,
+  makeResizable,
+  resetMainContainer,
+  drawDeck,
+  drawCardList,
+  drawDeckVisual,
+  colorPieChart,
+  openActionLog,
+  toggleVisibility,
+  addCheckbox,
+  changeBackground,
+  openDialog,
+  closeDialog,
+  showColorpicker,
+  showDatepicker,
+  renderLogInput,
+  formatPercent,
+  formatNumber,
+  getWinrateClass,
+  getEventWinLossClass,
+  compareWinrates,
+  compareColorWinrates,
+  localTimeSince,
+  attachMatchData
+};

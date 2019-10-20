@@ -27,7 +27,7 @@
   "repository": "https://github.com/Manuel-777/MTG-Arena-Tool",
   "bugs": "https://github.com/Manuel-777/MTG-Arena-Tool/issues",
   "version": "2.12.3",
-  "main": "src/main.js",
+  "main": "lib/main.js",
   "build": {
     "appId": "com.github.manuel777.mtgatool",
     "files": [
@@ -55,17 +55,18 @@
     "clean:modules": "rm -fr node_modules",
     "clean:lock": "rm -f package-lock.json",
     "postclean": "npm install",
-    "start": "electron .",
+    "start": "npm run babel && electron .",
     "postinstall": "install-app-deps",
-    "format": "prettier --write \"**/*.js\"",
+    "format": "prettier --write \"src/**/*.js\"",
     "test": "npm run --silent test:eslint && npm run --silent test:prettier && npm run --silent test:jest",
     "test:eslint": "eslint . --quiet",
-    "test:prettier": "prettier --list-different \"**/*.js\"",
+    "test:prettier": "prettier --list-different \"src/**/*.js\"",
     "test:jest": "jest",
-    "dist": "build --x64",
+    "dist": "npm run babel && build --x64",
     "version": "node -p \"require('./package.json').version\"",
     "load-logs": "electron \"./scripts/load-logs.js\"",
-    "metadata": "electron \"./scripts/metadata.js\""
+    "metadata": "electron \"./scripts/metadata.js\"",
+    "babel": "babel src --out-dir lib --copy-files"
   },
   "dependencies": {
     "animejs": "^3.0.1",
@@ -80,7 +81,7 @@
     "electron-unhandled": "^2.2.0",
     "electron-updater": "^4.0.6",
     "electron-util": "^0.11.0",
-    "google-protobuf": "^3.7.1",
+    "google-protobuf": "^3.8.0",
     "gunzip-file": "^0.1.1",
     "howler": "^2.1.2",
     "interactjs": "1.5.2",
@@ -97,6 +98,9 @@
     "xmlhttprequest": "^1.8.0"
   },
   "devDependencies": {
+    "@babel/cli": "^7.6.4",
+    "@babel/core": "^7.6.4",
+    "@babel/preset-env": "^7.6.3",
     "@sentry/electron": "^0.17.4",
     "acorn": "^6.1.1",
     "devtron": "^1.4.0",

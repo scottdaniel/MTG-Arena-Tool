@@ -1,26 +1,25 @@
-const { app, remote, ipcRenderer: ipc } = require("electron");
-const Store = require("electron-store");
-const fs = require("fs");
-const sha1 = require("js-sha1");
-const path = require("path");
-
-const playerData = require("../shared/player-data");
-const { getReadableFormat } = require("../shared/util");
-const { HIDDEN_PW, MAIN_DECKS } = require("../shared/constants");
-
-const globals = require("./globals");
-const mtgaLog = require("./mtga-log");
-const httpApi = require("./http-api");
-const { createDeck } = require("./data");
-const { ipc_send, setData, unleakString } = require("./background-util");
-const addCustomDeck = require("./addCustomDeck");
-const forceDeckUpdate = require("./forceDeckUpdate");
-const {
+import { app, remote, ipcRenderer as ipc } from "electron";
+import _ from "lodash";
+import path from "path";
+import Store from "electron-store";
+import fs from "fs";
+import sha1 from "js-sha1";
+import * as httpApi from "./http-api";
+import playerData from "../shared/player-data";
+import { getReadableFormat } from "../shared/util";
+import { HIDDEN_PW, MAIN_DECKS } from "../shared/constants";
+import { ipc_send, setData, unleakString } from "./background-util";
+import { createDeck } from "./data";
+import * as mtgaLog from "./mtga-log";
+import globals from "./globals";
+import addCustomDeck from "./addCustomDeck";
+import forceDeckUpdate from "./forceDeckUpdate";
+import {
   loadPlayerConfig,
   syncSettings,
   startWatchingLog
-} = require("./loadPlayerConfig");
-const update_deck = require("./updateDeck");
+} from "./loadPlayerConfig";
+import update_deck from "./updateDeck";
 
 if (!remote.app.isPackaged) {
   const { openNewGitHubIssue, debugInfo } = require("electron-util");

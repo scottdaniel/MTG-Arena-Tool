@@ -1,28 +1,26 @@
-const differenceInCalendarDays = require("date-fns/differenceInCalendarDays");
-const startOfDay = require("date-fns/startOfDay");
-const compareAsc = require("date-fns/compareAsc");
-
-const db = require("../shared/database");
-const pd = require("../shared/player-data");
-const { createDiv } = require("../shared/dom-fns");
-const { createSelect } = require("../shared/select");
-const { addCardHover } = require("../shared/card-hover");
-const {
+import differenceInCalendarDays from "date-fns/differenceInCalendarDays";
+import startOfDay from "date-fns/startOfDay";
+import compareAsc from "date-fns/compareAsc";
+import db from "../shared/database";
+import pd from "../shared/player-data";
+import { createDiv } from "../shared/dom-fns";
+import { createSelect } from "../shared/select";
+import { addCardHover } from "../shared/card-hover";
+import {
   collectionSortRarity,
   getCardArtCrop,
   getCardImage,
   getReadableEvent,
   openScryfallCard
-} = require("../shared/util");
-
-const DataScroller = require("./data-scroller");
-const {
+} from "../shared/util";
+import DataScroller from "./data-scroller";
+import {
   formatNumber,
   formatPercent,
   resetMainContainer,
   toggleArchived,
   createInventoryCard
-} = require("./renderer-util");
+} from "./renderer-util";
 
 const byId = id => document.getElementById(id);
 const vaultPercentFormat = {
@@ -186,7 +184,7 @@ function getPrettyContext(context, full = true) {
   return pretty || context;
 }
 
-function openEconomyTab(dataIndex = 25, scrollTop = 0) {
+export function openEconomyTab(dataIndex = 25, scrollTop = 0) {
   const mainDiv = resetMainContainer();
   createEconomyUI(mainDiv);
   const dataScroller = new DataScroller(
@@ -980,7 +978,3 @@ function compare_economy(a, b) {
   if (b === undefined) return 0;
   return compareAsc(new Date(a.date), new Date(b.date));
 }
-
-module.exports = {
-  openEconomyTab: openEconomyTab
-};

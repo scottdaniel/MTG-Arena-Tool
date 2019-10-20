@@ -1,9 +1,9 @@
-const { ipc_send } = require("./background-util");
-const fs = require("fs");
-const path = require("path");
-const { IPC_OVERLAY } = require("../shared/constants.js");
-const globals = require("./globals");
-const format = require("date-fns/format");
+import { ipc_send } from "./background-util";
+import fs from "fs";
+import path from "path";
+import { IPC_OVERLAY } from "../shared/constants.js";
+import globals from "./globals";
+import format from "date-fns/format";
 
 var currentActionLog = "";
 
@@ -39,4 +39,4 @@ const actionLog = function(seat, time, str, grpId = 0) {
   );
 };
 
-module.exports = actionLog;
+export default actionLog;

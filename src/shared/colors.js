@@ -1,4 +1,4 @@
-const {
+import {
   WHITE,
   BLUE,
   BLACK,
@@ -6,7 +6,7 @@ const {
   GREEN,
   MULTI,
   COLORLESS
-} = require("../shared/constants.js");
+} from "./constants.js";
 
 class Colors {
   /**
@@ -176,4 +176,4 @@ class Colors {
   }
 }
 
-module.exports = Colors;
+export default Colors;

@@ -1,16 +1,13 @@
-const { IPC_OVERLAY } = require("../shared/constants.js");
-const { objectClone } = require("../shared/util");
-const { ipc_send } = require("./background-util");
-
-const Deck = require("../shared/deck");
-
-const globals = require("./globals");
-
-const actionLog = require("./actionLog");
-const db = require("../shared/database");
-const forceDeckUpdate = require("./forceDeckUpdate");
-const getNameBySeat = require("./getNameBySeat");
-const update_deck = require("./updateDeck");
+import { IPC_OVERLAY } from "../shared/constants.js";
+import { objectClone } from "../shared/util";
+import { ipc_send } from "./background-util";
+import Deck from "../shared/deck";
+import globals from "./globals";
+import actionLog from "./actionLog";
+import db from "../shared/database";
+import forceDeckUpdate from "./forceDeckUpdate";
+import getNameBySeat from "./getNameBySeat";
+import update_deck from "./updateDeck";
 
 let actionType = [];
 actionType[0] = "ActionType_None";
@@ -477,7 +474,7 @@ annotationFunctions.AnnotationType_CardRevealed = function(ann, details) {
 };
 
 // Used for debug only.
-function processAll() {
+export function processAll() {
   for (var i = 0; i < globals.currentMatch.latestMessage; i++) {
     let message = globals.currentMatch.GREtoClient[i];
     if (message) {
@@ -493,7 +490,7 @@ function processAll() {
   globals.currentMatch.oppCardsUsed = getOppUsedCards();
 }
 
-function GREMessageByID(msgId, time) {
+export function GREMessageByID(msgId, time) {
   let message = globals.currentMatch.GREtoClient[msgId];
   globals.logTime = time;
 
@@ -509,7 +506,7 @@ function GREMessageByID(msgId, time) {
   );
 }
 
-function GREMessage(message, time) {
+export function GREMessage(message, time) {
   //globals.currentMatch.GREtoClient[message.msgId] = message;
   globals.logTime = time;
 
@@ -850,10 +847,4 @@ GREMessages.GREMessageType_DieRollResultsResp = function(msg) {
     globals.currentMatch.onThePlay = highest.systemSeatId;
   }
   return true;
-};
-
-module.exports = {
-  GREMessage,
-  GREMessageByID,
-  processAll
 };

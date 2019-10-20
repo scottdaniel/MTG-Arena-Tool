@@ -1,8 +1,7 @@
-const electron = require("electron");
+import electron from "electron";
 const ipc = electron.ipcRenderer;
-const _ = require("lodash");
-
-const {
+import _ from "lodash";
+import {
   CARD_TILE_FLAT,
   DATE_LAST_30,
   DEFAULT_TILE,
@@ -16,8 +15,8 @@ const {
   OVERLAY_SEEN,
   OVERLAY_DRAFT,
   OVERLAY_LOG
-} = require("../shared/constants");
-const db = require("../shared/database");
+} from "./constants";
+import db from "./database";
 
 const playerDataDefault = {
   name: "",
@@ -487,4 +486,6 @@ class PlayerData {
   }
 }
 
-module.exports = new PlayerData();
+const playerData = new PlayerData();
+
+export default playerData;

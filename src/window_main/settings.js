@@ -1,8 +1,7 @@
-const { ipcRenderer: ipc, remote, shell } = require("electron");
-const format = require("date-fns/format");
-const fromUnixTime = require("date-fns/fromUnixTime");
-
-const {
+import { ipcRenderer as ipc, remote, shell } from "electron";
+import format from "date-fns/format";
+import fromUnixTime from "date-fns/fromUnixTime";
+import {
   CARD_TILE_ARENA,
   CARD_TILE_FLAT,
   COLORS_ALL,
@@ -24,26 +23,25 @@ const {
   SETTINGS_PRIVACY,
   SETTINGS_ABOUT,
   SETTINGS_LOGIN
-} = require("../shared/constants");
-const db = require("../shared/database");
-const pd = require("../shared/player-data");
-const {
+} from "../shared/constants";
+import db from "../shared/database";
+import pd from "../shared/player-data";
+import {
   createDiv,
   createImg,
   createInput,
   createLabel,
-  queryElements: $$
-} = require("../shared/dom-fns");
-const deckDrawer = require("../shared/deck-drawer");
-const { showWhatsNew } = require("./whats-new");
-const { createSelect } = require("../shared/select");
-const { getCardImage } = require("../shared/util");
+  queryElements as $$
+} from "../shared/dom-fns";
+import * as deckDrawer from "../shared/deck-drawer";
+import { showWhatsNew } from "./whats-new";
+import { createSelect } from "../shared/select";
+import { getCardImage } from "../shared/util";
 const byId = id => document.getElementById(id);
 
-const parse = require("date-fns/parse");
-const isValid = require("date-fns/isValid");
-
-const {
+import parse from "date-fns/parse";
+import isValid from "date-fns/isValid";
+import {
   addCheckbox,
   changeBackground,
   hideLoadingBars,
@@ -54,7 +52,7 @@ const {
   resetMainContainer,
   setLocalState,
   showColorpicker
-} = require("./renderer-util");
+} from "./renderer-util";
 
 let lastSettingsSection = 1;
 let updateState = "";
@@ -115,7 +113,10 @@ function blurIfEnterKey(element) {
 let currentOverlay = 0;
 
 //
-function openSettingsTab(openSection = lastSettingsSection, scrollTop = 0) {
+export function openSettingsTab(
+  openSection = lastSettingsSection,
+  scrollTop = 0
+) {
   if (openSection !== -1) {
     lastSettingsSection = openSection;
   } else {
@@ -1376,8 +1377,6 @@ function eraseData() {
   }
 }
 
-function setCurrentOverlaySettings(index) {
+export function setCurrentOverlaySettings(index) {
   currentOverlay = index;
 }
-
-module.exports = { setCurrentOverlaySettings, openSettingsTab };

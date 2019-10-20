@@ -1,4 +1,10 @@
-const {
+import fs from "fs";
+import { promisify } from "util";
+import { StringDecoder } from "string_decoder";
+import queue from "queue";
+import ArenaLogDecoder from "./arena-log-decoder/arena-log-decoder";
+import playerData from "../shared/player-data";
+import {
   onLabelOutLogInfo,
   onLabelGreToClient,
   onLabelClientToMatchServiceMessageTypeClientToGREMessage,
@@ -34,25 +40,16 @@ const {
   onLabelMythicRatingUpdated,
   onLabelTrackProgressUpdated,
   onLabelTrackRewardTierUpdated
-} = require("./labels");
-
-const { ARENA_MODE_MATCH, ARENA_MODE_DRAFT } = require("../shared/constants");
-const playerData = require("../shared/player-data");
-
-const ArenaLogDecoder = require("./arena-log-decoder");
-const update_deck = require("./updateDeck");
-const globals = require("./globals");
-const {
+} from "./labels";
+import {
   ipc_send,
   getDateFormat,
   setData,
   updateLoading
-} = require("./background-util");
-
-const fs = require("fs");
-const { promisify } = require("util");
-const queue = require("queue");
-const { StringDecoder } = require("string_decoder");
+} from "./background-util";
+import { ARENA_MODE_MATCH, ARENA_MODE_DRAFT } from "../shared/constants";
+import update_deck from "./updateDeck";
+import globals from "./globals";
 
 var debugLogSpeed = 0.001;
 let logReadEnd = null;
@@ -64,11 +61,11 @@ const fsAsync = {
   stat: promisify(fs.stat)
 };
 
-function start({ path, chunkSize, onLogEntry, onError, onFinish }) {
+export function start({ path, chunkSize, onLogEntry, onError, onFinish }) {
   const q = queue({ concurrency: 1 });
   let position = 0;
   let stringDecoder = new StringDecoder();
-  let logDecoder = new ArenaLogDecoder();
+  let logDecoder = ArenaLogDecoder();
 
   schedule();
   const stopWatching = fsWatch(path, schedule, 250);
@@ -97,7 +94,7 @@ function start({ path, chunkSize, onLogEntry, onError, onFinish }) {
     if (position > size) {
       // the file has been recreated, we must reset our state
       stringDecoder = new StringDecoder();
-      logDecoder = new ArenaLogDecoder();
+      logDecoder = ArenaLogDecoder();
       position = 0;
     }
     while (position < size) {
@@ -503,4 +500,4 @@ function finishLoading() {
   }
 }
 
-module.exports = { startWatchingLog };
+export default { startWatchingLog };

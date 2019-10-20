@@ -1,10 +1,9 @@
-const anime = require("animejs");
-
-const { queryElements: $$, createDiv } = require("../shared/dom-fns");
-const { createSelect } = require("../shared/select");
-const deckDrawer = require("../shared/deck-drawer");
-const { EASING_DEFAULT } = require("../shared/constants.js");
-const {
+import anime from "animejs";
+import { queryElements as $$, createDiv } from "../shared/dom-fns";
+import { createSelect } from "../shared/select";
+import * as deckDrawer from "../shared/deck-drawer";
+import { EASING_DEFAULT } from "../shared/constants.js";
+import {
   compare_cards,
   get_deck_export,
   get_deck_missing,
@@ -14,18 +13,17 @@ const {
   timestamp,
   toHHMMSS,
   urlDecode
-} = require("../shared/util");
-const pd = require("../shared/player-data");
-
-const Aggregator = require("./aggregator");
-const FilterPanel = require("./filter-panel");
-const {
+} from "../shared/util";
+import pd from "../shared/player-data";
+import Aggregator from "./aggregator";
+import FilterPanel from "./filter-panel";
+import {
   pop,
   changeBackground,
   drawDeck,
   drawDeckVisual,
   ipcSend
-} = require("./renderer-util");
+} from "./renderer-util";
 
 let tournamentDeck = null;
 let currentDeck = null;
@@ -37,7 +35,7 @@ let touStates = {};
 let stateClockInterval = null;
 let lastSeenInterval = null;
 
-function tournamentCreate() {
+export function tournamentCreate() {
   anime({
     targets: ".moving_ux",
     left: "-100%",
@@ -71,7 +69,7 @@ function tournamentCreate() {
 
 let stats;
 let record = "-";
-function tournamentOpen(t) {
+export function tournamentOpen(t) {
   //console.log(t);
   tou = t;
   let mainDiv = $$("#ux_1")[0];
@@ -718,7 +716,7 @@ function createDecklistTab() {
   return tab_cont_c;
 }
 
-function tournamentSetState(state) {
+export function tournamentSetState(state) {
   touStates[state.tid] = state;
   if (state.tid == tou._id) {
     $$(".tou_checks")[0].innerHTML = "";
@@ -812,9 +810,3 @@ function drawSideboardDeck(div) {
   div.appendChild(mainboardDiv);
   div.appendChild(sideboardDiv);
 }
-
-module.exports = {
-  tournamentOpen: tournamentOpen,
-  tournamentCreate: tournamentCreate,
-  tournamentSetState: tournamentSetState
-};

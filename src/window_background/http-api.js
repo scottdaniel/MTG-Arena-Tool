@@ -1,14 +1,12 @@
-const electron = require("electron");
-const async = require("async");
-const qs = require("qs");
-
-const { makeId } = require("../shared/util");
-const { ipc_send, setData } = require("./background-util");
-
-const globals = require("./globals");
-const db = require("../shared/database");
-const playerData = require("../shared/player-data.js");
-const { loadPlayerConfig } = require("./loadPlayerConfig");
+import electron from "electron";
+import async from "async";
+import qs from "qs";
+import { makeId } from "../shared/util";
+import { ipc_send, setData } from "./background-util";
+import playerData from "../shared/player-data";
+import db from "../shared/database";
+import globals from "./globals";
+import { loadPlayerConfig } from "./loadPlayerConfig";
 
 let metadataState = false;
 
@@ -109,7 +107,7 @@ function syncUserData(data) {
   setData({ courses_index, draft_index, economy_index, matches_index });
 }
 
-function httpBasic() {
+export function httpBasic() {
   var httpAsyncNew = httpAsync.slice(0);
   //var str = ""; httpAsync.forEach( function(h) {str += h.reqId+", "; }); console.log("httpAsync: ", str);
   async.forEachOfSeries(
@@ -529,7 +527,7 @@ function removeFromHttp(req) {
   });
 }
 
-function httpNotificationsPull() {
+export function httpNotificationsPull() {
   var _id = makeId(6);
   httpAsync.push({
     reqId: _id,
@@ -568,7 +566,7 @@ function notificationSetTimeout() {
   setTimeout(httpNotificationsPull, 10000);
 }
 
-function httpAuth(userName, pass) {
+export function httpAuth(userName, pass) {
   var _id = makeId(6);
   setData({ userName }, false);
   httpAsync.push({
@@ -584,7 +582,7 @@ function httpAuth(userName, pass) {
   });
 }
 
-function httpSubmitCourse(course) {
+export function httpSubmitCourse(course) {
   var _id = makeId(6);
   if (playerData.settings.anon_explore == true) {
     course.PlayerId = "000000000000000";
@@ -600,13 +598,13 @@ function httpSubmitCourse(course) {
   });
 }
 
-function httpSetPlayer() {
+export function httpSetPlayer() {
   // useless I think
   //var _id = makeId(6);
   //httpAsync.push({'reqId': _id, 'method': 'set_player', 'name': name, 'rank': rank, 'tier': tier});
 }
 
-function httpGetExplore(query) {
+export function httpGetExplore(query) {
   var _id = makeId(6);
   httpAsync.unshift({
     reqId: _id,
@@ -628,7 +626,7 @@ function httpGetExplore(query) {
   });
 }
 
-function httpGetTopLadderDecks() {
+export function httpGetTopLadderDecks() {
   var _id = makeId(6);
   httpAsync.unshift({
     reqId: _id,
@@ -637,7 +635,7 @@ function httpGetTopLadderDecks() {
   });
 }
 
-function httpGetTopLadderTraditionalDecks() {
+export function httpGetTopLadderTraditionalDecks() {
   var _id = makeId(6);
   httpAsync.push({
     reqId: _id,
@@ -646,7 +644,7 @@ function httpGetTopLadderTraditionalDecks() {
   });
 }
 
-function httpGetCourse(courseId) {
+export function httpGetCourse(courseId) {
   var _id = makeId(6);
   httpAsync.unshift({
     reqId: _id,
@@ -656,7 +654,7 @@ function httpGetCourse(courseId) {
   });
 }
 
-function httpSetMatch(match) {
+export function httpSetMatch(match) {
   var _id = makeId(6);
   if (playerData.settings.anon_explore == true) {
     match.player.userid = "000000000000000";
@@ -671,7 +669,7 @@ function httpSetMatch(match) {
   });
 }
 
-function httpSetDraft(draft) {
+export function httpSetDraft(draft) {
   var _id = makeId(6);
   draft = JSON.stringify(draft);
   httpAsync.push({
@@ -682,7 +680,7 @@ function httpSetDraft(draft) {
   });
 }
 
-function httpSetEconomy(change) {
+export function httpSetEconomy(change) {
   var _id = makeId(6);
   change = JSON.stringify(change);
   httpAsync.push({
@@ -693,7 +691,7 @@ function httpSetEconomy(change) {
   });
 }
 
-function httpSetSeasonal(change) {
+export function httpSetSeasonal(change) {
   var _id = makeId(6);
   change = JSON.stringify(change);
   httpAsync.push({
@@ -704,7 +702,7 @@ function httpSetSeasonal(change) {
   });
 }
 
-function httpSetSettings(settings) {
+export function httpSetSettings(settings) {
   var _id = makeId(6);
   settings = JSON.stringify(settings);
   httpAsync.push({
@@ -715,7 +713,7 @@ function httpSetSettings(settings) {
   });
 }
 
-function httpDeleteData() {
+export function httpDeleteData() {
   var _id = makeId(6);
   httpAsync.push({
     reqId: _id,
@@ -724,12 +722,12 @@ function httpDeleteData() {
   });
 }
 
-function httpGetDatabase(lang) {
+export function httpGetDatabase(lang) {
   var _id = makeId(6);
   httpAsync.push({ reqId: _id, method: "get_database", lang: lang });
 }
 
-function httpGetDatabaseVersion(lang) {
+export function httpGetDatabaseVersion(lang) {
   var _id = makeId(6);
   httpAsync.push({
     reqId: _id,
@@ -738,7 +736,7 @@ function httpGetDatabaseVersion(lang) {
   });
 }
 
-function httpDraftShareLink(did, exp, draftData) {
+export function httpDraftShareLink(did, exp, draftData) {
   var _id = makeId(6);
   httpAsync.push({
     reqId: _id,
@@ -750,7 +748,7 @@ function httpDraftShareLink(did, exp, draftData) {
   });
 }
 
-function httpLogShareLink(lid, log, exp) {
+export function httpLogShareLink(lid, log, exp) {
   var _id = makeId(6);
   httpAsync.push({
     reqId: _id,
@@ -762,7 +760,7 @@ function httpLogShareLink(lid, log, exp) {
   });
 }
 
-function httpDeckShareLink(deck, exp) {
+export function httpDeckShareLink(deck, exp) {
   var _id = makeId(6);
   httpAsync.push({
     reqId: _id,
@@ -773,7 +771,7 @@ function httpDeckShareLink(deck, exp) {
   });
 }
 
-function httpHomeGet(set) {
+export function httpHomeGet(set) {
   var _id = makeId(6);
   httpAsync.unshift({
     reqId: _id,
@@ -783,7 +781,7 @@ function httpHomeGet(set) {
   });
 }
 
-function httpTournamentGet(tid) {
+export function httpTournamentGet(tid) {
   var _id = makeId(6);
   httpAsync.unshift({
     reqId: _id,
@@ -793,7 +791,7 @@ function httpTournamentGet(tid) {
   });
 }
 
-function httpTournamentJoin(tid, _deck, pass) {
+export function httpTournamentJoin(tid, _deck, pass) {
   let _id = makeId(6);
   let deck = JSON.stringify(playerData.deck(_deck));
   httpAsync.unshift({
@@ -806,7 +804,7 @@ function httpTournamentJoin(tid, _deck, pass) {
   });
 }
 
-function httpTournamentDrop(tid) {
+export function httpTournamentDrop(tid) {
   var _id = makeId(6);
   httpAsync.unshift({
     reqId: _id,
@@ -816,7 +814,13 @@ function httpTournamentDrop(tid) {
   });
 }
 
-function httpTournamentCheck(deck, opp, setCheck, bo3 = "", playFirst = "") {
+export function httpTournamentCheck(
+  deck,
+  opp,
+  setCheck,
+  bo3 = "",
+  playFirst = ""
+) {
   var _id = makeId(6);
   deck = JSON.stringify(deck);
   httpAsync.unshift({
@@ -831,7 +835,7 @@ function httpTournamentCheck(deck, opp, setCheck, bo3 = "", playFirst = "") {
   });
 }
 
-function httpSetMythicRank(opp, rank) {
+export function httpSetMythicRank(opp, rank) {
   var _id = makeId(6);
   httpAsync.push({
     reqId: _id,
@@ -842,7 +846,7 @@ function httpSetMythicRank(opp, rank) {
   });
 }
 
-function httpSetDeckTag(tag, cards, format) {
+export function httpSetDeckTag(tag, cards, format) {
   var _id = makeId(6);
   cards.forEach(card => {
     card.quantity = 1;
@@ -858,7 +862,7 @@ function httpSetDeckTag(tag, cards, format) {
   });
 }
 
-function httpSyncRequest(data) {
+export function httpSyncRequest(data) {
   var _id = makeId(6);
   data = JSON.stringify(data);
   httpAsync.push({
@@ -869,7 +873,7 @@ function httpSyncRequest(data) {
   });
 }
 
-function httpDiscordUnlink() {
+export function httpDiscordUnlink() {
   var _id = makeId(6);
   httpAsync.unshift({
     reqId: _id,
@@ -877,34 +881,3 @@ function httpDiscordUnlink() {
     method_path: "/api/discord_unlink.php"
   });
 }
-
-module.exports = {
-  httpAuth,
-  httpBasic,
-  httpDiscordUnlink,
-  httpSubmitCourse,
-  httpSetPlayer,
-  httpGetExplore,
-  httpGetTopLadderDecks,
-  httpGetTopLadderTraditionalDecks,
-  httpGetCourse,
-  httpSetMatch,
-  httpSetDraft,
-  httpSetEconomy,
-  httpSetSeasonal,
-  httpSetSettings,
-  httpDeleteData,
-  httpGetDatabase,
-  httpGetDatabaseVersion,
-  httpHomeGet,
-  httpDraftShareLink,
-  httpLogShareLink,
-  httpDeckShareLink,
-  httpTournamentGet,
-  httpTournamentJoin,
-  httpTournamentDrop,
-  httpTournamentCheck,
-  httpSetMythicRank,
-  httpSetDeckTag,
-  httpSyncRequest
-};

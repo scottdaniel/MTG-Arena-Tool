@@ -1,19 +1,14 @@
-const _ = require("lodash");
-const db = require("./database.js");
-const { createDiv } = require("../shared/dom-fns");
-const { addCardHover } = require("../shared/card-hover");
-const {
-  get_wc_missing,
-  getCardArtCrop,
-  openScryfallCard
-} = require("../shared/util");
-
-const {
+import _ from "lodash";
+import db from "./database.js";
+import { createDiv } from "./dom-fns";
+import { addCardHover } from "./card-hover";
+import { get_wc_missing, getCardArtCrop, openScryfallCard } from "./util";
+import {
   CARD_TILE_FLAT,
   COLORS_ALL,
   FACE_SPLIT_FULL,
   FACE_ADVENTURE_MAIN
-} = require("./constants.js");
+} from "./constants.js";
 
 //
 function isNumber(n) {
@@ -73,11 +68,11 @@ function rankingClassName(ranking) {
   }
 }
 
-exports.cardSeparator = function(str) {
+export const cardSeparator = function(str) {
   return createDiv(["card_tile_separator"], str);
 };
 
-exports.cardTile = function(
+export const cardTile = function(
   style,
   grpId,
   indent,

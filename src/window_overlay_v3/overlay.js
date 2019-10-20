@@ -1,6 +1,6 @@
-const { ipcRenderer: ipc, webFrame, remote } = require("electron");
-const interact = require("interactjs");
-const format = require("date-fns/format");
+import { ipcRenderer as ipc, webFrame, remote } from "electron";
+import interact from "interactjs";
+import format from "date-fns/format";
 
 if (!remote.app.isPackaged) {
   const { openNewGitHubIssue, debugInfo } = require("electron-util");
@@ -21,30 +21,28 @@ if (!remote.app.isPackaged) {
   });
 }
 
-const TransparencyMouseFix = require("./electron-transparency-mouse-fix.js");
+import TransparencyMouseFix from "./electron-transparency-mouse-fix.js";
 let fix = null;
 
-const striptags = require("striptags");
-
-const db = require("../shared/database");
-const pd = require("../shared/player-data");
-const Deck = require("../shared/deck.js");
-const Colors = require("../shared/colors");
-const deckDrawer = require("../shared/deck-drawer");
-const {
+import striptags from "striptags";
+import db from "../shared/database";
+import pd from "../shared/player-data";
+import Deck from "../shared/deck.js";
+import Colors from "../shared/colors";
+import * as deckDrawer from "../shared/deck-drawer";
+import {
   compare_cards,
   deckManaCurve,
   deckTypesStats,
   get_card_type_sort
-} = require("../shared/util");
-const {
+} from "../shared/util";
+import {
   addCardHover,
   attachOwnerhipStars,
   setRenderer
-} = require("../shared/card-hover");
-const { queryElements, createDiv } = require("../shared/dom-fns");
-
-const {
+} from "../shared/card-hover";
+import { queryElements, createDiv } from "../shared/dom-fns";
+import {
   ARENA_MODE_IDLE,
   ARENA_MODE_MATCH,
   ARENA_MODE_DRAFT,
@@ -64,7 +62,9 @@ const {
   OVERLAY_LOG,
   OVERLAY_DRAFT_BREW,
   OVERLAY_DRAFT_MODES
-} = require("../shared/constants.js");
+} from "../shared/constants.js";
+
+const DEFAULT_BACKGROUND = "../images/Bedevil-Art.jpg";
 
 const byId = id => document.getElementById(id);
 
@@ -1077,7 +1077,7 @@ function change_background(index, arg = "default") {
     if (pd.settings.back_url && pd.settings.back_url !== "default") {
       mainWrapper.style.backgroundImage = "url(" + pd.settings.back_url + ")";
     } else {
-      mainWrapper.style.backgroundImage = "url(../images/Bedevil-Art.jpg)";
+      mainWrapper.style.backgroundImage = "url(" + DEFAULT_BACKGROUND + ")";
     }
   } else {
     const xhr = new XMLHttpRequest();
