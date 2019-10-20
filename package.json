@@ -55,7 +55,7 @@
     "clean:modules": "rm -fr node_modules",
     "clean:lock": "rm -f package-lock.json",
     "postclean": "npm install",
-    "start": "electron ./src/main.js",
+    "start": "electron .",
     "postinstall": "install-app-deps",
     "format": "prettier --write \"**/*.js\"",
     "test": "npm run --silent test:eslint && npm run --silent test:prettier && npm run --silent test:jest",
