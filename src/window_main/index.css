@@ -2478,6 +2478,11 @@ a:hover {
     background-color: var(--color-mid-20);
     border: 1px solid var(--color-light-50);
     -webkit-transition: all .25s cubic-bezier(0.2, 0.5, 0.35, 1);
+    justify-content: space-between;
+    align-items: center;
+    white-space: nowrap;
+    margin: 0;
+    padding: 0 12px;
 }
 
 .select_button:after {
@@ -3103,7 +3108,7 @@ a:hover {
 }
 
 .tou_list_player_name {
-    color: var(--color-light-75));
+    color: var(--color-light-75);
     font-size: 14px;
     text-align: center;
     margin-bottom: 2px;
@@ -3170,7 +3175,7 @@ a:hover {
 }
 
 .tournament_title {
-    color: var(--color-light-75));
+    color: var(--color-light-75);
     text-align: center;
     margin-top: 16px;
     font-family: Beleren;

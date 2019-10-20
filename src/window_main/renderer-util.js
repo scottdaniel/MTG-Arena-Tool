@@ -26,7 +26,7 @@ import {
   createSpan,
   queryElements as $$
 } from "../shared/dom-fns";
-import { createSelect } from "../shared/select";
+import { createSelect } from "../shared/createSelect";
 import * as deckDrawer from "../shared/deck-drawer";
 import cardTypes from "../shared/card-types";
 import { addCardHover } from "../shared/card-hover";
