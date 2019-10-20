@@ -1,13 +1,13 @@
-const { ipc_send, setData } = require("./background-util");
-const globals = require("./globals");
-const playerData = require("../shared/player-data");
-const Store = require("electron-store");
-const arenaLogWatcher = require("./arena-log-watcher");
+import { ipc_send, setData } from "./background-util";
+import globals from "./globals";
+import playerData from "../shared/player-data";
+import Store from "electron-store";
+import arenaLogWatcher from "./arena-log-watcher";
 
 // Merges settings and updates singletons across processes
 // (essentially fancy setData for settings field only)
 // To persist changes, see "save_user_settings" or "save_app_settings"
-function syncSettings(
+export function syncSettings(
   dirtySettings = {},
   refresh = globals.debugLog || !globals.firstPass
 ) {
@@ -17,7 +17,7 @@ function syncSettings(
 }
 
 // Loads this player's configuration file
-function loadPlayerConfig(playerId) {
+export function loadPlayerConfig(playerId) {
   ipc_send("ipc_log", "Load player ID: " + playerId);
   ipc_send("popup", {
     text: "Loading player history...",
@@ -76,8 +76,3 @@ function loadPlayerConfig(playerId) {
 
   return __playerData;
 }
-
-module.exports = {
-  loadPlayerConfig,
-  syncSettings
-};

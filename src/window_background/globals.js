@@ -70,7 +70,7 @@ let watchingLog = false;
 
 let stopWatchingLog;
 
-module.exports = {
+export default {
   actionLogDir,
   currentDeck,
   currentMatch,

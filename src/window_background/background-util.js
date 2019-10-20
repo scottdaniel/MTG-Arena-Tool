@@ -77,7 +77,7 @@ export function parseWotcTimeFallback(dateStr) {
   }
 }
 
-function updateLoading(entry) {
+export function updateLoading(entry) {
   if (globals.firstPass) {
     const completion = entry.position / entry.size;
     ipc_send("popup", {
