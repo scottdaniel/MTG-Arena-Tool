@@ -500,4 +500,4 @@ function finishLoading() {
   }
 }
 
-module.exports = { startWatchingLog };
+export default { startWatchingLog };

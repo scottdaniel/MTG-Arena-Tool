@@ -1,9 +1,9 @@
-const globals = require("./globals");
-const { IPC_OVERLAY } = require("../shared/constants.js");
-const { ipc_send } = require("./background-util");
-const forceDeckUpdate = require("./forceDeckUpdate");
-const getOpponentDeck = require("./getOpponentDeck");
-const { objectClone } = require("../shared/util");
+import globals from './globals';
+import { IPC_OVERLAY } from '../shared/constants.js';
+import { ipc_send } from './background-util';
+import forceDeckUpdate from './forceDeckUpdate';
+import getOpponentDeck from './getOpponentDeck';
+import { objectClone } from '../shared/util';
 
 var lastDeckUpdate = new Date();
 
@@ -34,4 +34,4 @@ function update_deck(force) {
   }
 }
 
-module.exports = update_deck;
+export default update_deck;

@@ -921,8 +921,7 @@ export function createInventoryCard(card) {
   return inventoryCard;
 }
 
-exports.createRoundCard = createRoundCard;
-function createRoundCard(card, rarityOverlay = false) {
+export function createRoundCard(card, rarityOverlay = false) {
   var roundCard = createDiv([
     "round_card",
     card.rarity,
@@ -1043,3 +1042,38 @@ function draftShareLink(id, draft) {
   showLoadingBars();
   ipcSend("request_draft_link", { expire, id, draftData });
 }
+
+export {
+  actionLogDir,
+  ipcSend,
+  pop,
+  showLoadingBars,
+  hideLoadingBars,
+  setLocalState,
+  getLocalState,
+  toggleArchived,
+  getTagColor,
+  makeResizable,
+  resetMainContainer,
+  drawDeck,
+  drawCardList,
+  drawDeckVisual,
+  colorPieChart,
+  openActionLog,
+  toggleVisibility,
+  addCheckbox,
+  changeBackground,
+  openDialog,
+  closeDialog,
+  showColorpicker,
+  showDatepicker,
+  renderLogInput,
+  formatPercent,
+  formatNumber,
+  getWinrateClass,
+  getEventWinLossClass,
+  compareWinrates,
+  compareColorWinrates,
+  localTimeSince,
+  attachMatchData,
+};
