@@ -1,5 +1,5 @@
-const Deck = require("../shared/deck");
-const mtgaLog = require("./mtga-log");
+import Deck from '../shared/deck';
+import mtgaLog from './mtga-log';
 
 // Hey! If you're here, you might be thinking of adding stuff to this file.
 // Don't. This is a shadowy place. You must never go here.
