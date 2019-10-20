@@ -1,15 +1,16 @@
+import _ from 'lodash';
+import database from '../shared/database';
+import electron from 'electron';
+import getOpponentDeck from './getOpponentDeck';
+import globals from './globals';
+import playerData from '../shared/player-data.js';
+import { DEFAULT_TILE } from '../shared/constants';
+import { MatchCreatedEvent } from '../shared/types/MatchCreatedEvent';
+import { objectClone } from '../shared/util';
 // Generate objects using default templates.
 // Nothing in here should call IPC functions
 
-import _ from "lodash";
 
-import electron from "electron";
-import { DEFAULT_TILE } from "../shared/constants";
-import { objectClone } from "../shared/util";
-import playerData from "../shared/player-data.js";
-import database from "../shared/database";
-import getOpponentDeck from "./getOpponentDeck";
-import globals from "./globals";
 
 // Draft Creation
 
@@ -43,19 +44,36 @@ export interface DeckData {
 }
 
 export interface PlayerMatchData {
-    seat: number,
-    deck: DeckData,
-    life: number,
-    turn: number,
-    name: string,
-    id: string,
-    rank: string,
-    tier: number
+  seat: number,
+  deck: DeckData,
+  life: number,
+  turn: number,
+  name: string,
+  id: string,
+  rank: string,
+  tier: number,
+  originalDeck?: any,
+  percentile?: number,
+  leaderboardPlace?: number,
+  cards?: any[],
+}
+
+export interface ExtendedPlayerMatchData {
+  userid: string;
+  win: number;
+  step?: number;
+  seat: number,
+  tier: number,
+  name: string,
+  rank: string,
+  percentile?: number,
+  leaderboardPlace?: number,
 }
 
 export interface MatchData {
   eventId: string;
   matchId: string;
+  InternalEventName?: string,
   beginTime: number;
   matchTime: number;
   currentPriority: number;
@@ -85,6 +103,24 @@ export interface MatchData {
   player: PlayerMatchData;
   opponent: PlayerMatchData;
 };
+
+export interface ExtendedMatchData {
+  draws: number;
+  playerDeck: any;
+  oppDeck: any;
+  tags: any;
+  date: number;
+  onThePlay: number;
+  eventId: string;
+  bestOf: number;
+  gameStats: any[];
+  toolVersion: null;
+  toolRunFromSource: boolean;
+  id: string;
+  duration: number;
+  player: ExtendedPlayerMatchData;
+  opponent: ExtendedPlayerMatchData;
+}
 
 const matchDataDefault: MatchData = {
   eventId: "",
@@ -137,12 +173,14 @@ const matchDataDefault: MatchData = {
   }
 };
 
-export function createMatch(json, matchBeginTime) {
+export function createMatch(json: MatchCreatedEvent, matchBeginTime: number): MatchData {
   var match = _.cloneDeep(matchDataDefault);
 
   match.player.originalDeck = globals.originalDeck;
-  match.player.deck = globals.originalDeck.clone();
-  match.playerCardsLeft = globals.originalDeck.clone();
+  if (globals.originalDeck) {
+    match.player.deck = globals.originalDeck.clone();
+    match.playerCardsLeft = globals.originalDeck.clone();
+  }
 
   match.opponent.name = json.opponentScreenName;
   match.opponent.rank = json.opponentRankingClass;
@@ -164,7 +202,7 @@ export function createMatch(json, matchBeginTime) {
   return match;
 }
 
-function matchResults(matchData) {
+function matchResults(matchData: MatchData): number[] {
   let playerWins = 0;
   let opponentWins = 0;
   let draws = 0;
@@ -185,7 +223,7 @@ function matchResults(matchData) {
 }
 
 // Guess if an event is a limited or constructed event.
-function matchIsLimited(match) {
+function matchIsLimited(match: MatchData): boolean {
   // old data uses InternalEventName
   var eventId = match.eventId || match.InternalEventName;
 
@@ -193,21 +231,23 @@ function matchIsLimited(match) {
   if (database.limited_ranked_events.includes(eventId)) {
     return true;
   }
-  if (eventId.startsWith("QuickDraft")) {
-    return true;
-  }
-  if (eventId.includes("Draft") || eventId.includes("Sealed")) {
-    return true;
-  }
-  if (eventId.includes("Constructed")) {
-    return false;
+  if (eventId) {
+    if (eventId.startsWith("QuickDraft")) {
+      return true;
+    }
+    if (eventId.includes("Draft") || eventId.includes("Sealed")) {
+      return true;
+    }
+    if (eventId.includes("Constructed")) {
+      return false;
+    }
   }
   return false;
 }
 
 // Given match data calculates derived data for storage.
 // This is called when a match is complete.
-export function completeMatch(match, matchData, matchEndTime) {
+export function completeMatch(match: ExtendedMatchData, matchData: MatchData, matchEndTime: number): ExtendedMatchData | undefined {
   if (matchData.eventId === "AIBotMatch") return;
 
   let mode = matchIsLimited(matchData) ? "limited" : "constructed";
@@ -267,7 +307,7 @@ export function completeMatch(match, matchData, matchEndTime) {
 }
 
 // Deck Creation
-
+// This isn't typed yet because it's slightly more complicated.
 const deckDefault = {
   deckTileId: DEFAULT_TILE,
   description: "",

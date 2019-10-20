@@ -12,7 +12,7 @@ let logUri = mtgaLog.defaultLogUri();
 
 let currentDeck = new Deck();
 
-let currentMatch = null;
+let currentMatch: any = null;
 
 const debugLog = false;
 
@@ -26,25 +26,25 @@ let firstPass = true;
 
 let gameNumberCompleted = 0;
 
-let idChanges = {};
+let idChanges: any = {};
 
-let initialLibraryInstanceIds = [];
+let initialLibraryInstanceIds: any[] = [];
 
-let instanceToCardIdMap = {};
+let instanceToCardIdMap: any = {};
 
-let logReadStart = null;
+let logReadStart: any = null;
 
 let logTime = false;
 
 let matchCompletedOnGameNumber = 0;
 
-let matchGameStats = [];
+let matchGameStats: any[] = [];
 
-let originalDeck = null;
+let originalDeck: any = undefined;
 
 let odds_sample_size = 1;
 
-let toolVersion = null;
+let toolVersion: any = null;
 
 const rememberCfg = {
   email: "",
@@ -60,15 +60,15 @@ const rememberCfg = {
   }
 };
 
-let rStore = null;
+let rStore: any = null;
 
-let store = null;
+let store: any = null;
 
-let tokenAuth = undefined;
+let tokenAuth: any = undefined;
 
 let watchingLog = false;
 
-let stopWatchingLog;
+let stopWatchingLog: any;
 
 export default {
   actionLogDir,
