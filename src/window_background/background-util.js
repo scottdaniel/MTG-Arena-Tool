@@ -1,8 +1,3 @@
-/*
-global
-  debugLog
-  firstPass
-*/
 // Utility functions that belong only to background
 import { ipcRenderer as ipc } from "electron";
 
@@ -11,6 +6,7 @@ import parse from "date-fns/parse";
 import isValid from "date-fns/isValid";
 import { IPC_BACKGROUND, IPC_MAIN, IPC_OVERLAY } from "../shared/constants.js";
 import playerData from "../shared/player-data.js";
+import globals from './globals';
 
 // These were tested briefly
 // They are all taken from logs
@@ -78,6 +74,17 @@ export function parseWotcTimeFallback(dateStr) {
     } else {
       throw e;
     }
+  }
+}
+
+function updateLoading(entry) {
+  if (globals.firstPass) {
+    const completion = entry.position / entry.size;
+    ipc_send("popup", {
+      text: `Reading log: ${Math.round(100 * completion)}%`,
+      time: 0,
+      progress: completion
+    });
   }
 }
 

@@ -640,6 +640,7 @@ export const RANKS = [
   "Diamond",
   "Mythic"
 ];
+export const CONSTRUCTED_EVENTS = ["Ladder", "Traditional_Ladder"];
 export const OVERLAY_FULL = 0;
 export const OVERLAY_LEFT = 1;
 export const OVERLAY_ODDS = 2;

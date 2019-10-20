@@ -1,3 +1,45 @@
+## <small>2.12.3 (2019-10-16)</small>
+
+* bugfix ([469211e](https://github.com/Manuel-777/MTG-Arena-Tool/commit/469211e))
+* constructed events constant ([8e7300f](https://github.com/Manuel-777/MTG-Arena-Tool/commit/8e7300f))
+* edit mode - hover card ([662f0c3](https://github.com/Manuel-777/MTG-Arena-Tool/commit/662f0c3))
+* mythic rank update ([85af02f](https://github.com/Manuel-777/MTG-Arena-Tool/commit/85af02f))
+* save to store ([c7b4a18](https://github.com/Manuel-777/MTG-Arena-Tool/commit/c7b4a18))
+* seasonal http send ([ca1d249](https://github.com/Manuel-777/MTG-Arena-Tool/commit/ca1d249))
+* Separate data from index ([552b738](https://github.com/Manuel-777/MTG-Arena-Tool/commit/552b738))
+* sync seasonal ([1f7c4a0](https://github.com/Manuel-777/MTG-Arena-Tool/commit/1f7c4a0))
+* track season rank ([9ec8a27](https://github.com/Manuel-777/MTG-Arena-Tool/commit/9ec8a27))
+* Update player-data.js ([5cef87b](https://github.com/Manuel-777/MTG-Arena-Tool/commit/5cef87b))
+
+
+
+## <small>2.12.2 (2019-10-14)</small>
+
+* bugfix ([c84edd1](https://github.com/Manuel-777/MTG-Arena-Tool/commit/c84edd1))
+* disable transaprency debug ([f16e421](https://github.com/Manuel-777/MTG-Arena-Tool/commit/f16e421))
+* extend timeout ([5ffaa96](https://github.com/Manuel-777/MTG-Arena-Tool/commit/5ffaa96)), closes [#631](https://github.com/Manuel-777/MTG-Arena-Tool/issues/631)
+* move sentry dependency to dev-only ([5b79b15](https://github.com/Manuel-777/MTG-Arena-Tool/commit/5b79b15))
+* prettier ([b4a6c08](https://github.com/Manuel-777/MTG-Arena-Tool/commit/b4a6c08))
+* track card types in zones ([0cf53de](https://github.com/Manuel-777/MTG-Arena-Tool/commit/0cf53de))
+* Unknown dates ([479827a](https://github.com/Manuel-777/MTG-Arena-Tool/commit/479827a))
+
+
+
+## <small>2.12.1 (2019-10-13)</small>
+
+* Added an Advanced Filter : Owned quantity  ([120c1ec](https://github.com/Manuel-777/MTG-Arena-Tool/commit/120c1ec))
+* bullet behaviour and reset filters ([24445f2](https://github.com/Manuel-777/MTG-Arena-Tool/commit/24445f2))
+* filter non booster sets ([8e72382](https://github.com/Manuel-777/MTG-Arena-Tool/commit/8e72382))
+* hide overlay if not visible ([6f9273f](https://github.com/Manuel-777/MTG-Arena-Tool/commit/6f9273f))
+* new events ([c37e83b](https://github.com/Manuel-777/MTG-Arena-Tool/commit/c37e83b))
+* only in boosters toggle ([cec0a2f](https://github.com/Manuel-777/MTG-Arena-Tool/commit/cec0a2f))
+* testing Sentry ([ae747ed](https://github.com/Manuel-777/MTG-Arena-Tool/commit/ae747ed))
+* Update collection.js ([d52f2da](https://github.com/Manuel-777/MTG-Arena-Tool/commit/d52f2da))
+* Update main.js ([8a41db3](https://github.com/Manuel-777/MTG-Arena-Tool/commit/8a41db3))
+* Update metadata-constants.js ([b02f8c2](https://github.com/Manuel-777/MTG-Arena-Tool/commit/b02f8c2))
+
+
+
 ## 2.12.0 (2019-10-12)
 
 * add class once ([f16d0c6](https://github.com/Manuel-777/MTG-Arena-Tool/commit/f16d0c6))

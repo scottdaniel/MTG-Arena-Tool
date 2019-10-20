@@ -7,6 +7,7 @@ import subDays from "date-fns/subDays";
 import {
   COLORS_ALL,
   COLORS_BRIEF,
+  CONSTRUCTED_EVENTS,
   DATE_ALL_TIME,
   DATE_LAST_30,
   DATE_LAST_DAY,
@@ -34,6 +35,7 @@ const ALL_DRAFTS = "All Drafts";
 const DRAFT_REPLAYS = "Draft Replays";
 // Event-related constant
 const ALL_EVENT_TRACKS = "All Event Tracks";
+
 // Archetype constants
 const NO_ARCH = "No Archetype";
 

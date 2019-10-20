@@ -1,7 +1,6 @@
 import _ from "lodash";
 import nthLastIndexOf from "./nth-last-index-of";
 import * as jsonText from "./json-text";
-import { unleakString } from "../background-util";
 
 const CONNECTION_JSON_PATTERN = /\[(?:UnityCrossThreadLogger|Client GRE)\]WebSocketClient (?<client>.*) WebSocketSharp\.WebSocket connecting to .*: (?<socket>.*)(?:\r\n|\n)/;
 
@@ -28,7 +27,11 @@ const logEntryPattern = new RegExp(
   "g"
 );
 
-export default function ArenaLogDecoder() {
+function unleakString(s) {
+  return (" " + s).substr(1);
+}
+
+export function ArenaLogDecoder() {
   let buffer = "";
   let bufferDiscarded = 0;
   return { append };

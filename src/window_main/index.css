@@ -1,5 +1,14 @@
 @import '../../node_modules/pikaday/css/pikaday.css';
 
+
+:root {
+  --wc_common_png: url('../images/wc_common.png');
+  --wc_uncommon_png: url('../images/wc_uncommon.png');
+  --wc_rare_png: url('../images/wc_rare.png');
+  --wc_mythic_png: url('../images/wc_mythic.png');
+  --booster_png: url('../images/booster.png');
+}
+
 span i {
     margin-left: 4px;
 }
@@ -1204,11 +1213,11 @@ a:hover {
     background-image: url('../images/complete.png');
 }
 
-.wc_common      { background-image: url('../images/wc_common.png'); }
-.wc_uncommon    { background-image: url('../images/wc_uncommon.png'); }
-.wc_rare        { background-image: url('../images/wc_rare.png'); }
-.wc_mythic      { background-image: url('../images/wc_mythic.png'); }
-.wc_booster     { background-image: url('../images/booster.png'); height: 34px; line-height: 34px; }
+.wc_common      { background-image: var(--wc_common_png); }
+.wc_uncommon    { background-image: var(--wc_uncommon_png); }
+.wc_rare        { background-image: var(--wc_rare_png); }
+.wc_mythic      { background-image: var(--wc_mythic_png); }
+.wc_booster     { background-image: var(--booster_png); height: 34px; line-height: 34px; }
 
 .inventory {
     padding-left: 8px;
@@ -1269,7 +1278,7 @@ a:hover {
     box-shadow: 0 5px 14px 2px rgba(0, 0, 0, 0.25);
 }
 
-.inventory_card_img {
+.inventory_card img {
     cursor: pointer;
     -webkit-border-radius: 4.75% / 3.5%;
     box-shadow: 0 5px 14px 2px rgba(0, 0, 0, 0.25);
@@ -1346,6 +1355,40 @@ a:hover {
     height: 24px;
     display: inline-block;
     background: center no-repeat url('../images/quantity_inf_orange.png');
+}
+
+.round_card {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    position: relative;
+    margin: auto 4px;
+    background-size: contain;
+}
+
+.rarity-overlay:before {
+  pointer-events: none;
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background-repeat: no-repeat;
+  background-position: center center;
+}
+
+.rarity-overlay.common:before {
+  background-image: var(--wc_common_png);
+}
+.rarity-overlay.uncommon:before {
+  background-image: var(--wc_uncommon_png);
+}
+.rarity-overlay.rare:before {
+  background-image: var(--wc_rare_png);
+}
+.rarity-overlay.mythic:before {
+  background-image: var(--wc_mythic_png);
 }
 
 .icon_search_unowned {

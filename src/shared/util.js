@@ -33,13 +33,14 @@ export function getCardImage(cardObj) {
     cardObj = db.card(cardObj);
   }
 
+  if (quality == undefined) {
+    quality = pd.settings.cards_quality;
+  }
+
   try {
-    let url = cardObj.images[pd.settings.cards_quality];
+    let url = cardObj.images[quality];
     if (url == undefined || url == "") throw "Undefined url";
-    return (
-      "https://img.scryfall.com/cards" +
-      cardObj.images[pd.settings.cards_quality]
-    );
+    return "https://img.scryfall.com/cards" + cardObj.images[quality];
   } catch (e) {
     console.log("Cant find card image: ", cardObj);
     return "../images/notfound.png";

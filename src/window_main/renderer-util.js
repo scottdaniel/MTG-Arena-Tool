@@ -38,7 +38,8 @@ import {
   getCardImage,
   getReadableEvent,
   makeId,
-  toMMSS
+  toMMSS,
+  openScryfallCard
 } from "../shared/util";
 
 const DEFAULT_BACKGROUND = "../images/Bedevil-Art.jpg";
@@ -850,13 +851,13 @@ function attachMatchData(listItem, match) {
   oppRank.title = formatRank(match.opponent);
   listItem.rightTop.appendChild(oppRank);
 
+  let date = !match.date
+    ? "Unknown date - "
+    : localTimeSince(new Date(match.date));
   // Match time
   const matchTime = createDiv(
     ["list_match_time"],
-    localTimeSince(new Date(match.date)) +
-      " " +
-      toMMSS(match.duration) +
-      " long"
+    date + " " + toMMSS(match.duration) + " long"
   );
   listItem.rightBottom.appendChild(matchTime);
 
@@ -893,56 +894,79 @@ function attachMatchData(listItem, match) {
   }
 }
 
-export {
-  actionLogDir,
-  ipcSend,
-  pop,
-  showLoadingBars,
-  hideLoadingBars,
-  setLocalState,
-  getLocalState,
-  toggleArchived,
-  getTagColor,
-  makeResizable,
-  resetMainContainer,
-  drawDeck,
-  drawCardList,
-  drawDeckVisual,
-  colorPieChart,
-  openActionLog,
-  toggleVisibility,
-  addCheckbox,
-  changeBackground,
-  openDialog,
-  closeDialog,
-  showColorpicker,
-  showDatepicker,
-  renderLogInput,
-  formatPercent,
-  formatNumber,
-  getWinrateClass,
-  getEventWinLossClass,
-  compareWinrates,
-  compareColorWinrates,
-  localTimeSince,
-  attachMatchData,
-  attachDraftData
-};
-function attachDraftData(listItem, draft) {
-  // console.log("Draft: ", match);
+function createDraftSetDiv(draft) {
+  return createDiv(["list_deck_name"], draft.set + " draft");
+}
 
-  const draftSetDiv = createDiv(["list_deck_name"], draft.set + " draft");
-  listItem.leftTop.appendChild(draftSetDiv);
+export function createInventoryCard(card) {
+  var inventoryCard = createDiv(["inventory_card"]);
+  inventoryCard.style.width = "39px";
 
-  const draftTimeDiv = createDiv(
-    ["list_match_time"],
-    localTimeSince(new Date(draft.date))
-  );
-  listItem.rightBottom.appendChild(draftTimeDiv);
+  var img = createImg();
+  img.style.width = "39px";
+  img.src = getCardImage(card);
+  img.title = card.name;
+  inventoryCard.appendChild(img);
 
-  const replayDiv = createDiv(["list_match_replay"], "See replay");
-  listItem.rightTop.appendChild(replayDiv);
+  addCardHover(inventoryCard, card);
 
+  inventoryCard.addEventListener("click", () => {
+    if (card.dfc == "SplitHalf") {
+      card = db.card(card.dfcId);
+    }
+    //let newname = card.name.split(' ').join('-');
+    openScryfallCard(card);
+  });
+
+  return inventoryCard;
+}
+
+exports.createRoundCard = createRoundCard;
+function createRoundCard(card, rarityOverlay = false) {
+  var roundCard = createDiv([
+    "round_card",
+    card.rarity,
+    `rarity-overlay${rarityOverlay ? "" : "-none"}`
+  ]);
+
+  roundCard.title = card.name;
+  roundCard.style.backgroundImage = `url("${getCardImage(card, "art_crop")}")`;
+
+  addCardHover(roundCard, card);
+
+  roundCard.addEventListener("click", () => {
+    if (card.dfc == "SplitHalf") {
+      card = db.card(card.dfcId);
+    }
+    openScryfallCard(card);
+  });
+
+  return roundCard;
+}
+
+function createDraftRares(draft) {
+  var draftRares = createDiv(["flex_item"]);
+  draftRares.style.margin = "auto";
+  if (!draft.pickedCards) return draftRares;
+
+  draft.pickedCards
+    .map(cardId => db.card(cardId))
+    .filter(card => card.rarity == "rare" || card.rarity == "mythic")
+    .map(card => createRoundCard(card, true))
+    .forEach(inventoryCard => draftRares.appendChild(inventoryCard));
+
+  return draftRares;
+}
+
+function createDraftTimeDiv(draft) {
+  return createDiv(["list_match_time"], localTimeSince(new Date(draft.date)));
+}
+
+function createReplayDiv(draft) {
+  return createDiv(["list_match_replay"], "See replay");
+}
+
+function createReplayShareButton(draft) {
   const replayShareButton = createDiv(["list_draft_share", draft.id + "dr"]);
   replayShareButton.addEventListener("click", e => {
     e.stopPropagation();
@@ -976,6 +1000,22 @@ function attachDraftData(listItem, draft) {
     openDialog(cont);
     draftShareLink(draft.id, draft);
   });
+  return replayShareButton;
+}
+
+export function attachDraftData(listItem, draft) {
+  console.log("Draft: ", draft);
+
+  const draftSetDiv = createDraftSetDiv(draft);
+  const draftRares = createDraftRares(draft);
+  const draftTimeDiv = createDraftTimeDiv(draft);
+  const replayDiv = createReplayDiv(draft);
+  const replayShareButton = createReplayShareButton(draft);
+
+  listItem.leftTop.appendChild(draftSetDiv);
+  listItem.center.appendChild(draftRares);
+  listItem.rightBottom.appendChild(draftTimeDiv);
+  listItem.rightTop.appendChild(replayDiv);
   listItem.right.after(replayShareButton);
 }
 
