@@ -18,12 +18,6 @@ import {
   OVERLAY_DRAFT_MODES
 } from "./shared/constants";
 
-// required for webpack
-// require('./window_updater/index.html');
-// require('./window_background/index.html');
-// require('./window_overlay_v3/index.html');
-// require('./window_main/index.html');
-
 app.setAppUserModelId("com.github.manuel777.mtgatool");
 
 // Adds debug features like hotkeys for triggering dev tools and reload
@@ -600,7 +594,7 @@ function createMainWindow() {
     width: 800,
     height: 600,
     title: "MTG Arena Tool",
-    icon: "../icons/icon.png",
+    icon: "icons/icon.png",
     webPreferences: {
       nodeIntegration: true
     }

@@ -11,7 +11,7 @@ export const setRenderer = value => {
   renderer = value;
 };
 
-function addCardHover(element, card) {
+export function addCardHover(element, card) {
   if (!card || !card.images || card.type == "Special") return;
 
   element.addEventListener("mouseover", () => {
@@ -79,7 +79,7 @@ function hide(element) {
   return element;
 }
 
-function attachOwnerhipStars(card, starContainer) {
+export function attachOwnerhipStars(card, starContainer) {
   let isbasic = cardHasType(card, "Basic Land");
   starContainer.innerHTML = "";
   starContainer.style.opacity = 1;
@@ -119,8 +119,7 @@ function attachOwnerhipStars(card, starContainer) {
   }
 }
 
-export { addCardHover, attachOwnerhipStars, attachDraftRatings };
-function attachDraftRatings(card, ratingsContainer) {
+export function attachDraftRatings(card, ratingsContainer) {
   ratingsContainer.innerHTML = "";
   ratingsContainer.style.opacity = 1;
   ratingsContainer.style.display = "flex";
