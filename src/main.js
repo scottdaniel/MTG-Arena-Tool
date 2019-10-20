@@ -600,7 +600,7 @@ function createMainWindow() {
     width: 800,
     height: 600,
     title: "MTG Arena Tool",
-    icon: "icons/icon.png",
+    icon: "../icons/icon.png",
     webPreferences: {
       nodeIntegration: true
     }
