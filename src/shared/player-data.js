@@ -267,7 +267,7 @@ class PlayerData {
 
     this.transaction = this.transaction.bind(this);
     this.deck = this.deck.bind(this);
-    this.decks = this.decks.bind(this);
+    this.decks = undefined;
     this.draft = this.draft.bind(this);
     this.event = this.event.bind(this);
     this.match = this.match.bind(this);
@@ -310,10 +310,6 @@ class PlayerData {
     return this.economy_index
       .filter(this.transactionExists)
       .map(this.transaction);
-  }
-
-  get decks() {
-    return this.decks;
   }
 
   get deckList() {
