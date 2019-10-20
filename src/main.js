@@ -528,7 +528,7 @@ function createUpdaterWindow() {
     width: 320,
     height: 240,
     title: "Updater",
-    icon: "../icons/icon.png",
+    icon: "icons/icon.png",
     webPreferences: {
       nodeIntegration: true
     }
@@ -547,7 +547,7 @@ function createBackgroundWindow() {
     width: 640,
     height: 480,
     title: "Background",
-    icon: "../icons/icon.png",
+    icon: "icons/icon.png",
     webPreferences: {
       nodeIntegration: true
     }
@@ -601,7 +601,7 @@ function createMainWindow() {
     width: 800,
     height: 600,
     title: "MTG Arena Tool",
-    icon: "../icons/icon.png",
+    icon: "icons/icon.png",
     webPreferences: {
       nodeIntegration: true
     }
