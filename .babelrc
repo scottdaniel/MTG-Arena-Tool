@@ -1,8 +1,13 @@
 {
-    "presets": [["@babel/preset-env", {
-        "targets": {
-            "electron": "5.0.1"
-        }
-    }], "@babel/preset-react"],
+    "presets": [
+        ["@babel/preset-env", {
+            "targets": {
+                "electron": "5.0.1"
+            }
+        }],
+        "@babel/preset-react",
+        "@babel/preset-typescript"
+    ],
+    
     "exclude": "/node_modules/"
 }
