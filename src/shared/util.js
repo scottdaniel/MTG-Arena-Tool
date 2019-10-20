@@ -28,12 +28,10 @@ export function getCardArtCrop(cardObj) {
   }
 }
 
-export function getCardImage(cardObj) {
+export function getCardImage(cardObj, quality = undefined) {
   if (typeof cardObj !== "object") {
     cardObj = db.card(cardObj);
   }
-
-  let quality;
 
   if (quality == undefined) {
     quality = pd.settings.cards_quality;

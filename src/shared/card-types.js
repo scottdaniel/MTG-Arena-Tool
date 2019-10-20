@@ -2,7 +2,7 @@ import _ from "lodash";
 
 //
 // this order matters because things like Artifact Creatures exist
-const cardTypes = [
+export const cardTypes = [
   "Land",
   "Creature",
   "Artifact",
@@ -24,5 +24,3 @@ function cardHasType(card, type) {
     throw new Error("The specified card object does not have a type property");
   return card.type.includes(type + " ");
 }
-
-export default cardTypes;

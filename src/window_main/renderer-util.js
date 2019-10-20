@@ -28,7 +28,7 @@ import {
 } from "../shared/dom-fns";
 import { createSelect } from "../shared/createSelect";
 import * as deckDrawer from "../shared/deck-drawer";
-import cardTypes from "../shared/card-types";
+import { cardType } from "../shared/card-types";
 import { addCardHover } from "../shared/card-hover";
 import {
   deckTypesStats,
@@ -191,8 +191,8 @@ function drawDeck(div, deck, showWildcards = false) {
   const cardsByGroup = _(deck.mainDeck)
     .map(card => ({ data: db.card(card.id), ...card }))
     .groupBy(card => {
-      const cardType = cardTypes.cardType(card.data);
-      switch (cardType) {
+      const type = cardType(card.data);
+      switch (type) {
         case "Creature":
           return "Creatures";
         case "Planeswalker":
@@ -207,7 +207,7 @@ function drawDeck(div, deck, showWildcards = false) {
         case "Land":
           return "Lands";
         default:
-          throw new Error(`Unexpected card type: ${cardType}`);
+          throw new Error(`Unexpected card type: ${type}`);
       }
     })
     .value();
