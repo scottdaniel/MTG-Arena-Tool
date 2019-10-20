@@ -1,4 +1,7 @@
 import { createDiv, queryElements as $$ } from "./dom-fns";
+import * as React from 'react';
+import * as ReactDOM from 'react-dom';
+import ReactSelect from './reactSelect';
 
 function createSelect(
   parent,
@@ -8,62 +11,26 @@ function createSelect(
   divClass,
   optionFormatter
 ) {
-  // let selectContainer = createDiv(["select_container", divClass]);
-  // selectContainer.id = divClass;
-  // if (!options.includes(current)) current = options[0];
-  // selectContainer.value = current;
-  // let currentDisplay = current;
-  // if (typeof optionFormatter === "function") {
-  //   currentDisplay = optionFormatter(current);
-  // }
-  // let selectButton = createDiv(["select_button"], currentDisplay);
-  // let selectOptions = createDiv(["select_options_container"]);
-
-  // selectContainer.appendChild(selectButton);
-  // selectContainer.appendChild(selectOptions);
-
-  // selectButton.addEventListener("click", () => {
-  //   if (!selectButton.classList.contains("active")) {
-  //     current = selectContainer.value;
-
-  //     selectButton.classList.add("active");
-  //     selectOptions.style.display = "block";
-  //     for (let i = 0; i < options.length; i++) {
-  //       if (options[i] !== current) {
-  //         let optionDisplay = options[i];
-  //         if (typeof optionFormatter === "function") {
-  //           optionDisplay = optionFormatter(optionDisplay);
-  //         }
-
-  //         let option = createDiv(["select_option"], optionDisplay);
-  //         selectOptions.appendChild(option);
-
-  //         option.addEventListener("click", () => {
-  //           selectButton.classList.remove("active");
-  //           selectButton.innerHTML = optionDisplay;
-  //           selectContainer.value = options[i];
-  //           selectOptions.style.display = "none";
-  //           selectOptions.innerHTML = "";
-  //           callback(options[i]);
-  //         });
-  //       }
-  //     }
-  //   } else {
-  //     selectButton.classList.remove("active");
-  //     selectOptions.innerHTML = "";
-  //     selectOptions.style.display = "none";
-  //   }
-  // });
-
   let selectContainer = createDiv(["select_container", divClass]);
+  selectContainer.id = divClass;
+  selectContainer.value = current;
   parent.appendChild(selectContainer);
 
-  // return selectContainer;
+  const newCallback = (option) => {
+    selectContainer.value = option;
+    callback(option);
+  }
+
+  const props = {
+    options, current, optionFormatter, divClass, callback: newCallback,
+  }
 
   ReactDOM.render(
-    <reactSelect />,
+    <ReactSelect {...props} />,
     selectContainer
   );
+
+  return selectContainer;
 }
 
 export { createSelect, selectAdd };
