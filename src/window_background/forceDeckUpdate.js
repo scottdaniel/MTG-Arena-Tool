@@ -1,5 +1,5 @@
-import globals from './globals';
-import { hypergeometricRange } from '../shared/stats-fns';
+import globals from "./globals";
+import { hypergeometricRange } from "../shared/stats-fns";
 
 const forceDeckUpdate = function(removeUsed = true) {
   var decksize = 0;

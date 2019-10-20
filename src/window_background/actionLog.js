@@ -1,9 +1,9 @@
-import { ipc_send } from './background-util';
-import fs from 'fs';
-import path from 'path';
-import { IPC_OVERLAY } from '../shared/constants.js';
-import globals from './globals';
-import format from 'date-fns/format';
+import { ipc_send } from "./background-util";
+import fs from "fs";
+import path from "path";
+import { IPC_OVERLAY } from "../shared/constants.js";
+import globals from "./globals";
+import format from "date-fns/format";
 
 var currentActionLog = "";
 

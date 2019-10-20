@@ -1075,5 +1075,5 @@ export {
   compareWinrates,
   compareColorWinrates,
   localTimeSince,
-  attachMatchData,
+  attachMatchData
 };
