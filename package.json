@@ -27,7 +27,7 @@
   "repository": "https://github.com/Manuel-777/MTG-Arena-Tool",
   "bugs": "https://github.com/Manuel-777/MTG-Arena-Tool/issues",
   "version": "2.12.3",
-  "main": "main.js",
+  "main": "src/main.js",
   "build": {
     "appId": "com.github.manuel777.mtgatool",
     "files": [
@@ -35,18 +35,18 @@
     ],
     "win": {
       "target": "NSIS",
-      "icon": "icon.ico",
+      "icon": "icons/icon.ico",
       "artifactName": "${productName}-${version}.${ext}"
     },
     "mac": {
       "target": "pkg",
-      "icon": "icon-512.ico",
+      "icon": "icons/icon-512.ico",
       "artifactName": "${productName}-${version}.${ext}"
     },
     "linux": {
       "target": "AppImage",
       "category": "Utility;",
-      "icon": "icon-256.png",
+      "icon": "icons/icon-256.png",
       "artifactName": "${productName}-${version}.${ext}"
     }
   },
@@ -55,7 +55,7 @@
     "clean:modules": "rm -fr node_modules",
     "clean:lock": "rm -f package-lock.json",
     "postclean": "npm install",
-    "start": "electron .",
+    "start": "electron ./src/main.js",
     "postinstall": "install-app-deps",
     "format": "prettier --write \"**/*.js\"",
     "test": "npm run --silent test:eslint && npm run --silent test:prettier && npm run --silent test:jest",
