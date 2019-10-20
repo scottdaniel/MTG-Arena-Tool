@@ -1,7 +1,7 @@
 import { createDiv, queryElements as $$ } from "./dom-fns";
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import ReactSelect from './reactSelect';
+import ReactSelect from './ReactSelect';
 
 function createSelect(
   parent,
