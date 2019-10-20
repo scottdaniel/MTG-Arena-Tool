@@ -13,16 +13,10 @@ function createSelect(
 ) {
   let selectContainer = createDiv(["select_container", divClass]);
   selectContainer.id = divClass;
-  selectContainer.value = current;
   parent.appendChild(selectContainer);
 
-  const newCallback = (option) => {
-    selectContainer.value = option;
-    callback(option);
-  }
-
   const props = {
-    options, current, optionFormatter, divClass, callback: newCallback,
+    options, current, optionFormatter, divClass, callback,
   }
 
   ReactDOM.render(

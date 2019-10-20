@@ -1,7 +1,15 @@
 import * as React from 'react';
 
-export default function ReactSelect(props) {
-    const formatterFunc = typeof props.optionFormatter === "function" ? props.optionFormatter : string => string;
+export interface ReactSelectProps {
+    optionFormatter?: (option: string) => string;
+    current: string;
+    callback: (option: string) => void;
+    options: string[];
+    divClass: string;
+}
+
+export default function ReactSelect(props: ReactSelectProps) {
+    const formatterFunc = typeof props.optionFormatter === "function" ? props.optionFormatter : (inString: string) => inString;
 
     const [currentOption, setCurrentOption] = React.useState(props.current);
     const [optionsOpen, setOptionsOpen] = React.useState(false);
@@ -19,7 +27,7 @@ export default function ReactSelect(props) {
     const buttonClassNames = "button_reset select_button" + (optionsOpen ? " active" : "")
 
     return(
-        <div className={"select_container " + props.divClass} value={currentOption}>
+        <div className={"select_container " + props.divClass}>
             <button dangerouslySetInnerHTML={{ __html: formatterFunc(currentOption) }} className={buttonClassNames} onClick={onClickSelect} />
             {optionsOpen && <div className={"select_options_container"}>
                 {props.options.filter(option => option !== currentOption).map(option => {
