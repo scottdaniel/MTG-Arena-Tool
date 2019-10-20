@@ -1,9 +1,9 @@
-import globals from './globals';
-import { IPC_OVERLAY } from '../shared/constants.js';
-import { ipc_send } from './background-util';
-import forceDeckUpdate from './forceDeckUpdate';
-import getOpponentDeck from './getOpponentDeck';
-import { objectClone } from '../shared/util';
+import globals from "./globals";
+import { IPC_OVERLAY } from "../shared/constants.js";
+import { ipc_send } from "./background-util";
+import forceDeckUpdate from "./forceDeckUpdate";
+import getOpponentDeck from "./getOpponentDeck";
+import { objectClone } from "../shared/util";
 
 var lastDeckUpdate = new Date();
 

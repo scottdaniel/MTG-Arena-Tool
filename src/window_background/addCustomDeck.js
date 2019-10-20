@@ -1,6 +1,6 @@
-import { setData } from './background-util';
-import globals from './globals';
-import playerData from '../shared/player-data.js';
+import { setData } from "./background-util";
+import globals from "./globals";
+import playerData from "../shared/player-data.js";
 
 const addCustomDeck = function(customDeck) {
   const id = customDeck.id;
