@@ -3,6 +3,7 @@
         "targets": {
             "electron": "5.0.1"
         }
-    }]],
+    }],
+    "@babel/preset-typescript"],
     "exclude": "/node_modules/"
 }
