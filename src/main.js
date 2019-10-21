@@ -575,7 +575,12 @@ function createOverlayWindow() {
     }
   });
   overlay.loadURL(`file://${__dirname}/window_overlay_v3/index.html`);
-  //overlay.setIgnoreMouseEvents(true, { forward: true });
+
+  if (process.platform !== "linux") {
+    // https://electronjs.org/docs/api/browser-window#winsetignoremouseeventsignore-options
+    // does not currently support Linux
+    overlay.setIgnoreMouseEvents(true, { forward: true });
+  }
 
   return overlay;
 }
