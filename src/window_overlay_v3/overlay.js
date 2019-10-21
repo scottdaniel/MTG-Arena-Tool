@@ -1130,7 +1130,7 @@ ready(function() {
       <div class="outer_wrapper elements_wrapper">
         <div class="overlay_deckname"></div>
         <div class="overlay_deckcolors"></div>
-        <div class="overlay_decklist"></div>
+        <div class="overlay_decklist click-on"></div>
         <div class="overlay_clock_container">
             <div class="clock_prev click-on"></div>
             <div class="clock_turn"></div>
