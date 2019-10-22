@@ -21,7 +21,7 @@ if (!remote.app.isPackaged) {
   });
 }
 
-import TransparencyMouseFix from "./electron-transparency-mouse-fix.js";
+import TransparencyMouseFix from "electron-transparency-mouse-fix";
 let fix = null;
 
 import striptags from "striptags";
