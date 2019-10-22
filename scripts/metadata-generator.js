@@ -144,6 +144,16 @@ exports.generateMetadata = function(
         let scryfallObject = undefined;
         let scryfallSet = SETS_DATA[set].scryfall;
         if (!card.isToken) {
+          // Arena lands
+          // These arent the correct ones, these are lands from random sets.
+          // The arena lands from scryfall (in these collector ids) are properly handled already
+          /*
+          if (cardId == 69443) colllector = 61;
+          if (cardId == 69444) colllector = 62;
+          if (cardId == 69445) colllector = 63;
+          if (cardId == 69446) colllector = 64;
+          if (cardId == 69447) colllector = 65;
+          */
           // Unhingued lands
           if (cardId == 70501) scryfallSet = "unh";
           if (cardId == 70502) scryfallSet = "unh";
