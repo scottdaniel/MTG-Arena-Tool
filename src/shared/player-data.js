@@ -267,6 +267,9 @@ class PlayerData {
 
     this.transaction = this.transaction.bind(this);
     this.deck = this.deck.bind(this);
+    this.decks = undefined;
+    this.name = undefined;
+    this.arenaId = undefined;
     this.draft = this.draft.bind(this);
     this.event = this.event.bind(this);
     this.match = this.match.bind(this);
@@ -286,6 +289,7 @@ class PlayerData {
     });
 
     PlayerData.instance = this;
+    this.rank = undefined;
   }
 
   handleSetData(_event, arg) {
