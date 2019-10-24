@@ -10,9 +10,9 @@ let actionLogDir = "";
 
 let logUri = defaultLogUri();
 
-var currentDeck = new Deck();
+let currentDeck = new Deck();
 
-var currentMatch = null;
+let currentMatch: any = null;
 
 const debugLog = false;
 
@@ -20,31 +20,31 @@ const debugNet = true;
 
 let duringDraft = false;
 
-var duringMatch = false;
+let duringMatch = false;
 
-var firstPass = true;
+let firstPass = true;
 
-var gameNumberCompleted = 0;
+let gameNumberCompleted = 0;
 
-let idChanges = {};
+let idChanges: any = {};
 
-let initialLibraryInstanceIds = [];
+let initialLibraryInstanceIds: any[] = [];
 
-let instanceToCardIdMap = {};
+let instanceToCardIdMap: any = {};
 
-let logReadStart = null;
+let logReadStart: any = null;
 
 let logTime = false;
 
-var matchCompletedOnGameNumber = 0;
+let matchCompletedOnGameNumber = 0;
 
-var matchGameStats = [];
+let matchGameStats: any[] = [];
 
-var originalDeck = null;
+let originalDeck: any = undefined;
 
 let odds_sample_size = 1;
 
-let toolVersion = null;
+let toolVersion: any = null;
 
 const rememberCfg = {
   email: "",
@@ -60,15 +60,15 @@ const rememberCfg = {
   }
 };
 
-var rStore = null;
+let rStore: any = null;
 
-var store = null;
+let store: any = null;
 
-var tokenAuth = undefined;
+let tokenAuth: any = undefined;
 
 let watchingLog = false;
 
-let stopWatchingLog;
+let stopWatchingLog: any;
 
 export default {
   actionLogDir,

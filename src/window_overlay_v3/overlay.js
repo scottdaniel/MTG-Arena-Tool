@@ -21,7 +21,7 @@ if (!remote.app.isPackaged) {
   });
 }
 
-import TransparencyMouseFix from "./electron-transparency-mouse-fix.js";
+import TransparencyMouseFix from "electron-transparency-mouse-fix";
 let fix = null;
 
 import striptags from "striptags";
@@ -294,6 +294,7 @@ function settingsUpdated() {
 
     change_background(index, pd.settings.back_url);
 
+    let messageDom = `#overlay_${index + 1} .overlay_message`;
     let deckNameDom = `#overlay_${index + 1} .overlay_deckname`;
     let deckColorsDom = `#overlay_${index + 1} .overlay_deckcolors`;
     let deckListDom = `#overlay_${index + 1} .overlay_decklist`;
@@ -1130,13 +1131,14 @@ ready(function() {
       <div class="outer_wrapper elements_wrapper">
         <div class="overlay_deckname"></div>
         <div class="overlay_deckcolors"></div>
-        <div class="overlay_decklist"></div>
+        <div class="overlay_decklist click-on"></div>
         <div class="overlay_clock_container">
             <div class="clock_prev click-on"></div>
             <div class="clock_turn"></div>
             <div class="clock_elapsed"></div>
             <div class="clock_next click-on"></div>
         </div>
+        <div class="overlay_message click-on"></div>
       </div>
       <div class="outer_wrapper top_nav_wrapper">
         <div class="flex_item overlay_icon click-on"></div>
