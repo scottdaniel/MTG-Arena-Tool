@@ -58,6 +58,7 @@ const economyTransactionContextsMap = {
   "Booster.Open": "Booster Open",
   "Event.GrantCardPool": "Event Card Pool",
   "Event.PayEntry": "Pay Event Entry",
+  "Event.PayEntry.EventPayEntry": "Pay Event Entry",
   "Event.Season.Constructed.Payout": "Constructed Season Rewards",
   "Event.Season.Limited.Payout": "Limited Season Rewards",
   "PlayerReward.OnMatchCompletedDaily": "Player Rewards",
@@ -69,6 +70,7 @@ const economyTransactionContextsMap = {
   "Store.Fulfillment.Chest.ProgressionRewards": "Store Transaction",
   "Store.Fulfillment.Boosters": "Store Booster Purchase",
   "Store.Fulfillment.Gems": "Store Gems Purchase",
+  "PlayerInventory.RedeemBulkWildcards": "Redeem Wildcard",
   "WildCard.Redeem": "Redeem Wildcard",
   "Vault.Complete": "Vault Opening",
   "PlayerReward.OnMatchCompletedWeekly": "Weekly Rewards",
@@ -81,6 +83,13 @@ const trackCodeMap = {
   BattlePass_ELD: "Throne of Eldraine",
   BattlePass_M20: "Core Set 2020",
   EarlyPlayerProgression: "New Player Experience"
+};
+
+const rewardCodeMap = {
+  BattlePassLevelUp: "Track Progress",
+  DailyWins: "Daily Wins",
+  WeeklyWins: "Weekly Wins",
+  QuestReward: "Quest Reward"
 };
 
 function localDateFormat(date) {
@@ -100,6 +109,10 @@ function localDayDateFormat(date) {
     day="numeric">
     ${date.toDateString()}
   </local-time>`;
+}
+
+function getReadableReward(rewardCode) {
+  return rewardCodeMap[rewardCode] || rewardCode;
 }
 
 function getReadableTrack(trackCode) {
@@ -168,7 +181,23 @@ function getPrettyContext(context, full = true) {
 
   if (context.startsWith("Event.Prize")) {
     const eventCode = context.substring(12);
-    return full ? `Event Prize: ${getReadableEvent(eventCode)}` : "Event Prize";
+    return full
+      ? `Event Rewards: ${getReadableEvent(eventCode)}`
+      : "Event Rewards";
+  }
+
+  if (context.endsWith("EventReward")) {
+    const eventCode = context.split(".")[0];
+    return full
+      ? `Event Rewards: ${getReadableEvent(eventCode)}`
+      : "Event Rewards";
+  }
+
+  if (context.startsWith("PostMatch.Update")) {
+    const rewardCode = context.substring(17);
+    return full
+      ? `Match Rewards: ${getReadableReward(rewardCode)}`
+      : "Match Rewards";
   }
 
   if (context.startsWith("Quest.Completed")) {
