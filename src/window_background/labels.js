@@ -875,6 +875,46 @@ export function onLabelInventoryUpdated(entry, transaction) {
   return;
 }
 
+function inventoryUpdate(entry, update) {
+  let context = update.context.source;
+  // We use the original time string for the ID to ensure parsing does not alter it
+  // This will make the ID the same if parsing either changes or breaks
+  let id = sha1(entry.timestamp + context + JSON.stringify(update.delta));
+
+  let transaction = {
+    timestamp: entry.timestamp,
+    // Add missing data
+    date: parseWotcTimeFallback(entry.timestamp),
+    // Reduce the size for storage
+    delta: minifiedDelta(update.delta),
+    context: context,
+    id: id
+  };
+
+  saveEconomyTransaction(transaction);
+}
+
+export function onLabelPostMatchUpdate(entry, json) {
+  if (!json) return;
+
+  json.questUpdate.forEach(quest => {
+    if (quest.inventoryUpdate) {
+      inventoryUpdate(entry, quest.inventoryUpdate);
+    }
+  });
+
+  json.dailyWinUpdates.forEach(update => {
+    inventoryUpdate(entry, update);
+  });
+
+  json.weeklyWinUpdates.forEach(update => {
+    inventoryUpdate(entry, update);
+  });
+
+  //json.eppUpdate
+  //json.battlePassUpdate
+}
+
 export function onLabelInPlayerInventoryGetPlayerInventory(entry, json) {
   if (!json) return;
   globals.logTime = parseWotcTimeFallback(entry.timestamp);

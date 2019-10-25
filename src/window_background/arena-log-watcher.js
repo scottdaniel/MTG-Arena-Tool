@@ -20,6 +20,7 @@ import {
   onLabelInDeckUpdateDeck,
   onLabelInDeckUpdateDeckV3,
   onLabelInventoryUpdated,
+  onLabelPostMatchUpdate,
   onLabelInPlayerInventoryGetPlayerInventory,
   onLabelInPlayerInventoryGetPlayerCardsV3,
   onLabelInProgressionGetPlayerProgress,
@@ -329,6 +330,11 @@ function entrySwitch(entry, json) {
     case "Inventory.Updated":
       json = entry.json();
       onLabelInventoryUpdated(entry, json);
+      break;
+
+    case "PostMatch.Update":
+      json = entry.json();
+      onLabelPostMatchUpdate(entry, json);
       break;
 
     case "PlayerInventory.GetPlayerInventory":
