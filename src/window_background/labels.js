@@ -902,6 +902,13 @@ function inventoryUpdate(entry, update) {
   if (update.context && update.context.source) {
     // combine sub-context with parent context
     context += "." + update.context.source;
+    if (update.context.sourceId && update.context.source === "QuestReward") {
+      context += "." + update.context.sourceId;
+    }
+  }
+  if (update.context && update.context.subSource) {
+    // combine sub-sub-context with parent context
+    context += "." + update.context.subSource;
   }
 
   // We use the original time string for the ID to ensure parsing does not alter it
@@ -934,6 +941,7 @@ function trackUpdate(entry, trackUpdate) {
         trackName,
         trackTier
       };
+      data.context.subSource = trackName;
       inventoryUpdate(entry, data);
     });
   }
