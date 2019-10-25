@@ -14,11 +14,8 @@ import * as mtgaLog from "./mtga-log";
 import globals from "./globals";
 import addCustomDeck from "./addCustomDeck";
 import forceDeckUpdate from "./forceDeckUpdate";
-import {
-  loadPlayerConfig,
-  syncSettings,
-  startWatchingLog
-} from "./loadPlayerConfig";
+import arenaLogWatcher from "./arena-log-watcher";
+import { loadPlayerConfig, syncSettings } from "./loadPlayerConfig";
 import update_deck from "./updateDeck";
 
 if (!remote.app.isPackaged) {
@@ -408,7 +405,7 @@ ipc.on("set_odds_samplesize", function(event, state) {
 ipc.on("set_log", function(event, arg) {
   if (globals.watchingLog) {
     globals.stopWatchingLog();
-    globals.stopWatchingLog = startWatchingLog();
+    globals.stopWatchingLog = arenaLogWatcher.startWatchingLog();
   }
   globals.logUri = arg;
   settingsStore.set("logUri", arg);
