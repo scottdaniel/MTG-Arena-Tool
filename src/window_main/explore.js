@@ -619,16 +619,23 @@ function deckLoad(_deck, index) {
   });
 
   let deckWinrate = normalApproximationInterval(_deck.mt, _deck.mw);
-  
+
   let colClass = getWinrateClass(deckWinrate.winrate);
   d = createDiv(
     ["list_deck_record"],
-    `${_deck.mw}:${_deck.ml} <span class="${colClass}_bright">(${formatPercent(deckWinrate.winrate)})</span>`
+    `${_deck.mw}:${_deck.ml} <span class="${colClass}_bright">(${formatPercent(
+      deckWinrate.winrate
+    )})</span>`
   );
-  if(_deck.mt >= 20){
+  if (_deck.mt >= 20) {
     // sample Size is large enough to use Wald Interval
-    d.title = formatWinrateInterval(roundWinrate(deckWinrate.winrate - deckWinrate.interval), roundWinrate(deckWinrate.winrate + deckWinrate.interval));
-    d.innerHTML += `<i style="opacity:0.6;"> &plusmn; ${formatPercent(roundWinrate(deckWinrate.interval))}</i>)`;
+    d.title = formatWinrateInterval(
+      roundWinrate(deckWinrate.winrate - deckWinrate.interval),
+      roundWinrate(deckWinrate.winrate + deckWinrate.interval)
+    );
+    d.innerHTML += `<i style="opacity:0.6;"> &plusmn; ${formatPercent(
+      roundWinrate(deckWinrate.interval)
+    )}</i>)`;
   }
 
   flr.appendChild(d);
