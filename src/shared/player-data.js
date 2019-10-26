@@ -360,7 +360,10 @@ class PlayerData {
       "logUri",
       "log_locale_format",
       "remember_me",
-      "beta_channel"
+      "beta_channel",
+      "metadata_lang",
+      "email",
+      "token"
     ];
     data.settings = _.omit(data.settings, settingsBlacklistKeys);
 
