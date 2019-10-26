@@ -6,7 +6,7 @@ import _ from "lodash";
 import { MANA, EASING_DEFAULT } from "../shared/constants";
 import db from "../shared/database";
 import pd from "../shared/player-data";
-import { createSelect } from "../shared/select";
+import { createSelect } from "../shared/createSelect";
 import { createDiv, createInput, queryElements as $$ } from "../shared/dom-fns";
 import * as deckDrawer from "../shared/deck-drawer";
 import {

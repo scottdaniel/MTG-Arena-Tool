@@ -26,7 +26,7 @@ import {
   createSpan,
   queryElements as $$
 } from "../shared/dom-fns";
-import { createSelect } from "../shared/select";
+import { createSelect } from "../shared/createSelect";
 import * as deckDrawer from "../shared/deck-drawer";
 import { cardType } from "../shared/card-types";
 import { addCardHover } from "../shared/card-hover";
@@ -758,6 +758,11 @@ function formatPercent(value, config = { maximumSignificantDigits: 2 }) {
     style: "percent",
     ...config
   });
+}
+
+export function formatWinrateInterval(lower, upper) {
+  return `${formatPercent(lower)} to ${formatPercent(upper)} with 95% confidence
+(estimated actual winrate bounds, assuming a normal distribution)`;
 }
 
 function formatNumber(value, config = {}) {
