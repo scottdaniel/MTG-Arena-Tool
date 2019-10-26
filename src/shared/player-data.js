@@ -65,7 +65,7 @@ const defaultCfg = {
     anon_explore: false,
     close_on_match: true,
     cards_size: 2,
-    cards_size_hover_card: 2,
+    cards_size_hover_card: 10,
     export_format: "$Name,$Count,$Rarity,$SetName,$Collector",
     back_color: "rgba(0,0,0,0.3)",
     back_url: "",
