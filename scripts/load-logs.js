@@ -26,7 +26,7 @@ function createBackgroundWindow() {
     frame: false,
     x: 0,
     y: 0,
-    show: false,
+    show: DEBUG,
     width: 640,
     height: 480,
     title: "Background",
@@ -35,7 +35,7 @@ function createBackgroundWindow() {
       nodeIntegration: true
     }
   });
-  win.loadURL(`file://${__dirname}/../window_background/index.html`);
+  win.loadURL(`file://${__dirname}/../lib/window_background/index.html`);
   return win;
 }
 
