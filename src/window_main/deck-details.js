@@ -3,7 +3,7 @@ import _ from "lodash";
 import { MANA, CARD_RARITIES, EASING_DEFAULT } from "../shared/constants";
 import db from "../shared/database";
 import pd from "../shared/player-data";
-import { createSelect } from "../shared/select";
+import { createSelect } from "../shared/createSelect";
 import {
   createDiv,
   createSpan,

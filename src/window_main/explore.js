@@ -11,7 +11,7 @@ import {
 } from "../shared/constants";
 import db from "../shared/database";
 import { queryElements as $$, createDiv } from "../shared/dom-fns";
-import { createSelect } from "../shared/select";
+import { createSelect } from "../shared/createSelect";
 import {
   getCardArtCrop,
   get_rank_index_16,

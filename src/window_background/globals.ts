@@ -1,5 +1,5 @@
 import Deck from "../shared/deck";
-import * as mtgaLog from "./mtga-log";
+import { defaultLogUri } from "./mtga-log";
 
 // Hey! If you're here, you might be thinking of adding stuff to this file.
 // Don't. This is a shadowy place. You must never go here.
@@ -8,7 +8,7 @@ import * as mtgaLog from "./mtga-log";
 
 let actionLogDir = "";
 
-let logUri = mtgaLog.defaultLogUri();
+let logUri = defaultLogUri();
 
 let currentDeck = new Deck();
 
