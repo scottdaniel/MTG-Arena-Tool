@@ -898,6 +898,7 @@ function onLabelInventoryUpdated(entry, transaction) {
 
 function inventoryUpdate(entry, update) {
   // combine sub-context with parent context
+  console.log("inventoryUpdate", entry, update);
   let context = "PostMatch.Update";
   if (update.context && update.context.source) {
     // combine sub-context with parent context
@@ -921,7 +922,7 @@ function inventoryUpdate(entry, update) {
     // Add missing data
     date: parseWotcTimeFallback(entry.timestamp),
     // Reduce the size for storage
-    delta: minifiedDelta(update.delta),
+    delta: update.delta ? minifiedDelta(update.delta) : {},
     context,
     subContext: update.context, // preserve sub-context object data
     id: id
@@ -932,7 +933,7 @@ function inventoryUpdate(entry, update) {
 
 function trackUpdate(entry, trackUpdate) {
   if (!trackUpdate) return;
-  const { trackName, trackTier, trackDiff, orbDiff } = trackUpdate;
+  const { trackName, trackTier, trackDiff, orbCountDiff } = trackUpdate;
 
   if (trackDiff && trackDiff.inventoryUpdates) {
     trackDiff.inventoryUpdates.forEach(update => {
@@ -948,12 +949,12 @@ function trackUpdate(entry, trackUpdate) {
 
   // For some reason, orbs live separately from all other inventory
   if (
-    orbDiff &&
-    orbDiff.oldOrbCount &&
-    orbDiff.currentOrbCount &&
-    orbDiff.currentOrbCount - orbDiff.oldOrbCount
+    orbCountDiff &&
+    orbCountDiff.oldOrbCount &&
+    orbCountDiff.currentOrbCount &&
+    orbCountDiff.currentOrbCount - orbCountDiff.oldOrbCount
   ) {
-    const data = { trackName, trackTier, orbDiff };
+    const data = { trackName, trackTier, orbCountDiff };
     inventoryUpdate(entry, data);
   }
 }
