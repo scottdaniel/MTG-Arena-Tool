@@ -7,7 +7,6 @@ export interface ReactSelectProps {
     current: string;
     callback: (option: string) => void;
     options: string[];
-    divClass: string;
 }
 
 export function ReactSelect(props: ReactSelectProps) {
@@ -29,7 +28,7 @@ export function ReactSelect(props: ReactSelectProps) {
     const buttonClassNames = "button_reset select_button" + (optionsOpen ? " active" : "")
 
     return(
-        <div className={"select_container " + props.divClass}>
+        <>
             <button className={buttonClassNames} onClick={onClickSelect}>
                 {formatterFunc(currentOption)}
             </button>
@@ -42,7 +41,7 @@ export function ReactSelect(props: ReactSelectProps) {
                     )
                 })}
             </div>}
-        </div>
+        </>
     );
 }
 
@@ -54,12 +53,13 @@ export function createSelect(
     divClass: string,
     optionFormatter?: (option: string) => string | JSX.Element,
 ): JSX.Element {
+    // We create this container outside the component to ensure wherever we're rendering doens't get blanked.
     const selectContainer = createDiv(["select_container", divClass]);
     selectContainer.id = divClass;
     parent.appendChild(selectContainer);
   
     const props = {
-      options, current, optionFormatter, divClass, callback,
+      options, current, optionFormatter, callback,
     }
   
     ReactDOM.render(

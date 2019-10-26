@@ -2482,7 +2482,7 @@ a:hover {
     align-items: center;
     white-space: nowrap;
     margin: 0;
-    padding: 0 12px;
+    padding: 0;
 }
 
 .select_button:after {
