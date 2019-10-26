@@ -62,7 +62,7 @@
     "test:eslint": "eslint . --quiet --ext .js,.ts,.jsx,.tsx",
     "eslint:fix": "eslint . --quiet --ext .js,.ts,.jsx,.tsx --fix",
     "test:prettier": "prettier --list-different \"src/**/*.js\"",
-    "test:jest": "jest",
+    "test:jest": "jest src/",
     "dist": "npm run babel && build --x64",
     "version": "node -p \"require('./package.json').version\"",
     "load-logs": "electron \"./scripts/load-logs.js\"",
