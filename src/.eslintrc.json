@@ -1,8 +1,13 @@
 {
   "parser": "@typescript-eslint/parser",
-  "extends": ["plugin:@typescript-eslint/recommended", "prettier/@typescript-eslint"],
+  "extends": ["plugin:@typescript-eslint/recommended", "plugin:react/recommended", "prettier/@typescript-eslint"],
   "parserOptions": {
     "project": "./tsconfig.json"
+  },
+  "settings": {
+    "react": {
+      "version": "detect"
+    }
   },
   "rules": {
     "@typescript-eslint/camelcase": "warn",

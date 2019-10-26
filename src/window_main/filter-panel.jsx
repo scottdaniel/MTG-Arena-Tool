@@ -92,6 +92,7 @@ class FilterPanel {
     }
 
     if (deckName.length > maxChars) {
+      // eslint-disable-next-line react/jsx-key
       deckName = [(<abbr title={deckName}>{deckName.slice(
         0,
         maxChars
