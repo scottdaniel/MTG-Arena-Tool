@@ -145,6 +145,8 @@ export function attachDraftRatings(card, ratingsContainer) {
   let rankValues = card.rank_values;
   let rankControversy = card.rank_controversy;
 
+  // TODO: Refactor and enable this rule.
+  // eslint-disable-next-line prefer-spread
   let maxValue = Math.max.apply(Math, card.rank_values);
 
   let valuesContainer = createDiv([`rank_values_main_container`]);
