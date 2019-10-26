@@ -760,7 +760,7 @@ function formatPercent(value, config = { maximumSignificantDigits: 2 }) {
   });
 }
 
-function formatWinrateInterval(lower, upper){
+export function formatWinrateInterval(lower, upper) {
   return `${formatPercent(lower)} to ${formatPercent(upper)} with 95% confidence
 (estimated actual winrate bounds, assuming a normal distribution)`;
 }
@@ -1075,7 +1075,6 @@ export {
   renderLogInput,
   formatPercent,
   formatNumber,
-  formatWinrateInterval,
   getWinrateClass,
   getEventWinLossClass,
   compareWinrates,
