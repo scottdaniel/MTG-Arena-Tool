@@ -760,6 +760,11 @@ function formatPercent(value, config = { maximumSignificantDigits: 2 }) {
   });
 }
 
+export function formatWinrateInterval(lower, upper) {
+  return `${formatPercent(lower)} to ${formatPercent(upper)} with 95% confidence
+(estimated actual winrate bounds, assuming a normal distribution)`;
+}
+
 function formatNumber(value, config = {}) {
   return value.toLocaleString([], {
     style: "decimal",
