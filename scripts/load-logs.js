@@ -132,17 +132,20 @@ app.setPath("userData", path.join(appData, appName));
 
 function terminateStall() {
   const timeSinceLastMessage = Date.now() - lastMessageTime;
-  // if thirty seconds have passed then trigger a 
+  // if thirty seconds have passed then trigger a
   // termination using a false initialize event
 
   if (timeSinceLastMessage > 30000) {
-    ipc.send("ipc_switch", {event: 'Timeout - exiting', method: 'initialize'});
+    ipc.send("ipc_switch", {
+      event: "Timeout - exiting",
+      method: "initialize"
+    });
   }
 }
 
 app.on("ready", () => {
   const log_files = require("./batch_load_files.json");
-  
+
   var tsInterval = setInterval(terminateStall, 1000);
 
   nextLog(log_files, _ => {
