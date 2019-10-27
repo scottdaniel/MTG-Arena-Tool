@@ -1,14 +1,11 @@
-
 import differenceInCalendarDays from "date-fns/differenceInCalendarDays";
 import compareAsc from "date-fns/compareAsc";
 import pd from "../shared/player-data";
 import DataScroller from "./data-scroller";
-import {
-  resetMainContainer
-} from "./renderer-util";
+import { resetMainContainer } from "./renderer-util";
 import { createEconomyHeader } from "./EconomyHeader";
 import { createDayHeader } from "./EconomyDayHeader";
-import { createChangeRow } from './EconomyRow';
+import { createChangeRow } from "./EconomyRow";
 import { getPrettyContext } from "./economyUtils";
 
 const byId = id => document.getElementById(id);
@@ -18,8 +15,8 @@ const state = {
   filterEconomy: "All",
   daysago: 0,
   dayList: [],
-  sortedChanges: [],
-}
+  sortedChanges: []
+};
 
 export function openEconomyTab(dataIndex = 25, scrollTop = 0) {
   const mainDiv = resetMainContainer();
@@ -56,7 +53,8 @@ function renderData(container, index) {
   // print out daily summaries but no sub-events
   if (
     state.filterEconomy === "Day Summaries" &&
-    state.daysago !== differenceInCalendarDays(new Date(), new Date(change.date))
+    state.daysago !==
+      differenceInCalendarDays(new Date(), new Date(change.date))
   ) {
     container.appendChild(createDayHeader(change, state));
     return 1;
@@ -69,7 +67,9 @@ function renderData(container, index) {
 
   let rowsAdded = 0;
 
-  if (state.daysago != differenceInCalendarDays(new Date(), new Date(change.date))) {
+  if (
+    state.daysago != differenceInCalendarDays(new Date(), new Date(change.date))
+  ) {
     container.appendChild(createDayHeader(change, state));
     rowsAdded++;
   }
