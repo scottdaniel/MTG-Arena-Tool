@@ -667,7 +667,11 @@ function showColorpicker(
   pickerWrapper.style.boxShadow = "none";
 }
 
-function showDatepicker(defaultDate, onChange = () => {}, pickerOptions = {}) {
+function showDatepicker(
+  defaultDate,
+  onChange = date => {},
+  pickerOptions = {}
+) {
   const cont = createDiv(["dialog_content"]);
   cont.style.width = "320px";
   cont.style.heigh = "400px";

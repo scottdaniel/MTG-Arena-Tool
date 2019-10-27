@@ -10,7 +10,7 @@ import {
   getReadableFormat
 } from "../shared/util";
 import Aggregator from "./aggregator";
-import FilterPanel from "./filter-panel";
+import FilterPanel from "./FilterPanel";
 import ListItem from "./list-item";
 import StatsPanel from "./stats-panel";
 import { openDeck } from "./deck-details";
@@ -26,6 +26,7 @@ import {
   setLocalState,
   showColorpicker
 } from "./renderer-util";
+import ReactDOM from "react-dom";
 
 let filters = Aggregator.getDefaultFilters();
 filters.onlyCurrentDecks = true;
@@ -104,7 +105,7 @@ export function openDecksTab(_filters = {}, scrollTop = 0) {
     true,
     true
   );
-  decksTop.appendChild(filterPanel.render());
+  ReactDOM.render(filterPanel.render(), decksTop);
   wrap_l.appendChild(decksTop);
 
   const decks = [...pd.deckList];

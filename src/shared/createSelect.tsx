@@ -29,7 +29,7 @@ export function ReactSelect(props: ReactSelectProps) {
 
     return(
         <>
-            <button className={buttonClassNames} onClick={onClickSelect}>
+            <button key={currentOption} className={buttonClassNames} onClick={onClickSelect}>
                 {formatterFunc(currentOption)}
             </button>
             {optionsOpen && <div className={"select_options_container"}>
@@ -68,4 +68,19 @@ export function createSelect(
     );
   
     return selectContainer;
+}
+
+export interface WrappedReactSelectProps extends ReactSelectProps {
+    className: string;
+}
+
+// This is essentially what createSelect does, but reacty.
+// This should go away once createSelect goes away and is replaced by just ReactSelect.
+export function WrappedReactSelect(props: WrappedReactSelectProps) {
+    const { className, ...other } = props;
+    return (
+        <div className={"select_container " + className}>
+            <ReactSelect {...other} />
+        </div>
+    )
 }
