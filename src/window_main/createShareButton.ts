@@ -11,7 +11,7 @@ import { createSelect } from "../shared/createSelect";
 const byId = (id: string) => document.querySelector<HTMLInputElement>("input#" + id);
 
 export default function createShareButton(classNames: string[], callback: () => void) {
-    let button = createInput(classNames);
+    let button = createDiv(classNames);
     button.addEventListener("click", (e: MouseEvent) => {
         e.stopPropagation();
         createShareDialog(callback);
