@@ -912,6 +912,19 @@ function inventoryUpdate(entry, update) {
     context += "." + update.context.subSource;
   }
 
+  if (update.delta) {
+    const economy = playerData.economy;
+    let delta = update.delta;
+    economy.gems += delta.gemsDelta;
+    economy.gold += delta.goldDelta;
+    economy.vault += delta.vaultProgressDelta;
+    economy.wcCommon += delta.wcCommonDelta;
+    economy.wcUncommon += delta.wcUncommonDelta;
+    economy.wcRare += delta.wcRareDelta;
+    economy.wcMythic += delta.wcMythicDelta;
+    setData({ economy });
+  }
+
   // We use the original time string for the ID to ensure parsing does not alter it
   // This will make the ID the same if parsing either changes or breaks
   let id = sha1(entry.timestamp + context + JSON.stringify(update.delta));
