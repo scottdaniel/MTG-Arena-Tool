@@ -3,11 +3,9 @@ import _ from "lodash";
 import { MANA, CARD_RARITIES, EASING_DEFAULT } from "../shared/constants";
 import db from "../shared/database";
 import pd from "../shared/player-data";
-import { createSelect } from "../shared/createSelect";
 import {
   createDiv,
   createSpan,
-  createInput,
   queryElements as $$
 } from "../shared/dom-fns";
 import * as deckDrawer from "../shared/deck-drawer";
@@ -27,12 +25,12 @@ import {
   colorPieChart,
   drawDeck,
   drawDeckVisual,
-  openDialog,
   ipcSend,
   makeResizable,
   showLoadingBars,
   pop
 } from "./renderer-util";
+import createShareDialog from "./createShareDialog";
 
 const byId = id => document.getElementById(id);
 // We need to store a sorted list of card types so we create the card counts in the same order.
@@ -294,35 +292,7 @@ export function openDeck(deck = currentOpenDeck, filters = currentFilters) {
     const deckShareButton = createDiv(["list_log_share", deck.id + "al"]);
     deckShareButton.addEventListener("click", e => {
       e.stopPropagation();
-      const cont = createDiv(["dialog_content"]);
-      cont.style.width = "500px";
-
-      cont.append(createDiv(["share_title"], "Link for sharing:"));
-      const icd = createDiv(["share_input_container"]);
-      const linkInput = createInput([], "", {
-        id: "share_input",
-        autocomplete: "off"
-      });
-      linkInput.addEventListener("click", () => linkInput.select());
-      icd.appendChild(linkInput);
-      const but = createDiv(["button_simple"], "Copy");
-      but.addEventListener("click", function() {
-        ipcSend("set_clipboard", byId("share_input").value);
-      });
-      icd.appendChild(but);
-      cont.appendChild(icd);
-
-      cont.appendChild(createDiv(["share_subtitle"], "<i>Expires in: </i>"));
-      createSelect(
-        cont,
-        ["One day", "One week", "One month", "Never"],
-        "",
-        () => deckShareLink(deck),
-        "expire_select"
-      );
-
-      openDialog(cont);
-      deckShareLink(deck);
+      createShareDialog(() => deckShareLink(deck));
     });
     top.appendChild(deckShareButton);
   } else {
