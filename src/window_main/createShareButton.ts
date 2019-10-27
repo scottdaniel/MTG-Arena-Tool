@@ -10,8 +10,16 @@ import { createSelect } from "../shared/createSelect";
 
 const byId = (id: string) => document.querySelector<HTMLInputElement>("input#" + id);
 
-export default function createShareDialog(callback: () => void) {
-    e.stopPropagation();
+export default function createShareButton(classNames: string[], callback: () => void) {
+    let button = createInput(classNames);
+    button.addEventListener("click", (e: MouseEvent) => {
+        e.stopPropagation();
+        createShareDialog(callback);
+      });
+    return button;
+}
+
+function createShareDialog(callback: () => void) {
     const cont = createDiv(["dialog_content"]);
     cont.style.width = "500px";
 

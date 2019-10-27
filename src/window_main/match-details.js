@@ -29,7 +29,7 @@ import {
   showLoadingBars,
   toggleVisibility
 } from "./renderer-util";
-import createShareDialog from "./createShareDialog";
+import createShareButton from "./createShareButton";
 
 const byId = id => document.getElementById(id);
 
@@ -81,14 +81,10 @@ function openMatch(id) {
     flc.appendChild(actionLogButton);
 
     if (!pd.offline) {
-      const actionLogShareButton = createDiv([
-        "list_log_share",
-        match.id + "al"
-      ]);
-      actionLogShareButton.addEventListener("click", e => {
-        e.stopPropagation();
-        createShareDialog(() => logShareLink(match.id));
-      });
+      const actionLogShareButton = createShareButton(
+        ["list_log_share", match.id + "al"],
+        () => logShareLink(match.id)
+      );
       flc.appendChild(actionLogShareButton);
     } else {
       const actionLogCantShare = createDiv(["list_log_cant_share"]);

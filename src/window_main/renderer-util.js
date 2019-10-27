@@ -40,7 +40,7 @@ import {
   toMMSS,
   openScryfallCard
 } from "../shared/util";
-import createShareDialog from './createShareDialog';
+import createShareButton from "./createShareButton";
 
 const DEFAULT_BACKGROUND = "../images/Bedevil-Art.jpg";
 
@@ -975,11 +975,10 @@ function createReplayDiv(draft) {
 }
 
 function createReplayShareButton(draft) {
-  const replayShareButton = createDiv(["list_draft_share", draft.id + "dr"]);
-  replayShareButton.addEventListener("click", e => {
-    e.stopPropagation();
-    createShareDialog(() => draftShareLink(draft.id, draft));
-  });
+  const replayShareButton = createShareButton(
+    ["list_draft_share", draft.id + "dr"],
+    () => draftShareLink(draft.id, draft)
+  );
   return replayShareButton;
 }
 

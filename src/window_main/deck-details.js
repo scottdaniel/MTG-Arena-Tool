@@ -3,11 +3,7 @@ import _ from "lodash";
 import { MANA, CARD_RARITIES, EASING_DEFAULT } from "../shared/constants";
 import db from "../shared/database";
 import pd from "../shared/player-data";
-import {
-  createDiv,
-  createSpan,
-  queryElements as $$
-} from "../shared/dom-fns";
+import { createDiv, createSpan, queryElements as $$ } from "../shared/dom-fns";
 import * as deckDrawer from "../shared/deck-drawer";
 import {
   deckManaCurve,
@@ -30,7 +26,7 @@ import {
   showLoadingBars,
   pop
 } from "./renderer-util";
-import createShareDialog from "./createShareDialog";
+import createShareButton from "./createShareButton";
 
 const byId = id => document.getElementById(id);
 // We need to store a sorted list of card types so we create the card counts in the same order.
@@ -289,11 +285,10 @@ export function openDeck(deck = currentOpenDeck, filters = currentFilters) {
   top.appendChild(createDiv(["deck_name"], deck.name));
 
   if (!pd.offline) {
-    const deckShareButton = createDiv(["list_log_share", deck.id + "al"]);
-    deckShareButton.addEventListener("click", e => {
-      e.stopPropagation();
-      createShareDialog(() => deckShareLink(deck));
-    });
+    const deckShareButton = createShareButton(
+      ["list_log_share", deck.id + "al"],
+      () => deckShareLink(deck)
+    );
     top.appendChild(deckShareButton);
   } else {
     const deckCantShare = createDiv(["list_log_cant_share"]);
