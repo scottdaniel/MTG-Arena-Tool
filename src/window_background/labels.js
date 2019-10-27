@@ -879,6 +879,10 @@ function onLabelInventoryUpdated(entry, transaction) {
   // Add missing data
   transaction.date = parseWotcTimeFallback(entry.timestamp);
 
+  // Add delta to our current values
+  if (transaction.delta) {
+    inventoryAddDelta(transaction.delta);
+  }
   // Reduce the size for storage
   transaction.delta = minifiedDelta(transaction.delta);
 
@@ -894,6 +898,38 @@ function onLabelInventoryUpdated(entry, transaction) {
   // Do not modify the context from now on.
   saveEconomyTransaction(transaction);
   return;
+}
+
+function inventoryAddDelta(delta) {
+  const economy = playerData.economy;
+  economy.gems += delta.gemsDelta;
+  economy.gold += delta.goldDelta;
+
+  // Update new cards obtained.
+  let cardsNew = playerData.cardsNew;
+  let cards = playerData.cards;
+  delta.cardsAdded.forEach(grpId => {
+    // Add to inventory
+    if (cards.cards[grpId] === undefined) {
+      cards.cards[grpId] = 1;
+    } else {
+      cards.cards[grpId] += 1;
+    }
+    // Add to newly aquired
+    if (cardsNew[grpId] === undefined) {
+      cardsNew[grpId] = 1;
+    } else {
+      cardsNew[grpId] += 1;
+    }
+  });
+
+  economy.vault += delta.vaultProgressDelta;
+  economy.wcCommon += delta.wcCommonDelta;
+  economy.wcUncommon += delta.wcUncommonDelta;
+  economy.wcRare += delta.wcRareDelta;
+  economy.wcMythic += delta.wcMythicDelta;
+  console.log("cardsNew", cardsNew);
+  setData({ economy, cardsNew, cards });
 }
 
 function inventoryUpdate(entry, update) {
@@ -913,16 +949,7 @@ function inventoryUpdate(entry, update) {
   }
 
   if (update.delta) {
-    const economy = playerData.economy;
-    let delta = update.delta;
-    economy.gems += delta.gemsDelta;
-    economy.gold += delta.goldDelta;
-    economy.vault += delta.vaultProgressDelta;
-    economy.wcCommon += delta.wcCommonDelta;
-    economy.wcUncommon += delta.wcUncommonDelta;
-    economy.wcRare += delta.wcRareDelta;
-    economy.wcMythic += delta.wcMythicDelta;
-    setData({ economy });
+    inventoryAddDelta(update.delta);
   }
 
   // We use the original time string for the ID to ensure parsing does not alter it
