@@ -903,29 +903,6 @@ function createDraftSetDiv(draft) {
   return createDiv(["list_deck_name"], draft.set + " draft");
 }
 
-export function createInventoryCard(card) {
-  var inventoryCard = createDiv(["inventory_card"]);
-  inventoryCard.style.width = "39px";
-
-  var img = createImg();
-  img.style.width = "39px";
-  img.src = getCardImage(card);
-  img.title = card.name;
-  inventoryCard.appendChild(img);
-
-  addCardHover(inventoryCard, card);
-
-  inventoryCard.addEventListener("click", () => {
-    if (card.dfc == "SplitHalf") {
-      card = db.card(card.dfcId);
-    }
-    //let newname = card.name.split(' ').join('-');
-    openScryfallCard(card);
-  });
-
-  return inventoryCard;
-}
-
 export function createRoundCard(card, rarityOverlay = false) {
   var roundCard = createDiv([
     "round_card",

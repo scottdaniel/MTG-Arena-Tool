@@ -29,7 +29,7 @@ span i {
     margin-left: 4px;
 }
 
-relative-time, local-time {
+time, local-time, relative-time {
   margin-right: 8px;
   margin-left: 8px;
   font-size: 16px;
@@ -1282,6 +1282,14 @@ a:hover {
     margin: 6px;
 }
 
+.inventory_card.small {
+    width: 39px;
+}
+
+.inventory_card.small img {
+    width: 39px;
+}
+
 .inventory_card_settings {
     width: 140px;
     margin: 0px 16px;
@@ -1673,6 +1681,7 @@ a:hover {
     display: flex;
     justify-content: flex-end;
     margin: 0 6px;
+    line-height: 64px;
 }
 
 .economy_up {
@@ -1709,6 +1718,11 @@ a:hover {
     margin-left: 2px;
     font-family: var(--sub-font-name);
     color: var(--color-light);
+    line-height: 64px;
+}
+
+.economy_sub.small {
+    line-height: 32px;
 }
 
 .economy_wc {
@@ -2082,6 +2096,14 @@ a:hover {
 
 .flex_end {
     justify-content: flex-end;
+}
+
+.flex_top {
+    line-height: 32px;
+}
+
+.flexLeft {
+    flex-direction: column;
 }
 
 .draft_title {
@@ -3691,4 +3713,19 @@ a:hover {
 }
 .completion_table_card.wanted {
     opacity: 0.5;
+}
+
+.economyDateSelect {
+    margin: auto auto auto 0px;
+    display: flex;
+    align-items: center;
+}
+
+.economyIconMargin {
+    margin-left: 24px;
+}
+
+.economy_row_hidden {
+    height: 0px;
+    display: none;
 }
