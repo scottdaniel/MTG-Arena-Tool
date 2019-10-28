@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import * as React from "react";
 
 const CLOCK_MODE_BOTH = 0;
