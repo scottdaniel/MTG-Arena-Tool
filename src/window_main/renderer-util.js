@@ -26,7 +26,6 @@ import {
   createSpan,
   queryElements as $$
 } from "../shared/dom-fns";
-import { createSelect } from "../shared/createSelect";
 import * as deckDrawer from "../shared/deck-drawer";
 import { cardType } from "../shared/card-types";
 import { addCardHover } from "../shared/card-hover";
@@ -42,6 +41,7 @@ import {
   openScryfallCard
 } from "../shared/util";
 import ReactDOM from 'react-dom';
+import createShareButton from "./createShareButton";
 
 const DEFAULT_BACKGROUND = "../images/Bedevil-Art.jpg";
 
@@ -985,39 +985,10 @@ function createReplayDiv(draft) {
 }
 
 function createReplayShareButton(draft) {
-  const replayShareButton = createDiv(["list_draft_share", draft.id + "dr"]);
-  replayShareButton.addEventListener("click", e => {
-    e.stopPropagation();
-    const cont = createDiv(["dialog_content"]);
-    cont.style.width = "500px";
-
-    cont.append(createDiv(["share_title"], "Link for sharing:"));
-    const icd = createDiv(["share_input_container"]);
-    const linkInput = createInput([], "", {
-      id: "share_input",
-      autocomplete: "off"
-    });
-    linkInput.addEventListener("click", () => linkInput.select());
-    icd.appendChild(linkInput);
-    const but = createDiv(["button_simple"], "Copy");
-    but.addEventListener("click", function() {
-      ipcSend("set_clipboard", byId("share_input").value);
-    });
-    icd.appendChild(but);
-    cont.appendChild(icd);
-
-    cont.appendChild(createDiv(["share_subtitle"], "<i>Expires in: </i>"));
-    createSelect(
-      cont,
-      ["One day", "One week", "One month", "Never"],
-      "",
-      () => draftShareLink(draft.id, draft),
-      "expire_select"
-    );
-
-    openDialog(cont);
-    draftShareLink(draft.id, draft);
-  });
+  const replayShareButton = createShareButton(
+    ["list_draft_share", draft.id + "dr"],
+    () => draftShareLink(draft.id, draft)
+  );
   return replayShareButton;
 }
 
