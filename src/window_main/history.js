@@ -24,7 +24,8 @@ import {
   makeResizable,
   resetMainContainer,
   showColorpicker,
-  toggleArchived
+  toggleArchived,
+  addNodeToUnmountReact
 } from "./renderer-util";
 import { openDraft } from "./draft-details";
 import { openMatch } from "./match-details";
@@ -158,6 +159,7 @@ export function openHistoryTab(_filters = {}, dataIndex = 25, scrollTop = 0) {
     true
   );
   ReactDOM.render(filterPanel.render(), historyTop);
+  addNodeToUnmountReact(historyTop);
   wrap_l.appendChild(historyTop);
 
   mainDiv.appendChild(wrap_l);

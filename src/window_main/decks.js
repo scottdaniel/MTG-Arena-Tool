@@ -24,13 +24,16 @@ import {
   makeResizable,
   resetMainContainer,
   setLocalState,
-  showColorpicker
+  showColorpicker,
+  addNodeToUnmountReact
 } from "./renderer-util";
 import ReactDOM from "react-dom";
 
 let filters = Aggregator.getDefaultFilters();
 filters.onlyCurrentDecks = true;
 const tagPrompt = "Add";
+
+const cleanupReact = null;
 
 function setFilters(selected = {}) {
   if (selected.eventId || selected.date) {
@@ -106,6 +109,7 @@ export function openDecksTab(_filters = {}, scrollTop = 0) {
     true
   );
   ReactDOM.render(filterPanel.render(), decksTop);
+  addNodeToUnmountReact(decksTop);
   wrap_l.appendChild(decksTop);
 
   const decks = [...pd.deckList];

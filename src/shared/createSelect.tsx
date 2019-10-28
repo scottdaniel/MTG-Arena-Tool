@@ -1,6 +1,7 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { createDiv } from "./dom-fns";
+import { addNodeToUnmountReact } from '../window_main/renderer-util';
 
 export interface ReactSelectProps {
     optionFormatter?: (option: string) => string | JSX.Element;
@@ -66,7 +67,8 @@ export function createSelect(
       <ReactSelect {...props} />,
       selectContainer
     );
-  
+    
+    addNodeToUnmountReact(selectContainer);
     return selectContainer;
 }
 

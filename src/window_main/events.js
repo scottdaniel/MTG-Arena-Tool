@@ -17,7 +17,8 @@ import {
   getEventWinLossClass,
   localTimeSince,
   resetMainContainer,
-  toggleArchived
+  toggleArchived,
+  addNodeToUnmountReact
 } from "./renderer-util";
 import { openMatch } from "./match-details";
 import { openDraft } from "./draft-details";
@@ -59,6 +60,7 @@ export function openEventsTab(_filters, dataIndex = 25, scrollTop = 0) {
   );
 
   ReactDOM.render(filterPanel.render(), eventsTop);
+  addNodeToUnmountReact(eventsTop);
 
   const statsPanel = new StatsPanel("events_top", filteredMatches);
   const eventsTopWinrate = statsPanel.render();
