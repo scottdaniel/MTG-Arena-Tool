@@ -990,8 +990,8 @@ function trackUpdate(entry, trackUpdate) {
   // For some reason, orbs live separately from all other inventory
   if (
     orbCountDiff &&
-    orbCountDiff.oldOrbCount &&
-    orbCountDiff.currentOrbCount &&
+    orbCountDiff.oldOrbCount !== undefined &&
+    orbCountDiff.currentOrbCount !== undefined &&
     orbCountDiff.currentOrbCount - orbCountDiff.oldOrbCount
   ) {
     const data = { trackName, trackTier, orbCountDiff };
