@@ -24,9 +24,9 @@ import {
   makeResizable,
   resetMainContainer,
   setLocalState,
-  showColorpicker,
+  showColorpicker
 } from "./renderer-util";
-import mountReactComponent from './mountReactComponent';
+import mountReactComponent from "./mountReactComponent";
 
 let filters = Aggregator.getDefaultFilters();
 filters.onlyCurrentDecks = true;

@@ -28,7 +28,7 @@ import {
 } from "./renderer-util";
 import { openDraft } from "./draft-details";
 import { openMatch } from "./match-details";
-import mountReactComponent from './mountReactComponent';
+import mountReactComponent from "./mountReactComponent";
 
 const byId = id => document.getElementById(id);
 const {

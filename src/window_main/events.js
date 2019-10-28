@@ -17,11 +17,11 @@ import {
   getEventWinLossClass,
   localTimeSince,
   resetMainContainer,
-  toggleArchived,
+  toggleArchived
 } from "./renderer-util";
 import { openMatch } from "./match-details";
 import { openDraft } from "./draft-details";
-import mountReactComponent from './mountReactComponent';
+import mountReactComponent from "./mountReactComponent";
 
 let filters = Aggregator.getDefaultFilters();
 filters.eventId = Aggregator.ALL_EVENT_TRACKS;

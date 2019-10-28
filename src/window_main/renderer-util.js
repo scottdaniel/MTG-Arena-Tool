@@ -40,7 +40,7 @@ import {
   toMMSS,
   openScryfallCard
 } from "../shared/util";
-import ReactDOM from 'react-dom';
+import ReactDOM from "react-dom";
 import createShareButton from "./createShareButton";
 
 const DEFAULT_BACKGROUND = "../images/Bedevil-Art.jpg";
