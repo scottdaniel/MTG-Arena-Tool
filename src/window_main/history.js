@@ -24,12 +24,11 @@ import {
   makeResizable,
   resetMainContainer,
   showColorpicker,
-  toggleArchived,
-  addNodeToUnmountReact
+  toggleArchived
 } from "./renderer-util";
 import { openDraft } from "./draft-details";
 import { openMatch } from "./match-details";
-import ReactDOM from "react-dom";
+import mountReactComponent from './mountReactComponent';
 
 const byId = id => document.getElementById(id);
 const {
@@ -158,8 +157,7 @@ export function openHistoryTab(_filters = {}, dataIndex = 25, scrollTop = 0) {
     matchesInEvent.archCounts,
     true
   );
-  ReactDOM.render(filterPanel.render(), historyTop);
-  addNodeToUnmountReact(historyTop);
+  mountReactComponent(filterPanel.render(), historyTop);
   wrap_l.appendChild(historyTop);
 
   mainDiv.appendChild(wrap_l);

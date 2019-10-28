@@ -1,5 +1,5 @@
 import React from 'react';
-import { ReactSelect, ReactSelectProps } from '../shared/createSelect';
+import { ReactSelect, ReactSelectProps } from '../shared/ReactSelect';
 
 export interface DateFilterProps extends ReactSelectProps {
     prefixId: string;

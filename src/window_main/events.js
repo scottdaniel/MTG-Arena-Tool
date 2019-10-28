@@ -18,11 +18,10 @@ import {
   localTimeSince,
   resetMainContainer,
   toggleArchived,
-  addNodeToUnmountReact
 } from "./renderer-util";
 import { openMatch } from "./match-details";
 import { openDraft } from "./draft-details";
-import ReactDOM from "react-dom";
+import mountReactComponent from './mountReactComponent';
 
 let filters = Aggregator.getDefaultFilters();
 filters.eventId = Aggregator.ALL_EVENT_TRACKS;
@@ -59,8 +58,7 @@ export function openEventsTab(_filters, dataIndex = 25, scrollTop = 0) {
     true
   );
 
-  ReactDOM.render(filterPanel.render(), eventsTop);
-  addNodeToUnmountReact(eventsTop);
+  mountReactComponent(filterPanel.render(), eventsTop);
 
   const statsPanel = new StatsPanel("events_top", filteredMatches);
   const eventsTopWinrate = statsPanel.render();

@@ -1,7 +1,4 @@
 import * as React from 'react';
-import * as ReactDOM from 'react-dom';
-import { createDiv } from "./dom-fns";
-import { addNodeToUnmountReact } from '../window_main/renderer-util';
 
 export interface ReactSelectProps {
     optionFormatter?: (option: string) => string | JSX.Element;
@@ -44,32 +41,6 @@ export function ReactSelect(props: ReactSelectProps) {
             </div>}
         </>
     );
-}
-
-export function createSelect(
-    parent: Element,
-    options: string[],
-    current: string,
-    callback: (option: string) => void,
-    divClass: string,
-    optionFormatter?: (option: string) => string | JSX.Element,
-): JSX.Element {
-    // We create this container outside the component to ensure wherever we're rendering doens't get blanked.
-    const selectContainer = createDiv(["select_container", divClass]);
-    selectContainer.id = divClass;
-    parent.appendChild(selectContainer);
-  
-    const props = {
-      options, current, optionFormatter, callback,
-    }
-  
-    ReactDOM.render(
-      <ReactSelect {...props} />,
-      selectContainer
-    );
-    
-    addNodeToUnmountReact(selectContainer);
-    return selectContainer;
 }
 
 export interface WrappedReactSelectProps extends ReactSelectProps {

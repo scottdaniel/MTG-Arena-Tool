@@ -25,9 +25,8 @@ import {
   resetMainContainer,
   setLocalState,
   showColorpicker,
-  addNodeToUnmountReact
 } from "./renderer-util";
-import ReactDOM from "react-dom";
+import mountReactComponent from './mountReactComponent';
 
 let filters = Aggregator.getDefaultFilters();
 filters.onlyCurrentDecks = true;
@@ -108,8 +107,7 @@ export function openDecksTab(_filters = {}, scrollTop = 0) {
     true,
     true
   );
-  ReactDOM.render(filterPanel.render(), decksTop);
-  addNodeToUnmountReact(decksTop);
+  mountReactComponent(filterPanel.render(), decksTop);
   wrap_l.appendChild(decksTop);
 
   const decks = [...pd.deckList];

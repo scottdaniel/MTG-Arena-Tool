@@ -14,7 +14,7 @@ import React from 'react';
 import TagOption from './TagOption';
 import DateFilter from "./DateFilter";
 import ManaFilter, { ColorFilter } from "./ManaFilter";
-import { WrappedReactSelect } from '../shared/createSelect';
+import { WrappedReactSelect } from '../shared/ReactSelect';
 import { getDeckComponentForwarded } from './getDeckComponent';
 
 class FilterPanel {
