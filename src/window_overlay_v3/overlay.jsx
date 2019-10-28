@@ -92,9 +92,6 @@ let landsCard = {
   dfcId: 0
 };
 
-let matchBeginTime = Date.now();
-let priorityTimers = [];
-
 setRenderer(1);
 
 let playerSeat = 0;
@@ -121,21 +118,6 @@ ipc.on("set_arena_state", function(event, arg) {
     setRenderer(2);
   }
   settingsUpdated();
-});
-
-ipc.on("set_timer", function(event, arg) {
-  if (arg == -1) {
-    matchBeginTime = Date.now();
-  } else if (arg !== 0) {
-    //matchBeginTime = arg == 0 ? 0 : Date.parse(arg);
-    matchBeginTime = Date.parse(arg);
-  }
-});
-
-ipc.on("set_priority_timer", function(event, arg) {
-  if (arg) {
-    priorityTimers = arg;
-  }
 });
 
 ipc.on("edit", () => {
