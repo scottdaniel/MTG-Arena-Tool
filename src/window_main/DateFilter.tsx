@@ -4,18 +4,19 @@ import { ReactSelect, ReactSelectProps } from '../shared/createSelect';
 export interface DateFilterProps extends ReactSelectProps {
     prefixId: string;
     showArchivedFilter?: boolean;
+    showArchivedValue?: boolean;
     onArchiveClick?: (newValue: boolean) => void;
 }
 
 export default function DateFilter(props: DateFilterProps) {
-    const [ showArchived, onSetShowArchived ] = React.useState(false);
+    const [ showArchived, setShowArchived ] = React.useState(props.showArchivedValue);
     
     const onClickArchiveCheckbox = React.useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-        const newValue = event.currentTarget.checked;
-        if (newValue != showArchived) {
-            onSetShowArchived(newValue);
-            props.onArchiveClick && props.onArchiveClick(newValue);
-        }
+      const newValue = event.currentTarget.checked;
+      if (newValue != showArchived) {
+        setShowArchived(newValue);
+        props.onArchiveClick && props.onArchiveClick(newValue);
+      }
     }, [props.onArchiveClick, showArchived]);
     
     const { prefixId, options, current, callback, showArchivedFilter } = props;

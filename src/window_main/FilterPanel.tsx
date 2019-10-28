@@ -110,7 +110,7 @@ class FilterPanel {
     return (
       <div className={this.prefixId + "_filter filter_panel_root"}>
         <div className={"columnA"}>
-          <DateFilter prefixId={this.prefixId} options={dateOptions} current={dateSelected} callback={this.dateSelectCallback} showArchivedFilter={this.showArchivedFilter} onArchiveClick={this.filterCallback('showArchived')} />
+          <DateFilter showArchivedValue={this.filters.showArchived} prefixId={this.prefixId} options={dateOptions} current={dateSelected} callback={this.dateSelectCallback} showArchivedFilter={this.showArchivedFilter} onArchiveClick={this.filterCallback('showArchived')} />
           <WrappedReactSelect className={this.prefixId + "_query_event"} options={this.events} current={this.filters.eventId} callback={this.filterCallback('eventId')} optionFormatter={getReadableEvent} />
         </div>
         {(this.tags.length || this.showManaFilter) &&
