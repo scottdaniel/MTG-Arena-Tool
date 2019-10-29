@@ -361,6 +361,13 @@ function getInputValue(id, defaultVal) {
   return q[0].value;
 }
 
+function getExploreEventValue(defaultVal){
+  let exploreEventDiv = $$(".explore_query_event");
+  let exploreEventButton = exploreEventDiv[0].children[0];
+  
+  return exploreEventButton.textContent;
+}
+
 //
 function handleNewSearch() {
   const exploreList = document.getElementById("explore_list");
@@ -369,7 +376,7 @@ function handleNewSearch() {
   const ed = getLocalState().exploreData;
   const exploreData = {
     ...ed,
-    filterEvent: getInputValue("explore_query_event", ed.filterEvent),
+    filterEvent: getExploreEventValue(ed.filterEvent),
     filterSort: getInputValue("explore_query_sort", ed.filterSort),
     filterSortDir: getInputValue("explore_query_sortdir", ed.filterSortDir),
     filterWCC: getInputValue("explore_query_wc_c", ed.filterWCC),
@@ -453,7 +460,7 @@ function queryExplore() {
 
   // initial query defaults event filter to first event (dynamic)
   const filterEvent =
-    exploreData.filterEvent || getInputValue("explore_query_event", "Ladder");
+    exploreData.filterEvent || getExploreEventValue("Ladder");
   // map selected event display name back to event ID
   let filterEventId = filterEvent;
   const eventIds = db.eventIds.filter(
