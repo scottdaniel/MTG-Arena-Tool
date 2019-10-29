@@ -361,10 +361,10 @@ function getInputValue(id, defaultVal) {
   return q[0].value;
 }
 
-function getExploreEventValue(defaultVal){
+function getExploreEventValue(defaultVal) {
   let exploreEventDiv = $$(".explore_query_event");
   let exploreEventButton = exploreEventDiv[0].children[0];
-  
+
   return exploreEventButton.textContent;
 }
 
@@ -459,8 +459,7 @@ function queryExplore() {
   const sortDir = filterSortDir === "Descending" ? -1 : 1;
 
   // initial query defaults event filter to first event (dynamic)
-  const filterEvent =
-    exploreData.filterEvent || getExploreEventValue("Ladder");
+  const filterEvent = exploreData.filterEvent || getExploreEventValue("Ladder");
   // map selected event display name back to event ID
   let filterEventId = filterEvent;
   const eventIds = db.eventIds.filter(
