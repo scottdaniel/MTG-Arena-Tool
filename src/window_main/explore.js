@@ -361,10 +361,13 @@ function getInputValue(id, defaultVal) {
   return q[0].value;
 }
 
-function getExploreEventValue(defaultVal) {
-  let exploreEventDiv = $$(".explore_query_event");
+function getInputValueFromButton(id, defaultVal) {
+  let exploreEventDiv = $$("." + id);
   let exploreEventButton = exploreEventDiv[0].children[0];
 
+  if (exploreEventButton.textContent === "") {
+    return defaultVal;
+  }
   return exploreEventButton.textContent;
 }
 
@@ -376,9 +379,12 @@ function handleNewSearch() {
   const ed = getLocalState().exploreData;
   const exploreData = {
     ...ed,
-    filterEvent: getExploreEventValue(ed.filterEvent),
-    filterSort: getInputValue("explore_query_sort", ed.filterSort),
-    filterSortDir: getInputValue("explore_query_sortdir", ed.filterSortDir),
+    filterEvent: getInputValueFromButton("explore_query_event", ed.filterEvent),
+    filterSort: getInputValueFromButton("explore_query_sort", ed.filterSort),
+    filterSortDir: getInputValueFromButton(
+      "explore_query_sortdir",
+      ed.filterSortDir
+    ),
     filterWCC: getInputValue("explore_query_wc_c", ed.filterWCC),
     filterWCU: getInputValue("explore_query_wc_u", ed.filterWCU),
     filterWCR: getInputValue("explore_query_wc_r", ed.filterWCR),
@@ -459,7 +465,9 @@ function queryExplore() {
   const sortDir = filterSortDir === "Descending" ? -1 : 1;
 
   // initial query defaults event filter to first event (dynamic)
-  const filterEvent = exploreData.filterEvent || getExploreEventValue("Ladder");
+  const filterEvent =
+    exploreData.filterEvent ||
+    getInputValueFromButton("explore_query_event", "Ladder");
   // map selected event display name back to event ID
   let filterEventId = filterEvent;
   const eventIds = db.eventIds.filter(
@@ -631,7 +639,7 @@ function deckLoad(_deck, index) {
     ["list_deck_record"],
     `${_deck.mw}:${_deck.ml} <span class="${colClass}_bright">(${formatPercent(
       deckWinrate.winrate
-    )})</span>`
+    )}`
   );
   if (_deck.mt >= 20) {
     // sample Size is large enough to use Wald Interval
@@ -643,6 +651,7 @@ function deckLoad(_deck, index) {
       roundWinrate(deckWinrate.interval)
     )}</i>`;
   }
+  d.innerHTML += `)</span>`;
 
   flr.appendChild(d);
 
