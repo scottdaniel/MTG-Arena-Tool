@@ -1,4 +1,12 @@
-import React, { Fragment, useEffect, useState } from "react";
+import React, {
+  Fragment,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState
+} from "react";
+
+import { toMMSS, toHHMMSS } from "../shared/util";
 
 const CLOCK_MODE_BOTH = 0;
 const CLOCK_MODE_ELAPSED = 1;
@@ -23,21 +31,21 @@ export default function Clock(props: ClockProps): JSX.Element {
     playerSeat
   } = props;
 
-  const handleClockPrev = (): void => {
+  const handleClockPrev = useCallback((): void => {
     if (clockMode <= CLOCK_MODE_BOTH) {
       setClockMode(CLOCK_MODE_CLOCK);
     } else {
       setClockMode(clockMode - 1);
     }
-  };
+  }, [clockMode]);
 
-  const handleClockNext = (): void => {
+  const handleClockNext = useCallback((): void => {
     if (clockMode >= CLOCK_MODE_CLOCK) {
       setClockMode(CLOCK_MODE_BOTH);
     } else {
       setClockMode(clockMode + 1);
     }
-  };
+  }, [clockMode]);
 
   // update clock display by changing "now" state every 250ms
   useEffect(() => {
@@ -49,89 +57,66 @@ export default function Clock(props: ClockProps): JSX.Element {
     };
   });
 
-  let cleanName = oppName;
-  if (oppName !== "Sparky") {
-    cleanName = oppName.slice(0, -6);
+  // Memoize title computation
+  const clockTitle = useMemo((): JSX.Element => {
+    let cleanName = oppName;
+    if (oppName !== "Sparky") {
+      cleanName = oppName.slice(0, -6);
+    }
+    let p1name = cleanName;
+    let p2name = "You";
+    if (playerSeat === 1) {
+      p1name = "You";
+      p2name = cleanName;
+    }
+    if (clockMode === CLOCK_MODE_BOTH) {
+      const className1 =
+        "clock_pname1 " + (turnPriority === 1 ? "pname_priority" : "");
+      const className2 =
+        "clock_pname2 " + (turnPriority === 2 ? "pname_priority" : "");
+      return (
+        <Fragment>
+          <div className={className1}>{p1name}</div>
+          <div className={className2}>{p2name}</div>
+        </Fragment>
+      );
+    }
+    if (turnPriority === playerSeat) {
+      return <Fragment>{"You have priority."}</Fragment>;
+    }
+    return <Fragment>{cleanName + " has priority."}</Fragment>;
+  }, [clockMode, playerSeat, turnPriority]);
+
+  // Clock Mode BOTH
+  const lastDurationInSec = Math.floor(
+    (now.getTime() - new Date(priorityTimers[0]).getTime()) / 1000
+  );
+  let duration1 = Math.floor(priorityTimers[1] / 1000);
+  if (turnPriority === 1 && duration1 > 0) {
+    duration1 += lastDurationInSec;
   }
-  let p1name = cleanName;
-  let p2name = "You";
-  if (playerSeat === 1) {
-    p1name = "You";
-    p2name = cleanName;
+  let duration2 = Math.floor(priorityTimers[2] / 1000);
+  if (turnPriority === 1 && duration1 > 0) {
+    duration2 += lastDurationInSec;
   }
 
-  // BOTH mode timer 1
-  let mm, ss, time;
-  time = priorityTimers[1] / 1000;
-  const msDiff = now.getTime() - new Date(priorityTimers[0]).getTime();
-  if (turnPriority === 1 && time > 0) {
-    time += msDiff / 1000;
-  }
-  mm = Math.floor((time % 3600) / 60);
-  const mmP1 = ("0" + mm).slice(-2);
-  ss = Math.floor(time % 60);
-  const ssP1 = ("0" + ss).slice(-2);
-
-  // BOTH mode timer 2
-  time = priorityTimers[2] / 1000;
-  if (turnPriority === 2 && time > 0) {
-    time += msDiff / 1000;
-  }
-  mm = Math.floor((time % 3600) / 60);
-  const mmP2 = ("0" + mm).slice(-2);
-  ss = Math.floor(time % 60);
-  const ssP2 = ("0" + ss).slice(-2);
-
-  // ELAPSED mode
-  const diff = Math.floor((Date.now() - matchBeginTime.getTime()) / 1000);
-  const hh = Math.floor(diff / 3600);
-  mm = Math.floor((diff % 3600) / 60);
-  ss = Math.floor(diff % 60);
-  const hhE = ("0" + hh).slice(-2);
-  const mmE = ("0" + mm).slice(-2);
-  const ssE = ("0" + ss).slice(-2);
+  // Clock Mode ELAPSED
+  const elapsedDuration = Math.floor(
+    (now.getTime() - matchBeginTime.getTime()) / 1000
+  );
 
   return (
     <div className="overlay_clock_container click-on">
       <div className="clock_prev" onClick={handleClockPrev} />
-      <div className="clock_turn">
-        {clockMode === CLOCK_MODE_BOTH ? (
-          <Fragment>
-            <div
-              key="clock_pname1"
-              className={
-                "clock_pname1 " + (turnPriority === 1 ? "pname_priority" : "")
-              }
-            >
-              {p1name}
-            </div>
-            <div
-              key="clock_pname2"
-              className={
-                "clock_pname2 " + (turnPriority === 2 ? "pname_priority" : "")
-              }
-            >
-              {p2name}
-            </div>
-          </Fragment>
-        ) : turnPriority === playerSeat ? (
-          "You have priority."
-        ) : (
-          cleanName + " has priority."
-        )}
-      </div>
+      <div className="clock_turn">{clockTitle}</div>
       <div className="clock_elapsed">
         {clockMode === CLOCK_MODE_BOTH && (
           <Fragment>
-            <div className="clock_priority_1" key="clock_priority_1">
-              {mmP1 + ":" + ssP1}
-            </div>
-            <div className="clock_priority_2" key="clock_priority_2">
-              {mmP2 + ":" + ssP2}
-            </div>
+            <div className="clock_priority_1">{toMMSS(duration1)}</div>
+            <div className="clock_priority_2">{toMMSS(duration2)}</div>
           </Fragment>
         )}
-        {clockMode === CLOCK_MODE_ELAPSED && hhE + ":" + mmE + ":" + ssE}
+        {clockMode === CLOCK_MODE_ELAPSED && toHHMMSS(elapsedDuration)}
         {clockMode === CLOCK_MODE_CLOCK && now.toLocaleTimeString()}
       </div>
       <div className="clock_next" onClick={handleClockNext} />
