@@ -1,5 +1,4 @@
 import React, {
-  Fragment,
   useCallback,
   useEffect,
   useMemo,
@@ -75,16 +74,16 @@ export default function Clock(props: ClockProps): JSX.Element {
       const className2 =
         "clock_pname2 " + (turnPriority === 2 ? "pname_priority" : "");
       return (
-        <Fragment>
+        <>
           <div className={className1}>{p1name}</div>
           <div className={className2}>{p2name}</div>
-        </Fragment>
+        </>
       );
     }
     if (turnPriority === playerSeat) {
-      return <Fragment>{"You have priority."}</Fragment>;
+      return <>{"You have priority."}</>;
     }
-    return <Fragment>{cleanName + " has priority."}</Fragment>;
+    return <>{cleanName + " has priority."}</>;
   }, [clockMode, playerSeat, turnPriority]);
 
   // Clock Mode BOTH
@@ -96,7 +95,7 @@ export default function Clock(props: ClockProps): JSX.Element {
     duration1 += lastDurationInSec;
   }
   let duration2 = Math.floor(priorityTimers[2] / 1000);
-  if (turnPriority === 1 && duration1 > 0) {
+  if (turnPriority === 2 && duration1 > 0) {
     duration2 += lastDurationInSec;
   }
 
@@ -111,10 +110,10 @@ export default function Clock(props: ClockProps): JSX.Element {
       <div className="clock_turn">{clockTitle}</div>
       <div className="clock_elapsed">
         {clockMode === CLOCK_MODE_BOTH && (
-          <Fragment>
+          <>
             <div className="clock_priority_1">{toMMSS(duration1)}</div>
             <div className="clock_priority_2">{toMMSS(duration2)}</div>
-          </Fragment>
+          </>
         )}
         {clockMode === CLOCK_MODE_ELAPSED && toHHMMSS(elapsedDuration)}
         {clockMode === CLOCK_MODE_CLOCK && now.toLocaleTimeString()}
