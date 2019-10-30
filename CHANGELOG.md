@@ -1,3 +1,14 @@
+## <small>2.12.8 (2019-10-30)</small>
+
+* bugfix labels.trackUpdate handles zero orbs ([fe55218](https://github.com/Manuel-777/MTG-Arena-Tool/commit/fe55218))
+* Fix read data from other buttons; Include winrate interval in brackets ([34f30d4](https://github.com/Manuel-777/MTG-Arena-Tool/commit/34f30d4))
+* Get value from explore_query_value button inside div ([76b0662](https://github.com/Manuel-777/MTG-Arena-Tool/commit/76b0662))
+* npm format ([814433b](https://github.com/Manuel-777/MTG-Arena-Tool/commit/814433b))
+* Release 2.12.7 ([94b97d4](https://github.com/Manuel-777/MTG-Arena-Tool/commit/94b97d4))
+* size overlay based on the display it's on ([962e2f7](https://github.com/Manuel-777/MTG-Arena-Tool/commit/962e2f7))
+
+
+
 ## <small>2.12.6 (2019-10-28)</small>
 
 * ormat, removed trailing ), marked function as export and removed from export block ([c293348](https://github.com/Manuel-777/MTG-Arena-Tool/commit/c293348))
