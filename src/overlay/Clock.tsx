@@ -95,7 +95,7 @@ export default function Clock(props: ClockProps): JSX.Element {
     duration1 += lastDurationInSec;
   }
   let duration2 = Math.floor(priorityTimers[2] / 1000);
-  if (turnPriority === 2 && duration1 > 0) {
+  if (turnPriority === 2 && duration2 > 0) {
     duration2 += lastDurationInSec;
   }
 
