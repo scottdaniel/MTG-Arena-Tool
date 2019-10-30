@@ -6,7 +6,7 @@ const CLOCK_MODE_CLOCK = 2;
 
 export interface ClockProps {
   matchBeginTime: Date;
-  priorityTimers: any[];
+  priorityTimers: number[];
   turnPriority: number;
   oppName: string;
   playerSeat: number;
@@ -33,7 +33,7 @@ export default function Clock(props: ClockProps): JSX.Element {
   } = props;
 
   const tick = (): void => {
-    let hh, mm, ss, time;
+    let mm, ss, time;
 
     time = priorityTimers[1] / 1000;
     const now = new Date();
@@ -56,7 +56,7 @@ export default function Clock(props: ClockProps): JSX.Element {
     const ssP2 = ("0" + ss).slice(-2);
 
     const diff = Math.floor((Date.now() - matchBeginTime.getTime()) / 1000);
-    hh = Math.floor(diff / 3600);
+    const hh = Math.floor(diff / 3600);
     mm = Math.floor((diff % 3600) / 60);
     ss = Math.floor(diff % 60);
     const hhE = ("0" + hh).slice(-2);
@@ -126,7 +126,7 @@ export default function Clock(props: ClockProps): JSX.Element {
         ) : turnPriority === playerSeat ? (
           "You have priority."
         ) : (
-          "Opponent has priority."
+          cleanName + " has priority."
         )}
       </div>
       <div className="clock_elapsed">
