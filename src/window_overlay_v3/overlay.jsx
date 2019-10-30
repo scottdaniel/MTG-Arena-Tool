@@ -957,7 +957,9 @@ function recreateClock(index) {
       : new Date(),
     oppName: currentMatch ? currentMatch.opponent.name : "Opponent",
     playerSeat: playerSeat,
-    priorityTimers: currentMatch ? currentMatch.priorityTimers : [],
+    priorityTimers: currentMatch
+      ? currentMatch.priorityTimers
+      : [Date.now(), 0, 0],
     turnPriority: turnPriority
   };
   ReactDOM.render(<Clock {...props} />, clockDiv);
