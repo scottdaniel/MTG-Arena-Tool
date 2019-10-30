@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 
 const CLOCK_MODE_BOTH = 0;
 const CLOCK_MODE_ELAPSED = 1;
@@ -104,38 +104,42 @@ export default function Clock(props: ClockProps): JSX.Element {
     <div className="overlay_clock_container click-on">
       <div className="clock_prev" onClick={handleClockPrev} />
       <div className="clock_turn">
-        {clockMode === CLOCK_MODE_BOTH
-          ? [
-              <div
-                key="clock_pname1"
-                className={
-                  "clock_pname1 " + (turnPriority === 1 ? "pname_priority" : "")
-                }
-              >
-                {p1name}
-              </div>,
-              <div
-                key="clock_pname2"
-                className={
-                  "clock_pname2 " + (turnPriority === 2 ? "pname_priority" : "")
-                }
-              >
-                {p2name}
-              </div>
-            ]
-          : turnPriority === playerSeat
-          ? "You have priority."
-          : "Opponent has priority."}
+        {clockMode === CLOCK_MODE_BOTH ? (
+          <Fragment>
+            <div
+              key="clock_pname1"
+              className={
+                "clock_pname1 " + (turnPriority === 1 ? "pname_priority" : "")
+              }
+            >
+              {p1name}
+            </div>
+            <div
+              key="clock_pname2"
+              className={
+                "clock_pname2 " + (turnPriority === 2 ? "pname_priority" : "")
+              }
+            >
+              {p2name}
+            </div>
+          </Fragment>
+        ) : turnPriority === playerSeat ? (
+          "You have priority."
+        ) : (
+          "Opponent has priority."
+        )}
       </div>
       <div className="clock_elapsed">
-        {clockMode === CLOCK_MODE_BOTH && [
-          <div className="clock_priority_1" key="clock_priority_1">
-            {state.mmP1 + ":" + state.ssP1}
-          </div>,
-          <div className="clock_priority_2" key="clock_priority_2">
-            {state.mmP2 + ":" + state.ssP2}
-          </div>
-        ]}
+        {clockMode === CLOCK_MODE_BOTH && (
+          <Fragment>
+            <div className="clock_priority_1" key="clock_priority_1">
+              {state.mmP1 + ":" + state.ssP1}
+            </div>
+            <div className="clock_priority_2" key="clock_priority_2">
+              {state.mmP2 + ":" + state.ssP2}
+            </div>
+          </Fragment>
+        )}
         {clockMode === CLOCK_MODE_ELAPSED &&
           state.hhE + ":" + state.mmE + ":" + state.ssE}
         {clockMode === CLOCK_MODE_CLOCK && state.now.toLocaleTimeString()}
