@@ -4,6 +4,7 @@
 /node_modules
 
 # development
+/src/var.js
 main.sublime-workspace
 main.sublime-project
 *.sublime-workspace
