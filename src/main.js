@@ -75,7 +75,9 @@ app.on("ready", () => {
     require("devtron").install();
     const dotenv = require("dotenv");
     dotenv.config();
-    electron.BrowserWindow.addExtension(process.env.REACTDEVTOOLSEXT);
+    if (process.env.REACTDEVTOOLSEXT) {
+      electron.BrowserWindow.addExtension(process.env.REACTDEVTOOLSEXT);
+    }
     startApp();
   }
 });
