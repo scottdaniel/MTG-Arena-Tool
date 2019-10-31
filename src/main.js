@@ -72,13 +72,11 @@ app.on("ready", () => {
     Sentry.init({
       dsn: "https://4ec87bda1b064120a878eada5fc0b10f@sentry.io/1778171"
     });
+    startApp();
     require("devtron").install();
     const dotenv = require("dotenv");
     dotenv.config();
-    if (process.env.REACTDEVTOOLSEXT) {
-      electron.BrowserWindow.addExtension(process.env.REACTDEVTOOLSEXT);
-    }
-    startApp();
+    electron.BrowserWindow.addDevToolsExtension(process.env.REACTDEVTOOLSEXT);
   }
 });
 
