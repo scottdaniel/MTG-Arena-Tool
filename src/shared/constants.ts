@@ -1,21 +1,34 @@
-export const IPC_BACKGROUND = 0;
-export const IPC_MAIN = 1;
-export const IPC_OVERLAY = 2;
+interface EnumType {
+  CounterType: Record<number, string>,
+  SuperType: Record<number, string>,
+  ResultCode: Record<number, string>,
+  SubType: Record<number, string>,
+  FailureReason: Record<number, string>,
+  Phase: Record<number, string>,
+  MatchState: Record<number, string>,
+  Step: Record<number, string>,
+  CardType: Record<number, string>,
+  Color: Record<number, string>
+}
+
+export const IPC_BACKGROUND: number = 0;
+export const IPC_MAIN: number = 1;
+export const IPC_OVERLAY: number = 2;
 
 // Colour indices
-export const WHITE = 1;
+export const WHITE: number = 1;
 
-export const BLUE = 2;
-export const BLACK = 3;
-export const RED = 4;
-export const GREEN = 5;
-export const COLORLESS = 6;
-export const MULTI = 7;
+export const BLUE: number = 2;
+export const BLACK: number = 3;
+export const RED: number = 4;
+export const GREEN: number = 5;
+export const COLORLESS: number = 6;
+export const MULTI: number = 7;
 
 // Magic constant to represent auth token in form
-export const HIDDEN_PW = "********";
+export const HIDDEN_PW: string = "********";
 
-export const ENUMS = {
+export const ENUMS: EnumType = {
   CounterType: {
     "1": "+1/+1",
     "2": "-1/-1",
@@ -600,15 +613,15 @@ export const ENUMS = {
   Color: { "1": "White", "2": "Blue", "3": "Black", "4": "Red", "5": "Green" }
 };
 
-export const FACE_NONE = 0;
-export const FACE_DFC_BACK = 1;
-export const FACE_DFC_FRONT = 2;
-export const FACE_SPLIT_FULL = 6;
-export const FACE_SPLIT = 5;
-export const FACE_ADVENTURE = 7;
-export const FACE_ADVENTURE_MAIN = 8;
+export const FACE_NONE: number = 0;
+export const FACE_DFC_BACK: number = 1;
+export const FACE_DFC_FRONT: number = 2;
+export const FACE_SPLIT_FULL: number = 6;
+export const FACE_SPLIT: number = 5;
+export const FACE_ADVENTURE: number = 7;
+export const FACE_ADVENTURE_MAIN: number = 8;
 
-export const FORMATS = {
+export const FORMATS: Record<string, string> = {
   Standard: "Standard",
   TraditionalStandard: "Traditional Standard",
   Historic: "Historic",
@@ -630,9 +643,9 @@ export const FORMATS = {
   XLN: "Ixalan Constructed"
 };
 
-export const COLORS_ALL = ["w", "u", "b", "r", "g", "c"];
-export const COLORS_BRIEF = ["w", "u", "b", "r", "g"];
-export const RANKS = [
+export const COLORS_ALL: string[] = ["w", "u", "b", "r", "g", "c"];
+export const COLORS_BRIEF: string[] = ["w", "u", "b", "r", "g"];
+export const RANKS: string[] = [
   "Bronze",
   "Silver",
   "Gold",
@@ -640,23 +653,23 @@ export const RANKS = [
   "Diamond",
   "Mythic"
 ];
-export const CONSTRUCTED_EVENTS = ["Ladder", "Traditional_Ladder"];
-export const OVERLAY_FULL = 0;
-export const OVERLAY_LEFT = 1;
-export const OVERLAY_ODDS = 2;
-export const OVERLAY_SEEN = 3;
-export const OVERLAY_LOG = 4;
-export const OVERLAY_DRAFT = 5;
-export const OVERLAY_DRAFT_BREW = 6;
-export const OVERLAY_MIXED = 7;
+export const CONSTRUCTED_EVENTS: string[] = ["Ladder", "Traditional_Ladder"];
+export const OVERLAY_FULL: number = 0;
+export const OVERLAY_LEFT: number = 1;
+export const OVERLAY_ODDS: number = 2;
+export const OVERLAY_SEEN: number = 3;
+export const OVERLAY_LOG: number = 4;
+export const OVERLAY_DRAFT: number = 5;
+export const OVERLAY_DRAFT_BREW: number = 6;
+export const OVERLAY_MIXED: number = 7;
 
-export const OVERLAY_DRAFT_MODES = [OVERLAY_DRAFT, OVERLAY_DRAFT_BREW];
+export const OVERLAY_DRAFT_MODES: number[] = [OVERLAY_DRAFT, OVERLAY_DRAFT_BREW];
 
-export const ARENA_MODE_IDLE = 0;
-export const ARENA_MODE_MATCH = 1;
-export const ARENA_MODE_DRAFT = 2;
+export const ARENA_MODE_IDLE: number = 0;
+export const ARENA_MODE_MATCH: number = 1;
+export const ARENA_MODE_DRAFT: number = 2;
 
-const DRAFT_RANKS = [];
+const DRAFT_RANKS: string[] = [];
 DRAFT_RANKS[12] = "A+";
 DRAFT_RANKS[11] = "A";
 DRAFT_RANKS[10] = "A-";
@@ -671,7 +684,7 @@ DRAFT_RANKS[2] = "D";
 DRAFT_RANKS[1] = "D-";
 DRAFT_RANKS[0] = "F";
 export { DRAFT_RANKS };
-export const CARD_TYPE_CODES = [
+export const CARD_TYPE_CODES: string[] = [
   "cre",
   "lan",
   "ins",
@@ -681,7 +694,7 @@ export const CARD_TYPE_CODES = [
   "pla"
 ];
 
-export const CARD_TYPES = [
+export const CARD_TYPES: string[] = [
   "Creatures",
   "Lands",
   "Instants",
@@ -691,9 +704,9 @@ export const CARD_TYPES = [
   "Planeswalkers"
 ];
 
-export const CARD_RARITIES = ["common", "uncommon", "rare", "mythic"];
+export const CARD_RARITIES: string[] = ["common", "uncommon", "rare", "mythic"];
 
-export const MANA_COLORS = [
+export const MANA_COLORS: string[] = [
   "#E7CA8E",
   "#AABEDF",
   "#A18E87",
@@ -702,7 +715,7 @@ export const MANA_COLORS = [
   "#E3E3E3"
 ];
 
-export const MANA = {
+export const MANA: Record<number, string> = {
   0: "",
   1: "white",
   2: "blue",
@@ -714,7 +727,7 @@ export const MANA = {
   8: "x"
 };
 
-export const RANKS_SORT = {
+export const RANKS_SORT: Record<string, number> = {
   Begginer: 0,
   Bronze: 1,
   Silver: 2,
@@ -724,28 +737,28 @@ export const RANKS_SORT = {
   Mythic: 6
 };
 
-export const PACK_SIZES = {
+export const PACK_SIZES: Record<string, number> = {
   "Ravnica Allegiance": 14,
   "Guilds of Ravnica": 14,
   "Core Set 2020": 15
 };
 
-export const DEFAULT_TILE = 67003;
-export const CARD_TILE_ARENA = 0;
-export const CARD_TILE_FLAT = 1;
-export const EASING_DEFAULT = "cubicBezier(0.570, 0.165, 0.210, 0.990)";
-export const MAIN_LOGIN = -2;
-export const MAIN_HOME = -1;
-export const MAIN_DECKS = 0;
-export const MAIN_HISTORY = 1;
-export const MAIN_EVENTS = 2;
-export const MAIN_EXPLORE = 3;
-export const MAIN_ECONOMY = 4;
-export const MAIN_COLLECTION = 5;
-export const MAIN_SETTINGS = 6;
-export const MAIN_UPDATE = 9;
+export const DEFAULT_TILE: number = 67003;
+export const CARD_TILE_ARENA: number = 0;
+export const CARD_TILE_FLAT: number = 1;
+export const EASING_DEFAULT: string = "cubicBezier(0.570, 0.165, 0.210, 0.990)";
+export const MAIN_LOGIN: number = -2;
+export const MAIN_HOME: number = -1;
+export const MAIN_DECKS: number = 0;
+export const MAIN_HISTORY: number = 1;
+export const MAIN_EVENTS: number = 2;
+export const MAIN_EXPLORE: number = 3;
+export const MAIN_ECONOMY: number = 4;
+export const MAIN_COLLECTION: number = 5;
+export const MAIN_SETTINGS: number = 6;
+export const MAIN_UPDATE: number = 9;
 
-export const SHORTCUT_NAMES = {
+export const SHORTCUT_NAMES: Record<string, string> = {
   shortcut_overlay_1: "Toggle Overlay 1",
   shortcut_overlay_2: "Toggle Overlay 2",
   shortcut_overlay_3: "Toggle Overlay 3",
@@ -756,18 +769,18 @@ export const SHORTCUT_NAMES = {
   shortcut_devtools_overlay: "Toggle Developer Tools (overlays)"
 };
 
-export const SETTINGS_BEHAVIOUR = 1;
-export const SETTINGS_ARENA_DATA = 2;
-export const SETTINGS_OVERLAY = 3;
-export const SETTINGS_VISUAL = 4;
-export const SETTINGS_SHORTCUTS = 5;
-export const SETTINGS_PRIVACY = 6;
-export const SETTINGS_ABOUT = 7;
-export const SETTINGS_LOGIN = 8;
+export const SETTINGS_BEHAVIOUR: number = 1;
+export const SETTINGS_ARENA_DATA: number = 2;
+export const SETTINGS_OVERLAY: number = 3;
+export const SETTINGS_VISUAL: number = 4;
+export const SETTINGS_SHORTCUTS: number = 5;
+export const SETTINGS_PRIVACY: number = 6;
+export const SETTINGS_ABOUT: number = 7;
+export const SETTINGS_LOGIN: number = 8;
 
 // Date constants
-export const DATE_LAST_DAY = "Last 24 Hours";
+export const DATE_LAST_DAY: string = "Last 24 Hours";
 
-export const DATE_LAST_30 = "Last 30 Days";
-export const DATE_SEASON = "Current Season";
-export const DATE_ALL_TIME = "All Time";
+export const DATE_LAST_30: string = "Last 30 Days";
+export const DATE_SEASON: string = "Current Season";
+export const DATE_ALL_TIME: string = "All Time";
