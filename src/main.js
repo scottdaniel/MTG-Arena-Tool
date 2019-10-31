@@ -5,6 +5,7 @@ import fs from "fs";
 import { autoUpdater } from "electron-updater";
 import Store from "electron-store";
 import { format as formatUrl } from "url";
+import { reactDevToolsPath } from "./var";
 
 var rememberStore = new Store({
   name: "remember",
@@ -73,6 +74,8 @@ app.on("ready", () => {
       dsn: "https://4ec87bda1b064120a878eada5fc0b10f@sentry.io/1778171"
     });
     require("devtron").install();
+    if (reactDevToolsPath !== "")
+      electron.BrowserWindow.addExtension(reactDevToolsPath);
     startApp();
   }
 });
