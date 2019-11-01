@@ -228,7 +228,7 @@ function matchIsLimited(match: MatchData): boolean {
   var eventId = match.eventId || match.InternalEventName;
 
   // The order of can matter.
-  if (database.limited_ranked_events.includes(eventId)) {
+  if (eventId && Object.keys(database.limited_ranked_events).includes(eventId)) {
     return true;
   }
   if (eventId) {
