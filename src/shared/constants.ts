@@ -643,19 +643,17 @@ export const FORMATS: Record<string, string> = {
   XLN: "Ixalan Constructed"
 };
 
-export enum COLORS_ALL { "w", "u", "b", "r", "g" }
-export enum COLORS_BRIEF { "w", "u", "b", "r", "g" }
-export enum RANKS {
+export const COLORS_ALL: string[] = ["w", "u", "b", "r", "g", "c"];
+export const COLORS_BRIEF: string[] = ["w", "u", "b", "r", "g"];
+export const RANKS: string[] = [
   "Bronze",
   "Silver",
   "Gold",
   "Platinum",
   "Diamond",
   "Mythic"
-}
-
-export enum CONSTRUCTED_EVENTS { "Ladder", "Traditional_Ladder" }
-
+];
+export const CONSTRUCTED_EVENTS: string[] = ["Ladder", "Traditional_Ladder"];
 export const OVERLAY_FULL = 0;
 export const OVERLAY_LEFT = 1;
 export const OVERLAY_ODDS = 2;
@@ -665,7 +663,7 @@ export const OVERLAY_DRAFT = 5;
 export const OVERLAY_DRAFT_BREW = 6;
 export const OVERLAY_MIXED = 7;
 
-export enum OVERLAY_DRAFT_MODES { OVERLAY_DRAFT, OVERLAY_DRAFT_BREW }
+export const OVERLAY_DRAFT_MODES: number[] = [OVERLAY_DRAFT, OVERLAY_DRAFT_BREW];
 
 export const ARENA_MODE_IDLE = 0;
 export const ARENA_MODE_MATCH = 1;
@@ -685,9 +683,8 @@ DRAFT_RANKS[3] = "D+";
 DRAFT_RANKS[2] = "D";
 DRAFT_RANKS[1] = "D-";
 DRAFT_RANKS[0] = "F";
-
 export { DRAFT_RANKS };
-export enum CARD_TYPE_CODES {
+export const CARD_TYPE_CODES: string[] = [
   "cre",
   "lan",
   "ins",
@@ -695,9 +692,9 @@ export enum CARD_TYPE_CODES {
   "enc",
   "art",
   "pla"
-}
+];
 
-export enum CARD_TYPES {
+export const CARD_TYPES: string[] = [
   "Creatures",
   "Lands",
   "Instants",
@@ -705,18 +702,18 @@ export enum CARD_TYPES {
   "Enchantments",
   "Artifacts",
   "Planeswalkers"
-}
+];
 
-export enum CARD_RARITIES {"common", "uncommon", "rare", "mythic"}
+export const CARD_RARITIES: string[] = ["common", "uncommon", "rare", "mythic"];
 
-export enum MANA_COLORS{
+export const MANA_COLORS: string[] = [
   "#E7CA8E",
   "#AABEDF",
   "#A18E87",
   "#DD8263",
   "#B7C89E",
   "#E3E3E3"
-}
+];
 
 export const MANA: Record<number, string> = {
   0: "",
