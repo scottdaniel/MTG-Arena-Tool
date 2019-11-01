@@ -94,6 +94,16 @@ function ArenaCardTile(props: CardTileProps): JSX.Element {
   } = props;
   const [isMouseHovering, setMouseHovering] = useState(false);
 
+  useEffect(() => {
+    if (card) {
+      const contId = `t${card.id + indent}`;
+      const tileDiv = byId(contId);
+      if (tileDiv) {
+        addCardHover(tileDiv, card);
+      }
+    }
+  });
+
   if (quantity === 0) return <></>;
   if (!card) return <></>;
 
@@ -145,20 +155,13 @@ function ArenaCardTile(props: CardTileProps): JSX.Element {
   const contId = `t${card.id + indent}`;
   let wildcardElement = null;
   if (card) {
-    useEffect(() => {
-      const tileDiv = byId(contId);
-      if (tileDiv) {
-        addCardHover(tileDiv, card);
-      }
-    });
-
     let prevc = true;
     const hasSplitCost = card.dfc === FACE_SPLIT_FULL;
     if (card.cost) {
       card.cost.forEach((cost: string, index: number) => {
         if (hasSplitCost) {
           if (/^(x|\d)+$/.test(cost) && prevc === false) {
-            costSymbols.push(<span>//</span>);
+            costSymbols.push(<span key={card.id + "_cost_separator"}>//</span>);
           }
           prevc = /^\d+$/.test(cost);
         }
@@ -171,11 +174,11 @@ function ArenaCardTile(props: CardTileProps): JSX.Element {
       });
     }
     if (card.dfc === FACE_ADVENTURE_MAIN && dfcCard && dfcCard.cost) {
-      costSymbols.push(<span>//</span>);
+      costSymbols.push(<span key={dfcCard.id + "_cost_separator"}>//</span>);
       dfcCard.cost.forEach((cost: string, index: number) => {
         costSymbols.push(
           <div
-            key={card.id + "_" + index}
+            key={dfcCard.id + "_" + index}
             className={"mana_s16 flex_end mana_" + cost}
           />
         );
@@ -269,6 +272,16 @@ function FlatCardTile(props: CardTileProps): JSX.Element {
   } = props;
   const [isMouseHovering, setMouseHovering] = useState(false);
 
+  useEffect(() => {
+    if (card) {
+      const contId = `t${card.id + indent}`;
+      const tileDiv = byId(contId);
+      if (tileDiv) {
+        addCardHover(tileDiv, card);
+      }
+    }
+  });
+
   if (quantity === 0) return <></>;
   if (!card) return <></>;
 
@@ -300,13 +313,6 @@ function FlatCardTile(props: CardTileProps): JSX.Element {
   const contId = `t${card.id + indent}`;
   let wildcardElement = null;
   if (card) {
-    useEffect(() => {
-      const tileDiv = byId(contId);
-      if (tileDiv) {
-        addCardHover(tileDiv, card);
-      }
-    });
-
     try {
       if (card.type == "Special") {
         cardTileStyle.backgroundImage = `url(${card.images["art_crop"]})`;
@@ -339,7 +345,7 @@ function FlatCardTile(props: CardTileProps): JSX.Element {
       card.cost.forEach((cost: string, index: number) => {
         if (hasSplitCost) {
           if (/^(x|\d)+$/.test(cost) && prevc === false) {
-            costSymbols.push(<span>//</span>);
+            costSymbols.push(<span key={card.id + "_cost_separator"}>//</span>);
           }
           prevc = /^\d+$/.test(cost);
         }
@@ -352,11 +358,11 @@ function FlatCardTile(props: CardTileProps): JSX.Element {
       });
     }
     if (card.dfc === FACE_ADVENTURE_MAIN && dfcCard && dfcCard.cost) {
-      costSymbols.push(<span>//</span>);
+      costSymbols.push(<span key={dfcCard.id + "_cost_separator"}>//</span>);
       dfcCard.cost.forEach((cost: string, index: number) => {
         costSymbols.push(
           <div
-            key={card.id + "_" + index}
+            key={dfcCard.id + "_" + index}
             className={"mana_s16 flex_end mana_" + cost}
           />
         );
