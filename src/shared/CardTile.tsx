@@ -1,3 +1,4 @@
+import _ from "lodash";
 import React, { useEffect, useState } from "react";
 
 import {
@@ -14,7 +15,6 @@ import {
   openScryfallCard
 } from "./util";
 import { addCardHover } from "./card-hover";
-import { isNumber, frameClassName, rankingClassName } from "./deck-drawer";
 
 const byId = (id: string): HTMLElement | null => document.getElementById(id);
 
@@ -25,12 +25,63 @@ export interface CardTileProps {
   indent: string;
   isHighlighted: boolean;
   isSideboard: boolean;
-  quantity: { quantity: number; odds: number } | number | string; // TODO clean this up?
+  quantity: { quantity: string; odds: number } | number | string; // TODO clean this up?
   showWildcards: boolean;
   style: number;
 }
 
-export function ArenaCardTile(props: CardTileProps): JSX.Element {
+function isNumber(n: number | string): boolean {
+  return !isNaN(parseFloat(n as string)) && isFinite(parseFloat(n as string));
+}
+
+function frameClassName(card: any): string {
+  const frame = card ? card.frame.concat().sort() : [];
+  if (_.isEqual(frame, [])) return "tile_c";
+  if (_.isEqual(frame, [1])) return "tile_w";
+  if (_.isEqual(frame, [2])) return "tile_u";
+  if (_.isEqual(frame, [3])) return "tile_b";
+  if (_.isEqual(frame, [4])) return "tile_r";
+  if (_.isEqual(frame, [5])) return "tile_g";
+  if (_.isEqual(frame, [1, 2])) return "tile_uw";
+  if (_.isEqual(frame, [1, 3])) return "tile_wb";
+  if (_.isEqual(frame, [1, 4])) return "tile_wr";
+  if (_.isEqual(frame, [1, 5])) return "tile_gw";
+  if (_.isEqual(frame, [2, 3])) return "tile_ub";
+  if (_.isEqual(frame, [2, 4])) return "tile_ur";
+  if (_.isEqual(frame, [2, 5])) return "tile_ug";
+  if (_.isEqual(frame, [3, 4])) return "tile_br";
+  if (_.isEqual(frame, [3, 5])) return "tile_bg";
+  if (_.isEqual(frame, [4, 5])) return "tile_rg";
+  if (frame.length > 2) return "tile_multi";
+  return "";
+}
+
+function rankingClassName(ranking: number | string): string {
+  switch (ranking) {
+    case "A+":
+    case "A":
+      return "blue";
+
+    case "A-":
+    case "B+":
+    case "B":
+      return "green";
+
+    case "C-":
+    case "D+":
+    case "D":
+      return "orange";
+
+    case "D-":
+    case "F":
+      return "red";
+
+    default:
+      return "white";
+  }
+}
+
+function ArenaCardTile(props: CardTileProps): JSX.Element {
   const {
     card,
     deck,
@@ -205,7 +256,7 @@ export function ArenaCardTile(props: CardTileProps): JSX.Element {
   );
 }
 
-export function FlatCardTile(props: CardTileProps): JSX.Element {
+function FlatCardTile(props: CardTileProps): JSX.Element {
   const {
     card,
     deck,
