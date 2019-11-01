@@ -643,17 +643,17 @@ export const FORMATS: Record<string, string> = {
   XLN: "Ixalan Constructed"
 };
 
-export const COLORS_ALL: string[] = ["w", "u", "b", "r", "g", "c"];
-export const COLORS_BRIEF: string[] = ["w", "u", "b", "r", "g"];
-export const RANKS: string[] = [
+export const COLORS_ALL = ["w", "u", "b", "r", "g", "c"] as const;
+export const COLORS_BRIEF = ["w", "u", "b", "r", "g"] as const;
+export const RANKS = [
   "Bronze",
   "Silver",
   "Gold",
   "Platinum",
   "Diamond",
   "Mythic"
-];
-export const CONSTRUCTED_EVENTS: string[] = ["Ladder", "Traditional_Ladder"];
+] as const;
+export const CONSTRUCTED_EVENTS = ["Ladder", "Traditional_Ladder"] as const;
 export const OVERLAY_FULL = 0;
 export const OVERLAY_LEFT = 1;
 export const OVERLAY_ODDS = 2;
@@ -663,28 +663,29 @@ export const OVERLAY_DRAFT = 5;
 export const OVERLAY_DRAFT_BREW = 6;
 export const OVERLAY_MIXED = 7;
 
-export const OVERLAY_DRAFT_MODES: number[] = [OVERLAY_DRAFT, OVERLAY_DRAFT_BREW];
+export const OVERLAY_DRAFT_MODES = [OVERLAY_DRAFT, OVERLAY_DRAFT_BREW] as const;
 
 export const ARENA_MODE_IDLE = 0;
 export const ARENA_MODE_MATCH = 1;
 export const ARENA_MODE_DRAFT = 2;
 
-const DRAFT_RANKS: string[] = [];
-DRAFT_RANKS[12] = "A+";
-DRAFT_RANKS[11] = "A";
-DRAFT_RANKS[10] = "A-";
-DRAFT_RANKS[9] = "B+";
-DRAFT_RANKS[8] = "B";
-DRAFT_RANKS[7] = "B-";
-DRAFT_RANKS[6] = "C+";
-DRAFT_RANKS[5] = "C";
-DRAFT_RANKS[4] = "C-";
-DRAFT_RANKS[3] = "D+";
-DRAFT_RANKS[2] = "D";
-DRAFT_RANKS[1] = "D-";
-DRAFT_RANKS[0] = "F";
-export { DRAFT_RANKS };
-export const CARD_TYPE_CODES: string[] = [
+export const DRAFT_RANKS = [
+  "F",
+  "D-",
+  "D",
+  "D+",
+  "C-",
+  "C",
+  "C+",
+  "B-",
+  "B",
+  "B+",
+  "A-",
+  "A",
+  "A+"
+] as const;
+
+export const CARD_TYPE_CODES = [
   "cre",
   "lan",
   "ins",
@@ -692,9 +693,9 @@ export const CARD_TYPE_CODES: string[] = [
   "enc",
   "art",
   "pla"
-];
+] as const;
 
-export const CARD_TYPES: string[] = [
+export const CARD_TYPES = [
   "Creatures",
   "Lands",
   "Instants",
@@ -702,18 +703,18 @@ export const CARD_TYPES: string[] = [
   "Enchantments",
   "Artifacts",
   "Planeswalkers"
-];
+] as const;
 
-export const CARD_RARITIES: string[] = ["common", "uncommon", "rare", "mythic"];
+export const CARD_RARITIES = ["common", "uncommon", "rare", "mythic"] as const;
 
-export const MANA_COLORS: string[] = [
+export const MANA_COLORS = [
   "#E7CA8E",
   "#AABEDF",
   "#A18E87",
   "#DD8263",
   "#B7C89E",
   "#E3E3E3"
-];
+] as const;
 
 export const MANA: Record<number, string> = {
   0: "",
