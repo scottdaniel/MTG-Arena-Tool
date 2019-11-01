@@ -1,5 +1,5 @@
 import _ from "lodash";
-
+import { Card } from "./types/Metadata";
 //
 // this order matters because things like Artifact Creatures exist
 export const cardTypes = [
@@ -10,17 +10,14 @@ export const cardTypes = [
   "Instant",
   "Sorcery",
   "Planeswalker"
-];
+] as const;
 
-export const cardType = card => {
+export const cardType = (card: Card) => {
   const result = cardTypes.find(ct => cardHasType(card, ct));
   if (!result) throw new Error("Card type could not be determined");
   return result;
 };
 
-export { cardHasType };
-function cardHasType(card, type) {
-  if (!_.has(card, "type"))
-    throw new Error("The specified card object does not have a type property");
+export function cardHasType(card: Card, type: string) {
   return card.type.includes(type + " ");
 }

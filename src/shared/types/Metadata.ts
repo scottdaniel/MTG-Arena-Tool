@@ -33,7 +33,7 @@ export interface Card {
   rank: number,
   rank_values: number[],
   rank_controversy: string,
-  images: ImageLinks,// { [id: string]: string },
+  images: ImageLinks,
   reprints: boolean | number[]
 }
 
