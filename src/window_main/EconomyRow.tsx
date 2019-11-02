@@ -201,9 +201,9 @@ function FlexRight(props: FlexRightProps) {
           {change.delta.wcMythicDelta && <WildcardEconomyValueRecord count={change.delta.wcMythicDelta} title={"Mythic Wildcard"} className={"wc_mythic"} />}
         </>
       )}
-      {checkCards && change.delta.cardsAdded.map((cardId: string) => <InventoryCard card={db.card(cardId)} />)}
-      {aetherCards && aetherCards.map((card: any) => <InventoryCard card={card} isAetherized={true}/>)}
-      {skinsToCards && skinsToCards.map((card: any) => <EconomyIcon title={card.name + " Skin"} className={"economy_skin_art"} url={`url("${getCardArtCrop(card)}")`} />)}
+      {checkCards && change.delta.cardsAdded.map((cardId: string) => <InventoryCard key={cardId} card={db.card(cardId)} />)}
+      {aetherCards && aetherCards.map((card: any) => <InventoryCard key={card.name} card={card} isAetherized={true}/>)}
+      {skinsToCards && skinsToCards.map((card: any) => <EconomyIcon key={card.name} title={card.name + " Skin"} className={"economy_skin_art"} url={`url("${getCardArtCrop(card)}")`} />)}
     </div>
   )
 }

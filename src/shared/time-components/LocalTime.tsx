@@ -1,3 +1,6 @@
+// Disalbing this rule for this file since this is a known hack.
+/* eslint-disable @typescript-eslint/no-namespace */
+
 import React from "react";
 
 export interface LocalTimeProps extends React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement> {
