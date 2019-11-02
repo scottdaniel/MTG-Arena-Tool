@@ -23,6 +23,8 @@ export const cardTile = function(
 
   let card;
   if (grpId && typeof grpId == "object" && grpId.name) {
+    // This is hackish.. the way we insert our custom elements in the
+    // array of cards is wrong in the first place :()
     card = grpId;
     grpId = grpId.id;
   } else {

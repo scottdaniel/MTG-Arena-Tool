@@ -25,6 +25,7 @@ export interface CardTileProps {
   indent: string;
   isHighlighted: boolean;
   isSideboard: boolean;
+  landOdds: any;
   quantity: { quantity: string; odds: number } | number | string; // TODO clean this up?
   showWildcards: boolean;
   style: number;
@@ -89,6 +90,7 @@ function ArenaCardTile(props: CardTileProps): JSX.Element {
     indent,
     isHighlighted,
     isSideboard,
+    landOdds,
     quantity,
     showWildcards
   } = props;
@@ -99,7 +101,7 @@ function ArenaCardTile(props: CardTileProps): JSX.Element {
       const contId = `t${card.id + indent}`;
       const tileDiv = byId(contId);
       if (tileDiv) {
-        addCardHover(tileDiv, card);
+        addCardHover(tileDiv, card, landOdds);
       }
     }
   });
@@ -267,6 +269,7 @@ function FlatCardTile(props: CardTileProps): JSX.Element {
     indent,
     isHighlighted,
     isSideboard,
+    landOdds,
     quantity,
     showWildcards
   } = props;
@@ -277,7 +280,7 @@ function FlatCardTile(props: CardTileProps): JSX.Element {
       const contId = `t${card.id + indent}`;
       const tileDiv = byId(contId);
       if (tileDiv) {
-        addCardHover(tileDiv, card);
+        addCardHover(tileDiv, card, landOdds);
       }
     }
   });
@@ -426,8 +429,15 @@ function FlatCardTile(props: CardTileProps): JSX.Element {
 }
 
 export default function CardTile(props: CardTileProps): JSX.Element {
-  if (props.style === CARD_TILE_FLAT) {
-    return FlatCardTile(props);
+  const { card } = props;
+  // This is hackish.. the way we insert our custom elements in the
+  // array of cards is wrong in the first place :()
+  const haxxorProps = { ...props };
+  if (card.id && typeof card.id === "object" && card.id.name) {
+    haxxorProps.card = card.id;
   }
-  return ArenaCardTile(props);
+  if (haxxorProps.style === CARD_TILE_FLAT) {
+    return FlatCardTile(haxxorProps);
+  }
+  return ArenaCardTile(haxxorProps);
 }
