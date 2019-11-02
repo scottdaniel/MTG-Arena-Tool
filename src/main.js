@@ -72,8 +72,11 @@ app.on("ready", () => {
     Sentry.init({
       dsn: "https://4ec87bda1b064120a878eada5fc0b10f@sentry.io/1778171"
     });
-    require("devtron").install();
     startApp();
+    require("devtron").install();
+    const dotenv = require("dotenv");
+    dotenv.config();
+    electron.BrowserWindow.addDevToolsExtension(process.env.REACTDEVTOOLSEXT);
   }
 });
 
@@ -421,19 +424,18 @@ function updateOverlayVisibility() {
     // display entire overlay window
     clearTimeout(overlayHideTimeout);
     overlayHideTimeout = undefined;
-    overlay.show();
 
-    let displayId = settings.overlay_display
-      ? settings.overlay_display
-      : electron.screen.getPrimaryDisplay().id;
-    let display = electron.screen
-      .getAllDisplays()
-      .filter(d => d.id == displayId)[0];
-    if (display) {
-      overlay.setBounds(display.bounds);
-    } else {
-      overlay.setBounds(electron.screen.getPrimaryDisplay().bounds);
-    }
+    const {
+      bounds,
+      size: { width, height }
+    } =
+      electron.screen
+        .getAllDisplays()
+        .find(d => d.id === settings.overlay_display) ||
+      electron.screen.getPrimaryDisplay();
+    overlay.setBounds(bounds);
+    overlay.setSize(width, height);
+    overlay.show();
   }
 }
 
