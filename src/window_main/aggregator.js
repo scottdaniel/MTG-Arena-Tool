@@ -40,7 +40,7 @@ const ALL_EVENT_TRACKS = "All Event Tracks";
 // Archetype constants
 const NO_ARCH = "No Archetype";
 
-const dateMaxValid = (a, b) => {
+export const dateMaxValid = (a, b) => {
   const aValid = isValid(a);
   const bValid = isValid(b);
   return (
@@ -431,11 +431,16 @@ class Aggregator {
       this.deckLastPlayed[b.id],
       new Date(b.lastUpdated)
     );
-    const aValid = isValid(a);
-    const bValid = isValid(b);
+    const aValid = isValid(aDate);
+    const bValid = isValid(bDate);
     if (aValid && bValid && !isEqual(aDate, bDate)) {
       return compareDesc(aDate, bDate);
+    } else if (aValid) {
+      return 1;
+    } else if (bValid) {
+      return -1;
     }
+
     const aName = getRecentDeckName(a.id);
     const bName = getRecentDeckName(b.id);
     return aName.localeCompare(bName);
@@ -505,11 +510,16 @@ class Aggregator {
   compareEvents(a, b) {
     const aDate = this.eventLastPlayed[a];
     const bDate = this.eventLastPlayed[b];
-    const aValid = isValid(a);
-    const bValid = isValid(b);
+    const aValid = isValid(aDate);
+    const bValid = isValid(bDate);
     if (aValid && bValid && !isEqual(aDate, bDate)) {
       return compareDesc(aDate, bDate);
+    } else if (aValid) {
+      return 1;
+    } else if (bValid) {
+      return -1;
     }
+
     const aName = getReadableEvent(a);
     const bName = getReadableEvent(b);
     return aName.localeCompare(bName);
