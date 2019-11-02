@@ -1,6 +1,7 @@
 import compareDesc from "date-fns/compareDesc";
 import isAfter from "date-fns/isAfter";
 import isEqual from "date-fns/isEqual";
+import isValid from "date-fns/isValid";
 import max from "date-fns/max";
 import startOfDay from "date-fns/startOfDay";
 import subDays from "date-fns/subDays";
@@ -39,7 +40,13 @@ const ALL_EVENT_TRACKS = "All Event Tracks";
 // Archetype constants
 const NO_ARCH = "No Archetype";
 
-const dateMax = (a, b) => (a && b ? max([a, b]) : a || b);
+const dateMaxValid = (a, b) => {
+  const aValid = isValid(a);
+  const bValid = isValid(b);
+  return (
+    (aValid && bValid && max([a, b])) || (aValid && a) || (bValid && b) || a
+  );
+};
 
 class Aggregator {
   constructor(filters) {
@@ -313,7 +320,7 @@ class Aggregator {
     }
     // process event data
     if (match.eventId) {
-      this.eventLastPlayed[match.eventId] = dateMax(
+      this.eventLastPlayed[match.eventId] = dateMaxValid(
         new Date(match.date),
         this.eventLastPlayed[match.eventId]
       );
@@ -344,7 +351,7 @@ class Aggregator {
     if (match.playerDeck && match.playerDeck.id) {
       const id = match.playerDeck.id;
       this.deckMap[id] = match.playerDeck;
-      this.deckLastPlayed[id] = dateMax(
+      this.deckLastPlayed[id] = dateMaxValid(
         new Date(match.date),
         this.deckLastPlayed[id]
       );
@@ -416,9 +423,17 @@ class Aggregator {
   }
 
   compareDecks(a, b) {
-    const aDate = dateMax(this.deckLastPlayed[a.id], new Date(a.lastUpdated));
-    const bDate = dateMax(this.deckLastPlayed[b.id], new Date(b.lastUpdated));
-    if (aDate && bDate && !isEqual(aDate, bDate)) {
+    const aDate = dateMaxValid(
+      this.deckLastPlayed[a.id],
+      new Date(a.lastUpdated)
+    );
+    const bDate = dateMaxValid(
+      this.deckLastPlayed[b.id],
+      new Date(b.lastUpdated)
+    );
+    const aValid = isValid(a);
+    const bValid = isValid(b);
+    if (aValid && bValid && !isEqual(aDate, bDate)) {
       return compareDesc(aDate, bDate);
     }
     const aName = getRecentDeckName(a.id);
@@ -490,7 +505,9 @@ class Aggregator {
   compareEvents(a, b) {
     const aDate = this.eventLastPlayed[a];
     const bDate = this.eventLastPlayed[b];
-    if (aDate && bDate && !isEqual(aDate, bDate)) {
+    const aValid = isValid(a);
+    const bValid = isValid(b);
+    if (aValid && bValid && !isEqual(aDate, bDate)) {
       return compareDesc(aDate, bDate);
     }
     const aName = getReadableEvent(a);
