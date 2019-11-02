@@ -436,9 +436,9 @@ class Aggregator {
     if (aValid && bValid && !isEqual(aDate, bDate)) {
       return compareDesc(aDate, bDate);
     } else if (aValid) {
-      return 1;
-    } else if (bValid) {
       return -1;
+    } else if (bValid) {
+      return 1;
     }
 
     const aName = getRecentDeckName(a.id);
@@ -515,9 +515,9 @@ class Aggregator {
     if (aValid && bValid && !isEqual(aDate, bDate)) {
       return compareDesc(aDate, bDate);
     } else if (aValid) {
-      return 1;
-    } else if (bValid) {
       return -1;
+    } else if (bValid) {
+      return 1;
     }
 
     const aName = getReadableEvent(a);
