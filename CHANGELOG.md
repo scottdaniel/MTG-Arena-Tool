@@ -1,3 +1,74 @@
+## <small>2.12.9 (2019-11-02)</small>
+
+* add last touch to decks page ([42dde20](https://github.com/Manuel-777/MTG-Arena-Tool/commit/42dde20))
+* addDevToolsExtension ([70002d3](https://github.com/Manuel-777/MTG-Arena-Tool/commit/70002d3))
+* amend ([1bffacf](https://github.com/Manuel-777/MTG-Arena-Tool/commit/1bffacf))
+* bugfix 2 ([2c5cca4](https://github.com/Manuel-777/MTG-Arena-Tool/commit/2c5cca4))
+* bugfix aggregator handles invalid date comparison ([dc8960b](https://github.com/Manuel-777/MTG-Arena-Tool/commit/dc8960b))
+* bugfix and fragment clean up ([56e9421](https://github.com/Manuel-777/MTG-Arena-Tool/commit/56e9421))
+* Clock optimizations based on review feedback ([3623627](https://github.com/Manuel-777/MTG-Arena-Tool/commit/3623627))
+* convert Clock into function component ([359df90](https://github.com/Manuel-777/MTG-Arena-Tool/commit/359df90))
+* Custom react dev tools path ([4b46756](https://github.com/Manuel-777/MTG-Arena-Tool/commit/4b46756))
+* disable prop-types check ([dbee01f](https://github.com/Manuel-777/MTG-Arena-Tool/commit/dbee01f))
+* i am dum ([0b885b3](https://github.com/Manuel-777/MTG-Arena-Tool/commit/0b885b3))
+* lint and use opponent name in label ([0ad1f7d](https://github.com/Manuel-777/MTG-Arena-Tool/commit/0ad1f7d))
+* now ignore it ([c0bc675](https://github.com/Manuel-777/MTG-Arena-Tool/commit/c0bc675))
+* port react overlay clock ([12dceda](https://github.com/Manuel-777/MTG-Arena-Tool/commit/12dceda))
+* refactor overlay to use react clock ([0772001](https://github.com/Manuel-777/MTG-Arena-Tool/commit/0772001))
+* remove deprecated IPC and state ([26d37fa](https://github.com/Manuel-777/MTG-Arena-Tool/commit/26d37fa))
+* rename Clock to tsx ([ab4b14d](https://github.com/Manuel-777/MTG-Arena-Tool/commit/ab4b14d))
+* rename overlay jsx ([a83429d](https://github.com/Manuel-777/MTG-Arena-Tool/commit/a83429d))
+* simplify Clock state ([63738f2](https://github.com/Manuel-777/MTG-Arena-Tool/commit/63738f2))
+* Simplify if clauses ([81a2055](https://github.com/Manuel-777/MTG-Arena-Tool/commit/81a2055))
+* Update main.js ([003f4bc](https://github.com/Manuel-777/MTG-Arena-Tool/commit/003f4bc))
+* use Fragment instead of array ([60d4cb1](https://github.com/Manuel-777/MTG-Arena-Tool/commit/60d4cb1))
+* we have .env, duh ([fb58ee6](https://github.com/Manuel-777/MTG-Arena-Tool/commit/fb58ee6))
+
+
+
+## <small>2.12.8 (2019-10-30)</small>
+
+* bugfix labels.trackUpdate handles zero orbs ([fe55218](https://github.com/Manuel-777/MTG-Arena-Tool/commit/fe55218))
+* Fix read data from other buttons; Include winrate interval in brackets ([34f30d4](https://github.com/Manuel-777/MTG-Arena-Tool/commit/34f30d4))
+* Get value from explore_query_value button inside div ([76b0662](https://github.com/Manuel-777/MTG-Arena-Tool/commit/76b0662))
+* npm format ([814433b](https://github.com/Manuel-777/MTG-Arena-Tool/commit/814433b))
+* Release 2.12.7 ([94b97d4](https://github.com/Manuel-777/MTG-Arena-Tool/commit/94b97d4))
+* size overlay based on the display it's on ([962e2f7](https://github.com/Manuel-777/MTG-Arena-Tool/commit/962e2f7))
+
+
+
+## <small>2.12.6 (2019-10-28)</small>
+
+* ormat, removed trailing ), marked function as export and removed from export block ([c293348](https://github.com/Manuel-777/MTG-Arena-Tool/commit/c293348))
+* Add cards from delta updates ([e32ba25](https://github.com/Manuel-777/MTG-Arena-Tool/commit/e32ba25))
+* add React rules ([845e6b4](https://github.com/Manuel-777/MTG-Arena-Tool/commit/845e6b4))
+* Added helper functions ([de11bb8](https://github.com/Manuel-777/MTG-Arena-Tool/commit/de11bb8))
+* adds react ([8da9d92](https://github.com/Manuel-777/MTG-Arena-Tool/commit/8da9d92))
+* Calculate winrate and winrate-interval for decks in explore tab and display values ([e94d87a](https://github.com/Manuel-777/MTG-Arena-Tool/commit/e94d87a))
+* check card ([ba3200d](https://github.com/Manuel-777/MTG-Arena-Tool/commit/ba3200d))
+* consolidate all the share dialog cases ([771174e](https://github.com/Manuel-777/MTG-Arena-Tool/commit/771174e))
+* default hover cards size ([4cb3a52](https://github.com/Manuel-777/MTG-Arena-Tool/commit/4cb3a52))
+* fix mastery orbs in economy ([a66759d](https://github.com/Manuel-777/MTG-Arena-Tool/commit/a66759d))
+* fixed name ([6803393](https://github.com/Manuel-777/MTG-Arena-Tool/commit/6803393))
+* format ([d50958c](https://github.com/Manuel-777/MTG-Arena-Tool/commit/d50958c))
+* further cleanup ([32cfcc5](https://github.com/Manuel-777/MTG-Arena-Tool/commit/32cfcc5))
+* minimal eslint changes to enable typescript lint ([0fd1da6](https://github.com/Manuel-777/MTG-Arena-Tool/commit/0fd1da6))
+* move the button in too, why not ([7076a8e](https://github.com/Manuel-777/MTG-Arena-Tool/commit/7076a8e))
+* no more need to disable that rule ([2339f1b](https://github.com/Manuel-777/MTG-Arena-Tool/commit/2339f1b))
+* npm format ([46cb141](https://github.com/Manuel-777/MTG-Arena-Tool/commit/46cb141))
+* react pt 1 ([2c3bb60](https://github.com/Manuel-777/MTG-Arena-Tool/commit/2c3bb60))
+* should be a div not an input ([c18f894](https://github.com/Manuel-777/MTG-Arena-Tool/commit/c18f894))
+* test shoudl only test src ([92e03a7](https://github.com/Manuel-777/MTG-Arena-Tool/commit/92e03a7))
+* typescript + react :) ([ef323ce](https://github.com/Manuel-777/MTG-Arena-Tool/commit/ef323ce))
+* update new items ([9706a57](https://github.com/Manuel-777/MTG-Arena-Tool/commit/9706a57))
+* Update src/shared/card-hover.js ([0a36138](https://github.com/Manuel-777/MTG-Arena-Tool/commit/0a36138))
+* updates ([32fe0f6](https://github.com/Manuel-777/MTG-Arena-Tool/commit/32fe0f6))
+* Use previously introduced helper function ([d1a8b18](https://github.com/Manuel-777/MTG-Arena-Tool/commit/d1a8b18))
+* WAR Draft ([446dca0](https://github.com/Manuel-777/MTG-Arena-Tool/commit/446dca0))
+* yet more economy contexts ([e70d331](https://github.com/Manuel-777/MTG-Arena-Tool/commit/e70d331))
+
+
+
 ## <small>2.12.5 (2019-10-26)</small>
 
 * Add sourcemaps ([62b6de9](https://github.com/Manuel-777/MTG-Arena-Tool/commit/62b6de9))

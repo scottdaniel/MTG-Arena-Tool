@@ -165,15 +165,12 @@ function processMatch(json, matchBeginTime) {
   globals.instanceToCardIdMap = {};
 
   ipc_send("ipc_log", "vs " + match.opponent.name);
-  ipc_send("set_timer", match.beginTime, IPC_OVERLAY);
 
   if (match.eventId == "DirectGame" && globals.currentDeck) {
     let str = globals.currentDeck.getSave();
     const httpApi = require("./http-api");
     httpApi.httpTournamentCheck(str, match.opponent.name, true);
   }
-
-  ipc_send("set_priority_timer", match.priorityTimers, IPC_OVERLAY);
 
   return match;
 }
@@ -255,7 +252,6 @@ function saveMatch(id, matchEndTime) {
     const httpApi = require("./http-api");
     httpApi.httpSetMatch(match);
   }
-  ipc_send("set_timer", 0, IPC_OVERLAY);
   ipc_send("popup", { text: "Match saved!", time: 3000 });
 }
 
@@ -879,6 +875,10 @@ function onLabelInventoryUpdated(entry, transaction) {
   // Add missing data
   transaction.date = parseWotcTimeFallback(entry.timestamp);
 
+  // Add delta to our current values
+  if (transaction.delta) {
+    inventoryAddDelta(transaction.delta);
+  }
   // Reduce the size for storage
   transaction.delta = minifiedDelta(transaction.delta);
 
@@ -896,6 +896,38 @@ function onLabelInventoryUpdated(entry, transaction) {
   return;
 }
 
+function inventoryAddDelta(delta) {
+  const economy = playerData.economy;
+  economy.gems += delta.gemsDelta;
+  economy.gold += delta.goldDelta;
+
+  // Update new cards obtained.
+  let cardsNew = playerData.cardsNew;
+  let cards = playerData.cards;
+  delta.cardsAdded.forEach(grpId => {
+    // Add to inventory
+    if (cards.cards[grpId] === undefined) {
+      cards.cards[grpId] = 1;
+    } else {
+      cards.cards[grpId] += 1;
+    }
+    // Add to newly aquired
+    if (cardsNew[grpId] === undefined) {
+      cardsNew[grpId] = 1;
+    } else {
+      cardsNew[grpId] += 1;
+    }
+  });
+
+  economy.vault += delta.vaultProgressDelta;
+  economy.wcCommon += delta.wcCommonDelta;
+  economy.wcUncommon += delta.wcUncommonDelta;
+  economy.wcRare += delta.wcRareDelta;
+  economy.wcMythic += delta.wcMythicDelta;
+  console.log("cardsNew", cardsNew);
+  setData({ economy, cardsNew, cards });
+}
+
 function inventoryUpdate(entry, update) {
   // combine sub-context with parent context
   console.log("inventoryUpdate", entry, update);
@@ -910,6 +942,10 @@ function inventoryUpdate(entry, update) {
   if (update.context && update.context.subSource) {
     // combine sub-sub-context with parent context
     context += "." + update.context.subSource;
+  }
+
+  if (update.delta) {
+    inventoryAddDelta(update.delta);
   }
 
   // We use the original time string for the ID to ensure parsing does not alter it
@@ -950,8 +986,8 @@ function trackUpdate(entry, trackUpdate) {
   // For some reason, orbs live separately from all other inventory
   if (
     orbCountDiff &&
-    orbCountDiff.oldOrbCount &&
-    orbCountDiff.currentOrbCount &&
+    orbCountDiff.oldOrbCount !== undefined &&
+    orbCountDiff.currentOrbCount !== undefined &&
     orbCountDiff.currentOrbCount - orbCountDiff.oldOrbCount
   ) {
     const data = { trackName, trackTier, orbCountDiff };
