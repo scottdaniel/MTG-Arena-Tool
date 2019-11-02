@@ -162,7 +162,12 @@ function CostSymbols(props: { card: any; dfcCard: any }): JSX.Element {
   return <>{costSymbols}</>;
 }
 
-function ArenaWildcardsNeeded(props: any): JSX.Element {
+function ArenaWildcardsNeeded(props: {
+  card: any;
+  deck: Deck;
+  isSideboard: boolean;
+  ww: number;
+}): JSX.Element {
   const { card, deck, isSideboard, ww } = props;
   if (card.type.indexOf("Basic Land") === -1) {
     const missing = getWildcardsMissing(deck, card.id, isSideboard);
@@ -268,7 +273,7 @@ function ArenaCardTile(props: CardTileProps): JSX.Element {
   );
 }
 
-function FlatQuantityDisplay(props: any): JSX.Element {
+function FlatQuantityDisplay(props: { quantity: any }): JSX.Element {
   const { quantity } = props;
   if (typeof quantity === "object") {
     // Mixed quantity (odds and quantity)
@@ -291,7 +296,11 @@ function FlatQuantityDisplay(props: any): JSX.Element {
   }
 }
 
-function FlatWildcardsNeeded(props: any): JSX.Element {
+function FlatWildcardsNeeded(props: {
+  card: any;
+  deck: Deck;
+  isSideboard: boolean;
+}): JSX.Element {
   const { card, deck, isSideboard } = props;
   if (card.type.indexOf("Basic Land") === -1) {
     const missing = getWildcardsMissing(deck, card.id, isSideboard);
