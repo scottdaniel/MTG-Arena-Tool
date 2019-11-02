@@ -37,17 +37,14 @@ export function EconomyDayHeader(props: EconomyDayHeaderProps) {
   const { dayList, daysago } = econState;
   const deltaPercent = dayList[econState.daysago].vaultProgress / 100.0;
 
-  // gridTitle.style.gridArea = "1 / 1 / auto / 2";
-  // gridTitle.style.lineHeight = "64px";
-  // gridCards.style.gridArea = "1 / 2 / auto / 3";
-  // gridVault.style.gridArea = "1 / 3 / auto / 4";
-  // upcontca.style.width = "auto";
-  // gridGold.style.gridArea = "1 / 4 / auto / 5";
-  // gridGems.style.gridArea = "1 / 5 / auto / 6";
-  // gridExp.style.gridArea = "1 / 6 / auto / 7";
+  const gridTitleStyle = {
+    gridArea: "1 / 1 / auto / 2",
+    lineHeight: "64px"
+  };
+
   return (
     <>
-      <div className={"flex_item gridTitle"}>
+      <div style={gridTitleStyle} className={"flex_item gridTitle"}>
         {getDayString(daysago, timestamp)}
       </div>
       <EconomyValueRecord containerDiv iconClassName={"economy_card"} className={"gridCards"} deltaUpContent={formatNumber(dayList[daysago].cardsEarned)} title={"Cards"}/>

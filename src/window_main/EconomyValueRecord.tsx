@@ -33,9 +33,19 @@ export default function EconomyValueRecord(props: EconomyValueRecordProps) {
       )}
     </>
   )
+
+  let gridArea = "";
+  switch (props.title) {
+    case "Cards": gridArea = "1 / 2 / auto / 3"; break;
+    case "Vault": gridArea = "1 / 3 / auto / 4"; break;
+    case "Gold": gridArea = "1 / 4 / auto / 5"; break;
+    case "Gems": gridArea = "1 / 5 / auto / 6"; break;
+    case "Experience": gridArea = "1 / 6 / auto / 7"; break;
+  }
+
   return (
     props.containerDiv ? (
-      <div className={"economy_metric"}>
+      <div style={{gridArea: gridArea}} className={"economy_metric"}>
         {contents}
       </div>
   ) : (
