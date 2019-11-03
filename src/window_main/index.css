@@ -1284,6 +1284,7 @@ a:hover {
     width: 140px;
     display: inline-block;
     margin: 6px;
+    position: relative;
 }
 
 .inventory_card.small {
@@ -3775,4 +3776,17 @@ a:hover {
 
 .archive_label {
     margin-top: 4px;
+}
+
+.inventory_card_quantity_container {
+    position: absolute;
+    bottom: 8px;
+    left: 0;
+    text-align: center;
+    width: 100%;
+    pointer-events: none;
+}
+
+.inventory_card_quantity {
+    color: var(--color-light);
 }

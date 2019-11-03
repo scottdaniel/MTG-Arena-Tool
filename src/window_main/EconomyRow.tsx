@@ -19,6 +19,7 @@ import EconomyValueRecord, { EconomyIcon } from "./EconomyValueRecord";
 import { cardHasType } from "../shared/card-types";
 import ReactDOM from "react-dom";
 import LocalTime from "../shared/time-components/LocalTime";
+import { string } from "prop-types";
 
 function localDateFormat(date: Date) {
   return (
@@ -137,6 +138,31 @@ function FlexBottom(props: FlexBottomProps) {
   )
 }
 
+interface CardPoolAddedEconomyValueRecordProps {
+  addedCardIds: string[];
+  aetherizedCardIds: string[];
+}
+
+function countDupesArray(array: string[]): Record<string, number> {
+  const counted: Record<string, number> =  {};
+  array.forEach((value) => {
+    counted[value] = counted[value] ? counted[value] + 1 : 1;
+  });
+  return counted;
+}
+
+function CardPoolAddedEconomyValueRecord(props: CardPoolAddedEconomyValueRecordProps) {
+  const { addedCardIds, aetherizedCardIds } = props;
+  const addedUniques = (addedCardIds.length > 0) ? countDupesArray(addedCardIds) : undefined;
+  const aetherUniques = (aetherizedCardIds.length > 0) ? countDupesArray(aetherizedCardIds) : undefined;
+  return (
+    <>
+      {addedUniques && Object.entries(addedUniques).map((entry: [string, number]) => <InventoryCard key={entry[0]} card={db.card(entry[0])} quantity={entry[1]} />)}
+      {aetherUniques && Object.entries(aetherUniques).map((entry: [string, number]) => <InventoryCard key={entry[0]} card={db.card(entry[0])} quantity={entry[1]} isAetherized={true}/>)}
+    </>
+  )
+}
+
 interface FlexRightProps {
   fullContext: string;
   change: any;
@@ -165,22 +191,19 @@ function FlexRight(props: FlexRightProps) {
   }
 
   const checkAether = checkAetherized && change.aetherizedCards && change.aetherizedCards.length > 0;
-  const aetherCards = checkAether ? change.aetherizedCards.reduce(
-    (aggregator: any[], obj: { grpId: string }) => {
+  const aetherCards: string[] = checkAether ? change.aetherizedCards.reduce(
+    (aggregator: string[], obj: { grpId: string }) => {
       var grpId = obj.grpId;
-      var card = db.card(grpId);
-      if (card) {
-        if (change.delta.cardsAdded) {
-          if (change.delta.cardsAdded.indexOf(grpId) == -1) {
-            aggregator.push(card);
-          }
-        } else {
-          aggregator.push(card);
+      if (change.delta.cardsAdded) {
+        if (change.delta.cardsAdded.indexOf(grpId) == -1) {
+          aggregator.push(grpId);
         }
+      } else {
+        aggregator.push(grpId);
       }
       return aggregator;
     }
-  , []) : undefined;
+  , []) : [];
 
   const checkSkins = checkSkinsAdded && change.delta.artSkinsAdded !== undefined;
   const skinsToCards = checkSkins ? change.delta.artSkinsAdded.map((obj: { artId: string }) => db.cardFromArt(obj.artId)) : undefined;
@@ -204,8 +227,7 @@ function FlexRight(props: FlexRightProps) {
           {!!change.delta.wcMythicDelta && <WildcardEconomyValueRecord count={change.delta.wcMythicDelta} title={"Mythic Wildcard"} className={"wc_mythic"} />}
         </>
       )}
-      {checkCards && change.delta.cardsAdded.map((cardId: string) => <InventoryCard key={cardId} card={db.card(cardId)} />)}
-      {aetherCards && aetherCards.map((card: any) => <InventoryCard key={card.name} card={card} isAetherized={true}/>)}
+      {(checkCards || checkAether) && <CardPoolAddedEconomyValueRecord addedCardIds={change.delta.cardsAdded} aetherizedCardIds={aetherCards}/>}
       {skinsToCards && skinsToCards.map((card: any) => <EconomyIcon key={card.name} title={card.name + " Skin"} className={"economy_skin_art"} url={`url("${getCardArtCrop(card)}")`} />)}
     </div>
   )
@@ -214,10 +236,11 @@ function FlexRight(props: FlexRightProps) {
 interface InventoryCardProps {
   card: any;
   isAetherized?: boolean;
+  quantity?: number;
 }
 
 function InventoryCard(props: InventoryCardProps) {
-  const { card, isAetherized } = props;
+  const { card, isAetherized, quantity } = props;
   // addCardHover(inventoryCard, card);
   const onCardClick = React.useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     const lookupCard = card.dfc == "SplitHalf" ? db.card(card.dfcId) : card;
@@ -225,30 +248,34 @@ function InventoryCard(props: InventoryCardProps) {
   }, [card]);
   // inventoryCard.style.width = "39px";
 
-  const tooltip = isAetherized ? computeAetherizedTooltip(card) : card.name;
+  const tooltip = isAetherized ? computeAetherizedTooltip(card, quantity) : card.name;
   return (
     <div className={"inventory_card small"} onClick={onCardClick}>
       <img className={"inventory_card_img 39px" + (isAetherized ? " inventory_card_aetherized" : "")} src={getCardImage(card)} title={tooltip}/>
+      {(quantity && quantity > 1) && <div className={"inventory_card_quantity_container"}>
+        <span className={"inventory_card_quantity"}>{"x" + quantity}</span>
+      </div>}
     </div>
   )
 }
 
-function computeAetherizedTooltip(card: any) {
+function computeAetherizedTooltip(card: any, quantity?: number) {
   let tooltip = card.name;
+  const multiplier = quantity ? quantity : 1;
   switch (card.rarity) {
     case "mythic":
-      tooltip += " (Gems:+40)";
+      tooltip += ` (Gems: +${multiplier * 40})`;
       break;
     case "rare":
-      tooltip += " (Gems:+20)";
+      tooltip += ` (Gems: +${multiplier * 20})`;
       break;
     case "uncommon":
       tooltip +=
-        " (Vault:+" + formatPercent(1 / 300, vaultPercentFormat as any) + ")";
+        ` (Vault: +${formatPercent(multiplier / 300, vaultPercentFormat as any)})`;
       break;
     case "common":
       tooltip +=
-        " (Vault:+" + formatPercent(1 / 900, vaultPercentFormat as any) + ")";
+        ` (Vault: +${formatPercent(multiplier / 900, vaultPercentFormat as any)})`;
       break;
   }
   return tooltip;
