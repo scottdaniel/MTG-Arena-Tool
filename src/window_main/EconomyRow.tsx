@@ -125,15 +125,15 @@ function FlexBottom(props: FlexBottomProps) {
     <div className={"flex_bottom"}>
       {fullContext === "Booster Open" ? change.delta.boosterDelta.map((booster: any) => <BoosterDelta booster={booster} key={booster.collationId} />) : fullContext === "Redeem Wildcard" ? (
         <>
-          {change.delta.wcCommonDelta && <WildcardEconomyValueRecord count={change.delta.wcCommonDelta} title={"Common Wildcard"} className={"wc_common"} smallLabel={true} />}
-          {change.delta.wcUncommonDelta && <WildcardEconomyValueRecord count={change.delta.wcUncommonDelta} title={"Uncommon Wildcard"} className={"wc_uncommon"} smallLabel={true} />}
-          {change.delta.wcRareDelta && <WildcardEconomyValueRecord count={change.delta.wcRareDelta} title={"Rare Wildcard"} className={"wc_rare"} smallLabel={true} />}
-          {change.delta.wcMythicDelta && <WildcardEconomyValueRecord count={change.delta.wcMythicDelta} title={"Mythic Wildcard"} className={"wc_mythic"} smallLabel={true} />}
+          {!!change.delta.wcCommonDelta && <WildcardEconomyValueRecord count={change.delta.wcCommonDelta} title={"Common Wildcard"} className={"wc_common"} smallLabel={true} />}
+          {!!change.delta.wcUncommonDelta && <WildcardEconomyValueRecord count={change.delta.wcUncommonDelta} title={"Uncommon Wildcard"} className={"wc_uncommon"} smallLabel={true} />}
+          {!!change.delta.wcRareDelta && <WildcardEconomyValueRecord count={change.delta.wcRareDelta} title={"Rare Wildcard"} className={"wc_rare"} smallLabel={true} />}
+          {!!change.delta.wcMythicDelta && <WildcardEconomyValueRecord count={change.delta.wcMythicDelta} title={"Mythic Wildcard"} className={"wc_mythic"} smallLabel={true} />}
         </>
       ) : undefined
       }
-      {checkGemsPaid && change.delta.gemsDelta && <EconomyValueRecord iconClassName={"economy_gems"} title={"Gems"} smallLabel deltaContent={formatNumber(Math.abs(change.delta.gemsDelta))} />}
-      {checkGoldPaid && change.delta.goldDelta && <EconomyValueRecord iconClassName={"economy_gold"} title={"Gold"} smallLabel deltaContent={formatNumber(Math.abs(change.delta.goldDelta))} />}
+      {checkGemsPaid && !!change.delta.gemsDelta && <EconomyValueRecord iconClassName={"economy_gems"} title={"Gems"} smallLabel deltaContent={formatNumber(Math.abs(change.delta.gemsDelta))} />}
+      {checkGoldPaid && !!change.delta.goldDelta && <EconomyValueRecord iconClassName={"economy_gold"} title={"Gold"} smallLabel deltaContent={formatNumber(Math.abs(change.delta.goldDelta))} />}
     </div>
   )
 }
