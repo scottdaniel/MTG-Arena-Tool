@@ -37,7 +37,7 @@ function frameClassName(card: any): string {
   if (frame.length === 0) {
     return "tile_c";
   } else if (frame.length <= 2) {
-    const colorString = frame.map((i: number) => COLORS_ALL[i]).join("");
+    const colorString = frame.map((i: number) => COLORS_ALL[i - 1]).join("");
     return "tile_" + colorString;
   } else {
     return "tile_multi";
