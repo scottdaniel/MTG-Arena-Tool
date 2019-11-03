@@ -1,9 +1,12 @@
+import * as React from "react";
+import * as ReactDOM from "react-dom";
+
 import db from "./database";
-import pd from "./player-data";
-import { cardHasType } from "./card-types.js";
-import { createDiv, queryElements as $$ } from "./dom-fns";
+import { queryElements as $$ } from "./dom-fns";
 import { getCardImage } from "./util";
-import { DRAFT_RANKS, FACE_DFC_BACK, FACE_DFC_FRONT } from "./constants.js";
+import { FACE_DFC_BACK, FACE_DFC_FRONT } from "./constants";
+import DraftRatings from "./DraftRatings";
+import OwnershipStars from "./OwnershipStars";
 
 // controls when to auto-hide hover display
 // workaround for edge case bugs that cause hover to "get stuck"
@@ -97,86 +100,12 @@ function hide(element) {
 }
 
 export function attachOwnerhipStars(card, starContainer) {
-  let isbasic = cardHasType(card, "Basic Land");
-  starContainer.innerHTML = "";
   starContainer.style.opacity = 1;
-
-  const owned = pd.cards.cards[card.id];
-  const acquired = pd.cardsNew[card.id];
-
-  if (isbasic) {
-    // Show infinity for basics (should work for rats and petitioners?)
-    if (owned > 0) starContainer.title = `∞ copies in collection`;
-    else starContainer.title = `0 copies in collection`;
-    if (acquired) {
-      starContainer.title += ` (∞ recent)`;
-    }
-
-    let color = "gray";
-    if (owned > 0) color = "green";
-    if (acquired > 0) color = "orange";
-
-    starContainer.appendChild(createDiv([`inventory_card_infinity_${color}`]));
-  } else {
-    starContainer.title = `${owned || 0}/4 copies in collection`;
-    if (acquired) {
-      starContainer.title += ` (${acquired} recent)`;
-    }
-
-    for (let i = 0; i < 4; i++) {
-      let color = "gray";
-
-      if (i < owned) color = "green";
-      if (acquired && i >= owned - acquired && i < owned) color = "orange";
-
-      starContainer.appendChild(
-        createDiv([`inventory_card_quantity_${color}`])
-      );
-    }
-  }
+  ReactDOM.render(<OwnershipStars card={card} />, starContainer);
 }
 
 export function attachDraftRatings(card, ratingsContainer) {
-  ratingsContainer.innerHTML = "";
   ratingsContainer.style.opacity = 1;
   ratingsContainer.style.display = "flex";
-
-  let rank = card.rank;
-  let rankValues = card.rank_values;
-  let rankControversy = card.rank_controversy;
-  let maxValue = Math.max(...rankValues);
-  let valuesContainer = createDiv([`rank_values_main_container`]);
-
-  let rankCont = createDiv(
-    [`rank_value_container`],
-    `Rank: ${DRAFT_RANKS[Math.round(rank)]}`
-  );
-  valuesContainer.appendChild(rankCont);
-  let controversyCont = createDiv(
-    [`rank_value_container`],
-    `Controversy: ${rankControversy}`
-  );
-  valuesContainer.appendChild(controversyCont);
-
-  rankValues.forEach((v, index) => {
-    let rv = 12 - index;
-    let rank = DRAFT_RANKS[rv];
-
-    let colorClass = "white";
-    if (rank == "A+" || rank == "A") colorClass = "blue";
-    if (rank == "A-" || rank == "B+" || rank == "B") colorClass = "green";
-    if (rank == "C-" || rank == "D+" || rank == "D") colorClass = "orange";
-    if (rank == "D-" || rank == "F") colorClass = "red";
-
-    let divCont = createDiv([`rank_value_container`]);
-    let divTitle = createDiv([`rank_value_title`, colorClass], rank);
-    let divBar = createDiv([`rank_value_bar`]);
-    divBar.style.width = (240 / maxValue) * v + "px";
-
-    divCont.appendChild(divTitle);
-    divCont.appendChild(divBar);
-    valuesContainer.appendChild(divCont);
-  });
-
-  ratingsContainer.appendChild(valuesContainer);
+  ReactDOM.render(<DraftRatings card={card} />, ratingsContainer);
 }
