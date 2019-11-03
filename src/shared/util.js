@@ -52,7 +52,7 @@ export function openScryfallCard(cardObj) {
     cardObj = db.card(cardObj);
   }
 
-  const { cid, set } = card;
+  const { cid, set } = cardObj;
 
   try {
     shell.openExternal(
