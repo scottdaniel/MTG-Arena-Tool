@@ -129,7 +129,7 @@ export function EconomyHeader(props: EconomyHeaderProps) {
 
   return (
     <>
-      <DateFilter className={"economyDateSelect"} prefixId={"query_select"} showArchivedFilter={true} onArchiveClick={onArchiveClicked} options={selectOptions} current={state.filterEconomy} callback={onSelectChange} optionFormatter={selectFormatter}/>
+      <DateFilter className={"economyDateSelect"} prefixId={"query_select"} showArchivedValue={state.showArchived} showArchivedFilter={true} onArchiveClick={onArchiveClicked} options={selectOptions} current={state.filterEconomy} callback={onSelectChange} optionFormatter={selectFormatter}/>
       <EconomyValueRecord title={"Boosters"} iconClassName={"economy_wc_med wc_booster economyIconMargin"} deltaContent={total} />
       <EconomyValueRecord title={"Vault"} iconClassName={"economy_vault economyIconMargin"} deltaContent={vaultTotal} />
       <EconomyValueRecord title={"Common Wildcards"} iconClassName={"economy_wc_med wc_common"} deltaContent={formatNumber(pd.economy.wcCommon)} />

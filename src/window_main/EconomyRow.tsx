@@ -324,7 +324,7 @@ function ChangeRow(props: ChangeRowProps) {
     economyId,
   }
 
-  const [isHidden, setIsHidden] = React.useState(change.archived)
+  const [isHidden, setIsHidden] = React.useState(false)
 
   const hideRowCallback = React.useCallback(() => {
     setIsHidden(true);
