@@ -157,14 +157,14 @@ function FlexRight(props: FlexRightProps) {
       (change.orbCountDiff.oldOrbCount || 0)
   );
 
-  const checkCards = checkCardsAdded && change.delta.cardsAdded !== undefined;
+  const checkCards = checkCardsAdded && change.delta.cardsAdded && change.delta.cardsAdded.length > 0;
 
   if (checkCards) {
     // presort here
     change.delta.cardsAdded.sort(collectionSortRarity);
   }
 
-  const checkAether = checkAetherized && change.aetherizedCards !== undefined;
+  const checkAether = checkAetherized && change.aetherizedCards && change.aetherizedCards.length > 0;
   const aetherCards = checkAether ? change.aetherizedCards.reduce(
     (aggregator: any[], obj: { grpId: string }) => {
       var grpId = obj.grpId;
@@ -184,21 +184,24 @@ function FlexRight(props: FlexRightProps) {
 
   const checkSkins = checkSkinsAdded && change.delta.artSkinsAdded !== undefined;
   const skinsToCards = checkSkins ? change.delta.artSkinsAdded.map((obj: { artId: string }) => db.cardFromArt(obj.artId)) : undefined;
+
+  const xpGainedNumber = change.xpGained && parseInt(change.xpGained);
+  console.log(change);
   return (
     <div className={"tiny_scroll list_economy_awarded"} id={economyId}>
       {fullContext === "Pay Event Entry" && <EconomyIcon title={"Event Entry"} className={"economy_ticket_med"} />}
-      {checkGemsEarnt && change.delta.gemsDelta && <EconomyValueRecord iconClassName={"economy_gems_med"} title={"Gems"} deltaContent={formatNumber(Math.abs(change.delta.gemsDelta))} />}
-      {checkGoldEarnt && change.delta.goldDelta && <EconomyValueRecord iconClassName={"economy_gold_med"} title={"Gold"} deltaContent={formatNumber(Math.abs(change.delta.goldDelta))} />}
-      {lvlDelta && <EconomyValueRecord iconClassName={"economy_mastery_med"} title={`Mastery Level (${pd.economy.trackName})`} deltaContent={"+" + formatNumber(lvlDelta)} />}
-      {orbDelta && <EconomyValueRecord iconClassName={"economy_mastery_med"} title={"Orbs"} deltaContent={formatNumber(orbDelta)} />}
-      {change.xpGained && <EconomyValueRecord iconClassName={"economy_exp"} title={"Experience"} deltaContent={formatNumber(change.xpGained)} />}
+      {checkGemsEarnt && !!change.delta.gemsDelta && <EconomyValueRecord iconClassName={"economy_gems_med"} title={"Gems"} deltaContent={formatNumber(Math.abs(change.delta.gemsDelta))} />}
+      {checkGoldEarnt && !!change.delta.goldDelta && <EconomyValueRecord iconClassName={"economy_gold_med"} title={"Gold"} deltaContent={formatNumber(Math.abs(change.delta.goldDelta))} />}
+      {!!lvlDelta && <EconomyValueRecord iconClassName={"economy_mastery_med"} title={`Mastery Level (${pd.economy.trackName})`} deltaContent={"+" + formatNumber(lvlDelta)} />}
+      {!!orbDelta && <EconomyValueRecord iconClassName={"economy_mastery_med"} title={"Orbs"} deltaContent={formatNumber(orbDelta)} />}
+      {!!xpGainedNumber && <EconomyValueRecord iconClassName={"economy_exp"} title={"Experience"} deltaContent={formatNumber(xpGainedNumber)} />}
       {checkBoosterAdded && change.delta.boosterDelta && change.delta.boosterDelta.map((booster: any) => <BoosterDelta booster={booster} key={booster.collationId} />)}
       {checkWildcardsAdded && (
         <>
-          {change.delta.wcCommonDelta && <WildcardEconomyValueRecord count={change.delta.wcCommonDelta} title={"Common Wildcard"} className={"wc_common"} />}
-          {change.delta.wcUncommonDelta && <WildcardEconomyValueRecord count={change.delta.wcUncommonDelta} title={"Uncommon Wildcard"} className={"wc_uncommon"} />}
-          {change.delta.wcRareDelta && <WildcardEconomyValueRecord count={change.delta.wcRareDelta} title={"Rare Wildcard"} className={"wc_rare"} />}
-          {change.delta.wcMythicDelta && <WildcardEconomyValueRecord count={change.delta.wcMythicDelta} title={"Mythic Wildcard"} className={"wc_mythic"} />}
+          {!!change.delta.wcCommonDelta && <WildcardEconomyValueRecord count={change.delta.wcCommonDelta} title={"Common Wildcard"} className={"wc_common"} />}
+          {!!change.delta.wcUncommonDelta && <WildcardEconomyValueRecord count={change.delta.wcUncommonDelta} title={"Uncommon Wildcard"} className={"wc_uncommon"} />}
+          {!!change.delta.wcRareDelta && <WildcardEconomyValueRecord count={change.delta.wcRareDelta} title={"Rare Wildcard"} className={"wc_rare"} />}
+          {!!change.delta.wcMythicDelta && <WildcardEconomyValueRecord count={change.delta.wcMythicDelta} title={"Mythic Wildcard"} className={"wc_mythic"} />}
         </>
       )}
       {checkCards && change.delta.cardsAdded.map((cardId: string) => <InventoryCard key={cardId} card={db.card(cardId)} />)}

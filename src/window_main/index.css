@@ -756,6 +756,10 @@ font-family:  var(--main-font-name);
     max-width: calc(100% - 300px);
 }
 
+.list_economy_awarded > * {
+    flex-shrink: 0;
+}
+
 .list_event_expand {
     width: calc(100% - 32px);
     height: 0px;
