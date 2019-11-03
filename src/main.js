@@ -424,19 +424,15 @@ function updateOverlayVisibility() {
     // display entire overlay window
     clearTimeout(overlayHideTimeout);
     overlayHideTimeout = undefined;
-
-    const {
-      bounds,
-      size: { width, height }
-    } =
-      electron.screen
-        .getAllDisplays()
-        .find(d => d.id === settings.overlay_display) ||
-      electron.screen.getPrimaryDisplay();
-    overlay.setBounds(bounds);
-    overlay.setSize(width, height);
-    overlay.show();
   }
+
+  const { bounds } =
+    electron.screen
+      .getAllDisplays()
+      .find(d => d.id == settings.overlay_display) ||
+    electron.screen.getPrimaryDisplay();
+  overlay.show();
+  overlay.setBounds(bounds);
 }
 
 function isEntireOverlayVisible() {
