@@ -1,4 +1,3 @@
-import _ from "lodash";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import {
@@ -35,27 +34,18 @@ function isNumber(n: number | string): boolean {
 
 function frameClassName(card: any): string {
   const frame = card ? card.frame.concat().sort() : [];
-  if (_.isEqual(frame, [])) return "tile_c";
-  if (_.isEqual(frame, [1])) return "tile_w";
-  if (_.isEqual(frame, [2])) return "tile_u";
-  if (_.isEqual(frame, [3])) return "tile_b";
-  if (_.isEqual(frame, [4])) return "tile_r";
-  if (_.isEqual(frame, [5])) return "tile_g";
-  if (_.isEqual(frame, [1, 2])) return "tile_uw";
-  if (_.isEqual(frame, [1, 3])) return "tile_wb";
-  if (_.isEqual(frame, [1, 4])) return "tile_wr";
-  if (_.isEqual(frame, [1, 5])) return "tile_gw";
-  if (_.isEqual(frame, [2, 3])) return "tile_ub";
-  if (_.isEqual(frame, [2, 4])) return "tile_ur";
-  if (_.isEqual(frame, [2, 5])) return "tile_ug";
-  if (_.isEqual(frame, [3, 4])) return "tile_br";
-  if (_.isEqual(frame, [3, 5])) return "tile_bg";
-  if (_.isEqual(frame, [4, 5])) return "tile_rg";
-  if (frame.length > 2) return "tile_multi";
-  return "";
+  if (frame.length === 0) {
+    return "tile_c";
+  } else if (frame.length <= 2) {
+    const colorString = frame.map((i: number) => COLORS_ALL[i]).join("");
+    return "tile_" + colorString;
+  } else {
+    return "tile_multi";
+  }
 }
 
 function rankingClassName(ranking: number | string): string {
+  // TODO after #685 and #686 land: extract this and DraftRankValue into a util
   switch (ranking) {
     case "A+":
     case "A":
