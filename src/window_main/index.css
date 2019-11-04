@@ -306,7 +306,7 @@ relative-time, local-time {
 }
 
 
-.top_constructed_rank {
+.icon_7 {
     -webkit-app-region: no-drag;
     align-self: center;
     width: 48px;
@@ -315,7 +315,7 @@ relative-time, local-time {
     background-position: 0px 0px;
 }
 
-.top_limited_rank {
+.icon_8 {
     -webkit-app-region: no-drag;
     align-self: center;
     width: 48px;
@@ -373,7 +373,6 @@ relative-time, local-time {
 }
 
 .top_nav_icon {
-    display: none;
     opacity: 0;
     position: absolute;
     left: calc(50% - 16px);
@@ -459,7 +458,7 @@ span.top_nav_item_text {
     display: inline-grid;
 }
 
-.it7, .it8 {
+.icon_7, .icon_8 {
     opacity: 1;
 }
 
@@ -468,7 +467,7 @@ span.top_nav_item_text {
     opacity: 1;
 }
 
-.ith_icon {
+.icon_h {
     width: 32px;
     height: 32px;
     opacity: 1;

@@ -73,6 +73,8 @@ import { openCollectionTab } from "./collection";
 import { openSettingsTab, setCurrentOverlaySettings } from "./settings";
 import { showWhatsNew } from "./whats-new";
 
+import createTopNav from "./topNav";
+
 const byId = id => document.getElementById(id);
 let sidebarActive = MAIN_LOGIN;
 let loggedIn = false;
@@ -163,6 +165,9 @@ function updateNavIcons() {
 }
 
 function updateTopBar() {
+  const topNavDiv = $$(".top_nav_container")[0];
+  createTopNav(topNavDiv);
+/*
   updateNavIcons();
 
   if (pd.offline || !pd.settings.send_data) {
@@ -213,6 +218,7 @@ function updateTopBar() {
   } else {
     patreonIcon.style.display = "none";
   }
+  */
 }
 
 //
