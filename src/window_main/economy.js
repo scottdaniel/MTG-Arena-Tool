@@ -3,9 +3,9 @@ import compareAsc from "date-fns/compareAsc";
 import pd from "../shared/player-data";
 import DataScroller from "./data-scroller";
 import { resetMainContainer } from "./renderer-util";
-import { createEconomyHeader } from "./EconomyHeader";
-import { createDayHeader } from "./EconomyDayHeader";
-import { createChangeRow } from "./EconomyRow";
+import { createEconomyHeader } from "./components/economy/EconomyHeader";
+import { createDayHeader } from "./components/economy/EconomyDayHeader";
+import { createChangeRow } from "./components/economy/EconomyRow";
 import { getPrettyContext } from "./economyUtils";
 
 const byId = id => document.getElementById(id);

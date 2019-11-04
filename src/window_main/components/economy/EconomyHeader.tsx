@@ -1,14 +1,14 @@
 import {
   formatNumber,
   formatPercent,
-} from "./renderer-util";
-import pd from "../shared/player-data";
+} from "../../renderer-util";
+import pd from "../../../shared/player-data";
 import differenceInCalendarDays from "date-fns/differenceInCalendarDays";
-import { getPrettyContext, vaultPercentFormat, EconomyState } from "./economyUtils";
+import { getPrettyContext, vaultPercentFormat, EconomyState } from "../../economyUtils";
 import EconomyValueRecord from "./EconomyValueRecord";
 import React from "react";
-import DateFilter from './DateFilter';
-import { createDiv } from "../shared/dom-fns";
+import DateFilter from '../../DateFilter';
+import { createDiv } from "../../../shared/dom-fns";
 import ReactDOM from "react-dom";
 
 class EconomyDay {
@@ -136,8 +136,8 @@ export function EconomyHeader(props: EconomyHeaderProps) {
       <EconomyValueRecord title={"Uncommon Wildcards"} iconClassName={"economy_wc_med wc_uncommon"} deltaContent={formatNumber(pd.economy.wcUncommon)} />
       <EconomyValueRecord title={"Rare Wildcards"} iconClassName={"economy_wc_med wc_rare"} deltaContent={formatNumber(pd.economy.wcRare)} />
       <EconomyValueRecord title={"Mythic Wildcards"} iconClassName={"economy_wc_med wc_mythic"} deltaContent={formatNumber(pd.economy.wcMythic)} />
-      <EconomyValueRecord title={"Gold"} iconClassName={"economy_gold_med"} deltaContent={formatNumber(pd.economy.gold)} />
-      <EconomyValueRecord title={"Gems"} iconClassName={"economy_gems_med economyIconMargin"} deltaContent={formatNumber(pd.economy.gems)} />
+      <EconomyValueRecord title={"Gold"} iconClassName={"economy_gold marginLeft"} deltaContent={formatNumber(pd.economy.gold)} />
+      <EconomyValueRecord title={"Gems"} iconClassName={"economy_gems economyIconMargin"} deltaContent={formatNumber(pd.economy.gems)} />
       <EconomyValueRecord title={`Mastery Level (${pd.economy.trackName})`} iconClassName={"economy_mastery_med"} deltaContent={formatNumber(masteryLevel)} />
       <EconomyValueRecord title={"Experience"} iconClassName={"economy_exp economyIconMargin"} deltaContent={pd.economy.currentExp || 0} />
     </>

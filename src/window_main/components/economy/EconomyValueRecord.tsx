@@ -22,13 +22,13 @@ export default function EconomyValueRecord(props: EconomyValueRecordProps) {
       {props.deltaUpContent && (
         <div className={"economy_delta upConta"}>
           <DeltaLabel content={props.deltaUpContent}/>
-          <UpConta />
+          <div className={"economy_up"} title={"increase"} />
         </div>
       )}
       {props.deltaDownContent && (
         <div className={"economy_delta downConta"}>
           <DeltaLabel content={props.deltaDownContent}/>
-          <DownConta />
+          <div className={"economy_down"} title={"decrease"} />
         </div>
       )}
     </>
@@ -61,18 +61,6 @@ function DeltaLabel(props: { content: string, smallLabel?: boolean }) {
       {props.content}
     </div>
   );
-}
-
-function UpConta() {
-  return (
-    <div className={"economy_up"} title={"increase"} />
-  )
-}
-
-function DownConta() {
-  return (
-    <div className={"economy_down"} title={"decrease"} />
-  )
 }
 
 interface EconomyIconProps {

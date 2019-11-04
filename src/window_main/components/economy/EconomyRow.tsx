@@ -1,27 +1,23 @@
-import { createDiv } from "../shared/dom-fns";
 import {
   formatNumber,
   formatPercent,
   toggleArchived,
-} from "./renderer-util";
-import db from "../shared/database";
-import { getCollationSet, getPrettyContext, vaultPercentFormat } from './economyUtils';
-import pd from "../shared/player-data";
+} from "../../renderer-util";
+import db from "../../../shared/database";
+import { getCollationSet, getPrettyContext, vaultPercentFormat } from '../../economyUtils';
+import pd from "../../../shared/player-data";
 import {
   collectionSortRarity,
   getCardImage,
   openScryfallCard,
   getCardArtCrop,
-} from "../shared/util";
-import { addCardHover } from "../shared/card-hover";
+} from "../../../shared/util";
 import React from "react";
 import EconomyValueRecord, { EconomyIcon } from "./EconomyValueRecord";
-import { cardHasType } from "../shared/card-types";
 import ReactDOM from "react-dom";
-import LocalTime from "../shared/time-components/LocalTime";
-import { string } from "prop-types";
+import LocalTime from "../../../shared/time-components/LocalTime";
 
-function localDateFormat(date: Date) {
+function EconomyRowDate(date: Date) {
   return (
     <LocalTime datetime={date.toISOString()} month={"short"} day={"numeric"} hour={"numeric"} minute={"numeric"} />
   );
@@ -112,6 +108,30 @@ function WildcardEconomyValueRecord(props: WildcardEconomyValueRecordProps) {
   return <EconomyValueRecord iconClassName={"economy_wc " + className} title={title} smallLabel={smallLabel} deltaContent={"x" + Math.abs(count)} />
 }
 
+interface WildcardDelta {
+  wcCommonDelta: number;
+  wcUncommonDelta: number;
+  wcRareDelta: number;
+  wcMythicDelta: number;
+}
+
+interface AllWildcardsEconomyValueRecordProps {
+  delta: WildcardDelta;
+  isSmall?: boolean;
+}
+
+function AllWildcardsEconomyValueRecord(props: AllWildcardsEconomyValueRecordProps) {
+  const { delta, isSmall } = props;
+  return (
+    <>
+      {!!delta.wcCommonDelta && <WildcardEconomyValueRecord count={delta.wcCommonDelta} title={"Common Wildcard"} className={"wc_common"} smallLabel={isSmall} />}
+      {!!delta.wcUncommonDelta && <WildcardEconomyValueRecord count={delta.wcUncommonDelta} title={"Uncommon Wildcard"} className={"wc_uncommon"} smallLabel={isSmall} />}
+      {!!delta.wcRareDelta && <WildcardEconomyValueRecord count={delta.wcRareDelta} title={"Rare Wildcard"} className={"wc_rare"} smallLabel={isSmall} />}
+      {!!delta.wcMythicDelta && <WildcardEconomyValueRecord count={delta.wcMythicDelta} title={"Mythic Wildcard"} className={"wc_mythic"} smallLabel={isSmall} />}
+    </>
+  )
+}
+
 interface FlexBottomProps {
   fullContext: string;
   change: any;
@@ -124,12 +144,7 @@ function FlexBottom(props: FlexBottomProps) {
   return (
     <div className={"flex_bottom"}>
       {fullContext === "Booster Open" ? change.delta.boosterDelta.map((booster: any) => <BoosterDelta booster={booster} key={booster.collationId} />) : fullContext === "Redeem Wildcard" ? (
-        <>
-          {!!change.delta.wcCommonDelta && <WildcardEconomyValueRecord count={change.delta.wcCommonDelta} title={"Common Wildcard"} className={"wc_common"} smallLabel={true} />}
-          {!!change.delta.wcUncommonDelta && <WildcardEconomyValueRecord count={change.delta.wcUncommonDelta} title={"Uncommon Wildcard"} className={"wc_uncommon"} smallLabel={true} />}
-          {!!change.delta.wcRareDelta && <WildcardEconomyValueRecord count={change.delta.wcRareDelta} title={"Rare Wildcard"} className={"wc_rare"} smallLabel={true} />}
-          {!!change.delta.wcMythicDelta && <WildcardEconomyValueRecord count={change.delta.wcMythicDelta} title={"Mythic Wildcard"} className={"wc_mythic"} smallLabel={true} />}
-        </>
+        <AllWildcardsEconomyValueRecord delta={change.delta} isSmall />
       ) : undefined
       }
       {checkGemsPaid && !!change.delta.gemsDelta && <EconomyValueRecord iconClassName={"economy_gems"} title={"Gems"} smallLabel deltaContent={formatNumber(Math.abs(change.delta.gemsDelta))} />}
@@ -209,24 +224,16 @@ function FlexRight(props: FlexRightProps) {
   const skinsToCards = checkSkins ? change.delta.artSkinsAdded.map((obj: { artId: string }) => db.cardFromArt(obj.artId)) : undefined;
 
   const xpGainedNumber = change.xpGained && parseInt(change.xpGained);
-  console.log(change);
   return (
     <div className={"tiny_scroll list_economy_awarded"} id={economyId}>
       {fullContext === "Pay Event Entry" && <EconomyIcon title={"Event Entry"} className={"economy_ticket_med"} />}
-      {checkGemsEarnt && !!change.delta.gemsDelta && <EconomyValueRecord iconClassName={"economy_gems_med"} title={"Gems"} deltaContent={formatNumber(Math.abs(change.delta.gemsDelta))} />}
-      {checkGoldEarnt && !!change.delta.goldDelta && <EconomyValueRecord iconClassName={"economy_gold_med"} title={"Gold"} deltaContent={formatNumber(Math.abs(change.delta.goldDelta))} />}
+      {checkGemsEarnt && !!change.delta.gemsDelta && <EconomyValueRecord iconClassName={"economy_gems"} title={"Gems"} deltaContent={formatNumber(Math.abs(change.delta.gemsDelta))} />}
+      {checkGoldEarnt && !!change.delta.goldDelta && <EconomyValueRecord iconClassName={"economy_gold marginLeft"} title={"Gold"} deltaContent={formatNumber(Math.abs(change.delta.goldDelta))} />}
       {!!lvlDelta && <EconomyValueRecord iconClassName={"economy_mastery_med"} title={`Mastery Level (${pd.economy.trackName})`} deltaContent={"+" + formatNumber(lvlDelta)} />}
       {!!orbDelta && <EconomyValueRecord iconClassName={"economy_mastery_med"} title={"Orbs"} deltaContent={formatNumber(orbDelta)} />}
       {!!xpGainedNumber && <EconomyValueRecord iconClassName={"economy_exp"} title={"Experience"} deltaContent={formatNumber(xpGainedNumber)} />}
       {checkBoosterAdded && change.delta.boosterDelta && change.delta.boosterDelta.map((booster: any) => <BoosterDelta booster={booster} key={booster.collationId} />)}
-      {checkWildcardsAdded && (
-        <>
-          {!!change.delta.wcCommonDelta && <WildcardEconomyValueRecord count={change.delta.wcCommonDelta} title={"Common Wildcard"} className={"wc_common"} />}
-          {!!change.delta.wcUncommonDelta && <WildcardEconomyValueRecord count={change.delta.wcUncommonDelta} title={"Uncommon Wildcard"} className={"wc_uncommon"} />}
-          {!!change.delta.wcRareDelta && <WildcardEconomyValueRecord count={change.delta.wcRareDelta} title={"Rare Wildcard"} className={"wc_rare"} />}
-          {!!change.delta.wcMythicDelta && <WildcardEconomyValueRecord count={change.delta.wcMythicDelta} title={"Mythic Wildcard"} className={"wc_mythic"} />}
-        </>
-      )}
+      {checkWildcardsAdded && <AllWildcardsEconomyValueRecord delta={change.delta} />}
       {(checkCards || checkAether) && <CardPoolAddedEconomyValueRecord addedCardIds={change.delta.cardsAdded} aetherizedCardIds={aetherCards}/>}
       {skinsToCards && skinsToCards.map((card: any) => <EconomyIcon key={card.name} title={card.name + " Skin"} className={"economy_skin_art"} url={`url("${getCardArtCrop(card)}")`} />)}
     </div>
@@ -292,7 +299,7 @@ function FlexTop(props: FlexTopProps) {
   return (
     <div className={"flex_top economy_sub"}>
       <span title={change.originalContext}>{fullContext}</span>
-      <div className={"list_economy_time"}>{localDateFormat(new Date(change.date))}</div>
+      <div className={"list_economy_time"}>{EconomyRowDate(new Date(change.date))}</div>
     </div>
   )
 }

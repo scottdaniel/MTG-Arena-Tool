@@ -1,15 +1,15 @@
 import differenceInCalendarDays from "date-fns/differenceInCalendarDays";
-import { createDiv } from "../shared/dom-fns";
+import { createDiv } from "../../../shared/dom-fns";
 import startOfDay from "date-fns/startOfDay";
 import {
   formatNumber,
   formatPercent,
-} from "./renderer-util";
-import { vaultPercentFormat, EconomyState } from "./economyUtils";
+} from "../../renderer-util";
+import { vaultPercentFormat, EconomyState } from "../../economyUtils";
 import React from "react";
 import ReactDOM from "react-dom";
 import EconomyValueRecord from "./EconomyValueRecord";
-import LocalTime from "../shared/time-components/LocalTime";
+import LocalTime from "../../../shared/time-components/LocalTime";
 
 function localDayDateFormat(date: Date) {
   return (
@@ -49,8 +49,8 @@ export function EconomyDayHeader(props: EconomyDayHeaderProps) {
       </div>
       <EconomyValueRecord containerDiv iconClassName={"economy_card"} className={"gridCards"} deltaUpContent={formatNumber(dayList[daysago].cardsEarned)} title={"Cards"}/>
       <EconomyValueRecord containerDiv iconClassName={"economy_vault"} className={"gridVault"} deltaUpContent={formatPercent(deltaPercent, vaultPercentFormat as any)} title={"Vault"}/>
-      <EconomyValueRecord containerDiv iconClassName={"economy_gold_med"} className={"gridGold"} deltaUpContent={formatNumber(dayList[daysago].goldEarned)} deltaDownContent={formatNumber(dayList[daysago].goldSpent)} title={"Gold"}/>
-      <EconomyValueRecord containerDiv iconClassName={"economy_gems_med" } className={"gridGems"} deltaUpContent={formatNumber(dayList[daysago].gemsEarned)} deltaDownContent={formatNumber(dayList[daysago].gemsSpent)} title={"Gems"}/>
+      <EconomyValueRecord containerDiv iconClassName={"economy_gold marginLeft"} className={"gridGold"} deltaUpContent={formatNumber(dayList[daysago].goldEarned)} deltaDownContent={formatNumber(dayList[daysago].goldSpent)} title={"Gold"}/>
+      <EconomyValueRecord containerDiv iconClassName={"economy_gems" } className={"gridGems"} deltaUpContent={formatNumber(dayList[daysago].gemsEarned)} deltaDownContent={formatNumber(dayList[daysago].gemsSpent)} title={"Gems"}/>
       <EconomyValueRecord containerDiv iconClassName={"economy_exp" } className={"gridExp"} deltaUpContent={formatNumber(dayList[daysago].expEarned)} title={"Experience"}/>
     </>
   );
