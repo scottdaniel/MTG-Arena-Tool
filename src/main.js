@@ -572,7 +572,7 @@ function createOverlayWindow() {
       nodeIntegration: true
     }
   });
-  overlay.loadURL(`file://${__dirname}/window_overlay_v3/index.html`);
+  overlay.loadURL(`file://${__dirname}/overlay/index.html`);
 
   if (process.platform !== "linux") {
     // https://electronjs.org/docs/api/browser-window#winsetignoremouseeventsignore-options
