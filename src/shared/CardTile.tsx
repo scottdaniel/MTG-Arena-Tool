@@ -11,6 +11,7 @@ import Deck from "./deck";
 import {
   get_wc_missing as getWildcardsMissing,
   getCardArtCrop,
+  getRankColorClass,
   openScryfallCard
 } from "./util";
 import { addCardHover } from "./card-hover";
@@ -44,38 +45,12 @@ function frameClassName(card: any): string {
   }
 }
 
-function rankingClassName(ranking: number | string): string {
-  // TODO after #685 and #686 land: extract this and DraftRankValue into a util
-  switch (ranking) {
-    case "A+":
-    case "A":
-      return "blue";
-
-    case "A-":
-    case "B+":
-    case "B":
-      return "green";
-
-    case "C-":
-    case "D+":
-    case "D":
-      return "orange";
-
-    case "D-":
-    case "F":
-      return "red";
-
-    default:
-      return "white";
-  }
-}
-
 function getArenaQuantityDisplay(quantity: any): [number, number, JSX.Element] {
   let ww, ll, quantityElement;
   if (typeof quantity === "object") {
     ww = 64;
     ll = 48;
-    const rankClass = rankingClassName(quantity.quantity);
+    const rankClass = getRankColorClass(quantity.quantity);
     quantityElement = (
       <div className={"card_tile_odds " + rankClass}>
         <span>{quantity.quantity}</span>
@@ -84,7 +59,7 @@ function getArenaQuantityDisplay(quantity: any): [number, number, JSX.Element] {
   } else if (!isNumber(quantity)) {
     ww = 64;
     ll = 48;
-    const rankClass = rankingClassName(quantity);
+    const rankClass = getRankColorClass(quantity);
     quantityElement = (
       <div className={"card_tile_odds " + rankClass}>
         <span>{quantity}</span>
@@ -275,7 +250,7 @@ function FlatQuantityDisplay(props: { quantity: any }): JSX.Element {
     );
   } else if (!isNumber(quantity)) {
     // Text quantity
-    const rankClass = rankingClassName(quantity);
+    const rankClass = getRankColorClass(quantity);
     return <div className={"card_tile_odds_flat " + rankClass}>{quantity}</div>;
   } else if (quantity === 9999) {
     // Undefined Quantity
