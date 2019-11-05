@@ -222,7 +222,7 @@ function OverlayElements(props: OverlayElementsProps): JSX.Element {
           matchBeginTime={match ? new Date(match.beginTime) : new Date()}
           oppName={oppName}
           playerSeat={playerSeat}
-          priorityTimers={match ? match.priorityTimers : []}
+          priorityTimers={match ? match.priorityTimers : [Date.now(), 0, 0]}
           turnPriority={turnPriority}
         />
       )}

@@ -94,8 +94,8 @@ export default function OverlayController(): JSX.Element {
   const [match, setMatch] = useState(null);
   const [draft, setDraft] = useState(null);
   const [draftState, setDraftState] = useState({ packN: 0, pickN: 0 });
-  const [playerSeat, setPlayerSeat] = useState(0);
-  const [turnPriority, setTurnPriority] = useState(0);
+  const [playerSeat, setPlayerSeat] = useState(1);
+  const [turnPriority, setTurnPriority] = useState(playerSeat);
   const playerData = pd as any;
   const [settings, setSettings] = useState(playerData.settings);
 

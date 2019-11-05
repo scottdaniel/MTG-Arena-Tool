@@ -59,7 +59,7 @@ export default function Clock(props: ClockProps): JSX.Element {
   // Memoize title computation
   const clockTitle = useMemo((): JSX.Element => {
     let cleanName = oppName;
-    if (oppName !== "Sparky") {
+    if (!["Opponent", "Sparky"].includes(oppName)) {
       cleanName = oppName.slice(0, -6);
     }
     let p1name = cleanName;
