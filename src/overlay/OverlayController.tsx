@@ -1,5 +1,5 @@
 import { ipcRenderer as ipc, webFrame } from "electron";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useCallback, useRef, useState } from "react";
 import interact from "interactjs";
 import striptags from "striptags";
 
@@ -109,8 +109,8 @@ export default function OverlayController(): JSX.Element {
   const [draftState, setDraftState] = useState({ packN: 0, pickN: 0 });
   const [playerSeat, setPlayerSeat] = useState(0);
   const [turnPriority, setTurnPriority] = useState(0);
-  const [playerData, setPlayerData] = useState(pd as any);
-  const { settings } = playerData;
+  const playerData = pd as any;
+  const [settings, setSettings] = useState(playerData.settings);
 
   useEffect(() => {
     webFrame.setZoomFactor(settings.overlay_scale / 100);
@@ -215,15 +215,13 @@ export default function OverlayController(): JSX.Element {
     setDraftState({ packN: draft.currentPack, pickN: draft.currentPick });
   };
 
-  const handleSetPlayerData = (): void => {
+  const handleSettingsUpdated = useCallback((): void => {
     // mid-match Arena updates can make edit-mode difficult
     // temporarily allow the overlays to go stale during editing
     // (should be okay since ending edit-mode causes a refresh)
     if (editMode) return;
-
-    // TODO does this even work even???
-    setPlayerData(pd);
-  };
+    setSettings({ ...playerData.settings });
+  }, [editMode]);
 
   const handleSetMatch = (event: any, arg: any): void => {
     const newMatch = JSON.parse(arg);
@@ -263,7 +261,7 @@ export default function OverlayController(): JSX.Element {
     ipc.on("set_arena_state", handleSetArenaState);
     ipc.on("set_draft_cards", handleSetDraftCards);
     ipc.on("set_match", handleSetMatch);
-    ipc.on("set_player_data", handleSetPlayerData);
+    ipc.on("set_player_data", handleSettingsUpdated);
     ipc.on("set_turn", handleSetTurn);
 
     return (): void => {
@@ -274,7 +272,7 @@ export default function OverlayController(): JSX.Element {
       ipc.removeListener("set_arena_state", handleSetArenaState);
       ipc.removeListener("set_draft_cards", handleSetDraftCards);
       ipc.removeListener("set_match", handleSetMatch);
-      ipc.removeListener("set_player_data", handleSetPlayerData);
+      ipc.removeListener("set_player_data", handleSettingsUpdated);
       ipc.removeListener("set_turn", handleSetTurn);
     };
   });
