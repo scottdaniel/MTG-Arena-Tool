@@ -305,14 +305,21 @@ relative-time, local-time {
     cursor: default;
 }
 
+.it7, .it8 {
+    width: 60px;
+}
 
 .icon_7 {
     -webkit-app-region: no-drag;
     align-self: center;
     width: 48px;
     height: 48px;
-    background: url(../images/ranks_constructed_48.png);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
     background-position: 0px 0px;
+    background: url(../images/ranks_constructed_48.png);
 }
 
 .icon_8 {
@@ -320,16 +327,12 @@ relative-time, local-time {
     align-self: center;
     width: 48px;
     height: 48px;
-    background: url(../images/ranks_limited_48.png);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
     background-position: 0px 0px;
-}
-
-.top_constructed_rank, .top_limited_rank {
-  /* Align leaderboard indicator to center and add text border*/
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+    background: url(../images/ranks_limited_48.png);
 }
 
 .top_patreon {

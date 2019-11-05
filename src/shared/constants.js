@@ -734,6 +734,7 @@ export const DEFAULT_TILE = 67003;
 export const CARD_TILE_ARENA = 0;
 export const CARD_TILE_FLAT = 1;
 export const EASING_DEFAULT = "cubicBezier(0.570, 0.165, 0.210, 0.990)";
+
 export const MAIN_LOGIN = -2;
 export const MAIN_HOME = -1;
 export const MAIN_DECKS = 0;
@@ -744,6 +745,8 @@ export const MAIN_ECONOMY = 4;
 export const MAIN_COLLECTION = 5;
 export const MAIN_SETTINGS = 6;
 export const MAIN_UPDATE = 9;
+export const MAIN_CONSTRUCTED = 10;
+export const MAIN_LIMITED = 11;
 
 export const SHORTCUT_NAMES = {
   shortcut_overlay_1: "Toggle Overlay 1",

@@ -63,16 +63,13 @@ import {
 import Aggregator from "./aggregator";
 import { openHomeTab, requestHome } from "./home";
 import { tournamentOpen } from "./tournaments";
-import { openDecksTab } from "./decks";
 import { openDeck } from "./deck-details";
-import { openHistoryTab } from "./history";
-import { openEventsTab } from "./events";
-import { openEconomyTab } from "./economy";
-import { openExploreTab, setExploreDecks } from "./explore";
-import { openCollectionTab } from "./collection";
 import { openSettingsTab, setCurrentOverlaySettings } from "./settings";
 import { showWhatsNew } from "./whats-new";
+import { showOfflineSplash } from "./renderer-util";
+import { setExploreDecks } from "./explore";
 
+import { openTab } from "./tabControl";
 import createTopNav from "./topNav";
 
 const byId = id => document.getElementById(id);
@@ -167,7 +164,7 @@ function updateNavIcons() {
 function updateTopBar() {
   const topNavDiv = $$(".top_nav_container")[0];
   createTopNav(topNavDiv);
-/*
+  /*
   updateNavIcons();
 
   if (pd.offline || !pd.settings.send_data) {
@@ -394,63 +391,6 @@ function rememberMe() {
   };
   ipcSend("save_app_settings", rSettings);
 }
-
-//
-function openTab(tab, filters = {}, dataIndex = 0, scrollTop = 0) {
-  showLoadingBars();
-  $$(".top_nav_item").forEach(el => el.classList.remove("item_selected"));
-  let tabClass = "it" + tab;
-  resetMainContainer();
-  switch (tab) {
-    case 0:
-      openDecksTab(filters, scrollTop);
-      break;
-    case 1:
-      openHistoryTab(filters, dataIndex, scrollTop);
-      break;
-    case 2:
-      openEventsTab(filters, dataIndex, scrollTop);
-      break;
-    case 3:
-      if (pd.offline) {
-        showOfflineSplash();
-      } else {
-        openExploreTab();
-      }
-      break;
-    case 4:
-      openEconomyTab(dataIndex, scrollTop);
-      break;
-    case 5:
-      openCollectionTab();
-      break;
-    case 6:
-      tabClass = "ith";
-      openSettingsTab(-1, scrollTop);
-      break;
-    case -1:
-      tabClass = "ith";
-      if (pd.offline) {
-        showOfflineSplash();
-      } else {
-        if (getLocalState().discordTag === null) {
-          openHomeTab(null, true);
-        } else {
-          requestHome();
-        }
-      }
-      break;
-    case -2:
-    default:
-      // $$(".message_center")[0].style.display = "initial";
-      hideLoadingBars();
-      $$(".init_loading")[0].style.display = "block";
-      break;
-  }
-  if ($$("." + tabClass)[0])
-    $$("." + tabClass)[0].classList.add("item_selected");
-}
-
 //
 ipc.on("initialize", function() {
   showLoadingBars();
@@ -497,35 +437,7 @@ ipc.on("offline", function() {
   showOfflineSplash();
 });
 
-//
-function showOfflineSplash() {
-  hideLoadingBars();
-  byId("ux_0").innerHTML = `
-  <div class="message_center_offline" style="display: flex; position: fixed;">
-    <div class="message_unlink"></div>
-    <div class="message_big red">Oops, you are offline!</div>
-    <div class="message_sub_16 white">To access online features:</div>
-    <div class="message_sub_16 white">If you are logged in, you may need to <a class="privacy_link">enable online sharing</a> and restart.</div>
-    <div class="message_sub_16 white">If you are in offline mode, you can <a class="launch_login_link">login to your account</a>.</div>
-    <div class="message_sub_16 white">If you need an account, you can <a class="signup_link">sign up here</a>.</div>
-  </div>`;
-  $$(".privacy_link")[0].addEventListener("click", function() {
-    force_open_settings(SETTINGS_PRIVACY);
-  });
-  $$(".launch_login_link")[0].addEventListener("click", function() {
-    const clearAppSettings = {
-      remember_me: false,
-      auto_login: false,
-      launch_to_tray: false
-    };
-    ipcSend("save_app_settings", clearAppSettings);
-    remote.app.relaunch();
-    remote.app.exit(0);
-  });
-  $$(".signup_link")[0].addEventListener("click", function() {
-    shell.openExternal("https://mtgatool.com/signup/");
-  });
-}
+
 
 //
 ipc.on("log_read", function() {
@@ -540,31 +452,7 @@ ipc.on("popup", function(event, arg, time) {
   pop(arg, time);
 });
 
-//
-function force_open_settings(section = -1) {
-  sidebarActive = MAIN_SETTINGS;
-  anime({
-    targets: ".moving_ux",
-    left: 0,
-    easing: EASING_DEFAULT,
-    duration: 350
-  });
-  $$(".top_nav_item").forEach(el => el.classList.remove("item_selected"));
-  openSettingsTab(section, 0);
-}
 
-//
-function force_open_about() {
-  sidebarActive = MAIN_UPDATE;
-  anime({
-    targets: ".moving_ux",
-    left: 0,
-    easing: EASING_DEFAULT,
-    duration: 350
-  });
-  $$(".top_nav_item").forEach(el => el.classList.remove("item_selected"));
-  openSettingsTab(SETTINGS_ABOUT, 0);
-}
 
 //
 let top_compact = false;
@@ -719,6 +607,31 @@ ready(function() {
     });
   });
 });
+
+
+function force_open_settings(section = -1) {
+  sidebarActive = MAIN_SETTINGS;
+  anime({
+    targets: ".moving_ux",
+    left: 0,
+    easing: EASING_DEFAULT,
+    duration: 350
+  });
+  $$(".top_nav_item").forEach(el => el.classList.remove("item_selected"));
+  openSettingsTab(section, 0);
+}
+
+function force_open_about() {
+  sidebarActive = MAIN_UPDATE;
+  anime({
+    targets: ".moving_ux",
+    left: 0,
+    easing: EASING_DEFAULT,
+    duration: 350
+  });
+  $$(".top_nav_item").forEach(el => el.classList.remove("item_selected"));
+  openSettingsTab(SETTINGS_ABOUT, 0);
+}
 
 //
 //ipc.on("show_loading", () => showLoadingBars());

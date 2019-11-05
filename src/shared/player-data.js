@@ -270,6 +270,7 @@ class PlayerData {
     this.decks = undefined;
     this.name = undefined;
     this.arenaId = undefined;
+    this.offline = false;
     this.draft = this.draft.bind(this);
     this.event = this.event.bind(this);
     this.match = this.match.bind(this);
