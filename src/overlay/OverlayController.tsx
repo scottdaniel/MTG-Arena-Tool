@@ -27,19 +27,6 @@ function ipcSend(method: string, arg?: any, to = IPC_BACKGROUND): void {
   ipc.send("ipc_switch", method, IPC_OVERLAY, arg, to);
 }
 
-function close(bool: any, index: number): void {
-  const playerData = pd as any;
-  // -1 to toggle, else set
-  const show = bool == -1 ? !playerData.settings.overlays[index].show : bool;
-  const overlays = [...playerData.settings.overlays];
-  const newOverlay = {
-    ...overlays[index], // old overlay
-    show // new setting
-  };
-  overlays[index] = newOverlay;
-  ipcSend("save_user_settings", { overlays });
-}
-
 // TODO figure out a way to extract this pattern
 // some kind of custom useEffect?
 function makeElementDraggable(element: HTMLElement): void {
@@ -207,7 +194,17 @@ export default function OverlayController(): JSX.Element {
     event: any,
     arg: { action: any; index: number }
   ): void => {
-    close(arg.action, arg.index);
+    const bool = arg.action;
+    const index = arg.index;
+    // -1 to toggle, else set
+    const show = bool == -1 ? !settings.overlays[index].show : bool;
+    const overlays = [...settings.overlays];
+    const newOverlay = {
+      ...overlays[index], // old overlay
+      show // new setting
+    };
+    overlays[index] = newOverlay;
+    ipcSend("save_user_settings", { overlays });
   };
 
   const handleSetDraftCards = (event: any, draft: any): void => {
@@ -278,6 +275,7 @@ export default function OverlayController(): JSX.Element {
   });
 
   const SCALAR = 0.71808510638; // ???
+  const { cardsSizeHoverCard } = playerData;
 
   const setDraftStateCallback = (_draftState: {
     packN: number;
@@ -295,7 +293,8 @@ export default function OverlayController(): JSX.Element {
             ipcSend("renderer_show");
             ipcSend("force_open_overlay_settings", index, IPC_MAIN);
           };
-          const handleClickClose = (): void => close(-1, index);
+          const handleClickClose = (): void =>
+            handleClose(null, { action: -1, index });
           return (
             <OverlayWindowlet
               actionLog={actionLog}
@@ -327,10 +326,10 @@ export default function OverlayController(): JSX.Element {
           opacity: editMode ? "1" : undefined,
           left: settings.overlayHover
             ? `${settings.overlayHover.x}px`
-            : `${window.innerWidth / 2 - pd.cardsSizeHoverCard / 2}px`,
+            : `${window.innerWidth / 2 - cardsSizeHoverCard / 2}px`,
           top: settings.overlayHover
             ? `${settings.overlayHover.y}px`
-            : `${window.innerHeight - pd.cardsSizeHoverCard / SCALAR - 50}px`
+            : `${window.innerHeight - cardsSizeHoverCard / SCALAR - 50}px`
         }}
       >
         <img
@@ -338,8 +337,8 @@ export default function OverlayController(): JSX.Element {
           src="../images/nocard.png"
           style={{
             opacity: "0",
-            width: playerData.cardsSizeHoverCard + "px",
-            height: playerData.cardsSizeHoverCard / SCALAR + "px"
+            width: cardsSizeHoverCard + "px",
+            height: cardsSizeHoverCard / SCALAR + "px"
           }}
         />
         <div
