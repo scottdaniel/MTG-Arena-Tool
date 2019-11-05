@@ -305,7 +305,7 @@ relative-time, local-time {
     cursor: default;
 }
 
-.it7, .it8 {
+.it10, .it11 {
     width: 60px;
 }
 
@@ -391,30 +391,26 @@ relative-time, local-time {
 }
 
 .icon_0 {
-    background: url(../images/tab_tourneys.png);
-}
-
-.icon_1 {
     background: url(../images/tab_my_decks.png);
 }
 
-.icon_2 {
+.icon_1 {
     background: url(../images/tab_history.png);
 }
 
-.icon_3 {
+.icon_2 {
     background: url(../images/tab_events.png);
 }
 
-.icon_4 {
+.icon_3 {
     background: url(../images/tab_explore.png);
 }
 
-.icon_5 {
+.icon_4 {
     background: url(../images/tab_economy.png);
 }
 
-.icon_6 {
+.icon_5 {
     background: url(../images/tab_collection.png);
 }
 
@@ -434,6 +430,11 @@ span.top_nav_item_text {
     overflow: hidden;
     display: inline-block;
     -webkit-transition: all .5s ease-in-out;
+}
+
+.top_nav_item_no_label {
+    max-width: 60px !important;
+    min-width: 60px !important;
 }
 
 .top_nav_item {
@@ -470,11 +471,10 @@ span.top_nav_item_text {
     opacity: 1;
 }
 
-.icon_h {
+.icon_-1 {
     width: 32px;
     height: 32px;
     opacity: 1;
-    margin: 16px auto;
     background-repeat: no-repeat;
     background-image: url(../images/tab_home.png);
 }

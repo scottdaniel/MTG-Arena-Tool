@@ -140,33 +140,10 @@ function showLogin() {
   byId("signin_user").focus();
 }
 
-//
-function updateNavIcons() {
-  if ($$(".top_nav_icons")[0].offsetWidth < 530) {
-    if (!top_compact) {
-      $$("span.top_nav_item_text").forEach(el => (el.style.opacity = 0));
-      $$(".top_nav_icon").forEach(el => (el.style.display = "block"));
-      $$(".top_nav_icon").forEach(el => (el.style.opacity = 1));
-      top_compact = true;
-    }
-  } else {
-    if (top_compact) {
-      $$("span.top_nav_item_text").forEach(el => (el.style.opacity = 1));
-      $$(".top_nav_icon").forEach(el => (el.style.opacity = 0));
-      window.setTimeout(() => {
-        $$(".top_nav_icon").forEach(el => (el.style.display = "none"));
-      }, 500);
-      top_compact = false;
-    }
-  }
-}
-
 function updateTopBar() {
   const topNavDiv = $$(".top_nav_container")[0];
   createTopNav(topNavDiv);
   /*
-  updateNavIcons();
-
   if (pd.offline || !pd.settings.send_data) {
     $$(".unlink")[0].style.display = "block";
   }
@@ -453,14 +430,11 @@ ipc.on("popup", function(event, arg, time) {
 });
 
 
-
-//
-let top_compact = false;
 let resizeTimer;
 window.addEventListener("resize", () => {
   hideLoadingBars();
   clearTimeout(resizeTimer);
-  resizeTimer = setTimeout(updateNavIcons, 100);
+  resizeTimer = setTimeout(updateTopBar, 100);
 });
 
 function ready(fn) {

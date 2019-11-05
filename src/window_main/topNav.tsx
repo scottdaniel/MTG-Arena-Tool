@@ -1,5 +1,5 @@
 import _ from "lodash";
-import React from "react";
+import React, { useEffect } from "react";
 import ReactDOM from 'react-dom';
 import { queryElements as $$ } from "../shared/dom-fns";
 import { openTab } from "./tabControl";
@@ -17,12 +17,13 @@ import {
 } from "../shared/constants";
 
 interface topNavItemProps {
+    compact: boolean,
     id: number,
     title: string
 }
 
 function TopNavItem(props:topNavItemProps) {
-    const {id, title} = props;
+    const {compact, id, title} = props;
 
     const clickTab = React.useCallback((tabId: number) => (event: React.MouseEvent<HTMLDivElement>) => {
         if (!event.currentTarget.classList.contains("item_selected")) {
@@ -32,8 +33,12 @@ function TopNavItem(props:topNavItemProps) {
         }
     }, [props.id]);
 
-    return (
-        <div className={"top_nav_item it" + id} onClick={clickTab(id)}>
+    return compact ? (
+        <div className={"top_nav_item_no_label top_nav_item it" + id} onClick={clickTab(id)}>
+            <div className={"top_nav_icon icon_" + id} title={_.camelCase(title)}></div>
+        </div>
+    ) : (
+        <div className={"top_nav_item it" + id + (title == "" ? " top_nav_item_no_label" : "")} onClick={clickTab(id)}>
             {title !== "" ? (<span className={"top_nav_item_text"}>{title}</span>) : false}
             <div className={"top_nav_icon icon_" + id} title={_.camelCase(title)}></div>
         </div>
@@ -41,16 +46,27 @@ function TopNavItem(props:topNavItemProps) {
 }
 
 function TopNav() {
-    const homeTab = {id: MAIN_HOME, title:""};
-    const myDecksTab = {id: MAIN_DECKS, title:"MY DECKS"};
-    const historyTab = {id: MAIN_HISTORY, title:"HISTORY"};
-    const eventsTab = {id: MAIN_EVENTS, title:"EVENTS"};
-    const exploreTab = {id: MAIN_EXPLORE, title:"EXPLORE"};
-    const economyTab = {id: MAIN_ECONOMY, title:"ECONOMY"};
-    const collectionTab = {id: MAIN_COLLECTION, title:"COLLECTION"};
+    const [compact, setCompact] = React.useState(false);
+    const homeTab = {compact: compact, id: MAIN_HOME, title:""};
+    const myDecksTab = {compact: compact, id: MAIN_DECKS, title:"MY DECKS"};
+    const historyTab = {compact: compact, id: MAIN_HISTORY, title:"HISTORY"};
+    const eventsTab = {compact: compact, id: MAIN_EVENTS, title:"EVENTS"};
+    const exploreTab = {compact: compact, id: MAIN_EXPLORE, title:"EXPLORE"};
+    const economyTab = {compact: compact, id: MAIN_ECONOMY, title:"ECONOMY"};
+    const collectionTab = {compact: compact, id: MAIN_COLLECTION, title:"COLLECTION"};
 
-    const contructedNav = {id: MAIN_CONSTRUCTED, title:""};
-    const limitedNav = {id: MAIN_LIMITED, title:""};
+    const contructedNav = {compact: compact, id: MAIN_CONSTRUCTED, title:""};
+    const limitedNav = {compact: compact, id: MAIN_LIMITED, title:""};
+
+    React.useEffect(() => {
+        if ($$(".top_nav_icons")[0].offsetWidth < 530) {
+            if (!compact) {
+                setCompact(true);
+            }
+        } else if (compact) {
+            setCompact(false);
+        }
+    });
 
     return (
         <div className={"top_nav"}>
