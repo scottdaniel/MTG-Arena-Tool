@@ -182,7 +182,7 @@ function OverlayElements(props: OverlayElementsProps): JSX.Element {
           {settings.mode === OVERLAY_DRAFT && (
             <div
               className="overlay_draft_container"
-              style={!!settings.top && { top: "32px" }}
+              style={settings.top ? { top: "32px" } : undefined}
             >
               <div className="draft_prev click-on" onClick={handleDraftPrev} />
               <div className="draft_title" />
