@@ -3,15 +3,15 @@ import * as React from "react";
 import { MANA_COLORS } from "./constants";
 import db from "./database";
 
-function add(a, b) {
+function add(a: number, b: number): number {
   return a + b;
 }
 
-function getDeckCurve(deck) {
-  const curve = [];
+function getDeckCurve(deck: any): any[] {
+  const curve: any[] = [];
   if (!deck.mainDeck) return curve;
 
-  deck.mainDeck.forEach(card => {
+  deck.mainDeck.forEach((card: any) => {
     const cardObj = db.card(card.id);
     if (!cardObj) return;
 
@@ -19,13 +19,15 @@ function getDeckCurve(deck) {
     if (!curve[cmc]) curve[cmc] = [0, 0, 0, 0, 0, 0];
 
     if (!cardObj.type.includes("Land")) {
-      cardObj.cost.forEach(c => {
-        if (c.includes("w")) curve[cmc][1] += card.quantity;
-        if (c.includes("u")) curve[cmc][2] += card.quantity;
-        if (c.includes("b")) curve[cmc][3] += card.quantity;
-        if (c.includes("r")) curve[cmc][4] += card.quantity;
-        if (c.includes("g")) curve[cmc][5] += card.quantity;
-      });
+      cardObj.cost.forEach(
+        (c: string): void => {
+          if (c.includes("w")) curve[cmc][1] += card.quantity;
+          if (c.includes("u")) curve[cmc][2] += card.quantity;
+          if (c.includes("b")) curve[cmc][3] += card.quantity;
+          if (c.includes("r")) curve[cmc][4] += card.quantity;
+          if (c.includes("g")) curve[cmc][5] += card.quantity;
+        }
+      );
 
       curve[cmc][0] += card.quantity;
     }
@@ -47,8 +49,8 @@ function getDeckCurve(deck) {
   return curve;
 }
 
-export default function DeckManaCurve(_props) {
-  const { deck } = _props;
+export default function DeckManaCurve(props: { deck: any }): JSX.Element {
+  const { deck } = props;
   const manaCounts = getDeckCurve(deck);
   const curveMax = Math.max(
     ...manaCounts
@@ -63,7 +65,7 @@ export default function DeckManaCurve(_props) {
   return (
     <div className="mana_curve_container">
       <div className="mana_curve">
-        {manaCounts &&
+        {!!manaCounts &&
           manaCounts.map((cost, i) => {
             const total = cost[0];
             const manaTotal = cost.reduce(add, 0) - total;
@@ -97,7 +99,7 @@ export default function DeckManaCurve(_props) {
           })}
       </div>
       <div className="mana_curve_numbers">
-        {manaCounts &&
+        {!!manaCounts &&
           manaCounts.map((cost, i) => {
             return (
               <div
