@@ -39,8 +39,8 @@ function TopNavItem(props:topNavItemProps) {
         </div>
     ) : (
         <div className={"top_nav_item it" + id + (title == "" ? " top_nav_item_no_label" : "")} onClick={clickTab(id)}>
-            {title !== "" ? (<span className={"top_nav_item_text"}>{title}</span>) : false}
-            <div className={"top_nav_icon icon_" + id} title={_.camelCase(title)}></div>
+            {title !== "" ? (<span className={"top_nav_item_text"}>{title}</span>) : 
+            (<div className={"top_nav_icon icon_" + id} title={_.camelCase(title)}></div>)}
         </div>
     );
 }

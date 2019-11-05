@@ -429,12 +429,9 @@ ipc.on("popup", function(event, arg, time) {
   pop(arg, time);
 });
 
-
-let resizeTimer;
 window.addEventListener("resize", () => {
   hideLoadingBars();
-  clearTimeout(resizeTimer);
-  resizeTimer = setTimeout(updateTopBar, 100);
+  updateTopBar();
 });
 
 function ready(fn) {

@@ -376,7 +376,7 @@ relative-time, local-time {
 }
 
 .top_nav_icon {
-    opacity: 0;
+    opacity: 1;
     position: absolute;
     left: calc(50% - 16px);
     top: 16px;
