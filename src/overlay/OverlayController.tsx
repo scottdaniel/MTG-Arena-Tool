@@ -211,7 +211,7 @@ export default function OverlayController(): JSX.Element {
   };
 
   const handleSetDraftCards = (event: any, draft: any): void => {
-    setDraft(draft);
+    setDraft(JSON.parse(draft));
     setDraftState({ packN: draft.currentPack, pickN: draft.currentPick });
   };
 

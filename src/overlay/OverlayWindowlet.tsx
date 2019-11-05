@@ -176,13 +176,13 @@ function OverlayElements(props: OverlayElementsProps): JSX.Element {
 
   return (
     <>
-      {settings.title && (
+      {!!settings.title && (
         <div className="overlay_deckname">
           {mainTitle}
           {settings.mode === OVERLAY_DRAFT && (
             <div
               className="overlay_draft_container"
-              style={settings.top && { top: "32px" }}
+              style={!!settings.top && { top: "32px" }}
             >
               <div className="draft_prev click-on" onClick={handleDraftPrev} />
               <div className="draft_title" />
@@ -191,10 +191,10 @@ function OverlayElements(props: OverlayElementsProps): JSX.Element {
           )}
         </div>
       )}
-      {settings.mode === OVERLAY_SEEN && match && (
+      {settings.mode === OVERLAY_SEEN && !!match && (
         <div className="overlay_archetype">{match.oppArchetype}</div>
       )}
-      {settings.title && visibleDeck && (
+      {!!settings.title && !!visibleDeck && (
         <div className="overlay_deckcolors">
           {visibleDeck.colors.get().map((color: number) => (
             <div
@@ -205,7 +205,7 @@ function OverlayElements(props: OverlayElementsProps): JSX.Element {
         </div>
       )}
       {settings.mode === OVERLAY_LOG && <ActionLog actionLog={actionLog} />}
-      {settings.deck && visibleDeck && (
+      {!!settings.deck && !!visibleDeck && (
         <DeckList
           deck={visibleDeck}
           subTitle={subTitle}
@@ -216,7 +216,7 @@ function OverlayElements(props: OverlayElementsProps): JSX.Element {
           setOddsCallback={setOddsCallback}
         />
       )}
-      {settings.clock && !OVERLAY_DRAFT_MODES.includes(settings.mode) && (
+      {!!settings.clock && !OVERLAY_DRAFT_MODES.includes(settings.mode) && (
         <Clock
           key={"overlay_clock_" + index}
           matchBeginTime={match ? new Date(match.beginTime) : new Date()}

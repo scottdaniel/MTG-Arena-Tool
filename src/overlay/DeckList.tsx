@@ -238,13 +238,13 @@ export default function DeckList(props: DeckListProps): JSX.Element {
     <div className="overlay_decklist click-on">
       <div className="decklist_title">{subTitle}</div>
       {mainCardTiles}
-      {settings.sideboard && sideboardCardTiles.length && (
+      {!!settings.sideboard && sideboardCardTiles.length && (
         <div className="card_tile_separator">Sideboard</div>
       )}
-      {settings.sideboard && sideboardCardTiles}
-      {settings.type_counts && <DeckTypesStats deck={arenaDeck} />}
-      {settings.mana_curve && <DeckManaCurve deck={arenaDeck} />}
-      {settings.draw_odds &&
+      {!!settings.sideboard && sideboardCardTiles}
+      {!!settings.type_counts && <DeckTypesStats deck={arenaDeck} />}
+      {!!settings.mana_curve && <DeckManaCurve deck={arenaDeck} />}
+      {!!settings.draw_odds &&
         (settings.mode === OVERLAY_ODDS || settings.mode === OVERLAY_MIXED) && (
           <SampleSizePanel
             cardOdds={cardOdds}
