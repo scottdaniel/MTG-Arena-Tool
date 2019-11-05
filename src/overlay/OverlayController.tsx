@@ -1,6 +1,5 @@
 import { ipcRenderer as ipc, webFrame } from "electron";
 import React, { useEffect, useCallback, useRef, useState } from "react";
-import interact from "interactjs";
 import striptags from "striptags";
 
 import pd from "../shared/player-data";
@@ -14,10 +13,13 @@ import {
   IPC_OVERLAY
 } from "../shared/constants";
 
-import OverlayWindowlet from "../overlay/OverlayWindowlet";
-
-export const RENDERER_MATCH = 1;
-export const RENDERER_DRAFT = 2;
+import {
+  getEditModeClass,
+  RENDERER_MATCH,
+  RENDERER_DRAFT,
+  useEditModeOnRef
+} from "./overlayUtil";
+import OverlayWindowlet from "./OverlayWindowlet";
 
 // TODO figure out a way to refactor this out
 // some kind of useRef array?
@@ -26,58 +28,6 @@ const byId = (id: string): HTMLElement | null => document.getElementById(id);
 function ipcSend(method: string, arg?: any, to = IPC_BACKGROUND): void {
   ipc.send("ipc_switch", method, IPC_OVERLAY, arg, to);
 }
-
-// TODO figure out a way to extract this pattern
-// some kind of custom useEffect?
-function makeElementDraggable(element: HTMLElement): void {
-  const restrictMinSize =
-    interact.modifiers &&
-    interact.modifiers.restrictSize({
-      min: { width: 100, height: 100 }
-    });
-  const cursorChecker: any = (
-    action: any,
-    interactable: any,
-    element: any,
-    interacting: boolean
-  ): string => {
-    switch (action.axis) {
-      case "x":
-        return "ew-resize";
-      case "y":
-        return "ns-resize";
-      default:
-        return interacting ? "grabbing" : "grab";
-    }
-  };
-  interact(element)
-    .draggable({ cursorChecker })
-    .on("dragmove", function(event) {
-      const target = event.target;
-      const x = parseFloat(target.style.left) + event.dx;
-      const y = parseFloat(target.style.top) + event.dy;
-      target.style.left = x + "px";
-      target.style.top = y + "px";
-    })
-    .resizable({
-      edges: { left: true, right: true, bottom: true, top: true },
-      modifiers: [restrictMinSize],
-      inertia: true
-    } as any)
-    .on("resizemove", function(event) {
-      const target = event.target;
-      const x = parseFloat(target.style.left) + event.deltaRect.left;
-      const y = parseFloat(target.style.top) + event.deltaRect.top;
-      //fix for interact.js adding 4px to height/width on resize
-      target.style.width = event.rect.width - 4 + "px";
-      target.style.height = event.rect.height - 4 + "px";
-      target.style.left = x + "px";
-      target.style.top = y + "px";
-    });
-}
-
-const getEditModeClass = (editMode: boolean): string =>
-  editMode ? "click-on editable" : "click-through";
 
 const forceInt = (num: any): number => Math.round(parseFloat(num));
 
@@ -102,24 +52,14 @@ export default function OverlayController(): JSX.Element {
   useEffect(() => {
     webFrame.setZoomFactor(settings.overlay_scale / 100);
   }, [settings]);
-
-  // TODO figure out a way to extract this pattern
-  // some kind of custom useEffect?
-  const hoverContainerRef = useRef(null);
   useEffect(() => {
-    const container = hoverContainerRef.current as any;
-    if (editMode) {
-      // mainHover.style.opacity = "1";
-      document.body.style.backgroundColor = "rgba(0, 0, 0, 0.3)";
-      if (container) {
-        makeElementDraggable(container);
-        return (): void => interact(container).unset();
-      }
-    } else {
-      // mainHover.style.opacity = "0";
-      document.body.style.backgroundColor = "rgba(0, 0, 0, 0.05)";
-    }
-  });
+    document.body.style.backgroundColor = editMode
+      ? "rgba(0, 0, 0, 0.3)"
+      : "rgba(0, 0, 0, 0.05)";
+  }, [editMode]);
+
+  const hoverContainerRef = useRef(null);
+  useEditModeOnRef(editMode, hoverContainerRef);
 
   const handleSaveOverlaysPosition = (): void => {
     // Update each overlay with the new dimensions
@@ -238,7 +178,7 @@ export default function OverlayController(): JSX.Element {
     const { playerSeat: _we, turnPriority: _priority } = arg;
     if (
       turnPriority != _priority &&
-      _priority == playerSeat &&
+      _priority == _we &&
       settings.sound_priority
     ) {
       const { Howl, Howler } = require("howler");
@@ -277,11 +217,6 @@ export default function OverlayController(): JSX.Element {
   const SCALAR = 0.71808510638; // ???
   const { cardsSizeHoverCard } = playerData;
 
-  const setDraftStateCallback = (_draftState: {
-    packN: number;
-    pickN: number;
-  }): void => setDraftState(_draftState);
-
   const setOddsCallback = (sampleSize: number): void =>
     ipcSend("set_odds_samplesize", sampleSize);
 
@@ -308,10 +243,9 @@ export default function OverlayController(): JSX.Element {
               index={index}
               key={"overlay_windowlet_" + index}
               match={match}
-              makeElementDraggable={makeElementDraggable}
               playerSeat={playerSeat}
               settings={settings}
-              setDraftStateCallback={setDraftStateCallback}
+              setDraftStateCallback={setDraftState}
               setOddsCallback={setOddsCallback}
               tileStyle={parseInt(settings.card_tile_style)}
               turnPriority={turnPriority}

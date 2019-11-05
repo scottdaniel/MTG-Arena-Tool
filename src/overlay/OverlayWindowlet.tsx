@@ -1,5 +1,4 @@
-import React, { useCallback, useEffect, useRef } from "react";
-import interact from "interactjs";
+import React, { useCallback, useRef } from "react";
 
 import {
   ARENA_MODE_MATCH,
@@ -19,6 +18,7 @@ import {
 } from "../shared/constants";
 import Deck from "../shared/deck";
 
+import { getEditModeClass, useEditModeOnRef } from "./overlayUtil";
 import Clock from "./Clock";
 import ActionLog from "./ActionLog";
 import DeckList from "./DeckList";
@@ -237,12 +237,8 @@ export interface OverlayWindowletProps extends OverlayElementsProps {
   handleClickSettings: () => void;
   handleToggleEditMode: () => void;
   index: number;
-  makeElementDraggable: (element: HTMLElement) => void;
   settings: any;
 }
-
-const getEditModeClass = (editMode: boolean): string =>
-  editMode ? "click-on editable" : "click-through";
 
 export default function OverlayWindowlet(
   props: OverlayWindowletProps
@@ -254,21 +250,12 @@ export default function OverlayWindowlet(
     handleClickSettings,
     handleToggleEditMode,
     index,
-    makeElementDraggable,
     settings,
     ...elProps
   } = props;
 
-  // TODO figure out a way to extract this pattern
-  // some kind of custom useEffect?
   const containerRef = useRef(null);
-  useEffect(() => {
-    const container = containerRef.current as any;
-    if (container && editMode) {
-      makeElementDraggable(container);
-      return (): void => interact(container).unset();
-    }
-  });
+  useEditModeOnRef(editMode, containerRef);
 
   const backgroundImage =
     "url(" +

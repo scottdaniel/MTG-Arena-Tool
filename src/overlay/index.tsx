@@ -5,9 +5,8 @@ import ReactDOM from "react-dom";
 import { createDiv } from "../shared/dom-fns";
 import { setRenderer } from "../shared/card-hover";
 
-import OverlayController, {
-  RENDERER_MATCH
-} from "../overlay/OverlayController";
+import { RENDERER_MATCH } from "../overlay/overlayUtil";
+import OverlayController from "../overlay/OverlayController";
 
 const TransparencyMouseFix = require("electron-transparency-mouse-fix");
 
@@ -45,7 +44,6 @@ function ready(fn: () => void): void {
 
 ready(function() {
   setRenderer(RENDERER_MATCH);
-  document.body.style.backgroundColor = "rgba(0, 0, 0, 0)";
   const wrap = createDiv([]);
   ReactDOM.render(<OverlayController />, wrap);
   document.body.appendChild(wrap);
