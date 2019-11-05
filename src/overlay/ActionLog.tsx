@@ -5,12 +5,12 @@ import db from "../shared/database";
 import { queryElements } from "../shared/dom-fns";
 import { addCardHover } from "../shared/card-hover";
 
-export default function ActionLog(_props) {
-  const { actionLog } = _props;
+export default function ActionLog(props: { actionLog: any[] }): JSX.Element {
+  const { actionLog } = props;
 
   const containerRef = useRef(null);
   useEffect(() => {
-    const container = containerRef.current;
+    const container = containerRef.current as any;
     const doscroll =
       Math.round(
         container.scrollHeight - container.offsetHeight - container.scrollTop
@@ -33,7 +33,7 @@ export default function ActionLog(_props) {
 
   return (
     <div className="overlay_decklist click-on" ref={containerRef}>
-      {actionLog &&
+      {!!actionLog &&
         actionLog.map((log, index) => {
           const displayLog = { ...log };
           displayLog.str = log.str.replace(
@@ -46,12 +46,14 @@ export default function ActionLog(_props) {
             '<log-ability class="click-on"',
             "gi"
           );
-          const _date = new Date(log.time);
-          const secondsPast = Math.round((_date - initalTime) / 1000);
+          const date = new Date(log.time);
+          const secondsPast = Math.round(
+            (date.getTime() - initalTime.getTime()) / 1000
+          );
 
           return (
             <div className={"actionlog log_p" + log.seat} key={"log_" + index}>
-              <div className="actionlog_time" title={format(_date, "HH:mm:ss")}>
+              <div className="actionlog_time" title={format(date, "HH:mm:ss")}>
                 {secondsPast + "s"}
               </div>
               <div
