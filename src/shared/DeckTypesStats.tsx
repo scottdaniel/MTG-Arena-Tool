@@ -3,11 +3,11 @@ import * as React from "react";
 import { CARD_TYPES, CARD_TYPE_CODES } from "./constants";
 import db from "./database";
 
-function getDeckTypesAmount(deck) {
+function getDeckTypesAmount(deck: any): { [key: string]: number } {
   const types = { art: 0, cre: 0, enc: 0, ins: 0, lan: 0, pla: 0, sor: 0 };
   if (!deck.mainDeck) return types;
 
-  deck.mainDeck.forEach(function(card) {
+  deck.mainDeck.forEach(function(card: any) {
     // This is hackish.. the way we insert our custom elements in the
     // array of cards is wrong in the first place :()
     if (card.id.id && card.id.id == 100) {
@@ -29,8 +29,8 @@ function getDeckTypesAmount(deck) {
   return types;
 }
 
-export default function DeckTypesStats(_props) {
-  const { deck } = _props;
+export default function DeckTypesStats(props: { deck: any }): JSX.Element {
+  const { deck } = props;
   const cardTypes = getDeckTypesAmount(deck);
   return (
     <div className="types_container">
