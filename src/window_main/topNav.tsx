@@ -55,7 +55,7 @@ function TopNavItem(props:topNavItemProps) {
 interface topRankProps {
     currentTab: number,
     id: number,
-    rank: any,
+    rank: any | null,
     callback: (id:number) => void,
     rankClass: string
 }
@@ -70,10 +70,22 @@ function TopRankIcon(props:topRankProps) {
         callback(tabId);
     }, [props.id, props.callback]);
 
-   const propTitle = formatRank(rank);
-   const rankStyle = {
-       backgroundPosition: get_rank_index(rank.rank, rank.tier) * -48 + "px 0px"
-   };
+    if (rank == null) {
+        // No rank badge, default to beginner and remove interactions
+        const rankStyle = {
+            backgroundPosition: "0px 0px"
+        };
+        return (
+            <div className="top_nav_item">
+                <div style={rankStyle} className={rankClass}></div>
+            </div>
+        );
+    }
+
+    const propTitle = formatRank(rank);
+    const rankStyle = {
+        backgroundPosition: get_rank_index(rank.rank, rank.tier) * -48 + "px 0px"
+    };
 
     return (
         <div className={(selected ? "item_selected" : "") + " top_nav_item"} onClick={clickTab(id)}>
@@ -125,9 +137,22 @@ function TopNav() {
     const exploreTab = {...defaultTab, id: MAIN_EXPLORE, title:"EXPLORE"};
     const economyTab = {...defaultTab, id: MAIN_ECONOMY, title:"ECONOMY"};
     const collectionTab = {...defaultTab, id: MAIN_COLLECTION, title:"COLLECTION"};
+    
+    const contructedNav = {
+        callback: setCurrentTabCallback,
+        currentTab: currentTab,
+        id: MAIN_CONSTRUCTED,
+        rank: pd.rank ? pd.rank.constructed : null,
+        rankClass: "top_constructed_rank"
+    };
 
-    const contructedNav = {callback: setCurrentTabCallback, currentTab: currentTab, id: MAIN_CONSTRUCTED,rank: pd.rank.constructed, rankClass: "top_constructed_rank"};
-    const limitedNav = {callback: setCurrentTabCallback, currentTab: currentTab, id: MAIN_LIMITED,rank: pd.rank.limited, rankClass: "top_limited_rank"};
+    const limitedNav = {
+        callback: setCurrentTabCallback,
+        currentTab: currentTab,
+        id: MAIN_LIMITED,
+        rank: pd.rank ? pd.rank.limited : null,
+        rankClass: "top_limited_rank"
+    };
 
     React.useEffect(() => {
         if ($$(".top_nav_icons")[0].offsetWidth < 530) {
