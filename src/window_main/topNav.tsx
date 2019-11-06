@@ -26,22 +26,19 @@ interface topNavItemProps {
     currentTab: number,
     compact: boolean,
     id: number,
+    callback: (id:number) => void,
     title: string
 }
 
 function TopNavItem(props:topNavItemProps) {
-    const {currentTab, compact, id, title} = props;
+    const {currentTab, compact, id, callback, title} = props;
 
-    const selected = currentTab == id;
+    const selected = currentTab === id;
 
     const clickTab = React.useCallback((tabId: number) => (event: React.MouseEvent<HTMLDivElement>) => {
-        if (!event.currentTarget.classList.contains("item_selected")) {
-            $$(".top_nav_item").forEach(el => el.classList.remove("item_selected"));
-            event.currentTarget.classList.add("item_selected");
-            clickNav(tabId);
-            openTab(tabId);
-        }
-    }, [props.id]);
+        clickNav(tabId, selected);
+        callback(tabId);
+    }, [props.id, props.callback]);
 
     return compact ? (
         <div className={(selected ? "item_selected" : "") + " top_nav_item_no_label top_nav_item it" + id} onClick={clickTab(id)}>
@@ -59,18 +56,19 @@ interface topRankProps {
     currentTab: number,
     id: number,
     rank: any,
+    callback: (id:number) => void,
     rankClass: string
 }
 
 function TopRankIcon(props:topRankProps) {
-    const {currentTab, id, rank, rankClass} = props;
+    const {currentTab, id, rank, callback, rankClass} = props;
     
-    const selected = currentTab == id;
+    const selected = currentTab === id;
 
-    const clickTab = React.useCallback(() => (event: React.MouseEvent<HTMLDivElement>) => {
-        clickNav(id);
-    }, [props.id]);
-    
+    const clickTab = React.useCallback((tabId) => (event: React.MouseEvent<HTMLDivElement>) => {
+        clickNav(tabId, selected);
+        callback(tabId);
+    }, [props.id, props.callback]);
 
    const propTitle = formatRank(rank);
    const rankStyle = {
@@ -78,7 +76,7 @@ function TopRankIcon(props:topRankProps) {
    };
 
     return (
-        <div className={(selected ? "item_selected" : "") + " top_nav_item"} onClick={clickTab()}>
+        <div className={(selected ? "item_selected" : "") + " top_nav_item"} onClick={clickTab(id)}>
             <div style={rankStyle} title={propTitle} className={rankClass}></div>
         </div>
     );
@@ -109,11 +107,15 @@ function PatreonBadge(props: patreonProps) {
 
 function TopNav() {
     const [compact, setCompact] = React.useState(false);
-    const currentTab = pd.settings.last_open_tab;
+    const [currentTab, setCurrentTab] = React.useState(pd.settings.last_open_tab);
+    const setCurrentTabCallback = (id:number) => {
+        setCurrentTab(id);
+    };
 
     const defaultTab = {
         compact: compact,
-        currentTab: currentTab
+        currentTab: currentTab,
+        callback: setCurrentTabCallback
     }
 
     const homeTab = {...defaultTab, id: MAIN_HOME, title:""};
@@ -124,8 +126,8 @@ function TopNav() {
     const economyTab = {...defaultTab, id: MAIN_ECONOMY, title:"ECONOMY"};
     const collectionTab = {...defaultTab, id: MAIN_COLLECTION, title:"COLLECTION"};
 
-    const contructedNav = {currentTab: currentTab, id: MAIN_CONSTRUCTED,rank: pd.rank.constructed, rankClass: "top_constructed_rank"};
-    const limitedNav = {currentTab: currentTab, id: MAIN_LIMITED,rank: pd.rank.limited, rankClass: "top_limited_rank"};
+    const contructedNav = {callback: setCurrentTabCallback, currentTab: currentTab, id: MAIN_CONSTRUCTED,rank: pd.rank.constructed, rankClass: "top_constructed_rank"};
+    const limitedNav = {callback: setCurrentTabCallback, currentTab: currentTab, id: MAIN_LIMITED,rank: pd.rank.limited, rankClass: "top_limited_rank"};
 
     React.useEffect(() => {
         if ($$(".top_nav_icons")[0].offsetWidth < 530) {

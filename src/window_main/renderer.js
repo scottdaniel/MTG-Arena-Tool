@@ -68,7 +68,6 @@ import { openTab } from "./tabControl";
 import createTopNav from "./topNav";
 
 const byId = id => document.getElementById(id);
-let sidebarActive = MAIN_LOGIN;
 let loggedIn = false;
 let canLogin = false;
 let lastSettings = {};
@@ -95,7 +94,7 @@ ipc.on("auth", function(event, arg) {
 //
 ipc.on("set_discord_tag", (event, arg) => {
   setLocalState({ discordTag: arg });
-  if (sidebarActive === MAIN_HOME) {
+  if (pd.settings.last_open_tab === MAIN_HOME) {
     openHomeTab(null, true);
   }
 });
@@ -148,7 +147,7 @@ function updateTopBar() {
 ipc.on("set_home", function(event, arg) {
   hideLoadingBars();
 
-  if (sidebarActive === MAIN_HOME) {
+  if (pd.settings.last_open_tab === MAIN_HOME) {
     console.log("Home", arg);
     openHomeTab(arg);
   }
@@ -157,7 +156,7 @@ ipc.on("set_home", function(event, arg) {
 //
 ipc.on("set_explore_decks", function(event, arg) {
   hideLoadingBars();
-  if (sidebarActive === MAIN_EXPLORE) {
+  if (pd.settings.last_open_tab === MAIN_EXPLORE) {
     setExploreDecks(arg);
   }
 });
@@ -209,7 +208,7 @@ ipc.on("settings_updated", function() {
     changeBackground();
   }
   $$(".main_wrapper")[0].style.backgroundColor = pd.settings.back_color;
-  if (sidebarActive === MAIN_SETTINGS) {
+  if (pd.settings.last_open_tab === MAIN_SETTINGS) {
     const ls = getLocalState();
     openSettingsTab(-1, ls.lastScrollTop);
   }
@@ -221,7 +220,7 @@ let lastDataRefresh = null;
 //
 ipc.on("player_data_refresh", () => {
   // ignore signal before user login
-  if (sidebarActive === MAIN_LOGIN) return;
+  if (pd.settings.last_open_tab === MAIN_LOGIN) return;
 
   // limit refresh to one per second
   const ts = Date.now();
@@ -230,13 +229,14 @@ ipc.on("player_data_refresh", () => {
 
   const ls = getLocalState();
   updateTopBar();
-  openTab(sidebarActive, {}, ls.lastDataIndex, ls.lastScrollTop);
+  // Will not be needed when elements are all reactify'ed
+  openTab(pd.settings.last_open_tab, {}, ls.lastDataIndex, ls.lastScrollTop);
   lastDataRefresh = ts;
 });
 
 //
 ipc.on("set_update_state", function(event, arg) {
-  if (sidebarActive === MAIN_UPDATE) {
+  if (pd.settings.last_open_tab === MAIN_UPDATE) {
     openSettingsTab(SETTINGS_ABOUT);
   }
 });
@@ -288,11 +288,10 @@ ipc.on("force_open_tab", function(event, arg) {
     easing: EASING_DEFAULT,
     duration: 350
   });
-  //$$(".top_nav_item").forEach(el => el.classList.remove("item_selected"));
+
   setLocalState({ lastDataIndex: 0, lastScrollTop: 0 });
   openTab(arg);
   ipcSend("save_user_settings", {
-    last_open_tab: sidebarActive,
     skip_refresh: true
   });
   updateTopBar();
@@ -318,13 +317,13 @@ function rememberMe() {
   };
   ipcSend("save_app_settings", rSettings);
 }
+
 //
 ipc.on("initialize", function() {
   showLoadingBars();
   updateTopBar();
 
-  sidebarActive = pd.settings.last_open_tab;
-  openTab(sidebarActive);
+  openTab(pd.settings.last_open_tab);
 
   if (isNew) {
     ipcSend("save_app_settings", {});
@@ -463,27 +462,23 @@ ready(function() {
 });
 
 function force_open_settings(section = -1) {
-  sidebarActive = MAIN_SETTINGS;
   anime({
     targets: ".moving_ux",
     left: 0,
     easing: EASING_DEFAULT,
     duration: 350
   });
-  //$$(".top_nav_item").forEach(el => el.classList.remove("item_selected"));
   openSettingsTab(section, 0);
   updateTopBar();
 }
 
 function force_open_about() {
-  sidebarActive = MAIN_UPDATE;
   anime({
     targets: ".moving_ux",
     left: 0,
     easing: EASING_DEFAULT,
     duration: 350
   });
-  //$$(".top_nav_item").forEach(el => el.classList.remove("item_selected"));
   openSettingsTab(SETTINGS_ABOUT, 0);
   updateTopBar();
 }
