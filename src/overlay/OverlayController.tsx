@@ -26,6 +26,8 @@ import {
 } from "./overlayUtil";
 import OverlayWindowlet from "./OverlayWindowlet";
 
+const { Howl, Howler } = require("howler");
+
 // TODO figure out a way to refactor this out
 // some kind of useRef array?
 const byId = (id: string): HTMLElement | null => document.getElementById(id);
@@ -52,6 +54,7 @@ export default function OverlayController(): JSX.Element {
   const [turnPriority, setTurnPriority] = useState(1);
   const playerData = pd as any;
   const [settings, setSettings] = useState(playerData.settings as SettingsData);
+  const [lastBeep, setLastBeep] = useState(Date.now());
 
   useEffect(() => {
     webFrame.setZoomFactor(settings.overlay_scale / 100);
@@ -61,6 +64,15 @@ export default function OverlayController(): JSX.Element {
       ? "rgba(0, 0, 0, 0.3)"
       : "rgba(0, 0, 0, 0.05)";
   }, [editMode]);
+
+  const beep = useCallback(() => {
+    if (Date.now() - lastBeep > 1000) {
+      const sound = new Howl({ src: ["../sounds/blip.mp3"] });
+      Howler.volume(settings.sound_priority_volume);
+      sound.play();
+      setLastBeep(Date.now());
+    }
+  }, [lastBeep, settings]);
 
   const hoverContainerRef = useRef(null);
   useEditModeOnRef(editMode, hoverContainerRef);
@@ -177,10 +189,7 @@ export default function OverlayController(): JSX.Element {
       _priority == _we &&
       settings.sound_priority
     ) {
-      const { Howl, Howler } = require("howler");
-      const sound = new Howl({ src: ["../sounds/blip.mp3"] });
-      Howler.volume(settings.sound_priority_volume);
-      sound.play();
+      beep();
     }
     setTurnPriority(_priority);
   };
