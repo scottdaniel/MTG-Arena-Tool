@@ -11,7 +11,8 @@ import {
 import db from "../shared/database";
 import {
   compare_cards as compareCards,
-  get_card_type_sort as getCardTypeSort
+  get_card_type_sort as getCardTypeSort,
+  objectClone
 } from "../shared/util";
 import CardTile from "../shared/CardTile";
 import Colors from "../shared/colors";
@@ -89,7 +90,15 @@ export interface DeckListProps {
 }
 
 export default function DeckList(props: DeckListProps): JSX.Element {
-  const { deck, subTitle, settings, tileStyle, highlightCardId, cardOdds, setOddsCallback } = props;
+  const {
+    deck,
+    subTitle,
+    settings,
+    tileStyle,
+    highlightCardId,
+    cardOdds,
+    setOddsCallback
+  } = props;
   if (!deck) return <></>;
 
   const deckClone = deck.clone();
@@ -104,13 +113,13 @@ export default function DeckList(props: DeckListProps): JSX.Element {
   const mainCardTiles: JSX.Element[] = [];
   const mainCards = deckClone.mainboard;
   mainCards.removeDuplicates();
-  // group lands
-  if (
+
+  const shouldDoGroupLandsHack =
     settings.lands &&
     [OVERLAY_FULL, OVERLAY_LEFT, OVERLAY_ODDS, OVERLAY_MIXED].includes(
       settings.mode
-    )
-  ) {
+    );
+  if (shouldDoGroupLandsHack) {
     let landsNumber = 0;
     let landsChance = 0;
     const landsColors = new Colors();
@@ -119,20 +128,16 @@ export default function DeckList(props: DeckListProps): JSX.Element {
       if (cardObj && cardObj.type.includes("Land", 0)) {
         landsNumber += card.quantity;
         landsChance += card.chance !== undefined ? card.chance : 0;
-        delete card.chance;
-        card.quantity = 0;
         if (cardObj.frame) {
           landsColors.addFromArray(cardObj.frame);
         }
       }
     });
-    const lands = mainCards.add(landsCard, landsNumber, true);
-    if (landsChance > 0) {
-      lands.chance = landsChance;
-    }
-
-    // Set lands frame colors
-    landsCard.frame = landsColors.get();
+    const groupedLandsCard = objectClone(landsCard);
+    groupedLandsCard.quantity = landsNumber;
+    groupedLandsCard.chance = landsChance;
+    groupedLandsCard.frame = landsColors.get();
+    mainCards.add(groupedLandsCard, landsNumber, true);
   }
   mainCards.get().sort(sortFunc);
   mainCards.get().forEach((card: any) => {
@@ -178,6 +183,14 @@ export default function DeckList(props: DeckListProps): JSX.Element {
           <OwnershipStars card={fullCard} />
         </div>
       );
+    } else if (
+      shouldDoGroupLandsHack &&
+      fullCard &&
+      fullCard.type &&
+      fullCard.type.includes("Land", 0)
+    ) {
+      // skip land cards while doing group lands hack
+      return;
     }
     mainCardTiles.push(
       <CardTile
