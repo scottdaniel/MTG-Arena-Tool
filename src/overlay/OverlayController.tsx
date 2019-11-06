@@ -32,11 +32,12 @@ const { Howl, Howler } = require("howler");
 // some kind of useRef array?
 const byId = (id: string): HTMLElement | null => document.getElementById(id);
 
-function ipcSend(method: string, arg?: any, to = IPC_BACKGROUND): void {
+function ipcSend(method: string, arg?: unknown, to = IPC_BACKGROUND): void {
   ipc.send("ipc_switch", method, IPC_OVERLAY, arg, to);
 }
 
-const forceInt = (num: any): number => Math.round(parseFloat(num));
+const forceInt = (val: string | null): number =>
+  Math.round(parseFloat(val || ""));
 
 function compareLogEntries(a: LogData, b: LogData): -1 | 0 | 1 {
   if (a.time < b.time) return -1;
@@ -52,7 +53,10 @@ export default function OverlayController(): JSX.Element {
   const [draft, setDraft] = useState(undefined as undefined | DraftData);
   const [draftState, setDraftState] = useState({ packN: 0, pickN: 0 });
   const [turnPriority, setTurnPriority] = useState(1);
-  const playerData = pd as any;
+  const playerData = (pd as unknown) as {
+    settings: SettingsData;
+    cardsSizeHoverCard: number;
+  };
   const [settings, setSettings] = useState(playerData.settings as SettingsData);
   const [lastBeep, setLastBeep] = useState(Date.now());
 
@@ -119,7 +123,7 @@ export default function OverlayController(): JSX.Element {
     setEditMode(!editMode);
   };
 
-  const handleActionLog = (event: any, arg: LogData): void => {
+  const handleActionLog = (event: unknown, arg: LogData): void => {
     let newLog = [...actionLog];
     arg.str = striptags(arg.str, ["log-card", "log-ability"]);
     newLog.push(arg);
@@ -130,7 +134,7 @@ export default function OverlayController(): JSX.Element {
     setActionLog(newLog);
   };
 
-  const handleSetArenaState = (event: any, arenaState: number): void => {
+  const handleSetArenaState = (event: unknown, arenaState: number): void => {
     setArenaState(arenaState);
     // Change how cards hover are drawn if we are in a draft
     if (arenaState == ARENA_MODE_DRAFT) {
@@ -141,13 +145,13 @@ export default function OverlayController(): JSX.Element {
   };
 
   const handleClose = (
-    event: any,
-    arg: { action: any; index: number }
+    event: unknown,
+    arg: { action: boolean | -1; index: number }
   ): void => {
     const bool = arg.action;
     const index = arg.index;
     // -1 to toggle, else set
-    const show = bool == -1 ? !settings.overlays[index].show : bool;
+    const show = bool === -1 ? !settings.overlays[index].show : bool;
     const overlays = [...settings.overlays];
     const newOverlay = {
       ...overlays[index], // old overlay
@@ -157,7 +161,7 @@ export default function OverlayController(): JSX.Element {
     ipcSend("save_user_settings", { overlays });
   };
 
-  const handleSetDraftCards = (event: any, draft: DraftData): void => {
+  const handleSetDraftCards = (event: unknown, draft: DraftData): void => {
     setDraft(draft);
     setDraftState({ packN: draft.packNumber, pickN: draft.pickNumber });
   };
@@ -170,7 +174,7 @@ export default function OverlayController(): JSX.Element {
     setSettings({ ...playerData.settings });
   }, [editMode]);
 
-  const handleSetMatch = (event: any, arg: any): void => {
+  const handleSetMatch = (event: unknown, arg: string): void => {
     const newMatch = JSON.parse(arg);
     newMatch.oppCards = new Deck(newMatch.oppCards);
     newMatch.playerCardsLeft = new Deck(newMatch.playerCardsLeft);
@@ -180,7 +184,7 @@ export default function OverlayController(): JSX.Element {
   };
 
   const handleSetTurn = (
-    event: any,
+    event: unknown,
     arg: { playerSeat: number; turnPriority: number }
   ): void => {
     const { playerSeat: _we, turnPriority: _priority } = arg;

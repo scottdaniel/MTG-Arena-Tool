@@ -111,9 +111,12 @@ const cursorChecker: any = (
   }
 };
 
-export function useEditModeOnRef(editMode: boolean, containerRef: any): void {
+export function useEditModeOnRef(
+  editMode: boolean,
+  containerRef: React.MutableRefObject<any>
+): void {
   useEffect(() => {
-    const container = containerRef.current as any;
+    const container = containerRef.current;
     if (editMode) {
       if (container) {
         interact(container)
