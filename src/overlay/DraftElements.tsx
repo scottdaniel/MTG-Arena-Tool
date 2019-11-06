@@ -32,7 +32,7 @@ export default function DraftElements(props: DraftElementsProps): JSX.Element {
     settings,
     tileStyle
   } = props;
-  const packSize = (draft && packSizeMap[draft.set]) || 14;
+  const packSize = packSizeMap[draft.set] || 14;
 
   const handleDraftPrev = useCallback((): void => {
     let { packN, pickN } = draftState;
@@ -42,13 +42,8 @@ export default function DraftElements(props: DraftElementsProps): JSX.Element {
       packN -= 1;
     }
     if (packN < 0) {
-      if (draft) {
-        pickN = draft.pickNumber;
-        packN = draft.packNumber;
-      } else {
-        pickN = packSize;
-        packN = 0;
-      }
+      pickN = draft.pickNumber;
+      packN = draft.packNumber;
     }
     setDraftStateCallback({ packN, pickN });
   }, [draftState, draft]);
@@ -60,18 +55,16 @@ export default function DraftElements(props: DraftElementsProps): JSX.Element {
       pickN = 0;
       packN += 1;
     }
-    if (draft) {
-      if (pickN > draft.pickNumber && packN == draft.packNumber) {
-        pickN = 0;
-        packN = 0;
-      }
-      if (
-        packN > draft.packNumber ||
-        (pickN == draft.pickNumber && packN == draft.packNumber)
-      ) {
-        packN = draft.packNumber;
-        pickN = draft.pickNumber;
-      }
+    if (pickN > draft.pickNumber && packN == draft.packNumber) {
+      pickN = 0;
+      packN = 0;
+    }
+    if (
+      packN > draft.packNumber ||
+      (pickN == draft.pickNumber && packN == draft.packNumber)
+    ) {
+      packN = draft.packNumber;
+      pickN = draft.pickNumber;
     }
     setDraftStateCallback({ packN, pickN });
   }, [draftState, draft]);

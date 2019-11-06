@@ -7,8 +7,7 @@ import {
   OVERLAY_LEFT,
   OVERLAY_ODDS,
   OVERLAY_MIXED,
-  OVERLAY_SEEN,
-  OVERLAY_DRAFT_MODES
+  OVERLAY_SEEN
 } from "../shared/constants";
 
 import { LogData, MatchData, OverlaySettingsData } from "./overlayUtil";
@@ -83,14 +82,13 @@ export default function MatchElements(props: MatchElementsProps): JSX.Element {
       subTitle = "Total Seen: " + cardsCount + " cards";
       break;
   }
-
   return (
     <div
       className="outer_wrapper elements_wrapper"
       style={{ opacity: settings.alpha.toString() }}
     >
       {!!settings.title && <div className="overlay_deckname">{mainTitle}</div>}
-      {settings.mode === OVERLAY_SEEN && !!match && (
+      {settings.mode === OVERLAY_SEEN && (
         <div className="overlay_archetype">{match.oppArchetype}</div>
       )}
       {!!settings.title && !!visibleDeck && (
@@ -110,17 +108,17 @@ export default function MatchElements(props: MatchElementsProps): JSX.Element {
           subTitle={subTitle}
           settings={settings}
           tileStyle={tileStyle}
-          cardOdds={match ? match.playerCardsOdds : undefined}
+          cardOdds={cardOdds}
           setOddsCallback={setOddsCallback}
         />
       )}
-      {!!settings.clock && !OVERLAY_DRAFT_MODES.includes(settings.mode) && (
+      {!!settings.clock && (
         <Clock
           key={"overlay_clock_" + index}
-          matchBeginTime={match ? new Date(match.beginTime) : new Date()}
+          matchBeginTime={new Date(match.beginTime)}
           oppName={oppName}
-          playerSeat={match && match.player ? match.player.seat : 1}
-          priorityTimers={match ? match.priorityTimers : [Date.now(), 0, 0]}
+          playerSeat={match.player ? match.player.seat : 1}
+          priorityTimers={match.priorityTimers}
           turnPriority={turnPriority}
         />
       )}
