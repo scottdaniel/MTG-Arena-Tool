@@ -33,7 +33,6 @@ interface OverlayElementsProps {
   draftState: { packN: number; pickN: number };
   index: number;
   match: any;
-  playerSeat: number;
   settings: any;
   tileStyle: number;
   turnPriority: number;
@@ -48,7 +47,6 @@ function OverlayElements(props: OverlayElementsProps): JSX.Element {
     draftState,
     index,
     match,
-    playerSeat,
     settings,
     tileStyle,
     turnPriority,
@@ -221,7 +219,7 @@ function OverlayElements(props: OverlayElementsProps): JSX.Element {
           key={"overlay_clock_" + index}
           matchBeginTime={match ? new Date(match.beginTime) : new Date()}
           oppName={oppName}
-          playerSeat={playerSeat}
+          playerSeat={match && match.player ? match.player.seat : 1}
           priorityTimers={match ? match.priorityTimers : [Date.now(), 0, 0]}
           turnPriority={turnPriority}
         />

@@ -44,8 +44,7 @@ export default function OverlayController(): JSX.Element {
   const [match, setMatch] = useState(null);
   const [draft, setDraft] = useState(null);
   const [draftState, setDraftState] = useState({ packN: 0, pickN: 0 });
-  const [playerSeat, setPlayerSeat] = useState(1);
-  const [turnPriority, setTurnPriority] = useState(playerSeat);
+  const [turnPriority, setTurnPriority] = useState(1);
   const playerData = pd as any;
   const [settings, setSettings] = useState(playerData.settings);
 
@@ -186,7 +185,6 @@ export default function OverlayController(): JSX.Element {
       Howler.volume(settings.sound_priority_volume);
       sound.play();
     }
-    setPlayerSeat(_we);
     setTurnPriority(_priority);
   };
 
@@ -243,7 +241,6 @@ export default function OverlayController(): JSX.Element {
               index={index}
               key={"overlay_windowlet_" + index}
               match={match}
-              playerSeat={playerSeat}
               settings={settings}
               setDraftStateCallback={setDraftState}
               setOddsCallback={setOddsCallback}
