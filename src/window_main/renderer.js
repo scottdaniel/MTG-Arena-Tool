@@ -143,11 +143,11 @@ function showLogin() {
 function updateTopBar() {
   const topNavDiv = $$(".top_nav_container")[0];
   createTopNav(topNavDiv);
-  /*
+
   if (pd.offline || !pd.settings.send_data) {
     $$(".unlink")[0].style.display = "block";
   }
-
+  /*
   if (pd.name) {
     $$(".top_username")[0].innerHTML = pd.name.slice(0, -6);
     $$(".top_username_id")[0].innerHTML = pd.name.slice(-6);
@@ -413,8 +413,6 @@ ipc.on("no_log", function(event, arg) {
 ipc.on("offline", function() {
   showOfflineSplash();
 });
-
-
 
 //
 ipc.on("log_read", function() {

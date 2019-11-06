@@ -3,6 +3,7 @@ import React, { useEffect } from "react";
 import ReactDOM from 'react-dom';
 import { queryElements as $$ } from "../shared/dom-fns";
 import { openTab } from "./tabControl";
+import pd from "../shared/player-data";
 
 import {
     MAIN_HOME ,
@@ -45,6 +46,29 @@ function TopNavItem(props:topNavItemProps) {
     );
 }
 
+interface patreonProps {
+    patreon: boolean,
+    patreonTier: number
+}
+
+function PatreonBadge(props: patreonProps) {
+    const { patreonTier } = props;
+
+    let title = "Patreon Basic Tier";
+    if (patreonTier === 1) title = "Patreon Standard Tier";
+    if (patreonTier === 2) title = "Patreon Modern Tier";
+    if (patreonTier === 3) title = "Patreon Legacy Tier";
+    if (patreonTier === 4) title = "Patreon Vintage Tier";
+
+    const style = {
+        backgroundPosition: (-40 * patreonTier) + "px 0px"
+    };
+
+    return (
+        <div title={title} style={style} className="top_patreon" ></div>
+    );
+}
+
 function TopNav() {
     const [compact, setCompact] = React.useState(false);
     const homeTab = {compact: compact, id: MAIN_HOME, title:""};
@@ -68,6 +92,14 @@ function TopNav() {
         }
     });
 
+    const patreon = {
+        patreon: pd.patreon,
+        patreonTier: pd.patreon_tier
+    };
+
+    let userName = pd.name.slice(0, -6);
+    let userNumerical = pd.name.slice(-6);
+
     return (
         <div className={"top_nav"}>
             <div className={"top_nav_icons"}>
@@ -82,9 +114,9 @@ function TopNav() {
             <div className={"top_nav_info"}>
                 <TopNavItem {...contructedNav}/>
                 <TopNavItem {...limitedNav}/>
-                <div className={"top_patreon"}></div>
-                <div className={"top_username"} title={"Arena username"}></div>
-                <div className={"top_username_id"} title={"Arena user ID"}></div>
+                { pd.patreon ? <PatreonBadge {...patreon} /> : null }
+                <div className={"top_username"} title={"Arena username"}>{userName}</div>
+                <div className={"top_username_id"} title={"Arena user ID"}>{userNumerical}</div>
             </div>
         </div>
     );
