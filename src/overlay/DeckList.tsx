@@ -86,11 +86,11 @@ function compareDraftPicks(a: CardData, b: CardData): -1 | 0 | 1 {
 export interface DeckListProps {
   deck: Deck;
   subTitle: string;
-  highlightCardId: string;
+  highlightCardId?: string;
   settings: OverlaySettingsData;
   tileStyle: number;
   cardOdds?: OddsData;
-  setOddsCallback: (sampleSize: number) => void;
+  setOddsCallback?: (sampleSize: number) => void;
 }
 
 export default function DeckList(props: DeckListProps): JSX.Element {
@@ -263,7 +263,8 @@ export default function DeckList(props: DeckListProps): JSX.Element {
       {!!settings.mana_curve && <DeckManaCurve deck={arenaDeck} />}
       {!!settings.draw_odds &&
         (settings.mode === OVERLAY_ODDS || settings.mode === OVERLAY_MIXED) &&
-        cardOdds && (
+        cardOdds &&
+        setOddsCallback && (
           <SampleSizePanel
             cardOdds={cardOdds}
             cardsLeft={deck.mainboard.count()}
