@@ -147,7 +147,7 @@ export default function OverlayController(): JSX.Element {
   };
 
   const handleSetDraftCards = (event: any, draft: any): void => {
-    setDraft(JSON.parse(draft));
+    setDraft(draft);
     setDraftState({ packN: draft.currentPack, pickN: draft.currentPick });
   };
 
@@ -162,9 +162,7 @@ export default function OverlayController(): JSX.Element {
   const handleSetMatch = (event: any, arg: any): void => {
     const newMatch = JSON.parse(arg);
     newMatch.oppCards = new Deck(newMatch.oppCards);
-    const tempMain = newMatch.playerCardsLeft.mainDeck;
     newMatch.playerCardsLeft = new Deck(newMatch.playerCardsLeft);
-    newMatch.playerCardsLeft.mainboard._list = tempMain;
     newMatch.player.deck = new Deck(newMatch.player.deck);
     newMatch.player.originalDeck = new Deck(newMatch.player.originalDeck);
     setMatch(newMatch);
@@ -244,7 +242,6 @@ export default function OverlayController(): JSX.Element {
               settings={settings}
               setDraftStateCallback={setDraftState}
               setOddsCallback={setOddsCallback}
-              tileStyle={parseInt(settings.card_tile_style)}
               turnPriority={turnPriority}
             />
           );

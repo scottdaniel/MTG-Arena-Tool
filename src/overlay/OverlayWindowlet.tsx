@@ -228,14 +228,21 @@ function OverlayElements(props: OverlayElementsProps): JSX.Element {
   );
 }
 
-export interface OverlayWindowletProps extends OverlayElementsProps {
+export interface OverlayWindowletProps {
   arenaState: number;
+  actionLog: any;
+  draft: any;
+  draftState: { packN: number; pickN: number };
   editMode: boolean;
   handleClickClose: () => void;
   handleClickSettings: () => void;
   handleToggleEditMode: () => void;
   index: number;
+  match: any;
   settings: any;
+  setOddsCallback: (sampleSize: number) => void;
+  setDraftStateCallback: (state: { packN: number; pickN: number }) => void;
+  turnPriority: number;
 }
 
 export default function OverlayWindowlet(
@@ -311,6 +318,7 @@ export default function OverlayWindowlet(
         <OverlayElements
           index={index}
           settings={overlaySettings}
+          tileStyle={parseInt(settings.card_tile_style)}
           {...elProps}
         />
       </div>
