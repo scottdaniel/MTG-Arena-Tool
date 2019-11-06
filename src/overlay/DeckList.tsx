@@ -16,10 +16,12 @@ import {
 } from "../shared/util";
 import CardTile from "../shared/CardTile";
 import Colors from "../shared/colors";
+import Deck from "../shared/deck";
 import DeckManaCurve from "../shared/DeckManaCurve";
 import DeckTypesStats from "../shared/DeckTypesStats";
 import OwnershipStars from "../shared/OwnershipStars";
 
+import { CardData, OddsData, OverlaySettingsData } from "./overlayUtil";
 import SampleSizePanel from "./SampleSizePanel";
 
 const landsCard = {
@@ -43,16 +45,18 @@ const landsCard = {
   dfcId: 0
 };
 
-function getRank(cardId: string) {
+function getRank(cardId: string): number {
   const cardObj = db.card(cardId);
   return (cardObj && cardObj.rank) || 0;
 }
 
-function compareQuantity(a: any, b: any) {
-  return b.quantity - a.quantity;
+function compareQuantity(a: CardData, b: CardData): -1 | 0 | 1 {
+  if (b.quantity - a.quantity < 0) return -1;
+  if (b.quantity - a.quantity > 0) return 1;
+  return 0;
 }
 
-function compareDraftPicks(a: any, b: any) {
+function compareDraftPicks(a: CardData, b: CardData): -1 | 0 | 1 {
   const aCard = db.card(a.id);
   const bCard = db.card(b.id);
   if (!bCard) {
@@ -80,12 +84,12 @@ function compareDraftPicks(a: any, b: any) {
 }
 
 export interface DeckListProps {
-  deck: any;
+  deck: Deck;
   subTitle: string;
   highlightCardId: string;
-  settings: any;
+  settings: OverlaySettingsData;
   tileStyle: number;
-  cardOdds: any;
+  cardOdds?: OddsData;
   setOddsCallback: (sampleSize: number) => void;
 }
 
@@ -103,7 +107,7 @@ export default function DeckList(props: DeckListProps): JSX.Element {
 
   const deckClone = deck.clone();
 
-  let sortFunc: (a: any, b: any) => number = compareCards;
+  let sortFunc = compareCards;
   if (settings.mode === OVERLAY_ODDS || settings.mode == OVERLAY_MIXED) {
     sortFunc = compareQuantity;
   } else if (settings.mode === OVERLAY_DRAFT) {
@@ -123,7 +127,7 @@ export default function DeckList(props: DeckListProps): JSX.Element {
     let landsNumber = 0;
     let landsChance = 0;
     const landsColors = new Colors();
-    mainCards.get().forEach((card: any) => {
+    mainCards.get().forEach((card: CardData) => {
       const cardObj = db.card(card.id);
       if (cardObj && cardObj.type.includes("Land", 0)) {
         landsNumber += card.quantity;
@@ -214,7 +218,7 @@ export default function DeckList(props: DeckListProps): JSX.Element {
     const sideCards = deckClone.sideboard;
     sideCards.removeDuplicates();
     sideCards.get().sort(sortFunc);
-    sideCards.get().forEach((card: any) => {
+    sideCards.get().forEach((card: CardData) => {
       const quantity =
         settings.mode === OVERLAY_ODDS || settings.mode === OVERLAY_MIXED
           ? "0%"
@@ -258,7 +262,8 @@ export default function DeckList(props: DeckListProps): JSX.Element {
       {!!settings.type_counts && <DeckTypesStats deck={arenaDeck} />}
       {!!settings.mana_curve && <DeckManaCurve deck={arenaDeck} />}
       {!!settings.draw_odds &&
-        (settings.mode === OVERLAY_ODDS || settings.mode === OVERLAY_MIXED) && (
+        (settings.mode === OVERLAY_ODDS || settings.mode === OVERLAY_MIXED) &&
+        cardOdds && (
           <SampleSizePanel
             cardOdds={cardOdds}
             cardsLeft={deck.mainboard.count()}

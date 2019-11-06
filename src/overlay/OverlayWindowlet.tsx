@@ -18,7 +18,16 @@ import {
 } from "../shared/constants";
 import Deck from "../shared/deck";
 
-import { getEditModeClass, useEditModeOnRef } from "./overlayUtil";
+import {
+  getEditModeClass,
+  useEditModeOnRef,
+  DraftData,
+  DraftState,
+  LogData,
+  MatchData,
+  OverlaySettingsData,
+  SettingsData
+} from "./overlayUtil";
 import Clock from "./Clock";
 import ActionLog from "./ActionLog";
 import DeckList from "./DeckList";
@@ -28,16 +37,16 @@ const packSizeMap: { [key: string]: number } = PACK_SIZES;
 const manaColorMap: { [key: number]: string } = MANA;
 
 interface OverlayElementsProps {
-  actionLog: any;
-  draft: any;
-  draftState: { packN: number; pickN: number };
+  actionLog: LogData[];
+  draft?: DraftData;
+  draftState: DraftState;
   index: number;
-  match: any;
-  settings: any;
+  match?: MatchData;
+  settings: OverlaySettingsData;
   tileStyle: number;
   turnPriority: number;
   setOddsCallback: (sampleSize: number) => void;
-  setDraftStateCallback: (state: { packN: number; pickN: number }) => void;
+  setDraftStateCallback: (state: DraftState) => void;
 }
 
 function OverlayElements(props: OverlayElementsProps): JSX.Element {
@@ -74,8 +83,13 @@ function OverlayElements(props: OverlayElementsProps): JSX.Element {
       packN -= 1;
     }
     if (packN < 0) {
-      pickN = draft.pickNumber;
-      packN = draft.packNumber;
+      if (draft) {
+        pickN = draft.pickNumber;
+        packN = draft.packNumber;
+      } else {
+        pickN = packSize;
+        packN = 0;
+      }
     }
     setDraftStateCallback({ packN, pickN });
   }, [draftState, draft]);
@@ -87,16 +101,18 @@ function OverlayElements(props: OverlayElementsProps): JSX.Element {
       pickN = 0;
       packN += 1;
     }
-    if (pickN > draft.pickNumber && packN == draft.packNumber) {
-      pickN = 0;
-      packN = 0;
-    }
-    if (
-      packN > draft.packNumber ||
-      (pickN == draft.pickNumber && packN == draft.packNumber)
-    ) {
-      packN = draft.packNumber;
-      pickN = draft.pickNumber;
+    if (draft) {
+      if (pickN > draft.pickNumber && packN == draft.packNumber) {
+        pickN = 0;
+        packN = 0;
+      }
+      if (
+        packN > draft.packNumber ||
+        (pickN == draft.pickNumber && packN == draft.packNumber)
+      ) {
+        packN = draft.packNumber;
+        pickN = draft.pickNumber;
+      }
     }
     setDraftStateCallback({ packN, pickN });
   }, [draftState, draft]);
@@ -210,7 +226,7 @@ function OverlayElements(props: OverlayElementsProps): JSX.Element {
           highlightCardId={pick}
           settings={settings}
           tileStyle={tileStyle}
-          cardOdds={match ? match.playerCardsOdds : {}}
+          cardOdds={match ? match.playerCardsOdds : undefined}
           setOddsCallback={setOddsCallback}
         />
       )}
@@ -230,18 +246,18 @@ function OverlayElements(props: OverlayElementsProps): JSX.Element {
 
 export interface OverlayWindowletProps {
   arenaState: number;
-  actionLog: any;
-  draft: any;
-  draftState: { packN: number; pickN: number };
+  actionLog: LogData[];
+  draft?: DraftData;
+  draftState: DraftState;
   editMode: boolean;
   handleClickClose: () => void;
   handleClickSettings: () => void;
   handleToggleEditMode: () => void;
   index: number;
-  match: any;
-  settings: any;
+  match?: MatchData;
+  settings: SettingsData;
   setOddsCallback: (sampleSize: number) => void;
-  setDraftStateCallback: (state: { packN: number; pickN: number }) => void;
+  setDraftStateCallback: (state: DraftState) => void;
   turnPriority: number;
 }
 
@@ -318,7 +334,7 @@ export default function OverlayWindowlet(
         <OverlayElements
           index={index}
           settings={overlaySettings}
-          tileStyle={parseInt(settings.card_tile_style)}
+          tileStyle={parseInt(settings.card_tile_style + "")}
           {...elProps}
         />
       </div>

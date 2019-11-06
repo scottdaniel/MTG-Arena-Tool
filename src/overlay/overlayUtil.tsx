@@ -1,8 +1,94 @@
 import { useEffect } from "react";
 import interact from "interactjs";
 
+import Deck from "../shared/deck";
+
 export const RENDERER_MATCH = 1;
 export const RENDERER_DRAFT = 2;
+
+export interface CardData {
+  id: string;
+  quantity: number;
+  chance?: number;
+  dfcId?: string;
+}
+
+export interface LogData {
+  str: any;
+  seat: number;
+  time: number;
+}
+
+export interface OddsData {
+  landW: number;
+  landU: number;
+  landB: number;
+  landR: number;
+  landG: number;
+  [key: string]: number;
+}
+
+export interface MatchData {
+  id: string;
+  beginTime: number;
+  oppArchetype: string;
+  oppCards: Deck;
+  opponent: { name: string };
+  playerCardsOdds: OddsData;
+  playerCardsLeft: Deck;
+  player: { deck: Deck; originalDeck: Deck; seat: number };
+  priorityTimers: number[];
+}
+
+export interface DraftData {
+  id: string;
+  pickNumber: number;
+  packNumber: number;
+  set: string;
+  pickedCards: any;
+  currentPack?: any;
+  [key: string]: any;
+}
+
+export interface DraftState {
+  packN: number;
+  pickN: number;
+}
+
+export interface OverlaySettingsData {
+  alpha: number;
+  alpha_back: number;
+  bounds: { width: number; height: number; x: number; y: number };
+  cards_overlay: boolean;
+  clock: boolean;
+  draw_odds: boolean;
+  deck: boolean;
+  lands: boolean;
+  keyboard_shortcut: boolean;
+  mana_curve: boolean;
+  mode: number;
+  ontop: boolean;
+  show: boolean;
+  show_always: boolean;
+  sideboard: boolean;
+  title: boolean;
+  top: boolean;
+  type_counts: boolean;
+}
+
+export interface SettingsData {
+  sound_priority: boolean;
+  sound_priority_volume: number;
+  cards_quality: string;
+  cards_size: number;
+  cards_size_hover_card: number;
+  back_color: string;
+  back_url: string;
+  card_tile_style: number | string;
+  overlay_scale: number;
+  overlays: OverlaySettingsData[];
+  overlayHover: { x: number; y: number };
+}
 
 const restrictMinSize =
   interact.modifiers &&

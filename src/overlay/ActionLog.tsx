@@ -4,8 +4,11 @@ import format from "date-fns/format";
 import db from "../shared/database";
 import { queryElements } from "../shared/dom-fns";
 import { addCardHover } from "../shared/card-hover";
+import { LogData } from "./overlayUtil";
 
-export default function ActionLog(props: { actionLog: any[] }): JSX.Element {
+export default function ActionLog(props: {
+  actionLog: LogData[];
+}): JSX.Element {
   const { actionLog } = props;
 
   const containerRef = useRef(null);
@@ -34,7 +37,7 @@ export default function ActionLog(props: { actionLog: any[] }): JSX.Element {
   return (
     <div className="overlay_decklist click-on" ref={containerRef}>
       {!!actionLog &&
-        actionLog.map((log, index) => {
+        actionLog.map((log: LogData, index: number) => {
           const displayLog = { ...log };
           displayLog.str = log.str.replace(
             "<log-card",

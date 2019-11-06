@@ -3,7 +3,7 @@ import React, { useEffect, useCallback, useRef, useState } from "react";
 import striptags from "striptags";
 
 import pd from "../shared/player-data";
-import Deck from "../shared/deck.js";
+import Deck from "../shared/deck";
 import { setRenderer } from "../shared/card-hover";
 import {
   ARENA_MODE_IDLE,
@@ -17,7 +17,12 @@ import {
   getEditModeClass,
   RENDERER_MATCH,
   RENDERER_DRAFT,
-  useEditModeOnRef
+  useEditModeOnRef,
+  DraftData,
+  LogData,
+  MatchData,
+  OverlaySettingsData,
+  SettingsData
 } from "./overlayUtil";
 import OverlayWindowlet from "./OverlayWindowlet";
 
@@ -31,22 +36,22 @@ function ipcSend(method: string, arg?: any, to = IPC_BACKGROUND): void {
 
 const forceInt = (num: any): number => Math.round(parseFloat(num));
 
-function compareLogEntries(a: { time: any }, b: { time: any }): -1 | 0 | 1 {
+function compareLogEntries(a: LogData, b: LogData): -1 | 0 | 1 {
   if (a.time < b.time) return -1;
   if (a.time > b.time) return 1;
   return 0;
 }
 
 export default function OverlayController(): JSX.Element {
-  const [actionLog, setActionLog] = useState([] as any[]);
+  const [actionLog, setActionLog] = useState([] as LogData[]);
   const [arenaState, setArenaState] = useState(ARENA_MODE_IDLE);
   const [editMode, setEditMode] = useState(false);
-  const [match, setMatch] = useState(null);
-  const [draft, setDraft] = useState(null);
+  const [match, setMatch] = useState(undefined as undefined | MatchData);
+  const [draft, setDraft] = useState(undefined as undefined | DraftData);
   const [draftState, setDraftState] = useState({ packN: 0, pickN: 0 });
   const [turnPriority, setTurnPriority] = useState(1);
   const playerData = pd as any;
-  const [settings, setSettings] = useState(playerData.settings);
+  const [settings, setSettings] = useState(playerData.settings as SettingsData);
 
   useEffect(() => {
     webFrame.setZoomFactor(settings.overlay_scale / 100);
@@ -62,26 +67,23 @@ export default function OverlayController(): JSX.Element {
 
   const handleSaveOverlaysPosition = (): void => {
     // Update each overlay with the new dimensions
-    const newOverlays = [...settings.overlays];
-
-    newOverlays.forEach((_overlay, index) => {
-      // TODO figure out a way to refactor this out
-      // some kind of useRef array?
-      const overlayDiv = byId("overlay_" + (index + 1));
-      const bounds =
-        (overlayDiv && {
-          width: forceInt(overlayDiv.style.width),
-          height: forceInt(overlayDiv.style.height),
-          x: forceInt(overlayDiv.style.left),
-          y: forceInt(overlayDiv.style.top)
-        }) ||
-        {};
-      const newOverlay = {
-        ...newOverlays[index], // old overlay
-        bounds // new setting
-      };
-      newOverlays[index] = newOverlay;
-    });
+    const newOverlays = settings.overlays.map(
+      (overlay: OverlaySettingsData, index: number) => {
+        // TODO figure out a way to refactor this out
+        // some kind of useRef array?
+        const overlayDiv = byId("overlay_" + (index + 1));
+        let bounds = overlay.bounds;
+        if (overlayDiv) {
+          bounds = {
+            width: forceInt(overlayDiv.style.width),
+            height: forceInt(overlayDiv.style.height),
+            x: forceInt(overlayDiv.style.left),
+            y: forceInt(overlayDiv.style.top)
+          };
+        }
+        return { ...overlay, bounds };
+      }
+    );
 
     const hoverDiv = byId("overlay_hover");
     const overlayHover =
@@ -105,10 +107,7 @@ export default function OverlayController(): JSX.Element {
     setEditMode(!editMode);
   };
 
-  const handleActionLog = (
-    event: any,
-    arg: { str: string; seat: number }
-  ): void => {
+  const handleActionLog = (event: any, arg: LogData): void => {
     let newLog = [...actionLog];
     arg.str = striptags(arg.str, ["log-card", "log-ability"]);
     newLog.push(arg);
@@ -146,9 +145,9 @@ export default function OverlayController(): JSX.Element {
     ipcSend("save_user_settings", { overlays });
   };
 
-  const handleSetDraftCards = (event: any, draft: any): void => {
+  const handleSetDraftCards = (event: any, draft: DraftData): void => {
     setDraft(draft);
-    setDraftState({ packN: draft.currentPack, pickN: draft.currentPick });
+    setDraftState({ packN: draft.packNumber, pickN: draft.pickNumber });
   };
 
   const handleSettingsUpdated = useCallback((): void => {
@@ -219,33 +218,35 @@ export default function OverlayController(): JSX.Element {
   return (
     <div className="overlay_master_wrapper">
       {!!settings.overlays &&
-        settings.overlays.map((overlaySettings: any, index: number) => {
-          const handleClickSettings = (): void => {
-            ipcSend("renderer_show");
-            ipcSend("force_open_overlay_settings", index, IPC_MAIN);
-          };
-          const handleClickClose = (): void =>
-            handleClose(null, { action: -1, index });
-          return (
-            <OverlayWindowlet
-              actionLog={actionLog}
-              arenaState={arenaState}
-              draft={draft}
-              draftState={draftState}
-              editMode={editMode}
-              handleClickClose={handleClickClose}
-              handleClickSettings={handleClickSettings}
-              handleToggleEditMode={handleToggleEditMode}
-              index={index}
-              key={"overlay_windowlet_" + index}
-              match={match}
-              settings={settings}
-              setDraftStateCallback={setDraftState}
-              setOddsCallback={setOddsCallback}
-              turnPriority={turnPriority}
-            />
-          );
-        })}
+        settings.overlays.map(
+          (overlaySettings: OverlaySettingsData, index: number) => {
+            const handleClickSettings = (): void => {
+              ipcSend("renderer_show");
+              ipcSend("force_open_overlay_settings", index, IPC_MAIN);
+            };
+            const handleClickClose = (): void =>
+              handleClose(null, { action: -1, index });
+            return (
+              <OverlayWindowlet
+                actionLog={actionLog}
+                arenaState={arenaState}
+                draft={draft}
+                draftState={draftState}
+                editMode={editMode}
+                handleClickClose={handleClickClose}
+                handleClickSettings={handleClickSettings}
+                handleToggleEditMode={handleToggleEditMode}
+                index={index}
+                key={"overlay_windowlet_" + index}
+                match={match}
+                settings={settings}
+                setDraftStateCallback={setDraftState}
+                setOddsCallback={setOddsCallback}
+                turnPriority={turnPriority}
+              />
+            );
+          }
+        )}
       <div
         className={"overlay_hover_container " + getEditModeClass(editMode)}
         id={"overlay_hover"}
