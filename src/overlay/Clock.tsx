@@ -53,15 +53,11 @@ export default function Clock(props: ClockProps): JSX.Element {
 
   // Memoize title computation
   const clockTitle = useMemo((): JSX.Element => {
-    let cleanName = oppName;
-    if (!["Opponent", "Sparky"].includes(oppName)) {
-      cleanName = oppName.slice(0, -6);
-    }
-    let p1name = cleanName;
+    let p1name = oppName;
     let p2name = "You";
     if (playerSeat === 1) {
       p1name = "You";
-      p2name = cleanName;
+      p2name = oppName;
     }
     if (clockMode === CLOCK_MODE_BOTH) {
       const className1 =
@@ -78,7 +74,7 @@ export default function Clock(props: ClockProps): JSX.Element {
     if (turnPriority === playerSeat) {
       return <>{"You have priority."}</>;
     }
-    return <>{cleanName + " has priority."}</>;
+    return <>{oppName + " has priority."}</>;
   }, [clockMode, playerSeat, turnPriority]);
 
   // Clock Mode BOTH
