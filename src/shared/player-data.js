@@ -273,6 +273,7 @@ class PlayerData {
     this.offline = false;
     this.patreon = false;
     this.patreon_tier = -1;
+    this.settings = undefined;
     this.draft = this.draft.bind(this);
     this.event = this.event.bind(this);
     this.match = this.match.bind(this);

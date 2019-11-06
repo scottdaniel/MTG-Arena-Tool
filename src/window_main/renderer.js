@@ -19,35 +19,31 @@ if (!remote.app.isPackaged) {
     dsn: "https://4ec87bda1b064120a878eada5fc0b10f@sentry.io/1778171"
   });
 }
+
 import anime from "animejs";
 import "time-elements";
+
 import {
-  DATE_SEASON,
   EASING_DEFAULT,
   HIDDEN_PW,
   MAIN_LOGIN,
   MAIN_HOME,
-  MAIN_DECKS,
-  MAIN_HISTORY,
-  MAIN_EVENTS,
   MAIN_EXPLORE,
-  MAIN_ECONOMY,
-  MAIN_COLLECTION,
   MAIN_SETTINGS,
   MAIN_UPDATE,
   SETTINGS_ABOUT,
-  SETTINGS_OVERLAY,
-  SETTINGS_PRIVACY
+  SETTINGS_OVERLAY
 } from "../shared/constants";
+
 import pd from "../shared/player-data";
 import { createDiv, queryElements as $$ } from "../shared/dom-fns";
+
 import {
   compare_cards,
   get_deck_colors,
-  get_rank_index,
   removeDuplicates,
-  formatRank
 } from "../shared/util";
+
 import {
   changeBackground,
   getLocalState,
@@ -56,12 +52,11 @@ import {
   openDialog,
   pop,
   renderLogInput,
-  resetMainContainer,
   setLocalState,
   showLoadingBars
 } from "./renderer-util";
-import Aggregator from "./aggregator";
-import { openHomeTab, requestHome } from "./home";
+
+import { openHomeTab } from "./home";
 import { tournamentOpen } from "./tournaments";
 import { openDeck } from "./deck-details";
 import { openSettingsTab, setCurrentOverlaySettings } from "./settings";
@@ -147,52 +142,6 @@ function updateTopBar() {
   if (pd.offline || !pd.settings.send_data) {
     $$(".unlink")[0].style.display = "block";
   }
-  /*
-  if (pd.name) {
-    $$(".top_username")[0].innerHTML = pd.name.slice(0, -6);
-    $$(".top_username_id")[0].innerHTML = pd.name.slice(-6);
-  }
-
-  if (pd.rank) {
-    let rankOffset;
-    const constructed = pd.rank.constructed;
-    rankOffset = get_rank_index(constructed.rank, constructed.tier);
-    const constructedRankIcon = $$(".top_constructed_rank")[0];
-    constructedRankIcon.style.backgroundPosition = rankOffset * -48 + "px 0px";
-    constructedRankIcon.setAttribute("title", formatRank(constructed));
-
-    constructedRankIcon.innerHTML = constructed.leaderboardPlace
-      ? formatRank(constructed).split(" ")[1]
-      : "";
-
-    const limited = pd.rank.limited;
-    rankOffset = get_rank_index(limited.rank, limited.tier);
-    const limitedRankIcon = $$(".top_limited_rank")[0];
-    limitedRankIcon.style.backgroundPosition = rankOffset * -48 + "px 0px";
-    limitedRankIcon.setAttribute("title", formatRank(limited));
-
-    limitedRankIcon.innerHTML = limited.leaderboardPlace
-      ? formatRank(limited).split(" ")[1]
-      : "";
-  }
-
-  const patreonIcon = $$(".top_patreon")[0];
-  if (pd.patreon) {
-    const xoff = -40 * pd.patreon_tier;
-    let title = "Patreon Basic Tier";
-
-    if (pd.patreon_tier === 1) title = "Patreon Standard Tier";
-    if (pd.patreon_tier === 2) title = "Patreon Modern Tier";
-    if (pd.patreon_tier === 3) title = "Patreon Legacy Tier";
-    if (pd.patreon_tier === 4) title = "Patreon Vintage Tier";
-
-    patreonIcon.style.backgroundPosition = xoff + "px 0px";
-    patreonIcon.setAttribute("title", title);
-    patreonIcon.style.display = "block";
-  } else {
-    patreonIcon.style.display = "none";
-  }
-  */
 }
 
 //
@@ -339,13 +288,14 @@ ipc.on("force_open_tab", function(event, arg) {
     easing: EASING_DEFAULT,
     duration: 350
   });
-  $$(".top_nav_item").forEach(el => el.classList.remove("item_selected"));
+  //$$(".top_nav_item").forEach(el => el.classList.remove("item_selected"));
   setLocalState({ lastDataIndex: 0, lastScrollTop: 0 });
   openTab(arg);
   ipcSend("save_user_settings", {
     last_open_tab: sidebarActive,
     skip_refresh: true
   });
+  updateTopBar();
 });
 
 //
@@ -361,7 +311,7 @@ ipc.on("show_whats_new", function(event, arg) {
   isNew = true;
 });
 
-//
+// Seems this is not used anymore?
 function rememberMe() {
   const rSettings = {
     remember_me: byId("rememberme").checked
@@ -510,73 +460,7 @@ ready(function() {
   $$(".settings")[0].addEventListener("click", function() {
     force_open_settings();
   });
-
-  //
-  $$(".top_nav_item").forEach(el => {
-    el.addEventListener("click", function() {
-      changeBackground("default");
-      document.body.style.cursor = "auto";
-      const classList = [...this.classList];
-      if (!classList.includes("item_selected")) {
-        anime({
-          targets: ".moving_ux",
-          left: 0,
-          easing: EASING_DEFAULT,
-          duration: 350
-        });
-        let filters = { date: pd.settings.last_date_filter };
-        if (classList.includes("ith")) {
-          sidebarActive = MAIN_HOME;
-        } else if (classList.includes("it0")) {
-          sidebarActive = MAIN_DECKS;
-        } else if (classList.includes("it1")) {
-          sidebarActive = MAIN_HISTORY;
-        } else if (classList.includes("it2")) {
-          sidebarActive = MAIN_EVENTS;
-        } else if (classList.includes("it3")) {
-          sidebarActive = MAIN_EXPLORE;
-        } else if (classList.includes("it4")) {
-          sidebarActive = MAIN_ECONOMY;
-        } else if (classList.includes("it5")) {
-          sidebarActive = MAIN_COLLECTION;
-        } else if (classList.includes("it6")) {
-          sidebarActive = MAIN_SETTINGS;
-        } else if (classList.includes("it7")) {
-          sidebarActive = MAIN_HISTORY;
-          filters = {
-            ...Aggregator.getDefaultFilters(),
-            date: DATE_SEASON,
-            eventId: Aggregator.RANKED_CONST,
-            rankedMode: true
-          };
-        } else if (classList.includes("it8")) {
-          sidebarActive = MAIN_HISTORY;
-          filters = {
-            ...Aggregator.getDefaultFilters(),
-            date: DATE_SEASON,
-            eventId: Aggregator.RANKED_DRAFT,
-            rankedMode: true
-          };
-        }
-        setLocalState({ lastDataIndex: 0, lastScrollTop: 0 });
-        openTab(sidebarActive, filters);
-        ipcSend("save_user_settings", {
-          last_open_tab: sidebarActive,
-          last_date_filter: filters.date,
-          skip_refresh: true
-        });
-      } else {
-        anime({
-          targets: ".moving_ux",
-          left: 0,
-          easing: EASING_DEFAULT,
-          duration: 350
-        });
-      }
-    });
-  });
 });
-
 
 function force_open_settings(section = -1) {
   sidebarActive = MAIN_SETTINGS;
@@ -586,8 +470,9 @@ function force_open_settings(section = -1) {
     easing: EASING_DEFAULT,
     duration: 350
   });
-  $$(".top_nav_item").forEach(el => el.classList.remove("item_selected"));
+  //$$(".top_nav_item").forEach(el => el.classList.remove("item_selected"));
   openSettingsTab(section, 0);
+  updateTopBar();
 }
 
 function force_open_about() {
@@ -598,15 +483,10 @@ function force_open_about() {
     easing: EASING_DEFAULT,
     duration: 350
   });
-  $$(".top_nav_item").forEach(el => el.classList.remove("item_selected"));
+  //$$(".top_nav_item").forEach(el => el.classList.remove("item_selected"));
   openSettingsTab(SETTINGS_ABOUT, 0);
+  updateTopBar();
 }
-
-//
-//ipc.on("show_loading", () => showLoadingBars());
-
-//
-//ipc.on("hide_loading", () => hideLoadingBars());
 
 //
 ipc.on("set_draft_link", function(event, arg) {
