@@ -41,7 +41,7 @@ import { createDiv, queryElements as $$ } from "../shared/dom-fns";
 import {
   compare_cards,
   get_deck_colors,
-  removeDuplicates,
+  removeDuplicates
 } from "../shared/util";
 
 import {
