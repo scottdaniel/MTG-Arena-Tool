@@ -10,10 +10,11 @@ import {
   MAIN_COLLECTION,
   MAIN_SETTINGS,
   MAIN_CONSTRUCTED,
-  MAIN_LIMITED
+  MAIN_LIMITED,
+  SETTINGS_ABOUT
 } from "../shared/constants";
 
-import { queryElements as $$ } from "../shared/dom-fns";
+import { updateTopBar } from "./topNav";
 import pd from "../shared/player-data";
 import Aggregator from "./aggregator";
 import anime from "animejs";
@@ -86,7 +87,7 @@ export function openTab(tab:number, filters = {}, dataIndex = 0, scrollTop = 0) 
   }
 }
 
-export function clickNav(id:number, selected:boolean) {
+export function clickNav(id:number) {
   changeBackground("default");
   document.body.style.cursor = "auto";
   anime({
@@ -95,35 +96,65 @@ export function clickNav(id:number, selected:boolean) {
     easing: EASING_DEFAULT,
     duration: 350
   });
-  if (!selected) {
-    let filters = { date: pd.settings.last_date_filter, eventId: "All Events", rankedMode: false };
-    let sidebarActive = id;
+  let filters = { date: pd.settings.last_date_filter, eventId: "All Events", rankedMode: false };
+  let sidebarActive = id;
 
-    if (id == MAIN_CONSTRUCTED) {
-      sidebarActive = MAIN_HISTORY;
-      filters = {
-        ...Aggregator.getDefaultFilters(),
-        date: DATE_SEASON,
-        eventId: Aggregator.RANKED_CONST,
-        rankedMode: true
-      };
-    }
-    if (id == MAIN_LIMITED) {
-      sidebarActive = MAIN_HISTORY;
-      filters = {
-        ...Aggregator.getDefaultFilters(),
-        date: DATE_SEASON,
-        eventId: Aggregator.RANKED_DRAFT,
-        rankedMode: true
-      };
-    }
-
-    setLocalState({ lastDataIndex: 0, lastScrollTop: 0 });
-    openTab(sidebarActive, filters);
-    ipcSend("save_user_settings", {
-      last_open_tab: sidebarActive,
-      last_date_filter: filters.date,
-      skip_refresh: true
-    });
+  if (id === MAIN_CONSTRUCTED) {
+    sidebarActive = MAIN_HISTORY;
+    filters = {
+      ...Aggregator.getDefaultFilters(),
+      date: DATE_SEASON,
+      eventId: Aggregator.RANKED_CONST,
+      rankedMode: true
+    };
   }
+  if (id === MAIN_LIMITED) {
+    sidebarActive = MAIN_HISTORY;
+    filters = {
+      ...Aggregator.getDefaultFilters(),
+      date: DATE_SEASON,
+      eventId: Aggregator.RANKED_DRAFT,
+      rankedMode: true
+    };
+  }
+
+  setLocalState({ lastDataIndex: 0, lastScrollTop: 0 });
+  openTab(sidebarActive, filters);
+  ipcSend("save_user_settings", {
+    last_open_tab: sidebarActive,
+    last_date_filter: filters.date,
+    skip_refresh: true
+  });
+}
+
+export function forceOpenAbout() {
+  anime({
+    targets: ".moving_ux",
+    left: 0,
+    easing: EASING_DEFAULT,
+    duration: 350
+  });
+
+  ipcSend("save_user_settings", {
+    last_open_tab: MAIN_SETTINGS
+  });
+
+  openSettingsTab(SETTINGS_ABOUT, 0);
+  updateTopBar();
+}
+
+export function forceOpenSettings(section = -1) {
+  anime({
+    targets: ".moving_ux",
+    left: 0,
+    easing: EASING_DEFAULT,
+    duration: 350
+  });
+
+  ipcSend("save_user_settings", {
+    last_open_tab: MAIN_SETTINGS
+  });
+
+  openSettingsTab(section, 0);
+  updateTopBar();
 }

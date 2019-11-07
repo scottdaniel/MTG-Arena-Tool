@@ -13,7 +13,8 @@ import {
   MANA_COLORS,
   IPC_MAIN,
   IPC_BACKGROUND,
-  EASING_DEFAULT
+  EASING_DEFAULT,
+  SETTINGS_PRIVACY
 } from "../shared/constants";
 import db from "../shared/database";
 import pd from "../shared/player-data";
@@ -42,7 +43,7 @@ import {
 } from "../shared/util";
 import ReactDOM from "react-dom";
 import createShareButton from "./createShareButton";
-import { openSettingsTab } from "./settings";
+import { force_open_settings } from "./tabControl";
 
 const DEFAULT_BACKGROUND = "../images/Bedevil-Art.jpg";
 
@@ -1062,8 +1063,6 @@ function showOfflineSplash() {
     shell.openExternal("https://mtgatool.com/signup/");
   });
 }
-
-
 
 export {
   actionLogDir,

@@ -33,19 +33,17 @@ interface TopNavItemProps {
 function TopNavItem(props:TopNavItemProps) {
   const {currentTab, compact, id, callback, title} = props;
 
-  const selected = currentTab === id;
-
   const clickTab = React.useCallback((tabId: number) => (event: React.MouseEvent<HTMLDivElement>) => {
-    clickNav(tabId, selected);
+    clickNav(tabId);
     callback(tabId);
   }, [props.id, props.callback]);
 
   return compact ? (
-    <div className={(selected ? "item_selected" : "") + " top_nav_item_no_label top_nav_item it" + id} onClick={clickTab(id)}>
+    <div className={(currentTab === id ? "item_selected" : "") + " top_nav_item_no_label top_nav_item it" + id} onClick={clickTab(id)}>
       <div className={"top_nav_icon icon_" + id} title={_.camelCase(title)}></div>
     </div>
   ) : (
-    <div className={(selected ? "item_selected" : "") + " top_nav_item it" + id + (title == "" ? " top_nav_item_no_label" : "")} onClick={clickTab(id)}>
+    <div className={(currentTab === id ? "item_selected" : "") + " top_nav_item it" + id + (title == "" ? " top_nav_item_no_label" : "")} onClick={clickTab(id)}>
       {title !== "" ? (<span className={"top_nav_item_text"}>{title}</span>) : 
       (<div className={"top_nav_icon icon_" + id} title={_.camelCase(title)}></div>)}
     </div>
@@ -66,7 +64,7 @@ function TopRankIcon(props:topRankProps) {
   const selected = currentTab === id;
 
   const clickTab = React.useCallback((tabId) => (event: React.MouseEvent<HTMLDivElement>) => {
-    clickNav(tabId, selected);
+    clickNav(tabId);
     callback(tabId);
   }, [props.id, props.callback]);
 
@@ -199,4 +197,13 @@ export default function createTopNav(parent: Element): boolean {
     parent
   );
   return true;
+}
+
+export function updateTopBar() {
+  const topNavDiv = $$(".top_nav_container")[0];
+  createTopNav(topNavDiv);
+
+  if (pd.offline || !pd.settings.send_data) {
+    $$(".unlink")[0].style.display = "block";
+  }
 }

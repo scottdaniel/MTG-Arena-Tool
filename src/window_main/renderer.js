@@ -64,8 +64,8 @@ import { showWhatsNew } from "./whats-new";
 import { showOfflineSplash } from "./renderer-util";
 import { setExploreDecks } from "./explore";
 
-import { openTab } from "./tabControl";
-import createTopNav from "./topNav";
+import { openTab, forceOpenAbout, forceOpenSettings } from "./tabControl";
+import { updateTopBar } from "./topNav";
 
 const byId = id => document.getElementById(id);
 let loggedIn = false;
@@ -132,15 +132,6 @@ function showLogin() {
 
   $$(".button_simple_disabled")[0].classList.add("button_simple");
   byId("signin_user").focus();
-}
-
-function updateTopBar() {
-  const topNavDiv = $$(".top_nav_container")[0];
-  createTopNav(topNavDiv);
-
-  if (pd.offline || !pd.settings.send_data) {
-    $$(".unlink")[0].style.display = "block";
-  }
 }
 
 //
@@ -249,7 +240,7 @@ ipc.on("show_notification", function(event, arg) {
 
   if (arg === "Update available" || arg === "Update downloaded") {
     const handler = () => {
-      force_open_about();
+      forceOpenAbout();
       notification.removeEventListener("click", handler);
     };
     notification.addEventListener("click", handler);
@@ -265,18 +256,18 @@ ipc.on("hide_notification", function() {
 
 //
 ipc.on("force_open_settings", function() {
-  force_open_settings();
+  forceOpenSettings();
 });
 
 //
 ipc.on("force_open_overlay_settings", function(event, arg) {
   setCurrentOverlaySettings(arg);
-  force_open_settings(SETTINGS_OVERLAY);
+  forceOpenSettings(SETTINGS_OVERLAY);
 });
 
 //
 ipc.on("force_open_about", function() {
-  force_open_about();
+  forceOpenAbout();
 });
 
 //
@@ -411,7 +402,7 @@ ready(function() {
   $$(".version_number")[0].innerHTML = `v${remote.app.getVersion()}`;
 
   $$(".version_number")[0].addEventListener("click", function() {
-    force_open_settings(SETTINGS_ABOUT);
+    forceOpenSettings(SETTINGS_ABOUT);
   });
 
   $$(".signup_link")[0].addEventListener("click", function() {
@@ -457,31 +448,12 @@ ready(function() {
 
   //
   $$(".settings")[0].addEventListener("click", function() {
-    force_open_settings();
+    forceOpenSettings();
   });
 });
 
-function force_open_settings(section = -1) {
-  anime({
-    targets: ".moving_ux",
-    left: 0,
-    easing: EASING_DEFAULT,
-    duration: 350
-  });
-  openSettingsTab(section, 0);
-  updateTopBar();
-}
 
-function force_open_about() {
-  anime({
-    targets: ".moving_ux",
-    left: 0,
-    easing: EASING_DEFAULT,
-    duration: 350
-  });
-  openSettingsTab(SETTINGS_ABOUT, 0);
-  updateTopBar();
-}
+
 
 //
 ipc.on("set_draft_link", function(event, arg) {
