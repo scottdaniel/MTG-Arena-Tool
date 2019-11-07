@@ -79,7 +79,7 @@ export default function OverlayController(): JSX.Element {
   }, [lastBeep, settings]);
 
   const hoverContainerRef = useRef(null);
-  useEditModeOnRef(editMode, hoverContainerRef);
+  useEditModeOnRef(editMode, hoverContainerRef, settings.overlay_scale);
 
   const handleSaveOverlaysPosition = (): void => {
     // Update each overlay with the new dimensions

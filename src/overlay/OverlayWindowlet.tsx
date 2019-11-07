@@ -59,7 +59,7 @@ export default function OverlayWindowlet(
   } = props;
 
   const containerRef = useRef(null);
-  useEditModeOnRef(editMode, containerRef);
+  useEditModeOnRef(editMode, containerRef, settings.overlay_scale);
 
   const backgroundImage =
     "url(" +
