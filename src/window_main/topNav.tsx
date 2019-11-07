@@ -22,7 +22,7 @@ import {
   MAIN_LIMITED
 } from "../shared/constants";
 
-interface topNavItemProps {
+interface TopNavItemProps {
   currentTab: number,
   compact: boolean,
   id: number,
@@ -30,7 +30,7 @@ interface topNavItemProps {
   title: string
 }
 
-function TopNavItem(props:topNavItemProps) {
+function TopNavItem(props:TopNavItemProps) {
   const {currentTab, compact, id, callback, title} = props;
 
   const selected = currentTab === id;
@@ -120,14 +120,11 @@ function PatreonBadge(props: patreonProps) {
 function TopNav() {
   const [compact, setCompact] = React.useState(false);
   const [currentTab, setCurrentTab] = React.useState(pd.settings.last_open_tab);
-  const setCurrentTabCallback = (id:number) => {
-    setCurrentTab(id);
-  };
 
   const defaultTab = {
     compact: compact,
     currentTab: currentTab,
-    callback: setCurrentTabCallback
+    callback: setCurrentTab
   }
 
   const homeTab = {...defaultTab, id: MAIN_HOME, title:""};
@@ -139,7 +136,7 @@ function TopNav() {
   const collectionTab = {...defaultTab, id: MAIN_COLLECTION, title:"COLLECTION"};
   
   const contructedNav = {
-    callback: setCurrentTabCallback,
+    callback: setCurrentTab,
     currentTab: currentTab,
     id: MAIN_CONSTRUCTED,
     rank: pd.rank ? pd.rank.constructed : null,
@@ -147,7 +144,7 @@ function TopNav() {
   };
 
   const limitedNav = {
-    callback: setCurrentTabCallback,
+    callback: setCurrentTab,
     currentTab: currentTab,
     id: MAIN_LIMITED,
     rank: pd.rank ? pd.rank.limited : null,
