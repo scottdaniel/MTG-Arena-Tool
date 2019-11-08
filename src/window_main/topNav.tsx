@@ -118,6 +118,7 @@ function PatreonBadge(props: patreonProps) {
 function TopNav() {
   const [compact, setCompact] = React.useState(false);
   const [currentTab, setCurrentTab] = React.useState(pd.settings.last_open_tab);
+  const topNavIconsRef:any = React.useRef(null);
 
   const defaultTab = {
     compact: compact,
@@ -150,7 +151,7 @@ function TopNav() {
   };
 
   React.useEffect(() => {
-    if ($$(".top_nav_icons")[0].offsetWidth < 530) {
+    if (topNavIconsRef.current.offsetWidth < 530) {
       if (!compact) {
         setCompact(true);
       }
@@ -169,7 +170,7 @@ function TopNav() {
 
   return (
     <div className="top_nav">
-      <div className="top_nav_icons">
+      <div ref={topNavIconsRef} className="top_nav_icons">
         <TopNavItem {...homeTab}/>
         <TopNavItem {...myDecksTab}/>
         <TopNavItem {...historyTab}/>
