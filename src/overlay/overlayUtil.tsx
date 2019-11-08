@@ -12,9 +12,10 @@ export interface CardData {
 }
 
 export interface LogData {
+  grpId: number;
   str: any;
   seat: number;
-  time: number;
+  time: string;
 }
 
 export interface OddsData {

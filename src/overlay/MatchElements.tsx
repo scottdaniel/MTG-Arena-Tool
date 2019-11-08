@@ -107,7 +107,12 @@ export default function MatchElements(props: MatchElementsProps): JSX.Element {
           ))}
         </div>
       )}
-      {settings.mode === OVERLAY_LOG && <ActionLog actionLog={actionLog} />}
+      {settings.mode === OVERLAY_LOG && (
+        <ActionLog
+          actionLog={actionLog}
+          setHoverCardCallback={setHoverCardCallback}
+        />
+      )}
       {!!settings.deck && !!visibleDeck && (
         <DeckList
           deck={visibleDeck}
