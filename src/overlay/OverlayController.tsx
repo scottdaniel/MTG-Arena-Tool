@@ -5,18 +5,14 @@ import striptags from "striptags";
 
 import pd from "../shared/player-data";
 import Deck from "../shared/deck";
-import { setRenderer } from "../shared/card-hover";
 import {
   ARENA_MODE_IDLE,
-  ARENA_MODE_DRAFT,
   IPC_BACKGROUND,
   IPC_MAIN,
   IPC_OVERLAY
 } from "../shared/constants";
 
 import {
-  RENDERER_MATCH,
-  RENDERER_DRAFT,
   DraftData,
   LogData,
   MatchData,
@@ -165,12 +161,6 @@ export default function OverlayController(): JSX.Element {
   const handleSetArenaState = useCallback(
     (event: unknown, arenaState: number): void => {
       setArenaState(arenaState);
-      // Change how cards hover are drawn if we are in a draft
-      if (arenaState == ARENA_MODE_DRAFT) {
-        setRenderer(RENDERER_DRAFT);
-      } else {
-        setRenderer(RENDERER_MATCH);
-      }
     },
     []
   );

@@ -4,9 +4,6 @@ import interact from "interactjs";
 
 import Deck from "../shared/deck";
 
-export const RENDERER_MATCH = 1;
-export const RENDERER_DRAFT = 2;
-
 export interface CardData {
   id: string;
   quantity: number;

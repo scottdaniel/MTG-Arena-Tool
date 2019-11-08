@@ -3,9 +3,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 
 import { createDiv } from "../shared/dom-fns";
-import { setRenderer } from "../shared/card-hover";
 
-import { RENDERER_MATCH } from "../overlay/overlayUtil";
 import OverlayController from "../overlay/OverlayController";
 
 const TransparencyMouseFix = require("electron-transparency-mouse-fix");
@@ -43,7 +41,6 @@ function ready(fn: () => void): void {
 }
 
 ready(function() {
-  setRenderer(RENDERER_MATCH);
   const wrap = createDiv([]);
   ReactDOM.render(<OverlayController />, wrap);
   document.body.appendChild(wrap);

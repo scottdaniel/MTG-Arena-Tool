@@ -11,12 +11,6 @@ import OwnershipStars from "./OwnershipStars";
 // workaround for edge case bugs that cause hover to "get stuck"
 const MAX_HOVER_TIME = 10000; // 10 seconds
 
-let renderer = 0;
-
-export const setRenderer = value => {
-  renderer = value;
-};
-
 let lastHoverStart = null;
 
 export function addCardHover(element, card) {
@@ -32,10 +26,7 @@ export function addCardHover(element, card) {
   element.addEventListener("mouseover", () => {
     $$(".loader, .main_hover").forEach(element => (element.style.opacity = 1));
     // Split cards are readable both halves, no problem
-    if (
-      (card.dfc == FACE_DFC_BACK || card.dfc == FACE_DFC_FRONT) &&
-      renderer == 0
-    ) {
+    if (card.dfc == FACE_DFC_BACK || card.dfc == FACE_DFC_FRONT) {
       $$(".loader_dfc, .main_hover_dfc").forEach(el => {
         show(el);
         el.style.opacity = 1;
