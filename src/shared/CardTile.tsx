@@ -196,7 +196,7 @@ function ArenaCardTile(props: CardTileProps): JSX.Element {
     }
   }, [card, setHoverCardCallback]);
 
-  const [ww, ll, quantityElement] = getArenaQuantityDisplay(props);
+  const [ww, ll, quantityElement] = getArenaQuantityDisplay(quantity);
 
   return (
     <div
