@@ -33,11 +33,18 @@ export interface OverlayWindowletProps {
   index: number;
   match?: MatchData;
   settings: SettingsData;
-  setOddsCallback: (sampleSize: number) => void;
   setDraftStateCallback: (state: DraftState) => void;
+  setHoverCardCallback: (card: any) => void;
+  setOddsCallback: (sampleSize: number) => void;
   turnPriority: number;
 }
 
+/**
+ * This is a display component that renders one of the numbered overlay
+ * window widgets. This only renders the outer chrome display and delegates
+ * most of the contents to either DraftElements or MatchElements depending
+ * on the selected overlay settings.
+ */
 export default function OverlayWindowlet(
   props: OverlayWindowletProps
 ): JSX.Element {
@@ -52,8 +59,9 @@ export default function OverlayWindowlet(
     handleToggleEditMode,
     index,
     match,
-    setOddsCallback,
     setDraftStateCallback,
+    setHoverCardCallback,
+    setOddsCallback,
     settings,
     turnPriority
   } = props;
@@ -89,24 +97,26 @@ export default function OverlayWindowlet(
     overlaySettings.show && (currentModeApplies || overlaySettings.show_always);
   const tileStyle = parseInt(settings.card_tile_style + "");
   let elements = <></>;
+  const commonProps = {
+    index,
+    settings: overlaySettings,
+    setHoverCardCallback,
+    tileStyle
+  };
   if (draft && OVERLAY_DRAFT_MODES.includes(overlaySettings.mode)) {
     const props = {
+      ...commonProps,
       draft,
       draftState,
-      index,
-      setDraftStateCallback,
-      settings: overlaySettings,
-      tileStyle
+      setDraftStateCallback
     };
     elements = <DraftElements {...props} />;
   } else if (match) {
     const props = {
+      ...commonProps,
       actionLog,
-      index,
       match,
       setOddsCallback,
-      settings: overlaySettings,
-      tileStyle,
       turnPriority
     };
     elements = <MatchElements {...props} />;

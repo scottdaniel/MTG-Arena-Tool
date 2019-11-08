@@ -21,17 +21,23 @@ export interface MatchElementsProps {
   actionLog: LogData[];
   index: number;
   match: MatchData;
+  setHoverCardCallback: (card: any) => void;
   setOddsCallback: (sampleSize: number) => void;
   settings: OverlaySettingsData;
   tileStyle: number;
   turnPriority: number;
 }
 
+/**
+ * This is a display component that renders most of the contents of an overlay
+ * window set in one of the match-related modes.
+ */
 export default function MatchElements(props: MatchElementsProps): JSX.Element {
   const {
     actionLog,
     index,
     match,
+    setHoverCardCallback,
     setOddsCallback,
     settings,
     tileStyle,
@@ -108,7 +114,7 @@ export default function MatchElements(props: MatchElementsProps): JSX.Element {
           subTitle={subTitle}
           settings={settings}
           tileStyle={tileStyle}
-          cardOdds={cardOdds}
+          setHoverCardCallback={setHoverCardCallback}
           setOddsCallback={setOddsCallback}
         />
       )}

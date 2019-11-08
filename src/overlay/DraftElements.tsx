@@ -20,15 +20,21 @@ export interface DraftElementsProps {
   index: number;
   settings: OverlaySettingsData;
   setDraftStateCallback: (state: DraftState) => void;
+  setHoverCardCallback: (card: any) => void;
   tileStyle: number;
 }
 
+/**
+ * This is a display component that renders most of the contents of an overlay
+ * window set in one of the draft-related modes.
+ */
 export default function DraftElements(props: DraftElementsProps): JSX.Element {
   const {
     draft,
     draftState,
     index,
     setDraftStateCallback,
+    setHoverCardCallback,
     settings,
     tileStyle
   } = props;
@@ -136,10 +142,9 @@ export default function DraftElements(props: DraftElementsProps): JSX.Element {
           deck={visibleDeck}
           subTitle={subTitle}
           highlightCardId={pick}
+          setHoverCardCallback={setHoverCardCallback}
           settings={settings}
           tileStyle={tileStyle}
-          cardOdds={undefined}
-          setOddsCallback={undefined}
         />
       )}
     </div>

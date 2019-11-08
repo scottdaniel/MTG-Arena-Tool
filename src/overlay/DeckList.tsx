@@ -90,6 +90,7 @@ export interface DeckListProps {
   settings: OverlaySettingsData;
   tileStyle: number;
   cardOdds?: OddsData;
+  setHoverCardCallback: (card: any) => void;
   setOddsCallback?: (sampleSize: number) => void;
 }
 
@@ -101,6 +102,7 @@ export default function DeckList(props: DeckListProps): JSX.Element {
     tileStyle,
     highlightCardId,
     cardOdds,
+    setHoverCardCallback,
     setOddsCallback
   } = props;
   if (!deck) return <></>;
@@ -201,12 +203,12 @@ export default function DeckList(props: DeckListProps): JSX.Element {
         style={tileStyle}
         card={fullCard}
         dfcCard={dfcCard}
-        landOdds={cardOdds}
         key={"maincardtile_" + card.id}
         indent="a"
         isSideboard={false}
         quantity={quantity}
         showWildcards={false}
+        setHoverCardCallback={setHoverCardCallback}
         deck={deck}
         isHighlighted={card.id === highlightCardId}
       />
@@ -236,12 +238,12 @@ export default function DeckList(props: DeckListProps): JSX.Element {
           style={tileStyle}
           card={fullCard}
           dfcCard={dfcCard}
-          landOdds={cardOdds}
           key={"sideboardcardtile_" + card.id}
           indent="a"
           isSideboard={true}
           quantity={quantity}
           showWildcards={false}
+          setHoverCardCallback={setHoverCardCallback}
           deck={deck}
           isHighlighted={false}
         />
