@@ -23,8 +23,8 @@ export interface CardTileProps {
   indent: string;
   isHighlighted: boolean;
   isSideboard: boolean;
-  landOdds: any;
   quantity: { quantity: string; odds: number } | number | string; // TODO clean this up?
+  setHoverCardCallback?: (card: any) => void;
   showWildcards: boolean;
   style: number;
 }
@@ -162,14 +162,20 @@ function ArenaCardTile(props: CardTileProps): JSX.Element {
     indent,
     isHighlighted,
     isSideboard,
-    landOdds,
     quantity,
+    setHoverCardCallback,
     showWildcards
   } = props;
 
   const [isMouseHovering, setMouseHovering] = useState(false);
-  const handleMouseEnter = useCallback((): void => setMouseHovering(true), []);
-  const handleMouseLeave = useCallback((): void => setMouseHovering(false), []);
+  const handleMouseEnter = useCallback((): void => {
+    setMouseHovering(true);
+    setHoverCardCallback && setHoverCardCallback(card);
+  }, [setHoverCardCallback]);
+  const handleMouseLeave = useCallback((): void => {
+    setMouseHovering(false);
+    setHoverCardCallback && setHoverCardCallback(null);
+  }, [setHoverCardCallback]);
   const handleMouseClick = useCallback((): void => {
     let _card = card;
     if (card.dfc === FACE_SPLIT_FULL) {
@@ -180,11 +186,15 @@ function ArenaCardTile(props: CardTileProps): JSX.Element {
 
   const containerEl = useRef(null);
   useEffect(() => {
+    if (setHoverCardCallback) {
+      return; // React handles hover
+    }
+    // Legacy code support
     const containerDiv = containerEl.current;
     if (containerDiv) {
-      addCardHover(containerDiv, card, landOdds);
+      addCardHover(containerDiv, card);
     }
-  }, [card, landOdds]);
+  }, [card, setHoverCardCallback]);
 
   const [ww, ll, quantityElement] = getArenaQuantityDisplay(props);
 
@@ -294,13 +304,19 @@ function FlatCardTile(props: CardTileProps): JSX.Element {
     indent,
     isHighlighted,
     isSideboard,
-    landOdds,
     quantity,
+    setHoverCardCallback,
     showWildcards
   } = props;
   const [isMouseHovering, setMouseHovering] = useState(false);
-  const handleMouseEnter = useCallback((): void => setMouseHovering(true), []);
-  const handleMouseLeave = useCallback((): void => setMouseHovering(false), []);
+  const handleMouseEnter = useCallback((): void => {
+    setMouseHovering(true);
+    setHoverCardCallback && setHoverCardCallback(card);
+  }, [setHoverCardCallback]);
+  const handleMouseLeave = useCallback((): void => {
+    setMouseHovering(false);
+    setHoverCardCallback && setHoverCardCallback(null);
+  }, [setHoverCardCallback]);
   const handleMouseClick = useCallback((): void => {
     let _card = card;
     if (card.dfc === FACE_SPLIT_FULL) {
@@ -311,11 +327,15 @@ function FlatCardTile(props: CardTileProps): JSX.Element {
 
   const containerEl = useRef(null);
   useEffect(() => {
+    if (setHoverCardCallback) {
+      return; // React handles hover
+    }
+    // Legacy code support
     const containerDiv = containerEl.current;
     if (containerDiv) {
-      addCardHover(containerDiv, card, landOdds);
+      addCardHover(containerDiv, card);
     }
-  }, [card, landOdds]);
+  }, [card, setHoverCardCallback]);
 
   const cardTileStyle = { backgroundImage: "", borderImage: "" };
   try {
