@@ -93,7 +93,7 @@ class Colors {
   /**
    * Adds a string mana cost to this class.
    */
-  addFromCost(cost: string) {
+  addFromCost(cost: string[]) {
     for (var c of cost) {
       if (c == "w") {
         this._w += 1;
