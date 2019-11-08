@@ -452,9 +452,6 @@ ready(function() {
   });
 });
 
-
-
-
 //
 ipc.on("set_draft_link", function(event, arg) {
   hideLoadingBars();
