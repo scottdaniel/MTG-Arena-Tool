@@ -1,3 +1,9 @@
+## <small>2.12.12 (2019-11-09)</small>
+
+* Update package-lock.json ([61093aa](https://github.com/Manuel-777/MTG-Arena-Tool/commit/61093aa))
+
+
+
 ## <small>2.12.11 (2019-11-09)</small>
 
 * revert, update just build and updater ([4d4036e](https://github.com/Manuel-777/MTG-Arena-Tool/commit/4d4036e))
