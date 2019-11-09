@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { app, ipcRenderer as ipc, remote } from "electron";
+import { app, ipcRenderer as ipc, remote, shell } from "electron";
 const { dialog } = remote;
 import _ from "lodash";
 import anime from "animejs";
@@ -13,7 +13,8 @@ import {
   MANA_COLORS,
   IPC_MAIN,
   IPC_BACKGROUND,
-  EASING_DEFAULT
+  EASING_DEFAULT,
+  SETTINGS_PRIVACY
 } from "../shared/constants";
 import db from "../shared/database";
 import pd from "../shared/player-data";
@@ -42,6 +43,7 @@ import {
 } from "../shared/util";
 import ReactDOM from "react-dom";
 import createShareButton from "./createShareButton";
+import { force_open_settings } from "./tabControl";
 
 const DEFAULT_BACKGROUND = "../images/Bedevil-Art.jpg";
 
@@ -1013,6 +1015,35 @@ function draftShareLink(id, draft) {
   ipcSend("request_draft_link", { expire, id, draftData });
 }
 
+function showOfflineSplash() {
+  hideLoadingBars();
+  byId("ux_0").innerHTML = `
+  <div class="message_center_offline" style="display: flex; position: fixed;">
+    <div class="message_unlink"></div>
+    <div class="message_big red">Oops, you are offline!</div>
+    <div class="message_sub_16 white">To access online features:</div>
+    <div class="message_sub_16 white">If you are logged in, you may need to <a class="privacy_link">enable online sharing</a> and restart.</div>
+    <div class="message_sub_16 white">If you are in offline mode, you can <a class="launch_login_link">login to your account</a>.</div>
+    <div class="message_sub_16 white">If you need an account, you can <a class="signup_link">sign up here</a>.</div>
+  </div>`;
+  $$(".privacy_link")[0].addEventListener("click", function() {
+    force_open_settings(SETTINGS_PRIVACY);
+  });
+  $$(".launch_login_link")[0].addEventListener("click", function() {
+    const clearAppSettings = {
+      remember_me: false,
+      auto_login: false,
+      launch_to_tray: false
+    };
+    ipcSend("save_app_settings", clearAppSettings);
+    remote.app.relaunch();
+    remote.app.exit(0);
+  });
+  $$(".signup_link")[0].addEventListener("click", function() {
+    shell.openExternal("https://mtgatool.com/signup/");
+  });
+}
+
 export {
   actionLogDir,
   ipcSend,
@@ -1044,5 +1075,6 @@ export {
   compareWinrates,
   compareColorWinrates,
   localTimeSince,
-  attachMatchData
+  attachMatchData,
+  showOfflineSplash
 };

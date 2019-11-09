@@ -305,31 +305,61 @@ time, local-time, relative-time {
     cursor: default;
 }
 
-
 .top_constructed_rank {
-    -webkit-app-region: no-drag;
-    align-self: center;
-    width: 48px;
-    height: 48px;
     background: url(../images/ranks_constructed_48.png);
-    background-position: 0px 0px;
 }
 
 .top_limited_rank {
+    background: url(../images/ranks_limited_48.png);
+}
+
+.top_constructed_rank, .top_limited_rank {
+    /* Align leaderboard indicator to center and add text border*/
+    display: flex;
+    margin: auto;
+    align-items: center;
+    justify-content: center;
     -webkit-app-region: no-drag;
     align-self: center;
     width: 48px;
     height: 48px;
-    background: url(../images/ranks_limited_48.png);
     background-position: 0px 0px;
+    text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
 }
 
-.top_constructed_rank, .top_limited_rank {
-  /* Align leaderboard indicator to center and add text border*/
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+.top_userdata_container {
+    display: flex;
+    margin-left: auto;
+}
+
+.it10, .it11 {
+    width: 60px;
+}
+
+.icon_7 {
+    -webkit-app-region: no-drag;
+    align-self: center;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+    background-position: 0px 0px;
+    background: url(../images/ranks_constructed_48.png);
+}
+
+.icon_8 {
+    -webkit-app-region: no-drag;
+    align-self: center;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+    background-position: 0px 0px;
+    background: url(../images/ranks_limited_48.png);
 }
 
 .top_patreon {
@@ -373,8 +403,7 @@ time, local-time, relative-time {
 }
 
 .top_nav_icon {
-    display: none;
-    opacity: 0;
+    opacity: 1;
     position: absolute;
     left: calc(50% - 16px);
     top: 16px;
@@ -389,30 +418,26 @@ time, local-time, relative-time {
 }
 
 .icon_0 {
-    background: url(../images/tab_tourneys.png);
-}
-
-.icon_1 {
     background: url(../images/tab_my_decks.png);
 }
 
-.icon_2 {
+.icon_1 {
     background: url(../images/tab_history.png);
 }
 
-.icon_3 {
+.icon_2 {
     background: url(../images/tab_events.png);
 }
 
-.icon_4 {
+.icon_3 {
     background: url(../images/tab_explore.png);
 }
 
-.icon_5 {
+.icon_4 {
     background: url(../images/tab_economy.png);
 }
 
-.icon_6 {
+.icon_5 {
     background: url(../images/tab_collection.png);
 }
 
@@ -432,6 +457,11 @@ span.top_nav_item_text {
     overflow: hidden;
     display: inline-block;
     -webkit-transition: all .5s ease-in-out;
+}
+
+.top_nav_item_no_label {
+    max-width: 60px !important;
+    min-width: 60px !important;
 }
 
 .top_nav_item {
@@ -459,7 +489,7 @@ span.top_nav_item_text {
     display: inline-grid;
 }
 
-.it7, .it8 {
+.icon_7, .icon_8 {
     opacity: 1;
 }
 
@@ -468,11 +498,10 @@ span.top_nav_item_text {
     opacity: 1;
 }
 
-.ith_icon {
+.icon_-1 {
     width: 32px;
     height: 32px;
     opacity: 1;
-    margin: 16px auto;
     background-repeat: no-repeat;
     background-image: url(../images/tab_home.png);
 }
