@@ -6,25 +6,19 @@ import {
   GREEN,
   MULTI,
   COLORLESS
-} from "./constants";
+} from "./constants.js";
 
 class Colors {
   /**
    * Creates a new colors object
-   * Colors can be set by properties matching the colors (w, u, b, r, g)
+   * Colors can be set by propierties matching the colors (w, u, b, r, g)
    **/
-  private _w: number;
-  private _u: number;
-  private _b: number;
-  private _r: number;
-  private _g: number;
-
   constructor() {
-    this._w = 0;
-    this._u = 0;
-    this._b = 0;
-    this._r = 0;
-    this._g = 0;
+    this._w = false;
+    this._u = false;
+    this._b = false;
+    this._r = false;
+    this._g = false;
 
     return this;
   }
@@ -93,20 +87,20 @@ class Colors {
   /**
    * Adds a string mana cost to this class.
    */
-  addFromCost(cost: string[]) {
-    for (var c of cost) {
-      if (c == "w") {
+  addFromCost(cost) {
+    cost.forEach(_c => {
+      if (_c == "w") {
         this._w += 1;
-      } else if (c == "u") {
+      } else if (_c == "u") {
         this._u += 1;
-      } else if (c == "b") {
+      } else if (_c == "b") {
         this._b += 1;
-      } else if (c == "r") {
+      } else if (_c == "r") {
         this._r += 1;
-      } else if (c == "g") {
+      } else if (_c == "g") {
         this._g += 1;
       }
-    };
+    });
 
     return this;
   }
@@ -114,7 +108,7 @@ class Colors {
   /**
    * Adds an array mana cost to this one.
    */
-  addFromArray(cost: number[]) {
+  addFromArray(cost) {
     cost.forEach(color => {
       if (color === WHITE) {
         this._w += 1;
@@ -135,7 +129,7 @@ class Colors {
   /**
    * Merges another instance of Colors into this one.
    */
-  addFromColor(color: Colors) {
+  addFromColor(color) {
     this._w += color.w;
     this._u += color.u;
     this._b += color.b;
@@ -148,7 +142,7 @@ class Colors {
   /**
    * Checks if this color is equal to another
    */
-  equalTo(color: Colors) {
+  equalTo(color) {
     if (
       this._w == color.w &&
       this._u == color.u &&
