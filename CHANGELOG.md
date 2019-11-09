@@ -1,3 +1,9 @@
+## <small>2.12.11 (2019-11-09)</small>
+
+* revert, update just build and updater ([4d4036e](https://github.com/Manuel-777/MTG-Arena-Tool/commit/4d4036e))
+
+
+
 ## <small>2.12.10 (2019-11-09)</small>
 
 * a few more types ([8b04578](https://github.com/Manuel-777/MTG-Arena-Tool/commit/8b04578))
