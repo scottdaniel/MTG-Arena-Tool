@@ -1,3 +1,16 @@
+interface EnumType {
+  CounterType: Record<number, string>,
+  SuperType: Record<number, string>,
+  ResultCode: Record<number, string>,
+  SubType: Record<number, string>,
+  FailureReason: Record<number, string>,
+  Phase: Record<number, string>,
+  MatchState: Record<number, string>,
+  Step: Record<number, string>,
+  CardType: Record<number, string>,
+  Color: Record<number, string>
+}
+
 export const IPC_BACKGROUND = 0;
 export const IPC_MAIN = 1;
 export const IPC_OVERLAY = 2;
@@ -15,7 +28,7 @@ export const MULTI = 7;
 // Magic constant to represent auth token in form
 export const HIDDEN_PW = "********";
 
-export const ENUMS = {
+export const ENUMS: EnumType = {
   CounterType: {
     "1": "+1/+1",
     "2": "-1/-1",
@@ -608,7 +621,7 @@ export const FACE_SPLIT = 5;
 export const FACE_ADVENTURE = 7;
 export const FACE_ADVENTURE_MAIN = 8;
 
-export const FORMATS = {
+export const FORMATS: Record<string, string> = {
   Standard: "Standard",
   TraditionalStandard: "Traditional Standard",
   Historic: "Historic",
@@ -630,8 +643,8 @@ export const FORMATS = {
   XLN: "Ixalan Constructed"
 };
 
-export const COLORS_ALL = ["w", "u", "b", "r", "g", "c"];
-export const COLORS_BRIEF = ["w", "u", "b", "r", "g"];
+export const COLORS_ALL = ["w", "u", "b", "r", "g", "c"] as const;
+export const COLORS_BRIEF = ["w", "u", "b", "r", "g"] as const;
 export const RANKS = [
   "Bronze",
   "Silver",
@@ -639,8 +652,8 @@ export const RANKS = [
   "Platinum",
   "Diamond",
   "Mythic"
-];
-export const CONSTRUCTED_EVENTS = ["Ladder", "Traditional_Ladder"];
+] as const;
+export const CONSTRUCTED_EVENTS = ["Ladder", "Traditional_Ladder"] as const;
 export const OVERLAY_FULL = 0;
 export const OVERLAY_LEFT = 1;
 export const OVERLAY_ODDS = 2;
@@ -650,27 +663,28 @@ export const OVERLAY_DRAFT = 5;
 export const OVERLAY_DRAFT_BREW = 6;
 export const OVERLAY_MIXED = 7;
 
-export const OVERLAY_DRAFT_MODES = [OVERLAY_DRAFT, OVERLAY_DRAFT_BREW];
+export const OVERLAY_DRAFT_MODES = [OVERLAY_DRAFT, OVERLAY_DRAFT_BREW] as const;
 
 export const ARENA_MODE_IDLE = 0;
 export const ARENA_MODE_MATCH = 1;
 export const ARENA_MODE_DRAFT = 2;
 
-const DRAFT_RANKS = [];
-DRAFT_RANKS[12] = "A+";
-DRAFT_RANKS[11] = "A";
-DRAFT_RANKS[10] = "A-";
-DRAFT_RANKS[9] = "B+";
-DRAFT_RANKS[8] = "B";
-DRAFT_RANKS[7] = "B-";
-DRAFT_RANKS[6] = "C+";
-DRAFT_RANKS[5] = "C";
-DRAFT_RANKS[4] = "C-";
-DRAFT_RANKS[3] = "D+";
-DRAFT_RANKS[2] = "D";
-DRAFT_RANKS[1] = "D-";
-DRAFT_RANKS[0] = "F";
-export { DRAFT_RANKS };
+export const DRAFT_RANKS = [
+  "F",
+  "D-",
+  "D",
+  "D+",
+  "C-",
+  "C",
+  "C+",
+  "B-",
+  "B",
+  "B+",
+  "A-",
+  "A",
+  "A+"
+] as const;
+
 export const CARD_TYPE_CODES = [
   "cre",
   "lan",
@@ -679,7 +693,7 @@ export const CARD_TYPE_CODES = [
   "enc",
   "art",
   "pla"
-];
+] as const;
 
 export const CARD_TYPES = [
   "Creatures",
@@ -689,9 +703,9 @@ export const CARD_TYPES = [
   "Enchantments",
   "Artifacts",
   "Planeswalkers"
-];
+] as const;
 
-export const CARD_RARITIES = ["common", "uncommon", "rare", "mythic"];
+export const CARD_RARITIES = ["common", "uncommon", "rare", "mythic"] as const;
 
 export const MANA_COLORS = [
   "#E7CA8E",
@@ -700,9 +714,9 @@ export const MANA_COLORS = [
   "#DD8263",
   "#B7C89E",
   "#E3E3E3"
-];
+] as const;
 
-export const MANA = {
+export const MANA: Record<number, string> = {
   0: "",
   1: "white",
   2: "blue",
@@ -714,7 +728,7 @@ export const MANA = {
   8: "x"
 };
 
-export const RANKS_SORT = {
+export const RANKS_SORT: Record<string, number> = {
   Begginer: 0,
   Bronze: 1,
   Silver: 2,
@@ -724,7 +738,7 @@ export const RANKS_SORT = {
   Mythic: 6
 };
 
-export const PACK_SIZES = {
+export const PACK_SIZES: Record<string, number> = {
   "Ravnica Allegiance": 14,
   "Guilds of Ravnica": 14,
   "Core Set 2020": 15
@@ -745,7 +759,7 @@ export const MAIN_COLLECTION = 5;
 export const MAIN_SETTINGS = 6;
 export const MAIN_UPDATE = 9;
 
-export const SHORTCUT_NAMES = {
+export const SHORTCUT_NAMES: Record<string, string> = {
   shortcut_overlay_1: "Toggle Overlay 1",
   shortcut_overlay_2: "Toggle Overlay 2",
   shortcut_overlay_3: "Toggle Overlay 3",
