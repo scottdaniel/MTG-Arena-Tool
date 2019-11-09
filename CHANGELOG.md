@@ -1,3 +1,9 @@
+## <small>2.12.14 (2019-11-09)</small>
+
+* again ([479afba](https://github.com/Manuel-777/MTG-Arena-Tool/commit/479afba))
+
+
+
 ## <small>2.12.13 (2019-11-09)</small>
 
 * revert builder ([9d26271](https://github.com/Manuel-777/MTG-Arena-Tool/commit/9d26271))
