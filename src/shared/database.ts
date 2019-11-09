@@ -179,16 +179,16 @@ class Database {
     return this.metadata ? this.metadata.events_format : {};
   }
 
-  get limited_ranked_events(): { [id: string]: string } {
-    return this.metadata ? this.metadata.limited_ranked_events : {};
+  get limited_ranked_events(): string[] {
+    return this.metadata ? this.metadata.limited_ranked_events : [];
   }
 
-  get standard_ranked_events(): { [id: number]: string } {
-    return this.metadata ? this.metadata.standard_ranked_events : {};
+  get standard_ranked_events(): string[] {
+    return this.metadata ? this.metadata.standard_ranked_events : [];
   }
 
-  get single_match_events(): { [id: number]: string } {
-    return this.metadata ? this.metadata.single_match_events : {};
+  get single_match_events(): string[] {
+    return this.metadata ? this.metadata.single_match_events : [];
   }
 
   get season_starts(): Date {

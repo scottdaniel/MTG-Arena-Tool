@@ -8,9 +8,9 @@ export interface Metadata {
   events_format: { [id: string]: string },
   sets: CardSet[],
   abilities: { [id: number]: string },
-  limited_ranked_events: { [id: string]: string },
-  standard_ranked_events: { [id: number]: string },
-  single_match_events: { [id: number]: string },
+  limited_ranked_events: string[],
+  standard_ranked_events: string[],
+  single_match_events: string[],
   archetypes: { [id: number]: Archetype }
 }
 
