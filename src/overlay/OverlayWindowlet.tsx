@@ -3,6 +3,7 @@ import React, { useRef } from "react";
 import {
   ARENA_MODE_MATCH,
   ARENA_MODE_DRAFT,
+  ARENA_MODE_IDLE,
   COLORS_ALL,
   OVERLAY_DRAFT_MODES
 } from "../shared/constants";
@@ -89,11 +90,14 @@ export default function OverlayWindowlet(
   //   xhr.send();
   // }, [backgroundImage]);
   const overlaySettings = settings.overlays[index];
+  // Note: ensure this logic matches the logic in main.getOverlayVisible
+  // TODO: extract a common utility?
   const currentModeApplies =
     (OVERLAY_DRAFT_MODES.includes(overlaySettings.mode) &&
       arenaState === ARENA_MODE_DRAFT) ||
     (!OVERLAY_DRAFT_MODES.includes(overlaySettings.mode) &&
-      arenaState === ARENA_MODE_MATCH);
+      arenaState === ARENA_MODE_MATCH) ||
+      (editMode && arenaState === ARENA_MODE_IDLE);
   const isVisible =
     overlaySettings.show && (currentModeApplies || overlaySettings.show_always);
   const tileStyle = parseInt(settings.card_tile_style + "");
@@ -159,9 +163,13 @@ export default function OverlayWindowlet(
       {overlaySettings.top && (
         <div className="outer_wrapper top_nav_wrapper">
           <div
-            className="flex_item overlay_icon click-on"
+            className="button overlay_icon click-on"
             onClick={handleToggleEditMode}
-            style={{ backgroundColor: `var(--color-${COLORS_ALL[index]})` }}
+            style={{
+              backgroundColor: `var(--color-${COLORS_ALL[index]})`,
+              marginRight: "auto"
+            }}
+            title={settings.shortcut_editmode}
           />
           <div
             className="button settings click-on"

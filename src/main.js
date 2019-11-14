@@ -44,6 +44,7 @@ let mainLoaded = false;
 let backLoaded = false;
 let overlayLoaded = false;
 let arenaState = ARENA_MODE_IDLE;
+let editMode = false;
 
 const singleLock = app.requestSingleInstanceLock();
 
@@ -227,6 +228,10 @@ function startApp() {
         }
         break;
 
+      case "toggle_edit_mode":
+        toggleEditMode();
+        break;
+
       case "renderer_window_minimize":
         mainWindow.minimize();
         break;
@@ -367,6 +372,12 @@ function setArenaState(state) {
   updateOverlayVisibility();
 }
 
+function toggleEditMode() {
+  editMode = !editMode;
+  overlay.webContents.send("set_edit_mode", editMode);
+  updateOverlayVisibility();
+}
+
 function setSettings(_settings) {
   try {
     settings = JSON.parse(_settings);
@@ -386,7 +397,7 @@ function setSettings(_settings) {
       openOverlayDevTools
     );
     globalShortcut.register(settings.shortcut_editmode, () => {
-      overlay.webContents.send("edit");
+      toggleEditMode();
     });
     settings.overlays.forEach((_settings, index) => {
       let short = "shortcut_overlay_" + (index + 1);
@@ -431,8 +442,8 @@ function updateOverlayVisibility() {
         .getAllDisplays()
         .find(d => d.id == settings.overlay_display) ||
       electron.screen.getPrimaryDisplay();
-    overlay.show();
     overlay.setBounds(bounds);
+    overlay.show();
   }
 }
 
@@ -440,14 +451,25 @@ function isEntireOverlayVisible() {
   return overlay.isVisible();
 }
 
+/**
+ * Computes whether an Overlay windowlet should be visible based on the
+ * specified current overlay settings and Arena state. For example, given
+ * overlay settings for a draft-mode overlay, it will return true iff Arena
+ * is currently in a draft or idle.
+ *
+ * @param OverlaySettingsData settings
+ */
 function getOverlayVisible(settings) {
   if (!settings) return false;
 
+  // Note: ensure this logic matches the logic in OverlayWindowlet
+  // TODO: extract a common utility?
   const currentModeApplies =
     (OVERLAY_DRAFT_MODES.includes(settings.mode) &&
       arenaState === ARENA_MODE_DRAFT) ||
     (!OVERLAY_DRAFT_MODES.includes(settings.mode) &&
-      arenaState === ARENA_MODE_MATCH);
+      arenaState === ARENA_MODE_MATCH) ||
+    (editMode && arenaState === ARENA_MODE_IDLE);
 
   return settings.show && (currentModeApplies || settings.show_always);
 }
@@ -618,9 +640,9 @@ function createMainWindow() {
       }
     },
     {
-      label: "Edit Mode",
+      label: "Edit Overlay Positions",
       click: () => {
-        overlay.webContents.send("edit");
+        toggleEditMode();
       }
     },
     {
