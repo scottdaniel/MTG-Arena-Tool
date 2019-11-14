@@ -536,6 +536,22 @@ function saveWindowPos() {
   background.webContents.send("windowBounds", obj);
 }
 
+function resetWindows() {
+  const primary = electron.screen.getPrimaryDisplay();
+  const { bounds, id } = primary;
+  // reset overlay to primary
+  overlay.setBounds(bounds);
+  background.webContents.send("save_user_settings", {
+    overlay_display: id,
+    skip_refresh: true
+  });
+  // reset main to primary
+  mainWindow.setBounds({ ...bounds, width: 800, height: 600 });
+  mainWindow.show();
+  mainWindow.moveTop();
+  saveWindowPos();
+}
+
 function createUpdaterWindow() {
   const win = new electron.BrowserWindow({
     frame: false,
@@ -644,6 +660,10 @@ function createMainWindow() {
       click: () => {
         toggleEditMode();
       }
+    },
+    {
+      label: "Reset Windows",
+      click: () => resetWindows()
     },
     {
       label: "Quit",
