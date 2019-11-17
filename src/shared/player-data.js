@@ -25,9 +25,11 @@ const playerDataDefault = {
   arenaVersion: "",
   offline: false,
   patreon: false,
-  patreon_tier: 0,
+  patreon_tier: -1,
   last_log_timestamp: null,
-  last_log_format: ""
+  last_log_format: "",
+  appDbPath: "",
+  playerDbPath: ""
 };
 
 const overlayCfg = {
@@ -270,6 +272,12 @@ class PlayerData {
     this.decks = undefined;
     this.name = undefined;
     this.arenaId = undefined;
+    this.rank = undefined;
+    this.economy = undefined;
+    this.offline = false;
+    this.patreon = false;
+    this.patreon_tier = -1;
+    this.settings = undefined;
     this.draft = this.draft.bind(this);
     this.event = this.event.bind(this);
     this.match = this.match.bind(this);
@@ -289,7 +297,6 @@ class PlayerData {
     });
 
     PlayerData.instance = this;
-    this.rank = undefined;
   }
 
   handleSetData(_event, arg) {

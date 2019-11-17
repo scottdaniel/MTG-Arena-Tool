@@ -235,7 +235,7 @@ function matchIsLimited(match: MatchData): boolean {
   var eventId = match.eventId || match.InternalEventName;
 
   // The order of can matter.
-  if (database.limited_ranked_events.includes(eventId)) {
+  if (eventId && database.limited_ranked_events.includes(eventId)) {
     return true;
   }
   if (eventId) {
@@ -293,6 +293,7 @@ export function completeMatch(match: ExtendedMatchData, matchData: MatchData, ma
   match.eventId = matchData.eventId;
   match.playerDeck = matchData.player.originalDeck.getSave();
   match.oppDeck = getOpponentDeck();
+  match.oppDeck.commandZoneGRPIds = matchData.opponent.commanderGrpIds;
 
   if (
     (!match.tags || !match.tags.length) &&

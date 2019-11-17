@@ -63,6 +63,17 @@ const cardTypes = [
   //"CardType_Vanguard",
 ];
 
+const gameObjectCardTypes = [
+  "GameObjectType_Card",
+  "GameObjectType_SplitCard"
+  // "GameObjectType_SplitLeft",
+  // "GameObjectType_SplitRight"
+];
+
+function isObjectACard(card) {
+  return gameObjectCardTypes.includes(card.type);
+}
+
 function keyValuePair(obj, addTo) {
   // I found some times we get f as the value array.. *shrug*
   if (obj.f) {
@@ -150,7 +161,8 @@ annotationFunctions.AnnotationType_ZoneTransfer = function(ann, details) {
     actionLog(
       ann.affectorId,
       globals.logTime,
-      `${playerName} played ${actionLogGenerateLink(grpId)}`
+      `${playerName} played ${actionLogGenerateLink(grpId)}`,
+      grpId
     );
   }
 
@@ -164,7 +176,8 @@ annotationFunctions.AnnotationType_ZoneTransfer = function(ann, details) {
       actionLog(
         zone.ownerSeatId,
         globals.logTime,
-        `${playerName} drew ${actionLogGenerateLink(grpId)}`
+        `${playerName} drew ${actionLogGenerateLink(grpId)}`,
+        grpId
       );
     } else {
       actionLog(zone.ownerSeatId, globals.logTime, `${playerName} drew a card`);
@@ -188,7 +201,8 @@ annotationFunctions.AnnotationType_ZoneTransfer = function(ann, details) {
     actionLog(
       seat,
       globals.logTime,
-      `${playerName} cast ${actionLogGenerateLink(grpId)}`
+      `${playerName} cast ${actionLogGenerateLink(grpId)}`,
+      grpId
     );
   }
 
@@ -201,7 +215,8 @@ annotationFunctions.AnnotationType_ZoneTransfer = function(ann, details) {
     actionLog(
       seat,
       globals.logTime,
-      `${playerName} discarded ${actionLogGenerateLink(grpId)}`
+      `${playerName} discarded ${actionLogGenerateLink(grpId)}`,
+      grpId
     );
   }
 
@@ -218,13 +233,14 @@ annotationFunctions.AnnotationType_ZoneTransfer = function(ann, details) {
         affector.objectSourceGrpId
       )}'s ${actionLogGenerateAbilityLink(affector.grpId)}`;
     }
-    if (affector.type == "GameObjectType_Card") {
+    if (isObjectACard(affector)) {
       text = actionLogGenerateLink(affector.grpId);
     }
     actionLog(
       seat,
       globals.logTime,
-      `${text} put ${actionLogGenerateLink(grpId)} in ${zone}`
+      `${text} put ${actionLogGenerateLink(grpId)} in ${zone}`,
+      grpId
     );
   }
 
@@ -240,7 +256,7 @@ annotationFunctions.AnnotationType_ZoneTransfer = function(ann, details) {
         affector.objectSourceGrpId
       )}'s ${actionLogGenerateAbilityLink(affector.grpId)}`;
     }
-    if (affector.type == "GameObjectType_Card") {
+    if (isObjectACard(affector)) {
       text = actionLogGenerateLink(affector.grpId);
     }
 
@@ -248,7 +264,8 @@ annotationFunctions.AnnotationType_ZoneTransfer = function(ann, details) {
     actionLog(
       seat,
       globals.logTime,
-      `${text} returned ${actionLogGenerateLink(affected.grpId)} to ${zone}`
+      `${text} returned ${actionLogGenerateLink(affected.grpId)} to ${zone}`,
+      affected.grpId
     );
   }
 
@@ -263,7 +280,7 @@ annotationFunctions.AnnotationType_ZoneTransfer = function(ann, details) {
         affector.objectSourceGrpId
       )}'s ${actionLogGenerateAbilityLink(affector.grpId)}`;
     }
-    if (affector.type == "GameObjectType_Card") {
+    if (isObjectACard(affector)) {
       text = actionLogGenerateLink(affector.grpId);
     }
 
@@ -271,7 +288,8 @@ annotationFunctions.AnnotationType_ZoneTransfer = function(ann, details) {
     actionLog(
       seat,
       globals.logTime,
-      `${text} exiled ${actionLogGenerateLink(affected.grpId)}`
+      `${text} exiled ${actionLogGenerateLink(affected.grpId)}`,
+      affected.grpId
     );
   }
 
@@ -291,7 +309,7 @@ annotationFunctions.AnnotationType_ZoneTransfer = function(ann, details) {
         affector.objectSourceGrpId
       )}'s ${actionLogGenerateAbilityLink(affector.grpId)}`;
     }
-    if (affector.type == "GameObjectType_Card") {
+    if (isObjectACard(affector)) {
       text = actionLogGenerateLink(affector.grpId);
     }
 
@@ -299,7 +317,8 @@ annotationFunctions.AnnotationType_ZoneTransfer = function(ann, details) {
     actionLog(
       seat,
       globals.logTime,
-      `${text} countered ${actionLogGenerateLink(affected.grpId)}`
+      `${text} countered ${actionLogGenerateLink(affected.grpId)}`,
+      affected.grpId
     );
   }
 
@@ -342,7 +361,8 @@ annotationFunctions.AnnotationType_ResolutionStart = function(ann, details) {
       globals.logTime,
       `${actionLogGenerateLink(
         affected.objectSourceGrpId
-      )}'s ${actionLogGenerateAbilityLink(grpId)}`
+      )}'s ${actionLogGenerateAbilityLink(grpId)}`,
+      grpId
     );
   }
 };
@@ -364,7 +384,8 @@ annotationFunctions.AnnotationType_DamageDealt = function(ann, details) {
     globals.logTime,
     `${actionLogGenerateLink(
       affector.grpId
-    )} dealt ${dmg} damage to ${recipient}`
+    )} dealt ${dmg} damage to ${recipient}`,
+    affector.grpId
   );
 };
 
@@ -398,7 +419,7 @@ annotationFunctions.AnnotationType_TargetSpec = function(ann) {
       affector.objectSourceGrpId
     )}'s ${actionLogGenerateAbilityLink(affector.grpId)}`;
   }
-  if (affector.type == "GameObjectType_Card") {
+  if (isObjectACard(affector)) {
     text = actionLogGenerateLink(affector.grpId);
   }
   actionLog(seat, globals.logTime, `${text} targetted ${target}`);
@@ -435,7 +456,8 @@ annotationFunctions.AnnotationType_Scry = function(ann, details) {
         actionLog(
           affector,
           globals.logTime,
-          ` ${actionLogGenerateLink(grpId)} to the top`
+          ` ${actionLogGenerateLink(grpId)} to the top`,
+          grpId
         );
       });
     }
@@ -445,7 +467,8 @@ annotationFunctions.AnnotationType_Scry = function(ann, details) {
         actionLog(
           affector,
           globals.logTime,
-          ` ${actionLogGenerateLink(grpId)} to the bottom`
+          ` ${actionLogGenerateLink(grpId)} to the bottom`,
+          grpId
         );
       });
     }
@@ -462,7 +485,8 @@ annotationFunctions.AnnotationType_CardRevealed = function(ann, details) {
   actionLog(
     owner,
     globals.logTime,
-    `revealed ${actionLogGenerateLink(grpId)} from ${zone.type}`
+    `revealed ${actionLogGenerateLink(grpId)} from ${zone.type}`,
+    grpId
   );
 };
 
@@ -526,7 +550,7 @@ function getOppUsedCards() {
           let obj = globals.currentMatch.gameObjs[id];
           if (
             obj.ownerSeatId == globals.currentMatch.opponent.seat &&
-            obj.type == "GameObjectType_Card"
+            isObjectACard(obj)
           ) {
             grpId = obj.grpId;
             //cardsUsed.push(db.card(grpId).name+" - "+zone.type);
@@ -551,8 +575,9 @@ function getCardsTypeZone() {
       zone.objectInstanceIds.forEach(id => {
         try {
           let obj = globals.currentMatch.gameObjs[id];
-          if (obj.type == "GameObjectType_Card" && obj.grpId !== 3) {
-            obj.cardTypes
+          if (isObjectACard(obj) && obj.grpId !== 3) {
+            const cardTypes = [...new Set(obj.cardTypes)];
+            cardTypes
               .filter(cardType => cardTypes.includes(cardType))
               .forEach(cardType => {
                 let grpId;
@@ -592,7 +617,7 @@ function getPlayerUsedCards() {
           let obj = globals.currentMatch.gameObjs[id];
           if (
             obj.ownerSeatId == globals.currentMatch.player.seat &&
-            obj.type == "GameObjectType_Card"
+            isObjectACard(obj)
           ) {
             grpId = obj.grpId;
             //cardsUsed.push(db.card(grpId).name+" - "+zone.type);

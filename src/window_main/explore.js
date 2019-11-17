@@ -211,7 +211,9 @@ function drawFilters() {
     buttonsTop,
     eventFilters,
     filterEvent || eventFilters[0],
-    () => null,
+    value => {
+      exploreData.filterEvent = value;
+    },
     "explore_query_event"
   );
 
@@ -228,7 +230,9 @@ function drawFilters() {
     buttonsTop,
     sortFilters,
     filterSort,
-    () => null,
+    value => {
+      exploreData.filterSort = value;
+    },
     "explore_query_sort"
   );
   sortSelect.style.width = "130px";
@@ -241,7 +245,9 @@ function drawFilters() {
     buttonsTop,
     sortDirection,
     filterSortDir,
-    () => null,
+    value => {
+      exploreData.filterSortDir = value;
+    },
     "explore_query_sortdir"
   );
   sortDirSelect.style.width = "130px";
@@ -558,7 +564,8 @@ function deckLoad(_deck, index) {
   let wc;
   let n = 0;
   let boosterCost = getBoosterCountEstimate(_deck.wildcards);
-  CARD_RARITIES.forEach(rarity => {
+  CARD_RARITIES.filter(r => r !== "Land").forEach(rarity => {
+    rarity = rarity.toLowerCase();
     const key = rarity[0];
     if (_deck.wildcards.hasOwnProperty(key) && _deck.wildcards[key] > 0) {
       wc = createDiv(["wc_explore_cost", "wc_" + rarity], _deck.wildcards[key]);
