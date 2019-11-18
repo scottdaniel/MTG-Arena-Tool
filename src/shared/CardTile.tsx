@@ -16,6 +16,7 @@ import {
 } from "./util";
 import { addCardHover } from "./card-hover";
 import { DbCardData, Rarity } from "./types/Metadata";
+import _ from "lodash";
 
 export interface CardTileProps {
   card: DbCardData | any; // TODO remove group lands hack
