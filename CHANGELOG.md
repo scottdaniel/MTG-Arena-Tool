@@ -1,3 +1,9 @@
+## <small>2.13.2 (2019-11-18)</small>
+
+* fix the wildcards fix (#735) ([c841e62](https://github.com/Manuel-777/MTG-Arena-Tool/commit/c841e62)), closes [#735](https://github.com/Manuel-777/MTG-Arena-Tool/issues/735)
+
+
+
 ## <small>2.13.1 (2019-11-18)</small>
 
 * 2.13.0 (#699) ([c5ddc00](https://github.com/Manuel-777/MTG-Arena-Tool/commit/c5ddc00)), closes [#699](https://github.com/Manuel-777/MTG-Arena-Tool/issues/699) [#700](https://github.com/Manuel-777/MTG-Arena-Tool/issues/700) [#704](https://github.com/Manuel-777/MTG-Arena-Tool/issues/704) [#706](https://github.com/Manuel-777/MTG-Arena-Tool/issues/706) [#702](https://github.com/Manuel-777/MTG-Arena-Tool/issues/702) [#701](https://github.com/Manuel-777/MTG-Arena-Tool/issues/701) [#705](https://github.com/Manuel-777/MTG-Arena-Tool/issues/705) [#703](https://github.com/Manuel-777/MTG-Arena-Tool/issues/703) [#709](https://github.com/Manuel-777/MTG-Arena-Tool/issues/709) [#717](https://github.com/Manuel-777/MTG-Arena-Tool/issues/717) [#716](https://github.com/Manuel-777/MTG-Arena-Tool/issues/716) [#714](https://github.com/Manuel-777/MTG-Arena-Tool/issues/714) [#713](https://github.com/Manuel-777/MTG-Arena-Tool/issues/713) [#712](https://github.com/Manuel-777/MTG-Arena-Tool/issues/712) [#722](https://github.com/Manuel-777/MTG-Arena-Tool/issues/722) [#723](https://github.com/Manuel-777/MTG-Arena-Tool/issues/723) [#724](https://github.com/Manuel-777/MTG-Arena-Tool/issues/724) [#720](https://github.com/Manuel-777/MTG-Arena-Tool/issues/720)
