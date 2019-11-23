@@ -28,6 +28,7 @@ export const cardTile = function(
   }
 
   const wrap = createDiv([]);
+  wrap.style.width = "-webkit-fill-available";
   const props = {
     card,
     deck,
