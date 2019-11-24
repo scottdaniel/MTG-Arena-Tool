@@ -531,7 +531,6 @@ function appendOverlay(section) {
   displayControls.appendChild(label);
   */
   section.appendChild(displayControls);
-  */
 
   // Copy pasta with bolognesa!
   const pickerLabel = createLabel(
