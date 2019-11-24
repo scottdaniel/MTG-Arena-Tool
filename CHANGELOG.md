@@ -1,3 +1,13 @@
+## 2.14.0 (2019-11-24)
+
+* bugfix reset overlays position (#753) ([3ef2a08](https://github.com/Manuel-777/MTG-Arena-Tool/commit/3ef2a08)), closes [#753](https://github.com/Manuel-777/MTG-Arena-Tool/issues/753)
+* Bugfix Settings page Edit mode button (#754) ([2c86f86](https://github.com/Manuel-777/MTG-Arena-Tool/commit/2c86f86)), closes [#754](https://github.com/Manuel-777/MTG-Arena-Tool/issues/754) [#730](https://github.com/Manuel-777/MTG-Arena-Tool/issues/730) [#747](https://github.com/Manuel-777/MTG-Arena-Tool/issues/747)
+* Bugfixes misc (#748) ([d923030](https://github.com/Manuel-777/MTG-Arena-Tool/commit/d923030)), closes [#748](https://github.com/Manuel-777/MTG-Arena-Tool/issues/748) [#730](https://github.com/Manuel-777/MTG-Arena-Tool/issues/730) [#747](https://github.com/Manuel-777/MTG-Arena-Tool/issues/747)
+* more bugfixes (#752) ([3dd01d2](https://github.com/Manuel-777/MTG-Arena-Tool/commit/3dd01d2)), closes [#752](https://github.com/Manuel-777/MTG-Arena-Tool/issues/752)
+* Overlay borders (#732) ([812ed49](https://github.com/Manuel-777/MTG-Arena-Tool/commit/812ed49)), closes [#732](https://github.com/Manuel-777/MTG-Arena-Tool/issues/732) [#730](https://github.com/Manuel-777/MTG-Arena-Tool/issues/730) [#747](https://github.com/Manuel-777/MTG-Arena-Tool/issues/747)
+
+
+
 ## <small>2.13.4 (2019-11-23)</small>
 
 * bugfix grouped lands (#742) ([a257a18](https://github.com/Manuel-777/MTG-Arena-Tool/commit/a257a18)), closes [#742](https://github.com/Manuel-777/MTG-Arena-Tool/issues/742)
