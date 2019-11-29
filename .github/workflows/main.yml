@@ -26,6 +26,6 @@ jobs:
         with:
           tag-prefix: ''
         env:
-          GITHUB_TOKEN: ${{ env.GH_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
       - name: "cat package.json"
         run: cat ./package.json
