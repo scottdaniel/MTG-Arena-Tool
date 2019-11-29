@@ -93,15 +93,11 @@ function startDraft() {
 }
 
 function getDraftData(id, entry) {
-  const json = entry.json();
   const data = playerData.draft(id) || createDraft(id, entry);
-
-  if (!data.date && json.timestamp) {
+  if (!data.date) {
     // the first event we see we set the date.
-    data.timestamp = json.timestamp;
-    data.date = parseWotcTimeFallback(json.timestamp);
+    data.date = globals.logTime;
   }
-
   return data;
 }
 
@@ -258,7 +254,7 @@ function select_deck(arg) {
   } else {
     globals.currentDeck = new Deck(arg);
   }
-  console.log("Select deck: ", globals.currentDeck, arg);
+  // console.log("Select deck: ", globals.currentDeck, arg);
   globals.originalDeck = globals.currentDeck.clone();
   ipc_send("set_deck", globals.currentDeck.getSave(), IPC_OVERLAY);
 }
@@ -500,7 +496,7 @@ export function onLabelClientToMatchServiceMessageTypeClientToGREMessage(
     const msgType = entry.label.split("_")[1];
     payload = decodePayload(payload, msgType);
     payload = normaliseFields(payload);
-    //console.log("Client To GRE: ", payload);
+    // console.log("Client To GRE: ", payload);
   }
 
   if (payload.submitdeckresp) {
@@ -1175,7 +1171,6 @@ export function onLabelInDraftDraftStatus(entry) {
   startDraft();
   const {
     DraftId: draftId,
-    EventName: eventName,
     PackNumber: packNumber,
     PickNumber: pickNumber,
     PickedCards
@@ -1190,7 +1185,6 @@ export function onLabelInDraftDraftStatus(entry) {
     currentPack: (json.DraftPack || []).slice(0)
   };
   data.draftId = data.id;
-  data.set = getDraftSet(eventName) || data.set;
 
   setDraftData(data);
 }
@@ -1201,7 +1195,6 @@ export function onLabelInDraftMakePick(entry) {
   if (!json) return;
   const {
     DraftId: draftId,
-    EventName: eventName,
     PackNumber: packNumber,
     PickNumber: pickNumber,
     PickedCards: pickedCards
@@ -1210,14 +1203,12 @@ export function onLabelInDraftMakePick(entry) {
   const data = {
     ...getDraftData(draftId, entry),
     draftId,
-    eventName,
     packNumber,
     pickNumber,
     pickedCards,
     currentPack: (json.DraftPack || []).slice(0)
   };
   data.draftId = data.id;
-  data.set = getDraftSet(eventName) || data.set;
   setDraftData(data);
 }
 
@@ -1247,6 +1238,7 @@ export function onLabelInEventCompleteDraft(entry) {
     ...getDraftData(draftId, entry),
     ...json
   };
+  data.set = getDraftSet(json.InternalEventName) || data.set;
   data.id = toolId;
   // clear working-space draft data
   clearDraftData(draftId);
