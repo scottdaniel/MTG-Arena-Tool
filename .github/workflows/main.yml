@@ -1,0 +1,34 @@
+name: "Bump Version"
+
+on:
+  push:
+    branches:
+      - "master"
+
+jobs:
+  bump-version:
+    name: Bump version (${{ github.sha }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node_version: [10, 12]
+
+    steps:
+      - name: "Checkout source code"
+        uses: "actions/checkout@v1"
+        with:
+          ref: ${{ github.ref }}
+      - name: "cat package.json"
+        run: cat ./package.json
+      - name: Use node ${{ matrix.node_version }}
+        uses: actions/setup-node@v1
+        with:
+          version: ${{ matrix.node_version }}
+      - name: "Version Bump"
+        uses: "Manuel-777/gh-action-bump-version@master"
+        with:
+          tag-prefix: ''
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: "cat package.json"
+        run: cat ./package.json
