@@ -28,7 +28,7 @@ import {
   queryElements as $$
 } from "../shared/dom-fns";
 import * as deckDrawer from "../shared/deck-drawer";
-import { cardType } from "../shared/card-types";
+import { cardType } from "../shared/cardTypes";
 import { addCardHover } from "../shared/card-hover";
 import {
   deckTypesStats,
@@ -221,6 +221,7 @@ function drawDeck(div, deck, showWildcards = false) {
         case "Artifact":
           return "Artifacts";
         case "Land":
+        case "Basic Land":
           return "Lands";
         default:
           throw new Error(`Unexpected card type: ${type}`);
@@ -754,8 +755,6 @@ function renderLogInput(section) {
       )
     ) {
       ipcSend("set_log", byId("settings_log_uri").value);
-      remote.app.relaunch();
-      remote.app.exit(0);
     } else {
       logUriInput.value = pd.settings.logUri;
     }
