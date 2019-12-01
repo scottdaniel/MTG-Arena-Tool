@@ -771,6 +771,7 @@ export const MAIN_EXPLORE = 3;
 export const MAIN_ECONOMY = 4;
 export const MAIN_COLLECTION = 5;
 export const MAIN_SETTINGS = 6;
+export const MAIN_TIMELINE = 7;
 export const MAIN_UPDATE = 9;
 export const MAIN_CONSTRUCTED = 10;
 export const MAIN_LIMITED = 11;

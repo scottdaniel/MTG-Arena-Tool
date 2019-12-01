@@ -14,6 +14,7 @@ import {
   MAIN_HOME,
   MAIN_DECKS,
   MAIN_HISTORY,
+  MAIN_TIMELINE,
   MAIN_EVENTS,
   MAIN_EXPLORE,
   MAIN_ECONOMY,
@@ -129,11 +130,12 @@ function TopNav() {
   const homeTab = {...defaultTab, id: MAIN_HOME, title:""};
   const myDecksTab = {...defaultTab, id: MAIN_DECKS, title:"MY DECKS"};
   const historyTab = {...defaultTab, id: MAIN_HISTORY, title:"HISTORY"};
+  const timelineTab = {...defaultTab, id: MAIN_TIMELINE, title:"TIMELINE"};
   const eventsTab = {...defaultTab, id: MAIN_EVENTS, title:"EVENTS"};
   const exploreTab = {...defaultTab, id: MAIN_EXPLORE, title:"EXPLORE"};
   const economyTab = {...defaultTab, id: MAIN_ECONOMY, title:"ECONOMY"};
   const collectionTab = {...defaultTab, id: MAIN_COLLECTION, title:"COLLECTION"};
-  
+
   const contructedNav = {
     callback: setCurrentTab,
     currentTab: currentTab,
@@ -174,6 +176,7 @@ function TopNav() {
         <TopNavItem {...homeTab}/>
         <TopNavItem {...myDecksTab}/>
         <TopNavItem {...historyTab}/>
+        <TopNavItem {...timelineTab}/>
         <TopNavItem {...eventsTab}/>
         <TopNavItem {...exploreTab}/>
         <TopNavItem {...economyTab}/>
