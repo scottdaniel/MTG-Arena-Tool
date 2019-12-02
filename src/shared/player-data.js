@@ -480,6 +480,15 @@ class PlayerData {
     return this.seasonal_rank;
   }
 
+  getSeasonalRankData(seasonOrdinal, type) {
+    let tag = seasonOrdinal + "_" + type.toLowerCase();
+    return this.seasonal_rank[tag] ? this.seasonal_rank[tag] : [];
+  }
+
+  getSeasonal(id) {
+    return this.seasonal[id];
+  }
+
   match(id) {
     if (!this.matchExists(id)) return false;
     const matchData = this[id];

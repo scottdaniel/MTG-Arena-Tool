@@ -3816,3 +3816,15 @@ a:hover {
 .inventory_card_quantity {
     color: var(--color-light);
 }
+
+.TimeLineLine {
+    width: 20px;
+    height: 300px;
+}
+
+.TimeLine {
+    display: flex;
+    margin: 30px;
+    border: 1px solid #ffffff40;
+    background-color: #0000006e;
+}

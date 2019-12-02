@@ -1,9 +1,10 @@
 import {
   EASING_DEFAULT,
   DATE_SEASON,
-  MAIN_HOME ,
+  MAIN_HOME,
   MAIN_DECKS,
   MAIN_HISTORY,
+  MAIN_TIMELINE,
   MAIN_EVENTS,
   MAIN_EXPLORE,
   MAIN_ECONOMY,
@@ -31,6 +32,7 @@ import {
 
 import { openDecksTab } from "./decks";
 import { openHistoryTab } from "./history";
+import { openTimelineTab } from "./timeline";
 import { openEventsTab } from "./events";
 import { openEconomyTab } from "./economy";
 import { openExploreTab } from "./explore";
@@ -40,7 +42,12 @@ import { openSettingsTab } from "./settings";
 import { openHomeTab, requestHome } from "./home";
 
 //
-export function openTab(tab:number, filters = {}, dataIndex = 0, scrollTop = 0) {
+export function openTab(
+  tab: number,
+  filters = {},
+  dataIndex = 0,
+  scrollTop = 0
+) {
   showLoadingBars();
   resetMainContainer();
   switch (tab) {
@@ -49,6 +56,9 @@ export function openTab(tab:number, filters = {}, dataIndex = 0, scrollTop = 0) 
       break;
     case MAIN_HISTORY:
       openHistoryTab(filters, dataIndex, scrollTop);
+      break;
+    case MAIN_TIMELINE:
+      openTimelineTab();
       break;
     case MAIN_EVENTS:
       openEventsTab(filters, dataIndex, scrollTop);
@@ -87,7 +97,7 @@ export function openTab(tab:number, filters = {}, dataIndex = 0, scrollTop = 0) 
   }
 }
 
-export function clickNav(id:number) {
+export function clickNav(id: number) {
   changeBackground("default");
   document.body.style.cursor = "auto";
   anime({
@@ -96,7 +106,11 @@ export function clickNav(id:number) {
     easing: EASING_DEFAULT,
     duration: 350
   });
-  let filters = { date: pd.settings.last_date_filter, eventId: "All Events", rankedMode: false };
+  let filters = {
+    date: pd.settings.last_date_filter,
+    eventId: "All Events",
+    rankedMode: false
+  };
   let sidebarActive = id;
 
   if (id === MAIN_CONSTRUCTED) {
