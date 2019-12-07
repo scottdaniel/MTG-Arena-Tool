@@ -4,7 +4,7 @@ import playerData from "../shared/player-data";
 import mountReactComponent from "./mountReactComponent";
 import _ from "lodash";
 import { getRankColorClass } from "../shared/util";
-
+import { get_rank_index as getRankIndex } from "../shared/util";
 function sortByTimestamp(a: any, b: any): number {
   return a.timestamp - b.timestamp;
 }
@@ -87,10 +87,10 @@ function TimeLinePart(props:any) {
 
   const deckId = playerData.match(lastMatchId).playerDeck.id;
 
-  const rectPoints = `0 ${height - props.oldRankNumeric * 2} ${width} ${height -
-    props.newRankNumeric * 2} ${width} ${height} 0 ${height}`;
-  const linePoints = `0 ${height - props.oldRankNumeric * 2} ${width} ${height -
-    props.newRankNumeric * 2}`;
+  const newPointHeight = height - props.newRankNumeric * 2;
+  const oldwPointHeight = height - props.oldRankNumeric * 2;
+  const rectPoints = `0 ${oldwPointHeight} ${width} ${newPointHeight} ${width} ${height} 0 ${height}`;
+  const linePoints = `0 ${oldwPointHeight} ${width} ${newPointHeight}`;
 
   return (
     <div className={"TimeLineLine" + (hover == deckId ? " hover" : "")} onMouseEnter={() => {
@@ -103,7 +103,26 @@ function TimeLinePart(props:any) {
         />
         <polyline points={linePoints} strokeWidth="1" />
       </svg>
+      {
+        props.oldClass !== props.newClass
+        ? <TimelineRankBullet left={width - 24} height={props.newRankNumeric * 2 + 48} rankClass={props.newClass} rankLevel={props.newLevel} />
+        : <></>
+      }
     </div>
+  );
+}
+
+function TimelineRankBullet(props:any) {
+  const { left, height, rankClass, rankLevel } = props;
+
+  const divStyle = {
+    backgroundPosition: getRankIndex(rankClass, rankLevel) * -48 + "px 0px",
+    margin: `-${height}px 0 0px ${left}px`
+  };
+
+  const divTitle = rankClass + " " + rankLevel;
+  return (
+    <div style={divStyle} title={divTitle} className="timelineRank top_constructed_rank"></div>
   );
 }
 
@@ -132,10 +151,10 @@ function TimelineTab() {
   }, []);
 
   return (
-    <div style={{}} className="TimeLine">
+    <div className="TimeLine">
       {data.map((value: seasonalRankData, index: number) => {
-        //console.log("From: ", value.oldClass, value.oldLevel, "step", value.oldStep, value.oldRankNumeric);
-        //console.log("To:   ", value.newClass, value.newLevel, "step", value.newStep, value.newRankNumeric);
+        console.log("From: ", value.oldClass, value.oldLevel, "step", value.oldStep, value.oldRankNumeric);
+        console.log("To:   ", value.newClass, value.newLevel, "step", value.newStep, value.newRankNumeric);
         return <TimeLinePart
           height={dimensions.height}
           width={dimensions.width / data.length}
