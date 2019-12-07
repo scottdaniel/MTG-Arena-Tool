@@ -3,6 +3,7 @@ import { queryElements as $$ } from "../shared/dom-fns";
 import playerData from "../shared/player-data";
 import mountReactComponent from "./mountReactComponent";
 import _ from "lodash";
+import format from "date-fns/format";
 import { get_rank_index as getRankIndex } from "../shared/util";
 function sortByTimestamp(a: any, b: any): number {
   return a.timestamp - b.timestamp;
@@ -82,7 +83,8 @@ function getSeasonData(
   function morphData(data: seasonalRankData) {
     data.oldRankNumeric = getRankY(data.oldClass, data.oldLevel, data.oldStep);
     data.newRankNumeric = getRankY(data.newClass, data.newLevel, data.newStep);
-    data.date = new Date(data.timestamp);
+    data.date = new Date(data.timestamp * 1000);
+    console.log(data);
     return data;
   }
 
@@ -106,8 +108,14 @@ function TimeLinePart(props:any) {
   const rectPoints = `0 ${oldwPointHeight} ${width} ${newPointHeight} ${width} ${height} 0 ${height}`;
   const linePoints = `0 ${oldwPointHeight} ${width} ${newPointHeight}`;
 
+
+  const style = {
+    // Get a color that is the modulus of the hex ID
+    fill: `hsl(${ parseInt(deckId, 16) % 360 }, 64%, 63%)`
+  }
+
   return (
-    <div className={"TimeLineLine" + (hover == deckId ? " hover" : "")} onMouseEnter={() => {
+    <div style={style} className={"timeline-line" + (hover == deckId ? " hover" : "")} onMouseEnter={() => {
         setHover(deckId);
       }} >
       <svg width={width} height={height} version="1.1">
@@ -140,7 +148,7 @@ function TimelineRankBullet(props:any) {
 
   const divTitle = rankClass + " " + rankLevel;
   return (
-    <div style={divStyle} title={divTitle} className="timelineRank top_constructed_rank"></div>
+    <div style={divStyle} title={divTitle} className="timeline-rank top_constructed_rank"></div>
   );
 }
 
@@ -162,8 +170,8 @@ function TimelineTab() {
   
   const handleResize = function() {
     setDimensions({
-      height: $$(".TimeLine")[0].offsetHeight,
-      width: $$(".TimeLine")[0].offsetWidth
+      height: $$(".timeline-box")[0].offsetHeight,
+      width: $$(".timeline-box")[0].offsetWidth
     });
   };
 
@@ -175,21 +183,27 @@ function TimelineTab() {
     };
   }, []);
 
+  const drawingSeason = data[0].seasonOrdinal;
+  const drawingSeasonDate = data[0].date;
+
   return (
-    <div className="TimeLine">
-      {data.map((value: seasonalRankData, index: number) => {
-        //console.log("From: ", value.oldClass, value.oldLevel, "step", value.oldStep, value.oldRankNumeric);
-        //console.log("To:   ", value.newClass, value.newLevel, "step", value.newStep, value.newRankNumeric);
-        return <TimeLinePart
-          height={dimensions.height}
-          width={dimensions.width / data.length}
-          key={index}
-          hover={hoverDeckId}
-          setHover={setHoverDeckId}
-          {...value}
-        />;
-      })}
-    </div>
+    <>
+      <div className="timeline-title">Season {drawingSeason} - {format(drawingSeasonDate as Date, 'MMMM yyyy')}</div>
+      <div className="timeline-box">
+        {data.map((value: seasonalRankData, index: number) => {
+          //console.log("From: ", value.oldClass, value.oldLevel, "step", value.oldStep, value.oldRankNumeric);
+          //console.log("To:   ", value.newClass, value.newLevel, "step", value.newStep, value.newRankNumeric);
+          return <TimeLinePart
+            height={dimensions.height}
+            width={dimensions.width / data.length}
+            key={index}
+            hover={hoverDeckId}
+            setHover={setHoverDeckId}
+            {...value}
+          />;
+        })}
+      </div>
+    </>
   );
 }
 

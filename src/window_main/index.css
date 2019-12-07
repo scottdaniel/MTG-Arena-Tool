@@ -3817,18 +3817,18 @@ a:hover {
     color: var(--color-light);
 }
 
-.TimeLineLine {
+.timeline-line {
     height: 300px;
-    fill: var(--color-r);
     stroke:var(--color-light);
+    opacity: 1;
 }
 
-.TimeLineLine.hover {
-    fill: var(--color-g);
+.timeline-line.hover {
+    opacity: 0.9;
     background-color: var(--color-light-20);
 }
 
-.timelineRank {
+.timeline-rank {
     position: absolute;
     align-items: center;
     justify-content: center;
@@ -3839,9 +3839,16 @@ a:hover {
     text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
 }
 
-.TimeLine {
+.timeline-box {
     display: flex;
     margin: 30px;
     border: 1px solid #ffffff40;
     background-color: #0000006e;
+}
+
+.timeline-title {
+    font-family: var(--main-font-name);
+    font-size: 16px;
+    color: var(--color-light);
+    margin: 16px 32px 0 32px;
 }
