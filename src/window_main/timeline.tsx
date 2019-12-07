@@ -3,7 +3,6 @@ import { queryElements as $$ } from "../shared/dom-fns";
 import playerData from "../shared/player-data";
 import mountReactComponent from "./mountReactComponent";
 import _ from "lodash";
-import { getRankColorClass } from "../shared/util";
 import { get_rank_index as getRankIndex } from "../shared/util";
 function sortByTimestamp(a: any, b: any): number {
   return a.timestamp - b.timestamp;
@@ -31,6 +30,12 @@ interface seasonalRankData {
   date?: Date;
 }
 
+/**
+ * Get the ranks conversion to a Y coordinate
+ * @param rank Rank name
+ * @param tier Level
+ * @param steps 
+ */
 function getRankY(rank: string, tier: number, steps: number): number {
   let value = 0;
   switch (rank) {
@@ -57,6 +62,11 @@ function getRankY(rank: string, tier: number, steps: number): number {
   return value + 6 * (4 - tier) + steps;
 }
 
+/**
+ * Get the data for this season and add fields to the data for timeline processing
+ * @param type season type ("constructed" or "limited")
+ * @param seasonOrdinal Season number/id (optional)
+ */
 function getSeasonData(
   type = "constructed",
   seasonOrdinal?: number
@@ -82,6 +92,10 @@ function getSeasonData(
     .sort(sortByTimestamp);
 }
 
+/**
+ * Component for a line/stroke of the timeline
+ * @param props 
+ */
 function TimeLinePart(props:any) {
   const { width, height, hover, setHover, lastMatchId } = props;
 
@@ -112,6 +126,10 @@ function TimeLinePart(props:any) {
   );
 }
 
+/**
+ * Component for a Rank "bullet" icon in the timeline
+ * @param props 
+ */
 function TimelineRankBullet(props:any) {
   const { left, height, rankClass, rankLevel } = props;
 
@@ -126,15 +144,22 @@ function TimelineRankBullet(props:any) {
   );
 }
 
+/**
+ * Main component for the Timeline tab
+ * @param props 
+ */
 function TimelineTab() {
-  let data: seasonalRankData[] = getSeasonData("constructed");
   const [ hoverDeckId, setHoverDeckId ] = React.useState("");
   const [dimensions, setDimensions] = React.useState({
     height: window.innerHeight,
     width: window.innerWidth
   });
 
-  let linesWidth = 0;
+  // This should be a select
+  const seasonType = "constructed";
+  // Notice we can see old seasons too adding the seasonOrdinal
+  let data: seasonalRankData[] = getSeasonData(seasonType);
+  
   const handleResize = function() {
     setDimensions({
       height: $$(".TimeLine")[0].offsetHeight,
@@ -143,8 +168,8 @@ function TimelineTab() {
   };
 
   useEffect(() => {
+    // We might want to add a delay here to avoid re-rendering too many times per second while resizing
     window.addEventListener("resize", handleResize);
-
     return () => {
       window.removeEventListener("resize", handleResize);
     };
@@ -153,8 +178,8 @@ function TimelineTab() {
   return (
     <div className="TimeLine">
       {data.map((value: seasonalRankData, index: number) => {
-        console.log("From: ", value.oldClass, value.oldLevel, "step", value.oldStep, value.oldRankNumeric);
-        console.log("To:   ", value.newClass, value.newLevel, "step", value.newStep, value.newRankNumeric);
+        //console.log("From: ", value.oldClass, value.oldLevel, "step", value.oldStep, value.oldRankNumeric);
+        //console.log("To:   ", value.newClass, value.newLevel, "step", value.newStep, value.newRankNumeric);
         return <TimeLinePart
           height={dimensions.height}
           width={dimensions.width / data.length}
