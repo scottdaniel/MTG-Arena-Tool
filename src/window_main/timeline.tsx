@@ -2,6 +2,7 @@ import React, { useEffect, PureComponent } from "react";
 import { queryElements as $$ } from "../shared/dom-fns";
 import playerData from "../shared/player-data";
 import mountReactComponent from "./mountReactComponent";
+import _ from "lodash";
 import { getRankColorClass } from "../shared/util";
 
 function sortByTimestamp(a: any, b: any): number {
@@ -81,23 +82,26 @@ function getSeasonData(
     .sort(sortByTimestamp);
 }
 
-function TimeLinePart({ ...props }) {
-  const [hover, setHover] = React.useState(false);
-  const height = 300;
+function TimeLinePart(props:any) {
+  const { width, height, hover, setHover, lastMatchId } = props;
 
-  const rectPoints = `0 ${height - props.oldRankNumeric * 2} 20 ${height -
-    props.newRankNumeric * 2} 20 ${height} 0 ${height}`;
-  const linePoints = `0 ${height - props.oldRankNumeric * 2} 20 ${height -
+  const deckId = playerData.match(lastMatchId).playerDeck.id;
+
+  const rectPoints = `0 ${height - props.oldRankNumeric * 2} ${width} ${height -
+    props.newRankNumeric * 2} ${width} ${height} 0 ${height}`;
+  const linePoints = `0 ${height - props.oldRankNumeric * 2} ${width} ${height -
     props.newRankNumeric * 2}`;
+
   return (
-    <div className="TimeLineLine">
-      <svg width="20" height={height} version="1.1">
+    <div className={"TimeLineLine" + (hover == deckId ? " hover" : "")} onMouseEnter={() => {
+        setHover(deckId);
+      }} >
+      <svg width={width} height={height} version="1.1">
         <polygon
           points={rectPoints}
-          fill="var(--color-r)"
           strokeWidth="0"
         />
-        <polyline points={linePoints} stroke="var(--color-light)" strokeWidth="1" />
+        <polyline points={linePoints} strokeWidth="1" />
       </svg>
     </div>
   );
@@ -105,13 +109,41 @@ function TimeLinePart({ ...props }) {
 
 function TimelineTab() {
   let data: seasonalRankData[] = getSeasonData("constructed");
-  console.log(data);
+  const [ hoverDeckId, setHoverDeckId ] = React.useState("");
+  const [dimensions, setDimensions] = React.useState({
+    height: window.innerHeight,
+    width: window.innerWidth
+  });
+
+  let linesWidth = 0;
+  const handleResize = function() {
+    setDimensions({
+      height: $$(".TimeLine")[0].offsetHeight,
+      width: $$(".TimeLine")[0].offsetWidth
+    });
+  };
+
+  useEffect(() => {
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
   return (
-    <div className="TimeLine">
+    <div style={{}} className="TimeLine">
       {data.map((value: seasonalRankData, index: number) => {
-        console.log("From: ", value.oldClass, value.oldLevel, "step", value.oldStep, value.oldRankNumeric);
-        console.log("To:   ", value.newClass, value.newLevel, "step", value.newStep, value.newRankNumeric);
-        return <TimeLinePart key={index} {...value} />;
+        //console.log("From: ", value.oldClass, value.oldLevel, "step", value.oldStep, value.oldRankNumeric);
+        //console.log("To:   ", value.newClass, value.newLevel, "step", value.newStep, value.newRankNumeric);
+        return <TimeLinePart
+          height={dimensions.height}
+          width={dimensions.width / data.length}
+          key={index}
+          hover={hoverDeckId}
+          setHover={setHoverDeckId}
+          {...value}
+        />;
       })}
     </div>
   );

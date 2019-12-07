@@ -3818,8 +3818,14 @@ a:hover {
 }
 
 .TimeLineLine {
-    width: 20px;
     height: 300px;
+    fill: var(--color-r);
+    stroke:var(--color-light);
+}
+
+.TimeLineLine.hover {
+    fill: var(--color-g);
+    background-color: var(--color-light-20);
 }
 
 .TimeLine {
