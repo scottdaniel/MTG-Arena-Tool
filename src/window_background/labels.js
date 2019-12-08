@@ -580,7 +580,7 @@ export function onLabelRankUpdated(entry) {
     updateType + json.seasonOrdinal + json.lastMatchId + json.date
   );
 
-  let seasonal_rank = playerData.addSeasonalRank(
+  const seasonalRank = playerData.addSeasonalRank(
     json,
     json.seasonOrdinal,
     updateType
@@ -589,9 +589,13 @@ export function onLabelRankUpdated(entry) {
   const httpApi = require("./httpApi");
   httpApi.httpSetSeasonal(json);
 
-  setData({ rank, seasonal_rank });
+  const id = json.id;
+  const seasonal = { ...playerData.seasonal, [id]: json };
+  setData({ seasonal });
+  setData({ rank, seasonalRank });
   playerDb.upsert("", "rank", rank);
-  playerDb.upsert("", "seasonal_rank", seasonal_rank);
+  playerDb.upsert("seasonal", id, json);
+  playerDb.upsert("", "seasonal_rank", seasonalRank);
 }
 
 export function onLabelMythicRatingUpdated(entry) {
