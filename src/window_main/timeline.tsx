@@ -101,7 +101,7 @@ function getSeasonData(
 function TimeLinePart(props:any) {
   const { width, height, hover, setHover, lastMatchId } = props;
 
-  const deckId = playerData.match(lastMatchId).playerDeck.id;
+  const deckId = playerData.matchExists(lastMatchId) ? playerData.match(lastMatchId).playerDeck.id : "";
 
   const newPointHeight = height - props.newRankNumeric * 2;
   const oldwPointHeight = height - props.oldRankNumeric * 2;
