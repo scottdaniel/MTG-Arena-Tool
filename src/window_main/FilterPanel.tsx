@@ -39,7 +39,7 @@ class FilterPanel {
     showManaFilter: boolean,
     archs: string[],
     showOppManaFilter: boolean,
-    archCounts: { [key: string]: number },
+    archCounts: { [key: string]: number } | null,
     showArchivedFilter: boolean,
     showSortOption: boolean
   ) {
@@ -119,13 +119,15 @@ class FilterPanel {
             showArchivedFilter={this.showArchivedFilter}
             onArchiveClick={this.filterCallback("showArchived")}
           />
-          <WrappedReactSelect
-            className={this.prefixId + "_query_event"}
-            options={this.events}
-            current={this.filters.eventId}
-            callback={this.filterCallback("eventId")}
-            optionFormatter={getReadableEvent}
-          />
+          {!!this.events.length && (
+            <WrappedReactSelect
+              className={this.prefixId + "_query_event"}
+              options={this.events}
+              current={this.filters.eventId}
+              callback={this.filterCallback("eventId")}
+              optionFormatter={getReadableEvent}
+            />
+          )}
         </div>
         {(this.tags.length || this.showManaFilter) && (
           <div className={"filter_column"}>

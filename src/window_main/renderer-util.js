@@ -59,7 +59,8 @@ const localState = {
   lastDataIndex: 0,
   lastScrollHandler: null,
   lastScrollTop: 0,
-  exploreData: null
+  exploreData: null,
+  decksTable: {}
 };
 const actionLogDir = path.join(
   (app || remote.app).getPath("userData"),
@@ -658,8 +659,8 @@ function closeDialog() {
 
 function showColorpicker(
   color,
-  onChange = () => {},
-  onDone = () => {},
+  onChange = color => {},
+  onDone = color => {},
   onCancel = () => {},
   pickerOptions = {}
 ) {
