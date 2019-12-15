@@ -264,9 +264,8 @@ export function openHomeTab(arg, opentab = true) {
     let setsContainer = createDiv(["top_wildcards_sets_cont"]);
     orderedSets.forEach(set => {
       let setbutton = createDiv(["set_filter"]);
-      setbutton.style.backgroundImage = `url(data:image/svg+xml;base64,${
-        db.sets[set].svg
-      })`;
+      const svgData = db.sets[set].svg;
+      setbutton.style.backgroundImage = `url(data:image/svg+xml;base64,${svgData})`;
       if (filteredWildcardsSet !== set) {
         setbutton.classList.add("set_filter_on");
       }

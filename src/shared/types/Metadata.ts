@@ -50,13 +50,13 @@ interface ImageLinks {
 }
 
 export interface CardSet {
-  collation: number,
-  scryfall: string,
-  code: string,
-  arenacode: string,
-  tile: number,
-  release: string,
-  svg: string
+  collation: number;
+  scryfall: string;
+  code: string;
+  arenacode: string;
+  tile: number;
+  release: string;
+  svg: string;
 }
 
 export interface Archetype {

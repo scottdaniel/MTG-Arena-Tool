@@ -384,9 +384,8 @@ export function openCollectionTab() {
 
   orderedSets.forEach(set => {
     let setbutton = createDiv(["set_filter", "set_filter_on"]);
-    setbutton.style.backgroundImage = `url(data:image/svg+xml;base64,${
-      db.sets[set].svg
-    })`;
+    const svgData = db.sets[set].svg;
+    setbutton.style.backgroundImage = `url(data:image/svg+xml;base64,${svgData})`;
     setbutton.title = set;
 
     sets.appendChild(setbutton);
