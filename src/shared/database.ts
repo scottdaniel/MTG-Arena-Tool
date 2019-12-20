@@ -211,6 +211,13 @@ class Database {
     return new Date(this.season.currentSeason.seasonEndTime);
   }
 
+  get defaultSet(): CardSet | undefined {
+    if (!this.metadata) {
+      return undefined;
+    }
+    return this.metadata.sets[""];
+  }
+
   get sets(): { [id: string]: CardSet } {
     if (!this.metadata) {
       return {};
@@ -220,6 +227,16 @@ class Database {
       this.metadata.sets,
       (set, setName) => set && setName && set.code
     );
+  }
+
+  get sortedSetCodes(): string[] {
+    const setCodes = Object.keys(this.sets);
+    setCodes.sort(
+      (a, b) =>
+        new Date(this.sets[b].release).getTime() -
+        new Date(this.sets[a].release).getTime()
+    );
+    return setCodes;
   }
 
   get version() {
