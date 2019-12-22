@@ -231,8 +231,10 @@ function openMatch(id) {
             unique + game.deckSize,
             unknownCards + "x"
           );
-          cardDiv.appendChild(tile);
-          libraryDiv.appendChild(cardDiv);
+          if (tile) {
+            cardDiv.appendChild(tile);
+            libraryDiv.appendChild(cardDiv);
+          }
         }
 
         const handExplanation = createDiv(
