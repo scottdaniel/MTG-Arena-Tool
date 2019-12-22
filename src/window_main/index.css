@@ -3849,6 +3849,11 @@ a:hover {
 .decks_table_body_row {
     display: grid;
     color: var(--color-light);
+    -webkit-transition: all .2s ease-in;
+}
+
+.decks_table_body_row:hover {
+    background-color: rgba(0,0,0,0.4);
 }
 
 .decks_table_body_row .inner_div {
@@ -3860,5 +3865,5 @@ a:hover {
 }
 
 .hover_label:hover {
-    background-color: var(--color-back);
+    background-color: rgba(0,0,0,0.4);
 }
