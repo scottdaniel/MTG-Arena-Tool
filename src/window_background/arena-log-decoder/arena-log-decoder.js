@@ -1,6 +1,6 @@
 import _ from "lodash";
-import nthLastIndexOf from "./nth-last-index-of";
-import * as jsonText from "./jsonText";
+import nthLastIndexOf from "./nthLastIndexOf";
+import * as jsonText from "./json-text";
 import sha1 from "js-sha1";
 
 const LABEL_JSON_PATTERNS = [
