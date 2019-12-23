@@ -114,17 +114,6 @@ export function updateLoading(entry: any): void {
   }
 }
 
-export function normaliseFields(iterator: any): any {
-  if (typeof iterator == "object") {
-    return _.transform(iterator, function(result: any, value, key: string) {
-      const nkey =
-        typeof key == "string" ? key.replace(/List$/, "").toLowerCase() : key;
-      result[nkey] = normaliseFields(value);
-    });
-    return iterator;
-  }
-}
-
 export function unleakString(s: string): string {
   return (" " + s).substr(1);
 }
