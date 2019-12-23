@@ -149,23 +149,19 @@ function processAnnotations(): void {
       );
     }
 
-    let processedOk = true;
     try {
       ann.type.forEach((type: string) => {
         const fn = annotationFunctions[type];
         if (typeof fn == "function") {
           fn(ann, details);
         }
+
+        //globals.currentMatch.annotations = globals.currentMatch.annotations.splice(index, 1);
+        // add this annotation to the list of processed
+        globals.currentMatch.processedAnnotations.push(ann.id);
       });
     } catch (e) {
       // console.log(ann, e);
-      processedOk = false;
-    }
-
-    if (processedOk) {
-      //globals.currentMatch.annotations = globals.currentMatch.annotations.splice(index, 1);
-      // add this annotation to the list of processed
-      globals.currentMatch.processedAnnotations.push(ann.id);
     }
   });
 }
