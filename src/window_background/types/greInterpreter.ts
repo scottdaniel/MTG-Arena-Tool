@@ -1,9 +1,10 @@
 import anyCardsList from "../../shared/deck";
-import { GameInfo, TurnInfo, PlayerData } from "./currentMatch";
+import { GameInfo, TurnInfo, PlayerData, Timer, Action, Team } from "./currentMatch";
 
 export interface KeyValuePair {
   key: string;
   type: string;
+  f?: number[];
   valueNone?: number[];
   valueUint32?: number[];
   valueInt32?: number[];
@@ -16,49 +17,53 @@ export interface KeyValuePair {
 }
 
 export interface DetailsType {
-  grpid: number;
-  orig_id: number;
-  new_id: number;
-  category: string;
-  zone_src: string;
-  zone_dest: string;
-  source_zone: string;
-  topIds: number;
-  bottomIds: number;
-  damage: number;
-  life: number;
+  [key: string]: any;
 }
 
 export interface AnnotationType {
   id: number;
-  type: string[];
   affectorId: number;
   affectedIds: number[];
-  AnnotationType: string;
-  KeyValuePairInfo: KeyValuePair;
-  details: DetailsType[];
-  ignoreForSeatIds: number;
+  type: string[];
+  AnnotationType?: string;
+  KeyValuePairInfo?: KeyValuePair;
+  details?: KeyValuePair[];
+  ignoreForSeatIds?: number;
+}
+
+interface ValueType {
+  value: number;
 }
 
 export interface GameObjectType {
-  id: number;
+  instanceId: number;
   grpId: number;
-  zoneId: string;
-  cardTypes: string[];
+  type: string;
+  zoneId: number;
+  visibility: string;
   ownerSeatId: number;
   controllerSeatId: number;
-  instanceId: number;
-  type: string;
-  objectSourceGrpId: number;
-  visibility: string;
-  parentId: number;
+  cardTypes: string[];
+  superTypes?: string[];
+  subtypes?: string[];
+  color?: string[];
+  viewers: number[];
+  name: number;
+  abilities: number[];
+  overlayGrpId: number;
+  objectSourceGrpId?: number;
+  loyaltyUsed?: ValueType;
+  power?: ValueType;
+  toughness?: ValueType;
 }
 
 export interface ZoneType {
-  ownerSeatId: number;
+  zoneId: number;
   type: string;
+  visibility: string;
+  ownerSeatId: number;
   objectInstanceIds: number[];
-  zoneId: string;
+  viewers: number[];
 }
 
 export interface ZoneData {
@@ -73,7 +78,7 @@ interface GameStateMessage {
   type: string;
   gameStateId: number;
   gameInfo: GameInfo;
-  teams: any[];
+  teams: Team[];
   players: PlayerData[];
   turnInfo: TurnInfo;
   zones: ZoneType[];
@@ -82,9 +87,9 @@ interface GameStateMessage {
   diffDeletedInstanceIds: number[];
   pendingMessageCount: number;
   prevGameStateId: number;
-  timers: any[];
-  update: number;
-  actions: any[];
+  timers: Timer[];
+  update: string;
+  actions: Action[];
   gameObjects: GameObjectType[];
 }
 

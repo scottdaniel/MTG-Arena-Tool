@@ -23,16 +23,17 @@ export interface PlayerData {
   timerIds: number[];
   controllerSeatId: number;
   controllerType: string;
+  pendingMessageType: string;
   startingLifeTotal: number;
 }
 
 export interface TurnInfo {
+  activePlayer: number;
+  decisionPlayer: number;
   phase: number;
   step: number;
   turnNumber: number;
-  activePlayer: number;
   priorityPlayer: number;
-  decisionPlayer: number;
   stormCount: number;
   nextPhase: number;
   nextStep: number;
@@ -45,7 +46,36 @@ interface CardCast {
   player: number;
 }
 
-interface Timer {}
+export interface Timer {
+  timerId: number;
+  type: string;
+  durationSec: number;
+  elapsedSec: number;
+  running: number;
+  behavior: string;
+  warningThresholdSec: number;
+  elapsedMs: number;
+}
+
+interface ManaColor {
+  color: string[];
+  count: number;
+  costId: number;
+}
+
+export interface Action {
+  seatId: number;
+  action: {
+    actionType: string;
+    instanceId: number;
+    manaCost: ManaColor[];
+  };
+}
+
+export interface Team {
+  id: number;
+  playerIds: number[];
+}
 
 interface DeckConstraintInfo {
   minDeckSize: number;

@@ -16,7 +16,8 @@ import {
   AnnotationType,
   DetailsType,
   ZoneData,
-  ZoneType
+  ZoneType,
+  KeyValuePair
 } from "./types/greInterpreter";
 import { DbCardData } from "../shared/types/Metadata.js";
 import { anyCardsList } from "../shared/types/Deck.js";
@@ -103,7 +104,7 @@ function instanceIdToObject(instanceID: number): GameObjectType {
   //return false;
 }
 
-function keyValuePair(obj: any, addTo: any): any {
+function keyValuePair(obj: KeyValuePair, addTo: DetailsType): DetailsType {
   // I found some times we get f as the value array.. *shrug*
   if (obj.f) {
     addTo[obj.key] = obj.f[0];
@@ -145,7 +146,7 @@ function processAnnotations(): void {
     let details: DetailsType;
     if (ann.details) {
       ann.details.forEach(
-        (detail: DetailsType) => (details = keyValuePair(detail, details))
+        (detail: KeyValuePair) => (details = keyValuePair(detail, details))
       );
     }
 
@@ -264,7 +265,7 @@ annotationFunctions.AnnotationType_ZoneTransfer = function(
     const affector = instanceIdToObject(ann.affectorId);
     const seat = obj.ownerSeatId;
     let text = getNameBySeat(seat);
-    if (affector.type == "GameObjectType_Ability") {
+    if (affector.type == "GameObjectType_Ability" && affector.objectSourceGrpId) {
       text = `${actionLogGenerateLink(
         affector.objectSourceGrpId
       )}'s ${actionLogGenerateAbilityLink(affector.grpId)}`;
@@ -287,7 +288,7 @@ annotationFunctions.AnnotationType_ZoneTransfer = function(
     const affector = instanceIdToObject(ann.affectorId);
 
     let text = "";
-    if (affector.type == "GameObjectType_Ability") {
+    if (affector.type == "GameObjectType_Ability" && affector.objectSourceGrpId) {
       text = `${actionLogGenerateLink(
         affector.objectSourceGrpId
       )}'s ${actionLogGenerateAbilityLink(affector.grpId)}`;
@@ -311,7 +312,7 @@ annotationFunctions.AnnotationType_ZoneTransfer = function(
     const affector = instanceIdToObject(ann.affectorId);
 
     let text = "";
-    if (affector.type == "GameObjectType_Ability") {
+    if (affector.type == "GameObjectType_Ability" && affector.objectSourceGrpId) {
       text = `${actionLogGenerateLink(
         affector.objectSourceGrpId
       )}'s ${actionLogGenerateAbilityLink(affector.grpId)}`;
@@ -340,7 +341,7 @@ annotationFunctions.AnnotationType_ZoneTransfer = function(
     const affected = instanceIdToObject(ann.affectedIds[0]);
 
     let text = "";
-    if (affector.type == "GameObjectType_Ability") {
+    if (affector.type == "GameObjectType_Ability" && affector.objectSourceGrpId) {
       text = `${actionLogGenerateLink(
         affector.objectSourceGrpId
       )}'s ${actionLogGenerateAbilityLink(affector.grpId)}`;
@@ -374,17 +375,18 @@ annotationFunctions.AnnotationType_AbilityInstanceCreated = function(
   if (affector) {
     globals.currentMatch.gameObjs[affected] = {
       instanceId: affected,
-      grpId: 0,
+      grpId: affector.grpId,
       type: "GameObjectType_Ability",
       zoneId: affector.zoneId,
       visibility: "Visibility_Public",
       ownerSeatId: affector.ownerSeatId,
       controllerSeatId: affector.controllerSeatId,
       objectSourceGrpId: affector.grpId,
-      parentId: affector.instanceId,
-      // Maybe a custom type for our match data we created and is missing these two
-      id: 0,
-      cardTypes: []
+      cardTypes: [],
+      viewers: affector.viewers,
+      name: affector.name,
+      abilities: affector.abilities,
+      overlayGrpId: affector.overlayGrpId
     };
   }
 };
@@ -396,7 +398,7 @@ annotationFunctions.AnnotationType_ResolutionStart = function(
   const affected = instanceIdToObject(ann.affectedIds[0]);
   const grpId = details.grpid;
 
-  if (affected.type == "GameObjectType_Ability") {
+  if (affected.type == "GameObjectType_Ability" && affected.objectSourceGrpId) {
     affected.grpId = grpId;
     actionLog(
       affected.controllerSeatId,
@@ -463,7 +465,7 @@ annotationFunctions.AnnotationType_TargetSpec = function(
   const affector = instanceIdToObject(ann.affectorId);
   const seat = affector.ownerSeatId;
   let text = getNameBySeat(seat);
-  if (affector.type == "GameObjectType_Ability") {
+  if (affector.type == "GameObjectType_Ability" && affector.objectSourceGrpId) {
     text = `${actionLogGenerateLink(
       affector.objectSourceGrpId
     )}'s ${actionLogGenerateAbilityLink(affector.grpId)}`;
