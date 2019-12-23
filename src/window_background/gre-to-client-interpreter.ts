@@ -720,7 +720,6 @@ GREMessages.GREMessageType_ConnectResp = function(msg: GreMessage): void {
   }
 };
 
-
 function checkForStartingLibrary(): number[] {
   let zoneHand: ZoneType, zoneLibrary: ZoneType;
   Object.keys(globals.currentMatch.zones).forEach(key => {
@@ -908,7 +907,7 @@ GREMessages.GREMessageType_GameStateMessage = function(msg: GreMessage): void {
 GREMessages.GREMessageType_DieRollResultsResp = function(msg): void {
   if (msg.dieRollResultsResp) {
     const highest = msg.dieRollResultsResp.playerDieRolls.reduce((a, b) => {
-      if ((a.rollValue ? a.rollValue : 0) > (b.rollValue ? b.rollValue : 0)) {
+      if ((a.rollValue ?? 0) > (b.rollValue ?? 0)) {
         return a;
       } else {
         return b;
