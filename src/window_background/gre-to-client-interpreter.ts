@@ -444,9 +444,7 @@ annotationFunctions.AnnotationType_ModifiedLife = function(
 ): void {
   const affected = ann.affectedIds[0];
   const total = globals.currentMatch.players[affected].lifeTotal;
-
-  let lifeStr = "";
-  if (details.life > 0) lifeStr = "+" + details.life;
+  const lifeStr = details.life > 0 ? "+" + details.life : "";
 
   actionLog(
     affected,
@@ -484,6 +482,7 @@ annotationFunctions.AnnotationType_Scry = function(
   ann: AnnotationType,
   details: DetailsType
 ): void {
+  // REVIEW SCRY ANNOTATION
   let affector = ann.affectorId;
   if (affector > 3) {
     affector = instanceIdToObject(affector).ownerSeatId;
