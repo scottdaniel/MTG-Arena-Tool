@@ -11,7 +11,7 @@ import db from "../shared/database";
 import { playerDb } from "../shared/db/LocalDatabase";
 import CardsList from "../shared/cardsList";
 import { get_deck_colors, objectClone } from "../shared/util";
-import * as greToClientInterpreter from "./gre-to-client-interpreter";
+import * as greToClientInterpreter from "./greToClientInterpreter";
 import playerData from "../shared/player-data";
 import sha1 from "js-sha1";
 import globals from "./globals";
