@@ -19,9 +19,7 @@ import {
   ZoneType,
   KeyValuePair
 } from "./types/greInterpreter";
-import { DbCardData } from "../shared/types/Metadata.js";
-import { anyCardsList } from "../shared/types/Deck.js";
-import { GameInfo, TurnInfo } from "./types/currentMatch.js";
+import { GameInfo, TurnInfo } from "./types/greInterpreter";
 
 const actionType = [];
 actionType[0] = "ActionType_None";
@@ -76,14 +74,16 @@ function isObjectACard(card: GameObjectType): boolean {
   return gameObjectCardTypes.includes(card.type);
 }
 
-function noInstanceException(
-  orig: number,
-  instanceID: number,
-  instance: GameObjectType
-): void {
-  this.message = `No instance with ID ${orig} found.`;
-  this.instanceID = instanceID;
-  this.instance = instance;
+class NoInstanceException {
+  private message: string;
+  private instanceID: number;
+  private instance: GameObjectType;
+
+  constructor(orig: number, instanceID: number, instance: GameObjectType) {
+    this.message = `No instance with ID ${orig} found.`;
+    this.instanceID = instanceID;
+    this.instance = instance;
+  }
 }
 
 function instanceIdToObject(instanceID: number): GameObjectType {
@@ -99,7 +99,7 @@ function instanceIdToObject(instanceID: number): GameObjectType {
   if (instance) {
     return instance;
   }
-  throw new noInstanceException(orig, instanceID, instance);
+  throw new NoInstanceException(orig, instanceID, instance);
   //return false;
 }
 
@@ -137,6 +137,10 @@ function keyValuePair(obj: KeyValuePair, addTo: DetailsType): DetailsType {
   return addTo;
 }
 
+const annotationFunctions: {
+  [key: string]: (ann: AnnotationType, details: DetailsType) => void;
+} = {};
+
 function processAnnotations(): void {
   globals.currentMatch.annotations.forEach((ann: AnnotationType) => {
     // if this annotation has already been processed, skip
@@ -172,10 +176,6 @@ function removeProcessedAnnotations(): void {
       !globals.currentMatch.processedAnnotations.includes(ann.id)
   );
 }
-
-const annotationFunctions: {
-  [key: string]: (ann: AnnotationType, details: DetailsType) => void;
-} = {};
 
 annotationFunctions.AnnotationType_ObjectIdChanged = function(
   ann: AnnotationType,
@@ -377,8 +377,7 @@ annotationFunctions.AnnotationType_ZoneTransfer = function(
 };
 
 annotationFunctions.AnnotationType_AbilityInstanceCreated = function(
-  ann: AnnotationType,
-  details: DetailsType
+  ann: AnnotationType
 ): void {
   const affected = ann.affectedIds[0];
   const affector = instanceIdToObject(ann.affectorId);

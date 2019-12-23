@@ -1,5 +1,4 @@
 import anyCardsList from "../../shared/deck";
-import { GameInfo, TurnInfo, PlayerData, Timer, Action, Team } from "./currentMatch";
 
 export interface KeyValuePair {
   key: string;
@@ -55,6 +54,93 @@ export interface GameObjectType {
   loyaltyUsed?: ValueType;
   power?: ValueType;
   toughness?: ValueType;
+}
+
+export interface GameInfo {
+  matchID: string;
+  gameNumber: number;
+  stage: string;
+  type: string;
+  variant: string;
+  matchState: string;
+  matchWinCondition: string;
+  maxTimeoutCount: number;
+  maxPipCount: number;
+  timeoutDurationSec: number;
+  results: Result[];
+  superFormat: string;
+  mulliganType: string;
+  freeMulliganCount: number;
+  deckConstraintInfo: DeckConstraintInfo;
+}
+
+interface DeckConstraintInfo {
+  minDeckSize: number;
+  maxDeckSize: number;
+  maxSideboardSize: number;
+}
+
+export interface Timer {
+  timerId: number;
+  type: string;
+  durationSec: number;
+  elapsedSec: number;
+  running: number;
+  behavior: string;
+  warningThresholdSec: number;
+  elapsedMs: number;
+}
+
+export interface PlayerData {
+  lifeTotal: number;
+  systemSeatNumber: number;
+  maxHandSize: number;
+  teamId: number;
+  timerIds: number[];
+  controllerSeatId: number;
+  controllerType: string;
+  pendingMessageType: string;
+  startingLifeTotal: number;
+}
+
+export interface TurnInfo {
+  activePlayer: number;
+  decisionPlayer: number;
+  phase: number;
+  step: number;
+  turnNumber: number;
+  priorityPlayer: number;
+  stormCount: number;
+  nextPhase: number;
+  nextStep: number;
+  currentPriority: number;
+}
+
+interface ManaColor {
+  color: string[];
+  count: number;
+  costId: number;
+}
+
+export interface Action {
+  seatId: number;
+  action: {
+    actionType: string;
+    instanceId: number;
+    manaCost: ManaColor[];
+  };
+}
+
+export interface Team {
+  id: number;
+  playerIds: number[];
+}
+
+interface Result {
+  scope: string;
+  result: string;
+  winningTeamId: number;
+  reason: string;
 }
 
 export interface ZoneType {
