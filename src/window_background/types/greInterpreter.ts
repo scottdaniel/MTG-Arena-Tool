@@ -158,6 +158,19 @@ interface GameObjectTypeTriggerHolder extends GameObjectType {
 
 interface GameObjectTypeAdventure extends GameObjectType {
   type: "GameObjectType_Adventure";
+  instanceId: number;
+  grpId: number;
+  zoneId: number;
+  visibility: string;
+  ownerSeatId: number;
+  controllerSeatId: number;
+  cardTypes: string[];
+  subtypes: string[];
+  color: string[];
+  name: number;
+  abilities: number[];
+  parentId: number;
+  overlayGrpId: number;
 }
 
 export type GameObject =
