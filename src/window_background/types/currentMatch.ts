@@ -3,9 +3,13 @@ import {
   GameInfo,
   GreMessage,
   AnnotationType,
-  GameObjectType,
+  GameObject,
   ZoneType,
-  ZoneData
+  ZoneData,
+  PlayerData,
+  TurnInfo,
+  Timer,
+  Result
 } from "./greInterpreter";
 
 export interface MatchPlayer {
@@ -33,7 +37,7 @@ export interface MatchData {
   playerCardsLeft: Deck;
   annotations: AnnotationType[];
   processedAnnotations: number[];
-  gameObjs: { [key: number]: GameObjectType };
+  gameObjs: { [key: number]: GameObject };
   turnInfo: TurnInfo;
   priorityTimers: number[];
   currentPriority: number;

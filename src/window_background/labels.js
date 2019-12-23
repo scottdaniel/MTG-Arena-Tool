@@ -370,12 +370,10 @@ export function onLabelOutLogInfo(entry) {
         });
 
         Object.keys(mainDiff).forEach(id => {
-          if (mainDiff[id] > 0) {
-            for (let i = 0; i < mainDiff[id]; i++) {
-              sideboardChanges.added.push(id);
-            }
-            //console.log(mainDiff[id] + " - " + db.card(id).name);
+          for (let i = 0; i < mainDiff[id]; i++) {
+            sideboardChanges.added.push(id);
           }
+          //console.log(mainDiff[id] + " - " + db.card(id).name);
         });
 
         const sideDiff = {};
@@ -389,12 +387,10 @@ export function onLabelOutLogInfo(entry) {
         });
 
         Object.keys(sideDiff).forEach(id => {
-          if (sideDiff[id] > 0) {
-            for (let i = 0; i < sideDiff[id]; i++) {
-              sideboardChanges.removed.push(id);
-            }
-            //console.log(sideDiff[id] + " - " + db.card(id).name);
+          for (let i = 0; i < sideDiff[id]; i++) {
+            sideboardChanges.removed.push(id);
           }
+          //console.log(sideDiff[id] + " - " + db.card(id).name);
         });
 
         /*

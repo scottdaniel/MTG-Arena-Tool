@@ -35,26 +35,144 @@ interface ValueType {
 }
 
 export interface GameObjectType {
+  type: string;
+  zoneId: number;
+  controllerSeatId: number;
+  grpId: number;
+  instanceId: number;
+  ownerSeatId: number;
+  /*
+  groupId: number;
+  visibility: string;
+  superTypes: string[];
+  cardTypes: string[];
+  subtypes: string[];
+  color: string[];
+  power: ValueType;
+  toughness: ValueType;
+  isCopy: number;
+  isTapped: number;
+  hasSummoningSickness: boolean;
+  attackState: number;
+  blockState: number;
+  damage: number;
+  attackInfo: number;
+  blockInfo: number;
+  viewers: number[];
+  loyalty: number;
+  objectSourceGrpId: number;
+  name: number;
+  abilities: number[];
+  parentId: number;
+  overlayGrpId: number;
+  isFacedown: boolean;
+  skinCode: number;
+  loyaltyUsed: ValueType;
+  */
+}
+
+interface GameObjectTypeCard extends GameObjectType {
+  type: "GameObjectType_Card";
   instanceId: number;
   grpId: number;
-  type: string;
+  zoneId: number;
+  visibility: string;
+  ownerSeatId: 1;
+  controllerSeatId: 1;
+  cardTypes: string[];
+  subtypes: string[];
+  color: string[];
+  power: ValueType;
+  toughness: ValueType;
+  name: number;
+  abilities: number[];
+  overlayGrpId: number;
+}
+
+interface GameObjectTypeToken extends GameObjectType {
+  type: "GameObjectType_Token";
+  instanceId: number;
+  grpId: number;
   zoneId: number;
   visibility: string;
   ownerSeatId: number;
   controllerSeatId: number;
   cardTypes: string[];
-  superTypes?: string[];
-  subtypes?: string[];
-  color?: string[];
-  viewers: number[];
+  subtypes: string[];
+  power: ValueType;
+  toughness: ValueType;
+  hasSummoningSickness: boolean;
+  objectSourceGrpId: number;
+  name: number;
+  abilities: number[];
+  parentId: number;
+  overlayGrpId: number;
+}
+
+export interface GameObjectTypeAbility extends GameObjectType {
+  type: "GameObjectType_Ability";
+  instanceId: number;
+  grpId: number;
+  zoneId: number;
+  visibility: string;
+  ownerSeatId: number;
+  controllerSeatId: number;
+  objectSourceGrpId: number;
+  parentId: number;
+}
+
+interface GameObjectTypeEmblem extends GameObjectType {
+  type: "GameObjectType_Emblem";
+}
+
+interface GameObjectTypeSplitCard extends GameObjectType {
+  type: "GameObjectType_SplitCard";
+}
+
+interface GameObjectTypeSplitLeft extends GameObjectType {
+  type: "GameObjectType_SplitLeft";
+}
+
+interface GameObjectTypeSplitRight extends GameObjectType {
+  type: "GameObjectType_SplitRight";
+}
+
+interface GameObjectTypeRevealedCard extends GameObjectType {
+  type: "GameObjectType_RevealedCard";
+  instanceId: number;
+  grpId: number;
+  zoneId: number;
+  visibility: string;
+  ownerSeatId: number;
+  controllerSeatId: number;
+  cardTypes: string[];
+  subtypes: string[];
+  power: ValueType;
+  toughness: ValueType;
   name: number;
   abilities: number[];
   overlayGrpId: number;
-  objectSourceGrpId?: number;
-  loyaltyUsed?: ValueType;
-  power?: ValueType;
-  toughness?: ValueType;
 }
+
+interface GameObjectTypeTriggerHolder extends GameObjectType {
+  type: "GameObjectType_TriggerHolder";
+}
+
+interface GameObjectTypeAdventure extends GameObjectType {
+  type: "GameObjectType_Adventure";
+}
+
+export type GameObject =
+  | GameObjectTypeCard
+  | GameObjectTypeToken
+  | GameObjectTypeAbility
+  | GameObjectTypeEmblem
+  | GameObjectTypeSplitCard
+  | GameObjectTypeSplitLeft
+  | GameObjectTypeSplitRight
+  | GameObjectTypeRevealedCard
+  | GameObjectTypeTriggerHolder
+  | GameObjectTypeAdventure;
 
 export interface GameInfo {
   matchID: string;
@@ -136,7 +254,7 @@ export interface Team {
   playerIds: number[];
 }
 
-interface Result {
+export interface Result {
   scope: string;
   result: string;
   winningTeamId: number;
@@ -168,7 +286,7 @@ interface GameStateMessage {
   players: PlayerData[];
   turnInfo: TurnInfo;
   zones: ZoneType[];
-  GameObjectTypes: GameObjectType[];
+  GameObjectTypes: GameObject[];
   annotations: AnnotationType[];
   diffDeletedInstanceIds: number[];
   pendingMessageCount: number;
@@ -176,7 +294,7 @@ interface GameStateMessage {
   timers: Timer[];
   update: string;
   actions: Action[];
-  gameObjects: GameObjectType[];
+  gameObjects: GameObject[];
 }
 
 export interface GreMessage {

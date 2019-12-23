@@ -12,14 +12,16 @@ import getNameBySeat from "./getNameBySeat";
 import update_deck from "./updateDeck";
 import {
   GreMessage,
-  GameObjectType,
   AnnotationType,
   DetailsType,
   ZoneData,
   ZoneType,
-  KeyValuePair
+  KeyValuePair,
+  GameInfo,
+  TurnInfo,
+  GameObject,
+  GameObjectTypeAbility
 } from "./types/greInterpreter";
-import { GameInfo, TurnInfo } from "./types/greInterpreter";
 
 const actionType = [];
 actionType[0] = "ActionType_None";
@@ -61,32 +63,28 @@ const actionLogGenerateAbilityLink = function(abId: number): string {
   return `<log-ability id="${abId}">ability</log-ability>`;
 };
 
-const gameObjectCardTypes: string[] = [
-  "GameObjectType_Card",
-  "GameObjectType_SplitCard"
-  // "GameObjectType_SplitLeft",
-  // "GameObjectType_SplitRight"
-];
-
 const FACE_DOWN_CARD = 3;
 
-function isObjectACard(card: GameObjectType): boolean {
-  return gameObjectCardTypes.includes(card.type);
+function isObjectACard(card: GameObject): boolean {
+  return (
+    card.type == "GameObjectType_Card" ||
+    card.type == "GameObjectType_SplitCard"
+  );
 }
 
 class NoInstanceException {
   private message: string;
   private instanceID: number;
-  private instance: GameObjectType;
+  private instance: GameObject;
 
-  constructor(orig: number, instanceID: number, instance: GameObjectType) {
+  constructor(orig: number, instanceID: number, instance: GameObject) {
     this.message = `No instance with ID ${orig} found.`;
     this.instanceID = instanceID;
     this.instance = instance;
   }
 }
 
-function instanceIdToObject(instanceID: number): GameObjectType {
+function instanceIdToObject(instanceID: number): GameObject {
   const orig = instanceID;
   while (
     !globals.currentMatch.gameObjs[instanceID] &&
@@ -264,10 +262,7 @@ annotationFunctions.AnnotationType_ZoneTransfer = function(
     const affector = instanceIdToObject(ann.affectorId);
     const seat = obj.ownerSeatId;
     let text = getNameBySeat(seat);
-    if (
-      affector.type == "GameObjectType_Ability" &&
-      affector.objectSourceGrpId
-    ) {
+    if (affector.type == "GameObjectType_Ability") {
       text = `${actionLogGenerateLink(
         affector.objectSourceGrpId
       )}'s ${actionLogGenerateAbilityLink(affector.grpId)}`;
@@ -290,10 +285,7 @@ annotationFunctions.AnnotationType_ZoneTransfer = function(
     const affector = instanceIdToObject(ann.affectorId);
 
     let text = "";
-    if (
-      affector.type == "GameObjectType_Ability" &&
-      affector.objectSourceGrpId
-    ) {
+    if (affector.type == "GameObjectType_Ability") {
       text = `${actionLogGenerateLink(
         affector.objectSourceGrpId
       )}'s ${actionLogGenerateAbilityLink(affector.grpId)}`;
@@ -317,10 +309,7 @@ annotationFunctions.AnnotationType_ZoneTransfer = function(
     const affector = instanceIdToObject(ann.affectorId);
 
     let text = "";
-    if (
-      affector.type == "GameObjectType_Ability" &&
-      affector.objectSourceGrpId
-    ) {
+    if (affector.type == "GameObjectType_Ability") {
       text = `${actionLogGenerateLink(
         affector.objectSourceGrpId
       )}'s ${actionLogGenerateAbilityLink(affector.grpId)}`;
@@ -349,10 +338,7 @@ annotationFunctions.AnnotationType_ZoneTransfer = function(
     const affected = instanceIdToObject(ann.affectedIds[0]);
 
     let text = "";
-    if (
-      affector.type == "GameObjectType_Ability" &&
-      affector.objectSourceGrpId
-    ) {
+    if (affector.type == "GameObjectType_Ability") {
       text = `${actionLogGenerateLink(
         affector.objectSourceGrpId
       )}'s ${actionLogGenerateAbilityLink(affector.grpId)}`;
@@ -384,20 +370,16 @@ annotationFunctions.AnnotationType_AbilityInstanceCreated = function(
 
   if (affector) {
     globals.currentMatch.gameObjs[affected] = {
+      type: "GameObjectType_Ability",
       instanceId: affected,
       grpId: affector.grpId,
-      type: "GameObjectType_Ability",
       zoneId: affector.zoneId,
       visibility: "Visibility_Public",
       ownerSeatId: affector.ownerSeatId,
       controllerSeatId: affector.controllerSeatId,
       objectSourceGrpId: affector.grpId,
-      cardTypes: [],
-      viewers: affector.viewers,
-      name: affector.name,
-      abilities: affector.abilities,
-      overlayGrpId: affector.overlayGrpId
-    };
+      parentId: affector.instanceId
+    } as GameObjectTypeAbility;
   }
 };
 
@@ -408,7 +390,7 @@ annotationFunctions.AnnotationType_ResolutionStart = function(
   const affected = instanceIdToObject(ann.affectedIds[0]);
   const grpId = details.grpid;
 
-  if (affected.type == "GameObjectType_Ability" && affected.objectSourceGrpId) {
+  if (affected.type == "GameObjectType_Ability") {
     affected.grpId = grpId;
     actionLog(
       affected.controllerSeatId,
@@ -475,7 +457,7 @@ annotationFunctions.AnnotationType_TargetSpec = function(
   const affector = instanceIdToObject(ann.affectorId);
   const seat = affector.ownerSeatId;
   let text = getNameBySeat(seat);
-  if (affector.type == "GameObjectType_Ability" && affector.objectSourceGrpId) {
+  if (affector.type == "GameObjectType_Ability") {
     text = `${actionLogGenerateLink(
       affector.objectSourceGrpId
     )}'s ${actionLogGenerateAbilityLink(affector.grpId)}`;
@@ -597,7 +579,7 @@ function getCardsTypeZone(): ZoneData {
     if (zone.objectInstanceIds) {
       zone.objectInstanceIds.forEach((id: number) => {
         try {
-          const obj = globals.currentMatch.gameObjs[id] as GameObjectType;
+          const obj = globals.currentMatch.gameObjs[id] as GameObject;
           if (isObjectACard(obj) && obj.grpId !== FACE_DOWN_CARD) {
             const cardTypes = [...new Set(obj.cardTypes)] as string[];
             cardTypes
@@ -890,7 +872,7 @@ GREMessages.GREMessageType_GameStateMessage = function(msg: GreMessage): void {
   }
 
   if (gameState.gameObjects) {
-    gameState.gameObjects.forEach((obj: GameObjectType) => {
+    gameState.gameObjects.forEach((obj: GameObject) => {
       globals.currentMatch.gameObjs[obj.instanceId] = obj;
       globals.instanceToCardIdMap[obj.instanceId] = obj.grpId;
     });
