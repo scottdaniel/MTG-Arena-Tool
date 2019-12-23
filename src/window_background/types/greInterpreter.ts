@@ -39,9 +39,9 @@ export interface GameObjectType {
   grpId: number;
   instanceId: number;
   ownerSeatId: number;
+  visibility: string;
   /*
   groupId: number;
-  visibility: string;
   superTypes: string[];
   cardTypes: string[];
   subtypes: string[];
@@ -71,11 +71,6 @@ export interface GameObjectType {
 
 interface GameObjectTypeCard extends GameObjectType {
   type: "GameObjectType_Card";
-  instanceId: number;
-  grpId: number;
-  zoneId: number;
-  visibility: string;
-  ownerSeatId: 1;
   controllerSeatId: 1;
   cardTypes: string[];
   subtypes: string[];
@@ -89,11 +84,6 @@ interface GameObjectTypeCard extends GameObjectType {
 
 interface GameObjectTypeToken extends GameObjectType {
   type: "GameObjectType_Token";
-  instanceId: number;
-  grpId: number;
-  zoneId: number;
-  visibility: string;
-  ownerSeatId: number;
   controllerSeatId: number;
   cardTypes: string[];
   subtypes: string[];
@@ -109,11 +99,6 @@ interface GameObjectTypeToken extends GameObjectType {
 
 export interface GameObjectTypeAbility extends GameObjectType {
   type: "GameObjectType_Ability";
-  instanceId: number;
-  grpId: number;
-  zoneId: number;
-  visibility: string;
-  ownerSeatId: number;
   controllerSeatId: number;
   objectSourceGrpId: number;
   parentId: number;
@@ -137,11 +122,6 @@ interface GameObjectTypeSplitRight extends GameObjectType {
 
 interface GameObjectTypeRevealedCard extends GameObjectType {
   type: "GameObjectType_RevealedCard";
-  instanceId: number;
-  grpId: number;
-  zoneId: number;
-  visibility: string;
-  ownerSeatId: number;
   controllerSeatId: number;
   cardTypes: string[];
   subtypes: string[];
@@ -158,11 +138,6 @@ interface GameObjectTypeTriggerHolder extends GameObjectType {
 
 interface GameObjectTypeAdventure extends GameObjectType {
   type: "GameObjectType_Adventure";
-  instanceId: number;
-  grpId: number;
-  zoneId: number;
-  visibility: string;
-  ownerSeatId: number;
   controllerSeatId: number;
   cardTypes: string[];
   subtypes: string[];
