@@ -146,7 +146,7 @@ function processAnnotations(): void {
     // if this annotation has already been processed, skip
     if (globals.currentMatch.processedAnnotations.includes(ann.id)) return;
 
-    let details: DetailsType;
+    let details: DetailsType = {};
     if (ann.details) {
       ann.details.forEach(
         (detail: KeyValuePair) => (details = keyValuePair(detail, details))
