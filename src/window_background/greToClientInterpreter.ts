@@ -54,10 +54,9 @@ function changePriority(previous: number, current: number, time: number): void {
 
 const actionLogGenerateLink = function(grpId: number): string {
   const card = db.card(grpId);
-  if (card) {
-    return '<log-card id="' + grpId + '">' + card.name + "</log-card>";
-  }
-  return "";
+  return card
+    ? '<log-card id="' + grpId + '">' + card.name + "</log-card>"
+    : "";
 };
 
 const actionLogGenerateAbilityLink = function(abId: number): string {
@@ -265,7 +264,10 @@ annotationFunctions.AnnotationType_ZoneTransfer = function(
     const affector = instanceIdToObject(ann.affectorId);
     const seat = obj.ownerSeatId;
     let text = getNameBySeat(seat);
-    if (affector.type == "GameObjectType_Ability" && affector.objectSourceGrpId) {
+    if (
+      affector.type == "GameObjectType_Ability" &&
+      affector.objectSourceGrpId
+    ) {
       text = `${actionLogGenerateLink(
         affector.objectSourceGrpId
       )}'s ${actionLogGenerateAbilityLink(affector.grpId)}`;
@@ -288,7 +290,10 @@ annotationFunctions.AnnotationType_ZoneTransfer = function(
     const affector = instanceIdToObject(ann.affectorId);
 
     let text = "";
-    if (affector.type == "GameObjectType_Ability" && affector.objectSourceGrpId) {
+    if (
+      affector.type == "GameObjectType_Ability" &&
+      affector.objectSourceGrpId
+    ) {
       text = `${actionLogGenerateLink(
         affector.objectSourceGrpId
       )}'s ${actionLogGenerateAbilityLink(affector.grpId)}`;
@@ -312,7 +317,10 @@ annotationFunctions.AnnotationType_ZoneTransfer = function(
     const affector = instanceIdToObject(ann.affectorId);
 
     let text = "";
-    if (affector.type == "GameObjectType_Ability" && affector.objectSourceGrpId) {
+    if (
+      affector.type == "GameObjectType_Ability" &&
+      affector.objectSourceGrpId
+    ) {
       text = `${actionLogGenerateLink(
         affector.objectSourceGrpId
       )}'s ${actionLogGenerateAbilityLink(affector.grpId)}`;
@@ -341,7 +349,10 @@ annotationFunctions.AnnotationType_ZoneTransfer = function(
     const affected = instanceIdToObject(ann.affectedIds[0]);
 
     let text = "";
-    if (affector.type == "GameObjectType_Ability" && affector.objectSourceGrpId) {
+    if (
+      affector.type == "GameObjectType_Ability" &&
+      affector.objectSourceGrpId
+    ) {
       text = `${actionLogGenerateLink(
         affector.objectSourceGrpId
       )}'s ${actionLogGenerateAbilityLink(affector.grpId)}`;
