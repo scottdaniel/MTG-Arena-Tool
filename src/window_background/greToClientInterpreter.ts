@@ -41,13 +41,13 @@ actionType[13] = "ActionType_CastingTimeOption";
 actionType[14] = "ActionType_CombatCost";
 actionType[15] = "ActionType_OpeningHandAction";
 
-function changePriority(previous: number, current: number, time: number): void {
-  globals.currentMatch.priorityTimers[previous] +=
-    time - globals.currentMatch.lastPriorityChangeTime;
+function changePriority(previous: number, current: number, time: Date): void {
+  globals.currentMatch.priorityTimers.timers[previous] +=
+    time.getTime() - globals.currentMatch.priorityTimers.last.getTime();
 
   globals.currentMatch.lastPriorityChangeTime = time;
-  globals.currentMatch.priorityTimers[0] =
-    globals.currentMatch.lastPriorityChangeTime;
+  globals.currentMatch.priorityTimers.date =
+    globals.currentMatch.priorityTimers.last;
 
   globals.currentMatch.currentPriority = current;
 }
@@ -709,8 +709,19 @@ GREMessages.GREMessageType_ConnectResp = function(msg: GreMessage): void {
   }
 };
 
-function checkForStartingLibrary(): number[] {
-  let zoneHand: ZoneType, zoneLibrary: ZoneType;
+const defaultZone = {
+  zoneId: 0,
+  type: "",
+  visibility: "",
+  ownerSeatId: 0,
+  objectInstanceIds: [],
+  viewers: []
+};
+
+function checkForStartingLibrary(): boolean {
+  let zoneHand: ZoneType = defaultZone;
+  let zoneLibrary: ZoneType = defaultZone;
+
   Object.keys(globals.currentMatch.zones).forEach(key => {
     const zone = globals.currentMatch.zones[key];
     if (zone.ownerSeatId == globals.currentMatch.player.seat) {
@@ -724,15 +735,15 @@ function checkForStartingLibrary(): number[] {
   });
 
   // Probably just escape valves?
-  if (globals.currentMatch.gameStage !== "GameStage_Start") return -1;
-  if (!zoneHand || !zoneHand.objectInstanceIds) return -2;
-  if (!zoneLibrary || !zoneLibrary.objectInstanceIds) return -3;
+  if (globals.currentMatch.gameStage !== "GameStage_Start") return false;
+  if (zoneHand.type == "") return false;
+  if (zoneLibrary.type == "") return false;
 
   const hand = zoneHand.objectInstanceIds || [];
   const library = zoneLibrary.objectInstanceIds || [];
   // Check that a post-mulligan scry hasn't been done
   if (library.length == 0 || library[library.length - 1] < library[0]) {
-    return -4;
+    return false;
   }
 
   if (
@@ -743,7 +754,7 @@ function checkForStartingLibrary(): number[] {
     globals.initialLibraryInstanceIds = [...hand, ...library];
   }
 
-  return globals.initialLibraryInstanceIds;
+  return true;
 }
 
 function checkGameInfo(gameInfo: GameInfo): void {

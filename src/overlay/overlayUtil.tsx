@@ -1,8 +1,5 @@
-import { remote } from "electron";
 import { useEffect } from "react";
 import interact from "interactjs";
-
-import Deck from "../shared/deck";
 
 export interface CardData {
   id: string;
@@ -25,18 +22,6 @@ export interface OddsData {
   landR: number;
   landG: number;
   [key: string]: number;
-}
-
-export interface MatchData {
-  id: string;
-  beginTime: number;
-  oppArchetype: string;
-  oppCards: Deck;
-  opponent: { name: string };
-  playerCardsOdds: OddsData;
-  playerCardsLeft: Deck;
-  player: { deck: Deck; originalDeck: Deck; seat: number };
-  priorityTimers: number[];
 }
 
 export interface DraftData {

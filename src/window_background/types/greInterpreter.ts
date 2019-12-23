@@ -1,5 +1,3 @@
-import anyCardsList from "../../shared/deck";
-
 export interface KeyValuePair {
   key: string;
   type: string;
@@ -314,9 +312,9 @@ export interface GreMessage {
     seatId: string;
     settings: string;
     deckMessage: {
-      deckCards: anyCardsList;
-      sideboardCards: anyCardsList;
-      commanderCards: anyCardsList;
+      deckCards: number[];
+      sideboardCards: number[];
+      commanderCards: number[];
     };
   };
 }
