@@ -15,15 +15,6 @@ export interface LogData {
   time: string;
 }
 
-export interface OddsData {
-  landW: number;
-  landU: number;
-  landB: number;
-  landR: number;
-  landG: number;
-  [key: string]: number;
-}
-
 export interface DraftData {
   id: string;
   pickNumber: number;
