@@ -571,6 +571,10 @@ function getOppUsedCards(): number[] {
   return cardsUsed;
 }
 
+function onlyUnique(value: any, index: number, self: any): boolean {
+  return self.indexOf(value) === index;
+}
+
 function getCardsTypeZone(): ZoneData {
   const data: ZoneData = {};
   Object.keys(globals.currentMatch.zones).forEach(key => {
@@ -580,11 +584,15 @@ function getCardsTypeZone(): ZoneData {
       zone.objectInstanceIds.forEach((id: number) => {
         try {
           const obj = globals.currentMatch.gameObjs[id] as GameObject;
-          if (isObjectACard(obj) && obj.grpId !== FACE_DOWN_CARD) {
-            const cardTypes = [...new Set(obj.cardTypes)] as string[];
+          if (
+            (obj.type == "GameObjectType_Card" ||
+              obj.type == "GameObjectType_SplitCard") &&
+            obj.grpId !== FACE_DOWN_CARD
+          ) {
+            const cardTypes = obj.cardTypes.filter(onlyUnique);
             cardTypes
-              .filter(cardType => cardTypes.includes(cardType))
-              .forEach(cardType => {
+              .filter((cardType: string) => cardTypes.includes(cardType))
+              .forEach((cardType: string) => {
                 const grpId = obj.grpId;
                 const owner = obj.controllerSeatId;
                 if (!data[owner]) data[owner] = {};

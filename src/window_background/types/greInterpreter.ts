@@ -110,14 +110,17 @@ interface GameObjectTypeEmblem extends GameObjectType {
 
 interface GameObjectTypeSplitCard extends GameObjectType {
   type: "GameObjectType_SplitCard";
+  cardTypes: string[];
 }
 
 interface GameObjectTypeSplitLeft extends GameObjectType {
   type: "GameObjectType_SplitLeft";
+  cardTypes: string[];
 }
 
 interface GameObjectTypeSplitRight extends GameObjectType {
   type: "GameObjectType_SplitRight";
+  cardTypes: string[];
 }
 
 interface GameObjectTypeRevealedCard extends GameObjectType {
@@ -257,10 +260,14 @@ export interface ZoneType {
 }
 
 export interface ZoneData {
-  [key: number]: ZoneTypeData[];
+  [key: number]: ZoneTypeData;
 }
 
 export interface ZoneTypeData {
+  [key: string]: CardTypeData;
+}
+
+export interface CardTypeData {
   [key: string]: number[];
 }
 
