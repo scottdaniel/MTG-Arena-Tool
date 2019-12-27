@@ -90,7 +90,7 @@ class CardsList {
       const cardToFind = db.card(grpId);
       this.list.forEach(function(card) {
         const cardInList = db.card(card.id);
-        if (cardInList && cardToFind && cardToFind.name === cardInList.name) {
+        if (cardToFind?.name === cardInList?.name) {
           const remove = Math.min(card.quantity, quantity);
           card.quantity -= remove;
           quantity -= remove;
@@ -132,7 +132,7 @@ class CardsList {
 
     this.list.forEach(function(card) {
       const c = db.card(card.id);
-      if (c) {
+      if (c !== undefined) {
         if (c.type.includes("Land", 0))
           types.lan += card.measurable ? card.quantity : 1;
         else if (c.type.includes("Creature", 0))
@@ -178,7 +178,7 @@ class CardsList {
     this.list.forEach(function(card) {
       if (card.quantity > 0) {
         const dbCard = db.card(card.id);
-        if (dbCard) {
+        if (dbCard !== undefined) {
           dbCard.cost.forEach(function(c) {
             if (c.indexOf("w") !== -1) {
               colors.w += card.quantity;
@@ -221,7 +221,7 @@ class CardsList {
     this.list.forEach(function(cardEntry) {
       const quantity = cardEntry.quantity;
       const card = db.card(cardEntry.id);
-      if (card && quantity > 0) {
+      if (card !== undefined && quantity > 0) {
         if (
           card.type.indexOf("Land") != -1 ||
           card.type.indexOf("land") != -1
@@ -277,7 +277,7 @@ class CardsList {
     const colors = new Colors();
     this.list.forEach(card => {
       const cardData = db.card(card.id);
-      if (cardData) {
+      if (cardData !== undefined) {
         const isLand = cardData.type.indexOf("Land") !== -1;
         if (isLand && cardData.frame.length < 3) {
           colors.addFromArray(cardData.frame);
@@ -301,9 +301,7 @@ class CardsList {
       const cardObj = db.card(card.id);
       const found = newList.find((c: CardObject) => {
         const dbCard = db.card(c.id);
-        return (
-          dbCard && cardObj && dbCard.name === (cardObj as DbCardData).name
-        );
+        return dbCard?.name === cardObj?.name;
       });
       if (found) {
         if (found.measurable) {

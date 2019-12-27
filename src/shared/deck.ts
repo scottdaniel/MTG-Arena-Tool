@@ -177,8 +177,8 @@ class Deck {
         let grpid = cardObj.id;
         let quantity = cardObj.quantity;
         let card = db.card(grpid);
-        if (card as DbCardData) {
-          let rarity = (card as DbCardData).rarity;
+        if (card !== undefined) {
+          let rarity = card.rarity;
           let add = get_wc_missing(grpid, quantity);
           missing[rarity] += add;
         }
@@ -190,8 +190,8 @@ class Deck {
         let grpid = cardObj.id;
         let quantity = cardObj.quantity;
         let card = db.card(grpid);
-        if (card as DbCardData) {
-          let rarity = (card as DbCardData).rarity;
+        if (card !== undefined) {
+          let rarity = card.rarity;
           let add = get_wc_missing(grpid, quantity);
           missing[rarity] += add;
         }
