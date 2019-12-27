@@ -9,8 +9,8 @@ import {
 } from "./util";
 import { DEFAULT_TILE } from "./constants";
 
-import { anyCardsList, SerializedDeck } from "./types/Deck";
-import { DbCardData } from "./types/Metadata";
+import { anyCardsList, SerializedDeck } from "../types/Deck";
+import { DbCardData } from "../types/Metadata";
 
 class Deck {
   private mainboard: CardsList;
@@ -83,6 +83,14 @@ class Deck {
 
   getSideboard(): CardsList {
     return this.sideboard;
+  }
+
+  setMainboard(list: CardsList): void {
+    this.mainboard = list;
+  }
+
+  setSideboard(list: CardsList): void {
+    this.sideboard = list;
   }
 
   getName(): string {

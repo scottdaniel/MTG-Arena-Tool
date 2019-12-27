@@ -10,7 +10,7 @@ import Deck from "../shared/deck";
 
 import { DraftData, DraftState, OverlaySettingsData } from "./overlayUtil";
 import DeckList from "./DeckList";
-import { DbCardData } from "../shared/types/Metadata";
+import { DbCardData } from "../types/Metadata";
 
 const packSizeMap: { [key: string]: number } = PACK_SIZES;
 

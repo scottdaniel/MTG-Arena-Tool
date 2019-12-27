@@ -21,7 +21,7 @@ import {
   TurnInfo,
   GameObject,
   GameObjectTypeAbility
-} from "./types/greInterpreter";
+} from "../types/greInterpreter";
 
 const actionType = [];
 actionType[0] = "ActionType_None";

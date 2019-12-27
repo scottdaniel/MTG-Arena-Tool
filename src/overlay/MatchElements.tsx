@@ -14,8 +14,8 @@ import { LogData, OverlaySettingsData } from "./overlayUtil";
 import ActionLog from "./ActionLog";
 import Clock from "./Clock";
 import DeckList from "./DeckList";
-import { DbCardData } from "../shared/types/Metadata";
-import { MatchData } from "../window_background/types/currentMatch";
+import { DbCardData } from "../types/Metadata";
+import { MatchData } from "../types/currentMatch";
 
 export interface MatchElementsProps {
   actionLog: LogData[];

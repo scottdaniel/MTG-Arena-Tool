@@ -5,37 +5,13 @@ import getOpponentDeck from "./getOpponentDeck";
 import globals from "./globals";
 import playerData from "../shared/player-data.js";
 import { DEFAULT_TILE } from "../shared/constants";
-import { MatchCreatedEvent } from "../shared/types/MatchCreatedEvent";
+import { EntryJson as MatchCreatedEvent } from "./onLabel/EventMatchCreated";
 import { objectClone } from "../shared/util";
 import Deck from "../shared/deck";
-import { SerializedDeck } from "../shared/types/Deck";
-import { MatchData, matchDataDefault } from "./types/currentMatch";
+import { SerializedDeck } from "../types/Deck";
+import { MatchData, matchDataDefault } from "../types/currentMatch";
 // Generate objects using default templates.
 // Nothing in here should call IPC functions
-
-// Draft Creation
-
-const currentDraftDefault = {
-  eventId: "",
-  draftId: "",
-  set: "",
-  owner: "",
-  pickedCards: [],
-  packNumber: 0,
-  pickNumber: 0,
-  currentPack: [],
-  date: undefined
-};
-
-export function createDraft(id: string) {
-  const data = {
-    ..._.cloneDeep(currentDraftDefault),
-    id,
-    draftId: id,
-    owner: playerData.name
-  };
-  return data;
-}
 
 // Match Creation
 export interface PlayerMatchData {

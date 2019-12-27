@@ -1,8 +1,8 @@
 import globals from "./globals";
 import db from "../shared/database";
 import Deck from "../shared/deck";
-import { SerializedDeck } from "../shared/types/Deck";
-import { DbCardData } from "../shared/types/Metadata";
+import { SerializedDeck } from "../types/Deck";
+import { DbCardData } from "../types/Metadata";
 
 function calculateDeviation(values: number[]): number {
   return Math.sqrt(values.reduce((a, b) => a + b) / values.length - 1);

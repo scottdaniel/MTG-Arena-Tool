@@ -1,43 +1,17 @@
-import fs from "fs";
+/* eslint-disable @typescript-eslint/no-use-before-define */
+/* eslint-disable no-console */
+import fs, { Stats } from "fs";
 import { promisify } from "util";
 import { StringDecoder } from "string_decoder";
 import queue from "queue";
 import ArenaLogDecoder from "./arena-log-decoder/arena-log-decoder";
 import playerData from "../shared/player-data";
+import LogEntry from "../types/logDecoder";
+
+import * as Labels from "./onLabel";
+
 import {
-  onLabelClientToMatchServiceMessageTypeClientToGREMessage,
-  onLabelEventMatchCreated,
-  onLabelGetPlayerInventoryGetRewardSchedule,
-  onLabelGreToClient,
-  onLabelInEventGetCombinedRankInfo,
-  onLabelInEventGetPlayerCourseV2,
-  onLabelInEventGetPlayerCoursesV2,
-  onLabelInEventJoin,
-  onLabelInDeckGetDeckListsV3,
-  onLabelInDeckGetPreconDecks,
-  onLabelInDeckUpdateDeckV3,
-  onLabelInventoryUpdated,
-  onLabelInPlayerInventoryGetPlayerInventory,
-  onLabelInPlayerInventoryGetPlayerCardsV3,
-  onLabelInProgressionGetPlayerProgress,
-  onLabelInEventDeckSubmitV3,
-  onLabelInEventGetActiveEventsV2,
-  onLabelInDraftDraftStatus,
-  onLabelInDraftMakePick,
-  onLabelOutDraftMakePick,
-  onLabelInEventCompleteDraft,
-  onLabelInEventGetSeasonAndRankDetail,
-  onLabelMatchGameRoomStateChangedEvent,
-  onLabelMythicRatingUpdated,
-  onLabelOutLogInfo,
-  onLabelOutDirectGameChallenge,
-  onLabelOutEventAIPractice,
-  onLabelPostMatchUpdate,
-  onLabelRankUpdated,
-  onLabelTrackRewardTierUpdated
-} from "./labels";
-import {
-  ipc_send,
+  ipc_send as ipcSend,
   getDateFormat,
   parseWotcTimeFallback,
   setData,
@@ -51,7 +25,7 @@ import {
 import update_deck from "./updateDeck";
 import globals from "./globals";
 
-var debugLogSpeed = 0.001;
+const debugLogSpeed = 0.001;
 let logReadEnd = null;
 
 const fsAsync = {
@@ -61,35 +35,34 @@ const fsAsync = {
   stat: promisify(fs.stat)
 };
 
-export function start({ path, chunkSize, onLogEntry, onError, onFinish }) {
+interface StartProps {
+  path: fs.PathLike;
+  chunkSize: number;
+  onLogEntry: (entry: any) => void;
+  onError: (err: any) => void;
+  onFinish: () => void;
+}
+
+export function start({
+  path,
+  chunkSize,
+  onLogEntry,
+  onError,
+  onFinish
+}: StartProps): () => void {
   const q = queue({ concurrency: 1 });
   let position = 0;
   let stringDecoder = new StringDecoder();
   let logDecoder = ArenaLogDecoder();
 
-  schedule();
   const stopWatching = fsWatch(path, schedule, 250);
-  return stop;
 
-  function stop() {
+  function stop(): void {
     stopWatching();
     q.end();
   }
 
-  function schedule() {
-    q.push(attempt);
-    q.start();
-  }
-
-  async function attempt() {
-    try {
-      await read();
-    } catch (err) {
-      onError(err);
-    }
-  }
-
-  async function read() {
+  async function read(): Promise<void> {
     const { size } = await fsAsync.stat(path);
     if (position > size) {
       // the file has been recreated, we must reset our state
@@ -105,7 +78,8 @@ export function start({ path, chunkSize, onLogEntry, onError, onFinish }) {
           Math.min(size - position, chunkSize)
         );
         const text = stringDecoder.write(buffer);
-        logDecoder.append(text, entry => onLogEntry({ ...entry, size }));
+        logDecoder.append(text, (entry: any) => onLogEntry({ ...entry, size }));
+        // eslint-disable-next-line require-atomic-updates
         position += buffer.length;
       } else {
         position = size;
@@ -113,27 +87,35 @@ export function start({ path, chunkSize, onLogEntry, onError, onFinish }) {
     }
     onFinish();
   }
+
+  async function attempt(): Promise<void> {
+    try {
+      await read();
+    } catch (err) {
+      onError(err);
+    }
+  }
+
+  function schedule(): void {
+    q.push(attempt);
+    q.start();
+  }
+
+  schedule();
+  return stop;
 }
 
-function fsWatch(path, onChanged, interval) {
-  let lastSize;
-  let handle;
+function fsWatch(
+  path: fs.PathLike,
+  onChanged: () => void,
+  interval: number
+): () => void {
+  let lastSize: number;
+  let handle: number;
   start();
   return stop;
 
-  async function start() {
-    lastSize = await attemptSize();
-    handle = setInterval(checkFile, interval);
-  }
-
-  async function checkFile() {
-    const size = await attemptSize();
-    if (lastSize === size) return;
-    lastSize = size;
-    onChanged();
-  }
-
-  async function attemptSize() {
+  async function attemptSize(): Promise<Stats["size"]> {
     try {
       const stats = await fsAsync.stat(path);
       return stats.size;
@@ -143,12 +125,28 @@ function fsWatch(path, onChanged, interval) {
     }
   }
 
-  function stop() {
+  async function start(): Promise<void> {
+    lastSize = await attemptSize();
+    handle = setInterval(checkFile, interval);
+  }
+
+  async function checkFile(): Promise<void> {
+    const size = await attemptSize();
+    if (lastSize === size) return;
+    lastSize = size;
+    onChanged();
+  }
+
+  function stop(): void {
     if (handle) clearInterval(handle);
   }
 }
 
-async function readChunk(path, position, length) {
+async function readChunk(
+  path: fs.PathLike,
+  position: number,
+  length: number
+): Promise<Buffer> {
   const buffer = Buffer.alloc(length);
   const fd = await fsAsync.open(path, "r");
   try {
@@ -159,18 +157,18 @@ async function readChunk(path, position, length) {
   return buffer;
 }
 
-function startWatchingLog(path) {
+function startWatchingLog(path: fs.PathLike): () => void {
   globals.logReadStart = new Date();
   return start({
     path,
     chunkSize: 268435440,
     onLogEntry: onLogEntryFound,
-    onError: err => console.error(err),
+    onError: (err: any) => console.error(err),
     onFinish: finishLoading
   });
 }
 
-function onLogEntryFound(entry) {
+function onLogEntryFound(entry: any): void {
   if (globals.debugLog) {
     const currentTime = new Date().getTime();
     while (currentTime + debugLogSpeed >= new Date().getTime()) {
@@ -211,173 +209,169 @@ function onLogEntryFound(entry) {
 // But using strings to call functions is slower than a switch.
 // (in my testing)
 /* eslint-disable-next-line complexity */
-function entrySwitch(entry) {
+function entrySwitch(entry: LogEntry): void {
   // console.log(entry, entry.json());
   switch (entry.label) {
     case "Log.BI":
       if (entry.arrow == "==>") {
-        onLabelOutLogInfo(entry);
+        Labels.OutLogInfo(entry);
       }
       break;
 
     case "GreToClientEvent":
-      onLabelGreToClient(entry);
+      Labels.GreToClient(entry);
       break;
 
     case "ClientToMatchServiceMessageType_ClientToGREMessage":
-      onLabelClientToMatchServiceMessageTypeClientToGREMessage(entry);
+      Labels.ClientToMatchServiceMessageTypeClientToGREMessage(entry);
       break;
 
     case "Event.GetPlayerCourseV2":
       if (entry.arrow == "<==") {
-        onLabelInEventGetPlayerCourseV2(entry);
+        Labels.InEventGetPlayerCourseV2(entry);
       }
       break;
 
     case "Event.Join":
       if (entry.arrow == "<==") {
-        onLabelInEventJoin(entry);
+        Labels.InEventJoin(entry);
       }
       break;
 
     case "Event.GetCombinedRankInfo":
       if (entry.arrow == "<==") {
-        onLabelInEventGetCombinedRankInfo(entry);
+        Labels.InEventGetCombinedRankInfo(entry);
       }
       break;
 
     case "Rank.Updated":
-      {
-        onLabelRankUpdated(entry);
-      }
+      Labels.RankUpdated(entry);
       break;
 
     case "MythicRating.Updated":
-      {
-        onLabelMythicRatingUpdated(entry);
-      }
+      Labels.MythicRatingUpdated(entry);
       break;
 
     case "Event.GetPlayerCoursesV2":
       if (entry.arrow == "<==") {
-        onLabelInEventGetPlayerCoursesV2(entry);
+        Labels.InEventGetPlayerCoursesV2(entry);
       }
       break;
 
     case "Deck.GetDeckListsV3":
       if (entry.arrow == "<==") {
-        onLabelInDeckGetDeckListsV3(entry);
+        Labels.InDeckGetDeckListsV3(entry);
       }
       break;
 
     case "Deck.GetPreconDecks":
       if (entry.arrow == "<==") {
-        onLabelInDeckGetPreconDecks(entry);
+        Labels.InDeckGetPreconDecks(entry);
       }
       break;
 
     case "Deck.UpdateDeckV3":
       if (entry.arrow == "<==") {
-        onLabelInDeckUpdateDeckV3(entry);
+        Labels.InDeckUpdateDeckV3(entry);
       }
       break;
 
     case "Inventory.Updated":
       // handler works for both out and in arrows
-      onLabelInventoryUpdated(entry);
+      Labels.InventoryUpdated(entry);
       break;
 
     case "PostMatch.Update":
       if (entry.arrow == "==>") {
-        onLabelPostMatchUpdate(entry);
+        Labels.PostMatchUpdate(entry);
       }
       break;
 
     case "PlayerInventory.GetPlayerInventory":
       if (entry.arrow == "<==") {
-        onLabelInPlayerInventoryGetPlayerInventory(entry);
+        Labels.InPlayerInventoryGetPlayerInventory(entry);
       }
       break;
 
     case "PlayerInventory.GetPlayerCardsV3":
       if (entry.arrow == "<==") {
-        onLabelInPlayerInventoryGetPlayerCardsV3(entry);
+        Labels.InPlayerInventoryGetPlayerCardsV3(entry);
       }
       break;
 
     case "Progression.GetPlayerProgress":
       if (entry.arrow == "<==") {
-        onLabelInProgressionGetPlayerProgress(entry);
+        Labels.InProgressionGetPlayerProgress(entry);
       }
       break;
 
     case "TrackRewardTier.Updated":
-      onLabelTrackRewardTierUpdated(entry);
+      Labels.TrackRewardTierUpdated(entry);
       break;
 
     case "Event.DeckSubmitV3":
       if (entry.arrow == "<==") {
-        onLabelInEventDeckSubmitV3(entry);
+        Labels.InEventDeckSubmitV3(entry);
       }
       break;
 
     case "Event.MatchCreated":
       if (entry.arrow == "==>") {
-        onLabelEventMatchCreated(entry);
+        Labels.EventMatchCreated(entry);
       }
       break;
 
     case "Event.AIPractice":
       if (entry.arrow == "==>") {
-        onLabelOutEventAIPractice(entry);
+        Labels.OutEventAIPractice(entry);
       }
       break;
 
     case "DirectGame.Challenge":
       if (entry.arrow == "==>") {
-        onLabelOutDirectGameChallenge(entry);
+        Labels.OutDirectGameChallenge(entry);
       }
       break;
 
     case "Draft.DraftStatus":
       if (entry.arrow == "<==") {
-        onLabelInDraftDraftStatus(entry);
+        Labels.InDraftDraftStatus(entry);
       }
       break;
 
     case "Draft.MakePick":
       if (entry.arrow == "<==") {
-        onLabelInDraftMakePick(entry);
+        Labels.InDraftMakePick(entry);
       } else {
-        onLabelOutDraftMakePick(entry);
+        Labels.OutDraftMakePick(entry);
       }
       break;
 
     case "Event.CompleteDraft":
       if (entry.arrow == "<==") {
-        onLabelInEventCompleteDraft(entry);
+        Labels.InEventCompleteDraft(entry);
       }
       break;
 
     case "Event.GetActiveEventsV2":
       if (entry.arrow == "<==") {
-        onLabelInEventGetActiveEventsV2(entry);
+        Labels.InEventGetActiveEventsV2(entry);
       }
       break;
 
     case "MatchGameRoomStateChangedEvent":
-      onLabelMatchGameRoomStateChangedEvent(entry);
+      Labels.MatchGameRoomStateChangedEvent(entry);
       break;
 
     case "Event.GetSeasonAndRankDetail":
       if (entry.arrow == "<==") {
-        onLabelInEventGetSeasonAndRankDetail(entry);
+        Labels.InEventGetSeasonAndRankDetail(entry);
       }
       break;
 
     case "PlayerInventory.GetRewardSchedule":
       if (entry.arrow == "<==") {
-        onLabelGetPlayerInventoryGetRewardSchedule(entry);
+        Labels.GetPlayerInventoryGetRewardSchedule(entry);
       }
       break;
 
@@ -386,38 +380,38 @@ function entrySwitch(entry) {
   }
 }
 
-function finishLoading() {
+function finishLoading(): void {
   if (globals.firstPass) {
-    ipc_send("popup", {
+    ipcSend("popup", {
       text: "Finishing initial log read...",
       time: 0,
       progress: 2
     });
     globals.firstPass = false;
     logReadEnd = new Date();
-    let logReadElapsed = (logReadEnd - globals.logReadStart) / 1000;
-    ipc_send("ipc_log", `Log read in ${logReadElapsed}s`);
+    const logReadElapsed = (logReadEnd.getTime() - globals.logReadStart) / 1000;
+    ipcSend("ipc_log", `Log read in ${logReadElapsed}s`);
 
-    ipc_send("popup", {
+    ipcSend("popup", {
       text: "Initializing...",
       time: 0,
       progress: 2
     });
 
     if (globals.duringMatch) {
-      ipc_send("set_arena_state", ARENA_MODE_MATCH);
+      ipcSend("set_arena_state", ARENA_MODE_MATCH);
       update_deck(false);
     } else if (globals.duringDraft) {
-      ipc_send("set_arena_state", ARENA_MODE_DRAFT);
+      ipcSend("set_arena_state", ARENA_MODE_DRAFT);
     } else {
-      ipc_send("set_arena_state", ARENA_MODE_IDLE);
+      ipcSend("set_arena_state", ARENA_MODE_IDLE);
     }
 
-    ipc_send("set_settings", JSON.stringify(playerData.settings));
-    ipc_send("initialize");
-    ipc_send("player_data_refresh");
+    ipcSend("set_settings", JSON.stringify(playerData.settings));
+    ipcSend("initialize");
+    ipcSend("player_data_refresh");
 
-    ipc_send("popup", {
+    ipcSend("popup", {
       text: "Initialized successfully!",
       time: 3000,
       progress: -1

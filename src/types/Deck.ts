@@ -6,7 +6,7 @@ export interface ArenaV3Deck {
   isValid: boolean;
   lockedForUse: boolean;
   lockedForEdit: boolean;
-  reourceId: string;
+  reourceId?: string;
   cardSkins: CardSkin[];
   id: string;
   name: string;
@@ -55,9 +55,9 @@ export function isV2CardsList(
 
 export type anyCardsList = v2cardsList | v3cardsList;
 
-interface CardSkin {
+export interface CardSkin {
   grpId: number;
   ccv: string;
 }
 
-type Format = "" | "Standard" | "Draft" | "precon" | "Brawl";
+export type Format = "" | "Standard" | "Draft" | "precon" | "Brawl";

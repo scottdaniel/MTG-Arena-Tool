@@ -10,8 +10,8 @@ import {
   useEditModeOnRef,
   SettingsData
 } from "./overlayUtil";
-import { DbCardData } from "../shared/types/Metadata";
-import { Chances } from "../window_background/types/decks";
+import { DbCardData } from "../types/Metadata";
+import { Chances } from "../types/decks";
 
 const NO_IMG_URL = "./images/nocard.png";
 

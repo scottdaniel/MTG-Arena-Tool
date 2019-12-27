@@ -17,11 +17,11 @@ import {
   SettingsData
 } from "./overlayUtil";
 
-import { MatchData } from "../window_background/types/currentMatch";
+import { MatchData } from "../types/currentMatch";
 
 import DraftElements from "./DraftElements";
 import MatchElements from "./MatchElements";
-import { DbCardData } from "../shared/types/Metadata";
+import { DbCardData } from "../types/Metadata";
 
 const DEFAULT_BACKGROUND = "../images/Bedevil-Art.jpg";
 

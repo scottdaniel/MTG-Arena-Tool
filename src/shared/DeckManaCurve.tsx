@@ -4,7 +4,7 @@ import { MANA_COLORS } from "./constants";
 import db from "./database";
 import Deck from "../shared/deck";
 import { CardData } from "../overlay/overlayUtil";
-import { CardObject } from "./types/Deck";
+import { CardObject } from "../types/Deck";
 
 function add(a: number, b: number): number {
   return a + b;

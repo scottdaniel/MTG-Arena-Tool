@@ -18,10 +18,10 @@ import {
   OverlaySettingsData,
   SettingsData
 } from "./overlayUtil";
-import { MatchData } from "../window_background/types/currentMatch";
+import { MatchData } from "../types/currentMatch";
 import CardDetailsWindowlet from "./CardDetailsWindowlet";
 import OverlayWindowlet from "./OverlayWindowlet";
-import { DbCardData } from "../shared/types/Metadata";
+import { DbCardData } from "../types/Metadata";
 
 const sound = new Howl({ src: ["../sounds/blip.mp3"] });
 

@@ -21,11 +21,11 @@ import DeckManaCurve from "../shared/DeckManaCurve";
 import DeckTypesStats from "../shared/DeckTypesStats";
 import OwnershipStars from "../shared/OwnershipStars";
 
-import { CardObject } from "../shared/types/Deck";
+import { CardObject } from "../types/Deck";
 import { OverlaySettingsData } from "./overlayUtil";
 import SampleSizePanel from "./SampleSizePanel";
-import { DbCardData } from "../shared/types/Metadata";
-import { Chances } from "../window_background/types/decks";
+import { DbCardData } from "../types/Metadata";
+import { Chances } from "../types/decks";
 
 const landsCard = {
   id: 100,

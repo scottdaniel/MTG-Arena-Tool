@@ -1,11 +1,11 @@
-import { ipc_send } from "./backgroundUtil";
+import { ipc_send as ipcSend } from "./backgroundUtil";
 import fs from "fs";
 import path from "path";
 import { IPC_OVERLAY } from "../shared/constants.js";
 import globals from "./globals";
 import format from "date-fns/format";
 
-var currentActionLog = "";
+let currentActionLog = "";
 
 const actionLog = function(
   seat: number,
@@ -36,7 +36,7 @@ const actionLog = function(
   }
 
   //console.log("action_log", { seat: seat, time: time }, str);
-  ipc_send(
+  ipcSend(
     "action_log",
     { seat: seat, time: time, str: str, grpId: grpId },
     IPC_OVERLAY

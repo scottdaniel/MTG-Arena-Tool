@@ -17,7 +17,7 @@ import {
   makeSimpleResponseHandler
 } from "./httpWorker";
 import globals from "./globals";
-import { SerializedDeck } from "../shared/types/Deck";
+import { SerializedDeck } from "../types/Deck";
 
 let httpQueue: async.AsyncQueue<HttpTask>;
 

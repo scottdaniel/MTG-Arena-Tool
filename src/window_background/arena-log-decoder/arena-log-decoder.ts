@@ -1,7 +1,10 @@
+/* eslint-disable no-console */
+/* eslint-disable @typescript-eslint/no-use-before-define */
 import _ from "lodash";
 import nthLastIndexOf from "./nthLastIndexOf";
 import * as jsonText from "./jsonText";
 import sha1 from "js-sha1";
+import LogEntry from "../../types/logDecoder";
 
 const LABEL_JSON_PATTERNS = [
   /\[UnityCrossThreadLogger\](?<timestamp>.*): (?:Match to )?(?<playerId>\w*)(?: to Match)?: (?<label>.*)(?:\r\n|\n)/,
@@ -21,20 +24,23 @@ const logEntryPattern = new RegExp(
   "g"
 );
 
-function unleakString(s) {
+function unleakString(s: string): string {
   return (" " + s).substr(1);
 }
 
-export default function ArenaLogDecoder() {
+export default function ArenaLogDecoder(): (
+  newtext: string,
+  callback: any
+) => void {
   let buffer = "";
   let bufferDiscarded = 0;
   return { append };
 
-  function append(newText, callback) {
+  function append(newText: string, callback: any): void {
     logEntryPattern.lastIndex = 0;
 
     buffer = buffer.length ? buffer.concat(newText) : newText;
-    let bufferUsed = false;
+    let bufferUsed = 0;
     let match;
     while ((match = logEntryPattern.exec(buffer))) {
       const position = bufferDiscarded + match.index;
@@ -61,7 +67,7 @@ export default function ArenaLogDecoder() {
       }
     }
 
-    if (bufferUsed === false) {
+    if (bufferUsed === 0) {
       const i = nthLastIndexOf(buffer, "\n", maxLinesOfAnyPattern);
       bufferUsed = i === -1 ? 0 : i;
     }
@@ -75,8 +81,13 @@ export default function ArenaLogDecoder() {
   }
 }
 
-function parseLogEntry(text, matchText, position, absPosition) {
-  let rematches;
+function parseLogEntry(
+  text: string,
+  matchText: string,
+  position: number,
+  absPosition: number
+): [string?, number?, LogEntry?] {
+  let rematches: RegExpMatchArray | null;
 
   if ((rematches = matchText.match(LABEL_ARROW_JSON_PATTERN))) {
     const jsonStart = position + matchText.length;
@@ -108,7 +119,7 @@ function parseLogEntry(text, matchText, position, absPosition) {
         type: "label_arrow_json",
         ..._.mapValues(rematches.groups, unleakString),
         hash: sha1(jsonString + absPosition),
-        json: () => {
+        json: (): void => {
           try {
             // console.log(jsonString, jsonStart, jsonLen);
             const json = JSON.parse(jsonString);
@@ -117,7 +128,7 @@ function parseLogEntry(text, matchText, position, absPosition) {
             );
           } catch (e) {
             console.log(e, {
-              input: rematches.input,
+              input: rematches?.input,
               string: jsonString
             });
           }
@@ -160,7 +171,7 @@ function parseLogEntry(text, matchText, position, absPosition) {
         ..._.mapValues(rematches.groups, unleakString),
         hash: sha1(jsonString + absPosition),
         text: jsonString,
-        json: () => {
+        json: (): void => {
           try {
             // console.log(jsonString, jsonStart, jsonLen);
             const json = JSON.parse(jsonString);
@@ -169,7 +180,7 @@ function parseLogEntry(text, matchText, position, absPosition) {
             );
           } catch (e) {
             console.log(e, {
-              input: rematches.input,
+              input: rematches?.input,
               string: jsonString
             });
           }
@@ -183,13 +194,13 @@ function parseLogEntry(text, matchText, position, absPosition) {
   throw new Error("Could not parse an entry");
 }
 
-function occurrences(text, re) {
+function occurrences(text: string, re: RegExp): number {
   const matches = text.match(re);
   return matches ? matches.length : 0;
 }
 
 // The global RegExp object has a lastMatch property that holds references to
 // strings -- even our very large ones. This fn can be called to release those.
-function unleakRegExp() {
+function unleakRegExp(): void {
   /\s*/g.exec("");
 }

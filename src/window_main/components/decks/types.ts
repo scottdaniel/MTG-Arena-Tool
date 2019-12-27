@@ -1,4 +1,4 @@
-import { SerializedDeck } from "../../../shared/types/Deck";
+import { SerializedDeck } from "../../../types/Deck";
 
 export interface DeckStats {
   wins: number;

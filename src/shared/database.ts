@@ -8,9 +8,9 @@ import {
   DbCardData,
   CardSet,
   RewardsDate
-} from "./types/Metadata";
-import { Season, Rank, RankClassInfo } from "./types/Season";
-import { ArenaV3Deck } from "./types/Deck";
+} from "../types/Metadata";
+import { Season, Rank, RankClassInfo } from "../types/Season";
+import { ArenaV3Deck } from "../types/Deck";
 
 const cachePath: string | null =
   app || (remote && remote.app)

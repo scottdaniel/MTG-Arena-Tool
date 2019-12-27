@@ -10,7 +10,7 @@ import {
   getBoosterCountEstimate,
   getReadableFormat
 } from "../shared/util";
-import { SerializedDeck } from "../shared/types/Deck";
+import { SerializedDeck } from "../types/Deck";
 
 import Aggregator, { dateMaxValid } from "./aggregator";
 import StatsPanel from "./stats-panel";

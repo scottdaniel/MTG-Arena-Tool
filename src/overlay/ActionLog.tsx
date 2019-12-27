@@ -5,7 +5,7 @@ import db from "../shared/database";
 import { openScryfallCard } from "../shared/util";
 
 import { LogData } from "./overlayUtil";
-import { DbCardData } from "../shared/types/Metadata";
+import { DbCardData } from "../types/Metadata";
 
 interface LogEntryProps {
   initialTime: Date;
