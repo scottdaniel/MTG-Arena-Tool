@@ -1,6 +1,6 @@
 import globals from "./globals";
 import actionLog from "./actionLog";
-import { ipc_send as ipcSend } from "./backgroundUtil";
+import { ipcSend } from "./backgroundUtil";
 
 import { createMatch } from "./data";
 import { MatchData } from "../types/currentMatch";

@@ -1,6 +1,6 @@
 import { ARENA_MODE_IDLE } from "../shared/constants";
 import globals from "./globals";
-import { ipc_send as ipcSend } from "./backgroundUtil";
+import { ipcSend } from "./backgroundUtil";
 
 // REVIEW
 export default function endDraft(data?: any): void {

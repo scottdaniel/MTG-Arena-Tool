@@ -8,7 +8,7 @@ import { LogInfo } from "../../types/log";
 import { MatchGameStats } from "../../types/currentMatch";
 
 import globals from "../globals";
-import { ipc_send as ipcSend } from "../backgroundUtil";
+import { ipcSend } from "../backgroundUtil";
 
 import getNameBySeat from "../getNameBySeat";
 import actionLog from "../actionLog";

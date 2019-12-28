@@ -3,7 +3,7 @@ import { objectClone } from "../../shared/util";
 
 import playerData from "../../shared/player-data";
 import globals from "../globals";
-import { ipc_send as ipcSend, parseWotcTimeFallback } from "../backgroundUtil";
+import { ipcSend, parseWotcTimeFallback } from "../backgroundUtil";
 import LogEntry from "../../types/logDecoder";
 import { MatchGameRoomStateChange } from "../../types/match";
 import processMatch from "../processMatch";

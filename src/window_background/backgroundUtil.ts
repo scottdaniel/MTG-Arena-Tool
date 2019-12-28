@@ -14,7 +14,7 @@ const config = { precision: 2000 };
 const math: MathJsStatic = create(all, config) as MathJsStatic;
 
 // Begin of IPC messages recievers
-export function ipc_send(method: string, arg?: any, to = IPC_MAIN): void {
+export function ipcSend(method: string, arg?: any, to = IPC_MAIN): void {
   if (method == "ipc_log") {
     //
   }
@@ -123,7 +123,7 @@ export function parseLogTimestamp(numb: string | number): Date {
 export function updateLoading(entry: any): void {
   if (globals.firstPass) {
     const completion = entry.position / entry.size;
-    ipc_send("popup", {
+    ipcSend("popup", {
       text: `Reading log: ${Math.round(100 * completion)}%`,
       time: 0,
       progress: completion
@@ -164,10 +164,10 @@ export function setData(
   const cleanData = _.omit(data, dataBlacklist);
 
   playerData.handleSetData(null, JSON.stringify(cleanData));
-  ipc_send("set_player_data", JSON.stringify(cleanData), IPC_MAIN);
+  ipcSend("set_player_data", JSON.stringify(cleanData), IPC_MAIN);
 
   const overlayData = _.pick(cleanData, overlayWhitelist);
-  ipc_send("set_player_data", JSON.stringify(overlayData), IPC_OVERLAY);
+  ipcSend("set_player_data", JSON.stringify(overlayData), IPC_OVERLAY);
 
-  if (refresh) ipc_send("player_data_refresh");
+  if (refresh) ipcSend("player_data_refresh");
 }

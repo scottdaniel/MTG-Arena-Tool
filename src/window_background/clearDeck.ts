@@ -1,6 +1,6 @@
 import { IPC_OVERLAY } from "../shared/constants";
 
-import { ipc_send as ipcSend } from "./backgroundUtil";
+import { ipcSend } from "./backgroundUtil";
 
 export default function clearDeck(): void {
   const deck = { mainDeck: [], sideboard: [], name: "" };

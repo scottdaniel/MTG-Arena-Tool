@@ -1,7 +1,7 @@
 import { IPC_OVERLAY } from "../shared/constants";
 import { playerDb } from "../shared/db/LocalDatabase";
 import playerData from "../shared/player-data";
-import { ipc_send as ipcSend, setData } from "./backgroundUtil";
+import { ipcSend, setData } from "./backgroundUtil";
 
 // REVIEW
 export default function setDraftData(data: any): void {

@@ -1,5 +1,5 @@
 import db from "../../shared/database";
-import { ipc_send as ipcSend } from "../backgroundUtil";
+import { ipcSend } from "../backgroundUtil";
 import LogEntry from "../../types/logDecoder";
 
 export interface Reward {

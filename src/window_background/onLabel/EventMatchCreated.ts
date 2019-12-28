@@ -2,7 +2,7 @@
 import globals from "../globals";
 import LogEntry from "../../types/logDecoder";
 import processMatch from "../processMatch";
-import { ipc_send as ipcSend } from "../backgroundUtil";
+import { ipcSend } from "../backgroundUtil";
 
 export interface EntryJson {
   controllerFabricUri: string;

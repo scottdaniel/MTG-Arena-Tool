@@ -1,6 +1,6 @@
 import LogEntry from "../../types/logDecoder";
 import { ArenaV3Deck } from "../../types/Deck";
-import { ipc_send as ipcSend } from "../backgroundUtil";
+import { ipcSend } from "../backgroundUtil";
 
 interface Entry extends LogEntry {
   json: () => ArenaV3Deck[];

@@ -3,7 +3,7 @@ import { shell } from "electron";
 
 import { IPC_BACKGROUND, IPC_OVERLAY } from "../shared/constants";
 
-import { ipc_send as ipcSend, setData } from "./backgroundUtil";
+import { ipcSend, setData } from "./backgroundUtil";
 import globals from "./globals";
 import { playerDb, playerDbLegacy } from "../shared/db/LocalDatabase";
 import playerData from "../shared/player-data";

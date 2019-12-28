@@ -1,4 +1,4 @@
-import { ipc_send as ipcSend } from "./backgroundUtil";
+import { ipcSend } from "./backgroundUtil";
 import fs from "fs";
 import path from "path";
 import { IPC_OVERLAY } from "../shared/constants.js";

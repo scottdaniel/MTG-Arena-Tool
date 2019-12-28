@@ -11,7 +11,7 @@ import LogEntry from "../types/logDecoder";
 import * as Labels from "./onLabel";
 
 import {
-  ipc_send as ipcSend,
+  ipcSend,
   getDateFormat,
   parseWotcTimeFallback,
   setData,

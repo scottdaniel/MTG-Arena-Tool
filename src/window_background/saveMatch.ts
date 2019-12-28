@@ -3,7 +3,7 @@ import { completeMatch } from "./data";
 import globals from "./globals";
 import playerData from "../shared/player-data";
 import { playerDb } from "../shared/db/LocalDatabase";
-import { ipc_send as ipcSend, setData } from "./backgroundUtil";
+import { ipcSend, setData } from "./backgroundUtil";
 
 export default function saveMatch(id: string, matchEndTime: number): void {
   //console.log(globals.currentMatch.matchId, id);

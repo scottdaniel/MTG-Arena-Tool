@@ -9,7 +9,7 @@ import { rememberDefaults } from "../shared/db/databaseUtil";
 import playerData from "../shared/player-data";
 import { getReadableFormat } from "../shared/util";
 import { HIDDEN_PW, MAIN_DECKS } from "../shared/constants";
-import { ipc_send, setData, unleakString } from "./backgroundUtil";
+import { ipcSend, setData, unleakString } from "./backgroundUtil";
 import { createDeck } from "./data";
 import * as mtgaLog from "./mtgaLog";
 import globals from "./globals";
@@ -60,7 +60,7 @@ const debugArenaID = undefined;
 
 //
 ipc.on("save_app_settings", function(event, arg) {
-  ipc_send("show_loading");
+  ipcSend("show_loading");
   appDb.find("", "settings").then(appSettings => {
     appSettings.toolVersion = globals.toolVersion;
     const updated = { ...appSettings, ...arg };
@@ -70,7 +70,7 @@ ipc.on("save_app_settings", function(event, arg) {
     }
     appDb.upsert("", "settings", updated);
     syncSettings(updated);
-    ipc_send("hide_loading");
+    ipcSend("hide_loading");
   });
 });
 
@@ -97,7 +97,7 @@ function fixBadSettingsData() {
 function downloadMetadata() {
   appDb.find("", "settings").then(appSettings => {
     httpApi.httpGetDatabase(appSettings.metadata_lang);
-    ipc_send("popup", {
+    ipcSend("popup", {
       text: `Downloading metadata ${appSettings.metadata_lang}`,
       time: 0
     });
@@ -134,7 +134,7 @@ ipc.on("start_background", async function() {
     rememberDefaults.settings
   );
   syncSettings(settings, false);
-  ipc_send("initial_settings", settings);
+  ipcSend("initial_settings", settings);
 
   // start initial log parse
   logLoopInterval = window.setInterval(attemptLogLoop, 250);
@@ -142,19 +142,19 @@ ipc.on("start_background", async function() {
   // start http
   httpApi.initHttpQueue();
   httpApi.httpGetDatabaseVersion(settings.metadata_lang);
-  ipc_send("ipc_log", `Downloading metadata ${settings.metadata_lang}`);
+  ipcSend("ipc_log", `Downloading metadata ${settings.metadata_lang}`);
 
   // Check if it is the first time we open this version
   if (
     settings.toolVersion == undefined ||
     globals.toolVersion > settings.toolVersion
   ) {
-    ipc_send("show_whats_new");
+    ipcSend("show_whats_new");
   }
 });
 
 function offlineLogin() {
-  ipc_send("auth", { ok: true, user: -1 });
+  ipcSend("auth", { ok: true, user: -1 });
   loadPlayerConfig(playerData.arenaId);
   setData({ userName: "", offline: true });
 }
@@ -214,7 +214,7 @@ ipc.on("overlayBounds", (event, index, bounds) => {
 ipc.on("save_overlay_settings", function(event, settings) {
   // console.log("save_overlay_settings");
   if (settings.index === undefined) return;
-  ipc_send("show_loading");
+  ipcSend("show_loading");
 
   const { index } = settings;
   const overlays = playerData.settings.overlays.map((overlay, _index) => {
@@ -229,13 +229,13 @@ ipc.on("save_overlay_settings", function(event, settings) {
   const updated = { ...playerData.settings, overlays };
   playerDb.upsert("settings", "overlays", overlays);
   syncSettings(updated);
-  ipc_send("hide_loading");
+  ipcSend("hide_loading");
 });
 
 //
 ipc.on("save_user_settings", function(event, settings) {
   // console.log("save_user_settings");
-  ipc_send("show_loading");
+  ipcSend("show_loading");
   let refresh = true;
   if (settings.skip_refresh) {
     delete settings.skip_refresh;
@@ -243,7 +243,7 @@ ipc.on("save_user_settings", function(event, settings) {
   }
   syncSettings(settings, refresh);
   playerDb.upsert("", "settings", playerData.data.settings);
-  ipc_send("hide_loading");
+  ipcSend("hide_loading");
 });
 
 //
@@ -253,7 +253,7 @@ ipc.on("delete_data", function() {
 
 //
 ipc.on("import_custom_deck", function(event, arg) {
-  ipc_send("show_loading");
+  ipcSend("show_loading");
   const data = JSON.parse(arg);
   const id = data.id;
   if (!id || playerData.deckExists(id)) return;
@@ -262,13 +262,13 @@ ipc.on("import_custom_deck", function(event, arg) {
     ...data
   };
   addCustomDeck(deckData);
-  ipc_send("force_open_tab", MAIN_DECKS);
-  ipc_send("hide_loading");
+  ipcSend("force_open_tab", MAIN_DECKS);
+  ipcSend("hide_loading");
 });
 
 //
 ipc.on("toggle_deck_archived", function(event, arg) {
-  ipc_send("show_loading");
+  ipcSend("show_loading");
   const id = arg;
   if (!playerData.deckExists(id)) return;
   const deckData = { ...playerData.deck(id) };
@@ -277,12 +277,12 @@ ipc.on("toggle_deck_archived", function(event, arg) {
 
   setData({ decks });
   playerDb.upsert("decks", id, deckData);
-  ipc_send("hide_loading");
+  ipcSend("hide_loading");
 });
 
 //
 ipc.on("toggle_archived", function(event, arg) {
-  ipc_send("show_loading");
+  ipcSend("show_loading");
   const id = arg;
   const item = playerData[id];
   if (!item) return;
@@ -291,12 +291,12 @@ ipc.on("toggle_archived", function(event, arg) {
 
   setData({ [id]: data });
   playerDb.upsert("", id, data);
-  ipc_send("hide_loading");
+  ipcSend("hide_loading");
 });
 
 ipc.on("request_explore", function(event, arg) {
   if (playerData.userName === "") {
-    ipc_send("offline", 1);
+    ipcSend("offline", 1);
   } else {
     httpApi.httpGetExplore(arg);
   }
@@ -308,7 +308,7 @@ ipc.on("request_course", function(event, arg) {
 
 ipc.on("request_home", (event, set) => {
   if (playerData.userName === "") {
-    ipc_send("offline", 1);
+    ipcSend("offline", 1);
   } else {
     httpApi.httpHomeGet(set);
   }
@@ -432,24 +432,24 @@ async function attemptLogLoop() {
 async function logLoop() {
   const logUri = playerData.settings.logUri;
   //console.log("logLoop() start");
-  //ipc_send("ipc_log", "logLoop() start");
+  //ipcSend("ipc_log", "logLoop() start");
   if (fs.existsSync(logUri)) {
     if (fs.lstatSync(logUri).isDirectory()) {
-      ipc_send("no_log", logUri);
-      ipc_send("popup", {
+      ipcSend("no_log", logUri);
+      ipcSend("popup", {
         text: "No log file found. Please include the file name too.",
         time: 1000
       });
       return;
     }
   } else {
-    ipc_send("no_log", logUri);
-    ipc_send("popup", { text: "No log file found.", time: 1000 });
+    ipcSend("no_log", logUri);
+    ipcSend("popup", { text: "No log file found.", time: 1000 });
     return;
   }
 
   if (!globals.firstPass) {
-    ipc_send("log_read", 1);
+    ipcSend("log_read", 1);
   }
   /*
   if (globals.debugLog) {
@@ -485,12 +485,12 @@ async function logLoop() {
 
   let detailedLogs = true;
   splitString.forEach(value => {
-    //ipc_send("ipc_log", "Async: ("+index+")");
+    //ipcSend("ipc_log", "Async: ("+index+")");
 
     // Check if logs are disabled
     let strCheck = "DETAILED LOGS: DISABLED";
     if (value.includes(strCheck)) {
-      ipc_send("popup", {
+      ipcSend("popup", {
         text: `Detailed logs disabled.
 1) Open Arena (the game by WotC)
 2) Go to the settings screen in Arena
@@ -523,7 +523,7 @@ async function logLoop() {
     }
     /*
     if (globals.firstPass) {
-      ipc_send("popup", {"text": "Reading: "+Math.round(100/splitString.length*index)+"%", "time": 1000});
+      ipcSend("popup", {"text": "Reading: "+Math.round(100/splitString.length*index)+"%", "time": 1000});
     }
     */
   });
@@ -531,21 +531,21 @@ async function logLoop() {
   if (!detailedLogs) return;
 
   for (let key in parsedData) {
-    ipc_send("ipc_log", `Initial log parse: ${key}=${parsedData[key]}`);
+    ipcSend("ipc_log", `Initial log parse: ${key}=${parsedData[key]}`);
   }
   setData(parsedData, false);
 
   prevLogSize = size;
 
   if (!playerData.arenaId || !playerData.name) {
-    ipc_send("popup", {
+    ipcSend("popup", {
       text: "output_log.txt contains no player data",
       time: 0
     });
     return;
   }
 
-  ipc_send("popup", {
+  ipcSend("popup", {
     text: "Found Arena log for " + playerData.name,
     time: 0
   });
@@ -561,24 +561,24 @@ async function logLoop() {
     }
   }
 
-  ipc_send("prefill_auth_form", {
+  ipcSend("prefill_auth_form", {
     username,
     password,
     remember_me
   });
-  ipc_send("show_login", true);
+  ipcSend("show_login", true);
 
   if (auto_login) {
-    ipc_send("toggle_login", false);
+    ipcSend("toggle_login", false);
     if (remember_me && username && token) {
-      ipc_send("popup", {
+      ipcSend("popup", {
         text: "Logging in automatically...",
         time: 0,
         progress: 2
       });
       httpApi.httpAuth(username, HIDDEN_PW);
     } else {
-      ipc_send("popup", {
+      ipcSend("popup", {
         text: "Launching offline mode automatically...",
         time: 0,
         progress: 2

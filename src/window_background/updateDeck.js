@@ -1,6 +1,6 @@
 import globals from "./globals";
 import { IPC_OVERLAY } from "../shared/constants.js";
-import { ipc_send } from "./backgroundUtil";
+import { ipcSend } from "./backgroundUtil";
 import forceDeckUpdate from "./forceDeckUpdate";
 import getOpponentDeck from "./getOpponentDeck";
 import { objectClone } from "../shared/util";
@@ -30,7 +30,7 @@ function update_deck(force) {
     delete currentMatchCopy.processedAnnotations;
     delete currentMatchCopy.zones;
     currentMatchCopy = JSON.stringify(currentMatchCopy);
-    ipc_send("set_match", currentMatchCopy, IPC_OVERLAY);
+    ipcSend("set_match", currentMatchCopy, IPC_OVERLAY);
   }
 }
 

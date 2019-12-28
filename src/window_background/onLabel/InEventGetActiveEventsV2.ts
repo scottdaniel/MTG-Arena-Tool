@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { ipc_send as ipcSend } from "../backgroundUtil";
+import { ipcSend } from "../backgroundUtil";
 import LogEntry from "../../types/logDecoder";
 import { ActiveEvent } from "../../types/event";
 

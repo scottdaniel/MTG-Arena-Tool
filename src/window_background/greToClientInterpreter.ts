@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/camelcase */
 import { IPC_OVERLAY } from "../shared/constants.js";
 import { objectClone } from "../shared/util";
-import { ipc_send } from "./backgroundUtil";
+import { ipcSend } from "./backgroundUtil";
 import Deck from "../shared/deck";
 import globals from "./globals";
 import actionLog from "./actionLog";
@@ -816,7 +816,7 @@ function checkTurnDiff(turnInfo: TurnInfo): void {
   }
 
   if (!globals.firstPass) {
-    ipc_send(
+    ipcSend(
       "set_turn",
       {
         playerSeat: globals.currentMatch.player.seat,
