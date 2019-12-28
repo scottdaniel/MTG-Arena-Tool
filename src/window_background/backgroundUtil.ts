@@ -9,6 +9,10 @@ import { IPC_BACKGROUND, IPC_MAIN, IPC_OVERLAY } from "../shared/constants";
 import playerData from "../shared/player-data.js";
 import globals from "./globals";
 
+import { create, all, MathJsStatic } from "mathjs";
+const config = { precision: 2000 };
+const math: MathJsStatic = create(all, config) as MathJsStatic;
+
 // Begin of IPC messages recievers
 export function ipc_send(method: string, arg?: any, to = IPC_MAIN): void {
   if (method == "ipc_log") {
@@ -101,6 +105,19 @@ export function parseWotcTimeFallback(dateStr: string): Date {
       throw e;
     }
   }
+}
+
+export function parseLogTimestamp(numb: string | number): Date {
+  const normalEpoch: any = math.divide(
+    math.subtract(
+      math.bignumber(parseInt(numb + "")),
+      math.bignumber(621355968000000000)
+    ),
+    math.bignumber(10 * 1000)
+  );
+
+  const date = new Date(math.floor(math.number(normalEpoch) as any));
+  return date;
 }
 
 export function updateLoading(entry: any): void {

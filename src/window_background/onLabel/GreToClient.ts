@@ -1,7 +1,7 @@
 import globals from "../globals";
 import LogEntry from "../../types/logDecoder";
 import * as greToClientInterpreter from "../greToClientInterpreter";
-import { parseWotcTimeFallback } from "../backgroundUtil";
+import { parseLogTimestamp } from "../backgroundUtil";
 import { GreMessage } from "../../types/greInterpreter";
 
 // timestamp example : "637130091622772767"
@@ -23,7 +23,7 @@ export default function GreToClient(entry: Entry): void {
   //if (skipMatch) return;
   // Note: one of the only places we still depend on entry.timestamp
   // Another note: The timestamp now uses full epoch instead of the traditional format or date
-  globals.logTime = parseWotcTimeFallback(json.timestamp);
+  globals.logTime = parseLogTimestamp(json.timestamp);
 
   const message = json.greToClientEvent.greToClientMessages;
   message.forEach(function(msg) {
