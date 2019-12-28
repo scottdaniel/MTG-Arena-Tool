@@ -978,7 +978,7 @@ function createReplayShareButton(draft) {
 }
 
 export function attachDraftData(listItem, draft) {
-  console.log("Draft: ", draft);
+  //console.log("Draft: ", draft);
 
   const draftSetDiv = createDraftSetDiv(draft);
   const draftRares = createDraftRares(draft);
