@@ -21,13 +21,13 @@ export default function InDeckGetDeckLists(entry: Entry, json = false): void {
   json.forEach(deck => {
     const deckData = { ...(playerData.deck(deck.id) || {}), ...deck };
     decks[deck.id] = deckData;
-    if (globals.debugLog || !globals.firstPass)
-      globals.store.set("decks." + deck.id, deckData);
+    //if (globals.debugLog || !globals.firstPass)
+    //  globals.store.set("decks." + deck.id, deckData);
     static_decks.push(deck.id);
   });
 
   setData({ decks, static_decks });
-  if (globals.debugLog || !globals.firstPass) {
-    globals.store.set("static_decks", static_decks);
-  }
+  //if (globals.debugLog || !globals.firstPass) {
+  //  globals.store.set("static_decks", static_decks);
+  //}
 }
