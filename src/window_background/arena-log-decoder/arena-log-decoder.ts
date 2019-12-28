@@ -4,7 +4,6 @@ import _ from "lodash";
 import nthLastIndexOf from "./nthLastIndexOf";
 import * as jsonText from "./jsonText";
 import sha1 from "js-sha1";
-import LogEntry from "../../types/logDecoder";
 
 const LABEL_JSON_PATTERNS = [
   /\[UnityCrossThreadLogger\](?<timestamp>.*): (?:Match to )?(?<playerId>\w*)(?: to Match)?: (?<label>.*)(?:\r\n|\n)/,
@@ -86,7 +85,7 @@ function parseLogEntry(
   matchText: string,
   position: number,
   absPosition: number
-): [string?, number?, LogEntry?] {
+): any[] {
   let rematches: RegExpMatchArray | null;
 
   if ((rematches = matchText.match(LABEL_ARROW_JSON_PATTERN))) {
