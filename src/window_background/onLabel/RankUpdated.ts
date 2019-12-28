@@ -34,7 +34,7 @@ export default function RankUpdated(entry: Entry): void {
     updateType
   );
 
-  const httpApi = require("./httpApi");
+  const httpApi = require("../httpApi");
   httpApi.httpSetSeasonal(json);
 
   setData({ rank, seasonal_rank });

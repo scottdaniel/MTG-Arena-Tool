@@ -58,7 +58,7 @@ export default function InEventGetPlayerCourseV2(entry: Entry): void {
     addCustomDeck(json.CourseDeck);
     //newJson.date = timestamp();
     //console.log(newJson.CourseDeck, newJson.CourseDeck.colors)
-    const httpApi = require("./httpApi");
+    const httpApi = require("../httpApi");
     httpApi.httpSubmitCourse(newJson);
     saveCourse(newJson);
     selectDeck(newJson);

@@ -37,7 +37,7 @@ export default function EventMatchCreated(entry: Entry): void {
   const matchBeginTime = globals.logTime || new Date();
 
   if (json.opponentRankingClass == "Mythic") {
-    const httpApi = require("./httpApi");
+    const httpApi = require("../httpApi");
     httpApi.httpSetMythicRank(
       json.opponentScreenName,
       json.opponentMythicLeaderboardPlace

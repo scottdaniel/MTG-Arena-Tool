@@ -23,7 +23,7 @@ export default function OutDirectGameChallenge(entry: Entry): void {
   deck = JSON.parse(deck);
   selectDeck(convertDeckFromV3(deck));
 
-  const httpApi = require("./httpApi");
+  const httpApi = require("../httpApi");
   httpApi.httpTournamentCheck(
     globals.currentDeck.getSave(),
     json.params.opponentDisplayName,
