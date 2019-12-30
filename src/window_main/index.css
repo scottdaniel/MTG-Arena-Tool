@@ -3854,6 +3854,7 @@ a:hover {
 }
 
 .decks_table_head_container {
+    margin-top: 8px;
     display: flex;
     justify-content: center;   
 }
@@ -3877,10 +3878,6 @@ a:hover {
     justify-content: flex-start;
     align-items: center;
     overflow: hidden;
-}
-
-.hover_label {
-    padding-top: 8px;
 }
 
 .hover_label:hover {
