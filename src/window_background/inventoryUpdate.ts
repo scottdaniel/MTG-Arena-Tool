@@ -2,9 +2,9 @@ import globals from "./globals";
 import inventoryAddDelta from "./inventoryAddDelta";
 import saveEconomyTransaction from "./saveEconomyTransaction";
 import minifiedDelta from "./minifiedDelta";
-import sha1 from "js-sha1";
 import { InventoryUpdate } from "../types/inventory";
 import { Entry as PostMatchUpdateEntry } from "./onLabel/PostMatchUpdate";
+const sha1 = require("js-sha1");
 
 // REVIEW
 export default function inventoryUpdate(
