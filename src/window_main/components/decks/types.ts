@@ -66,11 +66,6 @@ export interface CellProps {
   deleteTagCallback: (deckid: string, tag: string) => void;
 }
 
-export interface StyledArtTileCellProps {
-  url: string;
-  className?: string;
-}
-
 export interface StyledTagProps {
   backgroundColor: string;
   fontStyle: string;

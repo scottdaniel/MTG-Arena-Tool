@@ -1,11 +1,11 @@
 import _ from "lodash";
-import React, { useRef, useState } from "react";
+import React, { useRef } from "react";
 import format from "date-fns/format";
 import isValid from "date-fns/isValid";
 import styled from "styled-components";
 
 import { MANA, CARD_RARITIES } from "../../../shared/constants";
-import { getCardArtCrop, toMMSS, toDDHHMMSS } from "../../../shared/util";
+import { toMMSS, toDDHHMMSS } from "../../../shared/util";
 import RelativeTime from "../../../shared/time-components/RelativeTime";
 import pd from "../../../shared/player-data";
 
@@ -18,80 +18,12 @@ import {
 } from "../../renderer-util";
 import { createInput } from "../../../shared/dom-fns"; // TODO remove this
 
-import { CSSTransition } from "react-transition-group";
 import {
   CellProps,
-  StyledArtTileCellProps,
   StyledTagProps,
   DeckTagProps,
   StyledArchivedCellProps
 } from "./types";
-
-const StyledArtTileHeader = styled.div`
-  width: 200px;
-  margin: 0;
-`;
-
-const StyledArtTile = styled(StyledArtTileHeader)`
-  background-size: 200px;
-  background-position-x: center;
-  background-position-y: -10px;
-  opacity: 0.66;
-  height: 64px;
-  width: 80px;
-  &.deckTileHover-enter {
-    opacity: 0.66;
-    width: 80px;
-  }
-  &.deckTileHover-enter-active {
-    opacity: 1;
-    width: 100px;
-    -webkit-transition: opacity 0.2s ease-in, width 0.2s ease-in;
-    transition: opacity 0.2s ease-in, width 0.2s ease-in;
-  }
-  &.deckTileHover-enter-done {
-    opacity: 1;
-    width: 100px;
-  }
-  &.deckTileHover-exit {
-    opacity: 1;
-    width: 100px;
-  }
-  &.deckTileHover-exit-active {
-    opacity: 0.66;
-    width: 80px;
-    -webkit-transition: opacity 0.2s ease-in, width 0.2s ease-in;
-    transition: opacity 0.2s ease-in, width 0.2s ease-in;
-  }
-  &.deckTileHover-exit-done {
-    opacity: 0.66;
-    width: 80px;
-  }
-`;
-
-export function StyledArtTileCell({
-  url,
-  ...otherProps
-}: StyledArtTileCellProps): JSX.Element {
-  return (
-    <StyledArtTile
-      style={{ backgroundImage: `url("${url}")` }}
-      {...otherProps}
-    />
-  );
-}
-
-export function ArtTileHeader(): JSX.Element {
-  return <StyledArtTileHeader />;
-}
-
-export function ArtTileCell({ cell }: CellProps): JSX.Element {
-  return (
-    <CSSTransition classNames="deckTileHover" in={!!cell.hover} timeout={200}>
-      <StyledArtTileCell url={getCardArtCrop(cell.value)} />
-    </CSSTransition>
-  );
-}
 
 const StyledFlexLeftCell = styled.div`
   display: flex;
@@ -118,7 +50,7 @@ export function ColorsCell({ cell }: CellProps): JSX.Element {
   return (
     <StyledFlexRightCell>
       {data.colors.map((color: number, index: number) => {
-        return <div key={index} className={"mana_s20 mana_" + MANA[color]} />;
+        return <div key={index} className={"mana_s16 mana_" + MANA[color]} />;
       })}
     </StyledFlexRightCell>
   );
@@ -156,7 +88,7 @@ export function MetricCell({ cell }: CellProps): JSX.Element {
 export function DatetimeCell({ cell }: CellProps): JSX.Element {
   const dateVal = new Date(cell.value);
   if (!isValid(dateVal)) {
-    return <MetricText>--</MetricText>;
+    return <MetricText>-</MetricText>;
   }
   return (
     <MetricText>
@@ -168,7 +100,7 @@ export function DatetimeCell({ cell }: CellProps): JSX.Element {
 export function WinRateCell({ cell }: CellProps): JSX.Element {
   const { total, interval, winrate, winrateLow, winrateHigh } = cell.row.values;
   if (!total) {
-    return <MetricText title={"no data yet"}>--</MetricText>;
+    return <MetricText title={"no data yet"}>-</MetricText>;
   }
   let intervalDisplay, tooltip;
   if (total >= 20) {
@@ -211,7 +143,7 @@ export function LastEditWinRateCell({ cell }: CellProps): JSX.Element {
       "Pp"
     )}`;
   } else {
-    value = <span>--</span>;
+    value = <span>-</span>;
     tooltip = "no data yet";
   }
   return <MetricText title={tooltip}>{value}</MetricText>;
@@ -224,7 +156,7 @@ export function DurationCell({ cell }: CellProps): JSX.Element {
     value = <span>{toMMSS(cell.value)}</span>;
     tooltip = toDDHHMMSS(cell.value);
   } else {
-    value = <span>--</span>;
+    value = <span>-</span>;
     tooltip = "no data yet";
   }
   return <MetricText title={tooltip}>{value}</MetricText>;

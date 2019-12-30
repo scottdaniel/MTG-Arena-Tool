@@ -5,8 +5,6 @@ import styled from "styled-components";
 
 import FilterPanel from "../../FilterPanel";
 import {
-  ArtTileHeader,
-  ArtTileCell,
   NameCell,
   ColorsCell,
   FormatCell,
@@ -67,16 +65,6 @@ export default function DecksTable({
   const columns = React.useMemo(
     () => [
       { id: "deckId", accessor: "id" },
-      {
-        Header: ArtTileHeader,
-        accessor: "deckTileId",
-        disableFilters: false,
-        filter: "uberSearch",
-        Filter: TextBoxFilter,
-        minWidth: 100,
-        disableSortBy: true,
-        Cell: CellWrapper(ArtTileCell)
-      },
       {
         Header: "Name",
         accessor: "name",
@@ -351,104 +339,105 @@ export default function DecksTable({
   ];
 
   return (
-    <>
+    <div className="decks_table_wrap">
       <div
         style={{
           display: "flex",
           flexWrap: "wrap",
           color: "var(--color-light)",
-          padding: "16px",
-          paddingBottom: 0,
-          cursor: "pointer",
-          alignItems: "center"
+          paddingBottom: "8px",
         }}
       >
-        <span style={{ paddingBottom: "8px" }}>Filter match results:</span>
-        <span style={{ width: "260px" }}>{filterPanel.render()}</span>
-        <span style={{ paddingBottom: "8px" }}>Presets:</span>
-        <PresetButton
-          onClick={(): void => {
-            setAllFilters(recentFilters);
-            setFiltersVisible(initialFiltersVisible);
-            toggleSortBy("timeTouched", true);
-            for (const columnId of toggleableIds) {
-              const isVisible = [
-                "name",
-                "format",
-                "colorSortVal",
-                "timeTouched",
-                "lastEditWinrate"
-              ].includes(columnId);
-              toggleHideColumn(columnId, !isVisible);
-            }
-          }}
-        >
-          Recent
-        </PresetButton>
-        <PresetButton
-          onClick={(): void => {
-            setAllFilters(bestFilters);
-            setFiltersVisible({
-              ...initialFiltersVisible,
-              wins: true,
-              winrate100: true
-            });
-            toggleSortBy("winrate100", true);
-            for (const columnId of toggleableIds) {
-              const isVisible = [
-                "name",
-                "format",
-                "colorSortVal",
-                "losses",
-                "winrate100",
-                "wins"
-              ].includes(columnId);
-              toggleHideColumn(columnId, !isVisible);
-            }
-          }}
-        >
-          Best
-        </PresetButton>
-        <PresetButton
-          onClick={(): void => {
-            setAllFilters(wantedFilters);
-            setFiltersVisible({ ...initialFiltersVisible, boosterCost: true });
-            toggleSortBy("boosterCost", true);
-            for (const columnId of toggleableIds) {
-              const isVisible = [
-                "name",
-                "format",
-                "colorSortVal",
-                "boosterCost",
-                "timeUpdated"
-              ].includes(columnId);
-              toggleHideColumn(columnId, !isVisible);
-            }
-          }}
-        >
-          Wanted
-        </PresetButton>
-        <MetricText
-          onClick={(): void => setTogglesVisible(!togglesVisible)}
-          className="button_simple"
-          style={{ margin: "0 0 5px 12px" }}
-        >
-          {togglesVisible ? "Hide" : "Show"} Column Toggles
-        </MetricText>
-        {togglesVisible &&
-          toggleableColumns.map((column: any) => (
-            <StyledCheckboxContainer key={column.id}>
-              {column.render("Header")}
-              <input type="checkbox" {...column.getToggleHiddenProps()} />
-              <span className={"checkmark"} />
-            </StyledCheckboxContainer>
-          ))}
+        <div className="decks_table_toggles">
+          <span style={{ paddingBottom: "8px" }}>Filter match results:</span>
+          <span style={{ width: "260px" }}>{filterPanel.render()}</span>
+          <span style={{ paddingBottom: "8px" }}>Presets:</span>
+          <PresetButton
+            onClick={(): void => {
+              setAllFilters(recentFilters);
+              setFiltersVisible(initialFiltersVisible);
+              toggleSortBy("timeTouched", true);
+              for (const columnId of toggleableIds) {
+                const isVisible = [
+                  "name",
+                  "format",
+                  "colorSortVal",
+                  "timeTouched",
+                  "lastEditWinrate"
+                ].includes(columnId);
+                toggleHideColumn(columnId, !isVisible);
+              }
+            }}
+          >
+            Recent
+          </PresetButton>
+          <PresetButton
+            onClick={(): void => {
+              setAllFilters(bestFilters);
+              setFiltersVisible({
+                ...initialFiltersVisible,
+                wins: true,
+                winrate100: true
+              });
+              toggleSortBy("winrate100", true);
+              for (const columnId of toggleableIds) {
+                const isVisible = [
+                  "name",
+                  "format",
+                  "colorSortVal",
+                  "losses",
+                  "winrate100",
+                  "wins"
+                ].includes(columnId);
+                toggleHideColumn(columnId, !isVisible);
+              }
+            }}
+          >
+            Best
+          </PresetButton>
+          <PresetButton
+            onClick={(): void => {
+              setAllFilters(wantedFilters);
+              setFiltersVisible({ ...initialFiltersVisible, boosterCost: true });
+              toggleSortBy("boosterCost", true);
+              for (const columnId of toggleableIds) {
+                const isVisible = [
+                  "name",
+                  "format",
+                  "colorSortVal",
+                  "boosterCost",
+                  "timeUpdated"
+                ].includes(columnId);
+                toggleHideColumn(columnId, !isVisible);
+              }
+            }}
+          >
+            Wanted
+          </PresetButton>
+          <MetricText
+            onClick={(): void => setTogglesVisible(!togglesVisible)}
+            className="button_simple"
+            style={{ margin: "0 0 5px 12px" }}
+          >
+            {togglesVisible ? "Hide" : "Show"} Column Toggles
+          </MetricText>
+        </div>
+        <div className="decks_table_toggles">
+          {togglesVisible &&
+            toggleableColumns.map((column: any) => (
+              <StyledCheckboxContainer key={column.id}>
+                {column.render("Header")}
+                <input type="checkbox" {...column.getToggleHiddenProps()} />
+                <span className={"checkmark"} />
+              </StyledCheckboxContainer>
+            ))}
+          </div>
       </div>
       <div
-        className="decks_table_head"
+        className="decks_table_head line_dark"
         style={{
-          gridTemplateColumns: `100px 200px 150px 150px ${"1fr ".repeat(
-            headerGroups[0].headers ? headerGroups[0].headers.length - 4 : 1
+          gridTemplateColumns: `200px 150px 150px ${"1fr ".repeat(
+            headerGroups[0].headers ? headerGroups[0].headers.length - 3 : 1
           )}`
         }}
         {...getTableProps()}
@@ -533,26 +522,29 @@ export default function DecksTable({
           ))}
       </div>
       <div className="decks_table_body" {...getTableBodyProps()}>
-        {rows.map((row: any) => {
+        {rows.map((row: any, index: number) => {
           prepareRow(row);
           return (
             <RowContainer
               openDeckCallback={openDeckCallback}
               row={row}
+              index={index}
               key={row.index}
             />
           );
         })}
       </div>
-    </>
+    </div>
   );
 }
 
 function RowContainer({
   row,
+  index,
   openDeckCallback
 }: {
   row: any;
+  index: number;
   openDeckCallback: (id: string) => void;
 }): JSX.Element {
   const [hover, setHover] = React.useState(false);
@@ -574,10 +566,12 @@ function RowContainer({
 
   return (
     <div
-      className="decks_table_body_row"
+      className={
+        "decks_table_body_row " + (index % 2 == 0 ? "line_light" : "line_dark")
+      }
       style={{
-        gridTemplateColumns: `100px 200px 150px 150px ${"1fr ".repeat(
-          row.cells.length - 4
+        gridTemplateColumns: `200px 150px 150px ${"1fr ".repeat(
+          row.cells.length - 3
         )}`
       }}
       onMouseEnter={mouseEnter}
