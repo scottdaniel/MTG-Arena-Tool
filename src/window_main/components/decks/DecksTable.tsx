@@ -345,7 +345,7 @@ export default function DecksTable({
           display: "flex",
           flexWrap: "wrap",
           color: "var(--color-light)",
-          paddingBottom: "8px",
+          paddingBottom: "8px"
         }}
       >
         <div className="decks_table_toggles">
@@ -398,7 +398,10 @@ export default function DecksTable({
           <PresetButton
             onClick={(): void => {
               setAllFilters(wantedFilters);
-              setFiltersVisible({ ...initialFiltersVisible, boosterCost: true });
+              setFiltersVisible({
+                ...initialFiltersVisible,
+                boosterCost: true
+              });
               toggleSortBy("boosterCost", true);
               for (const columnId of toggleableIds) {
                 const isVisible = [
@@ -431,7 +434,7 @@ export default function DecksTable({
                 <span className={"checkmark"} />
               </StyledCheckboxContainer>
             ))}
-          </div>
+        </div>
       </div>
       <div
         className="decks_table_head line_dark"
