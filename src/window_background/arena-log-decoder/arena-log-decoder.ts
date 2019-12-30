@@ -1,9 +1,10 @@
 /* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-use-before-define */
+/* eslint-disable @typescript-eslint/no-var-requires */
 import _ from "lodash";
 import nthLastIndexOf from "./nthLastIndexOf";
 import * as jsonText from "./jsonText";
-import sha1 from "js-sha1";
+const sha1 = require("js-sha1");
 
 const LABEL_JSON_PATTERNS = [
   /\[UnityCrossThreadLogger\](?<timestamp>.*): (?:Match to )?(?<playerId>\w*)(?: to Match)?: (?<label>.*)(?:\r\n|\n)/,
@@ -27,10 +28,9 @@ function unleakString(s: string): string {
   return (" " + s).substr(1);
 }
 
-export default function ArenaLogDecoder(): (
-  newtext: string,
-  callback: any
-) => void {
+export default function ArenaLogDecoder(): {
+  append: (newtext: string, callback: any) => void;
+} {
   let buffer = "";
   let bufferDiscarded = 0;
   return { append };
