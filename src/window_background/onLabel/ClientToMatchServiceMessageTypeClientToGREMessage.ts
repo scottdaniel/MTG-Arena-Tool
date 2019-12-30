@@ -19,7 +19,7 @@ interface Entry extends LogEntry {
 
 function decodePayload(payload: any, msgType: string): any {
   const messages = require("../messages_pb");
-  const binaryMsg = new Buffer.from(payload, "base64");
+  const binaryMsg = Buffer.from(payload, "base64");
 
   try {
     let msgDeserialiser;
