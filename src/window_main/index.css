@@ -3879,6 +3879,10 @@ a:hover {
     overflow: hidden;
 }
 
+.hover_label {
+    padding-top: 8px;
+}
+
 .hover_label:hover {
     background-color: rgba(0,0,0,0.4);
     cursor: pointer;
