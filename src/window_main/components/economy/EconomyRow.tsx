@@ -19,11 +19,11 @@ import {
 
 import { addCardHover } from "../../../shared/cardHover";
 
-import React, { useState } from "react";
+import React from "react";
 import EconomyValueRecord, { EconomyIcon } from "./EconomyValueRecord";
 import ReactDOM from "react-dom";
 import LocalTime from "../../../shared/time-components/LocalTime";
-import { DbCardData } from "../../../shared/types/Metadata";
+import { DbCardData } from "../../../types/Metadata";
 
 function EconomyRowDate(date: Date) {
   return (
