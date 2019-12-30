@@ -111,7 +111,7 @@ function fsWatch(
   interval: number
 ): () => void {
   let lastSize: number;
-  let handle: number;
+  let handle: NodeJS.Timeout;
   start();
   return stop;
 
