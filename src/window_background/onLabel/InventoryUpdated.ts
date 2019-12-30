@@ -2,12 +2,12 @@ import inventoryAddDelta from "../inventoryAddDelta";
 import globals from "../globals";
 import saveEconomyTransaction from "../saveEconomyTransaction";
 import minifiedDelta from "../minifiedDelta";
-import sha1 from "js-sha1";
 import LogEntry from "../../types/logDecoder";
 import {
   InventoryUpdate,
   InternalEconomyTransaction
 } from "../../types/inventory";
+const sha1 = require("js-sha1");
 
 interface EntryJson {
   context: string;
