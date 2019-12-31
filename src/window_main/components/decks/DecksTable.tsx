@@ -439,6 +439,16 @@ export default function DecksTable({
           </MetricText>
         </div>
         <div className="decks_table_toggles">
+          {togglesVisible &&
+            toggleableColumns.map((column: any) => (
+              <StyledCheckboxContainer key={column.id}>
+                {column.render("Header")}
+                <input type="checkbox" {...column.getToggleHiddenProps()} />
+                <span className={"checkmark"} />
+              </StyledCheckboxContainer>
+            ))}
+        </div>
+        <div className="decks_table_search_cont">
           {deckTileColumn.render("Filter")}
           {deckTileColumn.filterValue && (
             <div
@@ -451,16 +461,6 @@ export default function DecksTable({
               title={"clear column filter"}
             />
           )}
-        </div>
-        <div className="decks_table_toggles">
-          {togglesVisible &&
-            toggleableColumns.map((column: any) => (
-              <StyledCheckboxContainer key={column.id}>
-                {column.render("Header")}
-                <input type="checkbox" {...column.getToggleHiddenProps()} />
-                <span className={"checkmark"} />
-              </StyledCheckboxContainer>
-            ))}
         </div>
       </div>
       <div

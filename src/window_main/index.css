@@ -3847,6 +3847,14 @@ a:hover {
     justify-content: space-between;
 }
 
+.decks_table_search_cont {
+    display: flex;
+    margin: 4px auto;
+    width: -webkit-fill-available;
+    justify-content: center;
+    max-width: 600px;
+}
+
 .decks_table_head {
     display: grid;
     color: var(--color-light);
