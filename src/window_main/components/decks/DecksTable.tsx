@@ -5,8 +5,6 @@ import styled from "styled-components";
 
 import FilterPanel from "../../FilterPanel";
 import {
-  ArtTileHeader,
-  ArtTileCell,
   NameCell,
   ColorsCell,
   FormatCell,
@@ -68,14 +66,10 @@ export default function DecksTable({
     () => [
       { id: "deckId", accessor: "id" },
       {
-        Header: ArtTileHeader,
         accessor: "deckTileId",
         disableFilters: false,
         filter: "uberSearch",
-        Filter: TextBoxFilter,
-        minWidth: 100,
-        disableSortBy: true,
-        Cell: CellWrapper(ArtTileCell)
+        Filter: TextBoxFilter
       },
       {
         Header: "Name",
@@ -225,6 +219,7 @@ export default function DecksTable({
   const initialState: DecksTableState = React.useMemo(() => {
     const state = _.defaultsDeep(cachedState, {
       hiddenColumns: [
+        "deckTileId",
         "archived",
         "deckId",
         "custom",
@@ -254,6 +249,9 @@ export default function DecksTable({
     });
     if (!state.hiddenColumns.includes("archived")) {
       state.hiddenColumns.push("archived");
+    }
+    if (!state.hiddenColumns.includes("deckTileId")) {
+      state.hiddenColumns.push("deckTileId");
     }
     return state;
   }, [cachedState]);
@@ -314,12 +312,15 @@ export default function DecksTable({
   );
 
   const initialFiltersVisible: { [key: string]: boolean } = {};
+  let deckTileColumn: any;
   for (const column of flatColumns) {
-    if (column.canFilter) {
+    if (column.id === "deckTileId") {
+      deckTileColumn = column;
+      initialFiltersVisible[column.id] = true; // uber search always visible
+    } else if (column.canFilter) {
       initialFiltersVisible[column.id] = false;
     }
   }
-  initialFiltersVisible["deckTileId"] = true; // uber search always visible
   const [filtersVisible, setFiltersVisible] = useState(initialFiltersVisible);
   const [togglesVisible, setTogglesVisible] = useState(false);
   const filterPanel = new FilterPanel(
@@ -351,104 +352,122 @@ export default function DecksTable({
   ];
 
   return (
-    <>
+    <div className="decks_table_wrap">
       <div
         style={{
           display: "flex",
           flexWrap: "wrap",
           color: "var(--color-light)",
-          padding: "16px",
-          paddingBottom: 0,
-          cursor: "pointer",
-          alignItems: "center"
+          paddingBottom: "8px"
         }}
       >
-        <span style={{ paddingBottom: "8px" }}>Filter match results:</span>
-        <span style={{ width: "260px" }}>{filterPanel.render()}</span>
-        <span style={{ paddingBottom: "8px" }}>Presets:</span>
-        <PresetButton
-          onClick={(): void => {
-            setAllFilters(recentFilters);
-            setFiltersVisible(initialFiltersVisible);
-            toggleSortBy("timeTouched", true);
-            for (const columnId of toggleableIds) {
-              const isVisible = [
-                "name",
-                "format",
-                "colorSortVal",
-                "timeTouched",
-                "lastEditWinrate"
-              ].includes(columnId);
-              toggleHideColumn(columnId, !isVisible);
-            }
-          }}
-        >
-          Recent
-        </PresetButton>
-        <PresetButton
-          onClick={(): void => {
-            setAllFilters(bestFilters);
-            setFiltersVisible({
-              ...initialFiltersVisible,
-              wins: true,
-              winrate100: true
-            });
-            toggleSortBy("winrate100", true);
-            for (const columnId of toggleableIds) {
-              const isVisible = [
-                "name",
-                "format",
-                "colorSortVal",
-                "losses",
-                "winrate100",
-                "wins"
-              ].includes(columnId);
-              toggleHideColumn(columnId, !isVisible);
-            }
-          }}
-        >
-          Best
-        </PresetButton>
-        <PresetButton
-          onClick={(): void => {
-            setAllFilters(wantedFilters);
-            setFiltersVisible({ ...initialFiltersVisible, boosterCost: true });
-            toggleSortBy("boosterCost", true);
-            for (const columnId of toggleableIds) {
-              const isVisible = [
-                "name",
-                "format",
-                "colorSortVal",
-                "boosterCost",
-                "timeUpdated"
-              ].includes(columnId);
-              toggleHideColumn(columnId, !isVisible);
-            }
-          }}
-        >
-          Wanted
-        </PresetButton>
-        <MetricText
-          onClick={(): void => setTogglesVisible(!togglesVisible)}
-          className="button_simple"
-          style={{ margin: "0 0 5px 12px" }}
-        >
-          {togglesVisible ? "Hide" : "Show"} Column Toggles
-        </MetricText>
-        {togglesVisible &&
-          toggleableColumns.map((column: any) => (
-            <StyledCheckboxContainer key={column.id}>
-              {column.render("Header")}
-              <input type="checkbox" {...column.getToggleHiddenProps()} />
-              <span className={"checkmark"} />
-            </StyledCheckboxContainer>
-          ))}
+        <div className="decks_table_toggles">
+          <span style={{ paddingBottom: "8px" }}>Filter match results:</span>
+          <span style={{ width: "260px" }}>{filterPanel.render()}</span>
+          <span style={{ paddingBottom: "8px" }}>Presets:</span>
+          <PresetButton
+            onClick={(): void => {
+              setAllFilters(recentFilters);
+              setFiltersVisible(initialFiltersVisible);
+              toggleSortBy("timeTouched", true);
+              for (const columnId of toggleableIds) {
+                const isVisible = [
+                  "name",
+                  "format",
+                  "colorSortVal",
+                  "timeTouched",
+                  "lastEditWinrate"
+                ].includes(columnId);
+                toggleHideColumn(columnId, !isVisible);
+              }
+            }}
+          >
+            Recent
+          </PresetButton>
+          <PresetButton
+            onClick={(): void => {
+              setAllFilters(bestFilters);
+              setFiltersVisible({
+                ...initialFiltersVisible,
+                wins: true,
+                winrate100: true
+              });
+              toggleSortBy("winrate100", true);
+              for (const columnId of toggleableIds) {
+                const isVisible = [
+                  "name",
+                  "format",
+                  "colorSortVal",
+                  "losses",
+                  "winrate100",
+                  "wins"
+                ].includes(columnId);
+                toggleHideColumn(columnId, !isVisible);
+              }
+            }}
+          >
+            Best
+          </PresetButton>
+          <PresetButton
+            onClick={(): void => {
+              setAllFilters(wantedFilters);
+              setFiltersVisible({
+                ...initialFiltersVisible,
+                boosterCost: true
+              });
+              toggleSortBy("boosterCost", true);
+              for (const columnId of toggleableIds) {
+                const isVisible = [
+                  "name",
+                  "format",
+                  "colorSortVal",
+                  "boosterCost",
+                  "timeUpdated"
+                ].includes(columnId);
+                toggleHideColumn(columnId, !isVisible);
+              }
+            }}
+          >
+            Wanted
+          </PresetButton>
+          <MetricText
+            onClick={(): void => setTogglesVisible(!togglesVisible)}
+            className="button_simple"
+            style={{ margin: "0 0 5px 12px" }}
+          >
+            {togglesVisible ? "Hide" : "Show"} Column Toggles
+          </MetricText>
+        </div>
+        <div className="decks_table_toggles">
+          {togglesVisible &&
+            toggleableColumns.map((column: any) => (
+              <StyledCheckboxContainer key={column.id}>
+                {column.render("Header")}
+                <input type="checkbox" {...column.getToggleHiddenProps()} />
+                <span className={"checkmark"} />
+              </StyledCheckboxContainer>
+            ))}
+        </div>
+        <div className="decks_table_search_cont">
+          {deckTileColumn.render("Filter")}
+          {deckTileColumn.filterValue && (
+            <div
+              style={{ marginRight: 0 }}
+              className={"button close"}
+              onClick={(e): void => {
+                e.stopPropagation();
+                setFilter(deckTileColumn.id, undefined);
+              }}
+              title={"clear column filter"}
+            />
+          )}
+        </div>
       </div>
       <div
-        className="decks_table_head"
+        className="decks_table_head line_dark"
         style={{
-          gridTemplateColumns: `100px 200px 150px 150px ${"1fr ".repeat(
-            headerGroups[0].headers ? headerGroups[0].headers.length - 4 : 1
+          gridTemplateColumns: `200px 150px 150px ${"1fr ".repeat(
+            headerGroups[0].headers ? headerGroups[0].headers.length - 3 : 1
           )}`
         }}
         {...getTableProps()}
@@ -477,7 +496,7 @@ export default function DecksTable({
                   style={{ marginRight: "4px", width: "16px" }}
                 />
                 <div className={"flex_item"}>{column.render("Header")}</div>
-                {column.canFilter && column.id !== "deckTileId" && (
+                {column.canFilter && (
                   <div
                     style={{ marginRight: 0 }}
                     className={"button settings"}
@@ -494,7 +513,7 @@ export default function DecksTable({
                     }
                   />
                 )}
-                {column.filterValue && column.id !== "deckTileId" && (
+                {column.filterValue && (
                   <div
                     style={{ marginRight: 0 }}
                     className={"button close"}
@@ -516,43 +535,35 @@ export default function DecksTable({
                   title={"filter column"}
                 >
                   {column.render("Filter")}
-                  {column.filterValue && column.id === "deckTileId" && (
-                    <div
-                      style={{ marginRight: 0 }}
-                      className={"button close"}
-                      onClick={(e): void => {
-                        e.stopPropagation();
-                        setFilter(column.id, undefined);
-                      }}
-                      title={"clear search"}
-                    />
-                  )}
                 </div>
               )}
             </div>
           ))}
       </div>
       <div className="decks_table_body" {...getTableBodyProps()}>
-        {rows.map((row: any) => {
+        {rows.map((row: any, index: number) => {
           prepareRow(row);
           return (
             <RowContainer
               openDeckCallback={openDeckCallback}
               row={row}
+              index={index}
               key={row.index}
             />
           );
         })}
       </div>
-    </>
+    </div>
   );
 }
 
 function RowContainer({
   row,
+  index,
   openDeckCallback
 }: {
   row: any;
+  index: number;
   openDeckCallback: (id: string) => void;
 }): JSX.Element {
   const [hover, setHover] = React.useState(false);
@@ -569,15 +580,14 @@ function RowContainer({
     openDeckCallback(row.values.deckId);
   }, []);
 
-  const isLeftAlignCol = (id: string): boolean =>
-    ["deckTileId", "name", "tags"].includes(id);
-
   return (
     <div
-      className="decks_table_body_row"
+      className={
+        "decks_table_body_row " + (index % 2 == 0 ? "line_light" : "line_dark")
+      }
       style={{
-        gridTemplateColumns: `100px 200px 150px 150px ${"1fr ".repeat(
-          row.cells.length - 4
+        gridTemplateColumns: `200px 150px 150px ${"1fr ".repeat(
+          row.cells.length - 3
         )}`
       }}
       onMouseEnter={mouseEnter}
@@ -589,9 +599,6 @@ function RowContainer({
         return (
           <div
             className="inner_div"
-            style={{
-              justifyContent: isLeftAlignCol(cell.column.id) ? "flex-start" : ""
-            }}
             {...cell.getCellProps()}
             key={cell.column.id + "_" + row.index}
             title={`show ${row.values.name} details`}

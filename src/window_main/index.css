@@ -3836,20 +3836,42 @@ a:hover {
     height: 16px;
 }
 
+.decks_table_wrap {
+    padding: 16px;
+}
+
+.decks_table_toggles {
+    display: flex;
+    flex-wrap: wrap;
+    width: -webkit-fill-available;
+    justify-content: space-between;
+}
+
+.decks_table_search_cont {
+    display: flex;
+    margin: 4px auto;
+    width: -webkit-fill-available;
+    justify-content: center;
+    max-width: 600px;
+}
+
 .decks_table_head {
     display: grid;
     color: var(--color-light);
+    border-bottom: 1px solid var(--color-light);
 }
 
 .decks_table_head_container {
+    margin-top: 8px;
     display: flex;
     justify-content: center;   
 }
 
 .decks_table_body_row {
     display: grid;
+    height: 32px;
     color: var(--color-light);
-    -webkit-transition: all .2s ease-in;
+    -webkit-transition: all .1s ease-out;
 }
 
 .decks_table_body_row:hover {
@@ -3860,7 +3882,8 @@ a:hover {
 .decks_table_body_row .inner_div {
     display: flex;
     padding: 2px;
-    justify-content: flex-end;
+    margin-left: 8px;
+    justify-content: flex-start;
     align-items: center;
     overflow: hidden;
 }
