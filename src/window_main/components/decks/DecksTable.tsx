@@ -66,6 +66,12 @@ export default function DecksTable({
     () => [
       { id: "deckId", accessor: "id" },
       {
+        accessor: "deckTileId",
+        disableFilters: false,
+        filter: "uberSearch",
+        Filter: TextBoxFilter
+      },
+      {
         Header: "Name",
         accessor: "name",
         disableFilters: false,
@@ -213,6 +219,7 @@ export default function DecksTable({
   const initialState: DecksTableState = React.useMemo(() => {
     const state = _.defaultsDeep(cachedState, {
       hiddenColumns: [
+        "deckTileId",
         "archived",
         "deckId",
         "custom",
@@ -242,6 +249,9 @@ export default function DecksTable({
     });
     if (!state.hiddenColumns.includes("archived")) {
       state.hiddenColumns.push("archived");
+    }
+    if (!state.hiddenColumns.includes("deckTileId")) {
+      state.hiddenColumns.push("deckTileId");
     }
     return state;
   }, [cachedState]);
@@ -302,12 +312,15 @@ export default function DecksTable({
   );
 
   const initialFiltersVisible: { [key: string]: boolean } = {};
+  let deckTileColumn: any;
   for (const column of flatColumns) {
-    if (column.canFilter) {
+    if (column.id === "deckTileId") {
+      deckTileColumn = column;
+      initialFiltersVisible[column.id] = true; // uber search always visible
+    } else if (column.canFilter) {
       initialFiltersVisible[column.id] = false;
     }
   }
-  initialFiltersVisible["deckTileId"] = true; // uber search always visible
   const [filtersVisible, setFiltersVisible] = useState(initialFiltersVisible);
   const [togglesVisible, setTogglesVisible] = useState(false);
   const filterPanel = new FilterPanel(
@@ -426,6 +439,20 @@ export default function DecksTable({
           </MetricText>
         </div>
         <div className="decks_table_toggles">
+          {deckTileColumn.render("Filter")}
+          {deckTileColumn.filterValue && (
+            <div
+              style={{ marginRight: 0 }}
+              className={"button close"}
+              onClick={(e): void => {
+                e.stopPropagation();
+                setFilter(deckTileColumn.id, undefined);
+              }}
+              title={"clear column filter"}
+            />
+          )}
+        </div>
+        <div className="decks_table_toggles">
           {togglesVisible &&
             toggleableColumns.map((column: any) => (
               <StyledCheckboxContainer key={column.id}>
@@ -469,7 +496,7 @@ export default function DecksTable({
                   style={{ marginRight: "4px", width: "16px" }}
                 />
                 <div className={"flex_item"}>{column.render("Header")}</div>
-                {column.canFilter && column.id !== "deckTileId" && (
+                {column.canFilter && (
                   <div
                     style={{ marginRight: 0 }}
                     className={"button settings"}
@@ -486,7 +513,7 @@ export default function DecksTable({
                     }
                   />
                 )}
-                {column.filterValue && column.id !== "deckTileId" && (
+                {column.filterValue && (
                   <div
                     style={{ marginRight: 0 }}
                     className={"button close"}
@@ -508,17 +535,6 @@ export default function DecksTable({
                   title={"filter column"}
                 >
                   {column.render("Filter")}
-                  {column.filterValue && column.id === "deckTileId" && (
-                    <div
-                      style={{ marginRight: 0 }}
-                      className={"button close"}
-                      onClick={(e): void => {
-                        e.stopPropagation();
-                        setFilter(column.id, undefined);
-                      }}
-                      title={"clear search"}
-                    />
-                  )}
                 </div>
               )}
             </div>
@@ -564,9 +580,6 @@ function RowContainer({
     openDeckCallback(row.values.deckId);
   }, []);
 
-  const isLeftAlignCol = (id: string): boolean =>
-    ["deckTileId", "name", "tags"].includes(id);
-
   return (
     <div
       className={
@@ -586,9 +599,6 @@ function RowContainer({
         return (
           <div
             className="inner_div"
-            style={{
-              justifyContent: isLeftAlignCol(cell.column.id) ? "flex-start" : ""
-            }}
             {...cell.getCellProps()}
             key={cell.column.id + "_" + row.index}
             title={`show ${row.values.name} details`}
