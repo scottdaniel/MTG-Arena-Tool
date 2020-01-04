@@ -1,4 +1,4 @@
-This is meant as a guide to help you locate and resolve the most common issues running MTG Arena Tool. **Please** only follow these steps if you encounter one of the issues mentioned.
+This is meant as a guide to help you locate and resolve the most common issues running MTG Arena Tool (Mtgatool). **Please** only follow these steps if you encounter one of the issues mentioned.
 
 Common paths:
 - Output log: `%APPDATA%\..\LocalLow\Wizards Of The Coast\MTGA\`
@@ -7,12 +7,12 @@ Common paths:
 
 ### Stuck on 'please wait a minute' (without loading %)
 
-Refer to this issue, the solution is on the comments;
+Refer to this issue, the solution is in the comments:
 [github.com/Manuel-777/MTG-Arena-Tool/issues/112](https://github.com/Manuel-777/MTG-Arena-Tool/issues/112)
 
 ### "No log file found" error or "Output log contains no user data"
 
-Close MTG Arena and MTG Arena tool, then start MTG Arena. Once MTG Arena is loaded run MTG Arena Tool again.
+Close MTG Arena (MTGA) and MTG Arena tool, then start MTG Arena. Once MTG Arena is loaded run MTG Arena Tool again.
 
 If that does not work, go to `%APPDATA%/mtg-arena-tool/` and delete `settings.json`, then load MTG Arena Tool again.
 You might be asked to point at the path of the output log again.
@@ -22,13 +22,13 @@ You might be asked to point at the path of the output log again.
 Toggle Edit mode (default `Alt + Shift + E`) or toggle an overlay.
 
 ### If the app freezes in loading "Just a second" page:
-This is probably caused by an error reading the user configuration, probably due to an unhandled exception or new data added from MTGA that mtgatool is not handling properly. Bear in mind this issue is **not** because of a bad or improper installation, so reinstalling will make no difference. Altrough, you can roll back to a previous version safely if an update caused it.
+This is probably caused by an error reading the user configuration, probably due to an unhandled exception or new data added from MTGA that mtgatool is not handling properly. Bear in mind this issue is **not** because of a bad or improper installation, so reinstalling will make no difference. Although, you can roll back to a previous version safely if an update caused it.
 
 Locate your log and config files;
 - Go to the MTG Arena Tool "Settings" page (gear icon), then click on "Data"
-- copy the path to the "Arena Log"
+- Copy the path to the "Arena Log"
 - Close MTG Arena and MTG Arena Tool.
-- open the "Arena Log" path in a file browser
+- Open the "Arena Log" path in a file browser
 - Rename `output_log.txt`, do not delete it!
 - Run MTG Arena, once open, run MTG Arena Tool again.
 
