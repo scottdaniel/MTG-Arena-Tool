@@ -76,6 +76,7 @@ const defaultCfg = {
     right_panel_width: 400,
     last_date_filter: DATE_LAST_30,
     last_open_tab: -1,
+    decksTableState: undefined,
     card_tile_style: CARD_TILE_FLAT,
     skip_firstpass: false,
     overlay_scale: 100,
@@ -280,11 +281,20 @@ class PlayerData {
 
     this.transaction = this.transaction.bind(this);
     this.deck = this.deck.bind(this);
+    this.arenaVersion = undefined;
+    this.userName = undefined;
+    this.cards = undefined;
+    this.cardsNew = undefined;
     this.decks = undefined;
     this.name = undefined;
     this.arenaId = undefined;
     this.rank = undefined;
     this.economy = undefined;
+    this.seasonal = undefined;
+    this.courses_index = [];
+    this.matches_index = [];
+    this.economy_index = [];
+    this.draft_index = [];
     this.offline = false;
     this.patreon = false;
     this.patreon_tier = -1;

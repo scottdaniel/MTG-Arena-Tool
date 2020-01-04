@@ -9,9 +9,9 @@ import { rememberDefaults } from "../shared/db/databaseUtil";
 import playerData from "../shared/player-data";
 import { getReadableFormat } from "../shared/util";
 import { HIDDEN_PW, MAIN_DECKS } from "../shared/constants";
-import { ipc_send, setData, unleakString } from "./background-util";
+import { ipc_send, setData, unleakString } from "./backgroundUtil";
 import { createDeck } from "./data";
-import * as mtgaLog from "./mtga-log";
+import * as mtgaLog from "./mtgaLog";
 import globals from "./globals";
 import addCustomDeck from "./addCustomDeck";
 import forceDeckUpdate from "./forceDeckUpdate";
@@ -36,7 +36,6 @@ if (!remote.app.isPackaged) {
       });
     }
   });
-  require("devtron").install();
   const Sentry = require("@sentry/electron");
   Sentry.init({
     dsn: "https://4ec87bda1b064120a878eada5fc0b10f@sentry.io/1778171"

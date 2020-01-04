@@ -1026,13 +1026,6 @@ a:hover {
     display: flex;
 }
 
-.deck_tags_container {
-    margin: 6px 16px;
-    display: flex;
-    flex-wrap: wrap;
-    flex-grow: 2;
-}
-
 .deck_tag_input {
     height: 16px;
     min-width: 32px;
@@ -1672,21 +1665,21 @@ a:hover {
 .set_logo_med {
     background-repeat: no-repeat;
     width: 36px;
-    margin: auto 4px;
-    height: 100%;
+    margin: 0 4px;
+    min-height: 60%;
     cursor: pointer;
     background-size: contain;
-    background-position-y: center;
+    background-position: center;
 }
 
 .set_filter {
     opacity: 1;
     background-repeat: no-repeat;
     width: 32px;
-    padding: 16px;
+    margin: 16px;
     height: 32px;
     cursor: pointer;
-    background-size: 50%;
+    background-size: contain;
     background-position: center;
     -webkit-transition: all .15s ease-in-out;
 }
@@ -1755,6 +1748,8 @@ a:hover {
     margin-left: 2px;
     font-family: var(--sub-font-name);
     color: var(--color-light);
+    white-space: nowrap;
+    text-overflow: clip;
     margin: auto 0;
 }
 
@@ -3384,6 +3379,15 @@ a:hover {
     background-repeat: no-repeat;
     background-size: contain;
     background-position: center;
+    margin: auto;
+    width: 24px;
+    height: 24px;
+}
+
+.top_wildcards_wc_icon {
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: center;
     height: 24px;
 }
 
@@ -3851,4 +3855,75 @@ a:hover {
     font-size: 16px;
     color: var(--color-light);
     margin: 16px 32px 0 32px;
+}
+.sort_asc {
+    background-image: url(../images/icon_sort.png);
+    background-size: cover;
+    width: 16px;
+    height: 16px;
+}
+
+.sort_desc {
+    background-image: url(../images/icon_sort.png);
+    background-size: cover;
+    transform: rotate(180deg);
+    width: 16px;
+    height: 16px;
+}
+
+.decks_table_wrap {
+    padding: 16px;
+}
+
+.decks_table_toggles {
+    display: flex;
+    flex-wrap: wrap;
+    width: -webkit-fill-available;
+    justify-content: space-between;
+}
+
+.decks_table_search_cont {
+    display: flex;
+    margin: 4px auto;
+    width: -webkit-fill-available;
+    justify-content: center;
+    max-width: 600px;
+}
+
+.decks_table_head {
+    display: grid;
+    color: var(--color-light);
+    border-bottom: 1px solid var(--color-light);
+}
+
+.decks_table_head_container {
+    margin-top: 8px;
+    display: flex;
+    justify-content: center;   
+}
+
+.decks_table_body_row {
+    display: grid;
+    height: 32px;
+    color: var(--color-light);
+    -webkit-transition: all .1s ease-out;
+}
+
+.decks_table_body_row:hover {
+    background-color: rgba(0,0,0,0.4);
+    cursor: pointer;
+}
+
+.decks_table_body_row .inner_div {
+    display: flex;
+    padding: 2px;
+    margin-left: 8px;
+    justify-content: flex-start;
+    align-items: center;
+    overflow: hidden;
+}
+
+.hover_label:hover {
+    background-color: rgba(0,0,0,0.4);
+    cursor: pointer;
 }

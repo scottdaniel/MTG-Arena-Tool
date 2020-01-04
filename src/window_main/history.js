@@ -11,9 +11,9 @@ import pd from "../shared/player-data";
 import { createDiv, createInput } from "../shared/dom-fns";
 import { makeId } from "../shared/util";
 import Aggregator from "./aggregator";
-import DataScroller from "./data-scroller";
+import DataScroller from "./dataScroller";
 import FilterPanel from "./FilterPanel";
-import ListItem from "./list-item";
+import ListItem from "./listItem";
 import StatsPanel from "./stats-panel";
 import {
   attachDraftData,

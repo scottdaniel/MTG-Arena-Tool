@@ -27,9 +27,9 @@ import {
   createSpan,
   queryElements as $$
 } from "../shared/dom-fns";
-import * as deckDrawer from "../shared/deck-drawer";
+import * as deckDrawer from "./DeckDrawer";
 import { cardType } from "../shared/cardTypes";
-import { addCardHover } from "../shared/card-hover";
+import { addCardHover } from "../shared/cardHover";
 import {
   deckTypesStats,
   formatRank,
@@ -658,8 +658,8 @@ function closeDialog() {
 
 function showColorpicker(
   color,
-  onChange = () => {},
-  onDone = () => {},
+  onChange = color => {},
+  onDone = color => {},
   onCancel = () => {},
   pickerOptions = {}
 ) {

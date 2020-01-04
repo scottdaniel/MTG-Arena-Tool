@@ -22,7 +22,7 @@ import {
   get_deck_missing,
   getBoosterCountEstimate
 } from "../shared/util";
-import { normalApproximationInterval } from "../shared/stats-fns";
+import { normalApproximationInterval } from "../shared/statsFns";
 // Default filter values
 const DEFAULT_DECK = "All Decks";
 const DEFAULT_EVENT = "All Events";
@@ -150,7 +150,7 @@ class Aggregator {
     return isAfter(new Date(_date), dateFilter);
   }
 
-  _filterDeckByColors(deck, _colors) {
+  static filterDeckByColors(deck, _colors) {
     if (!deck) return true;
 
     // Normalize deck colors into matching data format
@@ -197,7 +197,7 @@ class Aggregator {
     const passesTagFilter = tag === DEFAULT_TAG || deckTags.includes(tag);
     if (!passesTagFilter) return false;
 
-    const passesColorFilter = this._filterDeckByColors(deck, colors);
+    const passesColorFilter = Aggregator.filterDeckByColors(deck, colors);
     if (!passesColorFilter) return false;
 
     return true;
@@ -238,7 +238,7 @@ class Aggregator {
     )
       return false;
 
-    const passesOppDeckFilter = this._filterDeckByColors(
+    const passesOppDeckFilter = Aggregator.filterDeckByColors(
       match.oppDeck,
       oppColors
     );

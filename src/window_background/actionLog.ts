@@ -1,4 +1,4 @@
-import { ipc_send } from "./background-util";
+import { ipc_send } from "./backgroundUtil";
 import fs from "fs";
 import path from "path";
 import { IPC_OVERLAY } from "../shared/constants.js";
@@ -7,8 +7,12 @@ import format from "date-fns/format";
 
 var currentActionLog = "";
 
-const actionLog = function(seat, time, str, grpId = 0) {
-  if (!time) time = new Date();
+const actionLog = function(
+  seat: number,
+  time = new Date(),
+  str: string,
+  grpId = 0
+): void {
   if (seat == -99) {
     currentActionLog = "version: 1\r\n";
   } else {

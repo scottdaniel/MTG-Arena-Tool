@@ -30,7 +30,7 @@ import {
   showLoadingBars
 } from "./renderer-util";
 
-import { openDecksTab } from "./decks";
+import { openDecksTab } from "./DecksTab";
 import { openHistoryTab } from "./history";
 import { openTimelineTab } from "./timeline";
 import { openEventsTab } from "./events";
@@ -52,7 +52,7 @@ export function openTab(
   resetMainContainer();
   switch (tab) {
     case MAIN_DECKS:
-      openDecksTab(filters, scrollTop);
+      openDecksTab(filters);
       break;
     case MAIN_HISTORY:
       openHistoryTab(filters, dataIndex, scrollTop);

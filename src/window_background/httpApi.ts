@@ -2,11 +2,11 @@ import electron from "electron";
 import async from "async";
 
 import { makeId } from "../shared/util";
-import pd from "../shared/player-data";
+import playerData from "../shared/player-data";
 import db from "../shared/database";
 import { appDb, playerDb } from "../shared/db/LocalDatabase";
 
-import { ipc_send as ipcSend, setData } from "./background-util";
+import { ipc_send as ipcSend, setData } from "./backgroundUtil";
 import { loadPlayerConfig, syncSettings } from "./loadPlayerConfig";
 import {
   asyncWorker,
@@ -19,7 +19,6 @@ import {
 import globals from "./globals";
 import { SerializedDeck } from "../shared/types/Deck";
 
-export const playerData = pd as any;
 let httpQueue: async.AsyncQueue<HttpTask>;
 
 export function initHttpQueue(): void {
@@ -503,17 +502,13 @@ export function httpGetDatabaseVersion(lang: string): void {
       ) {
         // compare language
         ipcLog(
-          `Downloading database (had lang ${db.metadata.language}, needed ${
-            parsedResult.lang
-          })`
+          `Downloading database (had lang ${db.metadata.language}, needed ${parsedResult.lang})`
         );
         httpGetDatabase(lang);
       } else if (parsedResult.latest > db.version) {
         // Compare parsedResult.version with stored version
         ipcLog(
-          `Downloading latest database (had v${db.version}, found v${
-            parsedResult.latest
-          })`
+          `Downloading latest database (had v${db.version}, found v${parsedResult.latest})`
         );
         httpGetDatabase(lang);
       } else {
