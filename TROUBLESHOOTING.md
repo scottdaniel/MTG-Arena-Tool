@@ -12,9 +12,10 @@ Refer to this issue, the solution is in the comments:
 
 ### "No log file found" error or "Output log contains no user data"
 
-Close MTG Arena (MTGA) and MTG Arena tool, then start MTG Arena. Once MTG Arena is loaded run MTG Arena Tool again.
+Close MTG Arena (MTGA) and Mtgatool, then start MTGA. Once MTGA is loaded run Mtgatool again.
+>>>>>>> master
 
-If that does not work, go to `%APPDATA%/mtg-arena-tool/` and delete `settings.json`, then load MTG Arena Tool again.
+If that does not work, go to `%APPDATA%/mtg-arena-tool/` and delete `settings.json`, then load Mtgatool again.
 You might be asked to point at the path of the output log again.
 
 ### Screen does not respond to mouse events (overlay covers)
@@ -30,15 +31,15 @@ Locate your log and config files;
 - Close MTG Arena and MTG Arena Tool.
 - Open the "Arena Log" path in a file browser
 - Rename `output_log.txt`, do not delete it!
-- Run MTG Arena, once open, run MTG Arena Tool again.
+- Run MTGA, once open, run Mtgatool again.
 
 If this works, send the the old log file file to [mtgatool@gmail.com](mailto:mtgatool@gmail.com) to analyze the error.
 
 If that does not work;
-- Go to the MTG Arena Tool "Settings" page (gear icon), then click on "Data"
+- Go to the Mtgatool "Settings" page (gear icon), then click on "Data"
 - In the bottom section called "Local Data", click on the link next to "Current player settings and history" (the .json file named with your User ID, something like `0A1F2E3E4D5C6B7A.json`)
 - Rename the file, adding something to the end. **Do not delete it!**
-- Run MTG Arena Tool again.
+- Run Mtgatool again.
 
 If the last step worked, send your user-data file to [mtgatool@gmail.com](mailto:mtgatool@gmail.com) and I will inspect what is wrong with it.
 
@@ -52,7 +53,7 @@ Otherwise, with a large amount of bad data, it's best to rename the *user-data f
 
 ### If you have any other unexpected behaviour
 
-First of all, uninstalling and installing again will probably not change anything, as most errors are either configuration errors or log provessing errors. Neither of them are solved by uninstalling. So, just to save you some time, make sure you have the latest version only.
+First of all, uninstalling and installing again will probably not change anything, as most errors are either configuration errors or log processing errors. Neither of them are solved by uninstalling. So, just to save you some time, make sure you have the latest version only.
 
 Run the app then use `Alt+Shift+D` to open three developer consoles, one for each process (main, overlay and background).
 Check if any of them has errors. If you see anything here (or anywhere else, really) you can submit to:
